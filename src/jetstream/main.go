@@ -247,13 +247,11 @@ func main() {
 	}()
 
 	// Initialise configuration
-	needSetupMiddleware, err := initialiseConsoleConfiguration(portalProxy)
+	err = initialiseConsoleConfiguration(portalProxy)
 	if err != nil {
 		log.Infof("Failed to initialise console config due to: %s", err)
 		return
 	}
-
-	showSSOConfig(portalProxy)
 
 	// Initialise Plugins
 	portalProxy.loadPlugins()
@@ -274,6 +272,19 @@ func main() {
 
 	portalProxy.Plugins = initedPlugins
 	log.Info("Plugins initialized")
+
+	var needSetupMiddleware bool
+
+	// At this stage, all plugins have had a chance to modify configurtion based on hosting environment
+	// Check to see if we are setup or not
+	if !portalProxy.Config.ConsoleConfig.IsSetupComplete() {
+		needSetupMiddleware = true
+		log.Info("Console does not have a complete configuration - going to enter setup mode (adding `setup` route and middleware)")
+	} else {
+		needSetupMiddleware = false
+		showStratosConfig(portalProxy.Config.ConsoleConfig)
+		showSSOConfig(portalProxy)
+	}
 
 	// Get Diagnostics and store them once - ensure this is done after plugins are loaded
 	portalProxy.StoreDiagnostics()
@@ -297,13 +308,12 @@ func (portalProxy *portalProxy) GetPlugin(name string) interface{} {
 	return plugin
 }
 
-func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
+func initialiseConsoleConfiguration(portalProxy *portalProxy) error {
 
-	addSetupMiddleware := false
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(portalProxy.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Unable to initialize Stratos backend config due to: %+v", err)
-		return addSetupMiddleware, err
+		return err
 	}
 
 	// Do this BEFORE we load the config from the database, so env var lookup at this stage
@@ -327,18 +337,12 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
 		log.Fatalf("Unable to load console config; %+v", err)
 	}
 
-	// We dynamically determine if we need to enter setup mode based on the configuration
-	// We need: UAA Endpoint and Console Admin Scope
-	if !consoleConfig.IsSetupComplete() {
-		addSetupMiddleware = true
-		log.Info("Will add `setup` route and middleware")
-	} else {
-		showStratosConfig(consoleConfig)
+	if consoleConfig.IsSetupComplete() {
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
 	}
 
-	return addSetupMiddleware, nil
+	return nil
 }
 
 func showStratosConfig(config *interfaces.ConsoleConfig) {
