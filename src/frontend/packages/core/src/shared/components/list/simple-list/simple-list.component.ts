@@ -3,6 +3,8 @@ import { StratosCatalogueEntity } from '../../../../core/entity-catalogue/entity
 import { ListComponent } from '../list.component';
 import { ListConfig, ListViewTypes } from '../list.component.types';
 import { ListHostDirective } from './list-host.directive';
+import { CatalogueEntityDrivenListDataSource } from './entity-catalogue-datasource';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-simple-list',
@@ -31,21 +33,25 @@ export class SimpleListComponent implements OnInit {
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
     private injector: Injector,
-  ) {
+    private store: Store<any>
+  ) { }
+
+  ngOnInit() {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ListComponent);
 
     const viewContainerRef = this.listHost.viewContainerRef;
     viewContainerRef.clear();
-    const config = new ListConfig();
+    const dataSource = new CatalogueEntityDrivenListDataSource<any>(
+      this.catalogueEntity,
+      {},
+      this.store,
+    );
     const componentRef = viewContainerRef.createComponent(
       componentFactory,
       null,
-      this.makeCustomConfigInjector(config)
+      this.makeCustomConfigInjector(dataSource.listConfig)
     );
     const instance = componentRef.instance as ListComponent<any>;
-  }
-
-  ngOnInit() {
   }
 
   private makeCustomConfigInjector(listConfig: ListConfig<any>) {

@@ -248,10 +248,10 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
     }),
     getLink: () => null,
     getGuid: metadata => metadata.guid,
-    getLines: metadata => [
-      ['Address', metadata.address],
-      ['User', metadata.user],
-      ['Admin', metadata.admin]
+    getLines: () => [
+      ['Address', (metadata) => metadata.address],
+      ['User', (metadata) => metadata.user],
+      ['Admin', (metadata) => metadata.admin]
     ]
   } as IStratosEntityBuilder<IEndpointFavMetadata, EndpointModel>;
   // This is needed here for typing
