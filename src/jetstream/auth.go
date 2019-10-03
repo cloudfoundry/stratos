@@ -97,14 +97,40 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 	if len(state) == 0 {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
-			"SSO Login: State parameter missing",
-			"SSO Login: State parameter missing")
+			"SSO Login: Redirect state parameter missing",
+			"SSO Login: Redirect state parameter missing")
+		return err
+	}
+
+	if !safeSSORedirectState(state, p.Config.SSOWhiteList) {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"SSO Login: Disallowed redirect state",
+			"SSO Login: Disallowed redirect state")
 		return err
 	}
 
 	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.AuthorizationEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, state, "")))
 	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 	return nil
+}
+
+func safeSSORedirectState(state string, whiteListStr string) bool {
+	if len(whiteListStr) == 0 {
+		return true;
+	}
+
+	whiteList := strings.Split(whiteListStr, ",")
+	if len(whiteList) == 0 {
+		return true;
+	}
+
+	for _, n := range whiteList {
+		if CompareURL(state, n) {
+			return true
+		}
+	}
+	return false
 }
 
 func getSSORedirectURI(base string, state string, endpointGUID string) string {
