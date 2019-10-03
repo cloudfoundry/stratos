@@ -35,7 +35,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
 
-  @ViewChild('pageHeaderTmpl') pageHeaderTmpl: TemplateRef<any>;
+  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl: TemplateRef<any>;
 
   @Input() hideSideNavButton = false;
 

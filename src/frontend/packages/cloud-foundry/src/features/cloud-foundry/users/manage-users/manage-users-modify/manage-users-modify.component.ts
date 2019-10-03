@@ -107,7 +107,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   ];
   orgDataSource: ITableListDataSource<APIResource<IOrganization>>;
 
-  @ViewChild('spaceRolesTable', { read: ViewContainerRef })
+  @ViewChild('spaceRolesTable', { read: ViewContainerRef, static: true })
   spaceRolesTable: ViewContainerRef;
 
   private wrapperFactory: ComponentFactory<SpaceRolesListWrapperComponent>;

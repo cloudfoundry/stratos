@@ -24,7 +24,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   @Input() busy: any;
 
-  @ViewChild('instanceField') instanceField: ElementRef;
+  @ViewChild('instanceField', { static: true }) instanceField: ElementRef;
 
   status$: Observable<StratosStatus>;
 

@@ -18,19 +18,19 @@ import { ISubHeaderTabs } from './page-subheader.types';
 export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
   cssClass: string;
 
-  @ViewChild('nav')
+  @ViewChild('nav', { static: false })
   nav: MatTabNav;
 
-  @ViewChild('navOuter')
+  @ViewChild('navOuter', { static: false })
   navOuter: ElementRef;
 
-  @ViewChild('navScroller')
+  @ViewChild('navScroller', { static: false })
   navScroller: ElementRef;
 
-  @ViewChild('leftButton')
+  @ViewChild('leftButton', { static: false })
   leftButton: MatButton;
 
-  @ViewChild('rightButton')
+  @ViewChild('rightButton', { static: false })
   rightButton: MatButton;
 
   @Input()

@@ -45,9 +45,9 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   @Input() logStream: Observable<any>;
 
-  @ViewChild('container') container: ElementRef;
+  @ViewChild('container', { static: true }) container: ElementRef;
 
-  @ViewChild('content') content: ElementRef;
+  @ViewChild('content', { static: true }) content: ElementRef;
 
   private logLinesCount = 0;
   private countAttribute = 'batchLength';

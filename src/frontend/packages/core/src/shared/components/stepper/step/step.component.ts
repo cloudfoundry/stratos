@@ -84,7 +84,7 @@ export class StepComponent {
   @Input()
   public destructiveStep = false;
 
-  @ViewChild(TemplateRef)
+  @ViewChild(TemplateRef, { static: true })
   content: TemplateRef<any>;
 
   @Input()

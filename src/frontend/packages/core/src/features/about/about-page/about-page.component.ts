@@ -28,8 +28,8 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   versionNumber$: Observable<string>;
   userIsAdmin$: Observable<boolean>;
 
-  @ViewChild('aboutInfoContainer', { read: ViewContainerRef }) aboutInfoContainer;
-  @ViewChild('supportInfoContainer', { read: ViewContainerRef }) supportInfoContainer;
+  @ViewChild('aboutInfoContainer', { read: ViewContainerRef, static: true }) aboutInfoContainer;
+  @ViewChild('supportInfoContainer', { read: ViewContainerRef, static: true }) supportInfoContainer;
 
   aboutInfoComponentRef: ComponentRef<any>;
   componentRef: ComponentRef<any>;

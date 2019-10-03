@@ -30,7 +30,7 @@ export class MetaCardComponent {
   @ContentChildren(MetaCardItemComponent)
   metaItems: QueryList<MetaCardItemComponent>;
 
-  @ContentChild(MetaCardTitleComponent)
+  @ContentChild(MetaCardTitleComponent, { static: true })
   title: MetaCardTitleComponent;
 
   @Input()

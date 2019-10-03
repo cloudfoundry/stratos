@@ -37,7 +37,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
 
   private uberSub: Subscription;
 
-  @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input() hideTable = false;

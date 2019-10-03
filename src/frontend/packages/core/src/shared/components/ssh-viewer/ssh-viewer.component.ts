@@ -38,7 +38,7 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
   public isConnecting = false;
   private isDestroying = false;
 
-  @ViewChild('terminal') container: ElementRef;
+  @ViewChild('terminal', { static: true }) container: ElementRef;
   private xterm: Terminal;
 
   private msgSubscription: Subscription;

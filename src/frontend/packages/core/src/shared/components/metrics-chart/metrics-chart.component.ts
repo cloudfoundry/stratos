@@ -40,7 +40,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   @Input()
   public title: string;
 
-  @ContentChild(MetricsRangeSelectorComponent)
+  @ContentChild(MetricsRangeSelectorComponent, { static: true })
   public timeRangeSelector: MetricsRangeSelectorComponent;
 
   @Input()

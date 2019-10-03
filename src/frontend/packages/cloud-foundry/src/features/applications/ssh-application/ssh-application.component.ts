@@ -39,7 +39,7 @@ export class SshApplicationComponent implements OnInit {
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
-  @ViewChild('sshViewer') sshViewer: SshViewerComponent;
+  @ViewChild('sshViewer', { static: true }) sshViewer: SshViewerComponent;
 
   private getBreadcrumbs(
     application: IApp,
