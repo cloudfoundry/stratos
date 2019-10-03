@@ -153,6 +153,7 @@ export interface AutoscalerPaginationParams extends PaginationParam {
   'start-time': string;
   'end-time': string;
   'page'?: string;
+  'order'?: string;
 }
 
 export interface AutoscalerQuery {
