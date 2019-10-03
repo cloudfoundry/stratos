@@ -1,5 +1,23 @@
 # Change Log
 
+## 2.5.3
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.2...2.5.3)
+
+This release contains a number of fixes and improvements:
+
+**Fixes:**
+
+- Metrics only shown for most recently added k8s metrics endpoint [\#3861](https://github.com/cloudfoundry-incubator/stratos/issues/3861)
+- Can't update user profile when using local user with mysql or postgres [\#3940](https://github.com/cloudfoundry-incubator/stratos/issues/3940)
+- Ensure we remove X-Forward-* HTTP headers that can cause problems proxying API requests [\#3934](https://github.com/cloudfoundry-incubator/stratos/pull/3934)
+
+**Improvements:**
+
+- Add ingress support to Helm Chart [\#3935](https://github.com/cloudfoundry-incubator/stratos/pull/3935)
+- Gate SSO redirect on optional state whitelist [\#3933](https://github.com/cloudfoundry-incubator/stratos/pull/3933)
+- Backend update for cacheing compat for HTTP 1.0 clients [\#3931](https://github.com/cloudfoundry-incubator/stratos/pull/3931)
+
 ## 2.5.2
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.1...2.5.2)
