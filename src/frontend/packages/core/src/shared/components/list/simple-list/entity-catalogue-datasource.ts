@@ -13,7 +13,6 @@ export interface GetMultipleActionConfig {
 
 export class CatalogueEntityDrivenListDataSource<T> extends ListDataSource<T> {
   public listConfig: ListConfig<T>;
-  public isLocal: boolean;
   constructor(
     catalogueEntity: StratosBaseCatalogueEntity,
     { endpointGuid, paginationKey = catalogueEntity.entityKey + '-list', extraArgs }: GetMultipleActionConfig,
@@ -51,11 +50,10 @@ export class CatalogueEntityDrivenListDataSource<T> extends ListDataSource<T> {
       action: getAllActionBuilder(endpointGuid, paginationKey, extraArgs),
       paginationKey,
       schema,
-      getRowUniqueId: entity => catalogueEntity.getGuidFromEntity(entity),
-      listConfig
+      getRowUniqueId: entity => schema.getId(entity),
+      listConfig,
+      isLocal: true
     });
-    this.isLocal = true;
     this.listConfig = listConfig;
-    this.getRowUniqueId = entity => schema.getId(entity);
   }
 }
