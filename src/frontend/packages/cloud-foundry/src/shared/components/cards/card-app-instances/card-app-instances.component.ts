@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, Renderer2 } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -30,7 +30,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   constructor(
     public appService: ApplicationService,
-    private renderer: Renderer,
+    private renderer: Renderer2,
     private confirmDialog: ConfirmationDialogService,
     private snackBar: MatSnackBar) {
     this.status$ = this.appService.applicationState$.pipe(
@@ -81,7 +81,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     this.editValue = this.currentCount;
     this.isEditing = true;
     setTimeout(() => {
-      this.renderer.invokeElementMethod(this.instanceField.nativeElement, 'focus', []);
+      this.instanceField.nativeElement.focus();
     }, 0);
   }
 
