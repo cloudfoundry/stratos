@@ -19,14 +19,15 @@ import { APIResource } from '../../../../../store/src/types/api.types';
   styleUrls: ['./service-plan-public.component.scss']
 })
 export class ServicePlanPublicComponent {
-
   planAccessibility$: Observable<StratosStatus>;
   planAccessibilityMessage$: Observable<string>;
   private pServicePlan: APIResource<IServicePlan>;
+
   @Input()
   get servicePlan(): APIResource<IServicePlan> {
     return this.pServicePlan;
   }
+
   set servicePlan(servicePlan: APIResource<IServicePlan>) {
     this.pServicePlan = servicePlan;
     if (!servicePlan) {
@@ -37,7 +38,7 @@ export class ServicePlanPublicComponent {
       this.servicesService.getServicePlanVisibilities(),
       this.getServiceBroker(servicePlan.entity.service_guid, servicePlan.entity.cfGuid)
     );
-    this.planAccessibilityMessage$ = this.planAccessibility$.pipe().pipe(
+    this.planAccessibilityMessage$ = this.planAccessibility$.pipe(
       map(o => {
         if (o === StratosStatus.WARNING) {
           return 'Service Plan has limited visibility';

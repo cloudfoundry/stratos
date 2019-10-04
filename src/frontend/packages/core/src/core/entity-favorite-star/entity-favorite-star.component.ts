@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
+
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
 import { ConfirmationDialogConfig } from '../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
@@ -23,14 +24,15 @@ export class EntityFavoriteStarComponent {
     this.isFavorite$ = this.userFavoriteManager.getIsFavoriteObservable(favorite);
     this.pFavourite = favorite;
   }
-  private pFavourite: UserFavorite<IFavoriteMetadata>;
 
   @Input()
-  private confirmRemoval = false;
+  public confirmRemoval = false;
 
   public isFavorite$: Observable<boolean>;
 
   private confirmationDialogConfig = new ConfirmationDialogConfig('Unfavorite?', '', 'Yes', true);
+
+  private pFavourite: UserFavorite<IFavoriteMetadata>;
 
   constructor(
     private confirmDialog: ConfirmationDialogService,

@@ -44,5 +44,4 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
     this.percentage = 0;
     this.autoLogout.unsubscribe();
   }
-
 }
