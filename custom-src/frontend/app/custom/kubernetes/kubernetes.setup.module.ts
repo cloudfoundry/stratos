@@ -21,12 +21,6 @@ import { generateKubernetesEntities } from './kubernetes-entity-generator';
 import { KubernetesStoreModule } from './kubernetes.store.module';
 import { KubeHealthCheck } from './store/kubernetes.actions';
 
-// TODO: RC Remove
-// export interface IK8FavMetadata extends IFavoriteMetadata {
-//   guid: string;
-//   name: string;
-//   address: string;
-// }
 
 @NgModule({
   imports: [

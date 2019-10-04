@@ -11,8 +11,6 @@ export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   return null;
 }
 
-// TODO: RC Action builders
-
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export const urlValidationExpression =

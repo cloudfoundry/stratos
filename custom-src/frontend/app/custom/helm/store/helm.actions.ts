@@ -1,16 +1,17 @@
 import { Action } from '@ngrx/store';
 
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
-import { PaginatedAction } from './../../../../../store/src/types/pagination.types';
-import { IRequestAction } from './../../../../../store/src/types/request.types';
+import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import {
+  HELM_ENDPOINT_TYPE,
+  helmEntityFactory,
   helmReleasePodKey,
   helmReleaseSchemaKey,
   helmReleaseServiceKey,
   helmReleaseStatusSchemaKey,
   helmVersionsSchemaKey,
   monocularChartsSchemaKey,
-} from './helm.entities';
+} from '../helm-entity-factory';
+import { PaginatedAction } from './../../../../../store/src/types/pagination.types';
 import { HelmInstallValues } from './helm.types';
 
 export const GET_MONOCULAR_CHARTS = '[Monocular] Get Charts';
@@ -41,15 +42,16 @@ export const HELM_INSTALL = '[Helm] Install';
 export const HELM_INSTALL_SUCCESS = '[Helm] Install Success';
 export const HELM_INSTALL_FAILURE = '[Helm] Install Failure';
 
-export interface MonocularPaginationAction extends PaginatedAction, IRequestAction { }
+export interface MonocularPaginationAction extends PaginatedAction, EntityRequestAction { }
 
 export class GetMonocularCharts implements MonocularPaginationAction {
   constructor() {
     this.paginationKey = 'monocular-charts';
   }
   type = GET_MONOCULAR_CHARTS;
-  entityKey = monocularChartsSchemaKey;
-  entity = [entityFactory(monocularChartsSchemaKey)];
+  endpointType = HELM_ENDPOINT_TYPE;
+  entityType = monocularChartsSchemaKey;
+  entity = [helmEntityFactory(monocularChartsSchemaKey)];
   actions = [
     GET_MONOCULAR_CHARTS,
     GET_MONOCULAR_CHARTS_SUCCESS,
@@ -68,8 +70,9 @@ export class GetHelmReleases implements MonocularPaginationAction {
     this.paginationKey = 'helm-releases';
   }
   type = GET_HELM_RELEASES;
-  entityKey = helmReleaseSchemaKey;
-  entity = [entityFactory(helmReleaseSchemaKey)];
+  endpointType = HELM_ENDPOINT_TYPE;
+  entityType = helmReleaseSchemaKey;
+  entity = [helmEntityFactory(helmReleaseSchemaKey)];
   actions = [
     GET_HELM_RELEASES,
     GET_HELM_RELEASES_SUCCESS,
@@ -87,8 +90,9 @@ export class GetHelmVersions implements MonocularPaginationAction {
     this.paginationKey = 'helm-versions';
   }
   type = GET_HELM_VERSIONS;
-  entityKey = helmVersionsSchemaKey;
-  entity = [entityFactory(helmVersionsSchemaKey)];
+  endpointType = HELM_ENDPOINT_TYPE;
+  entityType = helmVersionsSchemaKey;
+  entity = [helmEntityFactory(helmVersionsSchemaKey)];
   actions = [
     GET_HELM_VERSIONS,
     GET_HELM_VERSIONS_SUCCESS,
@@ -101,7 +105,7 @@ export class GetHelmVersions implements MonocularPaginationAction {
   };
 }
 
-export class GetHelmReleaseStatus implements IRequestAction {
+export class GetHelmReleaseStatus implements EntityRequestAction {
   key: string;
   constructor(
     public endpointGuid: string,
@@ -110,8 +114,9 @@ export class GetHelmReleaseStatus implements IRequestAction {
     this.key = `${endpointGuid}/${releaseTitle}`;
   }
   type = GET_HELM_RELEASE_STATUS;
-  entity = entityFactory(helmReleaseStatusSchemaKey);
-  entityKey = helmReleaseStatusSchemaKey;
+  endpointType = HELM_ENDPOINT_TYPE;
+  entity = helmEntityFactory(helmReleaseStatusSchemaKey);
+  entityType = helmReleaseStatusSchemaKey;
   actions = [
     GET_HELM_RELEASE_STATUS,
     GET_HELM_RELEASE_STATUS_SUCCESS,
@@ -127,8 +132,9 @@ export class GetHelmReleasePods implements MonocularPaginationAction {
     this.paginationKey = `${endpointGuid}/${releaseTitle}/pods`;
   }
   type = GET_HELM_RELEASE_PODS;
-  entityKey = helmReleasePodKey;
-  entity = [entityFactory(helmReleasePodKey)];
+  endpointType = HELM_ENDPOINT_TYPE;
+  entityType = helmReleasePodKey;
+  entity = [helmEntityFactory(helmReleasePodKey)];
   actions = [
     GET_HELM_RELEASE_PODS,
     GET_HELM_RELEASE_PODS_SUCCESS,
@@ -152,8 +158,9 @@ export class GetHelmReleaseServices implements MonocularPaginationAction {
     this.paginationKey = `${endpointGuid}/${releaseTitle}/services`;
   }
   type = GET_HELM_RELEASE_SERVICES;
-  entityKey = helmReleaseServiceKey;
-  entity = [entityFactory(helmReleaseServiceKey)];
+  endpointType = HELM_ENDPOINT_TYPE;
+  entityType = helmReleaseServiceKey;
+  entity = [helmEntityFactory(helmReleaseServiceKey)];
   actions = [
     GET_HELM_RELEASE_SERVICES,
     GET_HELM_RELEASE_SERVICES_SUCCESS,
