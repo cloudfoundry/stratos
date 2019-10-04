@@ -1,7 +1,7 @@
 import { hasJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
 import { PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PaginationPageIteratorConfig } from '../pagination-request-base-handlers/pagination-iterator.pipe';
-import { nonJetstreamRequestHandler } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { NonJetstreamRequestHandler } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 
 /**
  * Generic container for information about an errored request to a specific endpoint
@@ -136,7 +136,7 @@ export const handleJetstreamResponsePipeFactory = (
 
 export const handleNonJetstreamResponsePipeFactory = (
   requestUrl: string,
-  nonJetstreamRequestHandler?: nonJetstreamRequestHandler,
+  nonJetstreamRequestHandler?: NonJetstreamRequestHandler,
   flattenerConfig?: PaginationPageIteratorConfig<any, any>
 ) => (resData: any): HandledMultiEndpointResponse => {
   const isSuccess = nonJetstreamRequestHandler ? nonJetstreamRequestHandler.isSuccess(resData) : true;

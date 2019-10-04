@@ -122,10 +122,10 @@ export interface IStratosEntityDefinition<
   readonly errorMessageHandler?: ApiErrorMessageHandler;
   // Should the request response object for this entity be parsed as if it's passed through the jetstream backend?
   readonly nonJetstreamRequest?: boolean;
-  readonly nonJetstreamRequestHandler?: nonJetstreamRequestHandler;
+  readonly nonJetstreamRequestHandler?: NonJetstreamRequestHandler;
 }
 
-export class nonJetstreamRequestHandler<T = any> {
+export class NonJetstreamRequestHandler<T = any> {
   isSuccess: (request: T) => boolean;
   getErrorCode?: (request: T) => string;
 }
