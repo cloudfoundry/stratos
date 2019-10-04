@@ -4,14 +4,16 @@ import { Store } from '@ngrx/store';
 import { StratosBaseCatalogueEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
 import { ListConfig, ListViewTypes } from '../list.component.types';
 import { ITableColumn } from '../list-table/table.types';
+import { createTableColumnFavorite } from '../list-table/table-cell-favorite/table-cell-favorite.component';
+import { UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
+import { EntityPipelineEntity } from '../../../../../../store/src/entity-request-pipeline/pipeline.types';
 
 export interface GetMultipleActionConfig {
   endpointGuid?: string;
   paginationKey?: string;
   extraArgs?: Record<any, any>;
 }
-
-export class CatalogueEntityDrivenListDataSource<T> extends ListDataSource<T> {
+export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity> extends ListDataSource<T> {
   public listConfig: ListConfig<T>;
   constructor(
     catalogueEntity: StratosBaseCatalogueEntity,
@@ -33,16 +35,27 @@ export class CatalogueEntityDrivenListDataSource<T> extends ListDataSource<T> {
     };
     listConfig.getColumns = () => {
       const linBuilders = catalogueEntity.builders.entityBuilder.getLines ? catalogueEntity.builders.entityBuilder.getLines() : [];
-      return linBuilders.map((builder, i) => ({
-        columnId: builder[0],
-        cellDefinition: {
-          getValue: (e) => {
-            const metaData = catalogueEntity.builders.entityBuilder.getMetadata(e);
-            return builder[1](metaData);
-          }
-        },
-        headerCell: () => builder[0],
-      }));
+      return [
+        ...linBuilders.map((builder, i) => ({
+          columnId: builder[0],
+          cellDefinition: {
+            getValue: (e) => {
+              const metaData = catalogueEntity.builders.entityBuilder.getMetadata(e);
+              return builder[1](metaData);
+            }
+          },
+          headerCell: () => builder[0],
+        })),
+        createTableColumnFavorite(row => {
+          return new UserFavorite(
+            // TODO we need a reliable way to get the endpoint guid for any entity
+            row.__stratosEndpointGuid__,
+            catalogueEntity.endpointType,
+            catalogueEntity.definition.type,
+            catalogueEntity.getGuidFromEntity(row),
+          );
+        })
+      ];
     };
     listConfig.getDataSource = () => this;
     super({
@@ -50,7 +63,7 @@ export class CatalogueEntityDrivenListDataSource<T> extends ListDataSource<T> {
       action: getAllActionBuilder(endpointGuid, paginationKey, extraArgs),
       paginationKey,
       schema,
-      getRowUniqueId: entity => schema.getId(entity),
+      getRowUniqueId: entity => catalogueEntity.getGuidFromEntity(entity),
       listConfig,
       isLocal: true
     });

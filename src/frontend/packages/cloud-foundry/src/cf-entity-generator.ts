@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import {
   IService,
   IServiceBinding,
@@ -872,12 +873,14 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getMetadata: app => ({
           guid: app.metadata.guid,
           cfGuid: app.entity.cfGuid,
+          createdAt: moment(app.metadata.created_at).format('LLLL'),
           name: app.entity.name,
         }),
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
         getLines: () => ([
-          ['Name', (meta) => meta.name]
+          ['Name', (meta) => meta.name],
+          ['Creation  Date', (meta) => meta.createdAt]
         ])
       },
       actionBuilders: applicationActionBuilder

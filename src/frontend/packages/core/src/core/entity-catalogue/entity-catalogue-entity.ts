@@ -28,6 +28,7 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from './entity-catalogue.types';
+import { EntityPipelineEntity } from '../../../../store/src/entity-request-pipeline/pipeline.types';
 
 export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata,
@@ -137,6 +138,10 @@ export class StratosBaseCatalogueEntity<
     }
     const metadata = this.builders.entityBuilder.getMetadata(entity);
     return this.builders.entityBuilder.getGuid(metadata);
+  }
+
+  public getEndpointGuidFromEntity(entity: Y & EntityPipelineEntity) {
+    return entity.__stratosEndpointGuid__;
   }
 
   public getEntityMonitor<Q extends AppState, B = any>(

@@ -95,14 +95,20 @@ function postProcessSuccessResponses(
   if (Array.isArray(entities)) {
     return {
       endpointGuid,
-      entities,
+      entities: entities.map(entity => ({
+        ...entity,
+        __stratosEndpointGuid__: endpointGuid
+      })),
       totalPages: flattenerConfig ? flattenerConfig.getTotalPages(jetStreamResponse) : 0,
       totalResults: flattenerConfig ? flattenerConfig.getTotalEntities(jetStreamResponse) : 0
     };
   }
   return {
     endpointGuid,
-    entities: [entities],
+    entities: [{
+      ...entities,
+      __stratosEndpointGuid__: endpointGuid
+    }],
     totalPages: null,
     totalResults: 1
   };
