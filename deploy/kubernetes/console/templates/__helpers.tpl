@@ -108,19 +108,28 @@ tls.key: {{ $cert.Key | b64enc }}
 
 
 {{/*
-Ingress Host:
+Ingress Host from .Values.console.service
 */}}
-{{- define "ingress.host" -}}
-{{$host := ""}}
+{{- define "ingress.host.value" -}}
 {{- if .Values.console.service -}}
 {{- if .Values.console.service.ingress -}}
 {{- if .Values.console.service.ingress.host -}}
-{{$host = .Values.console.service.ingress.host }}
+{{ .Values.console.service.ingress.host }}
 {{- end -}}
 {{- end -}}
 {{- end -}}
-{{- if and .Values.env.DOMAIN (not $host) -}}
-{{$host = print "console." .Values.env.DOMAIN }}
 {{- end -}}
+
+{{/*
+Ingress Host:
+*/}}
+{{- define "ingress.host" -}}
+{{ $host := (include "ingress.host.value" .) }}
+{{- if $host -}}
+{{ $host | quote }}
+{{- else if .Values.env.DOMAIN -}}
+{{ print "console." .Values.env.DOMAIN }}
+{{- else -}}
 {{ required "Host name is required" $host | quote }}
+{{- end -}}
 {{- end -}}
