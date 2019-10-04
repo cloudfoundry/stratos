@@ -6,15 +6,15 @@ import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { getKubeAPIResourceGuid } from './store/kube.selectors';
 import { KubernetesApp } from './store/kube.types';
 
-export const kubernetesSchemaKey = 'kubernetesInfo';
-export const kubernetesNodesSchemaKey = 'kubernetesNode';
-export const kubernetesPodsSchemaKey = 'kubernetesPod';
-export const kubernetesNamespacesSchemaKey = 'kubernetesNamespace';
-export const kubernetesServicesSchemaKey = 'kubernetesService';
-export const kubernetesStatefulSetsSchemaKey = 'kubernetesStatefulSet';
-export const kubernetesDeploymentsSchemaKey = 'kubernetesDeployment';
-export const kubernetesAppsSchemaKey = 'kubernetesApp';
-export const kubernetesDashboardSchemaKey = 'kubernetesDashboard';
+export const kubernetesEntityType = 'kubernetesInfo';
+export const kubernetesNodesEntityType = 'kubernetesNode';
+export const kubernetesPodsEntityType = 'kubernetesPod';
+export const kubernetesNamespacesEntityType = 'kubernetesNamespace';
+export const kubernetesServicesEntityType = 'kubernetesService';
+export const kubernetesStatefulSetsEntityType = 'kubernetesStatefulSet';
+export const kubernetesDeploymentsEntityType = 'kubernetesDeployment';
+export const kubernetesAppsEntityType = 'kubernetesApp';
+export const kubernetesDashboardEntityType = 'kubernetesDashboard';
 
 export const getKubeAppId = (object: KubernetesApp) => object.name;
 
@@ -43,56 +43,56 @@ export class KubernetesEntitySchema extends EntitySchema {
 }
 
 
-entityCache[kubernetesSchemaKey] = new KubernetesEntitySchema(
-  kubernetesSchemaKey,
+entityCache[kubernetesEntityType] = new KubernetesEntitySchema(
+  kubernetesEntityType,
   {},
   { idAttribute: getAPIResourceGuid }
 );
 
-entityCache[kubernetesAppsSchemaKey] = new KubernetesEntitySchema(
-  kubernetesAppsSchemaKey,
+entityCache[kubernetesAppsEntityType] = new KubernetesEntitySchema(
+  kubernetesAppsEntityType,
   {},
   { idAttribute: getKubeAppId }
 );
 
-entityCache[kubernetesStatefulSetsSchemaKey] = new KubernetesEntitySchema(
-  kubernetesStatefulSetsSchemaKey,
+entityCache[kubernetesStatefulSetsEntityType] = new KubernetesEntitySchema(
+  kubernetesStatefulSetsEntityType,
   {},
   { idAttribute: getKubeAPIResourceGuid }
 );
 
-entityCache[kubernetesPodsSchemaKey] = new KubernetesEntitySchema(
-  kubernetesPodsSchemaKey,
+entityCache[kubernetesPodsEntityType] = new KubernetesEntitySchema(
+  kubernetesPodsEntityType,
   {},
   { idAttribute: getKubeAPIResourceGuid }
 );
 
-entityCache[kubernetesDeploymentsSchemaKey] = new KubernetesEntitySchema(
-  kubernetesDeploymentsSchemaKey,
+entityCache[kubernetesDeploymentsEntityType] = new KubernetesEntitySchema(
+  kubernetesDeploymentsEntityType,
   {},
   { idAttribute: getKubeAPIResourceGuid }
 );
 
-entityCache[kubernetesNodesSchemaKey] = new KubernetesEntitySchema(
-  kubernetesNodesSchemaKey,
+entityCache[kubernetesNodesEntityType] = new KubernetesEntitySchema(
+  kubernetesNodesEntityType,
   {},
   { idAttribute: getKubeAPIResourceGuid }
 );
 
-entityCache[kubernetesNamespacesSchemaKey] = new KubernetesEntitySchema(
-  kubernetesNamespacesSchemaKey,
+entityCache[kubernetesNamespacesEntityType] = new KubernetesEntitySchema(
+  kubernetesNamespacesEntityType,
   {},
   { idAttribute: getKubeAPIResourceGuid }
 );
 
-entityCache[kubernetesServicesSchemaKey] = new KubernetesEntitySchema(
-  kubernetesServicesSchemaKey,
+entityCache[kubernetesServicesEntityType] = new KubernetesEntitySchema(
+  kubernetesServicesEntityType,
   {},
   { idAttribute: getKubeAPIResourceGuid }
 );
 
-entityCache[kubernetesDashboardSchemaKey] = new KubernetesEntitySchema(
-  kubernetesDashboardSchemaKey,
+entityCache[kubernetesDashboardEntityType] = new KubernetesEntitySchema(
+  kubernetesDashboardEntityType,
   {},
   { idAttribute: getKubeAPIResourceGuid }
 );

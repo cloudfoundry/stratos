@@ -19,15 +19,15 @@ import {
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
 import {
   KUBERNETES_ENDPOINT_TYPE,
-  kubernetesAppsSchemaKey,
-  kubernetesDashboardSchemaKey,
-  kubernetesDeploymentsSchemaKey,
+  kubernetesAppsEntityType,
+  kubernetesDashboardEntityType,
+  kubernetesDeploymentsEntityType,
   kubernetesEntityFactory,
-  kubernetesNamespacesSchemaKey,
-  kubernetesNodesSchemaKey,
-  kubernetesPodsSchemaKey,
-  kubernetesServicesSchemaKey,
-  kubernetesStatefulSetsSchemaKey,
+  kubernetesNamespacesEntityType,
+  kubernetesNodesEntityType,
+  kubernetesPodsEntityType,
+  kubernetesServicesEntityType,
+  kubernetesStatefulSetsEntityType,
 } from './kubernetes-entity-factory';
 import {
   KubernetesApp,
@@ -166,8 +166,8 @@ function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefi
 
 function generateAppEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: kubernetesAppsSchemaKey,
-    schema: kubernetesEntityFactory(kubernetesAppsSchemaKey),
+    type: kubernetesAppsEntityType,
+    schema: kubernetesEntityFactory(kubernetesAppsEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, KubernetesApp>(definition);
@@ -175,8 +175,8 @@ function generateAppEntity(endpointDefinition: StratosEndpointExtensionDefinitio
 
 function generateStatefulSetsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: kubernetesStatefulSetsSchemaKey,
-    schema: kubernetesEntityFactory(kubernetesStatefulSetsSchemaKey),
+    type: kubernetesStatefulSetsEntityType,
+    schema: kubernetesEntityFactory(kubernetesStatefulSetsEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, KubernetesStatefulSet>(definition);
@@ -184,8 +184,8 @@ function generateStatefulSetsEntity(endpointDefinition: StratosEndpointExtension
 
 function generatePodsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: kubernetesPodsSchemaKey,
-    schema: kubernetesEntityFactory(kubernetesPodsSchemaKey),
+    type: kubernetesPodsEntityType,
+    schema: kubernetesEntityFactory(kubernetesPodsEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, KubernetesPod>(definition);
@@ -193,8 +193,8 @@ function generatePodsEntity(endpointDefinition: StratosEndpointExtensionDefiniti
 
 function generateDeploymentsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: kubernetesDeploymentsSchemaKey,
-    schema: kubernetesEntityFactory(kubernetesDeploymentsSchemaKey),
+    type: kubernetesDeploymentsEntityType,
+    schema: kubernetesEntityFactory(kubernetesDeploymentsEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, KubernetesDeployment>(definition);
@@ -202,8 +202,8 @@ function generateDeploymentsEntity(endpointDefinition: StratosEndpointExtensionD
 
 function generateNodesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: kubernetesNodesSchemaKey,
-    schema: kubernetesEntityFactory(kubernetesNodesSchemaKey),
+    type: kubernetesNodesEntityType,
+    schema: kubernetesEntityFactory(kubernetesNodesEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, KubernetesNode>(definition);
@@ -211,8 +211,8 @@ function generateNodesEntity(endpointDefinition: StratosEndpointExtensionDefinit
 
 function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: kubernetesNamespacesSchemaKey,
-    schema: kubernetesEntityFactory(kubernetesNamespacesSchemaKey),
+    type: kubernetesNamespacesEntityType,
+    schema: kubernetesEntityFactory(kubernetesNamespacesEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, KubernetesNamespace>(definition);
@@ -220,8 +220,8 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
 
 function generateServicesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: kubernetesServicesSchemaKey,
-    schema: kubernetesEntityFactory(kubernetesServicesSchemaKey),
+    type: kubernetesServicesEntityType,
+    schema: kubernetesEntityFactory(kubernetesServicesEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, KubeService>(definition);
@@ -229,8 +229,8 @@ function generateServicesEntity(endpointDefinition: StratosEndpointExtensionDefi
 
 function generateDashboardEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: kubernetesDashboardSchemaKey,
-    schema: kubernetesEntityFactory(kubernetesDashboardSchemaKey),
+    type: kubernetesDashboardEntityType,
+    schema: kubernetesEntityFactory(kubernetesDashboardEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata>(definition);

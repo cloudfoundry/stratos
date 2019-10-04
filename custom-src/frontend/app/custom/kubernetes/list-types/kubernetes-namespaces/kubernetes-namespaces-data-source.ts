@@ -4,7 +4,7 @@ import { getPaginationKey } from '../../../../../../store/src/actions/pagination
 import { AppState } from '../../../../../../store/src/app-state';
 import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
-import { kubernetesEntityFactory, kubernetesNamespacesSchemaKey } from '../../kubernetes-entity-factory';
+import { kubernetesEntityFactory, kubernetesNamespacesEntityType } from '../../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { getKubeAPIResourceGuid } from '../../store/kube.selectors';
 import { KubernetesNamespace } from '../../store/kube.types';
@@ -21,9 +21,9 @@ export class KubernetesNamespacesDataSource extends ListDataSource<KubernetesNam
     super({
       store,
       action: new GetKubernetesNamespaces(kubeGuid.guid),
-      schema: kubernetesEntityFactory(kubernetesNamespacesSchemaKey),
+      schema: kubernetesEntityFactory(kubernetesNamespacesEntityType),
       getRowUniqueId: getKubeAPIResourceGuid,
-      paginationKey: getPaginationKey(kubernetesNamespacesSchemaKey, kubeGuid.guid),
+      paginationKey: getPaginationKey(kubernetesNamespacesEntityType, kubeGuid.guid),
       isLocal: true,
       listConfig,
       transformEntities: [{ type: 'filter', field: 'metadata.name' }]

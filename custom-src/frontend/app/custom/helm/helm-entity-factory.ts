@@ -10,14 +10,13 @@ import {
   MonocularChart,
 } from './store/helm.types';
 
-// TODO: SchemaKey names (and kube names)
-export const monocularChartsSchemaKey = 'monocularCharts';
+export const monocularChartsEntityType = 'monocularCharts';
 
-export const helmReleaseSchemaKey = 'helmReleases';
-export const helmVersionsSchemaKey = 'helmVersions';
-export const helmReleaseStatusSchemaKey = 'helmReleaseStatus';
-export const helmReleasePodKey = 'helmReleasePod';
-export const helmReleaseServiceKey = 'helmReleaseService';
+export const helmReleaseEntityKey = 'helmReleases';
+export const helmVersionsEntityType = 'helmVersions';
+export const helmReleaseStatusEntityType = 'helmReleaseStatus';
+export const helmReleasePodEntityType = 'helmReleasePod';
+export const helmReleaseServiceEntityType = 'helmReleaseService';
 
 export const getMonocularChartId = (entity: MonocularChart) => entity.id;
 export const getHelmReleaseId = (entity: HelmRelease) => entity.endpointId;
@@ -50,38 +49,38 @@ export class HelmEntitySchema extends EntitySchema {
   }
 }
 
-entityCache[monocularChartsSchemaKey] = new HelmEntitySchema(
-  monocularChartsSchemaKey,
+entityCache[monocularChartsEntityType] = new HelmEntitySchema(
+  monocularChartsEntityType,
   {},
   { idAttribute: getMonocularChartId }
 );
 
-entityCache[helmReleaseSchemaKey] = new HelmEntitySchema(
-  helmReleaseSchemaKey,
+entityCache[helmReleaseEntityKey] = new HelmEntitySchema(
+  helmReleaseEntityKey,
   {},
   { idAttribute: getHelmReleaseId }
 );
 
-entityCache[helmVersionsSchemaKey] = new HelmEntitySchema(
-  helmVersionsSchemaKey,
+entityCache[helmVersionsEntityType] = new HelmEntitySchema(
+  helmVersionsEntityType,
   {},
   { idAttribute: getHelmVersionId }
 );
 
-entityCache[helmReleaseStatusSchemaKey] = new HelmEntitySchema(
-  helmReleaseStatusSchemaKey,
+entityCache[helmReleaseStatusEntityType] = new HelmEntitySchema(
+  helmReleaseStatusEntityType,
   {},
   { idAttribute: getHelmReleaseStatusId }
 );
 
-entityCache[helmReleasePodKey] = new HelmEntitySchema(
-  helmReleasePodKey,
+entityCache[helmReleasePodEntityType] = new HelmEntitySchema(
+  helmReleasePodEntityType,
   {},
   { idAttribute: getHelmReleasePodId }
 );
 
-entityCache[helmReleaseServiceKey] = new HelmEntitySchema(
-  helmReleaseServiceKey,
+entityCache[helmReleaseServiceEntityType] = new HelmEntitySchema(
+  helmReleaseServiceEntityType,
   {},
   { idAttribute: getHelmReleaseServiceId }
 );

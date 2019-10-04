@@ -8,12 +8,12 @@ import { StratosEndpointExtensionDefinition } from '../../core/entity-catalogue/
 import {
   HELM_ENDPOINT_TYPE,
   helmEntityFactory,
-  helmReleasePodKey,
-  helmReleaseSchemaKey,
-  helmReleaseServiceKey,
-  helmReleaseStatusSchemaKey,
-  helmVersionsSchemaKey,
-  monocularChartsSchemaKey,
+  helmReleaseEntityKey,
+  helmReleasePodEntityType,
+  helmReleaseServiceEntityType,
+  helmReleaseStatusEntityType,
+  helmVersionsEntityType,
+  monocularChartsEntityType,
 } from './helm-entity-factory';
 import {
   HelmRelease,
@@ -66,8 +66,8 @@ function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefi
 
 function generateChartEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: monocularChartsSchemaKey,
-    schema: helmEntityFactory(monocularChartsSchemaKey),
+    type: monocularChartsEntityType,
+    schema: helmEntityFactory(monocularChartsEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, MonocularChart>(definition);
@@ -75,8 +75,8 @@ function generateChartEntity(endpointDefinition: StratosEndpointExtensionDefinit
 
 function generateReleaseEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: helmReleaseSchemaKey,
-    schema: helmEntityFactory(helmReleaseSchemaKey),
+    type: helmReleaseEntityKey,
+    schema: helmEntityFactory(helmReleaseEntityKey),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, HelmRelease>(definition);
@@ -84,8 +84,8 @@ function generateReleaseEntity(endpointDefinition: StratosEndpointExtensionDefin
 
 function generateVersionEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: helmVersionsSchemaKey,
-    schema: helmEntityFactory(helmVersionsSchemaKey),
+    type: helmVersionsEntityType,
+    schema: helmEntityFactory(helmVersionsEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, HelmVersion>(definition);
@@ -93,8 +93,8 @@ function generateVersionEntity(endpointDefinition: StratosEndpointExtensionDefin
 
 function generateReleaseStatusEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: helmReleaseStatusSchemaKey,
-    schema: helmEntityFactory(helmReleaseStatusSchemaKey),
+    type: helmReleaseStatusEntityType,
+    schema: helmEntityFactory(helmReleaseStatusEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, HelmReleaseStatus>(definition);
@@ -102,8 +102,8 @@ function generateReleaseStatusEntity(endpointDefinition: StratosEndpointExtensio
 
 function generateReleasePodEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: helmReleasePodKey,
-    schema: helmEntityFactory(helmReleasePodKey),
+    type: helmReleasePodEntityType,
+    schema: helmEntityFactory(helmReleasePodEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, HelmReleasePod>(definition);
@@ -111,8 +111,8 @@ function generateReleasePodEntity(endpointDefinition: StratosEndpointExtensionDe
 
 function generateReleaseServiceEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
-    type: helmReleaseServiceKey,
-    schema: helmEntityFactory(helmReleaseServiceKey),
+    type: helmReleaseServiceEntityType,
+    schema: helmEntityFactory(helmReleaseServiceEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, HelmReleaseService>(definition);

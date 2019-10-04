@@ -16,7 +16,7 @@ import {
 } from '../../../../../store/src/types/request.types';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../environments/environment';
-import { HELM_ENDPOINT_TYPE, helmReleaseSchemaKey } from '../helm-entity-factory';
+import { HELM_ENDPOINT_TYPE, helmReleaseEntityKey } from '../helm-entity-factory';
 import { parseHelmReleaseStatus } from '../release/tabs/helm-release-helper.service';
 import {
   GET_HELM_RELEASE_PODS,
@@ -228,7 +228,7 @@ export class HelmEffects {
   private getHelmUpdateAction(guid: string, type: string, updatingKey: string) {
     return {
       endpointType: HELM_ENDPOINT_TYPE,
-      entityType: helmReleaseSchemaKey,
+      entityType: helmReleaseEntityKey,
       guid,
       type,
       updatingKey,

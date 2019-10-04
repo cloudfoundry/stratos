@@ -14,7 +14,7 @@ import { ConfirmationDialogConfig } from '../../../shared/components/confirmatio
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
-import { HELM_ENDPOINT_TYPE, helmReleaseSchemaKey } from '../helm-entity-factory';
+import { HELM_ENDPOINT_TYPE, helmReleaseEntityKey } from '../helm-entity-factory';
 import { HelmInstall } from '../store/helm.actions';
 import { HELM_INSTALLING_KEY, HelmInstallValues } from '../store/helm.types';
 
@@ -133,7 +133,7 @@ export class CreateReleaseComponent implements OnInit {
     const action = new HelmInstall(values);
     this.store.dispatch(action);
 
-    const releaseEntityConfig = entityCatalogue.getEntity(HELM_ENDPOINT_TYPE, helmReleaseSchemaKey);
+    const releaseEntityConfig = entityCatalogue.getEntity(HELM_ENDPOINT_TYPE, helmReleaseEntityKey);
 
     // Wait for result of request
     return of(true).pipe(

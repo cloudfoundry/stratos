@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import { CommonModule, DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 import { ConnectionBackend, Http } from '@angular/http';
@@ -20,6 +21,9 @@ import { createEmptyStoreModule } from '../../../../../core/test-framework/store
 import { AppStoreExtensionsModule } from '../../../../../store/src/store.extensions.module';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
+
+
+/* tslint:enable */
 
 describe('CfAppAutoscalerEventsConfigService', () => {
 

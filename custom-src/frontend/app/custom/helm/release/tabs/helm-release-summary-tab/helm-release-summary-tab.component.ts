@@ -12,7 +12,7 @@ import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-cat
 import { LoggerService } from '../../../../../core/logger.service';
 import { ConfirmationDialogConfig } from '../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../shared/components/confirmation-dialog.service';
-import { HELM_ENDPOINT_TYPE, helmReleaseSchemaKey } from '../../../helm-entity-factory';
+import { HELM_ENDPOINT_TYPE, helmReleaseEntityKey } from '../../../helm-entity-factory';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
 @Component({
@@ -123,7 +123,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
           this.logService.error('Failed to delete release: ', err);
         },
         complete: () => {
-          const releaseEntityConfig = entityCatalogue.getEntity(HELM_ENDPOINT_TYPE, helmReleaseSchemaKey);
+          const releaseEntityConfig = entityCatalogue.getEntity(HELM_ENDPOINT_TYPE, helmReleaseEntityKey);
           this.store.dispatch(new ClearPaginationOfType(releaseEntityConfig));
           this.completeDelete();
           this.store.dispatch(new RouterNav({ path: ['monocular/releases'] }));

@@ -12,10 +12,10 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import {
-  kubernetesDeploymentsSchemaKey,
-  kubernetesPodsSchemaKey,
-  kubernetesServicesSchemaKey,
-  kubernetesStatefulSetsSchemaKey,
+  kubernetesDeploymentsEntityType,
+  kubernetesPodsEntityType,
+  kubernetesServicesEntityType,
+  kubernetesStatefulSetsEntityType,
 } from '../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesDeployment, KubernetesPod, KubernetesStatefulSet, KubeService } from '../store/kube.types';
@@ -70,22 +70,22 @@ export class KubernetesEndpointService {
 
     this.deployments$ = this.getObservable<KubernetesDeployment>(
       new GeKubernetesDeployments(this.kubeGuid),
-      kubernetesDeploymentsSchemaKey
+      kubernetesDeploymentsEntityType
     );
 
     this.pods$ = this.getObservable<KubernetesPod>(
       new GetKubernetesPods(this.kubeGuid),
-      kubernetesPodsSchemaKey
+      kubernetesPodsEntityType
     );
 
     this.statefulSets$ = this.getObservable<KubernetesStatefulSet>(
       new GetKubernetesStatefulSets(this.kubeGuid),
-      kubernetesStatefulSetsSchemaKey
+      kubernetesStatefulSetsEntityType
     );
 
     this.services$ = this.getObservable<KubeService>(
       new GetKubernetesServices(this.kubeGuid),
-      kubernetesServicesSchemaKey
+      kubernetesServicesEntityType
     );
 
     const kubeDashboardEnabled$ = this.store.select('auth').pipe(

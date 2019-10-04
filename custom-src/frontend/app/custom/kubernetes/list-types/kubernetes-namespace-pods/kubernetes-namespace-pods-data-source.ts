@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/src/app-state';
 import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
-import { kubernetesEntityFactory, kubernetesPodsSchemaKey } from '../../kubernetes-entity-factory';
+import { kubernetesEntityFactory, kubernetesPodsEntityType } from '../../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
 import { KubernetesPod } from '../../store/kube.types';
@@ -21,7 +21,7 @@ export class KubernetesNamespacePodsDataSource extends ListDataSource<Kubernetes
     super({
       store,
       action,
-      schema: kubernetesEntityFactory(kubernetesPodsSchemaKey),
+      schema: kubernetesEntityFactory(kubernetesPodsEntityType),
       getRowUniqueId: (object: KubernetesPod) => object.metadata.name,
       paginationKey: action.paginationKey,
       isLocal: true,
