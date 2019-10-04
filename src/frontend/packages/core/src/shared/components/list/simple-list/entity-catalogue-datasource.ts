@@ -39,7 +39,11 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
         ...linBuilders.map((builder, i) => ({
           columnId: builder[0],
           cellDefinition: {
-            getValue: (e) => {
+            getLink: (e: any) => {
+              const metaData = catalogueEntity.builders.entityBuilder.getMetadata(e);
+              return catalogueEntity.builders.entityBuilder.getLink ? catalogueEntity.builders.entityBuilder.getLink(metaData) : null;
+            },
+            getValue: (e: any) => {
               const metaData = catalogueEntity.builders.entityBuilder.getMetadata(e);
               return builder[1](metaData);
             }

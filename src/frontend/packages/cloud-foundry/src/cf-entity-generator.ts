@@ -873,7 +873,7 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getMetadata: app => ({
           guid: app.metadata.guid,
           cfGuid: app.entity.cfGuid,
-          createdAt: moment(app.metadata.created_at).format('LLLL'),
+          createdAt: moment(app.metadata.created_at).format('LLL'),
           name: app.entity.name,
         }),
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
