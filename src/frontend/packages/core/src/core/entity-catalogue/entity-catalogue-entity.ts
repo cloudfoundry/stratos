@@ -28,7 +28,7 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from './entity-catalogue.types';
-import { EntityPipelineEntity } from '../../../../store/src/entity-request-pipeline/pipeline.types';
+import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../../../store/src/entity-request-pipeline/pipeline.types';
 
 export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata,
@@ -141,7 +141,7 @@ export class StratosBaseCatalogueEntity<
   }
 
   public getEndpointGuidFromEntity(entity: Y & EntityPipelineEntity) {
-    return entity.__stratosEndpointGuid__;
+    return entity[stratosEndpointGuidKey];
   }
 
   public getEntityMonitor<Q extends AppState, B = any>(

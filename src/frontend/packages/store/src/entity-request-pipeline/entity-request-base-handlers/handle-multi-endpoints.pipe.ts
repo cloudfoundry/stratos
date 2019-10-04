@@ -1,6 +1,7 @@
 import { hasJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
 import { PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PaginationPageIteratorConfig } from '../pagination-request-base-handlers/pagination-iterator.pipe';
+import { stratosEndpointGuidKey } from '../pipeline.types';
 
 /**
  * Generic container for information about an errored request to a specific endpoint
@@ -97,7 +98,7 @@ function postProcessSuccessResponses(
       endpointGuid,
       entities: entities.map(entity => ({
         ...entity,
-        __stratosEndpointGuid__: endpointGuid
+        [stratosEndpointGuidKey]: endpointGuid
       })),
       totalPages: flattenerConfig ? flattenerConfig.getTotalPages(jetStreamResponse) : 0,
       totalResults: flattenerConfig ? flattenerConfig.getTotalEntities(jetStreamResponse) : 0
@@ -107,7 +108,7 @@ function postProcessSuccessResponses(
     endpointGuid,
     entities: [{
       ...entities,
-      __stratosEndpointGuid__: endpointGuid
+      [stratosEndpointGuidKey]: endpointGuid
     }],
     totalPages: null,
     totalResults: 1

@@ -6,7 +6,7 @@ import { ListConfig, ListViewTypes } from '../list.component.types';
 import { ITableColumn } from '../list-table/table.types';
 import { createTableColumnFavorite } from '../list-table/table-cell-favorite/table-cell-favorite.component';
 import { UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
-import { EntityPipelineEntity } from '../../../../../../store/src/entity-request-pipeline/pipeline.types';
+import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../../../../../store/src/entity-request-pipeline/pipeline.types';
 
 export interface GetMultipleActionConfig {
   endpointGuid?: string;
@@ -52,8 +52,7 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
         })),
         createTableColumnFavorite(row => {
           return new UserFavorite(
-            // TODO we need a reliable way to get the endpoint guid for any entity
-            row.__stratosEndpointGuid__,
+            catalogueEntity.getEndpointGuidFromEntity(row),
             catalogueEntity.endpointType,
             catalogueEntity.definition.type,
             catalogueEntity.getGuidFromEntity(row),
