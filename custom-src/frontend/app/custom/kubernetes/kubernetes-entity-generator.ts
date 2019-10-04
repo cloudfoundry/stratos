@@ -99,7 +99,7 @@ const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig } = {
   }
 };
 
-// TODO: RC hack
+// TODO: RC Multi load issue
 /**
  * CustomImportModule brings in CustomModule. CustomModule brings in kube setup module. setup module brings this in multiple times
  */

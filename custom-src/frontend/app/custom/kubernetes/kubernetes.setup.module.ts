@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import { NgModule, Optional, SkipSelf } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../store/src/app-state';
@@ -24,7 +24,6 @@ import { KubeHealthCheck } from './store/kubernetes.actions';
 
 @NgModule({
   imports: [
-    // TODO: RC Every time this is imported it's executed. See note & `hack` in `generateKubernetesEntities`
     EntityCatalogueModule.forFeature(generateKubernetesEntities),
     CoreModule,
     CommonModule,
@@ -45,9 +44,18 @@ import { KubeHealthCheck } from './store/kubernetes.actions';
   ]
 })
 export class KubernetesSetupModule {
-  constructor(endpointService: EndpointsService, store: Store<AppState>) {
-    endpointService.registerHealthCheck(
-      new EndpointHealthCheck(KUBERNETES_ENDPOINT_TYPE, (endpoint) => store.dispatch(new KubeHealthCheck(endpoint.guid)))
-    );
+  constructor(
+    endpointService: EndpointsService,
+    store: Store<AppState>,
+    @Optional() @SkipSelf() parentModule: KubernetesSetupModule
+  ) {
+    // TODO: RC Multi load issue
+    if (parentModule) {
+      console.log('ALREADY IMPORTED, KUBE HACK ACTIVATED');
+    } else {
+      endpointService.registerHealthCheck(
+        new EndpointHealthCheck(KUBERNETES_ENDPOINT_TYPE, (endpoint) => store.dispatch(new KubeHealthCheck(endpoint.guid)))
+      );
+    }
   }
 }

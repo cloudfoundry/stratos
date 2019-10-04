@@ -8,6 +8,7 @@ import { getPaginationObservables } from '../../../../../store/src/reducers/pagi
 import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../shared/components/list/list.component.types';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
+import { kubernetesEntityFactory } from '../../kubernetes/kubernetes-entity-factory';
 import { KubeService } from '../../kubernetes/store/kube.types';
 import { GetKubernetesServicesInNamespace } from '../../kubernetes/store/kubernetes.actions';
 import { getHelmReleaseServiceId, helmEntityFactory } from '../helm-entity-factory';
@@ -18,7 +19,7 @@ export const fetchHelmReleaseServiceFromKubernetes = (store: Store<AppState>, he
   return fetchRelease(store, helmService.endpointId, helmService.releaseTitle).pipe(
     switchMap(release => {
       const action = new GetKubernetesServicesInNamespace(helmService.endpointId, release.namespace);
-      const paginationMonitor = new PaginationMonitor<KubeService>(store, action.paginationKey, helmEntityFactory(action.entityType));
+      const paginationMonitor = new PaginationMonitor<KubeService>(store, action.paginationKey, kubernetesEntityFactory(action.entityType));
       return getPaginationObservables<KubeService>({ store, action, paginationMonitor }).entities$;
     }),
     filter(entities => !!entities),

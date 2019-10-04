@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import { NgModule, Optional, SkipSelf } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { GetSystemInfo } from '../../../../store/src/actions/system.actions';
@@ -23,13 +23,23 @@ import { HelmStoreModule } from './helm.store.module';
   ]
 })
 export class HelmSetupModule {
-  constructor(endpointService: EndpointsService, store: Store<AppState>) {
-    endpointService.registerHealthCheck(
-      new EndpointHealthCheck(HELM_ENDPOINT_TYPE, (endpoint) => {
-        if (endpoint.endpoint_metadata && endpoint.endpoint_metadata.status === 'Synchronizing') {
-          store.dispatch(new GetSystemInfo());
-        }
-      })
-    );
+  constructor(
+    endpointService: EndpointsService,
+    store: Store<AppState>,
+    @Optional() @SkipSelf() parentModule: HelmSetupModule
+  ) {
+    // TODO: RC Multi load issue
+    if (parentModule) {
+      console.log('ALREADY IMPORTED, HELM HACK ACTIVATED');
+    } else {
+      endpointService.registerHealthCheck(
+        new EndpointHealthCheck(HELM_ENDPOINT_TYPE, (endpoint) => {
+          if (endpoint.endpoint_metadata && endpoint.endpoint_metadata.status === 'Synchronizing') {
+            store.dispatch(new GetSystemInfo());
+          }
+        })
+      );
+    }
+
   }
 }

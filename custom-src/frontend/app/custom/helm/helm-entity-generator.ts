@@ -24,10 +24,7 @@ import {
   MonocularChart,
 } from './store/helm.types';
 
-// TODO: RC hack
-/**
- * CustomImportModule brings in CustomModule. CustomModule brings in kube setup module. setup module brings this in multiple times
- */
+// TODO: RC Multi load issue
 let hack = false;
 
 export function generateHelmEntities(): StratosBaseCatalogueEntity[] {

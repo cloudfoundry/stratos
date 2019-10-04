@@ -12,8 +12,6 @@ import { SuseAboutInfoComponent } from './suse-about-info/suse-about-info.compon
 import { SuseLoginComponent } from './suse-login/suse-login.component';
 import { SuseWelcomeComponent } from './suse-welcome/suse-welcome.component';
 
-// import { HelmModule } from './helm/helm.module';
-// import { HelmSetupModule } from './helm/helm.setup.module';
 const SuseCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2019 SUSE',
   hasEula: true,
@@ -22,13 +20,24 @@ const SuseCustomizations: CustomizationsMetadata = {
   alwaysShowNavForEndpointTypes: (typ) => false,
 };
 
+// TODO: RC Multi load issue
+@NgModule({})
+export class MockModule {
+  constructor() {
+    console.log('WONT WORK');
+  }
+}
+
+let init = false;
+
 @NgModule({
   imports: [
     CoreModule,
     SharedModule,
     MDAppModule,
-    KubernetesSetupModule,
-    HelmSetupModule
+    // TODO: RC Multi load issue
+    init ? MockModule : KubernetesSetupModule,
+    init ? MockModule : HelmSetupModule,
   ],
   // FIXME: Ensure that anything lazy loaded/in kube endpoint pages is not included here - #3675
   declarations: [
@@ -52,6 +61,7 @@ export class CustomModule {
   static init = false;
 
   constructor(router: Router) {
+    init = true;
     // Only update the routes once
     if (!CustomModule.init) {
       // Override the component used for the login route
