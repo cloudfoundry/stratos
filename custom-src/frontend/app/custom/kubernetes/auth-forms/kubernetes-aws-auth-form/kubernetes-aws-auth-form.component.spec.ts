@@ -1,9 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { KubernetesAWSAuthFormComponent } from './kubernetes-aws-auth-form.component';
 import { FormBuilder } from '@angular/forms';
-import { SharedModule } from '../../../../shared/shared.module';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
 import { MDAppModule } from '../../../../core/md.module';
+import { SharedModule } from '../../../../shared/shared.module';
+import { KubernetesAWSAuthFormComponent } from './kubernetes-aws-auth-form.component';
 
 describe('KubernetesAWSAuthFormComponent', () => {
   let component: KubernetesAWSAuthFormComponent;
@@ -11,14 +12,14 @@ describe('KubernetesAWSAuthFormComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesAWSAuthFormComponent ],
+      declarations: [KubernetesAWSAuthFormComponent],
       imports: [
         MDAppModule,
         SharedModule,
         NoopAnimationsModule
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

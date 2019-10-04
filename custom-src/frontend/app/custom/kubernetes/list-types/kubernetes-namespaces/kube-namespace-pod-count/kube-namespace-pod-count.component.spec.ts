@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KubeNamespacePodCountComponent } from './kube-namespace-pod-count.component';
 import { BaseKubeGuid } from '../../../kubernetes-page.types';
+import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { HelmReleaseService } from '../../../services/helm-release.service';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
-import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
+import { KubeNamespacePodCountComponent } from './kube-namespace-pod-count.component';
 
 describe('KubeNamespacePodCountComponent', () => {
   let component: KubeNamespacePodCountComponent;

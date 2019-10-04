@@ -1,11 +1,12 @@
 import 'hammerjs';
 
+import { HttpClientModule } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpModule } from '@angular/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { BaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
 import {
   EntitySummaryTitleComponent,
 } from '../../../../shared/components/entity-summary-title/entity-summary-title.component';
@@ -14,6 +15,7 @@ import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ListItemComponent } from '../list-item/list-item.component';
 import { LoaderComponent } from '../loader/loader.component';
 import { PanelComponent } from '../panel/panel.component';
+import { MockChartService } from '../shared/services/chart.service.mock';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
 import { MenuService } from '../shared/services/menu.service';
@@ -22,8 +24,6 @@ import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-detail
 import { ChartDetailsUsageComponent } from './chart-details-usage/chart-details-usage.component';
 import { ChartDetailsVersionsComponent } from './chart-details-versions/chart-details-versions.component';
 import { ChartDetailsComponent } from './chart-details.component';
-import { MockChartService } from '../shared/services/chart.service.mock';
-import { HttpClientModule } from '@angular/common/http';
 
 /* tslint:disable:no-unused-variable */
 // import { Angulartics2Module } from 'angulartics2';
@@ -110,7 +110,7 @@ describe('ChartDetailsComponent', () => {
           EntitySummaryTitleComponent
         ],
         providers: [
-          { provide: ChartsService, useValue: new MockChartService()},
+          { provide: ChartsService, useValue: new MockChartService() },
           { provide: ConfigService, useValue: { appName: 'appName' } },
           // { provide: SeoService },
           { provide: MenuService },

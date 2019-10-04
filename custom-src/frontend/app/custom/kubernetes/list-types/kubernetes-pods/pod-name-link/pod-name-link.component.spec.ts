@@ -1,11 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PodNameLinkComponent } from './pod-name-link.component';
 import { BaseKubeGuid } from '../../../kubernetes-page.types';
+import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { HelmReleaseService } from '../../../services/helm-release.service';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesStatus } from '../../../store/kube.types';
-import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
+import { PodNameLinkComponent } from './pod-name-link.component';
 
 describe('PodNameLinkComponent', () => {
   let component: PodNameLinkComponent;
