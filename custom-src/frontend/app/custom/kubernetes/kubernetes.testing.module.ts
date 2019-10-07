@@ -11,7 +11,6 @@ import { entityCatalogue, TestEntityCatalogue } from '../../core/entity-catalogu
 import { SharedModule } from '../../shared/shared.module';
 import { generateKubernetesEntities } from './kubernetes-entity-generator';
 
-// TODO: RC import store as well
 @NgModule({
   imports: [{
     ngModule: EntityCatalogueFeatureModule,

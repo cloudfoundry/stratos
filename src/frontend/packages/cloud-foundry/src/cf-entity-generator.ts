@@ -134,11 +134,6 @@ export interface CFBasePipelineRequestActionMeta {
   flatten?: boolean;
 }
 
-// TODO: RC not used
-// export function registerCFEntities() {
-//   generateCFEntities().forEach(entity => entityCatalogue.register(entity));
-// }
-
 export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {
     urlValidationRegexString: urlValidationExpression,

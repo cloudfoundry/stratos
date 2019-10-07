@@ -20,24 +20,13 @@ const SuseCustomizations: CustomizationsMetadata = {
   alwaysShowNavForEndpointTypes: (typ) => false,
 };
 
-// TODO: RC Multi load issue
-@NgModule({})
-export class MockModule {
-  constructor() {
-    console.log('WONT WORK');
-  }
-}
-
-let init = false;
-
 @NgModule({
   imports: [
     CoreModule,
     SharedModule,
     MDAppModule,
-    // TODO: RC Multi load issue
-    init ? MockModule : KubernetesSetupModule,
-    init ? MockModule : HelmSetupModule,
+    KubernetesSetupModule,
+    HelmSetupModule,
   ],
   // FIXME: Ensure that anything lazy loaded/in kube endpoint pages is not included here - #3675
   declarations: [
@@ -60,7 +49,6 @@ export class CustomModule {
   constructor(router: Router, cs: CustomizationService) {
     cs.set(SuseCustomizations);
 
-    init = true;
     // Only update the routes once
     if (!CustomModule.init) {
       // Override the component used for the login route

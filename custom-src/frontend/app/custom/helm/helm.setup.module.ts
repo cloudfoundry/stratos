@@ -28,9 +28,8 @@ export class HelmSetupModule {
     store: Store<AppState>,
     @Optional() @SkipSelf() parentModule: HelmSetupModule
   ) {
-    // TODO: RC Multi load issue
     if (parentModule) {
-      console.log('ALREADY IMPORTED, HELM HACK ACTIVATED');
+      // Module has already been imported
     } else {
       endpointService.registerHealthCheck(
         new EndpointHealthCheck(HELM_ENDPOINT_TYPE, (endpoint) => {

@@ -99,18 +99,7 @@ const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig } = {
   }
 };
 
-// TODO: RC Multi load issue
-/**
- * CustomImportModule brings in CustomModule. CustomModule brings in kube setup module. setup module brings this in multiple times
- */
-let hack = false;
-
 export function generateKubernetesEntities(): StratosBaseCatalogueEntity[] {
-  if (hack) {
-    return [];
-  }
-  hack = true;
-
   const endpointDefinition: StratosEndpointExtensionDefinition = {
     type: KUBERNETES_ENDPOINT_TYPE,
     label: 'Kubernetes',

@@ -24,15 +24,8 @@ import {
   MonocularChart,
 } from './store/helm.types';
 
-// TODO: RC Multi load issue
-let hack = false;
 
 export function generateHelmEntities(): StratosBaseCatalogueEntity[] {
-  if (hack) {
-    return [];
-  }
-  hack = true;
-
   const endpointDefinition: StratosEndpointExtensionDefinition = {
     type: HELM_ENDPOINT_TYPE,
     label: 'Helm Repository',

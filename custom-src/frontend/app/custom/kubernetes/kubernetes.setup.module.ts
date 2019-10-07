@@ -49,9 +49,8 @@ export class KubernetesSetupModule {
     store: Store<AppState>,
     @Optional() @SkipSelf() parentModule: KubernetesSetupModule
   ) {
-    // TODO: RC Multi load issue
     if (parentModule) {
-      console.log('ALREADY IMPORTED, KUBE HACK ACTIVATED');
+      // Module has already been imported
     } else {
       endpointService.registerHealthCheck(
         new EndpointHealthCheck(KUBERNETES_ENDPOINT_TYPE, (endpoint) => store.dispatch(new KubeHealthCheck(endpoint.guid)))

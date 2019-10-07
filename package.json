@@ -17,6 +17,7 @@
     "ng": "ng",
     "start": "npm run customize && ng serve",
     "start-high-mem": "npm run customize && node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve",
+    "start-dev-high-mem": "npm run customize && node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve --aot=false",
     "start-prod-high-mem": "npm run customize && node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve --prod",
     "start-dev": "ng serve --aot=false",
     "test": "run-s test-frontend:* --continue-on-error",
