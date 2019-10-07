@@ -188,8 +188,11 @@ func fwdCNSIStandardHeaders(cnsiRequest *interfaces.CNSIRequest, req *http.Reque
 		// Skip these
 		//  - "Referer" causes CF to fail with a 403
 		//  - "Connection", "X-Cap-*" and "Cookie" are consumed by us
-		// - "Accept-Encoding" must be excluded otherwise the transport will expect us to handle the encoding/compression
-		case k == "Connection", k == "Cookie", k == "Referer", k == "Accept-Encoding", strings.HasPrefix(strings.ToLower(k), "x-cap-"):
+		//  - "Accept-Encoding" must be excluded otherwise the transport will expect us to handle the encoding/compression
+		//  - X-Forwarded-* headers - these will confuse Cloud Foundry in some cases (e.g. load balancers)
+		case k == "Connection", k == "Cookie", k == "Referer", k == "Accept-Encoding",
+			strings.HasPrefix(strings.ToLower(k), "x-cap-"),
+			strings.HasPrefix(strings.ToLower(k), "x-forwarded-"):
 
 		// Forwarding everything else
 		default:
