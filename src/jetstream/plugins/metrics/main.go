@@ -479,7 +479,9 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 			if compareURL(info.APIEndpoint.String(), metricProviderInfo.URL) {
 				relate := EndpointMetricsRelation{}
 				relate.endpoint = info
-				relate.metrics = &metricProviderInfo
+				// Make a copy
+				relate.metrics = &MetricsMetadata{}
+				*relate.metrics = metricProviderInfo
 				results[guid] = relate
 				delete(endpointsMap, guid)
 				break
