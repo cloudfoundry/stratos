@@ -4,7 +4,6 @@ import {
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
-  Inject,
   NgZone,
   OnDestroy,
   OnInit,
@@ -20,7 +19,7 @@ import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
+import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
   getActionsFromExtensions,
@@ -56,14 +55,18 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     action: 'Got it'
   };
 
+  public customizations: CustomizationsMetadata;
+
   constructor(
     public endpointsService: EndpointsService,
     public store: Store<AppState>,
     private ngZone: NgZone,
     private resolver: ComponentFactoryResolver,
     private snackBar: MatSnackBar,
-    @Inject(Customizations) public customizations: CustomizationsMetadata
+    cs: CustomizationService
   ) {
+    this.customizations = cs.get();
+
     // Redirect to /applications if not enabled.
     endpointsService.disablePersistenceFeatures$.pipe(
       map(off => {
