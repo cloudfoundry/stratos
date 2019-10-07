@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { CoreModule } from '../core/core.module';
-import { Customizations, CustomizationsMetadata } from '../core/customizations.types';
+import { CustomizationService, CustomizationsMetadata } from '../core/customizations.types';
 import { MDAppModule } from '../core/md.module';
 import { SharedModule } from '../shared/shared.module';
 import { DemoHelperComponent } from './demo/demo-helper/demo-helper.component';
@@ -52,15 +52,14 @@ let init = false;
     SuseWelcomeComponent,
     DemoHelperComponent,
   ],
-  providers: [
-    { provide: Customizations, useValue: SuseCustomizations }
-  ],
 })
 export class CustomModule {
 
   static init = false;
 
-  constructor(router: Router) {
+  constructor(router: Router, cs: CustomizationService) {
+    cs.set(SuseCustomizations);
+
     init = true;
     // Only update the routes once
     if (!CustomModule.init) {

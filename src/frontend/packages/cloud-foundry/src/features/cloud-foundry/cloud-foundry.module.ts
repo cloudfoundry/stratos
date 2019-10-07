@@ -41,6 +41,7 @@ import {
   EndpointsListConfigService,
 } from '../../../../core/src/shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
+import { CloudFoundryComponentsModule } from '../../shared/components/components.module';
 import {
   CFEndpointsListConfigService,
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
@@ -151,6 +152,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CloudFoundryRoutingModule,
     RouterModule,
     NgxChartsModule,
+    CloudFoundryComponentsModule
   ],
   declarations: [
     CloudFoundryBaseComponent,
