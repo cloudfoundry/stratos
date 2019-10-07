@@ -9,7 +9,6 @@ import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connec
 import { CreateEndpointModule } from './create-endpoint/create-endpoint.module';
 import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
 import { EndpointsRoutingModule } from './endpoints.routing';
-import { CustomImportModule } from '../../custom-import.module';
 
 @NgModule({
   imports: [
@@ -17,7 +16,6 @@ import { CustomImportModule } from '../../custom-import.module';
     SharedModule,
     EndpointsRoutingModule,
     CreateEndpointModule,
-    CustomImportModule
   ],
   declarations: [
     EndpointsPageComponent,

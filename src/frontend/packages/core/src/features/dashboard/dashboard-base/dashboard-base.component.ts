@@ -1,10 +1,10 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
-import { Component, NgZone, OnDestroy, OnInit, ViewChild, Inject } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription, of } from 'rxjs';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
 import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
@@ -18,13 +18,13 @@ import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permi
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { AppState } from '../../../../../store/src/app-state';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
+import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { TabNavService } from '../../../../tab-nav.service';
+import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 
 
 @Component({
@@ -53,7 +53,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService,
     private ngZone: NgZone,
-    @Inject(Customizations) private customizations: CustomizationsMetadata
+    private cs: CustomizationService
   ) {
     this.noMargin$ = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
@@ -195,8 +195,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
         };
         if (item.requiresEndpointType) {
           // Upstream always likes to show Cloud Foundry related endpoints - other distributions can chane this behaviour
-          const alwaysShow = this.customizations.alwaysShowNavForEndpointTypes ?
-            this.customizations.alwaysShowNavForEndpointTypes(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
+          const alwaysShow = this.cs.get().alwaysShowNavForEndpointTypes ?
+            this.cs.get().alwaysShowNavForEndpointTypes(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
           item.hidden = alwaysShow ? of(false) : this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
         } else if (item.requiresPersistence) {
           item.hidden = this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true));

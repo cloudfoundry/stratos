@@ -6,6 +6,7 @@ import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router
 import { Store } from '@ngrx/store';
 import { debounceTime, withLatestFrom } from 'rxjs/operators';
 
+import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
 import { CloudFoundryModule } from '../../cloud-foundry/src/cloud-foundry.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import { RouterNav } from '../../store/src/actions/router.actions';
@@ -34,6 +35,7 @@ import { IApp, IOrganization, ISpace } from './core/cf-api.types';
 import { CoreModule } from './core/core.module';
 import { CurrentUserPermissions } from './core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from './core/current-user-permissions.service';
+import { CustomizationService } from './core/customizations.types';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
@@ -55,7 +57,6 @@ import { FavoriteConfig, favoritesConfigMapper } from './shared/components/favor
 import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -116,6 +117,7 @@ export class CustomRouterStateSerializer
     CfAutoscalerModule
   ],
   providers: [
+    CustomizationService,
     TabNavService,
     LoggedInService,
     ExtensionService,
