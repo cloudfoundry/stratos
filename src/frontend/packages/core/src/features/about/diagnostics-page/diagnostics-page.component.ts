@@ -1,13 +1,12 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
-import { SessionData } from '../../../../../store/src/types/auth.types';
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
+import { SessionData } from '../../../../../store/src/types/auth.types';
 
 @Component({
   selector: 'app-diagnostics-page',
@@ -39,7 +38,6 @@ export class DiagnosticsPageComponent implements OnInit {
   constructor(
     private meta: Meta,
     private store: Store<GeneralEntityAppState>,
-    @Inject(Customizations) public customizations: CustomizationsMetadata
   ) { }
 
   ngOnInit() {
