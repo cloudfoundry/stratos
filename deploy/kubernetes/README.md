@@ -187,16 +187,16 @@ This configuration is described below:
 |Parameter|Description|Default|
 |----|---|---|
 |console.service.ingress.enabled|Enables ingress|false|
-|console.service.ingress.annotations|Annotations to add to the ingress resource|{}|
-|console.service.ingress.extraLabels|Additional labels to add to the ingress resource|{}|
-|console.service.ingress.host|Host name to use for the Stratos service||
-|console.service.ingress.secretName|Existing TLS secret containing certificate for ingress||
+|console.service.ingress.annotations|Annotations to be added to the ingress resource.|{}|
+|console.service.ingress.extraLabels|Additional labels to be added to the ingress resource.|{}|
+|console.service.ingress.host|The host name that will be used for the Stratos service.||
+|console.service.ingress.secretName|The existing TLS secret that contains the certificate for ingress.||
 
 You must provide `console.service.ingress.host` when enabling ingress.
 
 By default a certificate will be generated for TLS. You can provide your own certificate by creating a secret and specifying this with `console.service.ingress.secretName`.
 
-> Note: If you do not supply `console.service.ingress.host` but do supply `env.DOMAIN` then the host `console.[env.DOMAIN]` will be used
+> Note: If you do not supply `console.service.ingress.host` but do supply `env.DOMAIN` then the host `console.[env.DOMAIN]` will be used.
 
 ### Specifying an External IP
 
