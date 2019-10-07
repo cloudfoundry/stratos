@@ -18,7 +18,7 @@ export interface CustomizationsMetadata {
 })
 export class CustomizationService {
 
-  private customizationMetadata: CustomizationsMetadata;
+  private customizationMetadata: CustomizationsMetadata = {};
 
   set = (cm: CustomizationsMetadata) => this.customizationMetadata = cm;
   get = () => this.customizationMetadata;
