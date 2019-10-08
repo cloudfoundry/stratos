@@ -201,9 +201,6 @@ import { CreateSpaceQuotaStepComponent } from '../../../../core/src/features/clo
   ],
   providers: [
     CFEndpointsListConfigService,
-    // TODO: check if belongs to here
-    EndpointListHelper,
-    EndpointsListConfigService,
     {
       provide: ActiveRouteCfOrgSpace,
       useValue: {}

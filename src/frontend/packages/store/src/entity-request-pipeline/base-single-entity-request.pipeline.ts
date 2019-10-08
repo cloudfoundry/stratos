@@ -8,11 +8,14 @@ import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogu
 import { AppState, InternalAppState } from '../app-state';
 import { EntityRequestAction } from '../types/request.types';
 import { buildRequestEntityPipe } from './entity-request-base-handlers/build-entity-request.pipe';
-import { handleMultiEndpointsPipeFactory } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
+import {
+  handleJetstreamResponsePipeFactory,
+  handleNonJetstreamResponsePipeFactory
+} from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
 import { mapMultiEndpointResponses } from './entity-request-base-handlers/map-multi-endpoint.pipes';
 import { BasePipelineConfig, EntityRequestPipeline, PipelineResult } from './entity-request-pipeline.types';
-import { singleRequestToPaged } from './pipeline-helpers';
+import { singleRequestToPaged, isJetstreamRequest } from './pipeline-helpers';
 import { PipelineHttpClient } from './pipline-http-client.service';
 
 export interface SingleRequestPipelineConfig<T extends AppState = InternalAppState> extends BasePipelineConfig<T> {
@@ -33,7 +36,15 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const baseRequest = buildRequestEntityPipe(requestType, action.options);
   const request = preRequest ? preRequest(baseRequest, action, catalogueEntity) : baseRequest;
-  const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(action.options.url);
+  const definition = catalogueEntity.definition as IStratosEntityDefinition;
+  const isJetstreamEntityRequest = isJetstreamRequest(definition);
+  const handleMultiEndpointsPipe = isJetstreamEntityRequest ?
+    handleJetstreamResponsePipeFactory(
+      action.options.url
+    ) : handleNonJetstreamResponsePipeFactory(
+      action.options.url,
+      definition.nonJetstreamRequestHandler
+    );
   return makeRequestEntityPipe(
     httpClient,
     request,
@@ -41,7 +52,7 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
     action.endpointGuid,
     action.externalRequest
   ).pipe(
-    map(response => singleRequestToPaged(response)),
+    map(response => isJetstreamEntityRequest ? singleRequestToPaged(response) : response),
     // Convert { [endpointGuid]: <raw response> } to { { errors: [], successes: [] } }
     map(handleMultiEndpointsPipe),
     // Convert { { errors: [], successes: [] } } to { response: NoramlisedResponse, success: boolean }

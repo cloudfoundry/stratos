@@ -112,6 +112,8 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
+import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
 
 /* tslint:disable:max-line-length */
 
@@ -309,6 +311,8 @@ import { UserPermissionDirective } from './user-permission.directive';
   providers: [
     ListConfig,
     ApplicationStateService,
+    EndpointListHelper,
+    EndpointsListConfigService,
     // CfUserService,
     ConfirmationDialogService,
     EntityMonitorFactory,
