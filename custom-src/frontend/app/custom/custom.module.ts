@@ -6,17 +6,17 @@ import { GetSystemInfo } from '../../../store/src/actions/system.actions';
 import { AppState } from '../../../store/src/app-state';
 import { EndpointHealthCheck } from '../../endpoints-health-checks';
 import { CoreModule } from '../core/core.module';
-import { Customizations, CustomizationsMetadata } from '../core/customizations.types';
+import { CustomizationService, CustomizationsMetadata } from '../core/customizations.types';
 import { EndpointsService } from '../core/endpoints.service';
 import { MDAppModule } from '../core/md.module';
 import { SharedModule } from '../shared/shared.module';
 import { DemoHelperComponent } from './demo/demo-helper/demo-helper.component';
+import { HelmModule } from './helm/helm.module';
+import { HelmSetupModule } from './helm/helm.setup.module';
 import { KubernetesSetupModule } from './kubernetes/kubernetes.setup.module';
 import { KubeHealthCheck } from './kubernetes/store/kubernetes.actions';
 import { SuseAboutInfoComponent } from './suse-about-info/suse-about-info.component';
 import { SuseLoginComponent } from './suse-login/suse-login.component';
-import { HelmModule } from './helm/helm.module';
-import { HelmSetupModule } from './helm/helm.setup.module';
 import { SuseWelcomeComponent } from './suse-welcome/suse-welcome.component';
 
 const SuseCustomizations: CustomizationsMetadata = {
@@ -47,16 +47,15 @@ const SuseCustomizations: CustomizationsMetadata = {
     SuseAboutInfoComponent,
     SuseWelcomeComponent,
     DemoHelperComponent,
-  ],
-  providers: [
-    { provide: Customizations, useValue: SuseCustomizations }
-  ],
+  ]
 })
 export class CustomModule {
 
   static init = false;
 
-  constructor(endpointService: EndpointsService, store: Store<AppState>, router: Router) {
+  constructor(endpointService: EndpointsService, store: Store<AppState>, router: Router, cs: CustomizationService) {
+    cs.set(SuseCustomizations);
+
     endpointService.registerHealthCheck(
       new EndpointHealthCheck('k8s', (endpoint) => store.dispatch(new KubeHealthCheck(endpoint.guid)))
     );
