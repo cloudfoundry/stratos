@@ -90,7 +90,6 @@ function postProcessSuccessResponses(
   flattenerConfig: PaginationPageIteratorConfig<any, any>
 ): MultiEndpointResponse<any> {
   const entities = getAllEntitiesFromResponses(response, flattenerConfig ? flattenerConfig.getEntitiesFromResponse : null);
-  console.log(entities);
   const jetStreamResponse = {
     [endpointGuid]: response
   };
@@ -140,7 +139,6 @@ export const handleNonJetstreamResponsePipeFactory = (
   flattenerConfig?: PaginationPageIteratorConfig<any, any>
 ) => (resData: any): HandledMultiEndpointResponse => {
   const isSuccess = nonJetstreamRequestHandler ? nonJetstreamRequestHandler.isSuccess(resData) : true;
-  console.log(resData);
   const mappedRes = postProcessSuccessResponses(resData, null, flattenerConfig);
   if (isSuccess) {
     return {
