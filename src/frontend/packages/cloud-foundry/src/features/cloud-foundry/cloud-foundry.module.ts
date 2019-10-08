@@ -4,7 +4,38 @@ import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
-import { CustomImportModule } from '../../../../core/src/custom-import.module';
+import { AddQuotaComponent } from '../../../../core/src/features/cloud-foundry/add-quota/add-quota.component';
+import {
+  CreateQuotaStepComponent,
+} from '../../../../core/src/features/cloud-foundry/add-quota/create-quota-step/create-quota-step.component';
+import {
+  AddSpaceQuotaComponent,
+} from '../../../../core/src/features/cloud-foundry/add-space-quota/add-space-quota.component';
+import {
+  CreateSpaceQuotaStepComponent,
+} from '../../../../core/src/features/cloud-foundry/add-space-quota/create-space-quota-step/create-space-quota-step.component';
+import {
+  EditQuotaStepComponent,
+} from '../../../../core/src/features/cloud-foundry/edit-quota/edit-quota-step/edit-quota-step.component';
+import { EditQuotaComponent } from '../../../../core/src/features/cloud-foundry/edit-quota/edit-quota.component';
+import {
+  EditSpaceQuotaStepComponent,
+} from '../../../../core/src/features/cloud-foundry/edit-space-quota/edit-space-quota-step/edit-space-quota-step.component';
+import {
+  EditSpaceQuotaComponent,
+} from '../../../../core/src/features/cloud-foundry/edit-space-quota/edit-space-quota.component';
+import {
+  QuotaDefinitionFormComponent,
+} from '../../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
+import {
+  SpaceQuotaDefinitionFormComponent,
+} from '../../../../core/src/features/cloud-foundry/space-quota-definition-form/space-quota-definition-form.component';
+import {
+  CloudFoundryOrganizationSpaceQuotasComponent,
+} from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-space-quotas/cloud-foundry-organization-space-quotas.component';
+import {
+  CloudFoundryQuotasComponent,
+} from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
 import { EndpointListHelper } from '../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import {
   EndpointsListConfigService,
@@ -112,18 +143,7 @@ import {
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
-import { CloudFoundryQuotasComponent } from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
-import { CloudFoundryOrganizationSpaceQuotasComponent } from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-space-quotas/cloud-foundry-organization-space-quotas.component';
-import { AddQuotaComponent } from '../../../../core/src/features/cloud-foundry/add-quota/add-quota.component';
-import { EditQuotaComponent } from '../../../../core/src/features/cloud-foundry/edit-quota/edit-quota.component';
-import { EditQuotaStepComponent } from '../../../../core/src/features/cloud-foundry/edit-quota/edit-quota-step/edit-quota-step.component';
-import { EditSpaceQuotaComponent } from '../../../../core/src/features/cloud-foundry/edit-space-quota/edit-space-quota.component';
-import { EditSpaceQuotaStepComponent } from '../../../../core/src/features/cloud-foundry/edit-space-quota/edit-space-quota-step/edit-space-quota-step.component';
-import { AddSpaceQuotaComponent } from '../../../../core/src/features/cloud-foundry/add-space-quota/add-space-quota.component';
-import { QuotaDefinitionFormComponent } from '../../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
-import { SpaceQuotaDefinitionFormComponent } from '../../../../core/src/features/cloud-foundry/space-quota-definition-form/space-quota-definition-form.component';
-import { CreateQuotaStepComponent } from '../../../../core/src/features/cloud-foundry/add-quota/create-quota-step/create-quota-step.component';
-import { CreateSpaceQuotaStepComponent } from '../../../../core/src/features/cloud-foundry/add-space-quota/create-space-quota-step/create-space-quota-step.component';
+
 
 @NgModule({
   imports: [
@@ -132,7 +152,6 @@ import { CreateSpaceQuotaStepComponent } from '../../../../core/src/features/clo
     CloudFoundryRoutingModule,
     RouterModule,
     NgxChartsModule,
-    CustomImportModule,
     CloudFoundryComponentsModule,
   ],
   declarations: [

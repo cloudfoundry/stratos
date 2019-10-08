@@ -9,15 +9,15 @@ import { ConsoleUserType } from './e2e-helpers';
 // This helper is used internally - tests should not need to use this class
 
 export interface RequestDefaults {
-    headers: {
-      'Content-Type'?: string,
-      Accept?: string,
-      [key: string]: string
-    };
-    resolveWithFullResponse: boolean;
-    jar: any;
-    agentOptions: object;
-    timeout: number;
+  headers: {
+    'Content-Type'?: string,
+    Accept?: string,
+    [key: string]: string
+  };
+  resolveWithFullResponse: boolean;
+  jar: any;
+  agentOptions: object;
+  timeout: number;
 }
 
 export class RequestHelpers {
@@ -137,4 +137,24 @@ export class RequestHelpers {
   //       });
   //   });
   // }
+
+  chain<T>(
+    currentValue: T,
+    nextChainFc: () => promise.Promise<T>,
+    maxChain: number,
+    abortChainFc: (val: T) => boolean,
+    count = 0): promise.Promise<T> {
+    if (count >= maxChain || abortChainFc(currentValue)) {
+      return promise.fullyResolved(currentValue);
+    }
+    e2e.debugLog('Chaining requests. Count: ' + count);
+
+    return nextChainFc().then(res => {
+      if (abortChainFc(res)) {
+        return promise.fullyResolved<T>(res);
+      }
+      browser.sleep(500);
+      return this.chain<T>(res, nextChainFc, maxChain, abortChainFc, ++count);
+    });
+  }
 }

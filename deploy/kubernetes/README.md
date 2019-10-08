@@ -14,6 +14,7 @@ The following guide details how to deploy Stratos in Kubernetes.
 - [Accessing the Console](#accessing-the-console)
 - [Advanced Topics](#advanced-topics)
   * [Using a Load Balancer](#using-a-load-balancer)
+  * [Using an Ingress Controller](#ingress)
   * [Specifying an External IP](#specifying-an-external-ip)
   * [Upgrading your deployment](#upgrading-your-deployment)
   * [Specifying UAA configuration](#specifying-uaa-configuration)
@@ -23,7 +24,6 @@ The following guide details how to deploy Stratos in Kubernetes.
   * [Deploying Stratos with your own TLS certificates](#deploying-stratos-with-your-own-tls-certificates)
   * [Using with a Secure Image Repostiory](#using-with-a-secure-image-repository)
   * [Installing Nightly Release](#installing-a-nightly-release)
-  * [Configuring Stratos to use an Ingress controller](./ingress)
 <!-- /TOC -->
 
 ## Requirements
@@ -177,6 +177,26 @@ If your Kubernetes deployment supports automatic configuration of a load balance
 ```
 helm install stratos/console --namespace=console --name my-console --set console.service.type=LoadBalancer
 ```
+
+### Using an Ingress Controller
+
+If your Kubernetes Cluster supports Ingress, you can expose Stratos through Ingress by supplying the appropriate ingress configuration when installing.
+
+This configuration is described below:
+
+|Parameter|Description|Default|
+|----|---|---|
+|console.service.ingress.enabled|Enables ingress|false|
+|console.service.ingress.annotations|Annotations to be added to the ingress resource.|{}|
+|console.service.ingress.extraLabels|Additional labels to be added to the ingress resource.|{}|
+|console.service.ingress.host|The host name that will be used for the Stratos service.||
+|console.service.ingress.secretName|The existing TLS secret that contains the certificate for ingress.||
+
+You must provide `console.service.ingress.host` when enabling ingress.
+
+By default a certificate will be generated for TLS. You can provide your own certificate by creating a secret and specifying this with `console.service.ingress.secretName`.
+
+> Note: If you do not supply `console.service.ingress.host` but do supply `env.DOMAIN` then the host `console.[env.DOMAIN]` will be used.
 
 ### Specifying an External IP
 
@@ -351,3 +371,4 @@ Install
 ```
 helm install stratos/console --namespace=console --name my-console --version 2.0.0-dev-9a5611dc
 ```
+
