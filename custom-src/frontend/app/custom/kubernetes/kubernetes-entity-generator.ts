@@ -114,22 +114,26 @@ export function generateKubernetesEntities(): StratosBaseCatalogueEntity[] {
       type: 'caasp',
       label: 'SUSE CaaS Platform',
       authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG]],
-      logoUrl: '/core/assets/custom/caasp.png'
+      logoUrl: '/core/assets/custom/caasp.png',
+      renderPriority: 5
     }, {
       type: 'aks',
       label: 'Azure AKS',
       authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG_AZ]],
-      logoUrl: '/core/assets/custom/aks.svg'
+      logoUrl: '/core/assets/custom/aks.svg',
+      renderPriority: 6
     }, {
       type: 'eks',
       label: 'Amazon EKS',
       authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.AWS_IAM]],
-      logoUrl: '/core/assets/custom/eks.svg'
+      logoUrl: '/core/assets/custom/eks.svg',
+      renderPriority: 6
     }, {
       type: 'gke',
       label: 'Google Kubernetes Engine',
       authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.GKE]],
-      logoUrl: '/core/assets/custom/gke.svg'
+      logoUrl: '/core/assets/custom/gke.svg',
+      renderPriority: 6
     }],
   };
   return [

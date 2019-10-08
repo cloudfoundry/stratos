@@ -37,7 +37,7 @@ export function generateHelmEntities(): StratosBaseCatalogueEntity[] {
     unConnectable: true,
     techPreview: true,
     authTypes: [],
-    renderPriority: 5,
+    renderPriority: 10,
   };
   return [
     generateEndpointEntity(endpointDefinition),
