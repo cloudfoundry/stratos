@@ -40,7 +40,7 @@ const SuseCustomizations: CustomizationsMetadata = {
     SuseAboutInfoComponent,
     SuseWelcomeComponent,
     DemoHelperComponent,
-  ],
+  ]
 })
 export class CustomModule {
 
