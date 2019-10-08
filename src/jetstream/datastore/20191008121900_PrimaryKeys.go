@@ -15,7 +15,7 @@ func init() {
 			return nil
 		}
 
-		addTokensPrimaryKey := "ALTER TABLE tokens ADD CONSTRAINT PK_Tokens PRIMARY KEY (user_guid, cnsi_guid, token_guid);"
+		addTokensPrimaryKey := "ALTER TABLE tokens ADD CONSTRAINT PK_Tokens PRIMARY KEY (user_guid, token_guid);"
 		_, err := txn.Exec(addTokensPrimaryKey)
 		if err != nil {
 			return err
