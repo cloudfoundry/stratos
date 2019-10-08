@@ -192,6 +192,7 @@ export interface KubernetesPod extends BasicKubeAPIResource {
 export enum KubernetesStatus {
   ACTIVE = 'Active',
   RUNNING = 'Running',
+  FAILED = 'Failed',
 }
 export interface KubernetesNamespace extends BasicKubeAPIResource {
   metadata: Metadata;
