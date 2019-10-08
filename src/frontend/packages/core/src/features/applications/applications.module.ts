@@ -2,7 +2,6 @@ import { DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../core/core.module';
-import { CustomImportModule } from '../../custom-import.module';
 import { SharedModule } from '../../shared/shared.module';
 import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
 import {
@@ -42,7 +41,6 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
     CoreModule,
     SharedModule,
     ApplicationsRoutingModule,
-    CustomImportModule
   ],
   declarations: [
     ApplicationWallComponent,
