@@ -14,10 +14,15 @@ import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain
 import { ConsoleUaaWizardComponent } from './features/setup/uaa-wizard/console-uaa-wizard.component';
 import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page.component';
 import { SharedModule } from './shared/shared.module';
+import { NotSetupGuardService } from './core/not-setup-guard.service';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'uaa', component: ConsoleUaaWizardComponent },
+  {
+    path: 'uaa',
+    component: ConsoleUaaWizardComponent,
+    canActivate: [NotSetupGuardService]
+  },
   { path: 'upgrade', component: UpgradePageComponent },
   { path: 'domainMismatch', component: DomainMismatchComponent },
   { path: 'login', loadChildren: './features/login/login.module#LoginModule' },
@@ -44,6 +49,7 @@ const appRoutes: Routes = [
           stratosNavigation: {
             label: 'Applications',
             matIcon: 'apps',
+            requiresEndpointType: 'cf',
             position: 20
           }
         },
@@ -73,6 +79,7 @@ const appRoutes: Routes = [
           stratosNavigation: {
             label: 'Marketplace',
             matIcon: 'store',
+            requiresEndpointType: 'cf',
             position: 30
           }
         },
@@ -84,6 +91,7 @@ const appRoutes: Routes = [
             label: 'Services',
             matIcon: 'service',
             matIconFont: 'stratos-icons',
+            requiresEndpointType: 'cf',
             position: 40
           }
         },
@@ -95,6 +103,7 @@ const appRoutes: Routes = [
             label: 'Cloud Foundry',
             matIcon: 'cloud_foundry',
             matIconFont: 'stratos-icons',
+            requiresEndpointType: 'cf',
             position: 50
           }
         },

@@ -49,7 +49,7 @@ export class UserProfileEffect {
         type: action.type,
       } as IRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
-      return this.httpClient.get(`/pp/${proxyAPIVersion}/uaa/Users/${action.guid}`).pipe(
+      return this.httpClient.get(`/pp/${proxyAPIVersion}/users/${action.guid}`).pipe(
         mergeMap((info: UserProfileInfo) => {
           return [
             new WrapperRequestActionSuccess({
@@ -82,7 +82,7 @@ export class UserProfileEffect {
         headers['x-stratos-password'] = action.password;
       }
 
-      return this.httpClient.put(`/pp/${proxyAPIVersion}/uaa/Users/${guid}`, action.profile, { headers }).pipe(
+      return this.httpClient.put(`/pp/${proxyAPIVersion}/users/${guid}`, action.profile, { headers }).pipe(
         mergeMap((info: UserProfileInfo) => {
           return [
             new WrapperRequestActionSuccess({
@@ -114,7 +114,7 @@ export class UserProfileEffect {
         'x-stratos-password': action.passwordChanges.oldPassword,
         'x-stratos-password-new': action.passwordChanges.password
       };
-      return this.httpClient.put(`/pp/${proxyAPIVersion}/uaa/Users/${guid}/password`, action.passwordChanges, { headers }).pipe(
+      return this.httpClient.put(`/pp/${proxyAPIVersion}/users/${guid}/password`, action.passwordChanges, { headers }).pipe(
         switchMap((info: UserProfileInfo) => {
           return [
             new WrapperRequestActionSuccess({

@@ -195,16 +195,19 @@ type GooseDBVersionRecord struct {
 
 // Info - this represents user specific info
 type Info struct {
-	Versions     *Versions                             `json:"version"`
-	User         *ConnectedUser                        `json:"user"`
-	Endpoints    map[string]map[string]*EndpointDetail `json:"endpoints"`
-	CloudFoundry *CFInfo                               `json:"cloud-foundry,omitempty"`
-	Plugins      map[string]bool                       `json:"plugins"`
-	PluginConfig map[string]string                     `json:"plugin-config,omitempty"`
-	Diagnostics  *Diagnostics                          `json:"diagnostics,omitempty"`
+	Versions      *Versions                             `json:"version"`
+	User          *ConnectedUser                        `json:"user"`
+	Endpoints     map[string]map[string]*EndpointDetail `json:"endpoints"`
+	CloudFoundry  *CFInfo                               `json:"cloud-foundry,omitempty"`
+	Plugins       map[string]bool                       `json:"plugins"`
+	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
+	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
+	Configuration struct {
+		TechPreview bool `json:"enableTechPreview"`
+	} `json:"config"`
 }
 
-// Extends CNSI Record and adds the user
+// EndpointDetail extends CNSI Record and adds the user
 type EndpointDetail struct {
 	*CNSIRecord
 	EndpointMetadata  interface{}       `json:"endpoint_metadata,omitempty"`
@@ -237,19 +240,61 @@ var AuthEndpointTypes = map[string]AuthEndpointType{
 	"local":  Local,
 }
 
+// ConsoleConfig is essential configuration settings
 type ConsoleConfig struct {
-	UAAEndpoint           *url.URL `json:"uaa_endpoint"`
-	AuthorizationEndpoint *url.URL `json:"authorization_endpoint"`
-	ConsoleAdminScope     string   `json:"console_admin_scope"`
-	ConsoleClient         string   `json:"console_client"`
-	ConsoleClientSecret   string   `json:"console_client_secret"`
+	UAAEndpoint           *url.URL `json:"uaa_endpoint" configName:"UAA_ENDPOINT"`
+	AuthorizationEndpoint *url.URL `json:"authorization_endpoint" configName:"AUTHORIZATION_ENDPOINT"`
+	ConsoleAdminScope     string   `json:"console_admin_scope" configName:"CONSOLE_ADMIN_SCOPE"`
+	ConsoleClient         string   `json:"console_client" configName:"CONSOLE_CLIENT"`
+	ConsoleClientSecret   string   `json:"console_client_secret" configName:"CONSOLE_CLIENT_SECRET"`
 	LocalUser             string   `json:"local_user"`
 	LocalUserPassword     string   `json:"local_user_password"`
 	LocalUserScope        string   `json:"local_user_scope"`
-	AuthEndpointType      string   `json:"auth_endpoint_type"`
-	SkipSSLValidation     bool     `json:"skip_ssl_validation"`
-	IsSetupComplete       bool     `json:"is_setup_complete"`
-	UseSSO                bool     `json:"use_sso"`
+	AuthEndpointType      string   `json:"auth_endpoint_type" configName:"AUTH_ENDPOINT_TYPE"`
+	SkipSSLValidation     bool     `json:"skip_ssl_validation" configName:"SKIP_SSL_VALIDATION"`
+	UseSSO                bool     `json:"use_sso" configName:"SSO_LOGIN"`
+}
+
+const defaultAdminScope = "stratos.admin"
+
+// IsSetupComplete indicates if we have enough config
+func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
+
+	// Local user - check setup complete
+	if AuthEndpointTypes[consoleConfig.AuthEndpointType] == Local {
+
+		// Need LocalUser and LocalUserPassword
+		if len(consoleConfig.LocalUser) == 0 || len(consoleConfig.LocalUserPassword) == 0 {
+			return false
+		}
+
+		// Also, we will make sure that admin scopes are set up for admin, if not specified
+		if len(consoleConfig.LocalUserScope) == 0 {
+			if len(consoleConfig.ConsoleAdminScope) == 0 {
+				// Neither set, so use default for both
+				consoleConfig.LocalUserScope = defaultAdminScope
+				consoleConfig.ConsoleAdminScope = defaultAdminScope
+			} else {
+				// admin scope set, so just use that
+				consoleConfig.LocalUserScope = consoleConfig.ConsoleAdminScope
+			}
+		} else {
+			if len(consoleConfig.ConsoleAdminScope) == 0 {
+				// Console admin scope not set, so use local user scope
+				consoleConfig.ConsoleAdminScope = consoleConfig.LocalUserScope
+			}
+		}
+
+		// Setup is complete if we have LocalUser and LocalUserPassword set
+		return true
+	}
+
+	// UAA - check setup complete for UAA
+	if consoleConfig.UAAEndpoint == nil {
+		return false
+	}
+
+	return len(consoleConfig.UAAEndpoint.String()) > 0 && len(consoleConfig.ConsoleAdminScope) > 0
 }
 
 // CNSIRequest
@@ -290,6 +335,7 @@ type PortalConfig struct {
 	AutoRegisterCFName              string   `configName:"AUTO_REG_CF_NAME"`
 	SSOLogin                        bool     `configName:"SSO_LOGIN"`
 	SSOOptions                      string   `configName:"SSO_OPTIONS"`
+	SSOWhiteList                    string   `configName:"SSO_WHITELIST"`
 	AuthEndpointType                string   `configName:"AUTH_ENDPOINT_TYPE"`
 	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
 	LogLevel                        string   `configName:"LOG_LEVEL"`
@@ -304,4 +350,5 @@ type PortalConfig struct {
 	ConsoleConfig                   *ConsoleConfig
 	PluginConfig                    map[string]string
 	DatabaseProviderName            string
+	EnableTechPreview               bool `configName:"ENABLE_TECH_PREVIEW"`
 }

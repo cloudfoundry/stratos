@@ -6,13 +6,19 @@ import { DynamicExtensionRoutes } from '../../core/extension/dynamic-extension-r
 import { StratosActionType } from '../../core/extension/extension-service';
 import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 import { AddOrganizationComponent } from './add-organization/add-organization.component';
+import { AddQuotaComponent } from './add-quota/add-quota.component';
+import { AddSpaceQuotaComponent } from './add-space-quota/add-space-quota.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
+import { EditQuotaComponent } from './edit-quota/edit-quota.component';
+import { EditSpaceQuotaComponent } from './edit-space-quota/edit-space-quota.component';
 import { EditSpaceComponent } from './edit-space/edit-space.component';
+import { QuotaDefinitionComponent } from './quota-definition/quota-definition.component';
+import { SpaceQuotaDefinitionComponent } from './space-quota-definition/space-quota-definition.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import {
   CloudFoundryCellAppsComponent,
@@ -32,6 +38,9 @@ import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/clo
 import {
   CloudFoundryOrganizationBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component';
+import {
+  CloudFoundryOrganizationSpaceQuotasComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-space-quotas/cloud-foundry-organization-space-quotas.component';
 import {
   CloudFoundryOrganizationSpacesComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-organization-spaces.component';
@@ -65,6 +74,7 @@ import {
 import {
   CloudFoundryOrganizationsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organizations.component';
+import { CloudFoundryQuotasComponent } from './tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
 import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 import {
   CloudFoundrySecurityGroupsComponent,
@@ -73,8 +83,8 @@ import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-f
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { InviteUsersComponent } from './users/invite-users/invite-users.component';
-import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
+import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 
 
 /* tslint:enable:max-line-length */
@@ -136,12 +146,36 @@ const cloudFoundry: Routes = [{
       path: 'organizations/:orgId/add-space',
       component: AddSpaceComponent
     },
+    {
+      path: 'add-quota',
+      component: AddQuotaComponent
+    },
+    {
+      path: 'organizations/:orgId/add-space-quota',
+      component: AddSpaceQuotaComponent
+    },
     ...usersRoles,
     {
       path: '',
       // Root for attaching CF wide actions (i.e assignments, tabs)
       component: CloudFoundryBaseComponent,
       children: [
+        {
+          path: 'quota-definitions/:quotaId',
+          component: QuotaDefinitionComponent
+        },
+        {
+          path: 'quota-definitions/:quotaId/edit-quota',
+          component: EditQuotaComponent
+        },
+        {
+          path: 'organizations/:orgId/space-quota-definitions/:quotaId/edit-space-quota',
+          component: EditSpaceQuotaComponent
+        },
+        {
+          path: 'organizations/:orgId/space-quota-definitions/:quotaId',
+          component: SpaceQuotaDefinitionComponent
+        },
         {
           path: 'organizations/:orgId/edit-org',
           component: EditOrganizationComponent
@@ -217,6 +251,10 @@ const cloudFoundry: Routes = [{
               component: CloudFoundryRoutesComponent
             },
             {
+              path: 'quota-definitions',
+              component: CloudFoundryQuotasComponent
+            },
+            {
               path: '**',
               component: PageNotFoundComponentComponent,
               canActivate: [DynamicExtensionRoutes],
@@ -278,6 +316,14 @@ const cloudFoundry: Routes = [{
                   component: CloudFoundryOrganizationUsersComponent
                 },
                 {
+                  path: 'quota',
+                  component: QuotaDefinitionComponent
+                },
+                {
+                  path: 'space-quota-definitions',
+                  component: CloudFoundryOrganizationSpaceQuotasComponent
+                },
+                {
                   path: '**',
                   component: PageNotFoundComponentComponent,
                   canActivate: [DynamicExtensionRoutes],
@@ -322,6 +368,14 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'users',
                   component: CloudFoundrySpaceUsersComponent
+                },
+                {
+                  path: 'quota',
+                  component: QuotaDefinitionComponent
+                },
+                {
+                  path: 'space-quota',
+                  component: SpaceQuotaDefinitionComponent
                 },
                 {
                   path: '**',

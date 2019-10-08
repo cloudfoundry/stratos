@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -146,21 +147,41 @@ func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 
 	}
 
-	// SQL Lite
-	return GetSQLLiteConnection(env.MustBool("SQLITE_KEEP_DB"))
+	// SQL Lite - SQLITE_DB_DIR env var allows directory for console db to be changed
+	return GetSQLLiteConnection(env.MustBool("SQLITE_KEEP_DB"), env.String("SQLITE_DB_DIR", "."))
 }
 
 // GetSQLLiteConnection returns an SQLite DB Connection
-func GetSQLLiteConnection(sqliteKeepDB bool) (*sql.DB, error) {
+func GetSQLLiteConnection(sqliteKeepDB bool, sqlDbDir string) (*sql.DB, error) {
+
+	dbFilePath := path.Join(sqlDbDir, SQLiteDatabaseFile)
+	log.Infof("SQLite Database file: %s", dbFilePath)
+
+	return GetSQLLiteConnectionWithPath(dbFilePath, sqliteKeepDB)
+}
+
+// GetSQLLiteConnectionWithPath returns an SQLite DB Connection
+func GetSQLLiteConnectionWithPath(databaseFile string, sqliteKeepDB bool) (*sql.DB, error) {
 	if !sqliteKeepDB {
-		os.Remove(SQLiteDatabaseFile)
+		os.Remove(databaseFile)
 	}
 
-	db, err := sql.Open("sqlite3", SQLiteDatabaseFile)
+	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
 		return nil, err
 	}
 
+	conf := CreateFakeSQLiteGooseDriver()
+	err = ApplyMigrations(conf, db)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+// CreateFakeSQLiteGooseDriver creates a fake Goose Driver for SQLite
+func CreateFakeSQLiteGooseDriver() *goose.DBConf {
 	// Create fake goose db conf object for SQLite
 	d := goose.DBDriver{
 		Name:    "sqlite3",
@@ -171,13 +192,7 @@ func GetSQLLiteConnection(sqliteKeepDB bool) (*sql.DB, error) {
 	conf := &goose.DBConf{
 		Driver: d,
 	}
-
-	err = ApplyMigrations(conf, db)
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return conf
 }
 
 func buildConnectionString(dc DatabaseConfig) string {

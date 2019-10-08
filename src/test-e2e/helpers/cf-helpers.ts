@@ -1,4 +1,4 @@
-import { promise } from 'protractor';
+import { browser, promise } from 'protractor';
 
 import {
   IApp,
@@ -21,8 +21,8 @@ import { CFRequestHelpers } from './cf-request-helpers';
 import { UaaHelpers } from './uaa-helpers';
 
 const stackPriority = {
-  cf: [ 'cflinuxfs3', 'cflinuxfs2' ],
-  suse: [ 'sle15', 'opensuse42' ]
+  cf: ['cflinuxfs3', 'cflinuxfs2'],
+  suse: ['sle15', 'opensuse42']
 };
 
 export class CFHelpers {
@@ -119,7 +119,7 @@ export class CFHelpers {
   addSpaceIfMissing(cnsiGuid, orgGuid, spaceName, userGuid): promise.Promise<APIResource<ISpace>> {
     const that = this;
     return this.fetchSpace(cnsiGuid, orgGuid, spaceName)
-      .then(function(space) {
+      .then(space => {
         return space ? space : that.baseAddSpace(cnsiGuid, orgGuid, spaceName, userGuid);
       });
   }
@@ -290,8 +290,8 @@ export class CFHelpers {
     return cfRequestHelper.sendCfPost<APIResource<ISpace>>(cnsiGuid, 'spaces', body);
   }
 
-  baseAddOrg(cnsiGuid: string, orgName: string): promise.Promise<APIResource<IOrganization>> {
-    return this.cfRequestHelper.sendCfPost<APIResource<IOrganization>>(cnsiGuid, 'organizations', { name: orgName });
+  baseAddOrg(cnsiGuid: string, orgName: string, options = {}): promise.Promise<APIResource<IOrganization>> {
+    return this.cfRequestHelper.sendCfPost<APIResource<IOrganization>>(cnsiGuid, 'organizations', { name: orgName, ...options });
   }
 
   addRoute(cnsiGuid: string, spaceGuid: string, domainGuid: string, host: string, port?: number, path?: string)
@@ -425,14 +425,15 @@ export class CFHelpers {
   deleteUser(cfGuid: string, userGuid: string, userName?: string, uaaUserGuid?: string): promise.Promise<any> {
     const uaaHelpers = new UaaHelpers();
     return this.cfRequestHelper.sendCfDelete(cfGuid, `users/${userGuid}?async=false`)
+      .then(() => browser.sleep(500))
       .then(() => uaaHelpers.deleteUser(uaaUserGuid, userName));
   }
 
-  createUser(cfGuid: string, uaaUserGuid: string): promise.Promise<{ guid: string}> {
+  createUser(cfGuid: string, uaaUserGuid: string): promise.Promise<APIResource<CfUser>> {
     const body = {
       guid: uaaUserGuid
     };
-    return this.cfRequestHelper.sendCfPost<{ guid: string}>(cfGuid, 'users', body);
+    return this.cfRequestHelper.sendCfPost<APIResource<CfUser>>(cfGuid, 'users', body);
   }
 
   /**
@@ -476,7 +477,7 @@ export class CFHelpers {
         spacePage.loadingIndicator.waitUntilNotShown();
         return spacePage;
       });
-    }
+  }
 
   addOrgQuota(cfGuid, name, options = {}) {
     const body = {
@@ -506,5 +507,4 @@ export class CFHelpers {
     };
     return this.cfRequestHelper.sendCfPost<APIResource<IQuotaDefinition>>(cfGuid, 'space_quota_definitions', body);
   }
-
 }

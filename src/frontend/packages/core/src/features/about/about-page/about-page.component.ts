@@ -3,19 +3,19 @@ import {
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
-  Inject,
   OnDestroy,
   OnInit,
   ViewChild,
-  ViewContainerRef
+  ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
-import { SessionData } from '../../../../../store/src/types/auth.types';
+
 import { AppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
+import { SessionData } from '../../../../../store/src/types/auth.types';
+import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 
 @Component({
   selector: 'app-about-page',
@@ -34,11 +34,15 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   aboutInfoComponentRef: ComponentRef<any>;
   componentRef: ComponentRef<any>;
 
+  customizations: CustomizationsMetadata;
+
   constructor(
     private store: Store<AppState>,
     private resolver: ComponentFactoryResolver,
-    @Inject(Customizations) public customizations: CustomizationsMetadata
-  ) { }
+    cs: CustomizationService
+  ) {
+    this.customizations = cs.get();
+  }
 
   ngOnInit() {
     this.sessionData$ = this.store.select(s => s.auth).pipe(

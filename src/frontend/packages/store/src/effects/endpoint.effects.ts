@@ -111,14 +111,34 @@ export class EndpointsEffect {
       }
 
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
-      const params: HttpParams = new HttpParams({
-        fromObject: {
-          ...action.authValues as any,
+
+      let fromObject: any;
+      let body = action.body as any;
+
+      if (action.body) {
+        fromObject = {
+          ...action.authValues,
           cnsi_guid: action.guid,
           connect_type: action.authType,
-          system_shared: action.systemShared,
-        },
-        // Fix for #angular/18261
+          system_shared: action.systemShared
+        };
+      } else {
+        // If no body, then we will put the auth values in the body, not in the URL
+        fromObject = {
+          cnsi_guid: action.guid,
+          connect_type: action.authType,
+          system_shared: action.systemShared
+        };
+
+        // Encode auth values in the body
+        body = new FormData();
+        Object.keys(action.authValues).forEach(key => {
+          body.set(key, action.authValues[key]);
+        });
+      }
+
+      const params: HttpParams = new HttpParams({
+        fromObject,
         encoder: new BrowserStandardEncoder()
       });
 
@@ -129,7 +149,7 @@ export class EndpointsEffect {
         null,
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
         action.endpointType,
-        action.body,
+        body,
         response => response && response.error && response.error.error ? response.error.error : 'Could not connect, please try again'
       );
     }));
@@ -194,18 +214,20 @@ export class EndpointsEffect {
         /* tslint:disable-next-line:no-string-literal  */
         paramsObj['sub_type'] = action.endpointSubType;
       }
-      const params: HttpParams = new HttpParams({
-        fromObject: paramsObj
+      // Encode auth values in the body, not the query string
+      const body: any = new FormData();
+      Object.keys(paramsObj).forEach(key => {
+        body.set(key, paramsObj[key]);
       });
 
       return this.doEndpointAction(
         apiAction,
         '/pp/v1/register/' + action.endpointType,
-        params,
+        new HttpParams({}),
         'create',
         [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED],
         action.endpointType,
-        null,
+        body,
         this.processRegisterError
       );
     }));

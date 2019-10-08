@@ -1,4 +1,3 @@
-import { EndpointState } from './../../store/src/types/endpoint.types';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -7,13 +6,14 @@ import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router
 import { Store } from '@ngrx/store';
 import { debounceTime, withLatestFrom } from 'rxjs/operators';
 
+import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
 import { CloudFoundryModule } from '../../cloud-foundry/src/cloud-foundry.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import { RouterNav } from '../../store/src/actions/router.actions';
 import {
   UpdateUserFavoriteMetadataAction,
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
-import { AppState, IRequestEntityTypeState } from '../../store/src/app-state';
+import { AppState } from '../../store/src/app-state';
 import {
   applicationSchemaKey,
   endpointSchemaKey,
@@ -25,7 +25,7 @@ import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visi
 import { AppStoreModule } from '../../store/src/store.module';
 import { APIResource } from '../../store/src/types/api.types';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
-import { IRequestDataState, IRequestState } from '../../store/src/types/entity.types';
+import { IRequestDataState } from '../../store/src/types/entity.types';
 import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
@@ -35,6 +35,7 @@ import { IApp, IOrganization, ISpace } from './core/cf-api.types';
 import { CoreModule } from './core/core.module';
 import { CurrentUserPermissions } from './core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from './core/current-user-permissions.service';
+import { CustomizationService } from './core/customizations.types';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
@@ -52,11 +53,10 @@ import { ServiceCatalogModule } from './features/service-catalog/service-catalog
 import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
-import { ApplicationStateService } from './shared/components/application-state/application-state.service';
 import { FavoriteConfig, favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
+import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
-import { GlobalEventService, GlobalEventData } from './shared/global-events.service';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -113,9 +113,11 @@ export class CustomRouterStateSerializer
     AboutModule,
     CustomImportModule,
     XSRFModule,
-    CloudFoundryModule
+    CloudFoundryModule,
+    CfAutoscalerModule
   ],
   providers: [
+    CustomizationService,
     TabNavService,
     LoggedInService,
     ExtensionService,
@@ -135,14 +137,18 @@ export class AppModule {
     logger: LoggerService,
     eventService: GlobalEventService
   ) {
-    eventService.addEventConfig<boolean>(
-      {
-        eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.timeoutSession),
-        message: 'Timeout session is disabled - this is considered a security risk.',
-        key: 'timeoutSessionWarning',
-        link: '/user-profile'
-      }
-    );
+    eventService.addEventConfig<boolean>({
+      eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.timeoutSession),
+      message: 'Timeout session is disabled - this is considered a security risk.',
+      key: 'timeoutSessionWarning',
+      link: '/user-profile'
+    });
+    eventService.addEventConfig<boolean>({
+      eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.pollingEnabled),
+      message: 'Polling is disabled - some pages may show stale data.',
+      key: 'pollingEnabledWarning',
+      link: '/user-profile'
+    });
     // This should be brought back in in the future
     // eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
     //   {

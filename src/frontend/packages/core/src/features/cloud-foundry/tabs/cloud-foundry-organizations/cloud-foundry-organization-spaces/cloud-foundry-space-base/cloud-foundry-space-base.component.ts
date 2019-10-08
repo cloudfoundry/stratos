@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
@@ -17,8 +17,6 @@ import {
 } from '../../../../../../core/extension/extension-service';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { environment } from '../../../../../../environments/environment.prod';
-import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import { IPageSideNavTab } from '../../../../../dashboard/page-side-nav/page-side-nav.component';
@@ -44,35 +42,35 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     {
       link: 'summary',
       label: 'Summary',
-      matIcon: 'description'
+      icon: 'description'
     },
     {
       link: 'apps',
       label: 'Applications',
-      matIcon: 'apps'
+      icon: 'apps'
     },
     {
       link: 'service-instances',
       label: 'Services',
-      matIconFont: 'stratos-icons',
-      matIcon: 'service'
+      iconFont: 'stratos-icons',
+      icon: 'service'
     },
     {
       link: 'user-service-instances',
       label: 'User Services',
-      matIconFont: 'stratos-icons',
-      matIcon: 'service_square'
+      iconFont: 'stratos-icons',
+      icon: 'service_square'
     },
     {
       link: 'routes',
       label: 'Routes',
-      matIconFont: 'stratos-icons',
-      matIcon: 'network_route'
+      iconFont: 'stratos-icons',
+      icon: 'network_route'
     },
     {
       link: 'users',
       label: 'Users',
-      matIcon: 'people'
+      icon: 'people'
     }
   ];
 
@@ -89,6 +87,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
 
   private deleteRedirectSub: Subscription;
 
+  private quotaLinkSub: Subscription;
+
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
   public favorite$: Observable<UserFavorite<ISpaceFavMetadata>>;
 
@@ -97,7 +97,6 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     public cfSpaceService: CloudFoundrySpaceService,
     public cfOrgService: CloudFoundryOrganizationService,
     private store: Store<AppState>,
-    private confirmDialog: ConfirmationDialogService
   ) {
     this.favorite$ = cfSpaceService.space$.pipe(
       map(space => getFavoriteFromCfEntity(space.entity, spaceSchemaKey))
@@ -109,6 +108,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
       map(space => space.entity.entity.name),
       first()
     );
+
     this.setUpBreadcrumbs(cfEndpointService, cfOrgService);
 
     this.deleteRedirectSub = this.cfSpaceService.space$.pipe(
@@ -127,7 +127,22 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     ).subscribe();
 
     // Add any tabs from extensions
-    this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundrySpace));
+    this.setupLinks();
+  }
+
+  private setupLinks() {
+    this.quotaLinkSub = this.cfSpaceService.space$.pipe(
+      tap((space) => {
+        this.tabLinks.push({
+          link: 'space-quota',
+          label: 'Quota',
+          icon: 'data_usage',
+          hidden$: of(!space.entity.entity.space_quota_definition)
+        });
+        this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundrySpace));
+      }),
+      first()
+    ).subscribe();
   }
 
   private setUpBreadcrumbs(
@@ -162,34 +177,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     );
   }
 
-
   ngOnDestroy() {
     this.deleteRedirectSub.unsubscribe();
+    this.quotaLinkSub.unsubscribe();
   }
-
-  deleteSpaceWarn = () => {
-    // .first within name$
-    this.name$.pipe(
-      first()
-    ).subscribe(name => {
-      const confirmation = new ConfirmationDialogConfig(
-        'Delete Space',
-        {
-          textToMatch: name
-        },
-        'Delete',
-        true,
-      );
-      this.confirmDialog.open(confirmation, this.deleteSpace);
-    });
-  }
-
-  deleteSpace = () => {
-    this.cfOrgService.deleteSpace(
-      this.cfSpaceService.spaceGuid,
-      this.cfSpaceService.orgGuid,
-      this.cfSpaceService.cfGuid
-    );
-  }
-
 }

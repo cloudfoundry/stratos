@@ -1,10 +1,10 @@
-import { Component, Inject, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { Customizations, CustomizationsMetadata } from '../../core/customizations.types';
+import { AppState } from '../../../../store/src/app-state';
+import { CustomizationService, CustomizationsMetadata } from '../../core/customizations.types';
 import { StratosLoginComponent } from '../../core/extension/extension-service';
 import { LoginPageComponent } from '../../features/login/login-page/login-page.component';
-import { AppState } from '../../../../store/src/app-state';
 
 @StratosLoginComponent()
 @Component({
@@ -15,10 +15,13 @@ import { AppState } from '../../../../store/src/app-state';
 })
 export class AcmeLoginComponent extends LoginPageComponent {
 
+  config: CustomizationsMetadata;
+
   constructor(
     store: Store<AppState>,
-    @Inject(Customizations) public config: CustomizationsMetadata
+    cs: CustomizationService,
   ) {
     super(store);
+    this.config = cs.get();
   }
 }

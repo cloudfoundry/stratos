@@ -7,7 +7,6 @@ import { ListComponent } from '../../po/list.po';
 import { MetaCardTitleType } from '../../po/meta-card.po';
 import { MetaDataItemComponent } from '../../po/meta-data-item.po';
 
-
 export class CfTopLevelPage extends CFPage {
 
   private readonly until = protractor.ExpectedConditions;
@@ -54,6 +53,28 @@ export class CfTopLevelPage extends CFPage {
         card.waitUntilNotShown();
       });
     });
+  }
+
+  clickOnQuota(quotaName: string) {
+    const { table } = new ListComponent();
+    table.waitUntilShown();
+
+    const row = table.findRowByCellContent(quotaName);
+    row.element(by.css('a')).click();
+  }
+
+  deleteQuota(quotaName: string, waitUntilNotShown = true) {
+    const { table } = new ListComponent();
+    table.waitUntilShown();
+
+    const row = table.findRowByCellContent(quotaName);
+    const menu = table.openRowActionMenuByRow(row);
+    menu.clickItem('Delete');
+    ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Quota', quotaName);
+
+    if (waitUntilNotShown) {
+      browser.wait(this.until.invisibilityOf(row), 20000);
+    }
   }
 
   isSummaryView(): promise.Promise<boolean> {
@@ -118,6 +139,10 @@ export class CfTopLevelPage extends CFPage {
     return this.goToTab('Organizations', 'organizations');
   }
 
+  goToQuotasTab() {
+    return this.goToTab('Organization Quotas', 'quota-definitions');
+  }
+
   goToRoutesTab() {
     return this.goToTab('Routes', 'routes');
   }
@@ -150,7 +175,7 @@ export class CfTopLevelPage extends CFPage {
     return this.goToTab('Security Groups', 'security-groups');
   }
 
-  clickOnOrg(orgName: string) {
+  clickOnCard(orgName: string) {
     const list = new ListComponent();
     list.cards.findCardByTitle(orgName).then((card) => {
       expect(card).toBeDefined();

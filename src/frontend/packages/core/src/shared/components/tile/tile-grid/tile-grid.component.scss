@@ -1,9 +1,6 @@
 app-tile-grid {
   display: flex;
   flex-direction: column;
-  > app-tile-group {
-    margin-bottom: 24px;
-  }
   &.app-tile-grid-fit {
     height: 100%;
     width: 100%;

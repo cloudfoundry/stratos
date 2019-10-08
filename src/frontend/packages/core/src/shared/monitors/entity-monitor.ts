@@ -23,6 +23,7 @@ import {
   UpdatingSection,
 } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../../../store/src/selectors/api.selectors';
+import { selectDashboardState } from '../../../../store/src/selectors/dashboard.selectors';
 import { IRequestDataState } from '../../../../store/src/types/entity.types';
 
 
@@ -134,23 +135,28 @@ export class EntityMonitor<T = any> {
    * @param updateKey - The store updating key for the poll
    */
   poll(interval = 10000, action: () => void, getActionState: (request: RequestInfoState) => ActionState) {
+    const pollingEnabled$ = this.store.select(selectDashboardState).pipe(
+      map(dashboardState => dashboardState.pollingEnabled)
+    );
     return observableInterval(interval)
       .pipe(
         tag('poll'),
         withLatestFrom(
           this.entity$,
-          this.entityRequest$
+          this.entityRequest$,
+          pollingEnabled$
         ),
-        map(([poll, resource, requestState]) => ({
+        map(([, resource, requestState, pollingEnabled]) => ({
           resource,
-          updatingSection: getActionState(requestState)
+          updatingSection: getActionState(requestState),
+          pollingEnabled
         })),
-        tap(({ resource, updatingSection }) => {
-          if (!updatingSection || !updatingSection.busy) {
+        tap(({ updatingSection, pollingEnabled }) => {
+          if (pollingEnabled && (!updatingSection || !updatingSection.busy)) {
             action();
           }
         }),
-        filter(({ resource, updatingSection }) => {
+        filter(({ updatingSection }) => {
           return !!updatingSection;
         }),
         share()

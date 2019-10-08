@@ -73,10 +73,24 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *interfaces.PortalConfig)
 			}
 		}
 	}
+
 }
 
 // Init creates a new CFHosting plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+
+	// Update Database migration status depending on app instance index and SQLite
+	if portalProxy.Env().IsSet(VCapApplication) {
+		isSQLite := portalProxy.GetConfig().DatabaseProviderName == SQLiteProviderName
+		if !isSQLite && portalProxy.Env().IsSet("CF_INSTANCE_INDEX") {
+			if appInstanceIndex, ok := portalProxy.Env().Lookup("CF_INSTANCE_INDEX"); ok {
+				if index, err := strconv.Atoi(appInstanceIndex); err == nil {
+					portalProxy.SetCanPerformMigrations(index == 0)
+				}
+			}
+		}
+	}
+
 	return &CFHosting{portalProxy: portalProxy}, nil
 }
 
@@ -142,7 +156,7 @@ func (ch *CFHosting) Init() error {
 		data := []byte(vCapApp)
 		err := json.Unmarshal(data, &appData)
 		if err != nil {
-			log.Fatalf("Could not get the Cloud Foundry API URL: %v+", err)
+			log.Fatalf("Could not get the Cloud Foundry API URL: %+v", err)
 			return nil
 		}
 
@@ -183,7 +197,7 @@ func (ch *CFHosting) Init() error {
 		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
 		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true)
 		if err != nil {
-			log.Fatalf("Could not get the info for Cloud Foundry: %v+", err)
+			log.Fatalf("Could not get the info for Cloud Foundry: %+v", err)
 			return nil
 		}
 
@@ -208,13 +222,6 @@ func (ch *CFHosting) Init() error {
 		// Not set in the environment and failed to read from the Secrets file
 		// CHECK is this necessary to set here?
 		ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = ch.portalProxy.Env().MustBool("SKIP_SSL_VALIDATION")
-
-		// Save to Console DB
-		err = ch.portalProxy.SaveConsoleConfig(ch.portalProxy.GetConfig().ConsoleConfig, nil)
-		if err != nil {
-			log.Fatalf("Failed to save console configuration due to %s", err)
-			return fmt.Errorf("Failed to save console configuration due to %s", err)
-		}
 
 		if !ch.portalProxy.Env().IsSet(SkipAutoRegister) {
 			log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)
