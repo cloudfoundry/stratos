@@ -1,21 +1,21 @@
 import { inject, TestBed } from '@angular/core/testing';
 
 import { UtilsService } from '../../core/utils.service';
-import { MbToHumanSizePipe } from './mb-to-human-size.pipe';
+import { PercentagePipe } from './percentage.pipe';
 
 
-describe('MbToHumanSizePipe', () => {
-  let pipe: MbToHumanSizePipe;
+describe('PercentagePipe', () => {
+  let pipe: PercentagePipe;
   let utilsService: UtilsService;
 
   beforeEach(() => TestBed.configureTestingModule({
     providers: [
-      MbToHumanSizePipe,
+      PercentagePipe,
       UtilsService
     ]
   }));
 
-  beforeEach(inject([MbToHumanSizePipe], (p: MbToHumanSizePipe) => {
+  beforeEach(inject([PercentagePipe], (p: PercentagePipe) => {
     utilsService = TestBed.get(UtilsService);
     pipe = p;
   }));
@@ -25,13 +25,13 @@ describe('MbToHumanSizePipe', () => {
   });
 
   it('should call utils method', () => {
-    spyOn(utilsService, 'mbToHumanSize');
+    spyOn(utilsService, 'percent');
     pipe.transform(1024);
 
-    expect(utilsService.mbToHumanSize).toHaveBeenCalledWith(1024);
+    expect(utilsService.percent).toHaveBeenCalledWith(1024);
   });
 
   it('should transform the number', () => {
-    expect(pipe.transform(1024)).toEqual('1 GB');
+    expect(pipe.transform(0.234)).toEqual('23.40%');
   });
 });
