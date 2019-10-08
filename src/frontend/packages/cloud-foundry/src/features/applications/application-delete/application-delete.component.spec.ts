@@ -31,10 +31,6 @@ describe('ApplicationDeleteComponent', () => {
         generateTestApplicationServiceProvider(cfId, appId),
         TabNavService
       ]
-    }).overrideModule(ApplicationsModule, {
-      remove: {
-        imports: [CustomImportModule]
-      }
     }).compileComponents();
   }));
 

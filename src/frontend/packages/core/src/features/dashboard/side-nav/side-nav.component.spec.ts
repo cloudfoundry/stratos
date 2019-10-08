@@ -3,7 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { Customizations } from '../../../core/customizations.types';
+import { CustomizationService } from '../../../core/customizations.types';
 import { MDAppModule } from '../../../core/md.module';
 import { SideNavComponent } from './side-nav.component';
 
@@ -22,7 +22,7 @@ describe('SideNavComponent', () => {
         createBasicStoreModule()
       ],
       providers: [
-        { provide: Customizations, useValue: {} }
+        CustomizationService
       ]
     })
       .compileComponents();

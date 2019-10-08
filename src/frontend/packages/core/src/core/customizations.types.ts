@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 /**
  * Optional customizations
@@ -13,4 +13,13 @@ export interface CustomizationsMetadata {
   alwaysShowNavForEndpointTypes?: (epType) => boolean;
 }
 
-export const Customizations = new InjectionToken<CustomizationsMetadata>('Stratos customizations');
+@Injectable({
+  providedIn: 'root',
+})
+export class CustomizationService {
+
+  private customizationMetadata: CustomizationsMetadata = {};
+
+  set = (cm: CustomizationsMetadata) => this.customizationMetadata = cm;
+  get = () => this.customizationMetadata;
+}

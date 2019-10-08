@@ -3,7 +3,6 @@ import { inject, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
-import { CustomImportModule } from '../../../../../../../core/src/custom-import.module';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../../../core/test-framework/entity-service.helper';
@@ -38,10 +37,6 @@ describe('CfAppVariablesListConfigService', () => {
         ApplicationsModule,
         RouterTestingModule
       ]
-    }).overrideModule(ApplicationsModule, {
-      remove: {
-        imports: [CustomImportModule]
-      }
     });
   });
 
