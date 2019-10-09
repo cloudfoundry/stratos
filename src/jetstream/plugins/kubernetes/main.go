@@ -91,6 +91,7 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 // Init the Kubernetes Jetstream plugin
 func (c *KubernetesSpecification) Init() error {
 
+	c.AddAuthProvider(auth.InitGKEKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitAWSKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitCertKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitAzureKubeAuth(c.portalProxy))
