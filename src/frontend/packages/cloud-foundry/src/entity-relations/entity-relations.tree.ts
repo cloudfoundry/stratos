@@ -7,8 +7,9 @@ const entityTreeCache: {
 } = {};
 
 function generateCacheKey(entityKey: string, action: EntityInlineParentAction): string {
-  const includeRelations = action.includeRelations || [];
-  const relationKey = [...includeRelations].sort((a, b) => a.localeCompare(b)).join(',');
+  const relationKey = Array.isArray(action.includeRelations) ?
+    [...action.includeRelations].sort((a, b) => a.localeCompare(b)).join(',') :
+    '';
   return entityKey + '+' + relationKey;
 }
 

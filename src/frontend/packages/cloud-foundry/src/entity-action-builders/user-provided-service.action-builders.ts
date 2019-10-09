@@ -23,8 +23,8 @@ export interface UserProvidedServiceActionBuilder extends CFOrchestratedActionBu
     proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
   ) => UpdateUserProvidedServiceInstance;
   getMultiple: (
-    endpointGuid?: string,
     paginationKey?: string,
+    endpointGuid?: string,
     { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetAllUserProvidedServices;
   getAllInSpace: (
@@ -55,8 +55,8 @@ export const userProvidedServiceActionBuilder: UserProvidedServiceActionBuilder 
     proxyPaginationEntityConfig
   ),
   getMultiple: (
-    endpointGuid?: string,
-    paginationKey?: string,
+    paginationKey: string,
+    endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllUserProvidedServices(paginationKey, endpointGuid, includeRelations, populateMissing),
   getAllInSpace: (

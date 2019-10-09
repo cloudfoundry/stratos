@@ -2,6 +2,7 @@ import { hasJetStreamError, JetStreamErrorResponse } from '../../../../core/src/
 import { PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PaginationPageIteratorConfig } from '../pagination-request-base-handlers/pagination-iterator.pipe';
 import { stratosEndpointGuidKey } from '../pipeline.types';
+import { NonJetstreamRequestHandler } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 
 /**
  * Generic container for information about an errored request to a specific endpoint
@@ -29,7 +30,7 @@ export interface HandledMultiEndpointResponse<T = any> {
   successes: MultiEndpointResponse<T>[];
 }
 
-function mapResponses(
+function mapJetstreamResponses(
   jetstreamResponse: PagedJetstreamResponse,
   requestUrl: string,
   flattenerConfig: PaginationPageIteratorConfig<any, any>
@@ -62,7 +63,7 @@ function mapResponses(
   }, baseResponse);
 }
 
-function getAllEntitiesFromResponses(response: any[], getEntitiesFromResponse?: (response: any) => any) {
+function getAllEntitiesFromResponses(response: any, getEntitiesFromResponse?: (response: any) => any) {
   if (!Array.isArray(response)) {
     return response;
   }
@@ -85,7 +86,7 @@ function getAllEntitiesFromResponses(response: any[], getEntitiesFromResponse?: 
 }
 
 function postProcessSuccessResponses(
-  response: any[],
+  response: any,
   endpointGuid: string,
   flattenerConfig: PaginationPageIteratorConfig<any, any>
 ): MultiEndpointResponse<any> {
@@ -132,9 +133,30 @@ function buildJetstreamError(
     jetstreamErrorResponse,
   );
 }
-export const handleMultiEndpointsPipeFactory = (
+export const handleJetstreamResponsePipeFactory = (
   requestUrl: string,
   flattenerConfig?: PaginationPageIteratorConfig<any, any>
 ) => (resData: PagedJetstreamResponse): HandledMultiEndpointResponse => {
-  return mapResponses(resData, requestUrl, flattenerConfig);
+  return mapJetstreamResponses(resData, requestUrl, flattenerConfig);
+};
+
+export const handleNonJetstreamResponsePipeFactory = (
+  requestUrl: string,
+  nonJetstreamRequestHandler?: NonJetstreamRequestHandler,
+  flattenerConfig?: PaginationPageIteratorConfig<any, any>
+) => (resData: any): HandledMultiEndpointResponse => {
+  const isSuccess = nonJetstreamRequestHandler ? nonJetstreamRequestHandler.isSuccess(resData) : true;
+  const mappedRes = postProcessSuccessResponses(resData, null, flattenerConfig);
+  if (isSuccess) {
+    return {
+      successes: [mappedRes],
+      errors: []
+    };
+  }
+  const errorCode = nonJetstreamRequestHandler && nonJetstreamRequestHandler.getErrorCode ?
+    nonJetstreamRequestHandler.getErrorCode(resData) : '500';
+  return {
+    successes: [],
+    errors: [new JetstreamError(errorCode, null, requestUrl, null)]
+  };
 };

@@ -114,6 +114,8 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
 import { UserPermissionDirective } from './user-permission.directive';
 import { SimpleListComponent } from './components/list/simple-list/simple-list.component';
 import { ListHostDirective } from './components/list/simple-list/list-host.directive';
+import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
+import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
 
 /* tslint:disable:max-line-length */
 
@@ -315,6 +317,8 @@ import { ListHostDirective } from './components/list/simple-list/list-host.direc
   providers: [
     ListConfig,
     ApplicationStateService,
+    EndpointListHelper,
+    EndpointsListConfigService,
     // CfUserService,
     ConfirmationDialogService,
     EntityMonitorFactory,

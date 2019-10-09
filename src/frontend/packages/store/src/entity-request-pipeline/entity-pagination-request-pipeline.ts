@@ -13,7 +13,10 @@ import { AppState, InternalAppState } from '../app-state';
 import { PaginationFlattenerConfig } from '../helpers/paginated-request-helpers';
 import { PaginatedAction } from '../types/pagination.types';
 import { buildRequestEntityPipe } from './entity-request-base-handlers/build-entity-request.pipe';
-import { handleMultiEndpointsPipeFactory } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
+import {
+  handleJetstreamResponsePipeFactory,
+  handleNonJetstreamResponsePipeFactory
+} from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
 import { mapMultiEndpointResponses } from './entity-request-base-handlers/map-multi-endpoint.pipes';
 import {
@@ -24,7 +27,7 @@ import {
 } from './entity-request-pipeline.types';
 import { getPaginationParamsPipe } from './pagination-request-base-handlers/get-params.pipe';
 import { PaginationPageIterator } from './pagination-request-base-handlers/pagination-iterator.pipe';
-import { mergeHttpParams, singleRequestToPaged } from './pipeline-helpers';
+import { mergeHttpParams, singleRequestToPaged, isJetstreamRequest } from './pipeline-helpers';
 import { PipelineHttpClient } from './pipline-http-client.service';
 
 function getRequestObjectObservable(request: HttpRequest<any> | Observable<HttpRequest<any>>): Observable<HttpRequest<any>> {
@@ -82,10 +85,15 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
     prePaginatedRequestFunction(requestFromStore, action, catalogueEntity, appState) :
     requestFromStore;
 
-  const handleMultiEndpointsPipe = handleMultiEndpointsPipeFactory(
-    action.options.url,
-    flattenerConfig
-  );
+  const handleMultiEndpointsPipe = isJetstreamRequest(entity.definition) ?
+    handleJetstreamResponsePipeFactory(
+      action.options.url,
+      flattenerConfig
+    ) : handleNonJetstreamResponsePipeFactory(
+      action.options.url,
+      entity.definition.nonJetstreamRequestHandler,
+      flattenerConfig
+    );
 
   // Keep, helpful for debugging below chain via tap
   // const debug = (val, location) => console.log(`${entity.endpointType}:${entity.entityKey}:${location}: `, val);

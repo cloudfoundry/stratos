@@ -161,6 +161,14 @@ exports.config = {
   },
   params: secrets,
   onPrepare() {
+    // https://webdriver.io/docs/api/chromium.html#setnetworkconditions
+    // browser.driver.setNetworkConditions({
+    //   offline: false,
+    //   latency: 2000, // Additional latency (ms).
+    //   download_throughput: 500 * 1024 * 1024, // Maximal aggregated download throughput.
+    //   upload_throughput: 500 * 1024 * 1024 // Maximal aggregated upload throughput.
+    // });
+
     skipPlugin.install(jasmine);
     require('ts-node').register({
       project: 'src/test-e2e/tsconfig.e2e.json'
