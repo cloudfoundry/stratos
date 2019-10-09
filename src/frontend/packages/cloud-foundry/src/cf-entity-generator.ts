@@ -879,7 +879,6 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
         getLines: () => ([
-          ['Name', (meta) => meta.name],
           ['Creation  Date', (meta) => meta.createdAt]
         ])
       },

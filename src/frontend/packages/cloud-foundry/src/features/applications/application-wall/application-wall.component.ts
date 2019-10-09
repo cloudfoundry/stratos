@@ -12,8 +12,6 @@ import { CfAppConfigService } from '../../../shared/components/list/list-types/a
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 
 @Component({
   selector: 'app-application-wall',
@@ -31,43 +29,42 @@ import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
       ]
     )
   ],
-  // providers: [{
-  //   provide: ListConfig,
-  //   useClass: CfAppConfigService
-  // },
-  //   CfOrgSpaceDataService
-  // ]
+  providers: [{
+    provide: ListConfig,
+    useClass: CfAppConfigService
+  },
+    CfOrgSpaceDataService
+  ]
 })
-export class ApplicationWallComponent {
-  public applicationCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-  // public cfIds$: Observable<string[]>;
-  // private initCfOrgSpaceService: Subscription;
+export class ApplicationWallComponent implements OnDestroy {
+  public cfIds$: Observable<string[]>;
+  private initCfOrgSpaceService: Subscription;
 
-  // public canCreateApplication: string;
+  public canCreateApplication: string;
 
-  // public haveConnectedCf$: Observable<boolean>;
+  public haveConnectedCf$: Observable<boolean>;
 
-  // constructor(
-  //   public cloudFoundryService: CloudFoundryService,
-  //   private store: Store<CFAppState>,
-  //   private cfOrgSpaceService: CfOrgSpaceDataService,
-  // ) {
-  //   this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-  //     map(endpoints => endpoints.map(endpoint => endpoint.guid)),
-  //   );
-  //   this.canCreateApplication = CurrentUserPermissions.APPLICATION_CREATE;
+  constructor(
+    public cloudFoundryService: CloudFoundryService,
+    private store: Store<CFAppState>,
+    private cfOrgSpaceService: CfOrgSpaceDataService,
+  ) {
+    this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
+      map(endpoints => endpoints.map(endpoint => endpoint.guid)),
+    );
+    this.canCreateApplication = CurrentUserPermissions.APPLICATION_CREATE;
 
-  //   this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
-  //     map(endpoints => !!endpoints && endpoints.length > 0)
-  //   );
+    this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
+      map(endpoints => !!endpoints && endpoints.length > 0)
+    );
 
-  //   this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
-  //     this.cfOrgSpaceService,
-  //     applicationEntityType,
-  //     CfAppsDataSource.paginationKey).subscribe();
-  // }
+    this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
+      this.cfOrgSpaceService,
+      applicationEntityType,
+      CfAppsDataSource.paginationKey).subscribe();
+  }
 
-  // ngOnDestroy(): void {
-  //   this.initCfOrgSpaceService.unsubscribe();
-  // }
+  ngOnDestroy(): void {
+    this.initCfOrgSpaceService.unsubscribe();
+  }
 }

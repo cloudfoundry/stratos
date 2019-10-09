@@ -1,4 +1,4 @@
-<!-- <app-page-header [endpointIds$]="cfIds$">
+<app-page-header [endpointIds$]="cfIds$">
   <h1>Applications</h1>
   <div *ngIf="haveConnectedCf$ | async" class="page-header-right">
     <ng-container *appUserPermission="canCreateApplication">
@@ -26,9 +26,8 @@
   <app-no-content-message [icon]="'apps'" [firstLine]="'There are too many applications to show'" [secondLine]="{
     text: 'Please use the the Cloud Foundry, Organization or Space filters'
   }"></app-no-content-message>
-</ng-template> -->
-<app-simple-list [catalogueEntity]="applicationCatalogueEntity"></app-simple-list>
-<!-- <app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
+</ng-template>
+<app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
   [noEntriesMaxedResults]="noEntriesMaxedResults"
   *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">
-</app-list> -->
+</app-list>
