@@ -60,11 +60,6 @@ const applicationsRoutes: Routes = [
         }
       },
       {
-        path: 'simple-list-test',
-        component: ApplicationWallComponent,
-        pathMatch: 'full'
-      },
-      {
         path: ':endpointId/:id',
         component: ApplicationBaseComponent,
         children: [
