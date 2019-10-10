@@ -14,7 +14,7 @@ export interface JetStreamErrorResponse<T = any> {
   errorResponse: T;
 }
 
-// TODO It would be nice if the BE could return a unique para for us to check for.
+// TODO It would be nice if the BE could return a unique para for us to check for. #3827
 // There is always a chance that this will return a false positive (more so with extensions).
 export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]): JetStreamErrorResponse {
   if (!pages || !pages.length) {

@@ -272,7 +272,6 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
         }
       };
     },
-    // TODO: we need a envvar type
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition, {
     dataReducers: [
