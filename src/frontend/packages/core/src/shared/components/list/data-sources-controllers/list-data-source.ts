@@ -454,7 +454,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     return this.pagination$.pipe(
       map(pag => ({
         string: this.isLocal ? pag.clientPagination.filter.string : this.getFilterFromParams(pag),
-        items: { ...pag.clientPagination.filter.items }
+        items: { ...pag.clientPagination.filter.items },
+        filterKey: pag.clientPagination.filter.filterKey,
       })),
       tag('list-filter')
     );
