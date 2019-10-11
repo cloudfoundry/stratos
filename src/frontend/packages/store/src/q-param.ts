@@ -1,5 +1,3 @@
-import { AddParams, SetParams } from './actions/pagination.actions';
-
 export enum QParamJoiners {
   greaterThanOrEqual = '>=',
   lessThanOrEqual = '<=',
@@ -48,34 +46,4 @@ export class QParam {
   public toString() {
     return `${this.key}${this.joiner}${(this.value as string[]).join ? (this.value as string[]).join(',') : this.value}`;
   }
-}
-// TODO This isn't being used but there are some commented out with todo that need to be looked into.
-export function getUniqueQParams(action: AddParams | SetParams, state) {
-  let qStatePrams: QParam[] = [].concat(state.params.q || []);
-  const qActionPrams: QParam[] = [].concat(action.params.q || []);
-
-  // Update existing q params
-  for (const actionParam of qActionPrams) {
-    const existingParamIndex = qStatePrams.findIndex((stateParam: QParam) => stateParam.key === actionParam.key);
-    if (existingParamIndex >= 0) {
-      qStatePrams[existingParamIndex] = { ...actionParam };
-    } else {
-      qStatePrams.push(actionParam);
-    }
-  }
-
-  //  Ensure q params are unique
-  if (action.params.q) {
-    qStatePrams = qStatePrams.concat(qActionPrams)
-      .filter((q, index, self) => self.findIndex(
-        (qs) => {
-          return qs.key === q.key;
-        }
-      ) === index)
-      .filter((q: QParam) => {
-        // Filter out empties
-        return !!q.value;
-      });
-  }
-  return qStatePrams;
 }

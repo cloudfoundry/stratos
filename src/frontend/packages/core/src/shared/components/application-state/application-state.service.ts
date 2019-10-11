@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import { StratosStatus } from '../../shared.types';
 import { AppStat } from '../../../../../cloud-foundry/src/store/types/app-metadata.types';
+import { StratosStatus } from '../../shared.types';
 
 export interface ApplicationStateData {
   label: string;
@@ -11,7 +11,6 @@ export interface ApplicationStateData {
     [key: string]: boolean
   };
 }
-// TODO: NJ The typing here is bad and needs to be fixed.
 @Injectable()
 export class ApplicationStateService {
 

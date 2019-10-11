@@ -37,5 +37,6 @@ export interface GitCommit {
     };
     message: string;
   };
+  guid?: string;
 }
 

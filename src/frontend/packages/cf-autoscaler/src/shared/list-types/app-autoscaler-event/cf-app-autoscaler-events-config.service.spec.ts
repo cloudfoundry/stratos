@@ -18,7 +18,6 @@ import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
 import { createEmptyStoreModule } from '../../../../../core/test-framework/store-test-helper';
-import { AppStoreExtensionsModule } from '../../../../../store/src/store.extensions.module';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
 
@@ -47,7 +46,6 @@ describe('CfAppAutoscalerEventsConfigService', () => {
         { provide: ConnectionBackend, useClass: MockBackend },
       ],
       imports: [
-        AppStoreExtensionsModule,
         CfAutoscalerTestingModule,
         CommonModule,
         CoreModule,

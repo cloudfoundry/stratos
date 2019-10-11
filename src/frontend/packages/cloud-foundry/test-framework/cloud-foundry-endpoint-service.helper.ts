@@ -12,7 +12,6 @@ import { SharedModule } from '../../core/src/shared/shared.module';
 import { testSCFEndpointGuid } from '../../core/test-framework/store-test-helper';
 import { CfUserServiceTestProvider } from '../../core/test-framework/user-service-helper';
 import { appReducers } from '../../store/src/reducers.module';
-import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 import { CFAppState } from '../src/cf-app-state';
 import { CloudFoundryTestingModule } from '../src/cloud-foundry-test.module';
 import { ActiveRouteCfOrgSpace } from '../src/features/cloud-foundry/cf-page.types';
@@ -153,7 +152,6 @@ export function generateCfTopLevelStoreEntities() {
 export function generateCfStoreModules() {
   return [
     CloudFoundryTestingModule,
-    AppStoreExtensionsModule,
     StoreModule.forRoot(
       appReducers,
       // Do not include initial store here, it's properties will be ignored as they won't have corresponding reducers in appReducers

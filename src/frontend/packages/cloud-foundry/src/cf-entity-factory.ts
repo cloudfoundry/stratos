@@ -67,7 +67,7 @@ entityCache[gitBranchesEntityType] = GithubBranchSchema;
 const GithubRepoSchema = new CFEntitySchema(gitRepoEntityType);
 entityCache[gitRepoEntityType] = GithubRepoSchema;
 
-const GithubCommitSchema = new CFEntitySchema(gitCommitEntityType, {}, { idAttribute: commit => commit.sha });
+const GithubCommitSchema = new CFEntitySchema(gitCommitEntityType, {}, { idAttribute: commit => commit.guid });
 entityCache[gitCommitEntityType] = GithubCommitSchema;
 
 const CFInfoSchema = new CFEntitySchema(cfInfoEntityType);

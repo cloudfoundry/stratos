@@ -439,7 +439,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   private createSortObservable(): Observable<ListSort> {
-    // TODO Is this local only or are they some CF params?
     return this.pagination$.pipe(
       map(pag => ({
         direction: pag.params['order-direction'] as SortDirection,

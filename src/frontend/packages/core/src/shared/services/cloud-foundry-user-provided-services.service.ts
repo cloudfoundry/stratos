@@ -83,8 +83,8 @@ export class CloudFoundryUserProvidedServicesService {
     const uniqueKey = spaceGuid || orgGuid || cfGuid;
     const actionBuilder = this.userProvidedServiceEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const action = actionBuilder(
-      cfGuid,
       createEntityRelationPaginationKey(parentSchemaKey, uniqueKey),
+      cfGuid,
       { includeRelations: [], populateMissing: false }
     ) as PaginatedAction;
     action.initialParams.q = [];
