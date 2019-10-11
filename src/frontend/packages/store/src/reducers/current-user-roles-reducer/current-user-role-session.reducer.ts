@@ -1,15 +1,14 @@
+import {
+  IAllCfRolesState,
+  ICfRolesState,
+  IGlobalRolesState,
+} from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
+import { ScopeStrings } from '../../../../core/src/core/current-user-permissions.config';
 import { VerifiedSession } from '../../actions/auth.actions';
 import { EndpointActionComplete } from '../../actions/endpoint.actions';
 import { SessionUser } from '../../types/auth.types';
-import {
-  getDefaultEndpointRoles,
-  IAllCfRolesState,
-  ICfRolesState,
-  ICurrentUserRolesState,
-  IGlobalRolesState,
-} from '../../types/current-user-roles.types';
+import { getDefaultEndpointRoles, ICurrentUserRolesState } from '../../types/current-user-roles.types';
 import { EndpointUser, INewlyConnectedEndpointInfo } from '../../types/endpoint.types';
-import { ScopeStrings } from '../../../../core/src/core/current-user-permissions.config';
 
 interface PartialEndpoint {
   user: EndpointUser | SessionUser;

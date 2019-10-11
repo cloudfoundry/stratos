@@ -39,6 +39,10 @@ module.exports = function (project) {
         StratosChromeHeadless: {
           base: 'ChromeHeadless',
           flags: ['--no-sandbox']
+        },
+        ChromeDebugging: {
+          base: 'Chrome',
+          flags: ['--remote-debugging-port=9333']
         }
       },
       singleRun: process.env.CI_ENV ? true : false,

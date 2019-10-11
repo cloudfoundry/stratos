@@ -9,12 +9,14 @@ import { ClearPaginationOfType } from '../../../../../store/src/actions/paginati
 import { AppState } from '../../../../../store/src/app-state';
 import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import {
-  IRequestAction,
+  EntityRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../../../../../store/src/types/request.types';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../environments/environment';
+import { HELM_ENDPOINT_TYPE, helmReleaseEntityKey } from '../helm-entity-factory';
 import { parseHelmReleaseStatus } from '../release/tabs/helm-release-helper.service';
 import {
   GET_HELM_RELEASE_PODS,
@@ -32,7 +34,6 @@ import {
   HELM_INSTALL,
   HelmInstall,
 } from './helm.actions';
-import { helmReleaseSchemaKey, monocularChartsSchemaKey } from './helm.entities';
 import {
   HELM_INSTALLING_KEY,
   HelmRelease,
@@ -58,16 +59,17 @@ export class HelmEffects {
   fetchCharts$ = this.actions$.pipe(
     ofType<GetMonocularCharts>(GET_MONOCULAR_CHARTS),
     flatMap(action => {
+      const entityKey = entityCatalogue.getEntityKey(action);
       return this.makeRequest(action, `/pp/${this.proxyAPIVersion}/chartsvc/v1/charts`, (response) => {
         const base = {
-          entities: { [monocularChartsSchemaKey]: {} },
+          entities: { [entityKey]: {} },
           result: []
         } as NormalizedResponse;
 
         const items = response.data as Array<any>;
         const processedData = items.reduce((res, data) => {
           const id = data.id;
-          res.entities[monocularChartsSchemaKey][id] = data;
+          res.entities[entityKey][id] = data;
           // Promote the name to the top-level object for simplicity
           data.name = data.attributes.name;
           res.result.push(id);
@@ -83,9 +85,10 @@ export class HelmEffects {
   fetchReleases$ = this.actions$.pipe(
     ofType<GetHelmReleases>(GET_HELM_RELEASES),
     flatMap(action => {
+      const entityKey = entityCatalogue.getEntityKey(action);
       return this.makeRequest(action, `/pp/${this.proxyAPIVersion}/helm/releases`, (response) => {
         const processedData = {
-          entities: { [action.entityKey]: {} },
+          entities: { [entityKey]: {} },
           result: []
         } as NormalizedResponse;
 
@@ -108,7 +111,7 @@ export class HelmEffects {
             helmRelease.lastDeployed = mapHelmModifiedDate(data.info.last_deployed);
             helmRelease.firstDeployed = mapHelmModifiedDate(data.info.first_deployed);
             // data.info =
-            processedData.entities[helmReleaseSchemaKey][id] = helmRelease;
+            processedData.entities[entityKey][id] = helmRelease;
             processedData.result.push(id);
           });
         });
@@ -121,10 +124,11 @@ export class HelmEffects {
   fetchVersions$ = this.actions$.pipe(
     ofType<GetHelmVersions>(GET_HELM_VERSIONS),
     flatMap(action => {
+      const entityKey = entityCatalogue.getEntityKey(action);
       return this.makeRequest(action, `/pp/${this.proxyAPIVersion}/helm/versions`, (response) => {
         // const a: HelmVersion = {};
         const processedData = {
-          entities: { [action.entityKey]: {} },
+          entities: { [entityKey]: {} },
           result: []
         } as NormalizedResponse;
 
@@ -136,7 +140,7 @@ export class HelmEffects {
             endpointId: endpoint,
             ...endpointData
           };
-          processedData.entities[action.entityKey][endpoint] = version;
+          processedData.entities[entityKey][endpoint] = version;
           processedData.result.push(endpoint);
         });
         return processedData;
@@ -148,12 +152,13 @@ export class HelmEffects {
   fetchHelmReleaseStatus$ = this.actions$.pipe(
     ofType<GetHelmReleaseStatus>(GET_HELM_RELEASE_STATUS),
     flatMap(action => {
+      const entityKey = entityCatalogue.getEntityKey(action);
       return this.makeRequest(
         action,
         `/pp/${this.proxyAPIVersion}/helm/releases/${action.endpointGuid}/${action.releaseTitle}`,
         (response) => {
           const processedData = {
-            entities: { [action.entityKey]: {} },
+            entities: { [entityKey]: {} },
             result: []
           } as NormalizedResponse;
 
@@ -169,7 +174,7 @@ export class HelmEffects {
             releaseTitle: action.releaseTitle,
             ...status
           };
-          processedData.entities[action.entityKey][action.key] = newStatus;
+          processedData.entities[entityKey][action.key] = newStatus;
           processedData.result.push(action.key);
           return processedData;
         }, [action.endpointGuid]);
@@ -199,7 +204,7 @@ export class HelmEffects {
       return this.httpClient.post(url, action.values).pipe(
         mergeMap(() => {
           return [
-            new ClearPaginationOfType(helmReleaseSchemaKey),
+            new ClearPaginationOfType(apiAction),
             new WrapperRequestActionSuccess(null, apiAction)
           ];
         }),
@@ -222,15 +227,16 @@ export class HelmEffects {
 
   private getHelmUpdateAction(guid: string, type: string, updatingKey: string) {
     return {
-      entityKey: helmReleaseSchemaKey,
+      endpointType: HELM_ENDPOINT_TYPE,
+      entityType: helmReleaseEntityKey,
       guid,
       type,
       updatingKey,
-    } as IRequestAction;
+    } as EntityRequestAction;
   }
 
   private makeRequest(
-    action: IRequestAction,
+    action: EntityRequestAction,
     url: string,
     mapResult: (response: any) => NormalizedResponse,
     endpointIds: string[]
@@ -267,7 +273,7 @@ export class HelmEffects {
     }, {});
     const keys = Object.keys(pods);
     const releasePods = {
-      entities: { [releasePodsAction.entityKey]: pods },
+      entities: { [entityCatalogue.getEntityKey(releasePodsAction)]: pods },
       result: keys
     } as NormalizedResponse;
     this.store.dispatch(new WrapperRequestActionSuccess(
@@ -292,7 +298,7 @@ export class HelmEffects {
     }, {});
     const keys = Object.keys(services);
     const releaseServices = {
-      entities: { [releaseServiceAction.entityKey]: services },
+      entities: { [entityCatalogue.getEntityKey(releaseServiceAction)]: services },
       result: keys
     } as NormalizedResponse;
     this.store.dispatch(new WrapperRequestActionSuccess(

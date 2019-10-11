@@ -2,39 +2,11 @@ import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChi
 
 import { MultiActionListEntity } from '../../../../monitors/pagination-monitor';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import {
-  AppServiceBindingCardComponent,
-} from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
-import { CardAppComponent } from '../../list-types/app/card/card-app.component';
-import { CfBuildpackCardComponent } from '../../list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
-import { CfOrgCardComponent } from '../../list-types/cf-orgs/cf-org-card/cf-org-card.component';
-import {
-  CfSecurityGroupsCardComponent,
-} from '../../list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
-import { CfServiceCardComponent } from '../../list-types/cf-services/cf-service-card/cf-service-card.component';
-import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
-import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
 import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
-import {
-  ServiceInstanceCardComponent,
-} from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
-import {
-  UserProvidedServiceInstanceCardComponent,
-} from '../../list-types/services-wall/user-provided-service-instance-card/user-provided-service-instance-card.component';
 import { CardCell } from '../../list.types';
 import { CardDynamicComponent, CardMultiActionComponents } from '../card.component.types';
 
 export const listCards = [
-  CardAppComponent,
-  CfOrgCardComponent,
-  CfSpaceCardComponent,
-  CfBuildpackCardComponent,
-  CfSecurityGroupsCardComponent,
-  CfStacksCardComponent,
-  CfServiceCardComponent,
-  AppServiceBindingCardComponent,
-  ServiceInstanceCardComponent,
-  UserProvidedServiceInstanceCardComponent,
   EndpointCardComponent
 ];
 export type CardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents | CardDynamicComponent<T>;

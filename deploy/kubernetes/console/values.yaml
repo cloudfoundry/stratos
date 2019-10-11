@@ -32,6 +32,28 @@ console:
     # nodePort: 30000
     type: ClusterIP
     externalName:
+    ingress:
+      ## If true, Ingress will be created
+      enabled: false
+
+      ## Additional annotations
+      annotations: {}
+
+      ## Additional labels
+      extraLabels: {}
+
+      ## Host for the ingress
+      # Defaults to console.[env.Domain] if env.Domain is set and host is not
+      host:
+
+      # Name of secret containing TLS certificate
+      secretName:
+
+      # crt and key for TLS Certificate (this chart will create the secret based on these)
+      tls:
+        crt:
+        key:
+
     http:
       enabled: false
       servicePort: 80
@@ -48,6 +70,9 @@ console:
   
   # Enable/disable Tech Preview
   techPreview: false
+
+  # Use local admin user instead of UAA - set to a password to enable
+  localAdminPassword: ~
 
 images:
   console: stratos-console
@@ -99,6 +124,8 @@ env:
   DOMAIN:
   UAA_HOST: 
   UAA_PORT: 2793
+  # UAA Zone (namespace cf ias deployed to when deployed to Kubernetes)
+  UAA_ZONE: scf
 
   # SMTP Settings for Email Sending (User Invites)
   # If true, authenticate against the SMTP server using AUTH command.

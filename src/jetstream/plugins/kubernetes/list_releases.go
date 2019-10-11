@@ -55,7 +55,7 @@ func (c *KubernetesSpecification) listReleases(ep *interfaces.ConnectedEndpoint,
 	log.Debugf("listReleases: START: %s", ep.GUID)
 	client, _, tiller, err := c.GetHelmClient(ep.GUID, ep.Account)
 	if err != nil {
-		log.Debugf("listReleases: CLIENT_ERROR: %s", ep.GUID)
+		log.Errorf("Helm: ListReleases could not get a Helm Client: %s", err)
 		done <- response
 		return
 	}
@@ -90,6 +90,7 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 
 	client, _, tiller, err := c.GetHelmClient(endpointGUID, userID)
 	if err != nil {
+		log.Errorf("Helm: GetRelease could not get a Helm Client: %s", err)
 		return err
 	}
 

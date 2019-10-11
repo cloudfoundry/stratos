@@ -1,36 +1,34 @@
-import { favoritesConfigMapper, FavoriteConfig } from './../../shared/components/favorites-meta-card/favorite-config-mapper';
-import { NgModule } from '@angular/core';
-
-import { CoreModule } from '../../core/core.module';
 import { CommonModule } from '@angular/common';
-import { SharedModule } from '../../shared/shared.module';
-import { KubernetesCertsAuthFormComponent } from './auth-forms/kubernetes-certs-auth-form/kubernetes-certs-auth-form.component';
-import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
-import { KubernetesConfigAuthFormComponent } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
-import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
-import { EffectsModule } from '@ngrx/effects';
-import { KubernetesEffects } from './store/kubernetes.effects';
-import { KubernetesStoreModule } from './kubernetes.store.module';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { IEndpointFavMetadata, IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
-import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
-import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
+import { NgModule, Optional, SkipSelf } from '@angular/core';
+import { Store } from '@ngrx/store';
 
-export interface IK8FavMetadata extends IFavoriteMetadata {
-  guid: string;
-  name: string;
-  address: string;
-}
+import { AppState } from '../../../../store/src/app-state';
+import { EndpointHealthCheck } from '../../../endpoints-health-checks';
+import { CoreModule } from '../../core/core.module';
+import { EndpointsService } from '../../core/endpoints.service';
+import { EntityCatalogueModule } from '../../core/entity-catalogue.module';
+import { SharedModule } from '../../shared/shared.module';
+import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
+import {
+  KubernetesCertsAuthFormComponent,
+} from './auth-forms/kubernetes-certs-auth-form/kubernetes-certs-auth-form.component';
+import {
+  KubernetesConfigAuthFormComponent,
+} from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
+import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
+import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes-entity-factory';
+import { generateKubernetesEntities } from './kubernetes-entity-generator';
+import { KubernetesStoreModule } from './kubernetes.store.module';
+import { KubeHealthCheck } from './store/kubernetes.actions';
+
 
 @NgModule({
   imports: [
+    EntityCatalogueModule.forFeature(generateKubernetesEntities),
     CoreModule,
     CommonModule,
     SharedModule,
     KubernetesStoreModule,
-    EffectsModule.forFeature([
-      KubernetesEffects
-    ])
   ],
   declarations: [
     KubernetesCertsAuthFormComponent,
@@ -46,31 +44,17 @@ export interface IK8FavMetadata extends IFavoriteMetadata {
   ]
 })
 export class KubernetesSetupModule {
-  constructor() {
-    const endpointType = 'k8s';
-    favoritesConfigMapper.registerFavoriteConfig<EndpointModel, IK8FavMetadata>(
-      new FavoriteConfig({
-        endpointType,
-        entityType: endpointSchemaKey
-      },
-        'Kubernetes',
-        (endpoint: IK8FavMetadata) => ({
-          type: endpointType,
-          routerLink: `/kubernetes/${endpoint.guid}`,
-          lines: [
-            ['Address', endpoint.address]
-          ],
-          name: endpoint.name,
-        }),
-        endpoint => ({
-          guid: endpoint.guid,
-          name: endpoint.name,
-          address: getFullEndpointApiUrl(endpoint),
-        })
-      )
-    );
+  constructor(
+    endpointService: EndpointsService,
+    store: Store<AppState>,
+    @Optional() @SkipSelf() parentModule: KubernetesSetupModule
+  ) {
+    if (parentModule) {
+      // Module has already been imported
+    } else {
+      endpointService.registerHealthCheck(
+        new EndpointHealthCheck(KUBERNETES_ENDPOINT_TYPE, (endpoint) => store.dispatch(new KubeHealthCheck(endpoint.guid)))
+      );
+    }
   }
-
-
-
 }

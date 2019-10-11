@@ -39,9 +39,8 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
-
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
@@ -248,13 +247,11 @@ func main() {
 	}()
 
 	// Initialise configuration
-	needSetupMiddleware, err := initialiseConsoleConfiguration(portalProxy)
+	err = initialiseConsoleConfiguration(portalProxy)
 	if err != nil {
 		log.Infof("Failed to initialise console config due to: %s", err)
 		return
 	}
-
-	showSSOConfig(portalProxy)
 
 	// Initialise Plugins
 	portalProxy.loadPlugins()
@@ -275,6 +272,19 @@ func main() {
 
 	portalProxy.Plugins = initedPlugins
 	log.Info("Plugins initialized")
+
+	var needSetupMiddleware bool
+
+	// At this stage, all plugins have had a chance to modify configurtion based on hosting environment
+	// Check to see if we are setup or not
+	if !portalProxy.Config.ConsoleConfig.IsSetupComplete() {
+		needSetupMiddleware = true
+		log.Info("Console does not have a complete configuration - going to enter setup mode (adding `setup` route and middleware)")
+	} else {
+		needSetupMiddleware = false
+		showStratosConfig(portalProxy.Config.ConsoleConfig)
+		showSSOConfig(portalProxy)
+	}
 
 	// Get Diagnostics and store them once - ensure this is done after plugins are loaded
 	portalProxy.StoreDiagnostics()
@@ -298,13 +308,12 @@ func (portalProxy *portalProxy) GetPlugin(name string) interface{} {
 	return plugin
 }
 
-func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
+func initialiseConsoleConfiguration(portalProxy *portalProxy) error {
 
-	addSetupMiddleware := false
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(portalProxy.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Unable to initialize Stratos backend config due to: %+v", err)
-		return addSetupMiddleware, err
+		return err
 	}
 
 	// Do this BEFORE we load the config from the database, so env var lookup at this stage
@@ -328,18 +337,12 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
 		log.Fatalf("Unable to load console config; %+v", err)
 	}
 
-	// We dynamically determine if we need to enter setup mode based on the configuration
-	// We need: UAA Endpoint and Console Admin Scope
-	if !consoleConfig.IsSetupComplete() {
-		addSetupMiddleware = true
-		log.Info("Will add `setup` route and middleware")
-	} else {
-		showStratosConfig(consoleConfig)
+	if consoleConfig.IsSetupComplete() {
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
 	}
 
-	return addSetupMiddleware, nil
+	return nil
 }
 
 func showStratosConfig(config *interfaces.ConsoleConfig) {
@@ -355,7 +358,7 @@ func showStratosConfig(config *interfaces.ConsoleConfig) {
 			log.Infof("... Console Client          : %s", config.ConsoleClient)
 			log.Infof("... Admin Scope             : %s", config.ConsoleAdminScope)
 			log.Infof("... Use SSO Login           : %t", config.UseSSO)
-				}
+		}
 	}
 	log.Infof("... Skip SSL Validation     : %t", config.SkipSSLValidation)
 	log.Infof("... Setup Complete          : %t", config.IsSetupComplete())
@@ -366,6 +369,7 @@ func showSSOConfig(portalProxy *portalProxy) {
 	log.Infof("SSO Configuration:")
 	log.Infof("... SSO Enabled             : %t", portalProxy.Config.SSOLogin)
 	log.Infof("... SSO Options             : %s", portalProxy.Config.SSOOptions)
+	log.Infof("... SSO Redirect Whitelist  : %s", portalProxy.Config.SSOWhiteList)
 }
 
 func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
@@ -776,7 +780,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		pp.POST("/v1/setup/check", p.setupConsoleCheck)
 	}
 
-	pp.POST("/v1/auth/login/uaa", p.loginToUAA)
+	pp.POST("/v1/auth/login/uaa", p.stratosLoginHandler)
 	pp.POST("/v1/auth/logout", p.logout)
 
 	// SSO Routes will only respond if SSO is enabled
@@ -784,8 +788,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
 
 	// Local User login/logout
-	pp.POST("/v1/auth/local_login", p.localLogin)
-	pp.POST("/v1/auth/local_logout", p.logout)
+	// pp.POST("/v1/auth/local_login", p.localLogin)
+	// pp.POST("/v1/auth/local_logout", p.logout)
 
 	// Callback is used by both login to Stratos and login to an Endpoint
 	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)

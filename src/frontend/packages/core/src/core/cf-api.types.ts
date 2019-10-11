@@ -1,6 +1,27 @@
 import { APIResource } from '../../../store/src/types/api.types';
-import { CfUser } from '../../../store/src/types/user.types';
+import { CfUser } from '../../../cloud-foundry/src/store/types/user.types';
 import { IService, IServiceBinding } from './cf-api-svc.types';
+
+export interface StratosCFEntity {
+  cfGuid: string;
+}
+
+export interface IQuotaDefinition {
+  guid?: string;
+  name: string;
+  organization_guid?: string;
+  app_instance_limit: number;
+  app_task_limit?: number;
+  memory_limit: number;
+  instance_memory_limit: number;
+  total_services: number;
+  total_service_keys?: number;
+  non_basic_services_allowed?: boolean;
+  trial_db_allowed?: boolean;
+  total_routes: number;
+  total_reserved_route_ports?: number;
+  total_private_domains?: number;
+}
 
 export interface IRoute {
   host: string;
@@ -58,7 +79,7 @@ export interface ISpace {
   security_groups?: APIResource<ISecurityGroup>[];
   staging_security_groups_url: string;
   staging_security_groups?: APIResource<ISecurityGroup>[];
-  space_quota_definition?: APIResource<IQuotaDefinition>;
+  space_quota_definition?: APIResource<ISpaceQuotaDefinition>;
   routes?: APIResource<IRoute>[];
   cfGuid?: string;
   guid?: string;
@@ -85,7 +106,7 @@ export interface IRule {
   ports?: string;
 }
 
-export interface IApp {
+export interface IApp<T = unknown> {
   name: string;
   production?: boolean;
   space_guid: string;
@@ -118,7 +139,7 @@ export interface IApp {
   allow_ssh?: boolean;
   ports?: number[];
   service_bindings?: APIResource<IServiceBinding>[];
-  routes?: APIResource<IRoute>[];
+  routes?: T extends string ? string[] : APIResource<IRoute>[];
   stack?: string | APIResource<IStack>;
   space?: string | APIResource<ISpace>;
   space_url?: string;
@@ -153,7 +174,7 @@ export interface IDeveloper {
   audited_spaces_url: string;
 }
 
-export interface IOrganization<spaceT = APIResource<ISpace>[]> {
+export interface IOrganization<T = unknown> {
   name: string;
   billing_enabled?: boolean;
   quota_definition_guid?: string;
@@ -175,9 +196,9 @@ export interface IOrganization<spaceT = APIResource<ISpace>[]> {
   space_quota_definitions_url?: string;
   guid?: string;
   cfGuid?: string;
-  spaces?: spaceT;
+  spaces?: T extends string ? T[] : APIResource<ISpace>[];
   private_domains?: APIResource<IPrivateDomain>[];
-  quota_definition?: APIResource<IQuotaDefinition>;
+  quota_definition?: T extends string ? T : APIResource<IOrgQuotaDefinition>;
 }
 
 export interface IDomain {
@@ -225,6 +246,8 @@ export interface IFeatureFlag {
   enabled: boolean;
   url?: string;
   error_message?: string;
+  cfGuid?: string;
+  guid?: string;
 }
 export interface IStack {
   name: string;
@@ -244,21 +267,30 @@ export interface IPrivateDomain {
   cfGuid?: string;
 }
 
-export interface IQuotaDefinition {
-  guid?: string;
-  name: string;
-  organization_guid?: string;
-  app_instance_limit: number;
-  app_task_limit?: number;
+interface IBaseQuotaDefinition {
   memory_limit: number;
+  app_instance_limit: number;
   instance_memory_limit: number;
-  total_services: number;
-  total_service_keys?: number;
-  non_basic_services_allowed?: boolean;
-  trial_db_allowed?: boolean;
-  total_routes: number;
-  total_reserved_route_ports?: number;
+  name: string;
+  total_services?: number;
+  total_routes?: number;
   total_private_domains?: number;
+  non_basic_services_allowed?: boolean;
+  app_task_limit: number;
+  total_service_keys: number;
+  total_reserved_route_ports: number;
+  guid?: string;
+  cfGuid?: string;
+}
+
+export interface IOrgQuotaDefinition extends IBaseQuotaDefinition {
+  trial_db_allowed: boolean;
+}
+
+export interface ISpaceQuotaDefinition extends IBaseQuotaDefinition {
+  organization_guid?: string;
+  organization_url?: string;
+  spaces_url?: string;
 }
 
 export interface IUpdateSpace {
@@ -284,7 +316,7 @@ export interface IUpdateOrganization {
 export interface IAppSummary {
   guid: string;
   name: string;
-  routes: APIResource<IAppSummaryRoute>[];
+  routes: IAppSummaryRoute[];
   running_instances: number;
   services: IService[];
   available_domains: IDomain[];

@@ -2,7 +2,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../tab-nav.service';
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../test-framework/core-test.helper';
 import { DemoHelperComponent } from './demo-helper.component';
 
 describe('DemoHelperComponent', () => {

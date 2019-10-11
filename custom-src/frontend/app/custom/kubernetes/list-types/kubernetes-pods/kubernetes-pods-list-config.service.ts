@@ -80,6 +80,9 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
       columnId: 'container-status', headerCell: () => `Ready Containers`,
       cellDefinition: {
         getValue: (row) => {
+          if (row.status.phase === 'Failed') {
+            return `0 / ${row.spec.containers.length}`;
+          }
           const readyPods = row.status.containerStatuses.filter(status => status.ready).length;
           const allContainers = row.status.containerStatuses.length;
           return `${readyPods} / ${allContainers}`;

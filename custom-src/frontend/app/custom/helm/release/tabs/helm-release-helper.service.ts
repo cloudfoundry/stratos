@@ -3,11 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { PaginationMonitor } from '../../../../shared/monitors/pagination-monitor';
+import { helmEntityFactory, helmReleaseEntityKey } from '../../helm-entity-factory';
 import { GetHelmReleases, GetHelmReleaseStatus } from '../../store/helm.actions';
-import { helmReleaseSchemaKey } from '../../store/helm.entities';
 import { HelmRelease, HelmReleaseGuid, HelmReleaseStatus } from '../../store/helm.types';
 import { AppState } from './../../../../../../store/src/app-state';
 import {
@@ -35,7 +34,7 @@ export class HelmReleaseHelperService {
     this.endpointGuid = this.guid.split(':')[0];
 
     const action = new GetHelmReleases();
-    const paginationMonitor = new PaginationMonitor(store, action.paginationKey, entityFactory(helmReleaseSchemaKey));
+    const paginationMonitor = new PaginationMonitor(store, action.paginationKey, helmEntityFactory(helmReleaseEntityKey));
     const svc = getPaginationObservables({ store, action, paginationMonitor });
     this.isFetching$ = svc.fetchingEntities$;
 
@@ -48,7 +47,7 @@ export class HelmReleaseHelperService {
     // Get helm release
     const action = new GetHelmReleaseStatus(this.endpointGuid, this.releaseTitle);
 
-    return this.esf.create<HelmReleaseStatus>(action.entityKey, action.entity, action.key, action, false).waitForEntity$.pipe(
+    return this.esf.create<HelmReleaseStatus>(action.key, action).waitForEntity$.pipe(
       map(entity => entity.entity)
     );
   }

@@ -15,6 +15,7 @@ import { IListConfig } from '../../../shared/components/list/list.component.type
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 
 export class MonocularRepositoryDataSource extends BaseEndpointsDataSource {
 
@@ -38,7 +39,7 @@ export class MonocularRepositoryDataSource extends BaseEndpointsDataSource {
       store,
       listConfig,
       action,
-      'helm',
+      HELM_ENDPOINT_TYPE,
       paginationMonitorFactory,
       entityMonitorFactory,
       internalEventMonitorFactory,

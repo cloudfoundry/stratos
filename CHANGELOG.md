@@ -1,5 +1,63 @@
 # Change Log
 
+## 2.5.3
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.2...2.5.3)
+
+This release contains a number of fixes and improvements:
+
+**Fixes:**
+
+- Metrics only shown for most recently added k8s metrics endpoint [\#3861](https://github.com/cloudfoundry-incubator/stratos/issues/3861)
+- Can't update user profile when using local user with mysql or postgres [\#3940](https://github.com/cloudfoundry-incubator/stratos/issues/3940)
+- Ensure we remove X-Forward-* HTTP headers that can cause problems proxying API requests [\#3934](https://github.com/cloudfoundry-incubator/stratos/pull/3934)
+
+**Improvements:**
+
+- Add ingress support to Helm Chart [\#3935](https://github.com/cloudfoundry-incubator/stratos/pull/3935)
+- Gate SSO redirect on optional state whitelist [\#3933](https://github.com/cloudfoundry-incubator/stratos/pull/3933)
+- Backend update for cacheing compat for HTTP 1.0 clients [\#3931](https://github.com/cloudfoundry-incubator/stratos/pull/3931)
+
+## 2.5.2
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.1...2.5.2)
+
+This release contains a number of fixes and improvements:
+
+**Fixes:**
+
+- Clicking on a metrics endpoint to view details freezes the UI [\#212](https://github.com/SUSE/stratos/pull/212)
+- Ensure MB is only shown for memory based quota values in edit quota forms [\#3892](https://github.com/cloudfoundry-incubator/stratos/pull/3892)
+- Ensure stepper buttons are always visible and content scrolls [\#3890](https://github.com/cloudfoundry-incubator/stratos/pull/3890)
+- Fix autoscaler issue related to editing a newly created policy[\#3886](https://github.com/cloudfoundry-incubator/stratos/pull/3886)
+
+**Improvements:**
+
+- Add support for local user account [\#3632](https://github.com/cloudfoundry-incubator/stratos/pull/3632)
+- Add support for viewing and editing profile for local user account [\#3883](https://github.com/cloudfoundry-incubator/stratos/pull/3883)
+- Better metrics endpoint comparison [\#206](https://github.com/SUSE/stratos/pull/206)
+- Better Kubernetes endpoint comparison [\#209](https://github.com/SUSE/stratos/pull/209)
+
+> Note: To enable the local user account, configure the password for the local user ('admin') when deploying via Helm by setting the Helm chart value `console.localAdminPassword` when installing. Once the user has been created, the user profile and password can be edited subsequently from the user profile view in the UI.
+
+## 2.5.1
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.0...2.5.1)
+
+This release contains a number of fixes and improvements:
+
+**Fixes:**
+
+- Allow DB directory to be specified for SQLite [\#193](https://github.com/SUSE/stratos/pull/193)
+
+**Improvements:**
+
+- Tech preview for helm feature [\#190](https://github.com/SUSE/stratos/pull/190)
+- Add custom welcome message on endpoints page [\#194](https://github.com/SUSE/stratos/pull/194)
+- Add support for connecting CaaSP V4 endpoints [\#191](https://github.com/SUSE/stratos/pull/191)
+- Refinements to the Autoscaler UI [\#196](https://github.com/SUSE/stratos/pull/196)
+> Note: Tech preview features can be enabled when deploying via Helm by setting the Helm chart value `console.techPreview` to `true` - e.g. add `--set console.techPreview=true` when installing.
+
 ## 2.5.0
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.4.0...2.5.0)

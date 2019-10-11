@@ -1,15 +1,17 @@
-import { promise } from 'protractor';
+import { browser, promise } from 'protractor';
 
+import { CFResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
+import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/user.types';
 import {
   IApp,
   IDomain,
   IOrganization,
-  IQuotaDefinition,
+  IOrgQuotaDefinition,
   IRoute,
   ISpace,
+  ISpaceQuotaDefinition,
 } from '../../frontend/packages/core/src/core/cf-api.types';
-import { APIResource, CFResponse } from '../../frontend/packages/store/src/types/api.types';
-import { CfUser } from '../../frontend/packages/store/src/types/user.types';
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
 import { CfOrgLevelPage } from '../cloud-foundry/org-level/cf-org-level-page.po';
 import { CfSpaceLevelPage } from '../cloud-foundry/space-level/cf-space-level-page.po';
@@ -21,8 +23,8 @@ import { CFRequestHelpers } from './cf-request-helpers';
 import { UaaHelpers } from './uaa-helpers';
 
 const stackPriority = {
-  cf: [ 'cflinuxfs3', 'cflinuxfs2' ],
-  suse: [ 'sle15', 'opensuse42' ]
+  cf: ['cflinuxfs3', 'cflinuxfs2'],
+  suse: ['sle15', 'opensuse42']
 };
 
 export class CFHelpers {
@@ -119,7 +121,7 @@ export class CFHelpers {
   addSpaceIfMissing(cnsiGuid, orgGuid, spaceName, userGuid): promise.Promise<APIResource<ISpace>> {
     const that = this;
     return this.fetchSpace(cnsiGuid, orgGuid, spaceName)
-      .then(function(space) {
+      .then(space => {
         return space ? space : that.baseAddSpace(cnsiGuid, orgGuid, spaceName, userGuid);
       });
   }
@@ -425,14 +427,15 @@ export class CFHelpers {
   deleteUser(cfGuid: string, userGuid: string, userName?: string, uaaUserGuid?: string): promise.Promise<any> {
     const uaaHelpers = new UaaHelpers();
     return this.cfRequestHelper.sendCfDelete(cfGuid, `users/${userGuid}?async=false`)
+      .then(() => browser.sleep(500))
       .then(() => uaaHelpers.deleteUser(uaaUserGuid, userName));
   }
 
-  createUser(cfGuid: string, uaaUserGuid: string): promise.Promise<{ guid: string}> {
+  createUser(cfGuid: string, uaaUserGuid: string): promise.Promise<APIResource<CfUser>> {
     const body = {
       guid: uaaUserGuid
     };
-    return this.cfRequestHelper.sendCfPost<{ guid: string}>(cfGuid, 'users', body);
+    return this.cfRequestHelper.sendCfPost<APIResource<CfUser>>(cfGuid, 'users', body);
   }
 
   /**
@@ -476,7 +479,7 @@ export class CFHelpers {
         spacePage.loadingIndicator.waitUntilNotShown();
         return spacePage;
       });
-    }
+  }
 
   addOrgQuota(cfGuid, name, options = {}) {
     const body = {
@@ -490,7 +493,7 @@ export class CFHelpers {
       ...options
     };
 
-    return this.cfRequestHelper.sendCfPost<APIResource<IQuotaDefinition>>(cfGuid, 'quota_definitions', body);
+    return this.cfRequestHelper.sendCfPost<APIResource<IOrgQuotaDefinition>>(cfGuid, 'quota_definitions', body);
   }
 
   addSpaceQuota(cfGuid, orgGuid, name, options = {}) {
@@ -504,6 +507,6 @@ export class CFHelpers {
       total_reserved_route_ports: -1,
       ...options
     };
-    return this.cfRequestHelper.sendCfPost<APIResource<IQuotaDefinition>>(cfGuid, 'space_quota_definitions', body);
+    return this.cfRequestHelper.sendCfPost<APIResource<ISpaceQuotaDefinition>>(cfGuid, 'space_quota_definitions', body);
   }
 }

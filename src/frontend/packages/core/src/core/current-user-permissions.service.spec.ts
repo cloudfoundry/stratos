@@ -1,165 +1,41 @@
 import { TestBed } from '@angular/core/testing';
-import { StoreModule } from '@ngrx/store';
-import { CurrentUserPermissionsService } from './current-user-permissions.service';
+import { first, tap } from 'rxjs/operators';
+
+import { cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
+import { generateCFEntities } from '../../../cloud-foundry/src/cf-entity-generator';
+import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-types';
+import { AppState } from '../../../store/src/app-state';
+import { AppStoreExtensionsModule } from '../../../store/src/store.extensions.module';
+import { APIResource } from '../../../store/src/types/api.types';
+import { EndpointModel } from '../../../store/src/types/endpoint.types';
+import { BaseEntityValues } from '../../../store/src/types/entity.types';
+import { PaginationState } from '../../../store/src/types/pagination.types';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '../../test-framework/store-test-helper';
+import { endpointEntitySchema } from '../base-entity-schemas';
+import { generateStratosEntities } from '../base-entity-types';
+import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
+import { IFeatureFlag } from './cf-api.types';
 import {
   CurrentUserPermissions,
   PermissionConfig,
-  PermissionTypes,
   PermissionStrings,
-  ScopeStrings
+  PermissionTypes,
+  ScopeStrings,
 } from './current-user-permissions.config';
-import { tap, first } from 'rxjs/operators';
-import { appReducers } from '../../../store/src/reducers.module';
-import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
-const initialState = {
-  pagination: {
-    application: {},
-    stack: {},
-    space: {},
-    organization: {},
-    route: {},
-    event: {},
-    endpoint: {
-      'endpoint-list': {
-        currentPage: 1,
-        totalResults: 2,
-        ids: {
-          1: [
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87'
-          ]
-        },
-        pageRequests: {
-          1: {
-            busy: false,
-            error: false,
-            message: ''
-          }
-        },
-        params: {
-          'results-per-page': 50,
-          'order-direction': 'desc',
-          'order-direction-field': 'name',
-          page: 1,
-          q: []
-        },
-        clientPagination: {
-          pageSize: 5,
-          currentPage: 1,
-          filter: {
-            string: '',
-            items: {}
-          },
-          totalResults: 2
-        },
-        error: false
-      }
-    },
-    githubBranches: {},
-    user: {},
-    domain: {},
-    environmentVars: {},
-    stats: {},
-    summary: {},
-    serviceInstance: {},
-    servicePlan: {},
-    service: {},
-    serviceBinding: {},
-    buildpack: {},
-    securityGroup: {},
-    featureFlag: {
-      'endpoint-0e934dc8-7ad4-40ff-b85c-53c1b61d2abb': {
-        pageCount: 1,
-        currentPage: 1,
-        totalResults: 13,
-        ids: {
-          1: [
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-1',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-2',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-3',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-4',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-5',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-6',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-7',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-8',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-9',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-10',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-11',
-            '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-12'
-          ]
-        },
-        pageRequests: {
-          1: {
-            busy: false,
-            error: false,
-            message: ''
-          }
-        },
-        params: {},
-        clientPagination: {
-          pageSize: 9,
-          currentPage: 1,
-          filter: {
-            string: '',
-            items: {}
-          },
-          totalResults: 13
-        }
-      },
-      'endpoint-c80420ca-204b-4879-bf69-b6b7a202ad87': {
-        pageCount: 1,
-        currentPage: 1,
-        totalResults: 13,
-        ids: {
-          1: [
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-0',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-1',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-2',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-3',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-4',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-5',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-6',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-7',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-8',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-9',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-10',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-11',
-            'c80420ca-204b-4879-bf69-b6b7a202ad87-12'
-          ]
-        },
-        pageRequests: {
-          1: {
-            busy: false,
-            error: false,
-            message: ''
-          }
-        },
-        params: {},
-        clientPagination: {
-          pageSize: 9,
-          currentPage: 1,
-          filter: {
-            string: '',
-            items: {}
-          },
-          totalResults: 13
-        }
-      }
-    },
-    private_domains: {},
-    space_quota_definition: {},
-    metrics: {}
-  },
-  requestData: {
-    application: {},
-    stack: {},
-    space: {},
-    organization: {},
-    route: {},
-    event: {},
-    endpoint: {
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb': {
+import { CurrentUserPermissionsService } from './current-user-permissions.service';
+import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
+import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
+
+const ffSchema = cfEntityFactory(featureFlagEntityType);
+
+describe('CurrentUserPermissionsService', () => {
+  let service: CurrentUserPermissionsService;
+
+
+  function createStoreState(): Partial<AppState<BaseEntityValues>> {
+    // Data
+    const endpoints: EndpointModel[] = [
+      {
         guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
         name: 'SCF',
         cnsi_type: 'cf',
@@ -183,18 +59,18 @@ const initialState = {
           name: 'nathan',
           admin: false,
           scopes: [
-            'cloud_controller.read',
-            'password.write',
-            'cloud_controller.write',
-            'openid',
-            'uaa.user'
+            ScopeStrings.CF_WRITE_SCOPE,
+            ScopeStrings.STRATOS_CHANGE_PASSWORD,
+            ScopeStrings.CF_READ_SCOPE,
           ]
         },
         metricsAvailable: false,
         connectionStatus: 'connected',
-        registered: true
+        registered: true,
+        system_shared_token: false,
+        sso_allowed: false
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87': {
+      {
         guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
         name: 'MainSCF',
         cnsi_type: 'cf',
@@ -218,58 +94,40 @@ const initialState = {
           name: 'admin',
           admin: true,
           scopes: [
-            'openid',
-            'scim.read',
-            'cloud_controller.admin',
-            'uaa.user',
-            'routing.router_groups.read',
-            'cloud_controller.read',
-            'password.write',
-            'cloud_controller.write',
-            'doppler.firehose',
-            'scim.write'
+            ScopeStrings.CF_WRITE_SCOPE,
+            ScopeStrings.STRATOS_CHANGE_PASSWORD,
+            ScopeStrings.CF_READ_SCOPE,
+            ScopeStrings.CF_ADMIN_GROUP,
+            ScopeStrings.CF_READ_ONLY_ADMIN_GROUP,
+            ScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP,
+            ScopeStrings.SCIM_READ
           ]
         },
         metricsAvailable: false,
         connectionStatus: 'connected',
-        registered: true
+        registered: true,
+        system_shared_token: false,
+        sso_allowed: false
       }
-    },
-    domain: {},
-    system: {},
-    routerReducer: {},
-    createApplication: {},
-    uaaSetup: {},
-    user: {},
-    cloudFoundryInfo: {},
-    gitRepo: {},
-    gitBranches: {},
-    gitCommits: {},
-    environmentVars: {},
-    stats: {},
-    summary: {},
-    quota_definition: {},
-    buildpack: {},
-    securityGroup: {},
-    servicePlan: {},
-    service: {},
-    serviceBinding: {},
-    serviceInstance: {},
-    featureFlag: {
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0': {
+    ];
+
+    const featureFlags1: APIResource<IFeatureFlag>[] = [
+      {
         entity: {
           name: 'user_org_creation',
           enabled: false,
           error_message: null,
           url: '/v2/config/feature_flags/user_org_creation',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       },
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-1': {
+      {
         entity: {
           name: 'private_domain_creation',
           enabled: true,
@@ -279,10 +137,12 @@ const initialState = {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-1'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-1'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-1',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
-      },
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-2': {
+      }, {
         entity: {
           name: 'app_bits_upload',
           enabled: true,
@@ -292,10 +152,12 @@ const initialState = {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-2'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-2'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-2',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
-      },
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-3': {
+      }, {
         entity: {
           name: 'app_scaling',
           enabled: true,
@@ -305,10 +167,12 @@ const initialState = {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-3'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-3'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-3',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
-      },
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-4': {
+      }, {
         entity: {
           name: 'route_creation',
           enabled: true,
@@ -318,10 +182,12 @@ const initialState = {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-4'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-4'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-4',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
-      },
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-5': {
+      }, {
         entity: {
           name: 'service_instance_creation',
           enabled: true,
@@ -331,10 +197,12 @@ const initialState = {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-5'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-5'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-5',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
-      },
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-6': {
+      }, {
         entity: {
           name: 'diego_docker',
           enabled: false,
@@ -344,10 +212,12 @@ const initialState = {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-6'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-6'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-6',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
-      },
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-7': {
+      }, {
         entity: {
           name: 'set_roles_by_username',
           enabled: true,
@@ -357,10 +227,12 @@ const initialState = {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-7'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-7'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-7',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
-      },
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-8': {
+      }, {
         entity: {
           name: 'unset_roles_by_username',
           enabled: true,
@@ -370,10 +242,12 @@ const initialState = {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-8'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-8'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-8',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
-      },
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-10': {
+      }, {
         entity: {
           name: 'env_var_visibility',
           enabled: true,
@@ -383,10 +257,12 @@ const initialState = {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-10'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-10'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-10',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
-      },
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-11': {
+      }, {
         entity: {
           name: 'space_scoped_private_broker_creation',
           enabled: true,
@@ -396,10 +272,12 @@ const initialState = {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-11'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-11'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-11',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
-      },
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-12': {
+      }, {
         entity: {
           name: 'space_developer_env_var_visibility',
           enabled: true,
@@ -409,23 +287,31 @@ const initialState = {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-12'
         },
         metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-12'
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-12',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
-      },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-0': {
-        entity: {
-          name: 'user_org_creation',
-          enabled: false,
-          error_message: null,
-          url: '/v2/config/feature_flags/user_org_creation',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0'
-        }
-      },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-1': {
+      }
+    ];
+    const featureFlags2: APIResource<IFeatureFlag>[] = [
+      // {
+      //   entity: {
+      //     name: 'user_org_creation',
+      //     enabled: false,
+      //     error_message: null,
+      //     url: '/v2/config/feature_flags/user_org_creation',
+      //     cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+      //     guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0'
+      //   },
+      //   metadata: {
+      //     guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0',
+      //     created_at: '',
+      //     updated_at: '',
+      //     url: ''
+      //   }
+      // },
+      {
         entity: {
           name: 'private_domain_creation',
           enabled: true,
@@ -435,10 +321,13 @@ const initialState = {
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-1'
         },
         metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-1'
+          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-1',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-2': {
+      {
         entity: {
           name: 'app_bits_upload',
           enabled: true,
@@ -448,10 +337,13 @@ const initialState = {
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-2'
         },
         metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-2'
+          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-2',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-3': {
+      {
         entity: {
           name: 'app_scaling',
           enabled: true,
@@ -461,10 +353,13 @@ const initialState = {
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-3'
         },
         metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-3'
+          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-3',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-4': {
+      {
         entity: {
           name: 'route_creation',
           enabled: true,
@@ -474,10 +369,13 @@ const initialState = {
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-4'
         },
         metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-4'
+          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-4',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-5': {
+      {
         entity: {
           name: 'service_instance_creation',
           enabled: true,
@@ -487,10 +385,13 @@ const initialState = {
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-5'
         },
         metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-5'
+          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-5',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-6': {
+      {
         entity: {
           name: 'diego_docker',
           enabled: true,
@@ -500,10 +401,13 @@ const initialState = {
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-6'
         },
         metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-6'
+          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-6',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-7': {
+      {
         entity: {
           name: 'set_roles_by_username',
           enabled: true,
@@ -513,10 +417,13 @@ const initialState = {
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-7'
         },
         metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-7'
+          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-7',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-8': {
+      {
         entity: {
           name: 'unset_roles_by_username',
           enabled: true,
@@ -526,10 +433,13 @@ const initialState = {
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-8'
         },
         metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-8'
+          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-8',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-10': {
+      {
         entity: {
           name: 'env_var_visibility',
           enabled: true,
@@ -539,10 +449,13 @@ const initialState = {
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-10'
         },
         metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-10'
+          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-10',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-11': {
+      {
         entity: {
           name: 'space_scoped_private_broker_creation',
           enabled: true,
@@ -552,10 +465,13 @@ const initialState = {
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-11'
         },
         metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-11'
+          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-11',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87-12': {
+      {
         entity: {
           name: 'space_developer_env_var_visibility',
           enabled: true,
@@ -565,280 +481,457 @@ const initialState = {
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-12'
         },
         metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-12'
+          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-12',
+          created_at: '',
+          updated_at: '',
+          url: ''
         }
       }
-    },
-    private_domains: {},
-    space_quota_definition: {},
-    metrics: {},
-    userProfile: {}
-  },
-  currentUserRoles: {
-    internal: {
-      isAdmin: false,
-      scopes: [
-        'scim.me',
-        'openid',
-        'profile',
-        'roles',
-        'uaa.user',
-        'notification_preferences.write',
-        'cloud_controller.read',
-        'password.write',
-        'approvals.me',
-        'cloud_controller.write',
-        'cloud_controller_service_permissions.read',
-        'oauth.approvals',
-        'stratos.user'
+    ];
+
+    // Pagination
+    const pagination: PaginationState = {
+      stratosEndpoint: {
+        'endpoint-list': {
+          currentPage: 1,
+          totalResults: 2,
+          pageCount: 1,
+          ids: {
+            1: endpoints.map(endpoint => endpoint.guid)
+          },
+          pageRequests: {
+            1: {
+              busy: false,
+              error: false,
+              message: ''
+            }
+          },
+          params: {
+            'results-per-page': 50,
+            'order-direction': 'desc',
+            'order-direction-field': 'name',
+            page: 1,
+            q: []
+          },
+          clientPagination: {
+            pageSize: 5,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            },
+            totalResults: 2
+          },
+        }
+      },
+      cfFeatureFlag: {
+        'endpoint-0e934dc8-7ad4-40ff-b85c-53c1b61d2abb': {
+          pageCount: 1,
+          currentPage: 1,
+          totalResults: 13,
+          ids: {
+            1: featureFlags1.map(ff => ff.entity.guid)
+          },
+          pageRequests: {
+            1: {
+              busy: false,
+              error: false,
+              message: ''
+            }
+          },
+          params: {},
+          clientPagination: {
+            pageSize: 9,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            },
+            totalResults: 13
+          }
+        },
+        'endpoint-c80420ca-204b-4879-bf69-b6b7a202ad87': {
+          pageCount: 1,
+          currentPage: 1,
+          totalResults: 13,
+          ids: {
+            1: featureFlags2.map(ff => ff.entity.guid)
+          },
+          pageRequests: {
+            1: {
+              busy: false,
+              error: false,
+              message: ''
+            }
+          },
+          params: {},
+          clientPagination: {
+            pageSize: 9,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            },
+            totalResults: 13
+          }
+        }
+      },
+    };
+
+    // User roles
+    const initialState: Partial<AppState<BaseEntityValues>> = {
+
+    };
+
+
+    // Create request and requestData sections
+    // TODO: RC Roles/Permissions
+    const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
+      [
+        endpointEntitySchema,
+        endpoints.map(endpoint => ({
+          guid: endpoint.guid,
+          data: endpoint
+        }))
+      ],
+      [
+        ffSchema,
+        [...featureFlags1, ...featureFlags2].map(featureFlag => ({
+          guid: featureFlag.entity.guid,
+          data: featureFlag
+        }))
       ]
-    },
-    cf: {
-      '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb': {
-        global: {
+    ]);
+    const requestAndRequestData = createEntityStoreState(entityMap);
+
+    return {
+      currentUserRoles: {
+        internal: {
           isAdmin: false,
-          isReadOnlyAdmin: false,
-          isGlobalAuditor: false,
-          canRead: true,
-          canWrite: true,
+
           scopes: [
-            'cloud_controller.read',
-            'password.write',
-            'cloud_controller.write',
-            'openid',
-            'uaa.user'
-          ]
+            ScopeStrings.CF_ADMIN_GROUP,
+            ScopeStrings.CF_READ_ONLY_ADMIN_GROUP,
+            ScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP,
+            ScopeStrings.CF_WRITE_SCOPE,
+            ScopeStrings.CF_READ_SCOPE,
+            ScopeStrings.STRATOS_CHANGE_PASSWORD,
+            ScopeStrings.SCIM_READ
+          ],
         },
-        spaces: {
-          '56eb5ecc-7c96-4bb1-bdcc-0c6c3d444dc6': {
-            isManager: true,
-            isAuditor: false,
-            isDeveloper: true
-          }
-        },
-        organizations: {
-          'd5e50b05-497f-4b3b-9658-a396a592a8ba': {
-            isManager: false,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
+        cf: {
+          '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb': {
+            global: {
+              isAdmin: false,
+              isReadOnlyAdmin: false,
+              isGlobalAuditor: false,
+              canRead: true,
+              canWrite: true,
+              scopes: [
+                'cloud_controller.read',
+                'password.write',
+                'cloud_controller.write',
+                'openid',
+                'uaa.user'
+              ]
+            },
+            spaces: {
+              '56eb5ecc-7c96-4bb1-bdcc-0c6c3d444dc6': {
+                orgId: 'abc',
+                isManager: true,
+                isAuditor: false,
+                isDeveloper: true
+              }
+            },
+            organizations: {
+              'd5e50b05-497f-4b3b-9658-a396a592a8ba': {
+                isManager: false,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              },
+              'c58e7cfd-c765-400a-a473-313fa572d5c4': {
+                isManager: false,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              }
+            },
+            state: {
+              initialised: true,
+              fetching: false,
+              error: null
+            }
           },
-          'c58e7cfd-c765-400a-a473-313fa572d5c4': {
-            isManager: false,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
+          'c80420ca-204b-4879-bf69-b6b7a202ad87': {
+            global: {
+              isAdmin: false,
+              isReadOnlyAdmin: false,
+              isGlobalAuditor: false,
+              canRead: true,
+              canWrite: true,
+              scopes: [
+                'openid',
+                'scim.read',
+                'cloud_controller.admin',
+                'uaa.user',
+                'routing.router_groups.read',
+                'cloud_controller.read',
+                'password.write',
+                'cloud_controller.write',
+                'doppler.firehose',
+                'scim.write'
+              ]
+            },
+            spaces: {
+              '56eb5ecc-7c96-4bb1-bdcc-0c6c3d444dc6': {
+                isManager: true,
+                isAuditor: false,
+                isDeveloper: true,
+                orgId: 'abc'
+              },
+              'c6450a21-aa1a-4643-9437-035cc818ea72': {
+                isManager: true,
+                isAuditor: false,
+                isDeveloper: true,
+                orgId: 'abc'
+              },
+              '86577124-4b64-4ca1-9a78-d904c60505c4': {
+                isManager: true,
+                isAuditor: false,
+                isDeveloper: true,
+                orgId: 'abc'
+              }
+            },
+            organizations: {
+              '367a49c1-b5dc-44e6-a8cf-84b1f56426a7': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              },
+              'dccfedde-be2c-46a6-99cf-c1320ea8cb6d': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              },
+              '8a175cad-ff61-436b-8c6f-e5beb13edb5f': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              },
+              'd5246255-867b-4f62-9040-346f113f0b7d': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              }
+            },
+            state: {
+              initialised: true,
+              fetching: false,
+              error: null
+            }
+          },
+          READ_ONLY_ADMIN: {
+            global: {
+              isAdmin: false,
+              isReadOnlyAdmin: true,
+              isGlobalAuditor: false,
+              canRead: true,
+              canWrite: true,
+              scopes: [
+                'openid',
+                'scim.read',
+                'cloud_controller.admin',
+                'uaa.user',
+                'routing.router_groups.read',
+                'cloud_controller.read',
+                'password.write',
+                'cloud_controller.write',
+                'doppler.firehose',
+                'scim.write'
+              ]
+            },
+            spaces: {
+              '56eb5ecc-7c96-4bb1-bdcc-0c6c3d444dc6': {
+                orgId: 'abc',
+                isManager: true,
+                isAuditor: false,
+                isDeveloper: true
+              },
+              'c6450a21-aa1a-4643-9437-035cc818ea72': {
+                orgId: 'abc',
+                isManager: true,
+                isAuditor: false,
+                isDeveloper: true
+              },
+              '86577124-4b64-4ca1-9a78-d904c60505c4': {
+                orgId: 'abc',
+                isManager: true,
+                isAuditor: false,
+                isDeveloper: true
+              }
+            },
+            organizations: {
+              '367a49c1-b5dc-44e6-a8cf-84b1f56426a7': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              },
+              'dccfedde-be2c-46a6-99cf-c1320ea8cb6d': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              },
+              '8a175cad-ff61-436b-8c6f-e5beb13edb5f': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              },
+              'd5246255-867b-4f62-9040-346f113f0b7d': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              }
+            },
+            state: {
+              initialised: true,
+              fetching: false,
+              error: null
+            }
+          },
+          READ_ONLY_USER: {
+            global: {
+              isAdmin: false,
+              isReadOnlyAdmin: false,
+              isGlobalAuditor: false,
+              canRead: true,
+              canWrite: false,
+              scopes: [
+                'openid',
+                'scim.read',
+                'cloud_controller.admin',
+                'uaa.user',
+                'routing.router_groups.read',
+                'cloud_controller.read',
+                'password.write',
+                'cloud_controller.write',
+                'doppler.firehose',
+                'scim.write'
+              ]
+            },
+            spaces: {
+              '56eb5ecc-7c96-4bb1-bdcc-0c6c3d444dc6': {
+                isManager: true,
+                isAuditor: false,
+                isDeveloper: true,
+                orgId: 'abc'
+              },
+              'c6450a21-aa1a-4643-9437-035cc818ea72': {
+                isManager: true,
+                isAuditor: false,
+                isDeveloper: true,
+                orgId: 'abc'
+              },
+              '86577124-4b64-4ca1-9a78-d904c60505c4': {
+                isManager: true,
+                isAuditor: false,
+                isDeveloper: true,
+                orgId: 'abc'
+              }
+            },
+            organizations: {
+              '367a49c1-b5dc-44e6-a8cf-84b1f56426a7': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              },
+              'dccfedde-be2c-46a6-99cf-c1320ea8cb6d': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              },
+              '8a175cad-ff61-436b-8c6f-e5beb13edb5f': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              },
+              'd5246255-867b-4f62-9040-346f113f0b7d': {
+                isManager: true,
+                isAuditor: false,
+                isBillingManager: false,
+                isUser: true,
+                spaceGuids: []
+              }
+            },
+            state: {
+              initialised: true,
+              fetching: false,
+              error: null
+            }
           }
+        },
+        state: {
+          initialised: true,
+          fetching: false,
+          error: null
         }
       },
-      'c80420ca-204b-4879-bf69-b6b7a202ad87': {
-        global: {
-          isAdmin: false,
-          isReadOnlyAdmin: false,
-          isGlobalAuditor: false,
-          canRead: true,
-          canWrite: true,
-          scopes: [
-            'openid',
-            'scim.read',
-            'cloud_controller.admin',
-            'uaa.user',
-            'routing.router_groups.read',
-            'cloud_controller.read',
-            'password.write',
-            'cloud_controller.write',
-            'doppler.firehose',
-            'scim.write'
-          ]
-        },
-        spaces: {
-          '56eb5ecc-7c96-4bb1-bdcc-0c6c3d444dc6': {
-            isManager: true,
-            isAuditor: false,
-            isDeveloper: true
-          },
-          'c6450a21-aa1a-4643-9437-035cc818ea72': {
-            isManager: true,
-            isAuditor: false,
-            isDeveloper: true
-          },
-          '86577124-4b64-4ca1-9a78-d904c60505c4': {
-            isManager: true,
-            isAuditor: false,
-            isDeveloper: true
-          }
-        },
-        organizations: {
-          '367a49c1-b5dc-44e6-a8cf-84b1f56426a7': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          },
-          'dccfedde-be2c-46a6-99cf-c1320ea8cb6d': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          },
-          '8a175cad-ff61-436b-8c6f-e5beb13edb5f': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          },
-          'd5246255-867b-4f62-9040-346f113f0b7d': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          }
-        }
+      requestData: {
+        ...initialState.requestData,
+        ...requestAndRequestData.requestData
       },
-      READ_ONLY_ADMIN: {
-        global: {
-          isAdmin: false,
-          isReadOnlyAdmin: true,
-          isGlobalAuditor: false,
-          canRead: true,
-          canWrite: true,
-          scopes: [
-            'openid',
-            'scim.read',
-            'cloud_controller.admin',
-            'uaa.user',
-            'routing.router_groups.read',
-            'cloud_controller.read',
-            'password.write',
-            'cloud_controller.write',
-            'doppler.firehose',
-            'scim.write'
-          ]
-        },
-        spaces: {
-          '56eb5ecc-7c96-4bb1-bdcc-0c6c3d444dc6': {
-            isManager: true,
-            isAuditor: false,
-            isDeveloper: true
-          },
-          'c6450a21-aa1a-4643-9437-035cc818ea72': {
-            isManager: true,
-            isAuditor: false,
-            isDeveloper: true
-          },
-          '86577124-4b64-4ca1-9a78-d904c60505c4': {
-            isManager: true,
-            isAuditor: false,
-            isDeveloper: true
-          }
-        },
-        organizations: {
-          '367a49c1-b5dc-44e6-a8cf-84b1f56426a7': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          },
-          'dccfedde-be2c-46a6-99cf-c1320ea8cb6d': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          },
-          '8a175cad-ff61-436b-8c6f-e5beb13edb5f': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          },
-          'd5246255-867b-4f62-9040-346f113f0b7d': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          }
-        }
+      pagination: {
+        ...initialState.pagination,
+        ...pagination
       },
-      READ_ONLY_USER: {
-        global: {
-          isAdmin: false,
-          isReadOnlyAdmin: false,
-          isGlobalAuditor: false,
-          canRead: true,
-          canWrite: false,
-          scopes: [
-            'openid',
-            'scim.read',
-            'cloud_controller.admin',
-            'uaa.user',
-            'routing.router_groups.read',
-            'cloud_controller.read',
-            'password.write',
-            'cloud_controller.write',
-            'doppler.firehose',
-            'scim.write'
-          ]
-        },
-        spaces: {
-          '56eb5ecc-7c96-4bb1-bdcc-0c6c3d444dc6': {
-            isManager: true,
-            isAuditor: false,
-            isDeveloper: true
-          },
-          'c6450a21-aa1a-4643-9437-035cc818ea72': {
-            isManager: true,
-            isAuditor: false,
-            isDeveloper: true
-          },
-          '86577124-4b64-4ca1-9a78-d904c60505c4': {
-            isManager: true,
-            isAuditor: false,
-            isDeveloper: true
-          }
-        },
-        organizations: {
-          '367a49c1-b5dc-44e6-a8cf-84b1f56426a7': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          },
-          'dccfedde-be2c-46a6-99cf-c1320ea8cb6d': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          },
-          '8a175cad-ff61-436b-8c6f-e5beb13edb5f': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          },
-          'd5246255-867b-4f62-9040-346f113f0b7d': {
-            isManager: true,
-            isAuditor: false,
-            isBillingManager: false,
-            isUser: true
-          }
-        }
-      }
-    }
+    };
   }
-};
-describe('CurrentUserPermissionsService', () => {
-  let service: CurrentUserPermissionsService;
+
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CurrentUserPermissionsService],
+      providers: [
+        CurrentUserPermissionsService,
+      ],
       imports: [
-        StoreModule.forRoot(
-          appReducers,
-          {
-            initialState
-          }
-        )
-      ]
+        AppStoreExtensionsModule,
+        {
+          ngModule: EntityCatalogueTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES, useValue: [
+                ...generateStratosEntities(),
+                generateCFEntities().find(a => a.type === ffSchema.entityType)
+              ]
+            }
+          ]
+        },
+        createBasicStoreModule(createStoreState()),
+      ],
+
     });
     service = TestBed.get(CurrentUserPermissionsService);
   });
@@ -856,6 +949,7 @@ describe('CurrentUserPermissionsService', () => {
       first()
     ).subscribe();
   });
+
   it('should allow create application for single endpoint with access', done => {
     service.can(CurrentUserPermissions.APPLICATION_CREATE, '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb').pipe(
       tap(can => {
@@ -865,6 +959,7 @@ describe('CurrentUserPermissionsService', () => {
       first()
     ).subscribe();
   });
+
   it('should allow create application for single endpoint with access and org/space', done => {
     service.can(
       CurrentUserPermissions.APPLICATION_CREATE,
@@ -881,25 +976,10 @@ describe('CurrentUserPermissionsService', () => {
 
   it('should allow if feature flag', done => {
     service.can(
-      [
-        new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)
-      ]
+      [new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)]
     ).pipe(
       tap(can => {
         expect(can).toBe(true);
-        done();
-      }),
-      first()
-    ).subscribe();
-  });
-
-  it('should not allow if no feature flag', done => {
-    service.can(
-      [new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.user_org_creation)],
-      'c80420ca-204b-4879-bf69-b6b7a202ad87'
-    ).pipe(
-      tap(can => {
-        expect(can).toBe(false);
         done();
       }),
       first()

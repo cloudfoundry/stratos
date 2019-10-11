@@ -1,5 +1,8 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
+
+import { HELM_ENDPOINT_TYPE } from './helm/helm-entity-factory';
+import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes/kubernetes-entity-factory';
 
 const kubernetes: Routes = [
   {
@@ -9,9 +12,9 @@ const kubernetes: Routes = [
       stratosNavigation: {
         text: 'Kubernetes',
         matIcon: 'kubernetes',
-        matIconFont: 'stratos-icons',
+        matIconFont: 'stratos-icons', // TODO: get these from entity config?
         position: 60,
-        requiresEndpointType: 'k8s'
+        requiresEndpointType: KUBERNETES_ENDPOINT_TYPE
       }
     }
   },
@@ -24,7 +27,7 @@ const kubernetes: Routes = [
         matIcon: 'helm',
         matIconFont: 'stratos-icons',
         position: 65,
-        requiresEndpointType: 'helm'
+        requiresEndpointType: HELM_ENDPOINT_TYPE
       }
     }
   }

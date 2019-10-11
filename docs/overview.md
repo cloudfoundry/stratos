@@ -45,7 +45,9 @@ In this case, Stratos is deployed in a manner optimized for the management of a 
 
 In this case, the front-end web application static resources are served by the API Server back-end rather than a separate web server.
 
-A non-persistent SQLite database is used - by automatically registering the cloud foundry endpoint and connecting to it on login, all data stored in the database can be treated as ephimeral, since it will be re-created next time a user logs in. Cloud Foundry Session Affinity is used to ensure that when scaling up the Console Application to multiple instances, the user is also directed to the instance which will know about them and their endpoints (since each Application instance will have its own local SQLite store).
+By defaut, a non-persistent SQLite database is used - by automatically registering the cloud foundry endpoint and connecting to it on login, all data stored in the database can be treated as ephimeral, since it will be re-created next time a user logs in. Cloud Foundry Session Affinity is used to ensure that when scaling up the Console Application to multiple instances, the user is also directed to the instance which will know about them and their endpoints (since each Application instance will have its own local SQLite store).
+
+Alternatively, Stratos can be configured [with a persistent Cloud Foundry database service](deploy/cloud-foundry/db-migration/README.md), which enables features requiring persistence such as user favorites.
 
 ### Deployed in Kubernetes
 

@@ -1,12 +1,11 @@
 import { AfterContentInit, Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
+import { AuthOnlyAppState } from '../../store/src/app-state';
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../store/src/app-state';
-import { Observable } from 'rxjs';
-
 
 @Component({
   selector: 'app-root',
@@ -21,7 +20,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   constructor(
     private loggedInService: LoggedInService,
-    store: Store<AppState>
+    store: Store<AuthOnlyAppState>
   ) {
     // We use the username to key the session storage. We could replace this with the users id?
     this.userId$ = store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);

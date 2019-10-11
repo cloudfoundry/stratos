@@ -3,7 +3,7 @@ import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Md5 } from 'ts-md5/dist/md5';
 
-import { GitBranch, GitCommit, GitRepo } from '../../../../../store/src/types/git.types';
+import { GitBranch, GitCommit, GitRepo } from '../../../../../cloud-foundry/src/store/types/git.types';
 import { GitSCM, SCMIcon } from './scm';
 import { GitSCMType } from './scm.service';
 
@@ -64,12 +64,16 @@ export class GitLabSCM implements GitSCM {
   }
 
   getCommit(projectName: string, commitSha: string): Observable<GitCommit> {
-    const prjNameEncoded = encodeURIComponent(projectName);
-    return this.httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits/${commitSha}`).pipe(
+    return this.httpClient.get(this.getCommitApiUrl(projectName, commitSha)).pipe(
       map(data => {
         return this.convertCommit(projectName, data);
       })
     );
+  }
+
+  getCommitApiUrl(projectName: string, commitSha: string, ): string {
+    const prjNameEncoded = encodeURIComponent(projectName);
+    return `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits/${commitSha}`;
   }
 
   getCommits(projectName: string, commitSha: string): Observable<GitCommit[]> {

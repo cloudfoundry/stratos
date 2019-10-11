@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AppLinkComponent } from './app-link.component';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
+import { AppLinkComponent } from './app-link.component';
 
 describe('AppLinkComponent', () => {
   let component: AppLinkComponent<any>;

@@ -1,6 +1,7 @@
 import { browser, promise } from 'protractor';
 
 import { CFPage } from '../../po/cf-page.po';
+import { ConfirmDialogComponent } from '../../po/confirm-dialog';
 
 
 export class CfSpaceLevelPage extends CFPage {
@@ -49,6 +50,11 @@ export class CfSpaceLevelPage extends CFPage {
 
   goToUsersTab() {
     return this.goToTab('Users', 'users');
+  }
+
+  deleteSpace(spaceName: string) {
+    this.subHeader.clickIconButton('delete');
+    ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Space', spaceName);
   }
 
   private goToTab(label: string, urlSuffix: string) {

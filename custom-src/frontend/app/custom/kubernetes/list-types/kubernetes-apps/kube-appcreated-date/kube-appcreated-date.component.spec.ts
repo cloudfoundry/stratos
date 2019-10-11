@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KubeAppcreatedDateComponent } from './kube-appcreated-date.component';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
+import { KubeAppcreatedDateComponent } from './kube-appcreated-date.component';
 
 describe('KubeAppcreatedDateComponent', () => {
   let component: KubeAppcreatedDateComponent;

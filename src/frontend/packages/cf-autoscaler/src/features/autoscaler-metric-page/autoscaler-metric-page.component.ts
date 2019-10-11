@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../core/src/features/applications/application.service';
+import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { ListConfig } from '../../../../core/src/shared/components/list/list.component.types';
 import {
   AppAutoscalerMetricChartListConfigService,

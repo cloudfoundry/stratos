@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KubernetesPodTagsComponent } from './kubernetes-pod-tags.component';
-import { KubernetesStatus } from '../../../store/kube.types';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
+import { KubernetesStatus } from '../../../store/kube.types';
+import { KubernetesPodTagsComponent } from './kubernetes-pod-tags.component';
 
 describe('KubernetesPodTagsComponent', () => {
   let component: KubernetesPodTagsComponent<any>;

@@ -4,19 +4,17 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, shareReplay } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
-import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { MetricQueryConfig, MetricsAction } from '../../../../../store/src/actions/metrics.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory, metricSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { getIdFromRoute } from '../../../core/utils.service';
+import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { MetricQueryType } from '../../../shared/services/metrics-range-selector.types';
 import { KubernetesNode, MetricStatistic } from '../store/kube.types';
 import { FetchKubernetesMetricsAction, GetKubernetesNode } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
-import { MetricQueryType } from '../../../shared/services/metrics-range-selector.types';
-import { kubernetesNodesSchemaKey } from '../store/kubernetes.entities';
 
 
 export enum KubeNodeMetric {
@@ -43,11 +41,8 @@ export class KubernetesNodeService {
     this.kubeGuid = kubeEndpointService.kubeGuid;
 
     const nodeEntityService = this.entityServiceFactory.create<KubernetesNode>(
-      kubernetesNodesSchemaKey,
-      entityFactory(kubernetesNodesSchemaKey),
       this.nodeName,
       new GetKubernetesNode(this.nodeName, this.kubeGuid),
-      false
     );
 
     this.node$ = nodeEntityService.entityObs$.pipe(
@@ -68,7 +63,7 @@ export class KubernetesNodeService {
     const query = `${metricStatistic}(${metricStatistic}_over_time(${metric}{kubernetes_io_hostname="${this.nodeName}"}[1h]))`;
     const metricsAction = new FetchKubernetesMetricsAction(this.nodeName, this.kubeGuid, query);
     const metricsId = MetricsAction.buildMetricKey(this.nodeName, new MetricQueryConfig(query), true, MetricQueryType.QUERY);
-    const metricsMonitor = this.entityMonitorFactory.create<any>(metricsId, metricSchemaKey, entityFactory(metricSchemaKey));
+    const metricsMonitor = this.entityMonitorFactory.create<any>(metricsId, metricsAction);
     this.store.dispatch(metricsAction);
     const pollSub = metricsMonitor.poll(30000, () => this.store.dispatch(metricsAction),
       request => ({ busy: request.fetching, error: request.error, message: request.message }))

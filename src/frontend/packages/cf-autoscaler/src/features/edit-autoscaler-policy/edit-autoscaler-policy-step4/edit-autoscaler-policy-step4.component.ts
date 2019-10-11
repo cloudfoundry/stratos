@@ -1,32 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment-timezone';
-import { Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
+import { of as observableOf } from 'rxjs';
+import { filter, first, map, pairwise } from 'rxjs/operators';
 
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { EntityService } from '../../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
   numberWithFractionOrExceedRange,
   specificDateRangeOverlapping,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
+import { UpdateAppAutoscalerPolicyAction, CreateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import {
-  AppAutoscalerPolicy,
+  AppAutoscalerInvalidPolicyError,
   AppAutoscalerPolicyLocal,
   AppSpecificDate,
-  AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
-import { appAutoscalerPolicySchemaKey } from '../../../store/autoscaler.store.module';
+} from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
+import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step4',
@@ -40,7 +40,6 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
 
   policyAlert = PolicyAlert;
   editSpecificDateForm: FormGroup;
-  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   private updateAppAutoscalerPolicyService: EntityService;
   public currentPolicy: AppAutoscalerPolicyLocal;
@@ -49,15 +48,17 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     limit: true,
     datetime: true
   };
+  private action: CreateAppAutoscalerPolicyAction | UpdateAppAutoscalerPolicyAction;
 
   constructor(
     public applicationService: ApplicationService,
     private store: Store<AppState>,
     private fb: FormBuilder,
     private entityServiceFactory: EntityServiceFactory,
-    service: EditAutoscalerPolicyService
+    service: EditAutoscalerPolicyService,
+    route: ActivatedRoute
   ) {
-    super(service);
+    super(service, route);
     this.editSpecificDateForm = this.fb.group({
       instance_min_count: [0],
       instance_max_count: [0],
@@ -69,12 +70,12 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
 
   ngOnInit() {
     super.ngOnInit();
+    this.action = this.isCreate ?
+      new CreateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy) :
+      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy);
     this.updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
-      appAutoscalerPolicySchemaKey,
-      entityFactory(appAutoscalerPolicySchemaKey),
       this.applicationService.appGuid,
-      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy),
-      false
+      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
     );
   }
 
@@ -85,49 +86,45 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
         message: `Could not update policy: ${PolicyAlert.alertInvalidPolicyTriggerScheduleEmpty}`,
       });
     }
-    this.store.dispatch(
-      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
+    this.action.policy = this.currentPolicy;
+    this.store.dispatch(this.action);
+    return this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
+      pairwise(),
+      filter(([oldV, newV]) => !!oldV && !!newV),
+      filter(([oldV, newV]) => this.getBusyState(oldV) && !this.getBusyState(newV)),
+      map(([, newV]) => this.getStateResult(newV)),
+      map(request => ({
+        success: !request.error,
+        redirect: !request.error,
+        message: request.error ? `Could not update policy${request.message ? `: ${request.message}` : ''}` : null
+      })),
+      first(),
     );
-    const waitForAppAutoscalerUpdateStatus$ = this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(request => {
-        if (request.message && request.message.indexOf('fetch policy') >= 0) {
-          request.message = '';
-          return false;
-        } else {
-          return !!request.error || !!request.response;
-        }
-      }),
-      map(request => {
-        const msg = request.message;
-        request.error = false;
-        request.response = null;
-        request.message = '';
-        return msg;
-      }),
-      distinctUntilChanged(),
-    ).pipe(map(
-      errorMessage => {
-        if (errorMessage) {
-          return {
-            success: false,
-            message: `Could not update policy: ${errorMessage}`,
-          };
-        } else {
-          return {
-            success: true,
-            redirect: true
-          };
-        }
-      }));
-    return waitForAppAutoscalerUpdateStatus$.pipe(take(1), map(res => {
+  }
+
+  private getStateResult(info: RequestInfoState): { error: boolean, message: string } {
+    if (this.isCreate) {
       return {
-        ...res,
+        error: info.error,
+        message: info.message
       };
-    }));
+    }
+    const updatingState = info.updating[UpdateAppAutoscalerPolicyAction.updateKey];
+    return {
+      error: updatingState.error,
+      message: updatingState.message
+    };
+  }
+
+  private getBusyState(info: RequestInfoState): boolean {
+    if (this.isCreate) {
+      return info.creating;
+    }
+    return info.updating[UpdateAppAutoscalerPolicyAction.updateKey] && info.updating[UpdateAppAutoscalerPolicyAction.updateKey].busy;
   }
 
   addSpecificDate = () => {
-    const {...newSchedule} = AutoscalerConstants.PolicyDefaultSpecificDate;
+    const { ...newSchedule } = AutoscalerConstants.PolicyDefaultSpecificDate;
     this.currentPolicy.schedules.specific_date.push(newSchedule);
     this.editSpecificDate(this.currentPolicy.schedules.specific_date.length - 1);
   }
