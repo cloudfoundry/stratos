@@ -1,28 +1,26 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseKubeGuid } from '../../../kubernetes-page.types';
-import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
-import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
-import { KubernetesNodeLinkComponent } from './kubernetes-node-link.component';
+import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
+import { KubernetesNodeLabelsComponent } from './kubernetes-node-labels.component';
 
-describe('KubernetesNodeLinkComponent', () => {
-  let component: KubernetesNodeLinkComponent;
-  let fixture: ComponentFixture<KubernetesNodeLinkComponent>;
+describe('KubernetesNodeLabelsComponent', () => {
+  let component: KubernetesNodeLabelsComponent;
+  let fixture: ComponentFixture<KubernetesNodeLabelsComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodeLinkComponent],
-      imports: KubernetesBaseTestModules,
-      providers: [KubernetesEndpointService, BaseKubeGuid]
+      declarations: [KubernetesNodeLabelsComponent],
+      imports: BaseTestModules
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(KubernetesNodeLinkComponent);
+    fixture = TestBed.createComponent(KubernetesNodeLabelsComponent);
     component = fixture.componentInstance;
     component.row = {
       metadata: {
+        labels: {},
         namespace: 'test',
         name: 'test',
         uid: 'test'

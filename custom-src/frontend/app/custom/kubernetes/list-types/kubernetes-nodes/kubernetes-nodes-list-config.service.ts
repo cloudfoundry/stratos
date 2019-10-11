@@ -7,12 +7,15 @@ import { DataFunction } from '../../../../shared/components/list/data-sources-co
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, IListFilter, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { ConditionType, KubernetesNode } from '../../store/kube.types';
+import { ConditionType, KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { getConditionSort } from '../kube-sort.helper';
-import { ConditionCellComponent, SubtleConditionCellComponent } from './condition-cell/condition-cell.component';
+import { ConditionCellComponent } from './condition-cell/condition-cell.component';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity/kubernetes-node-capacity.component';
+import { KubernetesNodeIpsComponent } from './kubernetes-node-ips/kubernetes-node-ips.component';
+import { KubernetesNodeLabelsComponent } from './kubernetes-node-labels/kubernetes-node-labels.component';
 import { KubernetesNodeLinkComponent } from './kubernetes-node-link/kubernetes-node-link.component';
+import { KubernetesNodePressureComponent } from './kubernetes-node-pressure/kubernetes-node-pressure.component';
 import { KubernetesNodesDataSource } from './kubernetes-nodes-data-source';
 import { NodePodCountComponent } from './node-pod-count/node-pod-count.component';
 
@@ -38,6 +41,16 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
       cellFlex: '5',
     },
     {
+      columnId: 'ips', headerCell: () => 'IPs',
+      cellComponent: KubernetesNodeIpsComponent,
+      cellFlex: '1',
+    },
+    {
+      columnId: 'labels', headerCell: () => 'Labels',
+      cellComponent: KubernetesNodeLabelsComponent,
+      cellFlex: '1',
+    },
+    {
       columnId: 'ready', headerCell: () => 'Ready',
       cellConfig: {
         conditionType: ConditionType.Ready
@@ -48,21 +61,8 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
       cellFlex: '2',
     },
     {
-      columnId: 'diskPressure', headerCell: () => 'Disk Pressure',
-      cellComponent: SubtleConditionCellComponent,
-      cellConfig: {
-        conditionType: ConditionType.DiskPressure
-      },
-      sort: getConditionSort(ConditionType.DiskPressure),
-      cellFlex: '2',
-    },
-    {
-      columnId: 'memPressure', headerCell: () => 'Memory Pressure',
-      cellComponent: SubtleConditionCellComponent,
-      cellConfig: {
-        conditionType: ConditionType.MemoryPressure
-      },
-      sort: getConditionSort(ConditionType.MemoryPressure),
+      columnId: 'condition', headerCell: () => 'Condition',
+      cellComponent: KubernetesNodePressureComponent,
       cellFlex: '2',
     },
     {
@@ -73,8 +73,14 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     {
       columnId: 'capacity', headerCell: () => 'Capacity',
       cellComponent: KubernetesNodeCapacityComponent,
-      cellFlex: '5',
+      cellFlex: '4',
     },
+    // Display labels as the usual chip list
+    // {
+    //   columnId: 'labels', headerCell: () => 'Labels',
+    //   cellComponent: KubernetesLabelsCellComponent,
+    //   cellFlex: '6',
+    // },
   ];
   filters: IListFilter[] = [
     {
@@ -118,11 +124,11 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
   ) {
     const transformEntities: DataFunction<KubernetesNode>[] = [
       (entities: KubernetesNode[], paginationState: PaginationEntityState) => {
-        const filterString = paginationState.clientPagination.filter.string;
-
-        if (!filterString) {
+        if (!paginationState.clientPagination.filter.string) {
           return entities;
         }
+
+        const filterString = paginationState.clientPagination.filter.string.toUpperCase();
 
         const filterKey = paginationState.clientPagination.filter.filterKey;
 
@@ -130,8 +136,8 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
           case KubernetesNodesListFilterKeys.IP_ADDRESS:
             return entities.filter(node => {
               const ipAddress =
-                node.status.addresses.find(address => address.type === 'InternalIP') ||
-                node.status.addresses.find(address => address.type === 'ExternalIP');
+                node.status.addresses.find(address => address.type === KubernetesAddressInternal) ||
+                node.status.addresses.find(address => address.type === KubernetesAddressExternal);
               return ipAddress ? ipAddress.address.toUpperCase().includes(filterString) : false;
             });
 
