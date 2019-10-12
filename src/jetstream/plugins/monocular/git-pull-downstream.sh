@@ -7,9 +7,10 @@ usage() {
 	echo    "  options:" >&1
 	printf  "    -f MONOCULAR_FORK         The upstream fork/repo to pull from\n" >&1
 	printf  "    ONE OF EITHER -m or -s must be set\n" >&1
-	echo    "    -m MONOCULAR_BRANCH       The upstream branch to pull from" >&1
-	echo    "    -s MONOCULAR_REF4t  The upsream ref to pull from (e.g. tag or SHA1)" >&1
+	echo    "    -b MONOCULAR_BRANCH       The upstream branch to pull from" >&1
+	echo    "    -r MONOCULAR_REF  The upsream ref to pull from (e.g. tag or SHA1)" >&1
 	echo    "    -h usage" >&1
+	exit 0
 }
 
 while getopts f:b:r:h arg 
@@ -26,13 +27,11 @@ done
 if [ -z "$MONOCULAR_FORK" ]; then
 	echo "Must specify a monocular fork to pull from" >&2
 	usage
-	exit 0
 fi
 
 if [ -n "$MONOCULAR_BRANCH" ] && [ -n "$MONOCULAR_REF" ] || [ -z "$MONOCULAR_BRANCH" ] && [ -z "$MONOCULAR_REF" ]; then
 	echo "Must specify either a monocular branch or ref to pull from" >&2
 	usage
-	exit 1
 fi
 
 echo "Monocular fork: $MONOCULAR_FORK" >&1
