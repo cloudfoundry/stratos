@@ -42,7 +42,7 @@ echo "Checking out monocular target branch: $MONOCULAR_BRANCH from $MONOCULAR_FO
 
 ##Checkout the monocular feature branch onto a temporary merge branch
 git fetch "$MONOCULAR_FORK"
-git checkout -b temp-merge-branch "$MONOCULAR_FORK"/"$MONOCULAR_BRANCH"
+git checkout -b temp-merge-branch "$MONOCULAR_FORK"/"$MONOCULAR_BRANCH" || exit
 
 echo "Merging Stratos branch $STRATOS_BRANCH at src/jetstream/plugins/monocular into temporary merge branch" >&1
 
