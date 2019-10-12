@@ -40,17 +40,18 @@ source ./git-merge-subpath.sh
 
 echo "Checking out monocular target branch: $MONOCULAR_BRANCH from $MONOCULAR_FORK into temporary merge branch: temp-merge-branch" >&1
 
+##Change to top level of repo
+#repo_root=$(git rev-parse --show-toplevel)
+#echo "Moving to repo top level: $repo_root" >&1
+#pushd "$repo_root" >&/dev/null || exit
+
 ##Checkout the monocular feature branch onto a temporary merge branch
 git fetch "$MONOCULAR_FORK"
 git checkout -b temp-merge-branch "$MONOCULAR_FORK"/"$MONOCULAR_BRANCH" || exit
 
-echo "Merging Stratos branch $STRATOS_BRANCH at src/jetstream/plugins/monocular into temporary merge branch" >&1
-
 ##Merge changes from our monocular subtree in Stratos v2-master to our temp-merge-branch
-##Change to top level of repo
-repo_root=$(git rev-parse --show-toplevel)
-echo "Moving to repo top level: $repo_root" >&1
-pushd "$repo_root" >&/dev/null || exit
+
+echo "Merging Stratos branch $STRATOS_BRANCH at src/jetstream/plugins/monocular into temporary merge branch" >&1
 
 git-merge-subpath --squash origin/"$STRATOS_BRANCH" src/jetstream/plugins/monocular cmd
 if [ $? -ne 0 ]; then
