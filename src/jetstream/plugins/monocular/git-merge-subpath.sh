@@ -21,7 +21,7 @@ git-merge-subpath() {
     local SOURCE_COMMIT="$1" SOURCE_PREFIX="${2%/}" DEST_PREFIX="${3%/}"
 
     local SOURCE_SHA1
-    SOURCE_SHA1=$(git rev-parse --verify "$SOURCE_COMMIT^{commit}") || return 1
+    SOURCE_SHA1=$(git rev-parse --verify "$SOURCE_COMMIT^{commit}")
 
     local OLD_SHA1
     local GIT_ROOT=$(git rev-parse --show-toplevel)
@@ -42,17 +42,20 @@ git-merge-subpath() {
     fi &&
 
     if [[ -z $SQUASH ]]; then
-        git merge -s ours --no-commit "$SOURCE_COMMIT"
+        git merge -s ours --no-commit "$SOURCE_COMMIT" || return 1
     fi &&
 
+    printf "Calculating diff of changes from source and applying to destination..."
     git diff --color=never "$OLD_TREEISH" "$SOURCE_COMMIT:$SOURCE_PREFIX" \
         | git apply -3 --directory="$DEST_PREFIX" || git mergetool
-
+    echo "done."
     if (( $? == 1 )); then
         echo "Uh-oh! Try cleaning up with |git reset --merge|."
+	echo "You may be able to finish the merge manually then run the following (do not modify the commit message):"
+        echo "git commit -em \"Merge $SOURCE_COMMIT:$SOURCE_PREFIX/ to $DEST_PREFIX/ ${FUNCNAME[0]}: $SOURCE_SHA1 $SOURCE_PREFIX $DEST_PREFIX\""
 	return 1
     else
-        git commit -em "Merge $SOURCE_COMMIT:$SOURCE_PREFIX/ to $DEST_PREFIX/
+        git commit -em "Merge $SOURCE_COMMIT:$SOURCE_PREFIX/ to $DEST_PREFIX/ 
 
 # Feel free to edit the title and body above, but make sure to keep the
 # ${FUNCNAME[0]}: line below intact, so ${FUNCNAME[0]} can find it
