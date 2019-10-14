@@ -9,11 +9,15 @@ The scripts do their best to fail gracefully. To avoid problems however, make su
 
 1. Ensure you have the monocular fork as a remote. e.g.
 
-`git remote add -f -t master stratos-monocular-fork git@github.com:cf-stratos/monocular.git`
+```
+git remote add -f -t master stratos-monocular-fork git@github.com:cf-stratos/monocular.git
+```
 
 2. With a second remote it's useful to store remote refs separately in case of branch/tag collisions:
 
-`git config --add remote.stratos-monocular-fork.fetch 'refs/tags/*:refs/rtags/stratos-monocular-fork/*'`
+```
+git config --add remote.stratos-monocular-fork.fetch 'refs/tags/*:refs/rtags/stratos-monocular-fork/*
+```
 
 ## Before running the PULL script
 Follow these carefully. 
@@ -30,30 +34,49 @@ Follow these carefully.
 
 ## Running the scripts..
 
-Both scripts, when run either without arguments or with the -h flag, will show usage instructions.
+Both scripts, when run either without arguments or with the `-h` flag, will show usage instructions.
 
-### pull script:
+### PULL script:
 
-echo "Pulls the subtree under cmd from monocular repo into the src/jetstream/plugins/monocular subtree in stratos" >&1
-usage() {
-        echo    "Usage: git-pull-downstream.sh -f <MONOCULAR_FORK> [ -b <MONOCULAR_BRANCH>  | -r <MONOCULAR_REF> ]" >&1
-        echo    "  options:" >&1
-        printf  "    -f MONOCULAR_FORK         The upstream fork/repo to pull from\n" >&1
-        printf  "    ONE OF EITHER -m or -s must be set\n" >&1
-        echo    "    -b MONOCULAR_BRANCH       The upstream branch to pull from" >&1
-        echo    "    -r MONOCULAR_REF  The upsream ref to pull from (e.g. tag or SHA1)" >&1
-        echo    "    -h usage" >&1
-        exit 0
+This pulls the subtree from monocular repo under `/cmd` into the stratos repo under `/src/jetstream/plugins/monocular`
+
+Usage:
+
+```
+git-pull-downstream.sh -f <MONOCULAR_FORK> [ -b <MONOCULAR_BRANCH>  | -r <MONOCULAR_REF> ]
+-f MONOCULAR_FORK         The upstream (monocular) repo"
+-b MONOCULAR_BRANCH       The upstream branch to pull from" >&1
+-r MONOCULAR_REF          The upsream ref to pull from (e.g. tag or SHA1)
+```
+
+e.g.
+
+```
+./git-pull-downstream.sh -f stratos-monocular-fork -b master
+```
 
 #### To pull a tag:
 The tag should be specufied as : `refs/rtags/stratos-monocular-fork/<tag>`
+
 e.g.
 
+```
+./git-pull-downstream.sh -f stratos-monocular-fork -r refs/rtags/stratos-monocular-fork/v1.4.0
+```
 
-### push script:
-        echo "Usage: git-push-upstream.sh -f <MONOCULAR_FORK> -t <MONOCULAR_BRANCH> -s <STRATOS_SOURCE_BRANCH> ]" >&1
-        echo "  options:" >&1
-        echo "    -f MONOCULAR_FORK         The upstream fork/repo to push to" >&1
-        echo "    -t MONOCULAR_BRANCH       The target upstream branch to push to" >&1
-        echo "    -s STRATOS_SOURCE_BRANCH  The Stratos branch containing the changes" >&1
-        echo "    -h usage"
+
+### PUSH script:
+Usage: 
+
+```
+git-push-upstream.sh -f <MONOCULAR_FORK> -t <MONOCULAR_BRANCH> -s <STRATOS_SOURCE_BRANCH> ]
+-f MONOCULAR_FORK         The upstream (monocular) repo to push to"
+-t MONOCULAR_BRANCH       The target (monocular) upstream branch to push to
+-s STRATOS_SOURCE_BRANCH  The source stratos branch containing the changes
+```
+
+e.g. 
+
+```
+./git-push-upstream.sh -f stratos-monocular-fork -t feature-branch -s dummy-master
+```
