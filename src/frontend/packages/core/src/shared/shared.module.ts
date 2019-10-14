@@ -112,6 +112,8 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { SimpleListComponent } from './components/list/simple-list/simple-list.component';
+import { ListHostDirective } from './components/list/simple-list/list-host.directive';
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
 
@@ -214,6 +216,8 @@ import { EndpointsListConfigService } from './components/list/list-types/endpoin
     SnackBarReturnComponent,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
+    SimpleListComponent,
+    ListHostDirective,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -301,7 +305,9 @@ import { EndpointsListConfigService } from './components/list/list-types/endpoin
     TileSelectorComponent,
     AppNameUniqueDirective,
     PollingIndicatorComponent,
-    UnlimitedInputComponent
+    UnlimitedInputComponent,
+    SimpleListComponent,
+    ListHostDirective
   ],
   entryComponents: [
     DialogConfirmComponent,

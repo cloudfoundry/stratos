@@ -27,7 +27,6 @@
     text: 'Please use the the Cloud Foundry, Organization or Space filters'
   }"></app-no-content-message>
 </ng-template>
-
 <app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
   [noEntriesMaxedResults]="noEntriesMaxedResults"
   *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">

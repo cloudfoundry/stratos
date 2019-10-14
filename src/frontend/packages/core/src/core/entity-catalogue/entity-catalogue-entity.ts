@@ -28,6 +28,7 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from './entity-catalogue.types';
+import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../../../store/src/entity-request-pipeline/pipeline.types';
 
 export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata,
@@ -139,6 +140,10 @@ export class StratosBaseCatalogueEntity<
     return this.builders.entityBuilder.getGuid(metadata);
   }
 
+  public getEndpointGuidFromEntity(entity: Y & EntityPipelineEntity) {
+    return entity[stratosEndpointGuidKey];
+  }
+
   public getEntityMonitor<Q extends AppState, B = any>(
     store: Store<Q>,
     entityId: string,
@@ -248,10 +253,10 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
     }),
     getLink: () => null,
     getGuid: metadata => metadata.guid,
-    getLines: metadata => [
-      ['Address', metadata.address],
-      ['User', metadata.user],
-      ['Admin', metadata.admin]
+    getLines: () => [
+      ['Address', (metadata) => metadata.address],
+      ['User', (metadata) => metadata.user],
+      ['Admin', (metadata) => metadata.admin]
     ]
   } as IStratosEntityBuilder<IEndpointFavMetadata, EndpointModel>;
   // This is needed here for typing
