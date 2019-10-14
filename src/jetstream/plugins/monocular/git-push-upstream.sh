@@ -7,7 +7,7 @@ usage() {
 	echo "  options:" >&1
 	echo "    -f MONOCULAR_FORK         The upstream fork/repo to push to" >&1
 	echo "    -t MONOCULAR_BRANCH       The target upstream branch to push to" >&1
-	echo "    -s STRATOS_SOURCE_BRANCH  The Stratos branch containing the changes" >&1
+	echo "    -s STRATOS_SOURCE_BRANCH  The Stratos source branch containing the changes" >&1
 	echo "    -h usage"
 }
 
