@@ -89,8 +89,9 @@ export class FavoritesConfigMapper {
           menuItems: null
         };
       }
+      const linesBuilders = catalogueEntity.builders.entityBuilder.getLines ? catalogueEntity.builders.entityBuilder.getLines() : [];
       return {
-        lines: catalogueEntity.builders.entityBuilder.getLines ? catalogueEntity.builders.entityBuilder.getLines(entity) : null,
+        lines: linesBuilders.map(builder => ([builder[0], builder[1](entity)])) as [string, string | Observable<string>][],
         type: catalogueEntity.definition.type,
         routerLink: catalogueEntity.builders.entityBuilder.getLink(entity),
         name: entity.name,
