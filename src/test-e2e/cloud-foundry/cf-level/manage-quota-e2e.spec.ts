@@ -4,9 +4,9 @@ import { e2e } from '../../e2e';
 import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../../helpers/extend-test-helpers';
+import { TableComponent } from '../../po/table.po';
 import { CfTopLevelPage } from './cf-top-level-page.po';
 import { QuotaFormPage } from './quota-form-page.po';
-import { TableComponent } from '../../po/table.po';
 
 describe('Manage Quota', () => {
   let e2eSetup;
