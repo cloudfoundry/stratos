@@ -105,7 +105,6 @@ export interface IListDataSourceConfig<A, T> {
 
   /**
    * A function which fetches an observable containing a specific row's state
-   *
    */
   getRowState?(row: T): Observable<RowState>;
 }

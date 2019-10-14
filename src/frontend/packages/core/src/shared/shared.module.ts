@@ -45,6 +45,7 @@ import { FileInputComponent } from './components/file-input/file-input.component
 import { FocusDirective } from './components/focus.directive';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
+import { DefaultsListComponent } from './components/list/defaults-list/defaults-list.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
@@ -58,8 +59,12 @@ import { TableCellStatusDirective } from './components/list/list-table/table-cel
 import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
+import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
+import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
+import { ListHostDirective } from './components/list/simple-list/list-host.directive';
+import { SimpleListComponent } from './components/list/simple-list/simple-list.component';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
@@ -112,10 +117,6 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { SimpleListComponent } from './components/list/simple-list/simple-list.component';
-import { ListHostDirective } from './components/list/simple-list/list-host.directive';
-import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
-import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
 
 /* tslint:disable:max-line-length */
 
@@ -217,6 +218,7 @@ import { EndpointsListConfigService } from './components/list/list-types/endpoin
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     SimpleListComponent,
+    DefaultsListComponent,
     ListHostDirective,
   ],
   exports: [
@@ -307,7 +309,8 @@ import { EndpointsListConfigService } from './components/list/list-types/endpoin
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     SimpleListComponent,
-    ListHostDirective
+    DefaultsListComponent,
+    ListHostDirective,
   ],
   entryComponents: [
     DialogConfirmComponent,

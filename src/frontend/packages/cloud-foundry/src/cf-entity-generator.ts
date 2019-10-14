@@ -1,4 +1,5 @@
 import * as moment from 'moment';
+
 import {
   IService,
   IServiceBinding,
@@ -886,9 +887,6 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         }),
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
-        getLines: () => ([
-          ['Creation  Date', (meta) => meta.createdAt]
-        ])
       },
       actionBuilders: applicationActionBuilder
     },
@@ -921,9 +919,10 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
           name: space.entity.name,
           cfGuid: space.entity.cfGuid,
+          createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
-        getGuid: metadata => metadata.guid
+        getGuid: metadata => metadata.guid,
       }
     }
   );
@@ -953,9 +952,14 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
           status: getOrgStatus(org),
           name: org.entity.name,
           cfGuid: org.entity.cfGuid,
+          createdAt: moment(org.metadata.created_at).format('LLL'),
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
-        getGuid: metadata => metadata.guid
+        getGuid: metadata => metadata.guid,
+        getLines: () => ([
+          ['Name', (meta) => meta.name], // TODO: RC Nuke
+          ['Creation  Date', (meta) => meta.createdAt] // TODO: RC Nuke
+        ])
       }
     }
   );
@@ -985,3 +989,4 @@ function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinitio
     }
   );
 }
+

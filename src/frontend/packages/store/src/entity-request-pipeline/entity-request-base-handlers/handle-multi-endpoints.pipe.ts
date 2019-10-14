@@ -1,8 +1,8 @@
+import { NonJetstreamRequestHandler } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { hasJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
 import { PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PaginationPageIteratorConfig } from '../pagination-request-base-handlers/pagination-iterator.pipe';
 import { stratosEndpointGuidKey } from '../pipeline.types';
-import { NonJetstreamRequestHandler } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 
 /**
  * Generic container for information about an errored request to a specific endpoint

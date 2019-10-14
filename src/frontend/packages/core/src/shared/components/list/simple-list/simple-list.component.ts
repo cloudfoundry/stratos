@@ -1,10 +1,12 @@
-import { Component, OnInit, Input, ChangeDetectorRef, NgZone, ComponentFactoryResolver, ViewChild, Injector } from '@angular/core';
+import { Component, ComponentFactoryResolver, Injector, Input, OnInit, ViewChild } from '@angular/core';
+import { Store } from '@ngrx/store';
+
 import { StratosCatalogueEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
 import { ListComponent } from '../list.component';
-import { ListConfig, ListViewTypes } from '../list.component.types';
-import { ListHostDirective } from './list-host.directive';
+import { ListConfig } from '../list.component.types';
 import { CatalogueEntityDrivenListDataSource } from './entity-catalogue-datasource';
-import { Store } from '@ngrx/store';
+import { CatalogueEntityDrivenListConfig } from './entity-catalogue-list-config';
+import { ListHostDirective } from './list-host.directive';
 
 @Component({
   selector: 'app-simple-list',
@@ -24,7 +26,7 @@ export class SimpleListComponent implements OnInit {
 
   private listConfig: ListConfig<any>;
 
-  public litsComponent: ListComponent<any>;
+  // public litsComponent: ListComponent<any>;
 
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
@@ -37,15 +39,24 @@ export class SimpleListComponent implements OnInit {
 
     const viewContainerRef = this.listHost.viewContainerRef;
     viewContainerRef.clear();
+
+    const listConfig = new CatalogueEntityDrivenListConfig<any>(
+      this.catalogueEntity
+    );
+
     const dataSource = new CatalogueEntityDrivenListDataSource<any>(
       this.catalogueEntity,
       {},
       this.store,
+      listConfig
     );
+
+    listConfig.getDataSource = () => dataSource;
+
     const componentRef = viewContainerRef.createComponent(
       componentFactory,
       null,
-      this.makeCustomConfigInjector(dataSource.listConfig)
+      this.makeCustomConfigInjector(listConfig)
     );
     const instance = componentRef.instance as ListComponent<any>;
   }

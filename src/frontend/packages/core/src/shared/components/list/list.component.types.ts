@@ -142,7 +142,7 @@ export interface IListMultiFilterConfigItem {
 export const defaultPaginationPageSizeOptionsCards = [defaultClientPaginationPageSize, 30, 80];
 export const defaultPaginationPageSizeOptionsTable = [defaultClientPaginationPageSize, 20, 80];
 
-export class ListConfig<T> implements IListConfig<T> {
+export class ListConfig<T, A = T> implements IListConfig<T> {
   isLocal = false;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
@@ -155,7 +155,7 @@ export class ListConfig<T> implements IListConfig<T> {
   getMultiActions = (): IMultiListAction<T>[] => null;
   getSingleActions = (): IListAction<T>[] => null;
   getColumns = (): ITableColumn<T>[] => null;
-  getDataSource = (): ListDataSource<T> => null;
+  getDataSource = (): ListDataSource<T, A> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
   getFilters = (): IListFilter[] => [];
   getInitialised = () => observableOf(true);
