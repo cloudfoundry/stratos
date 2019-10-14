@@ -109,6 +109,8 @@ $bottom-index: $top-index - 1;
   &__menu-button {
     display: flex;
     justify-content: center;
+  }
+  &__usermenu {
     padding: 5px 0;
   }
   &__username {
