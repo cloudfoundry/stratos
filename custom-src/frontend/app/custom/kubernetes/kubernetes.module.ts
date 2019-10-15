@@ -40,23 +40,27 @@ import { AppLinkComponent } from './list-types/kubernetes-apps/app-link/app-link
 import {
   KubeAppcreatedDateComponent,
 } from './list-types/kubernetes-apps/kube-appcreated-date/kube-appcreated-date.component';
+import { KubernetesLabelsCellComponent } from './list-types/kubernetes-labels-cell/kubernetes-labels-cell.component';
 import {
   KubeNamespacePodCountComponent,
 } from './list-types/kubernetes-namespaces/kube-namespace-pod-count/kube-namespace-pod-count.component';
 import {
   KubernetesNamespaceLinkComponent,
 } from './list-types/kubernetes-namespaces/kubernetes-namespace-link/kubernetes-namespace-link.component';
-import {
-  ConditionCellComponent,
-  InverseConditionCellComponent,
-  SubtleConditionCellComponent,
-} from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
+import { ConditionCellComponent } from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
 import {
   KubernetesNodeCapacityComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-capacity/kubernetes-node-capacity.component';
+import { KubernetesNodeIpsComponent } from './list-types/kubernetes-nodes/kubernetes-node-ips/kubernetes-node-ips.component';
+import {
+  KubernetesNodeLabelsComponent,
+} from './list-types/kubernetes-nodes/kubernetes-node-labels/kubernetes-node-labels.component';
 import {
   KubernetesNodeLinkComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-link/kubernetes-node-link.component';
+import {
+  KubernetesNodePressureComponent,
+} from './list-types/kubernetes-nodes/kubernetes-node-pressure/kubernetes-node-pressure.component';
 import {
   KubernetesNodeConditionCardComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-condition-card/kubernetes-node-condition-card.component';
@@ -91,6 +95,7 @@ import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernete
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 
 
+
 /* tslint:enable */
 
 @NgModule({
@@ -120,6 +125,10 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     HelmReleaseSummaryCardComponent,
     PodMetricsComponent,
     KubernetesNodeLinkComponent,
+    KubernetesNodeIpsComponent,
+    KubernetesNodeLabelsComponent,
+    KubernetesNodePressureComponent,
+    KubernetesLabelsCellComponent,
     KubernetesNodeComponent,
     KubernetesNodeSummaryComponent,
     KubernetesNodePodsComponent,
@@ -134,8 +143,6 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesNodeMetricStatsCardComponent,
     KubernetesNodeSimpleMetricComponent,
     ConditionCellComponent,
-    InverseConditionCellComponent,
-    SubtleConditionCellComponent,
     KubernetesNamespaceLinkComponent,
     KubernetesNamespaceComponent,
     KubernetesNamespacePodsComponent,
@@ -161,9 +168,11 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesPodTagsComponent,
     AppLinkComponent,
     KubernetesNodeLinkComponent,
+    KubernetesNodeIpsComponent,
+    KubernetesNodeLabelsComponent,
+    KubernetesNodePressureComponent,
+    KubernetesLabelsCellComponent,
     ConditionCellComponent,
-    InverseConditionCellComponent,
-    SubtleConditionCellComponent,
     KubernetesNamespaceLinkComponent,
     KubeAppcreatedDateComponent,
     KubeNamespacePodCountComponent,

@@ -71,12 +71,26 @@
             </mat-form-field>
           </div>
           <!-- Filter by text input -->
+          <div class="filter" id="listFilterSelect"
+            [hidden]="filterColumns.length < 1 || !config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
+            <mat-form-field>
+              <mat-label>Filter Selection</mat-label>
+              <mat-select
+                [(value)]="filterSelected"
+                (selectionChange)="updateListFilter($event.value)"
+              >
+                <mat-option *ngFor="let filter of filterColumns" [value]="filter">
+                  {{ filter.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
           <div class="filter" id="listSearchFilter"
             [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <mat-form-field floatLabel="never" class="list-component__header__right-filter">
               <input matInput [ngModel]="filterString" #filter="ngModel"
-                [disabled]="(dataSource.isLoadingPage$ | async)" name="filter"
-                placeholder="{{config.text?.filter || 'Filter'}}">
+                [disabled]="(filterColumns.length > 1 && filterSelected === undefined) || (dataSource.isLoadingPage$ | async)" name="filter"
+                placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter'}}">
             </mat-form-field>
           </div>
           <!-- Sort Button & Drop down -->

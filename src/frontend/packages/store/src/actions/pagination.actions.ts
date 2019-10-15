@@ -16,6 +16,7 @@ export const SET_RESULT_COUNT = '[Pagination] Set result count';
 export const SET_CLIENT_PAGE_SIZE = '[Pagination] Set client page size';
 export const SET_CLIENT_PAGE = '[Pagination] Set client page';
 export const SET_CLIENT_FILTER = '[Pagination] Set client filter';
+export const SET_CLIENT_FILTER_KEY = '[Pagination] Set client filter key';
 export const SET_PARAMS = '[Pagination] Set Params';
 export const SET_INITIAL_PARAMS = '[Pagination] Set initial params';
 export const ADD_PARAMS = '[Pagination] Add Params';
@@ -134,6 +135,17 @@ export class SetClientFilter extends BasePaginationAction implements Action {
     super(pEntityConfig);
   }
   type = SET_CLIENT_FILTER;
+}
+
+export class SetClientFilterKey extends BasePaginationAction implements Action {
+  constructor(
+    pEntityConfig: Partial<EntityCatalogueEntityConfig>,
+    public paginationKey: string,
+    public filterKey: string,
+  ) {
+    super(pEntityConfig);
+  }
+  type = SET_CLIENT_FILTER_KEY;
 }
 
 export class SetParams extends BasePaginationAction implements Action {
