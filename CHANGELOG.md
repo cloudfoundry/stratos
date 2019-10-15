@@ -1,5 +1,30 @@
 # Change Log
 
+## 2.6.0
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.0...2.6.0)
+
+This release contains a number of fixes and improvements:
+
+**Fixes:**
+
+- Ensure we remove X-Forward-* HTTP headers that can cause problems proxying API requests [\#3934](https://github.com/cloudfoundry-incubator/stratos/pull/3934)
+- Ensure MB is only shown for memory based quota values in edit quota forms [\#3892](https://github.com/cloudfoundry-incubator/stratos/pull/3892)
+- Ensure stepper buttons are always visible and content scrolls [\#3890](https://github.com/cloudfoundry-incubator/stratos/pull/3890)
+- Fix autoscaler issue related to editing a newly created policy[\#3886](https://github.com/cloudfoundry-incubator/stratos/pull/3886)
+- Fix alignment of user button on newer Firefox [\#3983](https://github.com/cloudfoundry-incubator/stratos/pull/3983)
+- Fix self-signed certificate to support Mac OSX 10.15 [\#3982](https://github.com/cloudfoundry-incubator/stratos/pull/3982)
+
+**Improvements:**
+
+- Add ingress support to Helm Chart [\#3935](https://github.com/cloudfoundry-incubator/stratos/pull/3935)
+- Gate SSO redirect on optional state whitelist [\#3933](https://github.com/cloudfoundry-incubator/stratos/pull/3933)
+- Backend update for cacheing compatibility for HTTP 1.0 clients [\#3931](https://github.com/cloudfoundry-incubator/stratos/pull/3931)
+- Add support for local user account [\#3632](https://github.com/cloudfoundry-incubator/stratos/pull/3632)
+- Add support for viewing and editing profile for local user account [\#3883](https://github.com/cloudfoundry-incubator/stratos/pull/3883)
+- Better metrics endpoint comparison [\#3862](https://github.com/cloudfoundry/stratos/pull/3862)
+- Refinements to the Autoscaler UI [\#3817](https://github.com/cloudfoundry/stratos/pull/3817)
+
 ## 2.5.0
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.4.0...2.5.0)
