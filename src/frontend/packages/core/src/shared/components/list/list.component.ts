@@ -16,7 +16,6 @@ import {
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { schema as normalizrSchema } from 'normalizr';
 import {
   asapScheduler,
   BehaviorSubject,
@@ -42,6 +41,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   ListFilter,
   ListPagination,
@@ -50,12 +50,11 @@ import {
   SetListViewAction,
 } from '../../../../../store/src/actions/list.actions';
 import { SetPage } from '../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../../core/entity-catalogue/entity-catalogue.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
-import { EntityMonitor } from '../../monitors/entity-monitor';
 import {
   EntitySelectConfig,
   getDefaultRowState,
@@ -75,7 +74,7 @@ import {
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
-
+import { GeneralAppState } from '../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-list',
@@ -114,6 +113,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   @Input() listConfig: ListConfig<T>;
   initialEntitySelection$: Observable<number>;
   pPaginator: MatPaginator;
+  private filterString: string;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator || this.paginationWidgetToStore) {
@@ -174,7 +174,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       direction: null,
       value: null
     };
-  private filterString = '';
   private sortColumns: ITableColumn<T>[];
 
   private paginationWidgetToStore: Subscription;
@@ -225,7 +224,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<GeneralAppState>,
     private cd: ChangeDetectorRef,
     @Optional() public config: ListConfig<T>,
     private ngZone: NgZone
@@ -294,8 +293,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (this.dataSource.rowsState) {
       this.dataSource.getRowState = this.getRowStateFromRowsState;
     } else if (!this.dataSource.getRowState) {
-      const schema = entityFactory(this.dataSource.entityKey);
-      this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(schema, this.dataSource);
+      this.dataSource.getRowState = this.getRowStateGeneratorFromEntityMonitor(this.dataSource.sourceScheme, this.dataSource);
     }
     this.multiFilterManagers = this.getMultiFilterManagers();
 
@@ -637,7 +635,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   public setEntityPage(page: number) {
     this.pPaginator.firstPage();
     this.store.dispatch(new SetPage(
-      this.dataSource.entityKey,
+      this.dataSource,
       this.dataSource.paginationKey,
       page,
       true,
@@ -660,12 +658,19 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     return actions;
   }
 
-  private getRowStateGeneratorFromEntityMonitor(entitySchema: normalizrSchema.Entity, dataSource: IListDataSource<T>) {
+  private getRowStateGeneratorFromEntityMonitor(entityConfig: EntityCatalogueEntityConfig, dataSource: IListDataSource<T>) {
     return (row) => {
-      if (!entitySchema || !row) {
+      if (!entityConfig || !row) {
         return observableOf(getDefaultRowState());
       }
-      const entityMonitor = new EntityMonitor(this.store, dataSource.getRowUniqueId(row), dataSource.entityKey, entitySchema);
+      const catalogueEntity = entityCatalogue.getEntity(entityConfig);
+      const entityMonitor = catalogueEntity.getEntityMonitor(
+        this.store,
+        dataSource.getRowUniqueId(row),
+        {
+          schemaKey: entityConfig.schemaKey
+        }
+      );
       return entityMonitor.entityRequest$.pipe(
         distinctUntilChanged(),
         map(requestInfo => ({

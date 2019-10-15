@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, URLSearchParams } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
-import { AppState } from '../app-state';
 import {
   SETUP_UAA,
   SetupUAA,
@@ -20,8 +18,7 @@ export class UAASetupEffect {
 
   constructor(
     private http: Http,
-    private actions$: Actions,
-    private store: Store<AppState>
+    private actions$: Actions
   ) { }
 
   baseUrl = '/pp/v1/setup';

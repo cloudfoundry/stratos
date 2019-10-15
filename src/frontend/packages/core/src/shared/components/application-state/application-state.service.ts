@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 
+import { AppStat } from '../../../../../cloud-foundry/src/store/types/app-metadata.types';
 import { StratosStatus } from '../../shared.types';
-
-
 
 export interface ApplicationStateData {
   label: string;
@@ -12,7 +11,6 @@ export interface ApplicationStateData {
     [key: string]: boolean
   };
 }
-
 @Injectable()
 export class ApplicationStateService {
 
@@ -192,7 +190,7 @@ export class ApplicationStateService {
    * @param summary - the application summary metadata (either from summary or entity)
    * @param appInstances - the application instances metadata (from the app stats API call)
    */
-  get(summary: any, appInstances: any): ApplicationStateData {
+  get(summary: any, appInstances: AppStat[]): ApplicationStateData {
     const appState: string = summary ? summary.state : 'UNKNOWN';
     const pkgState = this.getPackageState(appState, summary);
     const wildcard = this.stateMetadata['?'];
@@ -280,7 +278,7 @@ export class ApplicationStateService {
    * @param appInstances - the application instances metadata (from the app stats API call)
    * @returns Object with instance count metadata
    */
-  private getCounts(summary, appInstances) {
+  private getCounts(summary, appInstances: AppStat[]) {
     const counts: any = {};
     // Need to check based on additional state
     // Note that the app summary returned when we are getting all apps does not report running_instances
@@ -315,7 +313,7 @@ export class ApplicationStateService {
    * @param appInstances - the application instances metadata (from the app stats API call)
    * @param instanceState - the instance state to use when filtering the app instance metadata
    */
-  private getCount(value: number, appInstances: any, instanceState: string): number {
+  private getCount(value: number, appInstances: AppStat[], instanceState: string): number {
     // Use a value if one available
     if (value) {
       return value;
@@ -347,7 +345,7 @@ export class ApplicationStateService {
    * @param summary - the application summary metadata (either from summary or entity)
    * @param appInstances - the application instances metadata (from the app stats API call)
    */
-  getInstanceState(summary: any, appInstances: any): ApplicationStateData {
+  getInstanceState(summary: any, appInstances: AppStat[]): ApplicationStateData {
     const appState: string = summary ? summary.state : 'UNKNOWN';
     if (appState !== 'STARTED') {
       return this.getStateForIndicator(StratosStatus.TENTATIVE);

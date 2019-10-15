@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CustomizationService } from '../../../core/customizations.types';
 import { MDAppModule } from '../../../core/md.module';
@@ -17,6 +18,7 @@ describe('SideNavComponent', () => {
       imports: [
         RouterTestingModule,
         MDAppModule,
+        CoreTestingModule,
         createBasicStoreModule()
       ],
       providers: [

@@ -6,6 +6,8 @@
   "exclude": [
     "./src/test.ts",
     "**/*.spec.ts",
-    "**/node_modules/**"
+    "**/*.spec.helpers.ts",
+    "**/node_modules/**",
+    "./test-framework/**"
   ]
 }

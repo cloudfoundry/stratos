@@ -1,17 +1,8 @@
-import { getEndpointSchemeKeys } from '../../../../core/src/core/extension/extension-service';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EndpointAction } from '../../actions/endpoint.actions';
-import {
-  applicationSchemaKey,
-  cfUserSchemaKey,
-  organizationSchemaKey,
-  serviceInstancesSchemaKey,
-  serviceSchemaKey,
-  spaceSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../helpers/entity-factory';
-import { PaginationState } from '../../types/pagination.types';
+import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 
-export function paginationClearAllTypes(state: PaginationState, entityKeys: string[], defaultPaginationEntityState) {
+export function paginationClearAllTypes(state: PaginationState, entityKeys: string[], defaultPaginationEntityState: PaginationEntityState) {
   return entityKeys.reduce((prevState, entityKey) => {
     if (prevState[entityKey]) {
       const entityState = state[entityKey];
@@ -30,25 +21,8 @@ export function paginationClearAllTypes(state: PaginationState, entityKeys: stri
   }, state);
 }
 
-export function clearEndpointEntities(state: PaginationState, action: EndpointAction, defaultPaginationEntityState) {
-  if (action.endpointType === 'cf') {
-    return paginationClearAllTypes(
-      state,
-      [
-        applicationSchemaKey,
-        spaceSchemaKey,
-        organizationSchemaKey,
-        serviceSchemaKey,
-        cfUserSchemaKey,
-        serviceInstancesSchemaKey,
-        userProvidedServiceInstanceSchemaKey
-      ],
-      defaultPaginationEntityState
-    );
-  }
-
-  // Check extensions
-  const entityKeys = getEndpointSchemeKeys(action.endpointType);
+export function clearEndpointEntities(state: PaginationState, action: EndpointAction, defaultPaginationEntityState: PaginationEntityState) {
+  const entityKeys = entityCatalogue.getAllEntitiesForEndpointType(action.endpointType).map(entity => entity.entityKey);
   if (entityKeys.length > 0) {
     return paginationClearAllTypes(
       state,

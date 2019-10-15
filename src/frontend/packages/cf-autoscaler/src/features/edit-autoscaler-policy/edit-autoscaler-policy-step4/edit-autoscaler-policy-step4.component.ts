@@ -4,32 +4,29 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment-timezone';
-import { Observable, of as observableOf } from 'rxjs';
+import { of as observableOf } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { EntityService } from '../../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
   numberWithFractionOrExceedRange,
   specificDateRangeOverlapping,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { CreateAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
+import { UpdateAppAutoscalerPolicyAction, CreateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import {
   AppAutoscalerInvalidPolicyError,
-  AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppSpecificDate,
 } from '../../../store/app-autoscaler.types';
-import { appAutoscalerPolicySchemaKey } from '../../../store/autoscaler.store.module';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
+import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step4',
@@ -43,7 +40,6 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
 
   policyAlert = PolicyAlert;
   editSpecificDateForm: FormGroup;
-  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   private updateAppAutoscalerPolicyService: EntityService;
   public currentPolicy: AppAutoscalerPolicyLocal;
@@ -78,11 +74,8 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
       new CreateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy) :
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy);
     this.updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
-      appAutoscalerPolicySchemaKey,
-      entityFactory(appAutoscalerPolicySchemaKey),
       this.applicationService.appGuid,
-      this.action,
-      false
+      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
     );
   }
 
