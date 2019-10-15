@@ -48,7 +48,7 @@
                 notifications
               </mat-icon>
             </button>
-            <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button
+            <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button page-header__usermenu" mat-icon-button
               [matMenuTriggerFor]="menu">
               <div class="page-header__menu-button-icon"> {{ userNameFirstLetter$ | async }} </div>
             </button>
