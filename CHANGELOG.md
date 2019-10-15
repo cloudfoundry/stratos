@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.6.0
+
+[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.3...2.6.0)
+
+This release contains two fixes listed below.
+
+> Note: The version number has been bumped to 2.6.0 to align with the upstream Stratos project.
+
+**Fixes:**
+
+- Fix alignment of user button on newer Firefox [\#3983](https://github.com/cloudfoundry-incubator/stratos/pull/3983)
+- Fix self-signed certificate to support Mac OSX 10.15 [\#3982](https://github.com/cloudfoundry-incubator/stratos/pull/3982)
+
 ## 2.5.3
 
 [Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.2...2.5.3)
