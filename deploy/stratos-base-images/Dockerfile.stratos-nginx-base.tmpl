@@ -5,8 +5,10 @@ RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SERVER}}' smt_internal_server
 {{/IS_SLE}}
 RUN zypper -n ref && \
     zypper -n up && \
-    zypper in -y nginx apache2-utils
+    zypper in -y nginx apache2-utils && \
+    zypper clean -a && \
+    rm -f /var/log/zypper.log /var/log/zypp/history
 
 {{#IS_SLE}}
 RUN zypper rr smt_internal_server
-{{/IS_SLE}}    
+{{/IS_SLE}}

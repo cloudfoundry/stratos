@@ -1,5 +1,10 @@
 FROM splatform/stratos-db-base:opensuse
 
+RUN \
+	find /etc/ -name 'my*.cnf' -print0 \
+		| xargs -0 grep -lZE '^(bind-address|log)' \
+		| xargs -rt -0 sed -Ei 's/^(bind-address|log)/#&/'; 
+
 COPY mariadb-entrypoint.sh /docker-entrypoint.sh
 
 # ENTRYPOINT

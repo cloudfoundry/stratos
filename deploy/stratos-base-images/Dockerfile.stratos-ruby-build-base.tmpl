@@ -9,8 +9,10 @@ RUN zypper ref
 {{/IS_SLE}}
 
 RUN zypper -n ref && \
-zypper -n up && \
-zypper in -y which tar curl wget
+    zypper -n up && \
+    zypper in -y which tar curl wget gzip && \
+    zypper clean -a && \
+    rm -f /var/log/zypper.log /var/log/zypp/history
 
 {{#IS_SLE}}
 RUN zypper rr  smt_internal

@@ -43,7 +43,7 @@ function buildAndPublishImage {
 
 # Proxy support
 # Remove intermediate containers after a successful build
-BUILD_ARGS="--rm=true"
+BUILD_ARGS="--rm=true --squash"
 RUN_ARGS=""
 if [ -n "${http_proxy:-}" -o -n "${HTTP_PROXY:-}" ]; then
   BUILD_ARGS="${BUILD_ARGS} --build-arg http_proxy=${http_proxy:-${HTTP_PROXY}}"
