@@ -10,9 +10,21 @@
     </div>
   </app-page-header>
   <div class="error-page">
-    <div class="error-page__endpoint-name-subtitle">Endpoint name</div>
-    <h2>{{errorDetails.endpoint.name}}</h2>
+    <div class="error-page__header">
+      <div class="error-page__header-left">
+        <div class="error-page__endpoint-name-subtitle">Endpoint name</div>
+        <h2>{{errorDetails.endpoint.name}}</h2>
+      </div>
+      <div class="error-page__header-right">
+        <a class="error-page__download" *ngIf="errorDetails.errors && errorDetails.errors.length" mat-icon-button
+          [href]="jsonDownloadHref$ | async" title="Download endpoint error information" download="endpoint-errors.json"
+          matTooltip="Download endpoint error information" aria-label="Download endpoint error information">
+          <mat-icon>cloud_download</mat-icon>
+        </a>
+      </div>
+    </div>
     <div *ngIf="errorDetails.errors && errorDetails.errors.length ; else noEvents">
+
       <mat-list>
         <mat-card class="error-page__event-row-card" *ngFor="let error of errorDetails.errors">
           <mat-card-header>
@@ -27,13 +39,13 @@
             <div class="error-page__event-row">
               <div matLine class="error-page__event-key">Endpoint Response</div>
               <div matLine class="error-page__event-value error-page__event-message">
-                {{error.metadata.errorResponse.errorResponse || '-' }}</div>
+                {{ error.metadata.errorResponse.errorResponse || '-' }}</div>
               <div matLine class="error-page__event-key">Jetstream Response</div>
               <div matLine class="error-page__event-value error-page__event-message">{{ error.message }}</div>
               <div matLine class="error-page__event-key">URL</div>
               <div matLine class="error-page__event-value">{{ error.metadata.url || '-' }}</div>
               <div matLine class="error-page__event-key">HTTP Code</div>
-              <div matLine class="error-page__event-value">{{error.eventCode }}</div>
+              <div matLine class="error-page__event-value">{{ error.eventCode }}</div>
             </div>
           </div>
         </mat-card>

@@ -75,7 +75,7 @@ export class InternalEventMonitor {
     return combineLatest(this.events$, interval$).pipe(
       map(([state]) => {
         const time = moment().subtract(minutes, 'minutes').unix() * 1000;
-        const errorObjects = Object.keys(state).reduce<Record<string, InternalEventState[]>>((errorObject, key) => {
+        return Object.keys(state).reduce<Record<string, InternalEventState[]>>((errorObject, key) => {
           const events = state[key];
           const hasErrorEvent = !!events.find(event => {
             const isError500 = event.eventCode[0] === '5';
@@ -86,8 +86,6 @@ export class InternalEventMonitor {
           }
           return errorObject;
         }, {});
-        console.log(errorObjects);
-        return errorObjects;
       })
     );
   }

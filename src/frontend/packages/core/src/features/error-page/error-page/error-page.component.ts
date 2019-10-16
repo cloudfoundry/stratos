@@ -13,6 +13,7 @@ import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-e
 import { InternalEventState } from '../../../../../store/src/types/internal-events.types';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { StratosStatus } from '../../../shared/shared.types';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-events-page',
@@ -23,6 +24,7 @@ export class ErrorPageComponent implements OnInit {
   public back$: Observable<string>;
   public errorDetails$: Observable<{ endpoint: EndpointModel; errors: InternalEventState[]; }>;
   public icon = StratosStatus.ERROR;
+  public jsonDownloadHref$: Observable<SafeUrl>;
   ngOnInit() {
     const endpointId = this.activatedRoute.snapshot.params.endpointId;
     if (endpointId) {
@@ -43,13 +45,20 @@ export class ErrorPageComponent implements OnInit {
         }),
         first()
       );
+      this.jsonDownloadHref$ = this.errorDetails$.pipe(
+        map((info) => {
+          const jsonString = JSON.stringify(info);
+          return this.sanitizer.bypassSecurityTrustUrl('data:text/json;charset=UTF-8,' + encodeURIComponent(jsonString));
+        })
+      );
     }
   }
 
   constructor(
     private activatedRoute: ActivatedRoute,
     private store: Store<AppState>,
-    private internalEventMonitorFactory: InternalEventMonitorFactory
+    private internalEventMonitorFactory: InternalEventMonitorFactory,
+    private sanitizer: DomSanitizer
   ) {
     this.back$ = store.select(getPreviousRoutingState).pipe(first()).pipe(
       map(previousState => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')

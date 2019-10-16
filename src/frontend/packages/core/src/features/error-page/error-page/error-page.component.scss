@@ -31,4 +31,14 @@
     margin-bottom: -20px;
     opacity: .6;
   }
+  &__download {
+    float: right;
+  }
+  &__header {
+    display: flex;
+    flex-direction: row;
+  }
+  &__header-left {
+    flex: 1;
+  }
 }
