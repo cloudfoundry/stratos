@@ -136,8 +136,8 @@ export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> 
   readonly actionable?: Observable<boolean>;
   readonly disabled?: Observable<boolean>;
 }
-export type EntityRowBuilder<T> = [string, (entityMetadata: T) => string];
-//| Observable<string>
+export type EntityRowBuilder<T> = [string, (entityMetadata: T) => string /* | Observable<string> */];
+
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
   getStatusObservable?(entity: Y): Observable<StratosStatus>;
