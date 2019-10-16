@@ -13,7 +13,7 @@ RUN zypper ref
 ENV MYSQL_ROOT_PASSWORD mysecretpassword
 
 # Add repo for the latest mariadb
-RUN zypper in -y mariadb net-tools mariadb-tools timezone wget && \
+RUN zypper in -y mariadb net-tools mariadb-tools timezone wget awk grep && \
     zypper clean -a && \
     rm -f /var/log/zypper.log /var/log/zypp/history
 

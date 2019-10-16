@@ -9,6 +9,8 @@ RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SERVER}}' smt_internal_server
 RUN zypper ref
 {{/IS_SLE}}
 RUN zypper in -y ca-certificates && \
+    # Can remove this when we remove the postflight job
+    zypper in -y mariadb-client curl && \
     mkdir -p /srv && \
     mkdir -p /root/.npm-global
 # Install latest git from devel/tools/scm repository

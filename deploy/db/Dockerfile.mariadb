@@ -6,6 +6,7 @@ RUN \
 		| xargs -rt -0 sed -Ei 's/^(bind-address|log)/#&/'; 
 
 COPY mariadb-entrypoint.sh /docker-entrypoint.sh
+COPY mariadb-ping.sh /dbping.sh
 
 # ENTRYPOINT
 ENTRYPOINT ["/docker-entrypoint.sh"]
