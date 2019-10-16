@@ -1,0 +1,34 @@
+@import '../../../../sass/mixins';
+.error-page {
+  @include breakpoint(tablet) {
+    margin: 0 20%;
+  }
+  &__event-row {
+    margin-right: 15px;
+  }
+  &__event-key {
+    font-size: 15px;
+    margin: 15px 15px 0;
+    opacity: .6;
+  }
+  &__event-value {
+    margin: 2px 15px 20px;
+  }
+  &__event-row-card {
+    margin-bottom: 15px;
+  }
+  &__event-message {
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 25px;
+  }
+  &___event-row-card {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+  }
+  &__endpoint-name-subtitle {
+    margin-bottom: -20px;
+    opacity: .6;
+  }
+}

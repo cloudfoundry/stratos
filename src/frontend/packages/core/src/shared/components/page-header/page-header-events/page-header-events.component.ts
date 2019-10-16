@@ -41,6 +41,7 @@ export class PageHeaderEventsComponent implements OnInit {
 
   public eventMinimized$: Observable<boolean>;
   public errorMessage$: Observable<string>;
+  endpointId: any;
 
   constructor(
     private internalEventMonitorFactory: InternalEventMonitorFactory,
@@ -58,8 +59,10 @@ export class PageHeaderEventsComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (!this.endpointIds$ && this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.endpointId) {
-      this.endpointIds$ = observableOf([this.activatedRoute.snapshot.params.endpointId]);
+    this.endpointId = this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.endpointId ?
+      this.activatedRoute.snapshot.params.endpointId : null;
+    if (!this.endpointIds$ && this.endpointId) {
+      this.endpointIds$ = observableOf([this.endpointId]);
     }
     if (this.endpointIds$) {
       const endpointMonitor = new PaginationMonitor<EndpointModel>(
@@ -72,18 +75,20 @@ export class PageHeaderEventsComponent implements OnInit {
         cfEndpointEventMonitor.hasErroredOverTime(),
         endpointMonitor.currentPage$
       ).pipe(
-        filter(([errors]) => !!errors && !!errors.length),
+        filter(([errors]) => !!Object.keys(errors).length),
         map(([errors, endpoints]) => {
-          const endpointString = errors
-            .map(id => endpoints.find(endpoint => endpoint.guid === id))
-            .map(endpoint => endpoint.name).reduce((message, endpointName, index, { length }) => {
+          const endpointString = Object.keys(errors)
+            .map(id => endpoints.find(endpoint => {
+              return endpoint.guid === id;
+            }))
+            .reduce((message, endpoint, index, { length }) => {
+              const endpointName = endpoint.name;
               if (index === 0) {
                 return endpointName;
               }
               return index + 1 === length ? `${message} & ${endpointName}` : `${message}, ${endpointName}`;
             }, '');
-          return `We've been having trouble communicating with ${endpointString}` +
-            `${this.simpleErrorMessage ? '' : ' - You may be seeing out-of-date information'}`;
+          return `We've been having trouble communicating with ${endpointString}`;
         })
       );
     }

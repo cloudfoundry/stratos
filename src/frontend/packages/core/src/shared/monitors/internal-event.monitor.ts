@@ -7,6 +7,7 @@ import {
   InternalEventSeverity,
   InternalEventsState,
   InternalEventSubjectState,
+  InternalEventState,
 } from '../../../../store/src/types/internal-events.types';
 
 export function newNonAngularInterval(ngZone: NgZone, intervalTime: number) {
@@ -74,17 +75,19 @@ export class InternalEventMonitor {
     return combineLatest(this.events$, interval$).pipe(
       map(([state]) => {
         const time = moment().subtract(minutes, 'minutes').unix() * 1000;
-        return Object.keys(state).reduce<string[]>((array, key) => {
+        const errorObjects = Object.keys(state).reduce<Record<string, InternalEventState[]>>((errorObject, key) => {
           const events = state[key];
           const hasErrorEvent = !!events.find(event => {
             const isError500 = event.eventCode[0] === '5';
             return event.severity === InternalEventSeverity.ERROR && isError500 && event.timestamp > time;
           });
           if (hasErrorEvent) {
-            array.push(key);
+            errorObject[key] = events;
           }
-          return array;
-        }, []);
+          return errorObject;
+        }, {});
+        console.log(errorObjects);
+        return errorObjects;
       })
     );
   }
