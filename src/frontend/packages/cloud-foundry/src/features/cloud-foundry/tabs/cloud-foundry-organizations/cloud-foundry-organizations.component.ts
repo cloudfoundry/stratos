@@ -77,7 +77,7 @@ export class CloudFoundryOrganizationsComponent {
         ], populateMissing: false
       }
     };
-    this.listActionConfig = action;
+    this.listActionConfig = a;
   }
 
   private setupWithListOverrides() {
@@ -179,8 +179,9 @@ export class CloudFoundryOrganizationsComponent {
     this.setupWithAction();
     // this.setupWithEntityConfig();
     this.setupWithListOverrides();
-    this.setupWithDataSourceOverrides();
+    // this.setupWithDataSourceOverrides();
     // this.setupWithOriginalListConfig();// (ListService provider)
     // this.setupWithMinimalListConfig();// (same as original but overrides instead of service)
+
   }
 }
