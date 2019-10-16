@@ -1,12 +1,10 @@
 import { ListDataSource } from '../data-sources-controllers/list-data-source';
-import { EntityCatalogueEntityConfig, IEntityMetadata } from '../../../../core/entity-catalogue/entity-catalogue.types';
 import { Store } from '@ngrx/store';
 import { StratosBaseCatalogueEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
 import { ListConfig, ListViewTypes } from '../list.component.types';
-import { ITableColumn } from '../list-table/table.types';
 import { createTableColumnFavorite } from '../list-table/table-cell-favorite/table-cell-favorite.component';
 import { UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
-import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../../../../../store/src/entity-request-pipeline/pipeline.types';
+import { EntityPipelineEntity, } from '../../../../../../store/src/entity-request-pipeline/pipeline.types';
 
 export interface GetMultipleActionConfig {
   endpointGuid?: string;
