@@ -41,7 +41,7 @@ export function getPaginationParamsPipe(
     action.paginationKey,
   )(appState);
   const paginationParams = getPaginationParams(paginationState);
-  // TODO We shouldn't be modifying this here as it is a unexpected side effect.
+  // TODO We shouldn't be modifying this here as it is a unexpected side effect. #3977
   action.pageNumber = paginationState
     ? paginationState.currentPage
     : 1;

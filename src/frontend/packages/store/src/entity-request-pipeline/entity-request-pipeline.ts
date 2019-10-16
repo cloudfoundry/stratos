@@ -69,7 +69,6 @@ export const apiRequestPipelineFactory = (
     appState
   }).pipe(
     tap((response) => {
-      // TODO Failure of a single endpoint (with many connected) doesn't seem to work - investigate.
       if (response.success) {
         successEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response, recursivelyDelete);
       } else {
@@ -84,7 +83,6 @@ export const apiRequestPipelineFactory = (
         errorMessage: httpResponse ? httpResponse.error : null
       };
       failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, res, recursivelyDelete);
-      // TODO We should pass the endpoint ids to this so we can correctly map the error to the endpoint.
       jetstreamErrorHandler(
         error,
         patchedAction,

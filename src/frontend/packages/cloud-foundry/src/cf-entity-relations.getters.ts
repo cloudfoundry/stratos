@@ -45,7 +45,6 @@ export function addCfRelationParams(request: HttpRequest<any>, action: EntityReq
     return request;
   }
   const paginationAction = isPaginatedAction(action);
-  // TODO This should decide which method to use getEntityRelationsForPaginationRequest or getEntityRelationsForEntityRequest
   const relationInfo = paginationAction ?
     getEntityRelationsForPaginationRequest(paginationAction as EntityInlineParentAction & PaginatedAction) :
     getEntityRelationsForEntityRequest(entityInlineParent as EntityInlineParentAction & EntityRequestAction);

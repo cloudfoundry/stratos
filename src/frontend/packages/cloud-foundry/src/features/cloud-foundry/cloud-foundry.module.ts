@@ -220,9 +220,6 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
   ],
   providers: [
     CFEndpointsListConfigService,
-    // TODO: check if belongs to here
-    EndpointListHelper,
-    EndpointsListConfigService,
     {
       provide: ActiveRouteCfOrgSpace,
       useValue: {}

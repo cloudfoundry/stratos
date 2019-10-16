@@ -1,17 +1,16 @@
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import {
+  BaseEntityRequestAction,
+  BaseEntityRequestConfig,
+  BasePaginationRequestAction,
+  EntityRequestActionConfig,
+  GetMultipleActionBuilder,
+  KnownEntityActionBuilder,
+  OrchestratedActionBuilder,
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
-  OrchestratedActionBuilder,
-  EntityRequestActionConfig,
   PaginationRequestActionConfig,
-  KnownEntityActionBuilder,
-  BaseEntityRequestAction,
-  GetMultipleActionBuilder,
-  BasePaginationRequestAction,
-  BaseEntityRequestConfig
 } from './action-orchestrator/action-orchestrator';
-
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 
 export class ActionBuilderConfigMapper {
 
@@ -66,7 +65,6 @@ export class ActionBuilderConfigMapper {
       };
     }
     if (configOrBuilder instanceof PaginationRequestActionConfig) {
-      // TODO We need to pass schemaKey
       return (...args: Parameters<GetMultipleActionBuilder>) => {
         const [endpointGuid, ...meta] = args;
         return new BasePaginationRequestAction(
