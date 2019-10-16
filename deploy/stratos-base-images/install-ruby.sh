@@ -20,6 +20,6 @@ if [ "$IS_SLES" == "false" ]; then
 fi
 
 # OpenSUSE Leap 15.1 will install ruby 2.5
-zypper in ruby
+zypper in -y ruby
 
 ruby --version
