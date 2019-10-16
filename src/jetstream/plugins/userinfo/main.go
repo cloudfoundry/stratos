@@ -54,11 +54,12 @@ func (userInfo *UserInfo) AddSessionGroupRoutes(echoGroup *echo.Group) {
 
 // Init performs plugin initialization
 func (userInfo *UserInfo) Init() error {
+
 	return nil
 }
 
 func (userInfo *UserInfo) getProvider(c echo.Context) Provider {
-	if interfaces.AuthEndpointTypes[userInfo.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType] == interfaces.Local {
+	if interfaces.AuthEndpointTypes[userInfo.portalProxy.GetConfig().AuthEndpointType] == interfaces.Local {
 		return InitLocalUserInfo(userInfo.portalProxy)
 	}
 
@@ -108,7 +109,6 @@ func (userInfo *UserInfo) userInfo(c echo.Context) error {
 	return nil
 }
 
-
 // update the user info for the current user
 func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 	_, err := userInfo.preFlightChecks(c)
@@ -142,8 +142,8 @@ func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 			"Unable to update user profile",
 			"Unable to update user profile: %v", err,
 		)
-	}		
-	
+	}
+
 	c.Response().WriteHeader(http.StatusOK)
 
 	return nil
@@ -182,8 +182,8 @@ func (userInfo *UserInfo) updateUserPassword(c echo.Context) error {
 			"Unable to update user password",
 			"Unable to update user password: %v", err,
 		)
-	}		
-	
+	}
+
 	c.Response().WriteHeader(http.StatusOK)
 
 	return nil

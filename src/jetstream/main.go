@@ -499,6 +499,19 @@ func loadPortalConfig(pc interfaces.PortalConfig, env *env.VarSet) (interfaces.P
 		pc.HTTPClientTimeoutMutatingInSecs = pc.HTTPClientTimeoutInSecs
 	}
 
+	if len(pc.AuthEndpointType) == 0 {
+		//Default to "remote" if AUTH_ENDPOINT_TYPE is not set
+		pc.AuthEndpointType = string(interfaces.Remote)
+	} else {
+		val, endpointTypeSupported := interfaces.AuthEndpointTypes[pc.AuthEndpointType]
+		if endpointTypeSupported {
+			pc.AuthEndpointType = string(val)
+		} else {
+			return pc, fmt.Errorf("AUTH_ENDPOINT_TYPE: %v is not valid. Must be set to local or remote (defaults to remote)", val)
+		}
+	}
+
+	log.Debugf("Portal config auth endpoint type initialised to: %v", pc.AuthEndpointType)
 	return pc, nil
 }
 
@@ -597,10 +610,10 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 	})
 
 	err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.AuthEndpointType])
-	if(err != nil) {
+	if err != nil {
 		log.Warnf("Defaulting to UAA authentication: %v", err)
 		err = pp.InitStratosAuthService(interfaces.Remote)
-		if(err != nil) {
+		if err != nil {
 			log.Fatalf("Could not initialise auth service. %v", err)
 		}
 	}
@@ -959,7 +972,7 @@ func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
 	}
 
 	//Only log if there is a message to log
-	he, _  := err.(*echo.HTTPError)
+	he, _ := err.(*echo.HTTPError)
 	if err != nil && he.Message.(string) != "" {
 		c.Logger().Error(err)
 	}

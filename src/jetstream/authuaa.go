@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
@@ -17,8 +16,8 @@ import (
 	"github.com/labstack/echo"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/stringutils"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/stringutils"
 )
 
 // UAAAdminIdentifier - The identifier that UAA uses to convey administrative level perms
@@ -27,15 +26,15 @@ const UAAAdminIdentifier = "stratos.admin"
 //More fields will be moved into here as global portalProxy struct is phased out
 type uaaAuth struct {
 	databaseConnectionPool *sql.DB
-	p *portalProxy
-	skipSSLValidation bool
+	p                      *portalProxy
+	skipSSLValidation      bool
 }
 
 //Login provides UAA-auth specific Stratos login
 func (a *uaaAuth) Login(c echo.Context) error {
-
+	log.Debug("UAA Login")
 	//This check will remain in until auth is factored down into its own package
-	if interfaces.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Remote {
+	if interfaces.AuthEndpointTypes[a.p.Config.AuthEndpointType] != interfaces.Remote {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusNotFound,
 			"UAA Login is not enabled",
@@ -83,7 +82,7 @@ func (a *uaaAuth) GetUsername(userid string) (string, error) {
 //GetUser gets the user guid for the specified UAA user
 func (a *uaaAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	log.Debug("GetUser")
-	
+
 	// get the uaa token record
 	uaaTokenRecord, err := a.p.GetUAATokenRecord(userGUID)
 	if err != nil {
@@ -112,7 +111,7 @@ func (a *uaaAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	}
 
 	return uaaEntry, nil
-	
+
 }
 
 //VerifySession verifies the session the specified UAA user and refreshes the token if necessary
@@ -310,7 +309,7 @@ func (p *portalProxy) RefreshUAALogin(username, password string, store bool) err
 	return nil
 }
 
-//getUAATokenWithAuthorizationCode 
+//getUAATokenWithAuthorizationCode
 func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string, state string, cnsiGUID string) (*interfaces.UAAResponse, error) {
 	log.Debug("getUAATokenWithAuthorizationCode")
 
@@ -404,8 +403,6 @@ func (p *portalProxy) GetUAATokenRecord(userGUID string) (interfaces.TokenRecord
 
 	return tr, nil
 }
-
-
 
 //RefreshUAAToken refreshes the UAA Token for the user using the refresh token, then updates our store
 func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord, err error) {
@@ -556,7 +553,7 @@ func getSSORedirectURI(base string, state string, endpointGUID string) string {
 
 //HTTP Basic
 
-//fetchHTTPBasicToken currently unused? 
+//fetchHTTPBasicToken currently unused?
 func (p *portalProxy) fetchHTTPBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
 
 	uaaRes, u, err := p.loginHTTPBasic(c)
@@ -570,7 +567,7 @@ func (p *portalProxy) fetchHTTPBasicToken(cnsiRecord interfaces.CNSIRecord, c ec
 	return uaaRes, u, &cnsiRecord, nil
 }
 
-//fetchHTTPBasicToken currently unused? 
+//fetchHTTPBasicToken currently unused?
 func (p *portalProxy) loginHTTPBasic(c echo.Context) (uaaRes *interfaces.UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
 	log.Debug("login")
 	username := c.FormValue("username")
