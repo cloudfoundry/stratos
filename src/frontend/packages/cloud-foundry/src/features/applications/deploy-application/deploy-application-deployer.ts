@@ -134,7 +134,7 @@ export class DeployApplicationDeployer {
 
         this.inputStream = new Subject<string>();
         this.messages = websocketConnect(streamUrl, this.inputStream)
-          .messages.pipe(
+          .pipe(
             catchError(e => {
               return [];
             }),

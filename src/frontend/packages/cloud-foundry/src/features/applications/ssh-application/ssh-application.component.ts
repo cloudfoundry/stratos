@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { NEVER, Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
-import { catchError, first, map } from 'rxjs/operators';
+import { catchError, first, map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { IApp } from '../../../../../core/src/core/cf-api.types';
@@ -81,11 +81,11 @@ export class SshApplicationComponent implements OnInit {
       );
       this.sshInput = new Subject<string>();
       const connection = websocketConnect(
-        streamUrl,
-        this.sshInput
+        streamUrl
       );
 
-      this.messages = connection.messages.pipe(
+      this.messages = connection.pipe(
+        switchMap(getResponse => getResponse(this.sshInput)),
         catchError(e => {
           if (e.type === 'error') {
             this.errorMessage = 'Error connecting to web socket';
@@ -93,7 +93,8 @@ export class SshApplicationComponent implements OnInit {
           return [];
         }));
 
-      this.connectionStatus = connection.connectionStatus;
+      // TODO angular 8
+      // this.connectionStatus = connection.connectionStatus;
 
       this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
         map(app => this.getBreadcrumbs(app.entity.entity)),

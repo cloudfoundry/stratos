@@ -187,12 +187,12 @@ export class ActionOrchestrator<T extends OrchestratedActionBuilders = Orchestra
     return new EntityActionDispatcherManager<T>(actionDispatcher, this);
   }
 
-  public getActionBuilder<Y extends keyof T>(actionType: Y): T[Y] {
+  public getActionBuilder<Y extends keyof T>(actionType: Y) {
     const actionBuilderForType = this.actionBuilders[actionType];
     if (!actionBuilderForType) {
       return null;
     }
-    const actionBuilder: T[Y] = (...args: Parameters<T[Y]>) => {
+    const actionBuilder = (...args: Parameters<T[Y]>) => {
       const action = actionBuilderForType(...args) as ActionBuilderAction;
       if (action) {
         action.actionBuilderActionType = actionType as string;

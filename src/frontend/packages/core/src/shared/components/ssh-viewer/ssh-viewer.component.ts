@@ -10,7 +10,8 @@ import {
 } from '@angular/core';
 
 import { Terminal } from 'xterm';
-import { fit } from 'xterm/lib/addons/fit/fit';
+// TODO
+// import { fit } from 'xterm/lib/addons/fit/fit';
 
 import { Observable, Subject, Subscription } from 'rxjs';
 
@@ -71,23 +72,26 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
     });
 
     this.xterm.open(this.container.nativeElement);
-    this.xterm.on('data', this.onTermSendData);
-    this.xterm.on('resize', this.onTermResize);
+    // TODO
+    // this.xterm.on('data', this.onTermSendData);
+    // this.xterm.on('resize', this.onTermResize);
 
     this.reconnect();
   }
 
   ngAfterViewChecked() {
     if (this.xterm) {
-      fit(this.xterm);
+      // TODO ANGULAR 8
+      // fit(this.xterm);
     }
   }
 
   ngOnDestroy() {
     this.isDestroying = true;
     if (this.xterm) {
-      this.xterm.off('data', this.onTermSendData);
-      this.xterm.off('resize', this.onTermResize);
+      // TODO ANGULAR 8
+      // this.xterm.off('data', this.onTermSendData);
+      // this.xterm.off('resize', this.onTermResize);
     }
     this.disconnect();
     if (this.connectSubscription && !this.connectSubscription.closed) {

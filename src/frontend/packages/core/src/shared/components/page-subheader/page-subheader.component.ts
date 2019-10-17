@@ -136,13 +136,13 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
       this.checkScrollBounds();
     }
   }
-
+  // TODO ANGULAR 8
   private navIsOverflowing() {
-    if (this.navOuter) {
-      const avaliableWidth = this.navOuter.nativeElement.offsetWidth;
-      const navFullWidth = this.nav._elementRef.nativeElement.offsetWidth;
-      return avaliableWidth < navFullWidth;
-    }
+    // if (this.navOuter) {
+    //   const avaliableWidth = this.navOuter.nativeElement.offsetWidth;
+    //   const navFullWidth = this.nav._elementRef.nativeElement.offsetWidth;
+    //   return avaliableWidth < navFullWidth;
+    // }
     return false;
   }
 
@@ -174,10 +174,11 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
       this.disableRight = false;
     }
   }
-
+  // TODO ANGULAR 8
   private navScrolledFarRight() {
-    const { scrollLeft } = this.navScroller.nativeElement;
-    return this.nav._elementRef.nativeElement.offsetWidth === (this.navScroller.nativeElement.offsetWidth + scrollLeft);
+    // const { scrollLeft } = this.navScroller.nativeElement;
+    // return this.nav._elementRef.nativeElement.offsetWidth === (this.navScroller.nativeElement.offsetWidth + scrollLeft);
+    return false;
   }
 
   private navScrolledFarLeft() {

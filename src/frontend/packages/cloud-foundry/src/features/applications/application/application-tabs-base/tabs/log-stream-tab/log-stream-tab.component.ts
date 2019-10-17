@@ -3,8 +3,8 @@ import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { NEVER, Observable, Subject } from 'rxjs';
-import websocketConnect from 'rxjs-websockets';
-import { catchError, filter, share } from 'rxjs/operators';
+import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
+import { catchError, filter, share, switchMap, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { LoggerService } from '../../../../../../../../core/src/core/logger.service';
@@ -53,18 +53,27 @@ export class LogStreamTabComponent implements OnInit {
         this.applicationService.cfGuid
         }/apps/${this.applicationService.appGuid}/stream`;
 
-      const { messages, connectionStatus } = websocketConnect(streamUrl, new Subject<string>());
-      messages.pipe(catchError(e => {
+      const socket$ = makeWebSocketObservable(streamUrl);
+      socket$.pipe(catchError(e => {
         this.logService.error(
           'Error while connecting to socket: ' + JSON.stringify(e)
         );
         return [];
       }),
         share(),
-        filter(data => !!data && data.length));
+        filter(data => !!data && data.length)
+      );
 
-      this.messages = messages;
-      this.connectionStatus = connectionStatus;
+      this.messages = socket$.pipe(
+        // the observable produces a value once the websocket has been opened
+        switchMap((getResponses: GetWebSocketResponses) => {
+          console.log('websocket opened')
+          return getResponses(new Subject<string>());
+        }),
+        map((message: string) => message),
+        share()
+      );
+      // this.connectionStatus = connectionStatus;
     }
   }
 
