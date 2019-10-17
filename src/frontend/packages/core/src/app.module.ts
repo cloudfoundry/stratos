@@ -16,7 +16,6 @@ import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/
 import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState } from '../../store/src/selectors/api.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
-import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 import { AppStoreModule } from '../../store/src/store.module';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
@@ -25,6 +24,7 @@ import { RouteModule } from './app.routing';
 import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
 import { generateStratosEntities } from './base-entity-types';
 import { CoreModule } from './core/core.module';
+import { CustomizationService } from './core/customizations.types';
 import { EntityCatalogueModule } from './core/entity-catalogue.module';
 import { EntityActionDispatcher } from './core/entity-catalogue/action-dispatcher/action-dispatcher';
 import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
@@ -85,7 +85,6 @@ export class CustomRouterStateSerializer
   ],
   imports: [
     EntityCatalogueModule.forFeature(generateStratosEntities),
-    AppStoreExtensionsModule,
     RouteModule,
     CloudFoundryPackageModule,
     AppStoreModule,
@@ -103,6 +102,7 @@ export class CustomRouterStateSerializer
     CfAutoscalerModule
   ],
   providers: [
+    CustomizationService,
     TabNavService,
     LoggedInService,
     ExtensionService,

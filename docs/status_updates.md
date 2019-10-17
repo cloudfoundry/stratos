@@ -125,7 +125,7 @@ A 2.3.0 Release Candidate will be published later today or on Monday of next wee
 
 We hope to finish testing and publish the 2.3.0 release next week.
 
-The 2.3.0 Change Log has been updated and is available [here](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/CHANGELOG.md)
+The 2.3.0 Change Log has been updated and is available [here](https://github.com/cloudfoundry-incubator/stratos/blob/master/CHANGELOG.md)
 
 ## 11 January 2019
 
@@ -357,7 +357,7 @@ Fixes/Misc:
 
 ## 14th September 2018
 
-We've been preparing the 2.1.0 release this week. This will be published next week. Going forward we will be publishing a new release every month. The release notes for 2.1.0 have been created and are [here](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/CHANGELOG.md#210).
+We've been preparing the 2.1.0 release this week. This will be published next week. Going forward we will be publishing a new release every month. The release notes for 2.1.0 have been created and are [here](https://github.com/cloudfoundry-incubator/stratos/blob/master/CHANGELOG.md#210).
 
 Highlights for this week:
 
@@ -436,7 +436,7 @@ Update for this week:
 
 - 2.0.1 - We tagged a 2.0.1 release. This is identical to 2.0.0 and only fixes an issue with a broken dependency - one of the pinned dependencies was no longer working. This issue only affects you if you were pushing to Cloud Foundry from the 2.0.0 tag.
 
-- Pre-built UI - We added the ability to pre-build the UI before pushing to Cloud Foundry. This allows you to build the UI with AOT (Ahead-of-time) compilation enabled and push to CF. This will also reduce push time. See the doc [Pre-building the UI](https://github.com/cloudfoundry-incubator/stratos/tree/v2-master/deploy/cloud-foundry#pre-building-the-ui).
+- Pre-built UI - We added the ability to pre-build the UI before pushing to Cloud Foundry. This allows you to build the UI with AOT (Ahead-of-time) compilation enabled and push to CF. This will also reduce push time. See the doc [Pre-building the UI](https://github.com/cloudfoundry-incubator/stratos/tree/master/deploy/cloud-foundry#pre-building-the-ui).
 
 - Go-backend re-structure. Work is almost complete on re-structuring the go backend to make it easier to develop with and contribute to. See issue [#2815](https://github.com/cloudfoundry-incubator/stratos/issues/2815).
 

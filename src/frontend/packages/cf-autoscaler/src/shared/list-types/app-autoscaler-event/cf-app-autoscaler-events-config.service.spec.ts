@@ -6,6 +6,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
 import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { ApplicationsModule } from '../../../../../cloud-foundry/src/features/applications/applications.module';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
@@ -13,10 +14,8 @@ import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
 import { createEmptyStoreModule } from '../../../../../core/test-framework/store-test-helper';
-import { AppStoreExtensionsModule } from '../../../../../store/src/store.extensions.module';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
-import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 
 describe('CfAppAutoscalerEventsConfigService', () => {
 
@@ -38,7 +37,6 @@ describe('CfAppAutoscalerEventsConfigService', () => {
         { provide: ConnectionBackend, useClass: MockBackend },
       ],
       imports: [
-        AppStoreExtensionsModule,
         CfAutoscalerTestingModule,
         CommonModule,
         CoreModule,

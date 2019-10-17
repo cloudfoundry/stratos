@@ -120,6 +120,14 @@ export interface IStratosEntityDefinition<
   readonly preRequest?: PreApiRequest;
   readonly prePaginationRequest?: PrePaginationApiRequest;
   readonly errorMessageHandler?: ApiErrorMessageHandler;
+  // Should the request response object for this entity be parsed as if it's passed through the jetstream backend?
+  readonly nonJetstreamRequest?: boolean;
+  readonly nonJetstreamRequestHandler?: NonJetstreamRequestHandler;
+}
+
+export class NonJetstreamRequestHandler<T = any> {
+  isSuccess: (request: T) => boolean;
+  getErrorCode?: (request: T) => string;
 }
 
 export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> {
@@ -128,6 +136,7 @@ export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> 
   readonly actionable?: Observable<boolean>;
   readonly disabled?: Observable<boolean>;
 }
+export type EntityRowBuilder<T> = [string, (entityMetadata: T) => string /* | Observable<string> */];
 
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
@@ -135,7 +144,7 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   // TODO This should be used in the entities schema.
   getGuid(entityMetadata: T): string;
   getLink?(entityMetadata: T): string;
-  getLines?(entityMetadata: T): [string, string | Observable<string>][];
+  getLines?(): EntityRowBuilder<T>[];
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,
     plural: string
@@ -164,4 +173,3 @@ export interface IStratosEntityData<T extends IEntityMetadata = IEntityMetadata>
 export interface IStratosEntityStatusData<Y extends IEntityMetadata = IEntityMetadata> extends IStratosEntityData<Y> {
   status$?: Observable<StratosStatus>;
 }
-

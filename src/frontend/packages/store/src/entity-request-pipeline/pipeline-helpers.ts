@@ -4,6 +4,11 @@ import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalo
 import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { JetstreamResponse, PagedJetstreamResponse } from './entity-request-pipeline.types';
 
+export function isJetstreamRequest(definition: IStratosEntityDefinition): boolean {
+  return !definition.nonJetstreamRequest && !definition.nonJetstreamRequestHandler;
+}
+
+
 export function getSuccessMapper(catalogueEntity: StratosBaseCatalogueEntity) {
   const definition = catalogueEntity.definition as IStratosEntityDefinition;
   if (typeof definition.successfulRequestDataMapper === 'string') {
@@ -30,9 +35,10 @@ export function singleRequestToPaged(response: JetstreamResponse<any>): PagedJet
     return null;
   }
   return Object.keys(response).reduce((mapped, endpointKey) => {
-    return {
+    const page = response[endpointKey];
+    return page ? {
       ...mapped,
-      [endpointKey]: [response[endpointKey]]
-    };
+      [endpointKey]: [page]
+    } : mapped;
   }, {});
 }

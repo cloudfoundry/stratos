@@ -4,7 +4,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { appReducers } from '../../store/src/reducers.module';
-import { AppStoreExtensionsModule } from '../../store/src/store.extensions.module';
 import { CoreModule } from '../src/core/core.module';
 import {
   ApplicationStateIconComponent,
@@ -34,7 +33,6 @@ import { createBasicStoreModule } from './store-test-helper';
 export function generateBaseTestStoreModules() {
   return [
     CoreTestingModule,
-    AppStoreExtensionsModule,
     StoreModule.forRoot(
       appReducers,
       {

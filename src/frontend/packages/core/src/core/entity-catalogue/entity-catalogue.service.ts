@@ -62,7 +62,8 @@ class EntityCatalogue {
     // Ensure the subtype inherits parent
     return new StratosBaseCatalogueEntity({
       ...parent,
-      ...subtype
+      ...subtype,
+      parentType: parent.type
     }, { ...entity.builders });
   }
 

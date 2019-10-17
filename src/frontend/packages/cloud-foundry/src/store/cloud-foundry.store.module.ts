@@ -10,38 +10,16 @@ import { GithubEffects } from './effects/github.effects';
 import { PermissionEffects, PermissionsEffects } from './effects/permissions.effect';
 import { RouteEffect } from './effects/route.effects';
 
-// TODO: Remove commented effects once all CF effects are moved across (leaving them here helps with tracking)
 @NgModule({
   imports: [
     CloudFoundryReducersModule,
-    // HttpModule,
-    // HttpClientModule,
     EffectsModule.forFeature([
-      // APIEffect,
-      // EndpointApiError,
-      // AuthEffect,
-      // UAASetupEffect,
-      // EndpointsEffect,
       CreateAppPageEffects,
-      // UpdateAppEffects,
-      // PaginationEffects,
-      // ActionHistoryEffect,
       AppVariablesEffect,
-      // RouterEffect,
-      // SystemEffects,
-      // SnackBarEffects,
-      // SetClientFilterEffect,
       DeployAppEffects,
       GithubEffects,
       CloudFoundryEffects,
-      // MetricsEffect,
-      // RequestEffect,
-      // UserProfileEffect,
-      // UsersRolesEffects,
-      // RecursiveDeleteEffect,
-      // AppEffects,
       RouteEffect,
-      // UserFavoritesEffect,
       PermissionsEffects,
       PermissionEffects
     ])

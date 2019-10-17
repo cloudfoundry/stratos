@@ -52,11 +52,11 @@ class UserFavoriteCatalogueEntity extends StratosCatalogueEntity {
       type: userFavoritesEntitySchema.entityType,
       endpoint: stratosType,
     }, {
-      dataReducers: [
-        addOrUpdateUserFavoriteMetadataReducer,
-        deleteUserFavoriteMetadataReducer,
-      ]
-    });
+        dataReducers: [
+          addOrUpdateUserFavoriteMetadataReducer,
+          deleteUserFavoriteMetadataReducer,
+        ]
+      });
   }
 }
 
@@ -93,7 +93,8 @@ export function generateStratosEntities() {
       labelPlural: 'Metrics',
       tokenSharing: true,
       logoUrl: '/core/assets/endpoint-icons/metrics.svg',
-      authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None]
+      authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None],
+      renderPriority: 1
     },
       metadata => `/endpoints/metrics/${metadata.guid}`
     )

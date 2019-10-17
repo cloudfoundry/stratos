@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import {
   IService,
   IServiceBinding,
@@ -150,6 +151,7 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     listDetailsComponent: CfEndpointDetailsComponent,
+    renderPriority: 1,
     globalPreRequest: (request, action) => {
       return addCfRelationParams(request, action);
     },
@@ -271,7 +273,6 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
         }
       };
     },
-    // TODO: we need a envvar type
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition, {
     dataReducers: [
@@ -653,7 +654,14 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
     schema: cfEntityFactory(gitCommitEntityType),
     label: 'Git Commit',
     labelPlural: 'Git Commits',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    nonJetstreamRequest: true,
+    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
+      return {
+        ...data,
+        guid: action.guid
+      };
+    },
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, GitCommit, GitCommitActionBuildersConfig, GitCommitActionBuilders>(
     definition,
@@ -664,7 +672,8 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
       actionBuilders: gitCommitActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
-          name: ent.commit ? ent.commit.message || ent.sha : ent.sha
+          name: ent.commit ? ent.commit.message || ent.sha : ent.sha,
+          guid: ent.guid
         }),
         getGuid: metadata => metadata.guid,
       }
@@ -872,10 +881,14 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getMetadata: app => ({
           guid: app.metadata.guid,
           cfGuid: app.entity.cfGuid,
+          createdAt: moment(app.metadata.created_at).format('LLL'),
           name: app.entity.name,
         }),
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
+        getLines: () => ([
+          ['Creation  Date', (meta) => meta.createdAt]
+        ])
       },
       actionBuilders: applicationActionBuilder
     },

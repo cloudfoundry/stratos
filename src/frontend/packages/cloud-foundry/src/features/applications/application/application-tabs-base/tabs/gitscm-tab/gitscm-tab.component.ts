@@ -134,7 +134,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         });
 
         this.commit$ = this.gitCommitEntityService.waitForEntity$.pipe(
-          map(p => p.entity && p.entity)
+          map(p => p.entity)
         );
 
         this.isHead$ = this.gitBranchEntityService.waitForEntity$.pipe(
