@@ -128,6 +128,9 @@ func (ch *CFHosting) Init() error {
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClient = ch.portalProxy.GetConfig().CFClient
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClientSecret = ch.portalProxy.GetConfig().CFClientSecret
 
+		//Set the auth endpoint type for the console
+		ch.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType = ch.portalProxy.GetConfig().AuthEndpointType
+
 		// Ensure that the identifier for an admin is the standard Cloud Foundry one
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = ch.portalProxy.GetConfig().CFAdminIdentifier
 

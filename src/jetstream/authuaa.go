@@ -34,7 +34,7 @@ type uaaAuth struct {
 func (a *uaaAuth) Login(c echo.Context) error {
 	log.Debug("UAA Login")
 	//This check will remain in until auth is factored down into its own package
-	if interfaces.AuthEndpointTypes[a.p.Config.AuthEndpointType] != interfaces.Remote {
+	if interfaces.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Remote {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusNotFound,
 			"UAA Login is not enabled",

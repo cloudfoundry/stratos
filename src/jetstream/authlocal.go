@@ -31,7 +31,7 @@ type localAuth struct {
 func (a *localAuth) Login(c echo.Context) error {
 
 	//This check will remain in until auth is factored down into its own package
-	if interfaces.AuthEndpointTypes[a.p.Config.AuthEndpointType] != interfaces.Local {
+	if interfaces.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Local {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusNotFound,
 			"Local Login is not enabled",
