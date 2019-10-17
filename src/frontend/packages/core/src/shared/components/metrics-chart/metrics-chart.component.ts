@@ -3,15 +3,19 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
+import {
+  ChartSeries,
+  IMetrics,
+  MetricResultTypes,
+  MetricsFilterSeries,
+} from '../../../../../store/src/types/base-metric.types';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes, MetricsLineChartConfig } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
-import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
-import { ChartSeries, IMetrics, MetricResultTypes, MetricsFilterSeries } from '../../../../../store/src/types/base-metric.types';
-import { AppState } from '../../../../../store/src/app-state';
-import { metricSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
 
 
 export interface MetricsConfig<T = any> {
@@ -60,7 +64,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   public isFetching$: Observable<boolean>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private entityMonitorFactory: EntityMonitorFactory
   ) { }
   private sort(metricsArray: ChartSeries[]) {
@@ -91,8 +95,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     this.committedAction = this.metricsConfig.metricsAction;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.guid,
-      metricSchemaKey,
-      entityFactory(metricSchemaKey)
+      this.committedAction
     );
 
     const baseResults$ = this.metricsMonitor.entity$.pipe(

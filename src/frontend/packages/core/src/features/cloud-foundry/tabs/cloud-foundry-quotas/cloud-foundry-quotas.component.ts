@@ -6,8 +6,10 @@ import {
   CfQuotasListConfigService,
 } from '../../../../shared/components/list/list-types/cf-quotas/cf-quotas-list-config.service';
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CurrentUserPermissionsService } from './../../../../core/current-user-permissions.service';
+import {
+  CloudFoundryEndpointService
+} from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-cloud-foundry-quotas',

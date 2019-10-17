@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../shared.module';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DialogErrorComponent } from './dialog-error.component';
@@ -15,7 +15,7 @@ describe('DialogErrorComponent', () => {
       imports: [
         CommonModule,
         CoreModule,
-        BrowserAnimationsModule
+        NoopAnimationsModule
       ],
       declarations: [DialogErrorComponent]
     })

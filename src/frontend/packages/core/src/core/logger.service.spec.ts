@@ -1,7 +1,8 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { inject, TestBed } from '@angular/core/testing';
 
-import { LoggerService } from './logger.service';
+import { CoreTestingModule } from '../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../test-framework/store-test-helper';
+import { LoggerService } from './logger.service';
 
 describe('LoggerService', () => {
 
@@ -11,6 +12,7 @@ describe('LoggerService', () => {
         LoggerService
       ],
       imports: [
+        CoreTestingModule,
         createBasicStoreModule(),
       ]
     });

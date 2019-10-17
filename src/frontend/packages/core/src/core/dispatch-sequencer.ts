@@ -2,7 +2,7 @@ import { Action, Store } from '@ngrx/store';
 import { from, Observable, of as observableOf } from 'rxjs';
 import { bufferTime, concatMap, delay, filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../store/src/app-state';
 
 
 export interface DispatchSequencerAction {
@@ -24,7 +24,12 @@ export class DispatchSequencer {
    * @param [debounceInMs=5000]
    * Ignore repeat request made within this time period
    */
-  constructor(private store: Store<AppState>, private batchSize = 5, private batchDelayInMs = 5000, private debounceInMs = 5000) { }
+  constructor(
+    private store: Store<GeneralEntityAppState>,
+    private batchSize = 5,
+    private batchDelayInMs = 5000,
+    private debounceInMs = 5000
+  ) { }
 
   /**
    * Filter out recently dispatched actions

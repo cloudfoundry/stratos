@@ -3,12 +3,11 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
 
 import { GetAllEndpoints } from '../../../../../../../../store/src/actions/endpoint.actions';
-import { endpointSchemaKey, entityFactory } from '../../../../../../../../store/src/helpers/entity-factory';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { getEndpointType } from '../../../../../../features/endpoints/endpoint-helpers';
 import { TableCellCustom } from '../../../list.types';
+import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 
 export interface RowWithEndpointId {
   endpointId: string;
@@ -23,7 +22,10 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
 
   public endpoint$: Observable<any>;
 
-  constructor(private entityServiceFactory: EntityServiceFactory) {
+  constructor(
+    private entityServiceFactory: EntityServiceFactory,
+
+  ) {
     super();
   }
 
@@ -32,16 +34,13 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
     /* tslint:disable-next-line:no-string-literal */
     const id = row['endpointId'] || row['guid'];
     this.endpoint$ = this.entityServiceFactory.create(
-      endpointSchemaKey,
-      entityFactory(endpointSchemaKey),
       id,
-      new GetAllEndpoints(),
-      false
+      new GetAllEndpoints()
     ).waitForEntity$.pipe(
       map(data => data.entity),
       map((data: any) => {
-        const ep = getEndpointType(data.cnsi_type, data.sub_type);
-        data.canShowLink = data.connectionStatus === 'connected' || ep.doesNotSupportConnect;
+        const ep = entityCatalogue.getEndpoint(data.cnsi_type, data.sub_type).definition;
+        data.canShowLink = data.connectionStatus === 'connected' || ep.unConnectable;
         data.link = EndpointsService.getLinkForEndpoint(data);
         return data;
       })

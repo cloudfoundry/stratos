@@ -5,18 +5,19 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
-import { AppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { TabNavService } from '../../../../tab-nav.service';
+import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { StratosStatus } from '../../shared.types';
-import { favoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
+import { FavoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 
@@ -82,11 +83,11 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
       this.pFavorite = favorite;
-      const mapperFunction = favoritesConfigMapper.getMapperFunction(favorite);
-      const prettyType = favoritesConfigMapper.getPrettyTypeName(favorite);
-      const prettyEndpointType = favoritesConfigMapper.getPrettyTypeName({
+      const mapperFunction = this.favoritesConfigMapper.getMapperFunction(favorite);
+      const prettyType = this.favoritesConfigMapper.getPrettyTypeName(favorite);
+      const prettyEndpointType = this.favoritesConfigMapper.getPrettyTypeName({
         endpointType: favorite.endpointType,
-        entityType: 'endpoint'
+        entityType: EntityCatalogueHelpers.endpointType
       });
       if (mapperFunction) {
         const { name, routerLink } = mapperFunction(favorite.metadata);
@@ -142,11 +143,12 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private route: ActivatedRoute,
     private tabNavService: TabNavService,
     private router: Router,
-    eventService: GlobalEventService
+    eventService: GlobalEventService,
+    private favoritesConfigMapper: FavoritesConfigMapper
   ) {
     this.eventCount$ = eventService.events$.pipe(
       map(events => events.length)
