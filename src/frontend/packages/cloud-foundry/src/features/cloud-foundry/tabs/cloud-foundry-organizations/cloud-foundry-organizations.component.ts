@@ -229,7 +229,5 @@ export class CloudFoundryOrganizationsComponent {
     // this.setupWithDataSourceOverrides(true);
     // this.setupWithOriginalListConfig(true);// (ListService provider)
     this.setupWithMinimalListConfig(true); // (same as original but overrides instead of service)
-
-
   }
 }
