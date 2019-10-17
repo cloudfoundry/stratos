@@ -6,15 +6,15 @@ import { CoreTestingModule } from '../../../../test-framework/core-test.modules'
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { EventsPageComponent } from './events-page.component';
+import { ErrorPageComponent } from './error-page.component';
 
-describe('EventsPageComponent', () => {
-  let component: EventsPageComponent;
-  let fixture: ComponentFixture<EventsPageComponent>;
+describe('ErrorPageComponent', () => {
+  let component: ErrorPageComponent;
+  let fixture: ComponentFixture<ErrorPageComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [EventsPageComponent],
+      declarations: [ErrorPageComponent],
       imports: [
         CoreModule,
         SharedModule,
@@ -28,7 +28,7 @@ describe('EventsPageComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EventsPageComponent);
+    fixture = TestBed.createComponent(ErrorPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
