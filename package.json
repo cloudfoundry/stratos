@@ -1,6 +1,6 @@
 {
   "name": "stratos",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Stratos Console",
   "main": "index.js",
   "scripts": {
@@ -115,7 +115,7 @@
     "jasmine-core": "~3.3.0",
     "jasmine-spec-reporter": "~4.2.1",
     "js-yaml": "~3.13.1",
-    "karma": "~4.0.0",
+    "karma": "^4.3.0",
     "karma-chrome-launcher": "~2.2.0",
     "karma-cli": "~1.0.1",
     "karma-coverage-istanbul-reporter": "^2.0.1",
@@ -136,7 +136,6 @@
     "request-promise-native": "^1.0.7",
     "rxjs-tslint": "^0.1.5",
     "sass-lint": "^1.12.1",
-    "stratos-merge-dirs": "^0.2.3",
     "stratos-protractor-reporter": "^1.2.3",
     "ts-node": "~3.2.0",
     "tsickle": ">=0.29.0",

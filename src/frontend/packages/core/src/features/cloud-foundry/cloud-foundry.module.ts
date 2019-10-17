@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../core/core.module';
-import { CustomImportModule } from '../../custom-import.module';
 import {
   CFEndpointsListConfigService,
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
@@ -125,6 +124,7 @@ import { UsersRolesSelectComponent } from './users/manage-users/manage-users-sel
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 
+
 @NgModule({
   imports: [
     CoreModule,
@@ -132,7 +132,6 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CloudFoundryRoutingModule,
     RouterModule,
     NgxChartsModule,
-    CustomImportModule
   ],
   declarations: [
     CloudFoundryBaseComponent,

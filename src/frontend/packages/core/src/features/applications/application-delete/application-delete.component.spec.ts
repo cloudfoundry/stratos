@@ -7,7 +7,6 @@ import { generateTestApplicationServiceProvider } from '../../../../test-framewo
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
 import { ApplicationsModule } from '../applications.module';
-import { CustomImportModule } from './../../../custom-import.module';
 import { ApplicationDeleteComponent } from './application-delete.component';
 
 describe('ApplicationDeleteComponent', () => {
@@ -30,10 +29,6 @@ describe('ApplicationDeleteComponent', () => {
         generateTestApplicationServiceProvider(cfId, appId),
         TabNavService
       ]
-    }).overrideModule(ApplicationsModule, {
-      remove: {
-        imports: [CustomImportModule]
-      }
     }).compileComponents();
   }));
 

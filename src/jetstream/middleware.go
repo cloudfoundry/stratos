@@ -163,6 +163,7 @@ func (p *portalProxy) urlCheckMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 func (p *portalProxy) setStaticCacheContentMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		c.Response().Header().Set("cache-control", "no-cache")
+		c.Response().Header().Set("pragma", "no-cache")
 		return h(c)
 	}
 }
@@ -170,6 +171,7 @@ func (p *portalProxy) setStaticCacheContentMiddleware(h echo.HandlerFunc) echo.H
 func (p *portalProxy) setSecureCacheContentMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		c.Response().Header().Set("cache-control", "no-store")
+		c.Response().Header().Set("pragma", "no-cache")
 		return h(c)
 	}
 }
