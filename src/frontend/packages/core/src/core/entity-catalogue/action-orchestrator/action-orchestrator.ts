@@ -192,12 +192,12 @@ export class ActionOrchestrator<T extends OrchestratedActionBuilders = Orchestra
     if (!actionBuilderForType) {
       return null;
     }
-    const actionBuilder = (...args: Parameters<T[Y]>) => {
+    const actionBuilder = (...args: Parameters<T[Y]>): ReturnType<T[Y]> => {
       const action = actionBuilderForType(...args) as ActionBuilderAction;
       if (action) {
         action.actionBuilderActionType = actionType as string;
       }
-      return action;
+      return action as ReturnType<T[Y]>;
     };
     return actionBuilder;
   }

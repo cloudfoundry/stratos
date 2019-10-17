@@ -79,11 +79,10 @@ export class DeployApplicationStep3Component implements OnDestroy {
       this.appGuid = guid;
 
       // Update the root app wall list
-      this.appCatalogueEntity.actionDispatchManager.dispatchGetAll(
+      this.appCatalogueEntity.actionDispatchManager.dispatchGetMultiple(
         null,
         CfAppsDataSource.paginationKey,
-        CfAppsDataSource.includeRelations,
-        true
+        CfAppsDataSource.includeRelations
       );
       // this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
       // Pre-fetch the app env vars
