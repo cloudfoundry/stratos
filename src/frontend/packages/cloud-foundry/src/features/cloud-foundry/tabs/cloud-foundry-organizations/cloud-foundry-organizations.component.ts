@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { IOrganization } from '../../../../../../core/src/core/cf-api.types';
@@ -11,6 +12,10 @@ import {
 import {
   ListDefaultsActionOrConfig,
 } from '../../../../../../core/src/shared/components/list/defaults-list/defaults-datasource';
+import {
+  ActionListConfigProvider,
+  EntityConfigListConfigProvider,
+} from '../../../../../../core/src/shared/components/list/list-configs/list-config-providers';
 import { IListConfig, ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -40,8 +45,8 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 export class CloudFoundryOrganizationsComponent {
   public canAddOrg$: Observable<boolean>;
   public listActionConfig: ListDefaultsActionOrConfig;
-  public listConfig: Partial<IListConfig<any>>;
-  public dataSourceConfig: Partial<IListDataSourceConfig<any, any>>;
+  public listConfig: Partial<IListConfig<APIResource<IOrganization>>>;
+  public dataSourceConfig: Partial<IListDataSourceConfig<APIResource<IOrganization>, APIResource<IOrganization>>>;
 
 
   // TODO: RC Nuke all below to ctor (keep setup minimal contents)
@@ -52,16 +57,22 @@ export class CloudFoundryOrganizationsComponent {
   };
   public catalogueEntity = entityCatalogue.getEntity(this.entityConfig);
 
-  private setupWithAction() {
-    const endpointGuid = this.cfEndpointService.cfGuid;
-    const action = CloudFoundryEndpointService.createGetAllOrganizations(endpointGuid);
-    this.listActionConfig = action;
+  private createAction() {
+    return CloudFoundryEndpointService.createGetAllOrganizations(this.cfEndpointService.cfGuid);
+  }
+  private setupWithAction(provider = false) {
+    const action = this.createAction();
+    if (provider) {
+      const a = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
+      this.listConfig = a.getListConfig();
+    } else {
+      this.listActionConfig = action;
+    }
   }
 
-  private setupWithEntityConfig() {
+  private setupWithEntityConfig(provider = false) {
     const endpointGuid = this.cfEndpointService.cfGuid;
     const action = CloudFoundryEndpointService.createGetAllOrganizations(endpointGuid);
-    // this.listActionConfig = {
     const a = {
       entityConfig: this.entityConfig,
       endpointGuid,
@@ -77,11 +88,18 @@ export class CloudFoundryOrganizationsComponent {
         ], populateMissing: false
       }
     };
-    this.listActionConfig = a;
+
+    if (provider) {
+      const b = new EntityConfigListConfigProvider<APIResource<IOrganization>>(this.store, a);
+      this.listConfig = b.getListConfig();
+    } else {
+      this.listActionConfig = a;
+    }
   }
 
-  private setupWithListOverrides() {
-    this.listConfig = {
+  private setupWithListOverrides(provider = false) {
+    const action = this.createAction();
+    const ls: Partial<IListConfig<APIResource<IOrganization<unknown>>>> = {
       cardComponent: CfOrgCardComponent,
       viewType: ListViewTypes.BOTH,
       defaultView: 'cards' as ListView,
@@ -116,10 +134,19 @@ export class CloudFoundryOrganizationsComponent {
         noEntries: 'There are no organizations'
       }
     };
+    if (provider) {
+      const a = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
+      a.updateListConfig(ls);
+      this.listConfig = a.getListConfig();
+    } else {
+      this.listConfig = ls;
+    }
+
   }
 
-  private setupWithDataSourceOverrides() {
-    this.dataSourceConfig = {
+  private setupWithDataSourceOverrides(provider = false) {
+    const action = this.createAction();
+    const dsc: Partial<IListDataSourceConfig<APIResource<IOrganization>, APIResource<IOrganization>>> = {
       refresh: null,
       transformEntities: [
         { type: 'filter', field: 'entity.name' },
@@ -128,15 +155,23 @@ export class CloudFoundryOrganizationsComponent {
           // return [entities[0], entities[1]];
         }]
     };
+    if (provider) {
+      const a = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
+      a.updateDataSourceConfig(dsc);
+      this.listConfig = a.getListConfig();
+    } else {
+      this.dataSourceConfig = dsc;
+    }
+
   }
 
-  private setupWithOriginalListConfig() {
+  private setupWithOriginalListConfig(provider = false) {
     this.listConfig = this.temp;
   }
 
-  private setupWithMinimalListConfig() {
-    this.listActionConfig = CloudFoundryEndpointService.createGetAllOrganizations(this.cfEndpointService.cfGuid);
-    this.listConfig = {
+  private setupWithMinimalListConfig(provider = false) {
+    const action = this.createAction();
+    const ls: Partial<IListConfig<APIResource<IOrganization<unknown>>>> = {
       cardComponent: CfOrgCardComponent,
       viewType: ListViewTypes.CARD_ONLY,
       defaultView: 'cards' as ListView,
@@ -163,25 +198,42 @@ export class CloudFoundryOrganizationsComponent {
         noEntries: 'There are no organizations'
       }
     };
-    this.dataSourceConfig = {
+    const dsc: Partial<IListDataSourceConfig<APIResource<IOrganization>, APIResource<IOrganization>>> = {
       transformEntities: [{ type: 'filter', field: 'entity.name' }] // Note - this will go away once fixed in default case
     };
+
+    if (provider) {
+      const a = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
+      a.updateListConfig(ls);
+      a.updateDataSourceConfig(dsc);
+      this.listConfig = a.getListConfig();
+    } else {
+      this.listActionConfig = action;
+      this.listConfig = ls;
+      this.dataSourceConfig = dsc;
+    }
+
+
+
+
   }
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     currentUserPermissionsService: CurrentUserPermissionsService,
     private temp: CfOrgsListConfigService,
+    private store: Store<any>,
   ) {
     this.canAddOrg$ = currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
 
     // TODO: RC Nuke all below (keep setup minimal contents)
-    this.setupWithAction();
-    // this.setupWithEntityConfig();
-    this.setupWithListOverrides();
-    // this.setupWithDataSourceOverrides();
-    // this.setupWithOriginalListConfig();// (ListService provider)
-    // this.setupWithMinimalListConfig();// (same as original but overrides instead of service)
+    // this.setupWithAction(true);
+    // this.setupWithEntityConfig(true);
+    // this.setupWithListOverrides(true);
+    // this.setupWithDataSourceOverrides(true);
+    // this.setupWithOriginalListConfig(true);// (ListService provider)
+    this.setupWithMinimalListConfig(true); // (same as original but overrides instead of service)
+
 
   }
 }

@@ -7,9 +7,11 @@
       </span>
     </button>
   </app-page-sub-nav>
-  <app-defaults-list [actionOrConfig]="listActionConfig" [listConfig]="listConfig"
-    [dataSourceConfig]="dataSourceConfig"></app-defaults-list>
+  <app-list-with-config [listConfig]="listConfig"></app-list-with-config>
   <!-- // TODO: RC Nuke all below -->
+  <!-- <app-defaults-list [actionOrConfig]="listActionConfig" [listConfig]="listConfig"
+    [dataSourceConfig]="dataSourceConfig"></app-defaults-list> -->
+
   -------------
   <app-simple-list [catalogueEntity]="catalogueEntity"></app-simple-list>
   <!-- <app-list></app-list> -->

@@ -90,6 +90,9 @@ export interface IListConfig<T> {
    * The card component used in card view
    */
   cardComponent?: CardTypes<T>;
+  /**
+   * Set to true to hide the list refresh button
+   */
   hideRefresh?: boolean;
   /**
    * Allow selection regardless of number or visibility of multi actions

@@ -61,6 +61,7 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
+import { ListWithConfigComponent } from './components/list/list-with-config/list-with-config.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { ListHostDirective } from './components/list/simple-list/list-host.directive';
@@ -220,6 +221,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     SimpleListComponent,
     DefaultsListComponent,
     ListHostDirective,
+    ListWithConfigComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -311,6 +313,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     SimpleListComponent,
     DefaultsListComponent,
     ListHostDirective,
+    ListWithConfigComponent
   ],
   entryComponents: [
     DialogConfirmComponent,
