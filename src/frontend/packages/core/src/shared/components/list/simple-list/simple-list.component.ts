@@ -19,7 +19,7 @@ import { ListHostDirective } from './list-host.directive';
 export class SimpleListComponent implements OnInit {
 
   @Input()
-  private catalogueEntity: StratosCatalogueEntity;
+  public catalogueEntity: StratosCatalogueEntity;
 
   @ViewChild(ListHostDirective)
   public listHost: ListHostDirective;
