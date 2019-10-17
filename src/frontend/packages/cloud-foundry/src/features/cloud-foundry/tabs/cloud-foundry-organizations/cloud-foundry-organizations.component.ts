@@ -212,10 +212,6 @@ export class CloudFoundryOrganizationsComponent {
       this.listConfig = ls;
       this.dataSourceConfig = dsc;
     }
-
-
-
-
   }
 
   constructor(
