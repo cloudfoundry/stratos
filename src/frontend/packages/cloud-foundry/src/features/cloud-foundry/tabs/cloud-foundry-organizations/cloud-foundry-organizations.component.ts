@@ -231,3 +231,4 @@ export class CloudFoundryOrganizationsComponent {
     this.setupWithMinimalListConfig(true); // (same as original but overrides instead of service)
   }
 }
+
