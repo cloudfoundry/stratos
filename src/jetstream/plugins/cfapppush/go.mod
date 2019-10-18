@@ -12,7 +12,6 @@ require (
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/bmatcuk/doublestar v1.1.5 // indirect
 	github.com/charlievieth/fs v0.0.0-20170613215519-7dc373669fa1 // indirect
-	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
 	github.com/cloudfoundry-incubator/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/bosh-cli v6.1.0+incompatible // indirect
 	github.com/cloudfoundry/bosh-utils v0.0.0-20191015185029-edd614a7817f // indirect
@@ -26,12 +25,9 @@ require (
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/gorilla/sessions v1.2.0 // indirect
 	github.com/gorilla/websocket v1.4.1
-	github.com/govau/cf-common v0.0.7 // indirect
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
-	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.0 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
@@ -44,7 +40,6 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/vito/go-interact v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect
 	golang.org/x/net v0.0.0-20191014212845-da9a3fd4c582 // indirect
 	golang.org/x/text v0.3.2 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
