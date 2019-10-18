@@ -5,22 +5,22 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
 )
 
 type portalProxy struct {
-	Config                 interfaces.PortalConfig
+	Config                 api.PortalConfig
 	DatabaseConnectionPool *sql.DB
-	SessionStore           interfaces.SessionStorer
+	SessionStore           api.SessionStorer
 	SessionStoreOptions    *sessions.Options
-	Plugins                map[string]interfaces.StratosPlugin
+	Plugins                map[string]api.StratosPlugin
 	PluginsStatus          map[string]bool
-	Diagnostics            *interfaces.Diagnostics
+	Diagnostics            *api.Diagnostics
 	SessionCookieName      string
 	EmptyCookieMatcher     *regexp.Regexp // Used to detect and remove empty Cookies sent by certain browsers
-	AuthProviders          map[string]interfaces.AuthProvider
+	AuthProviders          map[string]api.AuthProvider
 	env                    *env.VarSet
 }
 

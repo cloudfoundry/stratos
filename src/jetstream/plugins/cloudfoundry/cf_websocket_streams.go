@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/noaa"
 	"github.com/cloudfoundry/noaa/consumer"
 	noaa_errors "github.com/cloudfoundry/noaa/errors"
@@ -50,7 +50,7 @@ func (c CloudFoundrySpecification) commonStreamHandler(echoContext echo.Context,
 	}
 	defer ac.consumer.Close()
 
-	clientWebSocket, pingTicker, err := interfaces.UpgradeToWebSocket(echoContext)
+	clientWebSocket, pingTicker, err := api.UpgradeToWebSocket(echoContext)
 	if err != nil {
 		return err
 	}

@@ -15,7 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -43,11 +43,11 @@ func TestLoginToUAA(t *testing.T) {
 			msBody(jsonMust(mockUAAResponse)))
 
 		defer mockUAA.Close()
-		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
+		pp.Config.ConsoleConfig = new(api.ConsoleConfig)
 		uaaURL, _ := url.Parse(mockUAA.URL)
 		pp.Config.ConsoleConfig.UAAEndpoint = uaaURL
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
-		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Remote)
+		pp.Config.ConsoleConfig.AuthEndpointType = string(api.Remote)
 
 		mock.ExpectQuery(selectAnyFromTokens).
 			WillReturnRows(expectNoRows())
@@ -93,7 +93,7 @@ func TestLocalLogin(t *testing.T) {
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
 
-		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
+		pp.Config.ConsoleConfig.AuthEndpointType = string(api.Local)
 
 		rows := sqlmock.NewRows([]string{"user_guid"}).AddRow(userGUID)
 		mock.ExpectQuery(findUserGUID).WithArgs(username).WillReturnRows(rows)
@@ -146,7 +146,7 @@ func TestLocalLoginWithBadCredentials(t *testing.T) {
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
 
-		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
+		pp.Config.ConsoleConfig.AuthEndpointType = string(api.Local)
 
 		rows := sqlmock.NewRows([]string{"user_guid"}).AddRow(userGUID)
 		mock.ExpectQuery(findUserGUID).WithArgs(username).WillReturnRows(rows)
@@ -197,9 +197,9 @@ func TestLocalLoginWithNoAdminScope(t *testing.T) {
 		mock.ExpectQuery(findPasswordHash).WithArgs(userGUID).WillReturnRows(rows)
 
 		//Configure the admin scope we expect the user to have
-		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
+		pp.Config.ConsoleConfig = new(api.ConsoleConfig)
 		pp.Config.ConsoleConfig.LocalUserScope = "stratos.admin"
-		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Local)
+		pp.Config.ConsoleConfig.AuthEndpointType = string(api.Local)
 
 		//The user trying to log in has a non-admin scope
 		rows = sqlmock.NewRows([]string{"scope"}).AddRow(wrongScope)
@@ -237,18 +237,18 @@ func TestLoginToUAAWithBadCreds(t *testing.T) {
 		)
 
 		defer mockUAA.Close()
-		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
+		pp.Config.ConsoleConfig = new(api.ConsoleConfig)
 		uaaURL, _ := url.Parse(mockUAA.URL)
 		pp.Config.ConsoleConfig.UAAEndpoint = uaaURL
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
-		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Remote)
+		pp.Config.ConsoleConfig.AuthEndpointType = string(api.Remote)
 
 		err := pp.loginToUAA(ctx)
 		Convey("Login to UAA should fail", func() {
 			So(err, ShouldNotBeNil)
 		})
 
-		someErr := err.(interfaces.ErrHTTPShadow)
+		someErr := err.(api.ErrHTTPShadow)
 
 		Convey("HTTP status code should be 401", func() {
 			So(someErr.HTTPError.Code, ShouldEqual, http.StatusUnauthorized)
@@ -278,11 +278,11 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 			msBody(jsonMust(mockUAAResponse)))
 
 		defer mockUAA.Close()
-		pp.Config.ConsoleConfig = new(interfaces.ConsoleConfig)
+		pp.Config.ConsoleConfig = new(api.ConsoleConfig)
 		uaaURL, _ := url.Parse(mockUAA.URL)
 		pp.Config.ConsoleConfig.UAAEndpoint = uaaURL
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
-		pp.Config.ConsoleConfig.AuthEndpointType = string(interfaces.Remote)
+		pp.Config.ConsoleConfig.AuthEndpointType = string(api.Remote)
 
 		mock.ExpectQuery(selectAnyFromTokens).
 			// WithArgs(mockUserGUID).
@@ -330,7 +330,7 @@ func TestLoginToCNSI(t *testing.T) {
 		var mockURL *url.URL
 		mockURL, _ = url.Parse(mockUAA.URL)
 		stringCFType := "cf"
-		var mockCNSI = interfaces.CNSIRecord{
+		var mockCNSI = api.CNSIRecord{
 			GUID:                   mockCNSIGUID,
 			Name:                   "mockCF",
 			CNSIType:               "cf",
@@ -498,7 +498,7 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 		var mockURL *url.URL
 		mockURL, _ = url.Parse(mockUAA.URL)
 		stringCFType := "cf"
-		var mockCNSI = interfaces.CNSIRecord{
+		var mockCNSI = api.CNSIRecord{
 			GUID:                  mockCNSIGUID,
 			Name:                  "mockCF",
 			CNSIType:              "cf",
@@ -566,11 +566,11 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 		badCNSIID := ""
 		badAuthToken := ""
 		badRefreshToken := ""
-		badUserInfo := interfaces.JWTUserTokenInfo{
+		badUserInfo := api.JWTUserTokenInfo{
 			UserGUID:    "",
 			TokenExpiry: 0,
 		}
-		emptyTokenRecord := interfaces.TokenRecord{}
+		emptyTokenRecord := api.TokenRecord{}
 
 		req := setupMockReq("POST", "", map[string]string{})
 		_, _, _, pp, db, mock := setupHTTPTest(req)
@@ -604,7 +604,7 @@ func TestSetUAATokenRecord(t *testing.T) {
 	Convey("Test saving a UAA Token record with a DB exception", t, func() {
 
 		fakeKey := "fake-guid"
-		fakeTr := interfaces.TokenRecord{}
+		fakeTr := api.TokenRecord{}
 
 		req := setupMockReq("POST", "", map[string]string{})
 		_, _, _, pp, db, mock := setupHTTPTest(req)

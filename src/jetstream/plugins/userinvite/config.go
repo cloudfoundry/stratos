@@ -7,7 +7,7 @@ import (
 	"path"
 	text "text/template"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 
 	"github.com/govau/cf-common/env"
 	log "github.com/sirupsen/logrus"
@@ -62,17 +62,17 @@ func (userinvite *UserInvite) LoadConfig(env env.VarSet) (*Config, error) {
 	c := &Config{}
 
 	smtpConfig := &SMTPConfig{}
-	if err := config.Load(smtpConfig, env.Lookup); err != nil {
+	if err := api.Load(smtpConfig, env.Lookup); err != nil {
 		return c, fmt.Errorf("Unable to load SMTP configuration. %v", err)
 	}
 
 	templateConfig := &TemplateConfig{}
-	if err := config.Load(templateConfig, env.Lookup); err != nil {
+	if err := api.Load(templateConfig, env.Lookup); err != nil {
 		return c, fmt.Errorf("Unable to load Template configuration. %v", err)
 	}
 
 	clientConfig := &ClientConfig{}
-	if err := config.Load(clientConfig, env.Lookup); err != nil {
+	if err := api.Load(clientConfig, env.Lookup); err != nil {
 		return c, fmt.Errorf("Unable to load invite client configuration. %v", err)
 	}
 

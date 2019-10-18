@@ -9,7 +9,7 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 func TestPgSQLGooseDB(t *testing.T) {
@@ -44,7 +44,7 @@ func TestPgSQLGooseDB(t *testing.T) {
 		defer db.Close()
 
 		// General setup
-		expectedVersionRecord := interfaces.GooseDBVersionRecord{VersionID: mockVersionID}
+		expectedVersionRecord := api.GooseDBVersionRecord{VersionID: mockVersionID}
 
 		Convey("if one exists", func() {
 

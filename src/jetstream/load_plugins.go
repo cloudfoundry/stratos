@@ -10,19 +10,19 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinfo"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinvite"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	log "github.com/sirupsen/logrus"
 )
 
 func (pp *portalProxy) loadPlugins() {
 
-	pp.Plugins = make(map[string]interfaces.StratosPlugin)
+	pp.Plugins = make(map[string]api.StratosPlugin)
 
 	log.Info("Initialising plugins")
 
 	for _, p := range []struct {
 		Name string
-		Init func(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error)
+		Init func(portalProxy api.PortalProxy) (api.StratosPlugin, error)
 	}{
 		{"cfapppush", cfapppush.Init},
 		{"cfappssh", cfappssh.Init},

@@ -4,33 +4,33 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush/pushapp"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo"
 )
 
 // CFAppPush is a plugin to allow applications to be pushed to Cloud Foundry from Stratos
 type CFAppPush struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 	cfPush      pushapp.CFPush
 }
 
 // Init creates a new CFAppPush
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 	return &CFAppPush{portalProxy: portalProxy}, nil
 }
 
 // GetMiddlewarePlugin gets the middleware plugin for this plugin
-func (cfAppPush *CFAppPush) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (cfAppPush *CFAppPush) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
-func (cfAppPush *CFAppPush) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (cfAppPush *CFAppPush) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
-func (cfAppPush *CFAppPush) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (cfAppPush *CFAppPush) GetRoutePlugin() (api.RoutePlugin, error) {
 	return cfAppPush, nil
 }
 

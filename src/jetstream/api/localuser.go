@@ -1,4 +1,4 @@
-package interfaces
+package api
 
 // LocalUser - Used for local user auth and management
 type LocalUser struct {

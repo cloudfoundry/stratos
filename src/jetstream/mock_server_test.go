@@ -17,7 +17,7 @@ import (
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry"
@@ -114,7 +114,7 @@ func setupMockPGStore(db *sql.DB) *mockPGStore {
 	return pgs
 }
 
-func initCFPlugin(pp *portalProxy) interfaces.StratosPlugin {
+func initCFPlugin(pp *portalProxy) api.StratosPlugin {
 	plugin, _ := cloudfoundry.Init(pp)
 
 	return plugin
@@ -125,8 +125,8 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 	//_, _ = rand.Read(key)
 
 	urlP, _ := url.Parse("https://login.52.38.188.107.nip.io:50450")
-	pc := interfaces.PortalConfig{
-		ConsoleConfig: &interfaces.ConsoleConfig{
+	pc := api.PortalConfig{
+		ConsoleConfig: &api.ConsoleConfig{
 			ConsoleClient:       "console",
 			ConsoleClientSecret: "",
 			UAAEndpoint:         urlP,
@@ -141,7 +141,7 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 	pp := newPortalProxy(pc, db, nil, nil, env.NewVarSet())
 	pp.SessionStore = setupMockPGStore(db)
 	initialisedEndpoint := initCFPlugin(pp)
-	pp.Plugins = make(map[string]interfaces.StratosPlugin)
+	pp.Plugins = make(map[string]api.StratosPlugin)
 	pp.Plugins["cf"] = initialisedEndpoint
 	return pp
 }
@@ -252,7 +252,7 @@ const mockUAAToken = `eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eX
 
 var mockTokenExpiry = time.Now().AddDate(0, 0, 1).Unix()
 
-var mockUAAResponse = interfaces.UAAResponse{
+var mockUAAResponse = api.UAAResponse{
 	AccessToken:  mockUAAToken,
 	RefreshToken: mockUAAToken,
 }
@@ -288,13 +288,13 @@ var mockEncryptionKey = make([]byte, 32)
 
 var cipherClientSecret, _ = crypto.EncryptToken(mockEncryptionKey, mockClientSecret)
 
-var mockV2InfoResponse = interfaces.V2Info{
+var mockV2InfoResponse = api.V2Info{
 	AuthorizationEndpoint:  mockAuthEndpoint,
 	TokenEndpoint:          mockTokenEndpoint,
 	DopplerLoggingEndpoint: mockDopplerEndpoint,
 }
 
-var mockInfoResponse = interfaces.V2Info{
+var mockInfoResponse = api.V2Info{
 	AuthorizationEndpoint: mockAuthEndpoint,
 	TokenEndpoint:         mockTokenEndpoint,
 }

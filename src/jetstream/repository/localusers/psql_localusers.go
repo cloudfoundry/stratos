@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -99,10 +99,10 @@ func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error
 }
 
 //FindUser finds and returns meatdata for the given user
-func (p *PgsqlLocalUsersRepository) FindUser(userGUID string) (interfaces.LocalUser, error) {
+func (p *PgsqlLocalUsersRepository) FindUser(userGUID string) (api.LocalUser, error) {
 	log.Debug("FindUser")
 
-	var user interfaces.LocalUser
+	var user api.LocalUser
 	user.UserGUID = userGUID
 	if userGUID == "" {
 		msg := "Unable to find user without a valid user GUID"
@@ -226,7 +226,7 @@ func (p *PgsqlLocalUsersRepository) FindLastLoginTime(userGUID string) (time.Tim
 
 // AddLocalUser - Add a new local user to the datastore.
 // Email is optional
-func (p *PgsqlLocalUsersRepository) AddLocalUser(user interfaces.LocalUser) error {
+func (p *PgsqlLocalUsersRepository) AddLocalUser(user api.LocalUser) error {
 
 	log.Debug("AddLocalUser")
 
@@ -276,7 +276,7 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(user interfaces.LocalUser) erro
 	return err
 }
 
-func (p *PgsqlLocalUsersRepository) UpdateLocalUser(user interfaces.LocalUser) error {
+func (p *PgsqlLocalUsersRepository) UpdateLocalUser(user api.LocalUser) error {
 	log.Debug("UpdateLocalUser")
 
 	//Validate args

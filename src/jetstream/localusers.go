@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 func (p *portalProxy) FindUserGUID(c echo.Context) (string, error) {
@@ -57,7 +57,7 @@ func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 	if err != nil {
 		log.Errorf("Database error getting repo for local users: %v", err)
 	} else {
-		user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: username, Email: email, Scope: scope}
+		user := api.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: username, Email: email, Scope: scope}
 		err = localUsersRepo.AddLocalUser(user)
 		if err != nil {
 			log.Errorf("Error adding local user %v", err)

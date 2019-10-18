@@ -10,7 +10,7 @@ import (
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -54,11 +54,11 @@ func TestPgSQLCNSIs(t *testing.T) {
 	Convey("Given a request for a list of CNSIs", t, func() {
 
 		var (
-			expectedList []*interfaces.CNSIRecord
+			expectedList []*api.CNSIRecord
 		)
 
 		// general setup
-		expectedList = make([]*interfaces.CNSIRecord, 0)
+		expectedList = make([]*api.CNSIRecord, 0)
 
 		// sqlmock setup
 		db, mock, err := sqlmock.New()
@@ -111,8 +111,8 @@ func TestPgSQLCNSIs(t *testing.T) {
 
 			// general setup
 			u, _ := url.Parse(mockAPIEndpoint)
-			r1 := &interfaces.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: false}
-			r2 := &interfaces.CNSIRecord{GUID: mockCEGUID, Name: "Some fancy HCE Cluster", CNSIType: "hce", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: "", SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: false}
+			r1 := &api.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: false}
+			r2 := &api.CNSIRecord{GUID: mockCEGUID, Name: "Some fancy HCE Cluster", CNSIType: "hce", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: "", SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: false}
 			expectedList = append(expectedList, r1, r2)
 
 			mockCFAndCERows = sqlmock.NewRows(rowFieldsForCNSI).
@@ -183,11 +183,11 @@ func TestPgSQLCNSIs(t *testing.T) {
 			//SELECT c.guid, c.name, c.cnsi_type, c.api_endpoint, c.doppler_logging_endpoint, t.user_guid, t.token_expiry, c.skip_ssl_validation, t.disconnected, t.meta_data
 			//rowFieldsForCluster = []string{"guid", "name", "cnsi_type", "api_endpoint", "account", "token_expiry", "skip_ssl_validation"}
 			rowFieldsForCluster = []string{"guid", "name", "cnsi_type", "api_endpoint", "doppler_logging_endpoint", "account", "token_expiry", "skip_ssl_validation", "disconnected", "meta_data", "sub_type", "endpoint_metadata"}
-			expectedList        []*interfaces.ConnectedEndpoint
+			expectedList        []*api.ConnectedEndpoint
 			mockAccount         = "asd-gjfg-bob"
 		)
 
-		expectedList = make([]*interfaces.ConnectedEndpoint, 0)
+		expectedList = make([]*api.ConnectedEndpoint, 0)
 
 		db, mock, err := sqlmock.New()
 		if err != nil {
@@ -239,8 +239,8 @@ func TestPgSQLCNSIs(t *testing.T) {
 
 			// general setup
 			u, _ := url.Parse(mockAPIEndpoint)
-			r1 := &interfaces.ConnectedEndpoint{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, DopplerLoggingEndpoint: mockDopplerEndpoint, Account: mockAccount, TokenExpiry: mockTokenExpiry, SkipSSLValidation: true}
-			r2 := &interfaces.ConnectedEndpoint{GUID: mockCEGUID, Name: "Some fancy HCE Cluster", CNSIType: "hce", APIEndpoint: u, DopplerLoggingEndpoint: mockDopplerEndpoint, Account: mockAccount, TokenExpiry: mockTokenExpiry, SkipSSLValidation: true}
+			r1 := &api.ConnectedEndpoint{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, DopplerLoggingEndpoint: mockDopplerEndpoint, Account: mockAccount, TokenExpiry: mockTokenExpiry, SkipSSLValidation: true}
+			r2 := &api.ConnectedEndpoint{GUID: mockCEGUID, Name: "Some fancy HCE Cluster", CNSIType: "hce", APIEndpoint: u, DopplerLoggingEndpoint: mockDopplerEndpoint, Account: mockAccount, TokenExpiry: mockTokenExpiry, SkipSSLValidation: true}
 			expectedList = append(expectedList, r1, r2)
 
 			mockClusterList = sqlmock.NewRows(rowFieldsForCluster).
@@ -317,7 +317,7 @@ func TestPgSQLCNSIs(t *testing.T) {
 
 			// General setup
 			u, _ := url.Parse(mockAPIEndpoint)
-			expectedCNSIRecord := interfaces.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: false}
+			expectedCNSIRecord := api.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: false}
 
 			rs := sqlmock.NewRows(rowFieldsForCNSI).
 				AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "")
@@ -347,7 +347,7 @@ func TestPgSQLCNSIs(t *testing.T) {
 		Convey("if the specified CNSI isn't in the database", func() {
 
 			// General setup
-			expectedCNSIRecord := interfaces.CNSIRecord{}
+			expectedCNSIRecord := api.CNSIRecord{}
 
 			rs := sqlmock.NewRows(rowFieldsForCNSI)
 			mock.ExpectQuery(selectFromCNSIsWhere).
@@ -376,7 +376,7 @@ func TestPgSQLCNSIs(t *testing.T) {
 		Convey("if the Find() method throws an error", func() {
 
 			// General setup
-			expectedCNSIRecord := interfaces.CNSIRecord{}
+			expectedCNSIRecord := api.CNSIRecord{}
 			expectedErrorMessage := fmt.Sprintf("Error trying to Find CNSI record: %s", unknownDBError)
 
 			mock.ExpectQuery(selectFromCNSIsWhere).
@@ -414,7 +414,7 @@ func TestPgSQLCNSIs(t *testing.T) {
 
 			// General setup
 			u, _ := url.Parse(mockAPIEndpoint)
-			expectedCNSIRecord := interfaces.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: true}
+			expectedCNSIRecord := api.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: true}
 
 			rs := sqlmock.NewRows(rowFieldsForCNSI).
 				AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, true, "", "")
@@ -445,7 +445,7 @@ func TestPgSQLCNSIs(t *testing.T) {
 		Convey("if the specified endpoint isn't in the database", func() {
 
 			// General setup
-			expectedCNSIRecord := interfaces.CNSIRecord{}
+			expectedCNSIRecord := api.CNSIRecord{}
 
 			rs := sqlmock.NewRows(rowFieldsForCNSI)
 			mock.ExpectQuery(selectFromCNSIsWhere).
@@ -474,7 +474,7 @@ func TestPgSQLCNSIs(t *testing.T) {
 		Convey("if the find by endpoint method throws an error", func() {
 
 			// General setup
-			expectedCNSIRecord := interfaces.CNSIRecord{}
+			expectedCNSIRecord := api.CNSIRecord{}
 			expectedErrorMessage := fmt.Sprintf("Error trying to Find CNSI record: %s", unknownDBError)
 
 			mock.ExpectQuery(selectFromCNSIsWhere).
@@ -512,7 +512,7 @@ func TestPgSQLCNSIs(t *testing.T) {
 
 			// General setup
 			u, _ := url.Parse(mockAPIEndpoint)
-			cnsi := interfaces.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: true}
+			cnsi := api.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: true}
 
 			mock.ExpectExec(insertIntoCNSIs).
 				WithArgs(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), true, sqlmock.AnyArg(), sqlmock.AnyArg()).
@@ -532,7 +532,7 @@ func TestPgSQLCNSIs(t *testing.T) {
 
 			// General setup
 			u, _ := url.Parse(mockAPIEndpoint)
-			cnsi := interfaces.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: true}
+			cnsi := api.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: true}
 			expectedErrorMessage := fmt.Sprintf("Unable to Save CNSI record: %s", unknownDBError)
 
 			mock.ExpectExec(insertIntoCNSIs).

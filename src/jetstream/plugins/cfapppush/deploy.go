@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush/pushapp"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
@@ -84,7 +84,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	spaceName := echoContext.QueryParam("space")
 	orgName := echoContext.QueryParam("org")
 
-	clientWebSocket, pingTicker, err := interfaces.UpgradeToWebSocket(echoContext)
+	clientWebSocket, pingTicker, err := api.UpgradeToWebSocket(echoContext)
 	if err != nil {
 		log.Errorf("Upgrade to websocket failed due to: %+v", err)
 		return err
