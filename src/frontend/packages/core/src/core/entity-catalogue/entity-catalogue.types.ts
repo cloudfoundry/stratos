@@ -173,4 +173,3 @@ export interface IStratosEntityData<T extends IEntityMetadata = IEntityMetadata>
 export interface IStratosEntityStatusData<Y extends IEntityMetadata = IEntityMetadata> extends IStratosEntityData<Y> {
   status$?: Observable<StratosStatus>;
 }
-
