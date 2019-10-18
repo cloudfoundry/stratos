@@ -13,7 +13,7 @@ export interface ActionBuilderAction extends EntityRequestAction {
 
 // A function that returns a ICFAction
 export type OrchestratedActionBuilder<
-  T extends any[]= any[],
+  T extends any[] = any[],
   Y extends Action = Action
   > = (...args: T) => Y;
 
@@ -186,20 +186,19 @@ export class ActionOrchestrator<T extends OrchestratedActionBuilders = Orchestra
   public getEntityActionDispatcher(actionDispatcher?: (action: Action) => void) {
     return new EntityActionDispatcherManager<T>(actionDispatcher, this);
   }
-
+  // TODO should return T[Y]
   public getActionBuilder<Y extends keyof T>(actionType: Y) {
     const actionBuilderForType = this.actionBuilders[actionType];
     if (!actionBuilderForType) {
       return null;
     }
-    const actionBuilder: T[Y] = (...args: Parameters<T[Y]>): ReturnType<T[Y]> => {
+    return (...args: Parameters<T[Y]>): ReturnType<T[Y]> => {
       const action = actionBuilderForType(...args) as ActionBuilderAction;
       if (action) {
         action.actionBuilderActionType = actionType as string;
       }
       return action as ReturnType<T[Y]>;
     };
-    return actionBuilder;
   }
 
   public hasActionBuilder(actionType: keyof T) {

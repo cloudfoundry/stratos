@@ -1,5 +1,4 @@
 import { HttpRequest } from '@angular/common/http';
-import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
 import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
@@ -60,7 +59,7 @@ export interface EntityRequestAction extends EntityCatalogueEntityConfig, Reques
    * like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that
    */
   removeEntityOnDelete?: boolean;
-  options?: RequestOptions | HttpRequest<any>;
+  options?: HttpRequest<any>;
 }
 
 export interface IUpdateRequestAction {
@@ -119,7 +118,7 @@ export class UpdateCfAction extends RequestUpdateAction implements IUpdateReques
 }
 
 export interface ICFAction extends EntityRequestAction {
-  options: RequestOptions;
+  options: HttpRequest<any>;
   actions: string[];
   skipValidation?: boolean;
   validate?: boolean;

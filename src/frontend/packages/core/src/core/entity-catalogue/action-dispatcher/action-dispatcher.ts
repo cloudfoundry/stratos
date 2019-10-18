@@ -20,7 +20,7 @@ export class EntityActionDispatcher<
 
   constructor(
     private actionDispatcher?: ActionDispatcher,
-    private actionBuilder?: T
+    private actionBuilder?: T | ((...args: Parameters<T>) => ReturnType<T>)
   ) { }
   public dispatch(...args: Parameters<T>) {
     if (this.actionBuilder) {
