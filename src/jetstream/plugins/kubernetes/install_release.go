@@ -10,8 +10,8 @@ import (
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	"k8s.io/helm/pkg/chartutil"
-	"k8s.io/helm/pkg/helm"
+	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart/loader"
 )
 
 const chartCollection = "charts"
@@ -59,7 +59,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	log.Debugf("Chart Download URL: %s", downloadURL)
 
 	// Should we ignore SSL certs?
-	// TODO: Look up Helm Repository endpoiint and use the value from that
+	// TODO: Look up Helm Repository endpoint and use the value from that
 	http := c.portalProxy.GetHttpClient(true)
 
 	resp, err := http.Get(downloadURL)
@@ -69,50 +69,54 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	}
 
 	defer resp.Body.Close()
-	chart, err := chartutil.LoadArchive(resp.Body)
+
+	chart, err := loader.LoadArchive(resp.Body)
 	if err != nil {
 		return fmt.Errorf("Could not load chart from archive: %v+", err)
 	}
 
-	log.Debug("Loaded helm chart")
+	log.Warn("Loaded helm chart")
+	log.Warn(chart.Name())
 
 	endpointGUID := params.Endpoint
 	userGUID := ec.Get("user_id").(string)
 
-	client, _, tiller, err := c.GetHelmClient(endpointGUID, userGUID)
+	config, err := c.GetHelmConfiguration(endpointGUID, userGUID, params.Namespace)
 	if err != nil {
-		return fmt.Errorf("Could not get Helm Client for endpoint: %v+", err)
+		return fmt.Errorf("Could not get Helm Configuration for endpoint: %v+", err)
 	}
 
-	defer tiller.Close()
+	// if _, err := chartutil.LoadRequirements(chart); err == nil {
+	// 	log.Debug("Chart requirements loaded")
+	// } else if err != chartutil.ErrRequirementsNotFound {
+	// 	log.Error("Can not load requirements for helm chart")
+	// } else {
+	// 	log.Error(err)
+	// }
 
-	if _, err := chartutil.LoadRequirements(chart); err == nil {
-		log.Debug("Chart requirements loaded")
-	} else if err != chartutil.ErrRequirementsNotFound {
-		log.Error("Can not load requirements for helm chart")
-	} else {
+	log.Warn("Got values")
+
+	n := make(map[string]interface{})
+
+	log.Warn(params.Values)
+
+	install := action.NewInstall(config)
+	install.ReleaseName = params.Name
+	install.Namespace = params.Namespace
+	// Set timeout
+	// Wait?
+	// Generate Name ?
+	// Atomic?
+
+	release, err := install.Run(chart, n)
+	if err != nil {
 		log.Error(err)
-	}
-
-	installResponse, err := client.InstallReleaseFromChart(
-		chart,
-		params.Namespace,
-		helm.ValueOverrides([]byte(params.Values)),
-		helm.ReleaseName(params.Name),
-		helm.InstallDryRun(false),
-		helm.InstallReuseName(false),
-		helm.InstallDisableHooks(false),
-		helm.InstallDisableCRDHook(false),
-		helm.InstallTimeout(300),
-		helm.InstallWait(false),
-		helm.InstallDescription(""),
-	)
-
-	if err != nil {
 		return fmt.Errorf("Could not install Helm Chart: %v+", err)
-
 	}
-	return ec.JSON(200, installResponse)
+
+	log.Warn("All okay")
+
+	return ec.JSON(200, release)
 }
 
 func (c *KubernetesSpecification) getChart(chartID, version string) (string, error) {
@@ -151,15 +155,19 @@ func (c *KubernetesSpecification) DeleteRelease(ec echo.Context) error {
 	endpointGUID := ec.Param("endpoint")
 	releaseName := ec.Param("name")
 
+	// I think we're going to need the namespace
+
 	userGUID := ec.Get("user_id").(string)
-	client, _, tiller, err := c.GetHelmClient(endpointGUID, userGUID)
+
+	config, err := c.GetHelmConfiguration(endpointGUID, userGUID, "")
 	if err != nil {
-		return fmt.Errorf("Could not get Helm Client for endpoint: %v+", err)
+		log.Errorf("Helm: ListReleases could not get a Helm Configuration: %s", err)
+		return err
 	}
 
-	defer tiller.Close()
+	uninstall := action.NewUninstall(config)
 
-	deleteResponse, err := client.DeleteRelease(releaseName, helm.DeletePurge(true))
+	deleteResponse, err := uninstall.Run(releaseName)
 	if err != nil {
 		return fmt.Errorf("Could not delete Helm Release: %v+", err)
 	}

@@ -95,7 +95,8 @@ export class HelmEffects {
           if (!endpointData) {
             return;
           }
-          endpointData.releases.forEach((data) => {
+          endpointData.forEach((data) => {
+            console.log(data);
             const helmRelease: HelmRelease = {
               ...data,
               endpointId: endpoint
@@ -104,7 +105,7 @@ export class HelmEffects {
             const id = endpoint + ':' + data.name;
             helmRelease.guid = id;
             // Make a note of the guid of the endpoint for the release
-            helmRelease.status = mapHelmStatus(data.info.status.code);
+            helmRelease.status = mapHelmStatus(data.info.status);
             helmRelease.lastDeployed = mapHelmModifiedDate(data.info.last_deployed);
             helmRelease.firstDeployed = mapHelmModifiedDate(data.info.first_deployed);
             // data.info =
@@ -305,8 +306,14 @@ export class HelmEffects {
   }
 }
 
-function mapHelmStatus(status: number) {
+function _mapHelmStatus(status: number) {
   return HelmStatus[status].replace('_', ' ');
+}
+
+function mapHelmStatus(status: string) {
+  // TODO: Capitalize first letter
+  return status;
+  //return HelmStatus[status].replace('_', ' ');
 }
 
 function mapHelmModifiedDate(date: any) {
