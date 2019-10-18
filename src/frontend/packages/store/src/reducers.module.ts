@@ -72,12 +72,7 @@ export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionRedu
   })(reducer);
 }
 const metaReducers = [localStorageSyncReducer];
-if (!environment.production) {
-  metaReducers.push(storeFreeze);
-  // if (environment.logEnableConsoleActions) {
-  //   metaReducers.push(logger);
-  // }
-}
+
 const storeModule = StoreModule.forRoot(
   appReducers,
   {
