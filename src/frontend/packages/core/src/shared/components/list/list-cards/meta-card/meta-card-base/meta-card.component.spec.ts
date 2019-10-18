@@ -23,7 +23,7 @@ import { MetaCardComponent } from './meta-card.component';
     </app-meta-card>`
 })
 class WrapperComponent {
-  @ViewChild(MetaCardComponent)
+  @ViewChild(MetaCardComponent, { static: false })
   metaCard: MetaCardComponent;
 }
 
