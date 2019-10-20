@@ -55,22 +55,25 @@ fi
 if [ "${LOCAL_BUILD}" == "false" ]; then
   echo "Downloaded and unpacked an existing build - no need to build locally"
 else
-
   set -e
 
-# Get go
-curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-chmod +x ~/bin/gimme
-eval "$(gimme 1.12.4)"
-go version
+  # Get go
+  curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+  chmod +x ~/bin/gimme
+  eval "$(gimme 1.12.4)"
+  go version
 
-npm run build
-npm run build-backend
+  npm run build
+  npm run build-backend
 
   set +e
   tar cvfz ${GZIP_NAME} dist/* src/jetstream/jetstream
 
-# Upload
+  # Upload
   mc cp -q --insecure ${GZIP_NAME} ${MC_HOST}/${S3_BUILDS_BUCKET}
+
+  # Ignore error from uploading - should not fail build if we can't upload the build archive
+  # This just means we won't be able to us this cache next build
+  exit 0
 
 fi
