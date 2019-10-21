@@ -1,16 +1,16 @@
 # Stratos
 
-<a href="https://travis-ci.org/cloudfoundry-incubator/stratos/branches"><img src="https://travis-ci.org/cloudfoundry-incubator/stratos.svg?branch=v2-master"></a>&nbsp;<a style="padding-left: 4px" href="https://codeclimate.com/github/cloudfoundry-incubator/stratos/maintainability"><img src="https://api.codeclimate.com/v1/badges/61af8b605f385e894632/maintainability" /></a>
+<a href="https://travis-ci.org/cloudfoundry/stratos/branches"><img src="https://travis-ci.org/cloudfoundry-incubator/stratos.svg?branch=v2-master"></a>&nbsp;<a style="padding-left: 4px" href="https://codeclimate.com/github/cloudfoundry/stratos/maintainability"><img src="https://api.codeclimate.com/v1/badges/61af8b605f385e894632/maintainability" /></a>
 <a href="https://goreportcard.com/github.com/cloudfoundry-incubator/stratos"><img src="https://goreportcard.com/badge/github.com/cloudfoundry-incubator/stratos"/></a>
-<a href="https://codecov.io/gh/cloudfoundry-incubator/stratos/branch/v2-master"><img src="https://codecov.io/gh/cloudfoundry-incubator/stratos/branch/v2-master/graph/badge.svg"/></a>
-[![GitHub release](https://img.shields.io/github/release/cloudfoundry-incubator/stratos.svg)](https://github.com/cloudfoundry-incubator/stratos/releases/latest)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/cloudfoundry-incubator/stratos/blob/master/LICENSE)
+<a href="https://codecov.io/gh/cloudfoundry/stratos/branch/v2-master"><img src="https://codecov.io/gh/cloudfoundry/stratos/branch/v2-master/graph/badge.svg"/></a>
+[![GitHub release](https://img.shields.io/github/release/cloudfoundry-incubator/stratos.svg)](https://github.com/cloudfoundry/stratos/releases/latest)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/cloudfoundry/stratos/blob/master/LICENSE)
 [![slack.cloudfoundry.org](https://slack.cloudfoundry.org/badge.svg)](https://cloudfoundry.slack.com/messages/C80EP4Y57/)
 
 
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
-If you are looking for the V1 version of Stratos, you can find it in the [master](https://github.com/cloudfoundry-incubator/stratos/tree/master) branch.
+If you are looking for the V1 version of Stratos, you can find it in the [master](https://github.com/cloudfoundry/stratos/tree/master) branch.
 
 ![Stratos Application view](docs/images/screenshots/app-summary.png)
 
@@ -39,7 +39,7 @@ Please see our [Troubleshooting](docs/troubleshooting) page.
 ## Project Planning
 We use [ZenHub](https://zenhub.com) for project planning. Feel free to head over to the [Boards](https://github.com/cloudfoundry-incubator/stratos#boards)
 tab and have a look through our pipelines and milestones. Please note in order to view the Github ZenHub Boards tab you will need the [ZenHub
-browser extension](https://www.zenhub.com/extension). Alternatively, to view the planning board without the extension visit our [ZenHub Project Page](https://app.zenhub.com/workspace/o/cloudfoundry-incubator/stratos/boards)
+browser extension](https://www.zenhub.com/extension). Alternatively, to view the planning board without the extension visit our [ZenHub Project Page](https://app.zenhub.com/workspace/o/cloudfoundry/stratos/boards)
 
 ## Further Reading
  
@@ -49,7 +49,7 @@ Get an [Overview](docs/overview.md) of Stratos, its components and the different
 
 Take a look at the [Development Roadmap](docs/roadmap.md) to see where we are heading. We update our status page each week to summarize what we are working on - see the [Status Page](docs/status_updates.md).
 
-Browse through features and issues in the project's [issues](https://github.com/cloudfoundry-incubator/stratos/issues) page or [Zenhub Board](https://github.com/cloudfoundry-incubator/stratos#boards).
+Browse through features and issues in the project's [issues](https://github.com/cloudfoundry/stratos/issues) page or [Zenhub Board](https://github.com/cloudfoundry-incubator/stratos#boards).
 
 What kind of code is in Stratos? We've integrated [Code Climate](https://codeclimate.com) for some code quality and maintainability metrics. Take a stroll around the [project page](https://codeclimate.com/github/cloudfoundry-incubator/stratos)
 

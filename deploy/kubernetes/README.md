@@ -79,7 +79,7 @@ You can deploy Stratos from one of three different sources:
 
 Add the Helm repository to your helm installation
 ```
-helm repo add stratos https://cloudfoundry-incubator.github.io/stratos
+helm repo add stratos https://cloudfoundry.github.io/stratos
 ```
 Check the repository was successfully added by searching for the `console`
 ```
@@ -102,7 +102,7 @@ After the install, you should be able to access the Console in a web browser by 
 
 ### Deploy using an archive of the Helm Chart
 
-Helm chart archives are available for Stratos releases from our GitHub repository, under releases - see https://github.com/cloudfoundry-incubator/stratos/releases.
+Helm chart archives are available for Stratos releases from our GitHub repository, under releases - see https://github.com/cloudfoundry/stratos/releases.
 
 Download the appropriate release `console-helm-chart.X.Y.Z.tgz` from the GitHub repository and unpack the archive to a local folder. The Helm Chart will be extracted to a sub-folder named `console`.
 
@@ -119,7 +119,7 @@ helm install console --namespace=console --name my-console
 Clone the Stratos GitHub repository:
 
 ```
-git clone https://github.com/cloudfoundry-incubator/stratos.git
+git clone https://github.com/cloudfoundry/stratos.git
 ```
 
 Open a terminal and cd to the `deploy/kubernetes` directory:
