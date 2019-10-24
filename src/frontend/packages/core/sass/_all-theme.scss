@@ -84,7 +84,7 @@ $side-nav-light-active: #484848;
 
   @if $is-dark==true {
     $app-background-color: lighten(mat-color($background-colors, background), 10%);
-    $subdued: darken($subdued, 50);
+    $subdued: lighten($subdued, 90);
   }
 
   @else {

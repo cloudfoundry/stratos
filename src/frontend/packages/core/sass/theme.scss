@@ -5,19 +5,27 @@
 
 // Custom theme support
 @import './custom';
+@import './dark-theme.scss';
 
-// Themes palettes and colors
-$oss-theme-primary: mat-palette($mat-blue);
-$oss-theme-accent: mat-palette($mat-blue);
-$oss-theme-warn: mat-palette($mat-red);
-$oss-theme: mat-light-theme($oss-theme-primary, $oss-theme-accent, $oss-theme-warn);
 
-// Default to using the open source theme
-$stratos-theme: $oss-theme !default;
-$stratos-nav-theme: null !default;
-$stratos-status-theme: null !default;
+
+.default {
+  // Themes palettes and colors
+  $oss-theme-primary: mat-palette($mat-blue);
+  $oss-theme-accent: mat-palette($mat-blue);
+  $oss-theme-warn: mat-palette($mat-red);
+  $oss-theme: mat-light-theme($oss-theme-primary, $oss-theme-accent, $oss-theme-warn);
+
+  // Default to using the open source theme
+  $stratos-theme: $oss-theme !default;
+  $stratos-nav-theme: null !default;
+  $stratos-status-theme: null !default;
+
+  @include angular-material-theme($stratos-theme);
+  @include app-theme($stratos-theme, $stratos-nav-theme, $stratos-status-theme);
+}
+
 
 // Create the theme
 @include mat-core();
-@include angular-material-theme($stratos-theme);
-@include app-theme($stratos-theme, $stratos-nav-theme, $stratos-status-theme);
+
