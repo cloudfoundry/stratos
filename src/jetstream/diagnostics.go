@@ -7,12 +7,12 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 func (p *portalProxy) StoreDiagnostics() {
 
-	diagnostics := &interfaces.Diagnostics{}
+	diagnostics := &api.Diagnostics{}
 
 	log.Info("Storing Diagnostics")
 

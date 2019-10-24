@@ -1,4 +1,4 @@
-package interfaces
+package api
 
 // UAAResponse - Response returned by Cloud Foundry UAA Service
 type UAAResponse struct {

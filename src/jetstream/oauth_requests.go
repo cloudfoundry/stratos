@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	log "github.com/sirupsen/logrus"
 )
 
-func (p *portalProxy) OAuthHandlerFunc(cnsiRequest *interfaces.CNSIRequest, req *http.Request, refreshOAuthTokenFunc interfaces.RefreshOAuthTokenFunc) interfaces.AuthHandlerFunc {
+func (p *portalProxy) OAuthHandlerFunc(cnsiRequest *api.CNSIRequest, req *http.Request, refreshOAuthTokenFunc api.RefreshOAuthTokenFunc) api.AuthHandlerFunc {
 
-	return func(tokenRec interfaces.TokenRecord, cnsi interfaces.CNSIRecord) (*http.Response, error) {
+	return func(tokenRec api.TokenRecord, cnsi api.CNSIRecord) (*http.Response, error) {
 
 		got401 := false
 
@@ -47,14 +47,14 @@ func (p *portalProxy) OAuthHandlerFunc(cnsiRequest *interfaces.CNSIRequest, req 
 	}
 }
 
-func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
+func (p *portalProxy) doOauthFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doOauthFlowRequest")
 	authHandler := p.OAuthHandlerFunc(cnsiRequest, req, p.RefreshOAuthToken)
 	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 
 }
 
-func (p *portalProxy) getCNSIRequestRecords(r *interfaces.CNSIRequest) (t interfaces.TokenRecord, c interfaces.CNSIRecord, err error) {
+func (p *portalProxy) getCNSIRequestRecords(r *api.CNSIRequest) (t api.TokenRecord, c api.CNSIRecord, err error) {
 	log.Debug("getCNSIRequestRecords")
 	// look up token
 	t, ok := p.GetCNSITokenRecord(r.GUID, r.UserGUID)
@@ -70,7 +70,7 @@ func (p *portalProxy) getCNSIRequestRecords(r *interfaces.CNSIRequest) (t interf
 	return t, c, nil
 }
 
-func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
+func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
 	log.Debug("refreshToken")
 	userToken, ok := p.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
 	if !ok {

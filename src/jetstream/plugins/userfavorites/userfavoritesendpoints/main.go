@@ -2,11 +2,11 @@ package userfavoritesendpoints
 
 import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 type userFavoriteEndpoints struct {
-	portalProxy  interfaces.PortalProxy
+	portalProxy  api.PortalProxy
 	endpointGUID string
 }
 
@@ -14,7 +14,7 @@ type userEndpointFavorites interface {
 	RemoveFavorites() error
 }
 
-func Constructor(portalProxy interfaces.PortalProxy, endpointGUID string) userEndpointFavorites {
+func Constructor(portalProxy api.PortalProxy, endpointGUID string) userEndpointFavorites {
 	ufe := &userFavoriteEndpoints{
 		portalProxy:  portalProxy,
 		endpointGUID: endpointGUID,

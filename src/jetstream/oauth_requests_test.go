@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	. "github.com/smartystreets/goconvey/convey"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
@@ -63,7 +63,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 
 		var mockURL *url.URL
 		var mockURLasString string
-		var mockCNSI = interfaces.CNSIRecord{
+		var mockCNSI = api.CNSIRecord{
 			GUID:                  mockCNSIGUID,
 			Name:                  "mockCF",
 			CNSIType:              "cf",
@@ -76,7 +76,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 		defer db.Close()
 
 		encryptedToken, _ := crypto.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
-		var mockTokenRecord = interfaces.TokenRecord{
+		var mockTokenRecord = api.TokenRecord{
 			AuthToken:    mockUAAToken,
 			RefreshToken: mockUAAToken,
 			TokenExpiry:  tokenExpiration,
@@ -113,7 +113,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
 
-		res, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		res, err := pp.doOauthFlowRequest(&api.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -190,7 +190,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 
 		var mockURL *url.URL
 		var mockURLasString string
-		var mockCNSI = interfaces.CNSIRecord{
+		var mockCNSI = api.CNSIRecord{
 			GUID:                  mockCNSIGUID,
 			Name:                  "mockCF",
 			CNSIType:              "cf",
@@ -200,7 +200,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 		}
 		// pp.CNSIs[mockCNSIGuid] = mockCNSI
 
-		var mockTokenRecord = interfaces.TokenRecord{
+		var mockTokenRecord = api.TokenRecord{
 			AuthToken:    mockUAAToken,
 			RefreshToken: mockUAAToken,
 			TokenExpiry:  tokenExpiration,
@@ -255,7 +255,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		//
-		res, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		res, err := pp.doOauthFlowRequest(&api.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -333,7 +333,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 
 		var mockURL *url.URL
 		var mockURLasString string
-		var mockCNSI = interfaces.CNSIRecord{
+		var mockCNSI = api.CNSIRecord{
 			GUID:                  mockCNSIGUID,
 			Name:                  "mockCF",
 			CNSIType:              "cf",
@@ -343,7 +343,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 		}
 		// pp.CNSIs[mockCNSIGuid] = mockCNSI
 
-		var mockTokenRecord = interfaces.TokenRecord{
+		var mockTokenRecord = api.TokenRecord{
 			AuthToken:    mockUAAToken,
 			RefreshToken: mockUAAToken,
 			TokenExpiry:  tokenExpiration,
@@ -386,7 +386,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 			WillReturnError(errors.New("Unknown Database Error"))
 
 		//
-		_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		_, err := pp.doOauthFlowRequest(&api.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -424,13 +424,13 @@ func TestDoOauthFlowRequestWithMissingCNSITokenRecord(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/v2/info", nil)
 	pp := setupPortalProxy(nil)
 
-	var mockTokenRecord = interfaces.TokenRecord{
+	var mockTokenRecord = api.TokenRecord{
 		AuthToken:   mockUAAToken,
 		TokenExpiry: 0,
 	}
 	pp.setCNSITokenRecord("not-the-right-guid", mockUserGUID, mockTokenRecord)
 
-	_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+	_, err := pp.doOauthFlowRequest(&api.CNSIRequest{
 		GUID:     mockCNSIGUID,
 		UserGUID: mockUserGUID,
 	}, req)
@@ -471,7 +471,7 @@ func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
 
 		pp := setupPortalProxy(nil)
 
-		invalidCNSIRequest := &interfaces.CNSIRequest{
+		invalidCNSIRequest := &api.CNSIRequest{
 			GUID:     "",
 			UserGUID: "",
 		}
@@ -568,7 +568,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 
 		var mockURL *url.URL
 		var mockURLasString string
-		var mockCNSI = interfaces.CNSIRecord{
+		var mockCNSI = api.CNSIRecord{
 			GUID:                  mockCNSIGUID,
 			Name:                  "mockCF",
 			CNSIType:              "cf",
@@ -578,7 +578,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 		}
 		// pp.CNSIs[mockCNSIGuid] = mockCNSI
 
-		var mockTokenRecord = interfaces.TokenRecord{
+		var mockTokenRecord = api.TokenRecord{
 			AuthToken:    mockUAAToken,
 			RefreshToken: mockUAAToken,
 			TokenExpiry:  tokenExpiration,
@@ -642,7 +642,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 		mock.ExpectExec(updateTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
 		//
-		_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		_, err := pp.doOauthFlowRequest(&api.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)

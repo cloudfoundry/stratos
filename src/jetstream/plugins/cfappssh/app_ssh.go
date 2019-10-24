@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
@@ -73,7 +73,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		return sendSSHError("Can not get Cloud Foundry info")
 	}
 
-	cfInfo, found := info.(interfaces.V2Info)
+	cfInfo, found := info.(api.V2Info)
 	if !found {
 		return sendSSHError("Can not get Cloud Foundry info")
 	}
@@ -123,7 +123,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 	defer connection.Close()
 
 	// Upgrade the web socket
-	ws, pingTicker, err := interfaces.UpgradeToWebSocket(c)
+	ws, pingTicker, err := api.UpgradeToWebSocket(c)
 	if err != nil {
 		return err
 	}

@@ -10,17 +10,17 @@ import (
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 // UaaUserInfo for UAA User Info
 type UaaUserInfo struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 	echo        echo.Context
 }
 
 // InitUaaUserInfo creates a new UAA user info provider
-func InitUaaUserInfo(portalProxy interfaces.PortalProxy, c echo.Context) Provider {
+func InitUaaUserInfo(portalProxy api.PortalProxy, c echo.Context) Provider {
 	return &UaaUserInfo{portalProxy: portalProxy, echo: c}
 }
 

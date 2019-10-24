@@ -37,8 +37,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
@@ -96,13 +95,13 @@ func getEnvironmentLookup() *env.VarSet {
 	}
 
 	// Fallback to a "config.properties" files in our directory
-	envLookup.AppendSource(config.NewConfigFileLookup("./config.properties"))
+	envLookup.AppendSource(api.NewConfigFileLookup("./config.properties"))
 
 	// Fall back to "default.config.properties" in our directory
-	envLookup.AppendSource(config.NewConfigFileLookup("./default.config.properties"))
+	envLookup.AppendSource(api.NewConfigFileLookup("./default.config.properties"))
 
 	// Fallback to individual files in the "/etc/secrets" directory
-	envLookup.AppendSource(config.NewSecretsDirLookup("/etc/secrets"))
+	envLookup.AppendSource(api.NewSecretsDirLookup("/etc/secrets"))
 
 	return envLookup
 }
@@ -130,7 +129,7 @@ func main() {
 	}
 
 	// Load the portal configuration from env vars
-	var portalConfig interfaces.PortalConfig
+	var portalConfig api.PortalConfig
 	portalConfig, err := loadPortalConfig(portalConfig, envLookup)
 	if err != nil {
 		log.Fatal(err) // calls os.Exit(1) after logging
@@ -153,7 +152,7 @@ func main() {
 	log.Infof("Stratos Version: %s", portalConfig.ConsoleVersion)
 
 	// Initialize an empty config for the console - initially not setup
-	portalConfig.ConsoleConfig = new(interfaces.ConsoleConfig)
+	portalConfig.ConsoleConfig = new(api.ConsoleConfig)
 
 	// Initialize the HTTP client
 	initializeHTTPClients(portalConfig.HTTPClientTimeoutInSecs, portalConfig.HTTPClientTimeoutMutatingInSecs, portalConfig.HTTPConnectionTimeoutInSecs)
@@ -203,7 +202,7 @@ func main() {
 		log.Info("Session Store Secret detected okay")
 	}
 
-	for _, configPlugin := range interfaces.JetstreamConfigPlugins {
+	for _, configPlugin := range api.JetstreamConfigPlugins {
 		configPlugin(envLookup, &portalConfig)
 	}
 
@@ -256,7 +255,7 @@ func main() {
 	// Initialise Plugins
 	portalProxy.loadPlugins()
 
-	initedPlugins := make(map[string]interfaces.StratosPlugin)
+	initedPlugins := make(map[string]api.StratosPlugin)
 	portalProxy.PluginsStatus = make(map[string]bool)
 
 	// Initialise general plugins
@@ -345,11 +344,11 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) error {
 	return nil
 }
 
-func showStratosConfig(config *interfaces.ConsoleConfig) {
+func showStratosConfig(config *api.ConsoleConfig) {
 	log.Infof("Stratos is initialized with the following setup:")
 	log.Infof("... Auth Endpoint Type      : %s", config.AuthEndpointType)
-	if val, found := interfaces.AuthEndpointTypes[config.AuthEndpointType]; found {
-		if val == interfaces.Local {
+	if val, found := api.AuthEndpointTypes[config.AuthEndpointType]; found {
+		if val == api.Local {
 			log.Infof("... Local User              : %s", config.LocalUser)
 			log.Infof("... Local User Scope        : %s", config.LocalUserScope)
 		} else { //Auth type is set to remote
@@ -372,7 +371,7 @@ func showSSOConfig(portalProxy *portalProxy) {
 	log.Infof("... SSO Redirect Whitelist  : %s", portalProxy.Config.SSOWhiteList)
 }
 
-func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
+func getEncryptionKey(pc api.PortalConfig) ([]byte, error) {
 	log.Debug("getEncryptionKey")
 
 	// If it exists in "EncryptionKey" we must be in compose; use it.
@@ -435,7 +434,7 @@ func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error)
 	return pool, nil
 }
 
-func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int, env *env.VarSet) (HttpSessionStore, *sessions.Options, error) {
+func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, sessionExpiry int, env *env.VarSet) (HttpSessionStore, *sessions.Options, error) {
 	log.Debug("initSessionStore")
 
 	sessionsTable := "sessions"
@@ -487,10 +486,10 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	return sessionStore, sessionStore.Options, err
 }
 
-func loadPortalConfig(pc interfaces.PortalConfig, env *env.VarSet) (interfaces.PortalConfig, error) {
+func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, error) {
 	log.Debug("loadPortalConfig")
 
-	if err := config.Load(&pc, env.Lookup); err != nil {
+	if err := api.Load(&pc, env.Lookup); err != nil {
 		return pc, fmt.Errorf("Unable to load configuration. %v", err)
 	}
 
@@ -517,7 +516,7 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig, env *env.VarSet) (datastore
 
 	if parsedDBConfig {
 		log.Info("Using Cloud Foundry DB service")
-	} else if err := config.Load(&dc, env.Lookup); err != nil {
+	} else if err := api.Load(&dc, env.Lookup); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
@@ -529,7 +528,7 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig, env *env.VarSet) (datastore
 	return dc, nil
 }
 
-func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
+func detectTLSCert(pc api.PortalConfig) (string, string, error) {
 	log.Debug("detectTLSCert")
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
@@ -567,7 +566,7 @@ func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
 	return certFilename, certKeyFilename, nil
 }
 
-func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options, env *env.VarSet) *portalProxy {
+func newPortalProxy(pc api.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options, env *env.VarSet) *portalProxy {
 	log.Debug("newPortalProxy")
 
 	// Generate cookie name - avoids issues if the cookie domain is changed
@@ -589,20 +588,20 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		SessionStoreOptions:    sessionStoreOptions,
 		SessionCookieName:      cookieName,
 		EmptyCookieMatcher:     regexp.MustCompile(cookieName + "=(?:;[ ]*|$)"),
-		AuthProviders:          make(map[string]interfaces.AuthProvider),
+		AuthProviders:          make(map[string]api.AuthProvider),
 		env:                    env,
 	}
 
 	// Initialize built-in auth providers
 
 	// Basic Auth
-	pp.AddAuthProvider(interfaces.AuthTypeHttpBasic, interfaces.AuthProvider{
+	pp.AddAuthProvider(api.AuthTypeHttpBasic, api.AuthProvider{
 		Handler:  pp.doHttpBasicFlowRequest,
 		UserInfo: pp.GetCNSIUserFromBasicToken,
 	})
 
 	// OIDC
-	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
+	pp.AddAuthProvider(api.AuthTypeOIDC, api.AuthProvider{
 		Handler: pp.doOidcFlowRequest,
 	})
 
@@ -646,7 +645,7 @@ func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeo
 	httpClientMutatingSkipSSL.Timeout = time.Duration(timeoutMutating) * time.Second
 }
 
-func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool) error {
+func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool) error {
 	log.Debug("start")
 	e := echo.New()
 	e.HideBanner = true
@@ -709,7 +708,7 @@ func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware b
 	return nil
 }
 
-func (p *portalProxy) GetEndpointTypeSpec(typeName string) (interfaces.EndpointPlugin, error) {
+func (p *portalProxy) GetEndpointTypeSpec(typeName string) (api.EndpointPlugin, error) {
 
 	for _, plugin := range p.Plugins {
 		endpointPlugin, err := plugin.GetEndpointPlugin()
@@ -879,8 +878,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	}
 }
 
-func (p *portalProxy) AddLoginHook(priority int, function interfaces.LoginHookFunc) error {
-	p.GetConfig().LoginHooks = append(p.GetConfig().LoginHooks, interfaces.LoginHook{
+func (p *portalProxy) AddLoginHook(priority int, function api.LoginHookFunc) error {
+	p.GetConfig().LoginHooks = append(p.GetConfig().LoginHooks, api.LoginHook{
 		Priority: priority,
 		Function: function,
 	})

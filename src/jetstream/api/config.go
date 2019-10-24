@@ -1,6 +1,6 @@
 // Package config allows a struct-loading approach to configuration.
 // This is a modified version of the ucpconfig package
-package config
+package api
 
 import (
 	"bufio"

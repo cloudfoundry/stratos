@@ -8,10 +8,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
-func (p *portalProxy) GetUserTokenInfo(tok string) (u *interfaces.JWTUserTokenInfo, err error) {
+func (p *portalProxy) GetUserTokenInfo(tok string) (u *api.JWTUserTokenInfo, err error) {
 	log.Debug("getUserTokenInfo")
 	accessToken := strings.TrimPrefix(tok, "bearer ")
 	splits := strings.Split(accessToken, ".")

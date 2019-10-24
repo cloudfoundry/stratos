@@ -8,32 +8,32 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo"
 )
 
 // UserInfo is a plugin to fetch user info from the UAA
 type UserInfo struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 }
 
 // Init creates a new UserInfo
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 	return &UserInfo{portalProxy: portalProxy}, nil
 }
 
 // GetMiddlewarePlugin gets the middleware plugin for this plugin
-func (userInfo *UserInfo) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (userInfo *UserInfo) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
-func (userInfo *UserInfo) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (userInfo *UserInfo) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
-func (userInfo *UserInfo) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (userInfo *UserInfo) GetRoutePlugin() (api.RoutePlugin, error) {
 	return userInfo, nil
 }
 
@@ -58,7 +58,7 @@ func (userInfo *UserInfo) Init() error {
 }
 
 func (userInfo *UserInfo) getProvider(c echo.Context) Provider {
-	if interfaces.AuthEndpointTypes[userInfo.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType] == interfaces.Local {
+	if api.AuthEndpointTypes[userInfo.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType] == api.Local {
 		return InitLocalUserInfo(userInfo.portalProxy)
 	}
 
@@ -133,11 +133,11 @@ func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 
 	err = provider.UpdateUserInfo(updatedProfile)
 	if err != nil {
-		if httpError, ok := err.(interfaces.ErrHTTPShadow); ok {
+		if httpError, ok := err.(api.ErrHTTPShadow); ok {
 			return httpError
 		}
 
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Unable to update user profile",
 			"Unable to update user profile: %v", err,
@@ -173,11 +173,11 @@ func (userInfo *UserInfo) updateUserPassword(c echo.Context) error {
 
 	err = provider.UpdatePassword(id, passwordInfo)
 	if err != nil {
-		if httpError, ok := err.(interfaces.ErrHTTPShadow); ok {
+		if httpError, ok := err.(api.ErrHTTPShadow); ok {
 			return httpError
 		}
 
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Unable to update user password",
 			"Unable to update user password: %v", err,

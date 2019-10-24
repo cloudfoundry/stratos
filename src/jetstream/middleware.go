@@ -14,7 +14,7 @@ import (
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 const cfSessionCookieName = "JSESSIONID"
@@ -28,7 +28,7 @@ const StratosSSOHeader = "x-stratos-sso-login"
 // Header to communicate any error during SSO
 const StratosSSOErrorHeader = "x-stratos-sso-error"
 
-func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error, doNotLog bool, msg string) error {
+func handleSessionError(config api.PortalConfig, c echo.Context, err error, doNotLog bool, msg string) error {
 	// Add header so front-end knows SSO login is enabled
 	if config.SSOLogin {
 		// A non-empty SSO Header means SSO is enabled
@@ -41,7 +41,7 @@ func handleSessionError(config interfaces.PortalConfig, c echo.Context, err erro
 	}
 
 	if strings.Contains(err.Error(), "dial tcp") {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusServiceUnavailable,
 			"Service is currently unavailable",
 			"Service is currently unavailable: %v", err,
@@ -53,7 +53,7 @@ func handleSessionError(config interfaces.PortalConfig, c echo.Context, err erro
 		logMessage = msg + ": %v"
 	}
 
-	return interfaces.NewHTTPShadowError(
+	return api.NewHTTPShadowError(
 		http.StatusUnauthorized,
 		msg, logMessage, err,
 	)
@@ -117,7 +117,7 @@ func (p *portalProxy) xsrfMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 				errMsg = "XSRF Token was not supplied in the header"
 			}
 		}
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"XSRF Token could not be found or does not match",
 			"XSRF Token error: %s", errMsg,
@@ -150,7 +150,7 @@ func (p *portalProxy) urlCheckMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		requestPath := c.Request().URL.Path
 		if strings.Contains(requestPath, "../") {
 			err := "Invalid path"
-			return interfaces.NewHTTPShadowError(
+			return api.NewHTTPShadowError(
 				http.StatusBadRequest,
 				err,
 				err,
@@ -202,7 +202,7 @@ func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Debug("errorLoggingMiddleware")
 		err := h(c)
-		if shadowError, ok := err.(interfaces.ErrHTTPShadow); ok {
+		if shadowError, ok := err.(api.ErrHTTPShadow); ok {
 			if len(shadowError.LogMessage) > 0 {
 				log.Error(shadowError.LogMessage)
 			}

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	_ "github.com/satori/go.uuid"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
@@ -69,7 +69,7 @@ func TestRegisterCFClusterWithMissingName(t *testing.T) {
 	}
 }
 
-func getCFPlugin(p *portalProxy, endpointType string) interfaces.EndpointPlugin {
+func getCFPlugin(p *portalProxy, endpointType string) api.EndpointPlugin {
 
 	for _, plugin := range p.Plugins {
 		endpointPlugin, err := plugin.GetEndpointPlugin()

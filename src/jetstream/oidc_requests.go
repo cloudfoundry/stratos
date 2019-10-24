@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	log "github.com/sirupsen/logrus"
 )
 
-func (p *portalProxy) doOidcFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
+func (p *portalProxy) doOidcFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doOidcFlowRequest")
 
 	authHandler := p.OAuthHandlerFunc(cnsiRequest, req, p.RefreshOidcToken)
 	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
 
-func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
+func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
 	log.Debug("refreshToken")
 	userToken, ok := p.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
 	if !ok {
@@ -31,7 +31,7 @@ func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUI
 
 	log.Info(userToken.Metadata)
 	if len(userToken.Metadata) > 0 {
-		metadata := &interfaces.OAuth2Metadata{}
+		metadata := &api.OAuth2Metadata{}
 		if err := json.Unmarshal([]byte(userToken.Metadata), metadata); err == nil {
 			log.Info(metadata)
 			log.Info(metadata.ClientID)
@@ -63,7 +63,7 @@ func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUI
 	u.UserGUID = userGUID
 
 	tokenRecord := p.InitEndpointTokenRecord(u.TokenExpiry, uaaRes.AccessToken, uaaRes.RefreshToken, userToken.Disconnected)
-	tokenRecord.AuthType = interfaces.AuthTypeOIDC
+	tokenRecord.AuthType = api.AuthTypeOIDC
 	// Copy across the metadata from the original token
 	tokenRecord.Metadata = userToken.Metadata
 

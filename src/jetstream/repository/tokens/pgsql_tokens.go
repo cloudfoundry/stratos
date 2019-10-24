@@ -7,7 +7,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 )
@@ -91,7 +91,7 @@ func InitRepositoryProvider(databaseProvider string) {
 }
 
 // saveAuthToken - Save the Auth token to the datastore
-func (p *PgsqlTokenRepository) SaveAuthToken(userGUID string, tr interfaces.TokenRecord, encryptionKey []byte) error {
+func (p *PgsqlTokenRepository) SaveAuthToken(userGUID string, tr api.TokenRecord, encryptionKey []byte) error {
 	log.Debug("SaveAuthToken")
 	if userGUID == "" {
 		msg := "Unable to save Auth Token without a valid User GUID."
@@ -157,12 +157,12 @@ func (p *PgsqlTokenRepository) SaveAuthToken(userGUID string, tr interfaces.Toke
 }
 
 // FindAuthToken - return the UAA token from the datastore
-func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
+func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []byte) (api.TokenRecord, error) {
 	log.Debug("FindAuthToken")
 	if userGUID == "" {
 		msg := "Unable to find UAA Token without a valid User GUID."
 		log.Debug(msg)
-		return interfaces.TokenRecord{}, errors.New(msg)
+		return api.TokenRecord{}, errors.New(msg)
 	}
 
 	// temp vars to retrieve db data
@@ -180,23 +180,23 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	if err != nil {
 		msg := "Unable to Find UAA token: %v"
 		log.Debugf(msg, err)
-		return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
+		return api.TokenRecord{}, fmt.Errorf(msg, err)
 	}
 
 	log.Debug("Decrypting Auth Token")
 	plaintextAuthToken, err := crypto.DecryptToken(encryptionKey, ciphertextAuthToken)
 	if err != nil {
-		return interfaces.TokenRecord{}, err
+		return api.TokenRecord{}, err
 	}
 
 	log.Debug("Decrypting Refresh Token")
 	plaintextRefreshToken, err := crypto.DecryptToken(encryptionKey, ciphertextRefreshToken)
 	if err != nil {
-		return interfaces.TokenRecord{}, err
+		return api.TokenRecord{}, err
 	}
 
 	// Build a new TokenRecord based on the decrypted tokens
-	tr := new(interfaces.TokenRecord)
+	tr := new(api.TokenRecord)
 	if tokenGUID.Valid {
 		tr.TokenGUID = tokenGUID.String
 	}
@@ -213,7 +213,7 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 }
 
 // SaveCNSIToken - Save the CNSI (UAA) token to the datastore
-func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, tr interfaces.TokenRecord, encryptionKey []byte) error {
+func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, tr api.TokenRecord, encryptionKey []byte) error {
 	log.Debug("SaveCNSIToken")
 	if cnsiGUID == "" {
 		msg := "Unable to save CNSI Token without a valid CNSI GUID."
@@ -313,28 +313,28 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	return nil
 }
 
-func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
+func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (api.TokenRecord, error) {
 	log.Debug("FindCNSIToken")
 	return p.findCNSIToken(cnsiGUID, userGUID, encryptionKey, false)
 }
 
-func (p *PgsqlTokenRepository) FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
+func (p *PgsqlTokenRepository) FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (api.TokenRecord, error) {
 	log.Debug("FindCNSITokenIncludeDisconnected")
 	return p.findCNSIToken(cnsiGUID, userGUID, encryptionKey, true)
 }
 
-func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte, includeDisconnected bool) (interfaces.TokenRecord, error) {
+func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte, includeDisconnected bool) (api.TokenRecord, error) {
 	log.Debug("findCNSIToken")
 	if cnsiGUID == "" {
 		msg := "Unable to find CNSI Token without a valid CNSI GUID."
 		log.Debug(msg)
-		return interfaces.TokenRecord{}, errors.New(msg)
+		return api.TokenRecord{}, errors.New(msg)
 	}
 
 	if userGUID == "" {
 		msg := "Unable to find CNSI Token without a valid User GUID."
 		log.Debug(msg)
-		return interfaces.TokenRecord{}, errors.New(msg)
+		return api.TokenRecord{}, errors.New(msg)
 	}
 
 	// temp vars to retrieve db data
@@ -364,7 +364,7 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 		} else {
 			log.Errorf(msg, err)
 		}
-		return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
+		return api.TokenRecord{}, fmt.Errorf(msg, err)
 	}
 
 	// If this token is linked - fetch that token and use it instead
@@ -383,24 +383,24 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 			} else {
 				log.Errorf(msg, err)
 			}
-			return interfaces.TokenRecord{}, fmt.Errorf(msg, err)
+			return api.TokenRecord{}, fmt.Errorf(msg, err)
 		}
 	}
 
 	log.Debug("Decrypting Auth Token")
 	plaintextAuthToken, err := crypto.DecryptToken(encryptionKey, ciphertextAuthToken)
 	if err != nil {
-		return interfaces.TokenRecord{}, err
+		return api.TokenRecord{}, err
 	}
 
 	log.Debug("Decrypting Refresh Token")
 	plaintextRefreshToken, err := crypto.DecryptToken(encryptionKey, ciphertextRefreshToken)
 	if err != nil {
-		return interfaces.TokenRecord{}, err
+		return api.TokenRecord{}, err
 	}
 
 	// Build a new TokenRecord based on the decrypted tokens
-	tr := new(interfaces.TokenRecord)
+	tr := new(api.TokenRecord)
 	if tokenGUID.Valid {
 		tr.TokenGUID = tokenGUID.String
 	}
@@ -468,7 +468,7 @@ func (p *PgsqlTokenRepository) DeleteCNSITokens(cnsiGUID string) error {
 }
 
 // UpdateTokenAuth - Update a token's auth data
-func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr interfaces.TokenRecord, encryptionKey []byte) error {
+func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr api.TokenRecord, encryptionKey []byte) error {
 	log.Debug("UpdateTokenAuth")
 
 	if userGUID == "" {

@@ -1,27 +1,27 @@
 package tokens
 
-import "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+import "github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 
 // Token -
 type Token struct {
 	UserGUID  string
 	TokenType string
-	Record    interfaces.TokenRecord
+	Record    api.TokenRecord
 }
 
 const SystemSharedUserGuid = "00000000-1111-2222-3333-444444444444" // User ID for the system shared user for endpoints
 
 // Repository is an application of the repository pattern for storing tokens
 type Repository interface {
-	FindAuthToken(userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error)
-	SaveAuthToken(userGUID string, tokenRecord interfaces.TokenRecord, encryptionKey []byte) error
+	FindAuthToken(userGUID string, encryptionKey []byte) (api.TokenRecord, error)
+	SaveAuthToken(userGUID string, tokenRecord api.TokenRecord, encryptionKey []byte) error
 
-	FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error)
-	FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error)
+	FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (api.TokenRecord, error)
+	FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (api.TokenRecord, error)
 	DeleteCNSIToken(cnsiGUID string, userGUID string) error
 	DeleteCNSITokens(cnsiGUID string) error
-	SaveCNSIToken(cnsiGUID string, userGUID string, tokenRecord interfaces.TokenRecord, encryptionKey []byte) error
+	SaveCNSIToken(cnsiGUID string, userGUID string, tokenRecord api.TokenRecord, encryptionKey []byte) error
 
 	// Update a token's auth data
-	UpdateTokenAuth(userGUID string, tokenRecord interfaces.TokenRecord, encryptionKey []byte) error
+	UpdateTokenAuth(userGUID string, tokenRecord api.TokenRecord, encryptionKey []byte) error
 }
