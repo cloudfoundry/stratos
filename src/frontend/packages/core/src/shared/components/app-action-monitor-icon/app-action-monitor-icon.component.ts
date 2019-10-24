@@ -1,10 +1,11 @@
-import { Component, OnInit, Input, Output } from '@angular/core';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { EntityMonitor } from '../../monitors/entity-monitor';
+import { Component, Input, OnInit, Output } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map, pairwise, distinctUntilChanged, startWith, withLatestFrom, tap } from 'rxjs/operators';
-import { rootUpdatingKey, RequestInfoState, ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { distinctUntilChanged, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
+
 import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
+import { ActionState, RequestInfoState, rootUpdatingKey } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { EntityMonitor } from '../../monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 
 export enum AppMonitorComponentTypes {
   UPDATE = 'MONITOR_UPDATE',
@@ -59,6 +60,8 @@ export class AppActionMonitorIconComponent implements OnInit {
         return this.getUpdatingState(entityMonitor);
       case AppMonitorComponentTypes.FETCHING:
         return this.getFetchingState(entityMonitor);
+      case AppMonitorComponentTypes.CREATE:
+        return this.getCreatingState(entityMonitor);
       default:
         throw new Error(`Unknown state to monitor ${monitorState}`);
     }
@@ -83,8 +86,24 @@ export class AppActionMonitorIconComponent implements OnInit {
     return entityMonitor.entityRequest$.pipe(
       withLatestFrom(completed$),
       map(([requestState, completed]) => {
-        const oldUpdatingState = requestState.fetching;
-        const updatingState = requestState.updating[this.updateKey];
+        return {
+          busy: requestState.fetching,
+          error: requestState.error,
+          completed
+        };
+      })
+    );
+  }
+
+  private getCreatingState(entityMonitor: EntityMonitor): Observable<IApplicationMonitorComponentState> {
+    const completed$ = this.getHasCompletedObservable(
+      entityMonitor.entityRequest$.pipe(
+        map(requestState => requestState.creating),
+      )
+    );
+    return entityMonitor.entityRequest$.pipe(
+      withLatestFrom(completed$),
+      map(([requestState, completed]) => {
         return {
           busy: requestState.fetching,
           error: requestState.error,

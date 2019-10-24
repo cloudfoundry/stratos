@@ -36,7 +36,7 @@ import {
   selectUsersRolesPicked,
   selectUsersRolesRoles,
 } from '../../../../../../../store/src/selectors/users-roles.selector';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { UsersRolesSetOrg } from '../../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import {
@@ -138,8 +138,8 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnInit() {
-    const orgEntity$ = this.store.select(selectUsersRolesOrgGuid).pipe(
+  createOrgEntityObs = (): Observable<EntityInfo<APIResource<IOrganization>>> => {
+    return this.store.select(selectUsersRolesOrgGuid).pipe(
       startWith(''),
       distinctUntilChanged(),
       filter(orgGuid => !!orgGuid),
@@ -147,6 +147,27 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       switchMap(orgGuid => this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, orgGuid)),
       share()
     );
+  }
+
+  setCfOrgSpace(cfGuid: string, orgGuid: string, spaceGuid: string) {
+    if (orgGuid) {
+      this.cfRolesService.fetchOrg(cfGuid, orgGuid).pipe(
+        first()
+      ).subscribe(org => {
+        this.store.dispatch(new UsersRolesSetOrg(orgGuid, org.entity.entity.name));
+      });
+    } else {
+      this.orgGuidChangedSub = this.cfRolesService.fetchOrgs(cfGuid).pipe(
+        filter(orgs => orgs && !!orgs.length),
+        first()
+      ).subscribe(orgs => {
+        this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid, orgs[0].entity.name));
+      });
+    }
+  }
+
+  ngOnInit() {
+    const orgEntity$ = this.createOrgEntityObs();
 
     const orgConnect$ = orgEntity$.pipe(
       filter(entityInfo => !!entityInfo.entity),
@@ -167,20 +188,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     } as ITableListDataSource<APIResource<IOrganization>>;
 
     // Set the starting state of the org table
-    if (this.activeRouteCfOrgSpace.orgGuid) {
-      this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid).pipe(
-        first()
-      ).subscribe(org => {
-        this.store.dispatch(new UsersRolesSetOrg(this.activeRouteCfOrgSpace.orgGuid, org.entity.entity.name));
-      });
-    } else {
-      this.orgGuidChangedSub = this.cfRolesService.fetchOrgs(this.activeRouteCfOrgSpace.cfGuid).pipe(
-        filter(orgs => orgs && !!orgs.length),
-        first()
-      ).subscribe(orgs => {
-        this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid, orgs[0].entity.name));
-      });
-    }
+    this.setCfOrgSpace(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid, this.activeRouteCfOrgSpace.spaceGuid);
 
     const users$: Observable<CfUserWithWarning[]> = this.store.select(selectUsersRolesPicked).pipe(
       filter(users => !!users),

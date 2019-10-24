@@ -143,6 +143,8 @@ import {
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
+import { AddOrganizationConfirmComponent } from './add-organization/add-organization-confirm/add-organization-confirm.component';
+import { SelectRolesConfirmComponent } from './add-organization/select-roles-confirm/select-roles-confirm.component';
 
 
 @NgModule({
@@ -217,6 +219,8 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CfAdminAddUserWarningComponent,
     QuotaDefinitionComponent,
     SpaceQuotaDefinitionComponent,
+    AddOrganizationConfirmComponent,
+    SelectRolesConfirmComponent,
   ],
   providers: [
     CFEndpointsListConfigService,

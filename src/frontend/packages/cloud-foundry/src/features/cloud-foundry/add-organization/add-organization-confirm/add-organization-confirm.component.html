@@ -1,0 +1,21 @@
+<p>
+  add-organization-confirm works!
+</p>
+
+
+<div class="move-me">
+  Create
+  <app-action-monitor [columns]="create.columns" [data$]="create.changes$" [entityKey]="orgCatalogueEntity.entityKey"
+    [schema]="orgCatalogueEntity.getSchema()" [monitorState]="create.monitorState"
+    [getCellConfig]="create.getCellConfig">
+  </app-action-monitor>
+
+  Roles
+
+</div>
+
+
+<!-- <app-manage-users-confirm #confirm></app-manage-users-confirm> -->
+<!-- <app-action-monitor [columns]="columns" [data$]="changes$" [entityKey]="userSchemaKey"
+  [monitorState]="monitorState" [getCellConfig]="getCellConfig">
+</app-action-monitor> -->

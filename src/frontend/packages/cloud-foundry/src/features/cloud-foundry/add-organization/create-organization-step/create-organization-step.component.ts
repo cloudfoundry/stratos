@@ -2,17 +2,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
-import { CreateOrganization } from '../../../../../../cloud-foundry/src/actions/organization.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { IEntityMetadata } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
@@ -21,9 +13,15 @@ import { PaginationMonitorFactory } from '../../../../../../core/src/shared/moni
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../cf-entity-factory';
+import { organizationEntityType, quotaDefinitionEntityType } from '../../../../cf-entity-types';
 import { QuotaDefinitionActionBuilder } from '../../../../entity-action-builders/quota-definition.action-builders';
+import { createEntityRelationPaginationKey } from '../../../../entity-relations/entity-relations.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { AddOrganizationService } from '../add-organization.service';
+
 
 
 @Component({
@@ -50,8 +48,10 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     private store: Store<CFAppState>,
     private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
+    private addOrgService: AddOrganizationService
   ) {
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
+    this.addOrgService.cfGuid = this.cfGuid;
   }
 
   ngOnInit() {
@@ -116,20 +116,14 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
   validate = () => !!this.addOrg && this.addOrg.valid;
 
-  submit: StepOnNextFunction = () => {
-    this.store.dispatch(new CreateOrganization(this.cfGuid, {
+  onNext: StepOnNextFunction = () => {
+    this.addOrgService.orgDetails = {
       name: this.orgName.value,
       quota_definition_guid: this.quotaDefinition.value
-    }));
-
-    return this.store.select(selectCfRequestInfo(organizationEntityType, this.orgName.value)).pipe(
-      filter(requestInfo => !!requestInfo && !requestInfo.creating),
-      map(requestInfo => ({
-        success: !requestInfo.error,
-        redirect: !requestInfo.error,
-        message: requestInfo.error ? `Failed to create organization: ${requestInfo.message}` : ''
-      }))
-    );
+    };
+    return of({
+      success: true
+    });
   }
 
   ngOnDestroy() {
