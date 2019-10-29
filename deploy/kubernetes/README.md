@@ -76,7 +76,7 @@ You can deploy Stratos from one of three different sources:
 1. Using an archive file containing a given release of our Helm chart
 1. Using the latest Helm chart directly from out GitHub repository
 
-> **Note**: By default each deployment method deploys Stratos with its default user authentication mechanism - which requires a UAA. If you wish you use Stratos without the requirement for a UAA component, use the deployment commands from the following section below: [Configuring a local user account](#configuring-a-local-user-account). All other steps for each deployment method remain the same, as detailed in the following sections.
+> **Note**: By default each deployment method deploys Stratos with its default user authentication mechanism - which requires a UAA. If you wish to use Stratos without the requirement for a UAA component, use the deployment commands from the following section below: [Configuring a local user account](#configuring-a-local-user-account). All other steps for each deployment method remain the same, as detailed in the following sections.
 
 ### Deploy using the Helm repository
 
