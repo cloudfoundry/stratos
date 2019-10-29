@@ -53,7 +53,7 @@ Stratos should now be accessible at the following URL:
 
 https://localhost:4443
 
-If using a UAA, you will be presented with the Stratos Setup welcome screen - you will need to enter your UAA information to configure Stratos. Once complete, you will be able to login with your credentials. If you have configured the container to use a local user account instead of a UAA, log in with the credentials specified in the configuation file.
+If using a UAA, you will be presented with the Stratos Setup welcome screen - you will need to enter your UAA information to configure Stratos. Once complete, you will be able to login with your credentials. If you have configured the container to use a local user account instead of a UAA, log in with the credentials specified in the configuration file.
 
 ## Persisting the Database
 
