@@ -1,5 +1,3 @@
-import { RequestOptions, URLSearchParams } from '@angular/http';
-
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
@@ -21,6 +19,7 @@ import {
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
+import { HttpRequest } from '@angular/common/http';
 
 export const getUserProvidedServiceInstanceRelations = [
   createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceWithOrgEntityType),
@@ -40,10 +39,10 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
     super();
     this.paginationKey = paginationKey || (spaceGuid ? createEntityRelationPaginationKey(spaceEntityType, spaceGuid) :
       createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid));
-    this.options = new RequestOptions();
-    this.options.url = `user_provided_service_instances`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `user_provided_service_instances`,
+    );
     if (spaceGuid) {
       this.initialParams.q = [new QParam('space_guid', spaceGuid, QParamJoiners.in).toString()];
     }
@@ -51,7 +50,7 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
   actions = getActions('User Provided Services', 'Get all User Provided Services');
   entity = [cfEntityFactory(userProvidedServiceInstanceEntityType)];
   entityType = userProvidedServiceInstanceEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -71,15 +70,15 @@ export class GetUserProvidedService extends CFStartAction implements EntityInlin
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `user_provided_service_instances/${guid}`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `user_provided_service_instances/${guid}`
+    );
   }
   actions = getActions('User Provided Service', 'Get User Provided Service');
   entity = cfEntityFactory(userProvidedServiceInstanceEntityType);
   entityType = userProvidedServiceInstanceEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 export interface IUserProvidedServiceInstanceDataCredentials {
   [name: string]: string;
@@ -101,10 +100,6 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
     public proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `user_provided_service_instances`;
-    this.options.params = new URLSearchParams();
-    this.options.method = 'post';
     const {
       spaceGuid,
       name,
@@ -113,19 +108,24 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
       route_service_url,
       tags = []
     } = data;
-    this.options.body = {
-      space_guid: spaceGuid,
-      name,
-      credentials,
-      syslog_drain_url,
-      route_service_url,
-      tags
-    };
+    this.options = new HttpRequest(
+      'POST',
+      `user_provided_service_instances`,
+      {
+        space_guid: spaceGuid,
+        name,
+        credentials,
+        syslog_drain_url,
+        route_service_url,
+        tags
+      }
+    );
+
   }
   actions = getActions('User Provided Service', 'Create User Provided Service');
   entity = [cfEntityFactory(userProvidedServiceInstanceEntityType)];
   entityType = userProvidedServiceInstanceEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class UpdateUserProvidedServiceInstance extends CFStartAction implements ICFAction {
@@ -137,12 +137,6 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
     public proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `user_provided_service_instances/${guid}`;
-    this.options.params = new URLSearchParams();
-    // this.options.params.set('accepts_incomplete', 'true');
-    this.options.method = 'put';
-    this.options.body = {};
     const {
       name,
       credentials = {},
@@ -150,42 +144,39 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
       route_service_url,
       tags = []
     } = data;
-    if (name) {
-      this.options.body.name = name;
-    }
-
-    if (syslog_drain_url) {
-      this.options.body.syslog_drain_url = syslog_drain_url;
-    }
-    if (tags) {
-      this.options.body.tags = tags;
-    }
-    if (credentials) {
-      this.options.body.credentials = credentials;
-    }
-    if (route_service_url) {
-      this.options.body.route_service_url = route_service_url;
-    }
+    this.options = new HttpRequest(
+      'PUT',
+      `user_provided_service_instances/${guid}`,
+      // TODO Make sure this still works after angular 8 update
+      // We might need to go back to the if statements
+      {
+        name,
+        syslog_drain_url,
+        tags,
+        credentials,
+        route_service_url
+      }
+    );
   }
   actions = getActions('User Provided Service', 'Update User Provided Service');
   entity = [cfEntityFactory(userProvidedServiceInstanceEntityType)];
   entityType = userProvidedServiceInstanceEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   updatingKey = UpdateUserProvidedServiceInstance.updateServiceInstance;
 }
 
 export class DeleteUserProvidedInstance extends CFStartAction implements ICFAction {
   constructor(public endpointGuid: string, public guid: string, public proxyPaginationEntityConfig?: EntityCatalogueEntityConfig) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `user_provided_service_instances/${guid}`;
-    this.options.method = 'delete';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'DELETE',
+      `user_provided_service_instances/${guid}`
+    );
   }
   actions = getActions('User Provided Service', 'Delete User Provided Service');
   entity = cfEntityFactory(userProvidedServiceInstanceEntityType);
   entityType = userProvidedServiceInstanceEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   clearPaginationEntityKeys = [serviceBindingEntityType];
   removeEntityOnDelete = true;
 }

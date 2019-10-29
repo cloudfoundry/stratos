@@ -1,5 +1,3 @@
-import { RequestOptions } from '@angular/http';
-
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
@@ -11,6 +9,7 @@ import { createEntityRelationPaginationKey, EntityInlineParentAction } from '../
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/user.types';
 import { CFStartAction } from './cf-action.types';
 import { createDefaultUserRelations } from './user.actions.helpers';
+import { HttpRequest } from '@angular/common/http';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -43,14 +42,15 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
   ) {
     super();
     this.paginationKey = paginationKey || createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
-    this.options = new RequestOptions();
-    this.options.url = 'users';
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      'users'
+    );
   }
   actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
   entity = [cfEntityFactory(cfUserEntityType)];
   entityType = cfUserEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -81,9 +81,10 @@ export class ChangeUserRole extends CFStartAction implements EntityRequestAction
     super();
     this.guid = entityGuid;
     this.updatingKey = ChangeUserRole.generateUpdatingKey(permissionTypeKey, userGuid);
-    this.options = new RequestOptions();
-    this.options.url = `${isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.updatingKey}`;
-    this.options.method = method;
+    this.options = new HttpRequest(
+      method,
+      `${isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.updatingKey}`
+    );
     this.entityType = isSpace ? spaceEntityType : organizationEntityType;
     this.entity = cfEntityFactory(this.entityType);
   }
@@ -91,7 +92,7 @@ export class ChangeUserRole extends CFStartAction implements EntityRequestAction
   guid: string;
   entity: EntitySchema;
   entityType: string;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   updatingKey: string;
 
   static generateUpdatingKey<T>(permissionType: OrgUserRoleNames | SpaceUserRoleNames, userGuid: string) {
@@ -154,14 +155,14 @@ export class GetUser extends CFStartAction {
     public includeRelations: string[] = createDefaultUserRelations(),
     public populateMissing = true) {
     super();
-    this.options = new RequestOptions();
+    this.options = new HttpRequest();
     this.options.url = 'users/' + guid;
     this.options.method = 'get';
   }
   actions = getActions('Users', 'Fetch User');
   entity = [cfEntityFactory(cfUserEntityType)];
   entityType = cfUserEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 

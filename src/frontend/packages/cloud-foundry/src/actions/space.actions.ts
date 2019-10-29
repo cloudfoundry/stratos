@@ -54,8 +54,6 @@ export class GetSpace extends CFStartAction implements ICFAction, EntityInlinePa
       'GET',
       `spaces/${guid}`
     );
-    this.options.url = `spaces/${guid}`;
-    this.options.method = 'get';
   }
   actions = [
     GET_SPACE,
@@ -75,9 +73,10 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
     public populateMissing = true,
   ) {
     super();
-    this.options = new HttpRequest();
-    this.options.url = 'spaces';
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      'spsace'
+    );
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
   entity = [cfEntityFactory(spaceWithOrgEntityType)];
@@ -105,9 +104,10 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     public flattenPagination = true
   ) {
     super();
-    this.options = new HttpRequest();
-    this.options.url = `spaces/${spaceGuid}/routes`;
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      `spaces/${spaceGuid}/routes`
+    );
     this.parentGuid = spaceGuid;
   }
   actions = [
@@ -138,9 +138,10 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
     public flattenPagination = true
   ) {
     super();
-    this.options = new HttpRequest();
-    this.options.url = `spaces/${spaceGuid}/apps`;
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      `spaces/${spaceGuid}/apps`
+    );
     this.parentGuid = spaceGuid;
   }
   actions = getActions('Spaces', 'Get Apps');
@@ -172,12 +173,16 @@ export abstract class BaseSpaceAction extends CFStartAction implements ICFAction
 export class DeleteSpace extends BaseSpaceAction {
   constructor(guid: string, orgGuid: string, endpointGuid: string) {
     super(guid, orgGuid, endpointGuid);
-    this.options = new HttpRequest();
-    this.options.url = `spaces/${guid}`;
-    this.options.method = 'delete';
-    this.options.params = new URLSearchParams();
-    this.options.params.append('recursive', 'true');
-    this.options.params.append('async', 'false');
+    this.options = new HttpRequest(
+      'DELETE',
+      `spaces/${guid}`,
+      {
+        params: {
+          recursive: 'true',
+          async: 'false'
+        }
+      }
+    );
   }
   actions = [DELETE_SPACE, DELETE_SPACE_SUCCESS, DELETE_SPACE_FAILED];
   removeEntityOnDelete = true;
@@ -186,10 +191,13 @@ export class DeleteSpace extends BaseSpaceAction {
 export class CreateSpace extends BaseSpaceAction {
   constructor(public endpointGuid: string, orgGuid: string, createSpace: IUpdateSpace, key = `${orgGuid}-${createSpace.name}`) {
     super(key, orgGuid, endpointGuid);
-    this.options = new HttpRequest();
-    this.options.url = `spaces`;
-    this.options.method = 'post';
-    this.options.body = createSpace;
+    this.options = new HttpRequest(
+      'POST',
+      'spaces',
+      {
+        body: createSpace
+      }
+    );
   }
   actions = [CREATE_SPACE, CREATE_SPACE_SUCCESS, CREATE_SPACE_FAILED];
 }
@@ -198,10 +206,13 @@ export class UpdateSpace extends CFStartAction implements ICFAction {
   public static UpdateExistingSpace = 'Updating-Existing-Space';
   constructor(public guid: string, public endpointGuid: string, updateSpace: IUpdateSpace) {
     super();
-    this.options = new HttpRequest();
-    this.options.url = `spaces/${guid}`;
-    this.options.method = 'put';
-    this.options.body = updateSpace;
+    this.options = new HttpRequest(
+      'PUT',
+      `spaces/${guid}`,
+      {
+        body: updateSpace
+      }
+    );
   }
   actions = getActions('Spaces', 'Update Space');
   entity = [cfEntityFactory(spaceEntityType)];
@@ -218,7 +229,10 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
     public isAdmin: boolean,
     includeRelations?: string[]) {
     super(guid, paginationKey, endpointGuid, isAdmin, includeRelations);
-    this.options.url = `spaces/${guid}/user_roles`;
+    this.options = new HttpRequest(
+      'GET',
+      `spaces/${guid}/user_roles`
+    );
     this.flattenPaginationMax = 600;
   }
   actions = getActions('Spaces', 'List all user roles');
@@ -236,10 +250,10 @@ export class GetAllServicesForSpace extends CFStartAction implements PaginatedAc
     public populateMissing = true
   ) {
     super();
-    this.options = new HttpRequest();
-    this.options.url = `spaces/${spaceGuid}/services`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `spaces/${spaceGuid}/services`
+    );
   }
   actions = getActions('Space', 'Get all Services');
   entity = cfEntityFactory(serviceEntityType);
@@ -267,10 +281,10 @@ export class GetServiceInstancesForSpace
     public flattenPagination = true
   ) {
     super();
-    this.options = new HttpRequest();
-    this.options.url = `spaces/${spaceGuid}/service_instances`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `spaces/${spaceGuid}/service_instances`
+    );
     if (q) {
       this.initialParams.q = q;
     }
