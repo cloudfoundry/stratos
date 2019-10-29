@@ -18,7 +18,7 @@ set -e
 
 NAME=stratos-test
 NAMESPACE=stratos-ns
-HELM_REPO=https://cloudfoundry-incubator.github.io/stratos
+HELM_REPO=https://cloudfoundry.github.io/stratos
 HELM_REPO_NAME=cfstratos
 
 DEV_IMAGE_VERSION=2.0.0-dev

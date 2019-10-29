@@ -26,7 +26,7 @@ using Visual Studio Code. If you feel comfortable with these and are happy with 
 ### Set up Dependencies
 
 * Set up a Stratos backend - The frontend cannot run without a backend. Both backend and frontend exist in this same repo.
-  * Don't need to make changes to the backend code? To set up a backend run through the [deploy section](https://github.com/cloudfoundry-incubator/stratos/blob/master/deploy/README.md),
+  * Don't need to make changes to the backend code? To set up a backend run through the [deploy section](https://github.com/cloudfoundry/stratos/blob/master/deploy/README.md),
     choose a deployment method and bring one up. These deployments will bring up the entire backend, including api service and database
     along with a V2 frontend.
   * Need to make changes to the backend code? Follow the below [Backend Development](#Backend-Development) set up guide
@@ -40,7 +40,7 @@ Configuration information can be found in two places
 * `./proxy.conf.js`
   * In new forks this is missing and needs to be created using `./proxy.conf.template.js` as a template.
   * Contains the address of the backend. Which will either be...
-     * If the backend is deployed via the instructions in the [deploy section](https://github.com/cloudfoundry-incubator/stratos/blob/master/deploy/README.md)
+     * If the backend is deployed via the instructions in the [deploy section](https://github.com/cloudfoundry/stratos/blob/master/deploy/README.md)
        the url will be the same address as the V1 console's frontend address. For instance `https://localhost` would translate to
         ```
         const PROXY_CONFIG = {
