@@ -1,4 +1,4 @@
-FROM splatform/stratos-db-base:opensuse
+FROM splatform/stratos-db-base:leap15.1
 
 RUN \
 	find /etc/ -name 'my*.cnf' -print0 \
