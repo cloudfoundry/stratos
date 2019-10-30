@@ -1,5 +1,6 @@
 FROM splatform/stratos-db-base:leap15.1
 
+# See: https://github.com/docker-library/mariadb/blob/master/10.2/Dockerfile
 RUN \
 	find /etc/ -name 'my*.cnf' -print0 \
 		| xargs -0 grep -lZE '^(bind-address|log)' \
