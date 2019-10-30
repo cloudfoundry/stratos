@@ -4,18 +4,18 @@ import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfOrgsListConfigService } from '../cf-orgs/cf-orgs-list-config.service';
+import { CfSpacesListConfigService } from './cf-spaces-list-config.service';
 
 describe('CfOrgsSpaceListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [...generateTestCfEndpointServiceProvider(), CfOrgsListConfigService],
+      providers: [...generateTestCfEndpointServiceProvider(), CfSpacesListConfigService],
       imports: generateCfBaseTestModules()
 
     });
   });
 
-  it('should be created', inject([CfOrgsListConfigService], (service: CfOrgsListConfigService) => {
+  it('should be created', inject([CfSpacesListConfigService], (service: CfSpacesListConfigService) => {
     expect(service).toBeTruthy();
   }));
 });

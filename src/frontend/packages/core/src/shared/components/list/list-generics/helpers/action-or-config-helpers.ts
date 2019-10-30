@@ -29,6 +29,26 @@ function actionFromConfig(config: ListEntityConfig): PaginatedAction {
   return getAllActionBuilder(config.endpointGuid, config.paginationKey, config.extraArgs);
 }
 
+export class ListDataSourceFromActionOrConfig<A, T> extends ListDataSource<T, A> {
+
+  constructor(actionOrConfig: ListActionOrConfig,
+              listConfig: IListConfig<T>,
+              store: Store<any>,
+              dataSourceConfig?: Partial<IListDataSourceConfig<A, T>>, ) {
+    const { action, catalogueEntity } = ListActionOrConfigHelpers.createListAction(actionOrConfig);
+    super({
+      store,
+      action,
+      paginationKey: action.paginationKey,
+      schema: catalogueEntity.getSchema(action.schemaKey),
+      getRowUniqueId: entity => catalogueEntity.getGuidFromEntity(entity),
+      listConfig,
+      isLocal: true, // assume true unless overwritten
+      ...dataSourceConfig
+    });
+  }
+}
+
 export class ListActionOrConfigHelpers {
   static createListAction(actionOrConfig: ListActionOrConfig): {
     action: PaginatedAction,
@@ -75,26 +95,5 @@ export class ListActionOrConfigHelpers {
       dsOverrides
     );
 
-  }
-}
-
-
-export class ListDataSourceFromActionOrConfig<A, T> extends ListDataSource<T, A> {
-
-  constructor(actionOrConfig: ListActionOrConfig,
-    listConfig: IListConfig<T>,
-    store: Store<any>,
-    dataSourceConfig?: Partial<IListDataSourceConfig<A, T>>, ) {
-    const { action, catalogueEntity } = ListActionOrConfigHelpers.createListAction(actionOrConfig);
-    super({
-      store,
-      action,
-      paginationKey: action.paginationKey,
-      schema: catalogueEntity.getSchema(action.schemaKey),
-      getRowUniqueId: entity => catalogueEntity.getGuidFromEntity(entity),
-      listConfig,
-      isLocal: true, // assume true unless overwritten
-      ...dataSourceConfig
-    });
   }
 }

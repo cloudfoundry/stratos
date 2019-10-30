@@ -1,16 +1,12 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TabNavService } from '../../../../../tab-nav.service';
-
-import { CloudFoundryQuotasComponent } from './cloud-foundry-quotas.component';
-import {
-  CfOrgsListConfigService
-} from '../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
-import {
-  generateTestCfEndpointServiceProvider
-} from '../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
 import { CFBaseTestModules } from '../../../../../../cloud-foundry/test-framework/cf-test-helper';
+import {
+  generateTestCfEndpointServiceProvider,
+} from '../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
+import { TabNavService } from '../../../../../tab-nav.service';
+import { CloudFoundryQuotasComponent } from './cloud-foundry-quotas.component';
 
 describe('CloudFoundryQuotasComponent', () => {
   let component: CloudFoundryQuotasComponent;
@@ -19,7 +15,7 @@ describe('CloudFoundryQuotasComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryQuotasComponent],
-      providers: [CfOrgsListConfigService, generateTestCfEndpointServiceProvider(), TabNavService, DatePipe],
+      providers: [generateTestCfEndpointServiceProvider(), TabNavService, DatePipe],
       imports: [...CFBaseTestModules]
     })
       .compileComponents();

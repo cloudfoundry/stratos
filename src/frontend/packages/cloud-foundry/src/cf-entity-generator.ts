@@ -957,8 +957,8 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
         getGuid: metadata => metadata.guid,
         getLines: () => ([
-          ['Name', (meta) => meta.name], // TODO: RC Nuke
-          ['Creation  Date', (meta) => meta.createdAt] // TODO: RC Nuke
+          // ['Name', (meta) => meta.name],
+          // ['Creation  Date', (meta) => meta.createdAt]
         ])
       }
     }
