@@ -2,8 +2,8 @@ import { Component, ComponentFactoryResolver, ComponentRef, Injector, Input, OnI
 
 import { ListComponent } from '../../list.component';
 import { IListConfig, ListConfig } from '../../list.component.types';
-import { ListHostDirective } from '../../simple-list/list-host.directive';
-import { ListConfigProvider } from '../list-providers/list-config-provider.types';
+import { ListHostDirective } from '../helpers/list-host.directive';
+import { ListConfigProvider } from '../list-config-provider.types';
 
 @Component({
   selector: 'app-list-view',

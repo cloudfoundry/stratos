@@ -11,6 +11,7 @@ import {
 } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-config';
 import {
   ListActionOrConfig,
+  ListEntityConfig,
 } from '../../../../../../core/src/shared/components/list/list-generics/helpers/action-or-config-helpers';
 import {
   ActionListConfigProvider,
@@ -58,6 +59,7 @@ export class CloudFoundryOrganizationsComponent {
     endpointType: CF_ENDPOINT_TYPE
   };
   public catalogueEntity = entityCatalogue.getEntity(this.entityConfig);
+  public listEntityConfig: ListEntityConfig;
 
   private createAction() {
     return CloudFoundryEndpointService.createGetAllOrganizations(this.cfEndpointService.cfGuid);
@@ -221,6 +223,10 @@ export class CloudFoundryOrganizationsComponent {
     this.canAddOrg$ = currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
 
     // TODO: RC Nuke all below (keep setup minimal contents)
+    this.listEntityConfig = {
+      endpointGuid: cfEndpointService.cfGuid,
+      entityConfig: this.entityConfig,
+    };
     // this.setupWithAction(true);
     // this.setupWithEntityConfig(true);
     // this.setupWithListOverrides(true);

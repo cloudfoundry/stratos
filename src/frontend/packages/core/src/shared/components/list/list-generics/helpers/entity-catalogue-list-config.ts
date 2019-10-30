@@ -1,8 +1,8 @@
-import { EntityPipelineEntity } from '../../../../../../store/src/entity-request-pipeline/pipeline.types';
-import { UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
-import { StratosBaseCatalogueEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
-import { createTableColumnFavorite } from '../list-table/table-cell-favorite/table-cell-favorite.component';
-import { ListConfig, ListViewTypes } from '../list.component.types';
+import { EntityPipelineEntity } from '../../../../../../../store/src/entity-request-pipeline/pipeline.types';
+import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
+import { StratosBaseCatalogueEntity } from '../../../../../core/entity-catalogue/entity-catalogue-entity';
+import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
+import { ListConfig, ListViewTypes } from '../../list.component.types';
 
 export class CatalogueEntityDrivenListConfig<T extends EntityPipelineEntity> extends ListConfig<T> {
   constructor(

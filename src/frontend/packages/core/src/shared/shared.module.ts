@@ -51,6 +51,8 @@ import { MetaCardItemComponent } from './components/list/list-cards/meta-card/me
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { EntityListViewComponent } from './components/list/list-generics/entity-list-view/entity-list-view.component';
+import { ListHostDirective } from './components/list/list-generics/helpers/list-host.directive';
 import { ListViewComponent } from './components/list/list-generics/list-view/list-view.component';
 import {
   TableCellRequestMonitorIconComponent,
@@ -63,8 +65,6 @@ import { EndpointListHelper } from './components/list/list-types/endpoint/endpoi
 import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
-import { ListHostDirective } from './components/list/simple-list/list-host.directive';
-import { SimpleListComponent } from './components/list/simple-list/simple-list.component';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
@@ -217,9 +217,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     SnackBarReturnComponent,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
-    SimpleListComponent,
     ListHostDirective,
     ListViewComponent,
+    EntityListViewComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -308,9 +308,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     AppNameUniqueDirective,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
-    SimpleListComponent,
     ListHostDirective,
-    ListViewComponent
+    ListViewComponent,
+    EntityListViewComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

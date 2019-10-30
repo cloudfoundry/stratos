@@ -2,9 +2,9 @@ import { Store } from '@ngrx/store';
 
 import { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
 import { IListConfig } from '../../list.component.types';
-import { CatalogueEntityDrivenListConfig } from '../../simple-list/entity-catalogue-list-config';
 import { ListActionOrConfig, ListActionOrConfigHelpers } from '../helpers/action-or-config-helpers';
-import { ListConfigProvider, ListConfigUpdate, ListDataSourceConfigUpdate } from './list-config-provider.types';
+import { CatalogueEntityDrivenListConfig } from '../helpers/entity-catalogue-list-config';
+import { ListConfigProvider, ListConfigUpdate, ListDataSourceConfigUpdate } from '../list-config-provider.types';
 
 
 export class ActionOrConfigListConfigProvider<T, A = T> implements ListConfigProvider<T, A> {
@@ -45,10 +45,12 @@ export class ActionOrConfigListConfigProvider<T, A = T> implements ListConfigPro
       ...new CatalogueEntityDrivenListConfig<T>(catalogueEntity),
       ...(this.overrideListConfig || {})
     };
-    const dsConfig = {
-      ...ListActionOrConfigHelpers.createDataSourceConfig<A, T>(this.store, this.actionOrConfig, this.listConfig),
-      ...(this.overrideDataSourceConfig || {}) // TODO: RC pass in
-    };
+    const dsConfig = ListActionOrConfigHelpers.createDataSourceConfig<A, T>(
+      this.store,
+      this.actionOrConfig,
+      this.listConfig,
+      this.overrideDataSourceConfig || {}
+    );
     const ds = ListActionOrConfigHelpers.createDataSource<A, T>(
       this.store,
       this.actionOrConfig,

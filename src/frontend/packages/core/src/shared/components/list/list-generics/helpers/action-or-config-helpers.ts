@@ -10,11 +10,14 @@ import { IListConfig } from '../../list.component.types';
 
 export type ListActionOrConfig = PaginatedAction | ListEntityConfig;
 
-export interface ListEntityConfig {
-  entityConfig: EntityCatalogueEntityConfig;
+interface GetMultipleActionConfig {
   endpointGuid?: string;
   paginationKey?: string;
   extraArgs?: Record<any, any>;
+}
+
+export interface ListEntityConfig extends GetMultipleActionConfig {
+  entityConfig: EntityCatalogueEntityConfig;
 }
 
 function actionFromConfig(config: ListEntityConfig): PaginatedAction {
@@ -33,6 +36,7 @@ export class ListActionOrConfigHelpers {
   } {
     const action = isPaginatedAction(actionOrConfig) || actionFromConfig(actionOrConfig as ListEntityConfig);
     const catalogueEntity = entityCatalogue.getEntity(action);
+    action.paginationKey = action.paginationKey || catalogueEntity.entityKey + '-list';
     return {
       action,
       catalogueEntity
@@ -78,9 +82,9 @@ export class ListActionOrConfigHelpers {
 export class ListDataSourceFromActionOrConfig<A, T> extends ListDataSource<T, A> {
 
   constructor(actionOrConfig: ListActionOrConfig,
-              listConfig: IListConfig<T>,
-              store: Store<any>,
-              dataSourceConfig?: Partial<IListDataSourceConfig<A, T>>, ) {
+    listConfig: IListConfig<T>,
+    store: Store<any>,
+    dataSourceConfig?: Partial<IListDataSourceConfig<A, T>>, ) {
     const { action, catalogueEntity } = ListActionOrConfigHelpers.createListAction(actionOrConfig);
     super({
       store,
