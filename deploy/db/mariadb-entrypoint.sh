@@ -1,4 +1,13 @@
 #!/bin/bash
+
+###########################################################################################################
+#
+# This is the entrypoint script taken from here: https://github.com/docker-library/mariadb/tree/master/10.2
+#
+# There is one change - which is clearly marked below
+#
+###########################################################################################################
+
 set -eo pipefail
 shopt -s nullglob
 
