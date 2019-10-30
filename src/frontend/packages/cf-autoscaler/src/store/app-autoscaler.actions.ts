@@ -1,5 +1,3 @@
-import { RequestOptions } from '@angular/http';
-
 import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
@@ -16,6 +14,7 @@ import {
   AUTOSCALER_ENDPOINT_TYPE,
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
+import { HttpRequest } from '@angular/common/http';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -139,7 +138,7 @@ export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
   entity = [autoscalerEntityFactory(appAutoscalerPolicyTriggerEntityType)];
   entityType = appAutoscalerPolicyTriggerEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   query: AutoscalerQuery = {
     metric: 'policy'
   };
@@ -184,7 +183,7 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
   entity = [autoscalerEntityFactory(appAutoscalerScalingHistoryEntityType)];
   entityType = appAutoscalerScalingHistoryEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams: AutoscalerPaginationParams = {
     'order-direction-field': GetAppAutoscalerScalingHistoryAction.sortField,
     'order-direction': 'desc',

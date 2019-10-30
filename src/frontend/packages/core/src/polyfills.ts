@@ -44,7 +44,8 @@
 /**
  * Evergreen browsers require these.
  */
-import 'core-js/es6/reflect';
+// TODO angular 8 what is this replaced with?
+// import 'core-js/es6/reflect';
 
 
 /**

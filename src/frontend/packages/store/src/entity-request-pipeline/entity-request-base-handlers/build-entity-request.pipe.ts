@@ -1,4 +1,4 @@
-import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import { HttpRequest } from '@angular/common/http';
 
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 
@@ -52,12 +52,10 @@ export function getRequestTypeFromRequestType(requestType: ApiRequestTypes) {
 
 export const buildRequestEntityPipe = (
   requestType: ApiRequestTypes,
-  requestOptions: RequestOptions | HttpRequest<any>
+  requestOptions: HttpRequest<any>
 ): HttpRequest<any> => {
-  if (requestOptions instanceof HttpRequest) {
-    return requestOptions;
-  }
-  return getRequestFromLegacyOptions({ ...requestOptions } as RequestOptions, requestType);
+  // TODO Angular 8 this is no longer needed.
+  return requestOptions;
 };
 
 

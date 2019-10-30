@@ -70,7 +70,7 @@ export class ChangeUserRole extends CFStartAction implements EntityRequestAction
   constructor(
     public endpointGuid: string,
     public userGuid: string,
-    public method: string,
+    public method: 'PUT' | 'DELETE',
     public actions: string[],
     public permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     public entityGuid: string,
@@ -83,13 +83,14 @@ export class ChangeUserRole extends CFStartAction implements EntityRequestAction
     this.updatingKey = ChangeUserRole.generateUpdatingKey(permissionTypeKey, userGuid);
     this.options = new HttpRequest(
       method,
-      `${isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.updatingKey}`
+      `${isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.updatingKey}`,
+      {}
     );
     this.entityType = isSpace ? spaceEntityType : organizationEntityType;
     this.entity = cfEntityFactory(this.entityType);
   }
 
-  guid: string;
+  guid: string; you
   entity: EntitySchema;
   entityType: string;
   options: HttpRequest<any>;
@@ -113,7 +114,7 @@ export class AddUserRole extends ChangeUserRole {
     super(
       endpointGuid,
       userGuid,
-      'put',
+      'PUT',
       [ADD_ROLE, ADD_ROLE_SUCCESS, ADD_ROLE_FAILED],
       permissionTypeKey,
       entityGuid,
@@ -137,7 +138,7 @@ export class RemoveUserRole extends ChangeUserRole {
     super(
       endpointGuid,
       userGuid,
-      'delete',
+      'DELETE',
       [REMOVE_ROLE, REMOVE_ROLE_SUCCESS, REMOVE_ROLE_FAILED],
       permissionTypeKey,
       entityGuid,
@@ -155,9 +156,10 @@ export class GetUser extends CFStartAction {
     public includeRelations: string[] = createDefaultUserRelations(),
     public populateMissing = true) {
     super();
-    this.options = new HttpRequest();
-    this.options.url = 'users/' + guid;
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      'users/' + guid
+    );
   }
   actions = getActions('Users', 'Fetch User');
   entity = [cfEntityFactory(cfUserEntityType)];
