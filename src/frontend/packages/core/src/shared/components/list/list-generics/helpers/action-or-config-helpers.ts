@@ -29,8 +29,8 @@ function actionFromConfig(config: ListEntityConfig): PaginatedAction {
   return getAllActionBuilder(config.endpointGuid, config.paginationKey, config.extraArgs);
 }
 
+/* tslint:disable:no-use-before-declare  */
 export class ListDataSourceFromActionOrConfig<A, T> extends ListDataSource<T, A> {
-
   constructor(actionOrConfig: ListActionOrConfig,
               listConfig: IListConfig<T>,
               store: Store<any>,
@@ -48,6 +48,7 @@ export class ListDataSourceFromActionOrConfig<A, T> extends ListDataSource<T, A>
     });
   }
 }
+/* tslint:enable */
 
 export class ListActionOrConfigHelpers {
   static createListAction(actionOrConfig: ListActionOrConfig): {
