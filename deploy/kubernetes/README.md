@@ -18,6 +18,7 @@ The following guide details how to deploy Stratos in Kubernetes.
   * [Specifying an External IP](#specifying-an-external-ip)
   * [Upgrading your deployment](#upgrading-your-deployment)
   * [Specifying UAA configuration](#specifying-uaa-configuration)
+  * [Configuring a local user account](#configuring-a-local-user-account)
   * [Specifying a custom Storage Class](#specifying-a-custom-storage-class)
     + [Providing Storage Class override](#providing-storage-class-override)
     + [Create a default Storage Class](#create-a-default-storage-class)
@@ -74,6 +75,8 @@ You can deploy Stratos from one of three different sources:
 1. Using our Helm repository
 1. Using an archive file containing a given release of our Helm chart
 1. Using the latest Helm chart directly from out GitHub repository
+
+> **Note**: By default each deployment method deploys Stratos with its default user authentication mechanism - which requires a UAA. If you wish to use Stratos without the requirement for a UAA component, use the deployment commands from the following section below: [Configuring a local user account](#configuring-a-local-user-account). All other steps for each deployment method remain the same, as detailed in the following sections.
 
 ### Deploy using the Helm repository
 
@@ -247,6 +250,30 @@ To install Stratos with the above specified configuration:
 ```
 $ helm install stratos/console -f uaa-config.yaml
 ```
+
+### Configuring a local user account
+
+This allows for deployment without a UAA. To enable the local user account, supply a password for the local user in the deployment command, as follows. All other steps for each deployment method should be followed as in the preceding sections above.
+
+To deploy using our Helm repository:
+
+```
+helm install stratos/console --namespace=console --name my-console --set console.localAdminPassword=<password>
+```
+
+To deploy using an archive file containing a given release of our Helm chart
+
+```
+helm install console --namespace=console --name my-console --set console.localAdminPassword=<password>
+```
+
+To deploy using the latest Helm chart directly from out GitHub repository
+
+```
+$ helm install console --namespace console --name my-console --set console.localAdminPassword=<password>
+```
+
+For console access via the local user account see: [*Accessing the Console*](#accessing-the-console)
 
 ### Specifying a custom Storage Class 
 

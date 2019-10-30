@@ -182,7 +182,11 @@ We use Go Modules for dependency management.
 You will need the following installed/available:
 
 * go 1.12 or later.
-* UAA instance - you will need a UAA running for authentication
+
+*For authentication, **either***
+
+* A UAA instance
+* A local user account 
 
 ### Building the back-end
 
@@ -213,6 +217,13 @@ or an overrides file.
 
 ##### Environment variable
 
+If you wish to use a local user account, ensure you have set the following environment variables:
+
+- `AUTH_ENDPOINT_TYPE=local`
+- `LOCAL_USER` - The username for the local user
+- `LOCAL_USER_PASSWORD` - The password for the local user
+- `LOCAL_USER_SCOPE=stratos.admin` - This gives the local user admin permissions. Currently other roles are not available.
+
 If you have a custom uaa, ensure you have set the following environment variables:
 
 - `UAA_ENDPOINT`- the URL of your UAA
@@ -231,7 +242,20 @@ To easily persist configuration settings copy `src/jetstream/default.config.prop
 configuration from this file in preference to the default config file, if it exists. You can also modify individual configuration settings
 by setting the corresponding environment variable.
 
-#### Configure via Stratos
+##### To configure a local user account via config file
+
+In `src/jetstream/config.properties` uncomment the following lines:
+
+```
+AUTH_ENDPOINT_TYPE=local
+LOCAL_USER=localuser
+LOCAL_USER_PASSWORD=localuserpass
+LOCAL_USER_SCOPE=stratos.admin
+```
+
+Load the Stratos UI and proceed to log in using the configured credentials.
+
+#### To configure UAA via Stratos
 
 1. Go through the `Config File` step above and comment out the `UAA_ENDPOINT` with a `#` in the new `config.properties` file.
 1. If any previous configuration attempt has been made reset your database as described above.
