@@ -14,7 +14,7 @@ func TestConsoleSetup(t *testing.T) {
 
 	Convey("Check that we can migrate data from the old console_config table", t, func() {
 
-		db, err := datastore.GetSQLLiteConnectionWithPath("file::memory:?cache=shared", true)
+		db, _, err := datastore.GetSQLLiteConnectionWithPath("file::memory:?cache=shared", true)
 		if err != nil {
 			t.Errorf("can not open sqlite database for testing: %v", err)
 		}
@@ -60,7 +60,7 @@ func TestConsoleSetup(t *testing.T) {
 			t.Errorf("Could not get new config: %v", err)
 		}
 
-		// New config should be 
+		// New config should be
 
 		So(newConfig.UAAEndpoint.String(), ShouldEqual, "TEST_UAA")
 		So(newConfig.AuthorizationEndpoint.String(), ShouldEqual, "TEST_UAA")
