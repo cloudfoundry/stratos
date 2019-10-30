@@ -10,12 +10,14 @@ import {
   IListDataSourceConfig,
 } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-config';
 import {
-  ListDefaultsActionOrConfig,
-} from '../../../../../../core/src/shared/components/list/defaults-list/defaults-datasource';
+  ListActionOrConfig,
+} from '../../../../../../core/src/shared/components/list/list-generics/helpers/action-or-config-helpers';
 import {
   ActionListConfigProvider,
+} from '../../../../../../core/src/shared/components/list/list-generics/list-providers/action-list-config-provider';
+import {
   EntityConfigListConfigProvider,
-} from '../../../../../../core/src/shared/components/list/list-configs/list-config-providers';
+} from '../../../../../../core/src/shared/components/list/list-generics/list-providers/entity-config-list-config-provider';
 import { IListConfig, ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -44,10 +46,10 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 })
 export class CloudFoundryOrganizationsComponent {
   public canAddOrg$: Observable<boolean>;
-  public listActionConfig: ListDefaultsActionOrConfig;
+  public listActionConfig: ListActionOrConfig;
   public listConfig: Partial<IListConfig<APIResource<IOrganization>>>;
   public dataSourceConfig: Partial<IListDataSourceConfig<APIResource<IOrganization>, APIResource<IOrganization>>>;
-
+  public provider;
 
   // TODO: RC Nuke all below to ctor (keep setup minimal contents)
   // TODO: RC Nuke CfOrgsListConfigService && CfOrgsDataSourceService
@@ -90,8 +92,7 @@ export class CloudFoundryOrganizationsComponent {
     };
 
     if (provider) {
-      const b = new EntityConfigListConfigProvider<APIResource<IOrganization>>(this.store, a);
-      this.listConfig = b.getListConfig();
+      this.provider = new EntityConfigListConfigProvider<APIResource<IOrganization>>(this.store, a);
     } else {
       this.listActionConfig = a;
     }
@@ -135,9 +136,8 @@ export class CloudFoundryOrganizationsComponent {
       }
     };
     if (provider) {
-      const a = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
-      a.updateListConfig(ls);
-      this.listConfig = a.getListConfig();
+      this.provider = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
+      this.provider.updateListConfig(ls);
     } else {
       this.listConfig = ls;
     }
@@ -156,9 +156,8 @@ export class CloudFoundryOrganizationsComponent {
         }]
     };
     if (provider) {
-      const a = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
-      a.updateDataSourceConfig(dsc);
-      this.listConfig = a.getListConfig();
+      this.provider = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
+      this.provider.updateDataSourceConfig(dsc);
     } else {
       this.dataSourceConfig = dsc;
     }
@@ -196,21 +195,20 @@ export class CloudFoundryOrganizationsComponent {
         title: null,
         filter: 'Search by name',
         noEntries: 'There are no organizations'
-      }
+      },
     };
     const dsc: Partial<IListDataSourceConfig<APIResource<IOrganization>, APIResource<IOrganization>>> = {
       transformEntities: [{ type: 'filter', field: 'entity.name' }] // Note - this will go away once fixed in default case
     };
 
     if (provider) {
-      const a = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
-      a.updateListConfig(ls);
-      a.updateDataSourceConfig(dsc);
-      this.listConfig = a.getListConfig();
+      this.provider = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
+      this.provider.updateListConfig(ls);
+      this.provider.updateDataSourceConfig(dsc);
     } else {
-      this.listActionConfig = action;
-      this.listConfig = ls;
-      this.dataSourceConfig = dsc;
+      // this.listActionConfig = action;
+      // this.listConfig = ls;
+      // this.dataSourceConfig = dsc;
     }
   }
 

@@ -1,20 +1,21 @@
 import { Component, ComponentFactoryResolver, ComponentRef, Injector, Input, OnInit, ViewChild } from '@angular/core';
 
-import { ListComponent } from '../list.component';
-import { IListConfig, ListConfig } from '../list.component.types';
-import { ListHostDirective } from '../simple-list/list-host.directive';
+import { ListComponent } from '../../list.component';
+import { IListConfig, ListConfig } from '../../list.component.types';
+import { ListHostDirective } from '../../simple-list/list-host.directive';
+import { ListConfigProvider } from '../list-providers/list-config-provider.types';
 
 @Component({
-  selector: 'app-list-with-config',
-  templateUrl: './list-with-config.component.html',
-  styleUrls: ['./list-with-config.component.scss'],
+  selector: 'app-list-view',
+  templateUrl: './list-view.component.html',
+  styleUrls: ['./list-view.component.scss'],
   entryComponents: [
     ListComponent
   ]
 })
-export class ListWithConfigComponent<T> implements OnInit {
+export class ListViewComponent<T> implements OnInit {
 
-  @Input() listConfig: ListConfig<T>;
+  @Input() config: ListConfigProvider<T>;
 
   @ViewChild(ListHostDirective)
   public listHost: ListHostDirective;
@@ -34,7 +35,7 @@ export class ListWithConfigComponent<T> implements OnInit {
     this.componentRef = viewContainerRef.createComponent(
       componentFactory,
       null,
-      this.makeCustomConfigInjector(this.listConfig)
+      this.makeCustomConfigInjector(this.config.getListConfig())
     );
   }
 

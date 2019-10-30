@@ -45,13 +45,13 @@ import { FileInputComponent } from './components/file-input/file-input.component
 import { FocusDirective } from './components/focus.directive';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
-import { DefaultsListComponent } from './components/list/defaults-list/defaults-list.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { ListViewComponent } from './components/list/list-generics/list-view/list-view.component';
 import {
   TableCellRequestMonitorIconComponent,
 } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
@@ -61,7 +61,6 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
-import { ListWithConfigComponent } from './components/list/list-with-config/list-with-config.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { ListHostDirective } from './components/list/simple-list/list-host.directive';
@@ -219,9 +218,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     SimpleListComponent,
-    DefaultsListComponent,
     ListHostDirective,
-    ListWithConfigComponent,
+    ListViewComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -311,9 +309,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     SimpleListComponent,
-    DefaultsListComponent,
     ListHostDirective,
-    ListWithConfigComponent
+    ListViewComponent
   ],
   entryComponents: [
     DialogConfirmComponent,
