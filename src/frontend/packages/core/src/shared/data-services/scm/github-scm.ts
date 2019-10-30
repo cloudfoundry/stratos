@@ -2,13 +2,16 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { GitBranch, GitCommit, GitRepo } from '../../../../../store/src/types/git.types';
+import { GitBranch, GitCommit, GitRepo } from '../../../../../cloud-foundry/src/store/types/git.types';
 import { GitSCM, SCMIcon } from './scm';
 import { GitSCMType } from './scm.service';
+import { getGitHubAPIURL } from '../../../core/github.helpers';
 
 export class GitHubSCM implements GitSCM {
 
-  constructor(public httpClient: HttpClient, public gitHubURL: string) { }
+  constructor(public httpClient: HttpClient, public gitHubURL: string) {
+    this.gitHubURL = this.gitHubURL || getGitHubAPIURL();
+  }
 
   getType(): GitSCMType {
     return 'github';
@@ -34,7 +37,11 @@ export class GitHubSCM implements GitSCM {
   }
 
   getCommit(projectName: string, commitSha: string): Observable<GitCommit> {
-    return this.httpClient.get(`${this.gitHubURL}/repos/${projectName}/commits/${commitSha}`) as Observable<GitCommit>;
+    return this.httpClient.get<GitCommit>(this.getCommitApiUrl(projectName, commitSha)) as Observable<GitCommit>;
+  }
+
+  getCommitApiUrl(projectName: string, commitSha: string) {
+    return `${this.gitHubURL}/repos/${projectName}/commits/${commitSha}`;
   }
 
   getCommits(projectName: string, commitSha: string): Observable<GitCommit[]> {

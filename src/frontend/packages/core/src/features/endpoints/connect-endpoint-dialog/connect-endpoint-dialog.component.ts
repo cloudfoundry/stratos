@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 
 import { ShowSideHelp } from '../../../../../store/src/actions/dashboard-actions';
 import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { EndpointOnlyAppState } from '../../../../../store/src/app-state';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.service';
 
@@ -26,7 +26,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   constructor(
     public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ConnectEndpointConfig,
-    private store: Store<AppState>,
+    private store: Store<EndpointOnlyAppState>,
     endpointsService: EndpointsService,
   ) {
     this.connectService = new ConnectEndpointService(store, endpointsService, data);

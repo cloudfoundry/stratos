@@ -3,15 +3,15 @@ import { Store } from '@ngrx/store';
 import { isObservable, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   RemoveUserFavoriteAction,
 } from '../../../../../store/src/actions/user-favourites-actions/remove-user-favorite-action';
-import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory, userFavoritesSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import { userFavoritesEntitySchema } from '../../../base-entity-schemas';
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
-import { StratosStatus, ComponentEntityMonitorConfig } from '../../shared.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
@@ -78,7 +78,7 @@ export class FavoritesMetaCardComponent {
       this.favorite = favorite;
       this.metaFavorite = !this.endpoint || (this.endpoint && !this.endpointHasEntities) ? favorite : null;
       this.prettyName = prettyName || 'Unknown';
-      this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));
+      this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, userFavoritesEntitySchema);
 
       this.setConfirmation(this.prettyName, favorite);
 
@@ -97,7 +97,7 @@ export class FavoritesMetaCardComponent {
     }
   }
 
-  constructor(private store: Store<AppState>, private confirmDialog: ConfirmationDialogService) { }
+  constructor(private store: Store<CFAppState>, private confirmDialog: ConfirmationDialogService) { }
 
   public setConfirmation(prettyName: string, favorite: UserFavorite<IFavoriteMetadata>) {
     this.confirmation = new ConfirmationDialogConfig(

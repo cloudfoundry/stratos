@@ -1,4 +1,7 @@
-import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
+import {
+  GetCurrentUserRelationsComplete,
+  UserRelationTypes,
+} from '../../../../cloud-foundry/src/actions/permissions.actions';
 import { APIResource } from '../../types/api.types';
 
 export interface IKeyedByIDObject<T> {
@@ -44,17 +47,4 @@ export function removeOldRoles<T>(
       [id]: reducer(currentState[id], action.relationType, false)
     };
   }, { ...state });
-}
-
-export function isOrgRelation(relationType: UserRelationTypes) {
-  return relationType === UserRelationTypes.AUDITED_ORGANIZATIONS ||
-    relationType === UserRelationTypes.BILLING_MANAGED_ORGANIZATION ||
-    relationType === UserRelationTypes.MANAGED_ORGANIZATION ||
-    relationType === UserRelationTypes.ORGANIZATIONS;
-}
-
-export function isSpaceRelation(relationType: UserRelationTypes) {
-  return relationType === UserRelationTypes.AUDITED_SPACES ||
-    relationType === UserRelationTypes.MANAGED_SPACES ||
-    relationType === UserRelationTypes.SPACES;
 }

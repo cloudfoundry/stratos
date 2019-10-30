@@ -41,10 +41,10 @@ export class PageSideNavComponent implements OnInit {
   public breadcrumbs$: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;
   constructor(
+    public tabNavService: TabNavService,
     private store: Store<AppState>,
     private esf: EntityServiceFactory,
     private activatedRoute: ActivatedRoute,
-    public tabNavService: TabNavService
   ) {
     this.isMobile$ = this.store.select(selectIsMobile);
   }

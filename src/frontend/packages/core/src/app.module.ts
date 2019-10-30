@@ -4,56 +4,44 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
-import { debounceTime, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
 import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
-import { CloudFoundryModule } from '../../cloud-foundry/src/cloud-foundry.module';
+import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
-import { RouterNav } from '../../store/src/actions/router.actions';
 import {
   UpdateUserFavoriteMetadataAction,
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
-import { AppState } from '../../store/src/app-state';
-import {
-  applicationSchemaKey,
-  endpointSchemaKey,
-  organizationSchemaKey,
-  spaceSchemaKey,
-} from '../../store/src/helpers/entity-factory';
+import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
+import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState } from '../../store/src/selectors/api.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
 import { AppStoreModule } from '../../store/src/store.module';
-import { APIResource } from '../../store/src/types/api.types';
-import { EndpointModel } from '../../store/src/types/endpoint.types';
-import { IRequestDataState } from '../../store/src/types/entity.types';
-import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
-import { IAppFavMetadata, IOrgFavMetadata, ISpaceFavMetadata } from './cf-favourite-types';
-import { IApp, IOrganization, ISpace } from './core/cf-api.types';
+import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
+import { generateStratosEntities } from './base-entity-types';
 import { CoreModule } from './core/core.module';
-import { CurrentUserPermissions } from './core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from './core/current-user-permissions.service';
 import { CustomizationService } from './core/customizations.types';
+import { EntityCatalogueModule } from './core/entity-catalogue.module';
+import { EntityActionDispatcher } from './core/entity-catalogue/action-dispatcher/action-dispatcher';
+import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
-import { LoggerService } from './core/logger.service';
 import { UserFavoriteManager } from './core/user-favorite-manager';
 import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
-import { ApplicationsModule } from './features/applications/applications.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
-import { getFullEndpointApiUrl, initEndpointExtensions } from './features/endpoints/endpoint-helpers';
 import { HomeModule } from './features/home/home.module';
 import { LoginModule } from './features/login/login.module';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
-import { ServiceCatalogModule } from './features/service-catalog/service-catalog.module';
 import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
-import { FavoriteConfig, favoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
+import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
@@ -97,23 +85,22 @@ export class CustomRouterStateSerializer
     NoEndpointsNonAdminComponent,
   ],
   imports: [
+    EntityCatalogueModule.forFeature(generateStratosEntities),
+    RouteModule,
+    CloudFoundryPackageModule,
+    AppStoreModule,
     BrowserModule,
+    SharedModule,
     BrowserAnimationsModule,
     CoreModule,
-    AppStoreModule,
-    SharedModule,
-    RouteModule,
-    ApplicationsModule,
     SetupModule,
     LoginModule,
     HomeModule,
     DashboardModule,
-    ServiceCatalogModule,
     StoreRouterConnectingModule, // Create action for router navigation
     AboutModule,
     CustomImportModule,
     XSRFModule,
-    CloudFoundryModule,
     CfAutoscalerModule
   ],
   providers: [
@@ -129,23 +116,23 @@ export class CustomRouterStateSerializer
   bootstrap: [AppComponent]
 })
 export class AppModule {
-  private userFavoriteManager: UserFavoriteManager;
   constructor(
     ext: ExtensionService,
-    private permissionService: CurrentUserPermissionsService,
-    private store: Store<AppState>,
-    logger: LoggerService,
-    eventService: GlobalEventService
+    private store: Store<GeneralEntityAppState>,
+    eventService: GlobalEventService,
+    private userFavoriteManager: UserFavoriteManager,
+    private favoritesConfigMapper: FavoritesConfigMapper,
   ) {
+    EntityActionDispatcher.initialize(this.store);
     eventService.addEventConfig<boolean>({
-      eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.timeoutSession),
+      eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.timeoutSession),
       message: 'Timeout session is disabled - this is considered a security risk.',
       key: 'timeoutSessionWarning',
       link: '/user-profile'
     });
     eventService.addEventConfig<boolean>({
-      eventTriggered: (state: AppState) => new GlobalEventData(!state.dashboard.pollingEnabled),
-      message: 'Polling is disabled - some pages may show stale data.',
+      eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.pollingEnabled),
+      message: 'Data polling is disabled - you may be seeing out-of-date data throughout the application.',
       key: 'pollingEnabledWarning',
       link: '/user-profile'
     });
@@ -169,11 +156,11 @@ export class AppModule {
     // );
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
-    initEndpointExtensions(ext);
     // Once the CF modules become an extension point, these should be moved to a CF specific module
-    this.registerCfFavoriteMappers();
-    this.userFavoriteManager = new UserFavoriteManager(store, logger);
-    const allFavs$ = this.userFavoriteManager.getAllFavorites();
+
+    const allFavs$ = this.userFavoriteManager.getAllFavorites().pipe(
+      filter(([groups, favoriteEntities]) => !!groups && !!favoriteEntities)
+    );
     const recents$ = this.store.select(recentlyVisitedSelector);
     const debouncedApiRequestData$ = this.store.select(getAPIRequestDataState).pipe(debounceTime(2000));
     debouncedApiRequestData$.pipe(
@@ -199,10 +186,11 @@ export class AppModule {
     ).subscribe(
       ([entities, recents]) => {
         Object.values(recents.entities).forEach(recentEntity => {
-          const mapper = favoritesConfigMapper.getMapperFunction(recentEntity);
-          if (entities[recentEntity.entityType] && entities[recentEntity.entityType][recentEntity.entityId]) {
-            const entity = entities[recentEntity.entityType][recentEntity.entityId];
-            const entityToMetadata = favoritesConfigMapper.getEntityMetadata(recentEntity, entity);
+          const mapper = this.favoritesConfigMapper.getMapperFunction(recentEntity);
+          const entityKey = entityCatalogue.getEntityKey(recentEntity);
+          if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
+            const entity = entities[entityKey][recentEntity.entityId];
+            const entityToMetadata = this.favoritesConfigMapper.getEntityMetadata(recentEntity, entity);
             const name = mapper(entityToMetadata).name;
             if (name && name !== recentEntity.name) {
               this.store.dispatch(new SetRecentlyVisitedEntityAction({
@@ -216,11 +204,17 @@ export class AppModule {
     );
   }
 
-  private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: IRequestDataState) {
+  private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {
     if (favorite) {
-      const entity = entities[favorite.entityType][favorite.entityId || favorite.endpointId];
+      const isEndpoint = (favorite.entityType === endpointSchemaKey);
+      // If the favorite is an endpoint ensure we look in the stratosEndpoint part of the store instead of, for example, cfEndpoint
+      const entityKey = isEndpoint ? entityCatalogue.getEntityKey({
+        ...favorite,
+        endpointType: STRATOS_ENDPOINT_TYPE
+      }) : entityCatalogue.getEntityKey(favorite);
+      const entity = entities[entityKey][favorite.entityId || favorite.endpointId];
       if (entity) {
-        const newMetadata = favoritesConfigMapper.getEntityMetadata(favorite, entity);
+        const newMetadata = this.favoritesConfigMapper.getEntityMetadata(favorite, entity);
         if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
           this.store.dispatch(new UpdateUserFavoriteMetadataAction({
             ...favorite,
@@ -250,116 +244,4 @@ export class AppModule {
     }
     return false;
   }
-
-  private registerCfFavoriteMappers() {
-    const endpointType = 'cf';
-
-    this.registerCfEndpointMapper(endpointType);
-    this.registerCfApplicationMapper(endpointType);
-    this.registerCfSpaceMapper(endpointType);
-    this.registerCfOrgMapper(endpointType);
-  }
-  private registerCfEndpointMapper(endpointType: string) {
-    favoritesConfigMapper.registerFavoriteConfig<EndpointModel, IEndpointFavMetadata>(new FavoriteConfig({
-      endpointType,
-      entityType: endpointSchemaKey
-    },
-      'Cloud Foundry',
-      (endpoint: IEndpointFavMetadata) => ({
-        type: endpointType,
-        routerLink: `/cloud-foundry/${endpoint.guid}`,
-        lines: [
-          ['Address', endpoint.address],
-          ['User', endpoint.user],
-          ['Admin', endpoint.admin]
-        ],
-        name: endpoint.name,
-        menuItems: [
-          {
-            label: 'Create application',
-            action: () => this.store.dispatch(new RouterNav({ path: ['applications/new'], query: { endpointGuid: endpoint.guid } })),
-            can: this.permissionService.can(CurrentUserPermissions.APPLICATION_CREATE)
-          }
-        ]
-      }),
-      endpoint => ({
-        name: endpoint.name,
-        guid: endpoint.guid,
-        address: getFullEndpointApiUrl(endpoint),
-        user: endpoint.user ? endpoint.user.name : undefined,
-        admin: endpoint.user ? endpoint.user.admin ? 'Yes' : 'No' : undefined
-      })
-    ));
-  }
-
-  private registerCfApplicationMapper(endpointType: string) {
-    favoritesConfigMapper.registerFavoriteConfig<APIResource<IApp>, IAppFavMetadata>(new FavoriteConfig({
-      endpointType,
-      entityType: applicationSchemaKey
-    },
-      'Application',
-      (app: IAppFavMetadata) => {
-        return {
-          type: applicationSchemaKey,
-          routerLink: `/applications/${app.cfGuid}/${app.guid}/summary`,
-          name: app.name
-        };
-      },
-      app => ({
-        guid: app.metadata.guid,
-        cfGuid: app.entity.cfGuid,
-        name: app.entity.name,
-      })
-    ));
-  }
-
-  private registerCfSpaceMapper(endpointType: string) {
-    favoritesConfigMapper.registerFavoriteConfig<APIResource<ISpace>, ISpaceFavMetadata>(new FavoriteConfig({
-      endpointType,
-      entityType: spaceSchemaKey
-    },
-      'Space',
-      (space: ISpaceFavMetadata) => {
-        return {
-          type: spaceSchemaKey,
-          routerLink: `/cloud-foundry/${space.cfGuid}/organizations/${space.orgGuid}/spaces/${space.guid}/summary`,
-          name: space.name
-        };
-      },
-      space => ({
-        guid: space.metadata.guid,
-        orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
-        name: space.entity.name,
-        cfGuid: space.entity.cfGuid,
-      })
-    ));
-
-  }
-  private registerCfOrgMapper(endpointType: string) {
-
-    favoritesConfigMapper.registerFavoriteConfig<APIResource<IOrganization>, IOrgFavMetadata>(new FavoriteConfig({
-      endpointType,
-      entityType: organizationSchemaKey
-    },
-      'Organization',
-      (org: IOrgFavMetadata) => ({
-        type: organizationSchemaKey,
-        routerLink: `/cloud-foundry/${org.cfGuid}/organizations/${org.guid}`,
-        name: org.name
-      }),
-      org => ({
-        guid: org.metadata.guid,
-        status: this.getOrgStatus(org),
-        name: org.entity.name,
-        cfGuid: org.entity.cfGuid,
-      })
-    ));
-  }
-  private getOrgStatus(org: APIResource<IOrganization>) {
-    if (!org || !org.entity || !org.entity.status) {
-      return 'Unknown';
-    }
-    return org.entity.status.charAt(0).toUpperCase() + org.entity.status.slice(1);
-  }
 }
-

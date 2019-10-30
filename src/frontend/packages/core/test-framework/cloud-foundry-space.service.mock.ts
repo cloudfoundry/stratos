@@ -1,6 +1,10 @@
 import { Observable, of as observableOf } from 'rxjs';
 
-import { CloudFoundrySpaceService } from '../src/features/cloud-foundry/services/cloud-foundry-space.service';
+import {
+  CloudFoundrySpaceService,
+} from '../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-space.service';
+
+// TODO: Move this file to cf package - #3769
 
 export class CloudFoundrySpaceServiceMock {
 

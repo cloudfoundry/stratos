@@ -1,7 +1,7 @@
-import { DisconnectEndpoint, RegisterEndpoint, EndpointActionComplete } from '../../actions/endpoint.actions';
-import { ICurrentUserRolesState, getDefaultEndpointRoles } from '../../types/current-user-roles.types';
-import { APISuccessOrFailedAction } from '../../types/request.types';
+import { EndpointActionComplete } from '../../actions/endpoint.actions';
+import { getDefaultEndpointRoles, ICurrentUserRolesState } from '../../types/current-user-roles.types';
 import { EndpointModel } from '../../types/endpoint.types';
+import { APISuccessOrFailedAction } from '../../types/request.types';
 
 export function removeEndpointRoles(state: ICurrentUserRolesState, action: EndpointActionComplete) {
   const cfState = {
@@ -34,12 +34,10 @@ export function addEndpoint(state: ICurrentUserRolesState, action: EndpointActio
   };
 }
 
-
-
 export function removeSpaceRoles(state: ICurrentUserRolesState, action: APISuccessOrFailedAction) {
   const { endpointGuid, guid } = action.apiAction;
-  const removedOrgOrSpaceState = removeOrgOrSpaceRoles(state, endpointGuid, guid, 'spaces');
-  return removeSpaceIdFromOrg(state, endpointGuid, guid);
+  const removedOrgOrSpaceState = removeOrgOrSpaceRoles(state, endpointGuid as string, guid, 'spaces');
+  return removeSpaceIdFromOrg(state, endpointGuid as string, guid);
 }
 
 function removeSpaceIdFromOrg(state: ICurrentUserRolesState, endpointGuid: string, spaceGuid: string) {
@@ -68,7 +66,7 @@ function removeSpaceIdFromOrg(state: ICurrentUserRolesState, endpointGuid: strin
 
 export function removeOrgRoles(state: ICurrentUserRolesState, action: APISuccessOrFailedAction) {
   const { endpointGuid, guid } = action.apiAction;
-  if (!state.cf[endpointGuid].organizations[guid]) {
+  if (!state.cf[endpointGuid as string].organizations[guid]) {
     return state;
   }
   // const spaceIds = state.cf[endpointGuid].organizations[guid].spaceIds;

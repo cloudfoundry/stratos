@@ -75,9 +75,13 @@ function endpointHasMetrics(endpoint: EndpointModel) {
   return !!endpoint.metadata.metrics;
 }
 
-function changeEndpointConnectionStatus(state: IRequestEntityTypeState<EndpointModel>, action: {
-  guid: string
-},                                      connectionStatus: endpointConnectionStatus) {
+function changeEndpointConnectionStatus(
+  state: IRequestEntityTypeState<EndpointModel>,
+  action: {
+    guid: string
+  },
+  connectionStatus: endpointConnectionStatus
+) {
   if (!action.guid) {
     return state;
   }

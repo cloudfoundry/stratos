@@ -1,7 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModules } from '../../../../test-framework/core-test.helper';
+import { endpointEntitySchema } from '../../../base-entity-schemas';
 import { AppActionMonitorIconComponent } from './app-action-monitor-icon.component';
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('AppActionMonitorIconComponent', () => {
   let component: AppActionMonitorIconComponent;
@@ -9,7 +10,9 @@ describe('AppActionMonitorIconComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: BaseTestModules
+      imports: [
+        ...BaseTestModules
+      ]
     })
       .compileComponents();
   }));
@@ -17,6 +20,8 @@ describe('AppActionMonitorIconComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(AppActionMonitorIconComponent);
     component = fixture.componentInstance;
+    component.id = '1';
+    component.schema = endpointEntitySchema;
     fixture.detectChanges();
   });
 

@@ -6,7 +6,6 @@ import { Store } from '@ngrx/store';
 import { CoreModule } from '../../../core/src/core/core.module';
 import { EndpointsPageComponent } from '../../../core/src/features/endpoints/endpoints-page/endpoints-page.component';
 import { SharedModule } from '../../../core/src/shared/shared.module';
-import { AppState } from '../app-state';
 import { ShowSnackBar } from './../actions/snackBar.actions';
 import { AppStoreModule } from './../store.module';
 
@@ -25,7 +24,7 @@ describe('SnackBarEffect', () => {
   });
 
   it('Should open a dialog', () => {
-    inject([Store, MatDialog], (store: Store<AppState>, dialog: MatDialog) => {
+    inject([Store, MatDialog], (store: Store<unknown>, dialog: MatDialog) => {
       store.dispatch(new ShowSnackBar('Test'));
       expect(dialog.openDialogs[0]).toBeDefined();
     });

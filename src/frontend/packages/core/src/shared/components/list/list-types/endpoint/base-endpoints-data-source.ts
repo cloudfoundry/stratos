@@ -1,42 +1,51 @@
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { endpointEntitySchema } from '../../../../../base-entity-schemas';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { RowsState } from '../../data-sources-controllers/list-data-source-types';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
 import { ListRowSateHelper } from '../../list.helper';
 import { EndpointRowStateSetUpManager } from '../endpoint/endpoint-data-source.helpers';
 
 export function syncPaginationSection(
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   action: GetAllEndpoints,
   paginationKey: string
 ) {
   store.dispatch(new CreatePagination(
-    action.entityKey,
+    action,
     paginationKey,
     action.paginationKey
   ));
 }
 
 export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
-  store: Store<AppState>;
-  endpointType: string;
+  store: Store<CFAppState>;
+  /**
+   * Used to distinguish between data sources providing all endpoints or those that only provide endpoints matching this value.
+   * Value should match those of an endpoint's `cnsi_type`.
+   *
+   * Note - Should not be renamed to endpointType to avoid clash with ListDataSource endpointType
+   */
+  dsEndpointType: string;
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     listConfig: IListConfig<EndpointModel>,
     action: GetAllEndpoints,
-    endpointType: string = null,
+    dsEndpointType: string = null,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
@@ -47,7 +56,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       paginationMonitorFactory,
       entityMonitorFactory,
       GetAllEndpoints.storeKey,
-      endpointSchemaKey,
+      action,
       EndpointRowStateSetUpManager
     );
     const eventSub = BaseEndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager, store);
@@ -68,9 +77,9 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       paginationKey: action.paginationKey,
       transformEntities: [
         (entities: EndpointModel[]) => {
-          return endpointType || onlyConnected ? entities.filter(endpoint => {
+          return dsEndpointType || onlyConnected ? entities.filter(endpoint => {
             return (!onlyConnected || endpoint.connectionStatus === 'connected') &&
-              (!endpointType || endpoint.cnsi_type === endpointType);
+              (!dsEndpointType || endpoint.cnsi_type === dsEndpointType);
           }) : entities;
         },
         {
@@ -79,21 +88,21 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
         },
       ],
     });
-    this.endpointType = endpointType;
+    this.dsEndpointType = dsEndpointType;
   }
 
   static getEndpointConfig(
-    store,
-    action,
-    listConfig,
-    rowsState,
-    destroy,
-    refresh
+    store: Store<CFAppState>,
+    action: GetAllEndpoints,
+    listConfig: IListConfig<EndpointModel>,
+    rowsState: Observable<RowsState>,
+    destroy: () => void,
+    refresh: () => void
   ) {
     return {
       store,
       action,
-      schema: entityFactory(endpointSchemaKey),
+      schema: endpointEntitySchema,
       getRowUniqueId: object => object.guid,
       getEmptyType: () => ({
         name: '',
@@ -118,7 +127,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   static monitorEvents(
     internalEventMonitorFactory: InternalEventMonitorFactory,
     rowStateManager: TableRowStateManager,
-    store: Store<AppState>
+    store: Store<CFAppState>
   ) {
     const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
     return eventMonitor.hasErroredOverTime().pipe(

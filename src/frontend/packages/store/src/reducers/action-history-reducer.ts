@@ -1,6 +1,4 @@
-import { AppState } from '../app-state';
 import { Action } from '@ngrx/store';
-import { LoggerAction, LoggerDebugAction } from '../actions/log.actions';
 
 export class ActionHistoryState extends Array<string> { }
 

@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { TabNavService } from '../../../../../tab-nav.service';
+import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -22,6 +23,7 @@ describe('CreateEndpointBaseStepComponent', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
+        CoreTestingModule,
         createBasicStoreModule(),
         NoopAnimationsModule
       ],

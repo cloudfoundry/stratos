@@ -1,7 +1,8 @@
 import { browser, promise, protractor } from 'protractor';
 
+import { CFResponse, createEmptyCfResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
 import { IServiceInstance } from '../../frontend/packages/core/src/core/cf-api-svc.types';
-import { APIResource, CFResponse, createEmptyCfResponse } from '../../frontend/packages/store/src/types/api.types';
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
@@ -290,8 +291,30 @@ export class ServicesHelperE2E {
       list.header.setSearchText(serviceName);
     }
     const totalResults = list.getTotalResults();
-    expect(totalResults).toBe(0);
     return totalResults;
+  }
+
+  noServiceCardWithTitleAttempt(
+    list: ListComponent,
+    serviceName: string,
+    retryNumber: number,
+    maxRetries: number,
+    filter = true): promise.Promise<number> {
+    return this.noServiceCardWithTitle(list, serviceName, filter)
+      .then(totalResults => {
+        if (totalResults === 0) {
+          return 0;
+        }
+        const attemptsLeft = maxRetries - retryNumber;
+        if (!!attemptsLeft) {
+          e2e.log(`Found service with name '${serviceName}' when not expecting to, refreshing list and checking again`);
+          browser.sleep(1000);
+          return list.header.refresh()
+            .then(() => this.noServiceCardWithTitleAttempt(list, serviceName, retryNumber + 1, maxRetries, filter));
+        }
+        fail(`Continued to find service with name '${serviceName}' after ${maxRetries} when not expecting to`);
+        return list.getTotalResults();
+      });
   }
 
 }
