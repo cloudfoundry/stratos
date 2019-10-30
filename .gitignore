@@ -90,7 +90,6 @@ e2e-reports/
 src/jetstream/jetstream
 src/jetstream/console-database.db
 src/jetstream/config.properties
-src/jetstream/db/dbconf.yml
 
 # Customisations
 

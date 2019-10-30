@@ -34,13 +34,3 @@ sleep 20
 docker exec -t ${ID} /init.sh
 
 echo "Database ready"
-
-mkdir -p ${STRATOS_PATH}/src/jetstream/db
-cp ${STRATOS_PATH}/deploy/db/dbconf.yml ${STRATOS_PATH}/src/jetstream/db
-
-if [ -f ${STRATOS_PATH}/src/jetstream/jetstream ]; then
-  ${STRATOS_PATH}/src/jetstream/jetstream --env=mariadb-dev up
-else
-  echo "Build the Stratos backend and run db migrations with:"
-  echo "  ./jetstream --env=mariadb-local up"
-fi

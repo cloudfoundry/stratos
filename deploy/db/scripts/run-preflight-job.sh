@@ -1,12 +1,9 @@
 #!/bin/bash
 set -e
 
-# Step 1 - Set the lock file on the shared volume
-echo "Adding $UPGRADE_LOCK_FILENAME file to the shared upgrade volume $UPGRADE_VOLUME."
-touch /$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME
-chmod 440 /$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME
+exit 1
 
-echo "Created the upgrade lock file."
+# Step 1 - No longer needed
 
 # Step 2 - Create an AES-256 compliant encryption key
 # in a file on a shared volume.

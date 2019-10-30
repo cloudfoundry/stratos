@@ -350,4 +350,5 @@ type PortalConfig struct {
 	PluginConfig                    map[string]string
 	DatabaseProviderName            string
 	EnableTechPreview               bool `configName:"ENABLE_TECH_PREVIEW"`
+	CanMigrateDatabaseSchema        bool
 }

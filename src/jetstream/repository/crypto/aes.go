@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -84,7 +85,8 @@ func ReadEncryptionKey(v, f string) ([]byte, error) {
 		return nil, err
 	}
 
-	key32bytes, err := hex.DecodeString(string(key64chars))
+	ekStr := strings.TrimSpace(string(key64chars))
+	key32bytes, err := hex.DecodeString(ekStr)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -134,50 +134,40 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 	return nil
 }
 
-// GetConnection returns a database connection to either PostgreSQL or SQLite
-func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
+// GetConnection returns a database connection to either MySQL, PostgreSQL or SQLite
+func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, *goose.DBConf, error) {
 	log.Debug("GetConnection")
 
-	if dc.DatabaseProvider == PGSQL {
-		return sql.Open("postgres", buildConnectionString(dc))
+	// Get a Goose Configuration so that we can pass that to the schema migrator
+	conf, err := NewGooseDBConf(dc, env)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	if dc.DatabaseProvider == MYSQL {
-		return sql.Open("mysql", buildConnectionStringForMysql(dc))
+	log.Infof("%+v", conf)
 
-	}
-
-	// SQL Lite - SQLITE_DB_DIR env var allows directory for console db to be changed
-	return GetSQLLiteConnection(env.MustBool("SQLITE_KEEP_DB"), env.String("SQLITE_DB_DIR", "."))
-}
-
-// GetSQLLiteConnection returns an SQLite DB Connection
-func GetSQLLiteConnection(sqliteKeepDB bool, sqlDbDir string) (*sql.DB, error) {
-
-	dbFilePath := path.Join(sqlDbDir, SQLiteDatabaseFile)
-	log.Infof("SQLite Database file: %s", dbFilePath)
-
-	return GetSQLLiteConnectionWithPath(dbFilePath, sqliteKeepDB)
+	db, err := sql.Open(conf.Driver.Name, conf.Driver.OpenStr)
+	return db, conf, err
 }
 
 // GetSQLLiteConnectionWithPath returns an SQLite DB Connection
-func GetSQLLiteConnectionWithPath(databaseFile string, sqliteKeepDB bool) (*sql.DB, error) {
+func GetSQLLiteConnectionWithPath(databaseFile string, sqliteKeepDB bool) (*sql.DB, *goose.DBConf, error) {
 	if !sqliteKeepDB {
 		os.Remove(databaseFile)
 	}
 
 	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	conf := CreateFakeSQLiteGooseDriver()
 	err = ApplyMigrations(conf, db)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return db, nil
+	return db, conf, nil
 }
 
 // CreateFakeSQLiteGooseDriver creates a fake Goose Driver for SQLite
@@ -193,6 +183,65 @@ func CreateFakeSQLiteGooseDriver() *goose.DBConf {
 		Driver: d,
 	}
 	return conf
+}
+
+func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*goose.DBConf, error) {
+
+	var openStr, name string
+
+	log.Info(dc.DatabaseProvider)
+
+	if dc.DatabaseProvider == PGSQL {
+		name = "postgres"
+		openStr = buildConnectionString(dc)
+	} else if dc.DatabaseProvider == MYSQL {
+		name = "mysql"
+		openStr = buildConnectionStringForMysql(dc)
+	} else {
+		name = "sqlite3"
+		sqlDbDir := env.String("SQLITE_DB_DIR", ".")
+		openStr = path.Join(sqlDbDir, SQLiteDatabaseFile)
+		sqliteKeepDB := env.MustBool("SQLITE_KEEP_DB")
+
+		if !sqliteKeepDB {
+			os.Remove(openStr)
+		}
+	}
+
+	driver := newDBDriver(name, openStr)
+	return &goose.DBConf{
+		MigrationsDir: ".",
+		Env:           fmt.Sprintf("%s_dbenv", name),
+		Driver:        driver,
+		PgSchema:      "",
+	}, nil
+}
+
+// Create a new DBDriver and populate driver specific
+// fields for drivers that we know about.
+// Further customization may be done in NewDBConf
+func newDBDriver(name, open string) goose.DBDriver {
+
+	d := goose.DBDriver{
+		Name:    name,
+		OpenStr: open,
+	}
+
+	switch name {
+	case "postgres":
+		d.Import = "github.com/lib/pq"
+		d.Dialect = &goose.PostgresDialect{}
+
+	case "mysql":
+		d.Import = "github.com/go-sql-driver/mysql"
+		d.Dialect = &goose.MySqlDialect{}
+
+	case "sqlite3":
+		d.Import = "github.com/mattn/go-sqlite3"
+		d.Dialect = &goose.Sqlite3Dialect{}
+	}
+
+	return d
 }
 
 func buildConnectionString(dc DatabaseConfig) string {
@@ -300,7 +349,7 @@ func WaitForMigrations(db *sql.DB) error {
 			}
 			log.Infof("Database schema check: %s", errorMsg)
 		} else if databaseVersionRec.VersionID == targetVersion.Version {
-			log.Info("Database schema is up to date")
+			log.Infof("Database schema is up to date (%d)", databaseVersionRec.VersionID)
 			break
 		} else {
 			log.Info("Waiting for database schema to be initialized")
