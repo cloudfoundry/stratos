@@ -2,8 +2,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { ListStateActionTypes, ListView, SetListViewAction } from '../actions/list.actions';
-import { AppState } from '../app-state';
 import { mergeState } from '../helpers/reducer.helper';
+import { ListsOnlyAppState } from '../app-state';
 
 export class ListsState {
   [key: string]: ListState;
@@ -49,11 +49,12 @@ function mergeListState(state, listKey, key, value) {
 }
 
 export const getListStateObservable = (
-  store: Store<AppState>,
+  store: Store<ListsOnlyAppState>,
   key: string
 ): Observable<ListState> => store.select(selectListState(key));
+
 export const getListStateObservables = (
-  store: Store<AppState>,
+  store: Store<ListsOnlyAppState>,
   key: string
 ): {
   view: Observable<ListView>;

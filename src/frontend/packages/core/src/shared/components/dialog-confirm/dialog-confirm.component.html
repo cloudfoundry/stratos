@@ -11,6 +11,6 @@
 </div>
 <div mat-dialog-actions class="confirm-dialog__actions">
   <button color="primary" mat-button (click)="onNoClick()" cdkFocusInitial>Cancel</button>
-  <button *ngIf="data.confirm" [color]="data.critical ? 'warn' : 'primary'" mat-button [mat-dialog-close]="true" [innerHtml]="" [disabled]="textToMatch && textToMatch !== matchValue">{{
+  <button class="confirm-dialog__confirm" *ngIf="data.confirm" [color]="data.critical ? 'warn' : 'primary'" mat-button [mat-dialog-close]="true" [innerHtml]="" [disabled]="textToMatch && textToMatch !== matchValue">{{
     data.confirm }}</button>
 </div>

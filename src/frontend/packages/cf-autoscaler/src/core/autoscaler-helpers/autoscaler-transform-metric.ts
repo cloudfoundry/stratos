@@ -1,6 +1,5 @@
 import * as moment from 'moment-timezone';
 
-import { PaginationResponse } from '../../../../store/src/types/api.types';
 import {
   AppAutoscalerMetricBasicInfo,
   AppAutoscalerMetricData,
@@ -11,6 +10,7 @@ import {
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
 import { AutoscalerConstants, getScaleType } from './autoscaler-util';
+import { PaginationResponse } from '../../../../cloud-foundry/src/store/types/cf-api.types';
 
 function initMetricData(metricName: string): AppAutoscalerMetricDataLocal {
   return {

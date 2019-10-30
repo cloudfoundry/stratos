@@ -4,6 +4,8 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
@@ -32,13 +34,13 @@ import { SendClearEventAction } from '../actions/internal-events.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
-import { AppState } from '../app-state';
+import { DispatchOnlyAppState } from '../app-state';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
-import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
+import { EndpointModel } from '../types/endpoint.types';
 import {
-  IRequestAction,
+  EntityRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
@@ -56,7 +58,7 @@ export class EndpointsEffect {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<DispatchOnlyAppState>
   ) { }
 
   @Effect() getAllEndpointsBySystemInfo$ = this.actions$.pipe(
@@ -67,13 +69,14 @@ export class EndpointsEffect {
   @Effect() getAllEndpoints$ = this.actions$.pipe(
     ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS),
     mergeMap(action => {
+      const endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
       const { associatedAction } = action;
       const actionType = 'fetch';
       const endpoints = action.payload.endpoints;
       // Data is an array of endpoints
       const mappedData = {
         entities: {
-          [endpointStoreNames.type]: {}
+          [endpointEntityKey]: {}
         },
         result: []
       } as NormalizedResponse<EndpointModel>;
@@ -81,7 +84,7 @@ export class EndpointsEffect {
       Object.keys(endpoints).forEach((type: string) => {
         const endpointsForType = endpoints[type];
         Object.values(endpointsForType).forEach(endpointInfo => {
-          mappedData.entities[endpointStoreNames.type][endpointInfo.guid] = {
+          mappedData.entities[endpointEntityKey][endpointInfo.guid] = {
             ...endpointInfo,
             connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
             registered: !!endpointInfo.user,
@@ -242,24 +245,26 @@ export class EndpointsEffect {
     return message;
   }
   private getEndpointUpdateAction(guid: string, type: string, updatingKey: string) {
+    const entityType = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
     return {
-      entityKey: endpointStoreNames.type,
+      entityType,
       guid,
       type,
       updatingKey,
-    } as IRequestAction;
+    } as EntityRequestAction;
   }
 
   private getEndpointDeleteAction(guid, type) {
+    const entityType = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
     return {
-      entityKey: endpointStoreNames.type,
+      entityType,
       guid,
       type,
-    } as IRequestAction;
+    } as EntityRequestAction;
   }
 
   private doEndpointAction(
-    apiAction: IRequestAction | PaginatedAction,
+    apiAction: EntityRequestAction | PaginatedAction,
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
@@ -268,6 +273,7 @@ export class EndpointsEffect {
     body?: string,
     errorMessageHandler?: (e: any) => string,
   ) {
+    const endpointEntityKey = entityCatalogue.getEntityKey(apiAction);
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
@@ -283,7 +289,7 @@ export class EndpointsEffect {
         }
 
         if (apiActionType === 'delete') {
-          actions.push(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
+          actions.push(new ClearPaginationOfEntity(apiAction, apiAction.guid));
           actions.push(new GetUserFavoritesAction());
         }
 
@@ -291,7 +297,7 @@ export class EndpointsEffect {
           actions.push(new GetSystemInfo());
           response = {
             entities: {
-              [endpointSchemaKey]: {
+              [endpointEntityKey]: {
                 [endpoint.guid]: endpoint
               }
             },
@@ -300,7 +306,7 @@ export class EndpointsEffect {
         }
 
         if (apiAction.updatingKey === EndpointsEffect.disconnectingKey || apiActionType === 'create' || apiActionType === 'delete') {
-          actions.push(this.clearEndpointInternalEvents(apiAction.guid));
+          actions.push(this.clearEndpointInternalEvents(apiAction.guid, endpointEntityKey));
         }
 
         actions.push(new WrapperRequestActionSuccess(response, apiAction, apiActionType, null, null, endpoint ? endpoint.guid : null));
@@ -318,9 +324,9 @@ export class EndpointsEffect {
       }));
   }
 
-  private clearEndpointInternalEvents(guid: string) {
+  private clearEndpointInternalEvents(guid: string, endpointEntityKey: string) {
     return new SendClearEventAction(
-      endpointSchemaKey,
+      endpointEntityKey,
       guid,
       {
         clean: true

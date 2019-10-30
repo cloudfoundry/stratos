@@ -1,4 +1,4 @@
-import { AppState } from './../../../store/src/app-state';
+import { GeneralEntityAppState } from './../../../store/src/app-state';
 import { Injectable } from '@angular/core';
 import { Observable, combineLatest, ReplaySubject } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -33,15 +33,15 @@ export interface IGlobalEventConfig<SelectedState, EventState = SelectedState> e
    * Can be used to generate the data for an event.
    * If an array is passed then multiple events will be created of the type provided in the config.
    */
-  eventTriggered: (state: SelectedState | AppState) => GlobalEventData | GlobalEventData[];
-  message: ((data?: EventState, appState?: AppState) => string) | string;
-  key?: ((data?: EventState, appState?: AppState) => string) | string;
+  eventTriggered: (state: SelectedState | GeneralEntityAppState) => GlobalEventData | GlobalEventData[];
+  message: ((data?: EventState, appState?: GeneralEntityAppState) => string) | string;
+  key?: ((data?: EventState, appState?: GeneralEntityAppState) => string) | string;
 
   /**
    * Used to get the part of the store the event may be built from.
    */
-  selector?: (state: AppState) => SelectedState;
-  link?: ((data?: EventState, appState?: AppState) => string) | string;
+  selector?: (state: GeneralEntityAppState) => SelectedState;
+  link?: ((data?: EventState, appState?: GeneralEntityAppState) => string) | string;
 }
 
 export interface IGlobalEvent {
@@ -92,7 +92,7 @@ export class GlobalEventService {
   }
 
   // Get the event from the event config and event data.
-  private getEvent(eventData: any, config: IGlobalEventConfig<any>, appState: AppState): IGlobalEvent {
+  private getEvent(eventData: any, config: IGlobalEventConfig<any>, appState: GeneralEntityAppState): IGlobalEvent {
     const message = typeof config.message === 'function' ? config.message(eventData, appState) : config.message;
     const link = typeof config.link === 'function' ? config.link(eventData, appState) : config.link;
     const key = typeof config.key === 'function' ? config.key(eventData, appState) : config.link || config.message;
@@ -111,7 +111,7 @@ export class GlobalEventService {
     eventData: GlobalEventData | GlobalEventData[],
     selectedState: any,
     config: IGlobalEventConfig<any>,
-    appState: AppState
+    appState: GeneralEntityAppState
   ) {
     if (Array.isArray(eventData)) {
       if (eventData.length) {
@@ -143,7 +143,7 @@ export class GlobalEventService {
   }
 
   // We cache the event results by keying them by the selectedState object.
-  private getNewEventsOrCached(config: IGlobalEventConfig<any>, appState: AppState): IGlobalEvent[] {
+  private getNewEventsOrCached(config: IGlobalEventConfig<any>, appState: GeneralEntityAppState): IGlobalEvent[] {
     const selectedState = config.selector ? config.selector(appState) : appState;
     const isEventTriggered = config.eventTriggered(selectedState);
     if (!isEventTriggered) {
@@ -170,7 +170,7 @@ export class GlobalEventService {
     eventData: GlobalEventData,
     config: IGlobalEventConfig<any>,
     selectedState: any,
-    appState: AppState
+    appState: GeneralEntityAppState
   ) {
     // We will get cached events if the data object matches exactly.
     const cache = this.dataCache.get(config);
@@ -213,7 +213,7 @@ export class GlobalEventService {
     );
   }
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<GeneralEntityAppState>) {
     const eventsAndPriority$ = this.getEventsAndPriorityType();
     this.events$ = eventsAndPriority$.pipe(
       map(eventsAndPriority => eventsAndPriority[0])

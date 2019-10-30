@@ -17,7 +17,7 @@ var findPasswordHash = `SELECT password_hash
 var findUserGUID = `SELECT user_guid FROM local_users WHERE user_name = $1`
 var findUserScope = `SELECT user_scope FROM local_users WHERE user_guid = $1`
 var insertLocalUser = `INSERT INTO local_users (user_guid, password_hash, user_name, user_email, user_scope, given_name, family_name) VALUES ($1, $2, $3, $4, $5, $6, $7)`
-var updateLocalUser = `UPDATE local_users SET password_hash=$1, user_name=$2, user_email=$3, user_scope=$4, given_name=$5, family_name=$6, last_updated=now() WHERE user_guid=$7`
+var updateLocalUser = `UPDATE local_users SET password_hash=$1, user_name=$2, user_email=$3, user_scope=$4, given_name=$5, family_name=$6, last_updated=CURRENT_TIMESTAMP WHERE user_guid=$7`
 var updateLastLoginTime = `UPDATE local_users SET last_login=$1 WHERE user_guid = $2`
 var findLastLoginTime = `SELECT last_login FROM local_users WHERE user_guid = $1`
 var getTableCount = `SELECT count(user_guid) FROM local_users`
@@ -182,7 +182,7 @@ func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTi
 	var result sql.Result
 	var err error
 	if result, err = p.db.Exec(updateLastLoginTime, loginTime, userGUID); err != nil {
-		msg := "Unable to update last local user login time: %v"
+		msg := "Unable to update last local user login time for user userGUID : %v"
 		return fmt.Errorf(msg, err)
 	}
 

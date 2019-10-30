@@ -22,8 +22,8 @@ export class UaaHelpers {
   getUserByUsername(username: string): promise.Promise<any> {
     return this.requestHelper.sendGet(`Users?filter=userName+eq+%22${username}%22&startIndex=1`).then(res => {
       return res.totalResults === 1 ?
-      res.resources[0] :
-      promise.rejected(`Found no or multiple users matching name '${username}'`);
+        res.resources[0] :
+        promise.rejected(`Found no or multiple users matching name '${username}'`);
     });
   }
 
@@ -31,19 +31,20 @@ export class UaaHelpers {
     return this.requestHelper.sendGet(`Users?attributes=userName%2Cid`);
   }
 
-  createUser(userName: string, zone?: string): promise.Promise<{id: string}> {
+  createUser(userName: string, zone?: string): promise.Promise<{ id: string, userName: string }> {
     const body = {
       externalId: 'e2e',
       userName,
       password: userName,
-      emails: [{value: userName + '@e2e.com'}],
+      emails: [{ value: userName + '@e2e.com' }],
       origin: 'uaa',
       zoneId: e2e.secrets.getDefaultCfsUaaZone(zone)
     };
     return this.requestHelper.sendPost('Users', JSON.stringify(body)).then(res => {
       const newUser = JSON.parse(res);
       return {
-        id: newUser.id
+        id: newUser.id,
+        userName: newUser.userName
       };
     });
   }

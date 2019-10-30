@@ -39,7 +39,7 @@ describe('Manage Users Stepper', () => {
       manageUsersPage.navigateTo();
       return manageUsersPage.waitForPage();
     });
-  });
+  }, 75000);
 
   const timeout = 100000;
   extendE2ETestTime(timeout);
@@ -79,7 +79,7 @@ describe('Manage Users Stepper', () => {
       manageUsersPage.waitForPage();
       expect(manageUsersPage.stepper.getActiveStepName()).toBe('Select Roles');
 
-    // Select Roles Step
+      // Select Roles Step
       const modifyStep = manageUsersPage.modifyUsersStep;
       const orgsList = modifyStep.orgsList;
       const spacesList = modifyStep.spacesList;
@@ -87,12 +87,12 @@ describe('Manage Users Stepper', () => {
 
       orgsList.waitUntilShown();
       modifyStep.setOrg(orgName);
-    // ... check button state
+      // ... check button state
       expect(managerUsersStepper.canPrevious()).toBeFalsy();
       expect(managerUsersStepper.canCancel()).toBeTruthy();
       expect(managerUsersStepper.canNext()).toBeFalsy();
 
-    // ... check org state
+      // ... check org state
       orgManagerCheckbox = modifyStep.getOrgManagerCheckbox();
       orgAuditorCheckbox = modifyStep.getOrgAuditorCheckbox();
       orgBillingManagerCheckbox = modifyStep.getOrgBillingManagerCheckbox();
@@ -107,7 +107,7 @@ describe('Manage Users Stepper', () => {
       expect(orgUserCheckbox.isDisabled()).toBeTruthy();
       expect(orgUserCheckbox.isChecked()).toBeTruthy();
 
-    // ... check space state
+      // ... check space state
       expect(spacesList.getTotalResults()).toBe(1);
       expect(spacesList.table.getCell(0, 0).getText()).toBe(spaceName);
       spaceManagerCheckbox = modifyStep.getSpaceManagerCheckbox(0);
@@ -120,7 +120,7 @@ describe('Manage Users Stepper', () => {
       expect(spaceDeveloperCheckbox.isDisabled()).toBeFalsy();
       expect(spaceDeveloperCheckbox.isChecked()).toBeTruthy();
 
-    // ... check button state on toggle changes
+      // ... check button state on toggle changes
       orgManagerCheckbox.getComponent().click();
       expect(managerUsersStepper.canNext()).toBeTruthy();
       orgManagerCheckbox.getComponent().click();

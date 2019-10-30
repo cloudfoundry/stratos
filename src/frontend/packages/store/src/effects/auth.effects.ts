@@ -1,12 +1,11 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { catchError, map, mergeMap, switchMap, tap, filter, first } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
+import { LoggerService } from '../../../core/src/core/logger.service';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
-import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
-import { GetSystemInfo } from '../actions/system.actions';
-import { SessionData } from '../types/auth.types';
 import {
   InvalidSession,
   LOGIN,
@@ -25,11 +24,13 @@ import {
   VerifiedSession,
   VERIFY_SESSION,
   VerifySession,
-} from './../actions/auth.actions';
-import { Store } from '@ngrx/store';
-import { AppState } from '../app-state';
-import { getDashboardStateSessionId } from '../helpers/store-helpers';
+} from '../actions/auth.actions';
 import { HydrateDashboardStateAction } from '../actions/dashboard-actions';
+import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
+import { GetSystemInfo } from '../actions/system.actions';
+import { getDashboardStateSessionId } from '../helpers/store-helpers';
+import { SessionData } from '../types/auth.types';
+import { DispatchOnlyAppState } from '../app-state';
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
@@ -42,7 +43,8 @@ export class AuthEffect {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<DispatchOnlyAppState>,
+    private logger: LoggerService
   ) { }
 
   @Effect() loginRequest$ = this.actions$.pipe(
@@ -151,7 +153,7 @@ export class AuthEffect {
     return false;
   }
 
-  private rehydrateDashboardState(store: Store<AppState>, sessionData: SessionData) {
+  private rehydrateDashboardState(store: Store<DispatchOnlyAppState>, sessionData: SessionData) {
     const storage = localStorage || window.localStorage;
     // We use the username to key the session storage. We could replace this with the users id?
     if (storage && sessionData.user) {
@@ -160,7 +162,9 @@ export class AuthEffect {
         try {
           const dashboardData = JSON.parse(storage.getItem(sessionId));
           store.dispatch(new HydrateDashboardStateAction(dashboardData));
-        } catch (e) { }
+        } catch (e) {
+          this.logger.warn('Failed to parse user settings from session storage, consider clearing them manually', e);
+        }
       }
     }
   }

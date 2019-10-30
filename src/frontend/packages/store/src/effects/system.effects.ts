@@ -4,18 +4,19 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { AppState } from '../app-state';
-import { IRequestAction } from '../types/request.types';
-import { GET_SYSTEM_INFO, GetSystemFailed, GetSystemInfo, GetSystemSuccess } from './../actions/system.actions';
-import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
-import { SystemInfo, systemStoreNames } from './../types/system.types';
+import { EntityRequestAction } from '../types/request.types';
+import { GET_SYSTEM_INFO, GetSystemFailed, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
+import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
+import { SystemInfo, systemStoreNames } from '../types/system.types';
+import { InternalAppState } from '../app-state';
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 
 @Injectable()
 export class SystemEffects {
   constructor(
     private httpClient: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<InternalAppState>
   ) { }
 
   static guid = 'info';
@@ -24,10 +25,11 @@ export class SystemEffects {
     ofType<GetSystemInfo>(GET_SYSTEM_INFO),
     mergeMap(action => {
       const apiAction = {
-        entityKey: systemStoreNames.type,
+        entityType: systemStoreNames.type,
+        endpointType: STRATOS_ENDPOINT_TYPE,
         guid: SystemEffects.guid,
         type: action.type,
-      } as IRequestAction;
+      } as EntityRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
       const { associatedAction } = action;
       const actionType = 'fetch';

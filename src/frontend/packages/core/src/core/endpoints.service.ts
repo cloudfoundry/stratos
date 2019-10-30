@@ -1,26 +1,20 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { filter, first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
-import { FetchCFCellMetricsPaginatedAction, MetricQueryConfig } from '../../../store/src/actions/metrics.actions';
 import { RouterNav } from '../../../store/src/actions/router.actions';
-import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
-import { entityFactory } from '../../../store/src/helpers/entity-factory';
+import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
-import { getPaginationObservables } from '../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   endpointEntitiesSelector,
   endpointsEntityRequestDataSelector,
   endpointStatusSelector,
 } from '../../../store/src/selectors/endpoint.selectors';
-import { IMetrics } from '../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
-import { EndpointHealthCheck, endpointHealthChecks } from '../../endpoints-health-checks';
-import { getEndpointType } from '../features/endpoints/endpoint-helpers';
-import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
-import { MetricQueryType } from '../shared/services/metrics-range-selector.types';
+import { EndpointHealthCheck, EndpointHealthChecks } from '../../endpoints-health-checks';
+import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 import { UserService } from './user.service';
 
 
@@ -37,24 +31,29 @@ export class EndpointsService implements CanActivate {
     if (!endpoint) {
       return '';
     }
-    const ext = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-    if (ext && ext.homeLink) {
-      return ext.homeLink(endpoint.guid).join('/');
+    const catalogueEntity = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+    const metadata = catalogueEntity.builders.entityBuilder.getMetadata(endpoint);
+    if (catalogueEntity) {
+      return catalogueEntity.builders.entityBuilder.getLink(metadata);
     }
     return '';
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<EndpointOnlyAppState>,
     private userService: UserService,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private endpointHealthChecks: EndpointHealthChecks
   ) {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => {
-        const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-        return epType.doesNotSupportConnect ||
+        const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+        if (!epType.definition) {
+          return false;
+        }
+        const epEntity = epType.definition;
+        return epEntity.unConnectable ||
           endpoint.connectionStatus === 'connected' ||
           endpoint.connectionStatus === 'checking';
       }))
@@ -69,11 +68,11 @@ export class EndpointsService implements CanActivate {
   }
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {
-    endpointHealthChecks.registerHealthCheck(healthCheck);
+    this.endpointHealthChecks.registerHealthCheck(healthCheck);
   }
 
   public checkEndpoint(endpoint: EndpointModel) {
-    endpointHealthChecks.checkEndpoint(endpoint);
+    this.endpointHealthChecks.checkEndpoint(endpoint);
   }
 
   public checkAllEndpoints() {
@@ -129,36 +128,6 @@ export class EndpointsService implements CanActivate {
     );
   }
 
-  hasCellMetrics(endpointId: string): Observable<boolean> {
-    return this.hasMetrics(endpointId).pipe(
-      switchMap(hasMetrics => {
-        if (!hasMetrics) {
-          return of(false);
-        }
-
-        // Check that we successfully retrieve some stats. If the metric is unknown an empty list is returned
-        const action = new FetchCFCellMetricsPaginatedAction(
-          endpointId,
-          endpointId,
-          new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),
-          MetricQueryType.QUERY
-        );
-        return getPaginationObservables<IMetrics>({
-          store: this.store,
-          action,
-          paginationMonitor: this.paginationMonitorFactory.create(
-            action.paginationKey,
-            entityFactory(action.entityKey)
-          )
-        }).entities$.pipe(
-          filter(entities => !!entities && !!entities.length),
-          map(entities => !!entities.find(entity => !!entity.data.result.length)),
-          first()
-        );
-      })
-    );
-  }
-
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
     return this.connectedEndpointsOfTypes(type).pipe(
       map(eps => eps.length === 0)
@@ -176,8 +145,8 @@ export class EndpointsService implements CanActivate {
       map(ep => {
         return Object.values(ep)
           .filter(endpoint => {
-            const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-            return endpoint.cnsi_type === type && (epType.doesNotSupportConnect || endpoint.connectionStatus === 'connected');
+            const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
+            return endpoint.cnsi_type === type && (epType.unConnectable || endpoint.connectionStatus === 'connected');
           });
       })
     );

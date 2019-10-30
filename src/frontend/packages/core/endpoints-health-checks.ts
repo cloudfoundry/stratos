@@ -1,5 +1,7 @@
+import { Injectable } from '@angular/core';
+
 import { EndpointModel } from '../store/src/types/endpoint.types';
-import { getEndpointType } from './src/features/endpoints/endpoint-helpers';
+import { entityCatalogue } from './src/core/entity-catalogue/entity-catalogue.service';
 
 
 export class EndpointHealthCheck {
@@ -13,8 +15,10 @@ export class EndpointHealthCheck {
   ) { }
 }
 
-
-class EndpointHealthChecks {
+@Injectable({
+  providedIn: 'root'
+})
+export class EndpointHealthChecks {
   constructor() { }
   private healthChecks: EndpointHealthCheck[] = [];
 
@@ -23,8 +27,8 @@ class EndpointHealthChecks {
   }
 
   public checkEndpoint(endpoint: EndpointModel) {
-    const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-    if (endpoint.connectionStatus === 'connected' || epType.doesNotSupportConnect) {
+    const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
+    if (endpoint.connectionStatus === 'connected' || epType.unConnectable) {
       const healthCheck = this.healthChecks.find(check => {
         return check.endpointType === endpoint.cnsi_type;
       });
@@ -34,5 +38,3 @@ class EndpointHealthChecks {
     }
   }
 }
-
-export const endpointHealthChecks = new EndpointHealthChecks();

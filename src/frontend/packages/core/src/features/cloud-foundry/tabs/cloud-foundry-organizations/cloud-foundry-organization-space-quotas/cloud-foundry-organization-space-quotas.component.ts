@@ -6,9 +6,11 @@ import {
   CfSpaceQuotasListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-list-config.service';
 import { ListConfig } from '../../../../../shared/components/list/list.component.types';
-import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
-import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CurrentUserPermissionsService } from './../../../../../core/current-user-permissions.service';
+import {
+  CloudFoundryEndpointService
+} from '../../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 
 @Component({
   selector: 'app-cloud-foundry-organization-space-quotas',

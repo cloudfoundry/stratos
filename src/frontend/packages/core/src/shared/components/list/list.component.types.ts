@@ -168,7 +168,7 @@ export interface IMultiListAction<T> extends IOptionalAction<T> {
   /**
    * Return true if the selection should be cleared
    */
-  action: (items: T[]) => boolean | Observable<ActionState>;
+  action: (items?: T[]) => boolean | Observable<ActionState>;
 }
 
 export interface IGlobalListAction<T> extends IOptionalAction<T> {

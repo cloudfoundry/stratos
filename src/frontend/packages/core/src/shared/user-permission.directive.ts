@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
+import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { waitForCFPermissions } from '../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { CurrentUserPermissions } from '../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../core/current-user-permissions.service';
-import { waitForCFPermissions } from '../features/cloud-foundry/cf.helpers';
-import { AppState } from '../../../store/src/app-state';
 
 @Directive({
   selector: '[appUserPermission]'
@@ -28,7 +28,7 @@ export class UserPermissionDirective implements OnDestroy, OnInit {
   private canSub: Subscription;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private templateRef: TemplateRef<any>,
     private viewContainer: ViewContainerRef,
     private currentUserPermissionsService: CurrentUserPermissionsService,
