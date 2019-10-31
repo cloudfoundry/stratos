@@ -1,4 +1,3 @@
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
@@ -29,6 +28,7 @@ import { MultilineTitleComponent } from '../src/shared/components/multiline-titl
 import { SharedModule } from '../src/shared/shared.module';
 import { CoreTestingModule } from './core-test.modules';
 import { createBasicStoreModule } from './store-test-helper';
+import { HttpClientModule } from '@angular/common/http';
 
 export function generateBaseTestStoreModules() {
   return [
@@ -36,7 +36,7 @@ export function generateBaseTestStoreModules() {
     StoreModule.forRoot(
       appReducers,
       {
-        initialState: createBasicStoreModule(), runtimeChecks: { strictStateImmutability: true, strictActionImmutability: true }
+        initialState: createBasicStoreModule(), runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
       }
     )
   ];
@@ -47,7 +47,7 @@ export const BaseTestModulesNoShared = [
   RouterTestingModule,
   CoreModule,
   NoopAnimationsModule,
-  HttpModule
+  HttpClientModule
 ];
 export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
 

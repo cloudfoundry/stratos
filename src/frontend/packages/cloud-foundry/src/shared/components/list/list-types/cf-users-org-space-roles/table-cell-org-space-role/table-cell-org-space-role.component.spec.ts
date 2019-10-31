@@ -1,5 +1,4 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { ISpace } from '../../../../../../../../core/src/core/cf-api.types';
@@ -13,6 +12,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import { CfRoleCheckboxComponent } from '../../../../cf-role-checkbox/cf-role-checkbox.component';
 import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role.component';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('TableCellSpaceRoleComponent', () => {
   let component: TableCellRoleOrgSpaceComponent;
@@ -24,7 +24,7 @@ describe('TableCellSpaceRoleComponent', () => {
         ...generateCfStoreModules(),
         CoreModule,
         NoopAnimationsModule,
-        HttpModule
+        HttpClientModule
       ],
       providers: [
         CfUserServiceTestProvider,

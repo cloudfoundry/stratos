@@ -1,7 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
-import { ConnectionBackend, Http } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
@@ -16,8 +14,11 @@ import { generateTestEntityServiceProvider } from '../../../../../core/test-fram
 import { createEmptyStoreModule } from '../../../../../core/test-framework/store-test-helper';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
+import { HttpClient } from 'selenium-webdriver/http';
+import { HttpBackend, HttpClientModule } from '@angular/common/http';
+import { HttpTestingController } from '@angular/common/http/testing';
 
-describe('CfAppAutoscalerEventsConfigService', () => {
+fdescribe('CfAppAutoscalerEventsConfigService', () => {
 
   beforeEach(() => {
     const cfGuid = 'cfGuid';
@@ -25,6 +26,7 @@ describe('CfAppAutoscalerEventsConfigService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        { provide: HttpBackend, useClass: HttpTestingController },
         CfAppAutoscalerEventsConfigService,
         EntityServiceFactory,
         generateTestEntityServiceProvider(
@@ -33,10 +35,10 @@ describe('CfAppAutoscalerEventsConfigService', () => {
           new GetApplication(appGuid, cfGuid)
         ),
         generateTestApplicationServiceProvider(appGuid, cfGuid),
-        Http,
-        { provide: ConnectionBackend, useClass: MockBackend },
+        HttpClient,
       ],
       imports: [
+        HttpClientModule,
         CfAutoscalerTestingModule,
         CommonModule,
         CoreModule,

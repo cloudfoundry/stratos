@@ -76,8 +76,9 @@ const metaReducers = [localStorageSyncReducer];
 const storeModule = StoreModule.forRoot(
   appReducers,
   {
-    metaReducers, runtimeChecks: {
-      strictStateImmutability: true,
+    metaReducers,
+    runtimeChecks: {
+      strictStateImmutability: false,
       strictActionImmutability: false
     }
   }

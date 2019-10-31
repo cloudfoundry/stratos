@@ -23,7 +23,7 @@ import { MetaCardComponent } from './meta-card.component';
     </app-meta-card>`
 })
 class WrapperComponent {
-  @ViewChild(MetaCardComponent, { static: false })
+  @ViewChild(MetaCardComponent, { static: true })
   metaCard: MetaCardComponent;
 }
 
@@ -62,7 +62,7 @@ class EntityMonitorFactoryMock {
   }
 }
 
-describe('MetaCardComponent', () => {
+fdescribe('MetaCardComponent', () => {
   const favorite = new UserFavorite<IFavoriteMetadata>('endpoint', 'endpointType', 'entityType');
   const entityConfig = new ComponentEntityMonitorConfig('guid', new EntitySchema('schema', 'endpointType'));
 

@@ -1,6 +1,4 @@
 import { inject, TestBed } from '@angular/core/testing';
-import { HttpModule, XHRBackend } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
 import { Action, Store } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
@@ -22,9 +20,11 @@ import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
 import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
-import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
+import { EntityCatalogueEntityConfig, IStratosEndpointDefinition } from './entity-catalogue/entity-catalogue.types';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
+import { HttpClientModule, HttpXhrBackend } from '@angular/common/http';
+import { HttpTestingController } from '@angular/common/http/testing';
 
 function getActionDispatcher(store: Store<any>) {
   return (action: Action) => {
@@ -46,7 +46,17 @@ const createAction = (guid: string) => {
   } as ICFAction;
 };
 
-
+const endpointDefinition: IStratosEndpointDefinition = {
+  type: endpointType,
+  schema: new EntitySchema(
+    endpointType,
+    STRATOS_ENDPOINT_TYPE
+  ),
+  label: 'Endpoint',
+  labelPlural: 'Endpoints',
+  logoUrl: '',
+  authTypes: []
+};
 const catalogueEndpointEntity = new StratosBaseCatalogueEntity({
   type: endpointType,
   schema: new EntitySchema(
@@ -55,11 +65,13 @@ const catalogueEndpointEntity = new StratosBaseCatalogueEntity({
   ),
   label: 'Endpoint',
   labelPlural: 'Endpoints',
+  logoUrl: '',
+  authTypes: []
 });
 
 
 const catalogueEntity = new StratosBaseCatalogueEntity({
-  endpoint: catalogueEndpointEntity,
+  endpoint: catalogueEndpointEntity.definition as IStratosEndpointDefinition,
   type: entityType,
   schema: new EntitySchema(
     entityType,
@@ -150,12 +162,12 @@ describe('EntityServiceService', () => {
           action
         ),
         {
-          provide: XHRBackend,
-          useClass: MockBackend
+          provide: HttpXhrBackend,
+          useClass: HttpTestingController
         }
       ],
       imports: [
-        HttpModule,
+        HttpClientModule,
         createEntityStore(entityMap),
         {
           ngModule: EntityCatalogueTestModule,
@@ -176,7 +188,7 @@ describe('EntityServiceService', () => {
   }));
 
   it('should poll', (done) => {
-    inject([ENTITY_SERVICE, XHRBackend], (service: EntityService, mockBackend: MockBackend) => {
+    inject([ENTITY_SERVICE, HttpXhrBackend], (service: EntityService, mockBackend: HttpTestingController) => {
       const sub = service.poll(1, '_root_').subscribe(a => {
         sub.unsubscribe();
         expect('polled once').toEqual('polled once');
@@ -325,7 +337,9 @@ describe('EntityServiceService', () => {
         entityService,
         res
       } = getAllTheThings(store, guid, entitySchema.key);
-      action.options.method = 'delete';
+      action.options = action.options.clone({
+        method: 'DELETE'
+      });
       startApiRequest(store, action);
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entityRequestInfo.deleting.busy),
@@ -356,7 +370,9 @@ describe('EntityServiceService', () => {
       } = getAllTheThings(store, guid, entitySchema.key);
       startApiRequest(store, action);
       completeApiRequest(store, action, res);
-      action.options.method = 'delete';
+      action.options = action.options.clone({
+        method: 'DELETE'
+      });
       startApiRequest(store, action, 'delete');
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entityRequestInfo.deleting.busy),
@@ -388,7 +404,9 @@ describe('EntityServiceService', () => {
       } = getAllTheThings(store, guid, entitySchema.key);
       startApiRequest(store, action);
       completeApiRequest(store, action, res);
-      action.options.method = 'delete';
+      action.options = action.options.clone({
+        method: 'DELETE'
+      });
       entityService.entityObs$.pipe(
         pairwise(),
         filter(([x, y]) => x.entityRequestInfo.deleting.busy && !y.entityRequestInfo.deleting.busy),
