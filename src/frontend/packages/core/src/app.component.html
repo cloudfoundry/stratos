@@ -1,4 +1,4 @@
-<span class="dark-theme">
+<span class="dark-theme" [ngClass]="(themeService.getTheme() | async).styleName">
 
   <router-outlet></router-outlet>
   <div class="user-id" *ngIf="userId$ | async as userId" id="__stratos-userid__">{{userId}}</div>

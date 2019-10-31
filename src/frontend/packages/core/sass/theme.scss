@@ -5,8 +5,7 @@
 
 // Custom theme support
 @import './custom';
-@import './dark-theme.scss';
-
+@import './dark-theme';
 
 
 .default {
@@ -27,5 +26,4 @@
 
 
 // Create the theme
-@include mat-core();
-
+@include mat-core;

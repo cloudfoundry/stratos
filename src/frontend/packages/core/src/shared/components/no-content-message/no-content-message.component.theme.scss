@@ -3,6 +3,6 @@
   $subdued: map-get($app-theme, subdued-color);
 
   .app-no-content-container {
-    color: $subdued;
+    color: $subdued; // TODO: RC $subdued contrast(?)
   }
 }

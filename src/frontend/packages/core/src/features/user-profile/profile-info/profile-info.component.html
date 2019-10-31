@@ -92,6 +92,21 @@
                 polling may result in some pages showing out-of-date information.</div>
             </div>
           </div>
+          <div class="user-profile__option">
+            <div class="user-profile__option-inner">
+              <div class="user-profile__option-header">
+                Theme
+              </div>
+              <mat-form-field>
+                <mat-select [value]="themeService.getTheme() | async"
+                  (selectionChange)="themeService.setTheme($event.value)">
+                  <mat-option *ngFor="let theme of themeService.getThemes()" [value]="theme">
+                    {{ theme.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
         </div>
       </mat-card>
       <mat-card *ngIf="profile.origin === 'uaa'">

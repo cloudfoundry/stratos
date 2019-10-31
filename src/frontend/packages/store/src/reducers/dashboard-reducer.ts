@@ -1,22 +1,23 @@
+import { ThemeService } from '../../../core/src/core/theme.service';
 import {
   CLOSE_SIDE_HELP,
   CLOSE_SIDE_NAV,
   DISABLE_SIDE_NAV_MOBILE_MODE,
   ENABLE_POLLING,
   ENABLE_SIDE_NAV_MOBILE_MODE,
-  OPEN_SIDE_NAV,
-  SET_HEADER_EVENT,
-  SetHeaderEvent,
-  SetPollingEnabledAction,
-  SHOW_SIDE_HELP,
-  TOGGLE_HEADER_EVENT,
-  TOGGLE_SIDE_NAV,
-} from '../actions/dashboard-actions';
-import {
   HYDRATE_DASHBOARD_STATE,
   HydrateDashboardStateAction,
+  OPEN_SIDE_NAV,
+  SET_HEADER_EVENT,
+  SET_STRATOS_THEME,
+  SetHeaderEvent,
+  SetPollingEnabledAction,
   SetSessionTimeoutAction,
+  SetThemeAction,
+  SHOW_SIDE_HELP,
   TIMEOUT_SESSION,
+  TOGGLE_HEADER_EVENT,
+  TOGGLE_SIDE_NAV,
 } from '../actions/dashboard-actions';
 
 export interface DashboardState {
@@ -29,6 +30,7 @@ export interface DashboardState {
   headerEventMinimized: boolean;
   sideHelpOpen: boolean;
   sideHelpDocument: string;
+  theme: string;
 }
 
 export const defaultDashboardState: DashboardState = {
@@ -41,6 +43,7 @@ export const defaultDashboardState: DashboardState = {
   headerEventMinimized: false,
   sideHelpOpen: false,
   sideHelpDocument: null,
+  theme: ThemeService.themes[0].key
 };
 
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action): DashboardState {
@@ -92,6 +95,12 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       return {
         ...state,
         ...hydrateDashboardStateAction.dashboardState
+      };
+    case SET_STRATOS_THEME:
+      const setThemeAction = action as SetThemeAction;
+      return {
+        ...state,
+        theme: setThemeAction.theme.key
       };
     default:
       return state;
