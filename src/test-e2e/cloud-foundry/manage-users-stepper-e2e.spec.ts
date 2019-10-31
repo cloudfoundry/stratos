@@ -33,12 +33,6 @@ describe('Manage Users Stepper', () => {
         userGuid = user.metadata.guid;
       });
     });
-
-    protractor.promise.controlFlow().execute(() => {
-      manageUsersPage = new ManagerUsersPage(cfGuid);
-      manageUsersPage.navigateTo();
-      return manageUsersPage.waitForPage();
-    });
   }, 75000);
 
   const timeout = 100000;
