@@ -73,7 +73,7 @@ and binding a database service instance to Stratos - for more information see [h
 To do so, `clone` the **stratos** repository, `cd` into the newly cloned repository and `push` to Cloud Foundry. This can be done with:
 
 ```
-git clone https://github.com/cloudfoundry-incubator/stratos
+git clone https://github.com/cloudfoundry/stratos
 cd stratos
 git checkout tags/stable -b stable
 ./build/store-git-metadata.sh
@@ -91,7 +91,7 @@ If you wish to enable AOT or reduce the push time, you can pre-build the UI befo
 This can be done with:
 
 ```
-git clone https://github.com/cloudfoundry-incubator/stratos
+git clone https://github.com/cloudfoundry/stratos
 cd stratos
 npm install
 npm run prebuild-ui
@@ -289,7 +289,7 @@ applications:
   disk_quota: 256M
   host: console
   timeout: 180
-  buildpack: https://github.com/cloudfoundry-incubator/stratos-buildpack
+  buildpack: https://github.com/cloudfoundry/stratos-buildpack
   health-check-type: port
   env:
     CF_API_URL: https://<<CLOUD FOUNDRY API ENDPOINT>>>
@@ -306,7 +306,7 @@ applications:
   disk_quota: 256M
   host: console
   timeout: 180
-  buildpack: https://github.com/cloudfoundry-incubator/stratos-buildpack
+  buildpack: https://github.com/cloudfoundry/stratos-buildpack
   health-check-type: port
   env:
     CF_API_FORCE_SECURE: true
