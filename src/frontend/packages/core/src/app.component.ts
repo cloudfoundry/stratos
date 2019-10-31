@@ -12,9 +12,6 @@ import { LoggedInService } from './logged-in.service';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  providers: [
-    ThemeService
-  ]
 })
 export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 

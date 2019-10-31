@@ -18,6 +18,9 @@
     &__menu-separator {
       background-color: mat-color($foreground, divider);
     }
+    &__menu-inner {
+      color: mat-contrast($primary, 500);
+    }
     &__underflow {
       background-color: mat-color($primary);
     }

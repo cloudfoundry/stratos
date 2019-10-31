@@ -1,4 +1,3 @@
-import { ThemeService } from '../../../core/src/core/theme.service';
 import {
   CLOSE_SIDE_HELP,
   CLOSE_SIDE_NAV,
@@ -30,7 +29,7 @@ export interface DashboardState {
   headerEventMinimized: boolean;
   sideHelpOpen: boolean;
   sideHelpDocument: string;
-  theme: string;
+  themeKey: string;
 }
 
 export const defaultDashboardState: DashboardState = {
@@ -43,7 +42,7 @@ export const defaultDashboardState: DashboardState = {
   headerEventMinimized: false,
   sideHelpOpen: false,
   sideHelpDocument: null,
-  theme: ThemeService.themes[0].key
+  themeKey: null
 };
 
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action): DashboardState {
@@ -100,7 +99,7 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       const setThemeAction = action as SetThemeAction;
       return {
         ...state,
-        theme: setThemeAction.theme.key
+        themeKey: setThemeAction.theme.key
       };
     default:
       return state;

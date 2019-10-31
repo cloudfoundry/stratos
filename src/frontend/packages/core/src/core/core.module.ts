@@ -26,6 +26,7 @@ import { PageHeaderService } from './page-header-service/page-header.service';
 import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
 import { SafeImgPipe } from './safe-img.pipe';
 import { StatefulIconComponent } from './stateful-icon/stateful-icon.component';
+import { ThemeService } from './theme.service';
 import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
@@ -72,7 +73,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     EndpointsService,
     UserService,
     EntityServiceFactory,
-    CurrentUserPermissionsService
+    CurrentUserPermissionsService,
+    ThemeService
   ],
   declarations: [
     StatefulIconComponent,
