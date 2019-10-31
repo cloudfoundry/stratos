@@ -144,24 +144,25 @@ func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, *goose.DBConf, 
 		return nil, nil, err
 	}
 
-	log.Infof("%+v", conf)
-
 	db, err := sql.Open(conf.Driver.Name, conf.Driver.OpenStr)
 	return db, conf, err
 }
 
-// GetSQLLiteConnectionWithPath returns an SQLite DB Connection
-func GetSQLLiteConnectionWithPath(databaseFile string, sqliteKeepDB bool) (*sql.DB, *goose.DBConf, error) {
-	if !sqliteKeepDB {
-		os.Remove(databaseFile)
-	}
+// GetInMemorySQLLiteConnection returns an SQLite DB Connection
+func GetInMemorySQLLiteConnection() (*sql.DB, *goose.DBConf, error) {
 
+	databaseFile := "file::memory:?cache=shared"
+	log.Info("Using In Memory Database file")
 	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	conf := CreateFakeSQLiteGooseDriver()
+	driver := newDBDriver("sqlite3", databaseFile)
+	conf := &goose.DBConf{
+		Driver: driver,
+	}
+
 	err = ApplyMigrations(conf, db)
 	if err != nil {
 		return nil, nil, err
@@ -170,26 +171,10 @@ func GetSQLLiteConnectionWithPath(databaseFile string, sqliteKeepDB bool) (*sql.
 	return db, conf, nil
 }
 
-// CreateFakeSQLiteGooseDriver creates a fake Goose Driver for SQLite
-func CreateFakeSQLiteGooseDriver() *goose.DBConf {
-	// Create fake goose db conf object for SQLite
-	d := goose.DBDriver{
-		Name:    "sqlite3",
-		Import:  "github.com/mattn/go-sqlite3",
-		Dialect: &goose.Sqlite3Dialect{},
-	}
-
-	conf := &goose.DBConf{
-		Driver: d,
-	}
-	return conf
-}
-
+// NewGooseDBConf creates a new Goose config for database migrations
 func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*goose.DBConf, error) {
 
 	var openStr, name string
-
-	log.Info(dc.DatabaseProvider)
 
 	if dc.DatabaseProvider == PGSQL {
 		name = "postgres"
@@ -202,6 +187,7 @@ func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*goose.DBConf, error) {
 		sqlDbDir := env.String("SQLITE_DB_DIR", ".")
 		openStr = path.Join(sqlDbDir, SQLiteDatabaseFile)
 		sqliteKeepDB := env.MustBool("SQLITE_KEEP_DB")
+		log.Infof("SQLite Database file: %s", openStr)
 
 		if !sqliteKeepDB {
 			os.Remove(openStr)
@@ -219,7 +205,6 @@ func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*goose.DBConf, error) {
 
 // Create a new DBDriver and populate driver specific
 // fields for drivers that we know about.
-// Further customization may be done in NewDBConf
 func newDBDriver(name, open string) goose.DBDriver {
 
 	d := goose.DBDriver{
