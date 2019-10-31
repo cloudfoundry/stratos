@@ -37,7 +37,8 @@ export class EndpointApiError {
               severity: InternalEventSeverity.ERROR,
               message,
               metadata: {
-                error,
+                httpMethod: action.apiAction.options.method,
+                errorResponse: error,
                 url,
               },
             }),

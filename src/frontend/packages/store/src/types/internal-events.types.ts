@@ -4,14 +4,20 @@ export const SEND_EVENT = '[Internal Event] Send';
 
 export const CLEAR_EVENTS = '[Internal Event] Clear';
 
-export interface InternalEventState {
+export interface InternalEventState<T = {
+  [key: string]: any;
+}> {
   message?: string;
   timestamp?: number;
   eventCode: string;
   severity: InternalEventSeverity;
-  metadata: {
-    [key: string]: any;
-  };
+  metadata: T;
+}
+
+export interface InternalEventStateMetadata {
+  httpMethod: string;
+  errorResponse: any;
+  url: string;
 }
 
 export interface APIEventState extends InternalEventState {

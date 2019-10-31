@@ -3,6 +3,15 @@
   @include breakpoint(tablet) {
     margin: 0 20%;
   }
+  &__json-response {
+    border-radius: 4px;
+    line-height: 35px;
+    margin: 10px 20px;
+    padding: 20px;
+    pre {
+      white-space: pre-wrap;
+    }
+  }
   &__event-row {
     margin-right: 15px;
   }

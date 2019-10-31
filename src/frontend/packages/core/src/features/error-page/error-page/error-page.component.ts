@@ -25,6 +25,18 @@ export class ErrorPageComponent implements OnInit {
   public errorDetails$: Observable<{ endpoint: EndpointModel; errors: InternalEventState[]; }>;
   public icon = StratosStatus.ERROR;
   public jsonDownloadHref$: Observable<SafeUrl>;
+  private stringifyErrorResponse(error: InternalEventState) {
+    return {
+      ...error,
+      metadata: {
+        ...error.metadata,
+        errorResponse: {
+          ...error.metadata.errorResponse,
+          errorResponse: JSON.stringify(error.metadata.errorResponse.errorResponse)
+        }
+      }
+    };
+  }
   ngOnInit() {
     const endpointId = this.activatedRoute.snapshot.params.endpointId;
     if (endpointId) {
@@ -40,7 +52,7 @@ export class ErrorPageComponent implements OnInit {
         map(([errors, endpoint]) => {
           return {
             endpoint,
-            errors: errors[endpointId]
+            errors: errors && errors[endpointId] ? errors[endpointId].map(error => this.stringifyErrorResponse(error)) : errors[endpointId]
           };
         }),
         first()
@@ -52,6 +64,10 @@ export class ErrorPageComponent implements OnInit {
         })
       );
     }
+  }
+
+  private isStringable(obj: any) {
+    return obj !== undefined && obj !== null && (obj.constructor === Object || Array.isArray(obj.constructor));
   }
 
   constructor(

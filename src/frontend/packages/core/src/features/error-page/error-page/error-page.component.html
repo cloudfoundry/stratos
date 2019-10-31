@@ -32,18 +32,20 @@
               <app-stateful-icon class="error-page__event-row-icon" [state]="icon">
               </app-stateful-icon>
             </div>
-            <mat-card-title>{{ error.severity }}</mat-card-title>
-            <mat-card-subtitle>{{error.timestamp | date:'medium'}}</mat-card-subtitle>
+            <mat-card-title>{{ error.timestamp | date:'medium' }}</mat-card-title>
           </mat-card-header>
           <div>
             <div class="error-page__event-row">
               <div matLine class="error-page__event-key">Endpoint Response</div>
-              <div matLine class="error-page__event-value error-page__event-message">
-                {{ error.metadata.errorResponse.errorResponse || '-' }}</div>
+              <div matLine class="error-page__json-response error-page__event-value error-page__event-message">
+                <pre>{{ error.metadata.errorResponse.errorResponse || '-' }}</pre>
+              </div>
               <div matLine class="error-page__event-key">Jetstream Response</div>
               <div matLine class="error-page__event-value error-page__event-message">{{ error.message }}</div>
               <div matLine class="error-page__event-key">URL</div>
               <div matLine class="error-page__event-value">{{ error.metadata.url || '-' }}</div>
+              <div matLine class="error-page__event-key">HTTP Method</div>
+              <div matLine class="error-page__event-value">{{ error.metadata.httpMethod }}</div>
               <div matLine class="error-page__event-key">HTTP Code</div>
               <div matLine class="error-page__event-value">{{ error.eventCode }}</div>
             </div>

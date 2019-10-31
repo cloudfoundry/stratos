@@ -38,11 +38,6 @@
     <app-meta-card-key>Address</app-meta-card-key>
     <app-meta-card-value>{{ address }}</app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item>
-    <app-meta-card-key>Error Page</app-meta-card-key>
-    <app-meta-card-value>
-      <a href="errors/{{row.guid}}"></a>{{ row.guid }}</app-meta-card-value>
-  </app-meta-card-item>
   <app-meta-card-item *ngIf="hasDetails">
     <app-meta-card-key>Details</app-meta-card-key>
     <app-meta-card-value>
