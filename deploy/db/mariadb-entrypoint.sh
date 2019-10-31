@@ -38,12 +38,6 @@ EOSQL
     fi
   fi
 
-  if [ "$DB_DATABASE_NAME" ]; then
-    echo "CREATE DATABASE IF NOT EXISTS \`$DB_DATABASE_NAME\` ;" >> "$tempSqlFile"
-    echo "CREATE USER $DB_USER IDENTIFIED BY '$DB_PASSWORD' ;" >> "$tempSqlFile"
-    echo "GRANT ALL ON \`$DB_DATABASE_NAME\`.* TO '$DB_USER'@'%' ;" >> "$tempSqlFile"
-  fi
-
   echo 'FLUSH PRIVILEGES ;' >> "$tempSqlFile"
   set -- "$@" --init-file="$tempSqlFile"
 fi
