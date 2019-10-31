@@ -27,8 +27,7 @@ export interface LogItem {
 })
 export class LogStreamTabComponent implements OnInit {
   public messages: Observable<string>;
-
-  public connectionStatus: Observable<number>;
+  public connectionStatus = new Subject<number>();
   @ViewChild('searchFilter', { static: false }) searchFilter: NgModel;
 
 
@@ -45,6 +44,7 @@ export class LogStreamTabComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.connectionStatus.next(0);
     if (!this.applicationService.cfGuid || !this.applicationService.appGuid) {
       this.messages = NEVER;
     } else {
@@ -65,9 +65,8 @@ export class LogStreamTabComponent implements OnInit {
       );
 
       this.messages = socket$.pipe(
-        // the observable produces a value once the websocket has been opened
         switchMap((getResponses: GetWebSocketResponses) => {
-          console.log('websocket opened')
+          this.connectionStatus.next(1);
           return getResponses(new Subject<string>());
         }),
         map((message: string) => message),

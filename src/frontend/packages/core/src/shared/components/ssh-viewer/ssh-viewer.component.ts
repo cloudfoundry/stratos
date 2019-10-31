@@ -21,7 +21,7 @@ import { Observable, Subject, Subscription } from 'rxjs';
   templateUrl: './ssh-viewer.component.html',
   styleUrls: ['./ssh-viewer.component.scss']
 })
-export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class SshViewerComponent implements OnInit, OnDestroy {
 
   @Input()
   errorMessage: string;
@@ -44,9 +44,6 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   private msgSubscription: Subscription;
   private connectSubscription: Subscription;
-
-  private onTermSendData = this.termSendData.bind(this);
-  private onTermResize = this.termResize.bind(this);
 
   constructor(private changeDetector: ChangeDetectorRef) { }
 
@@ -79,20 +76,8 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.reconnect();
   }
 
-  ngAfterViewChecked() {
-    if (this.xterm) {
-      // TODO ANGULAR 8
-      // fit(this.xterm);
-    }
-  }
-
   ngOnDestroy() {
     this.isDestroying = true;
-    if (this.xterm) {
-      // TODO ANGULAR 8
-      // this.xterm.off('data', this.onTermSendData);
-      // this.xterm.off('resize', this.onTermResize);
-    }
     this.disconnect();
     if (this.connectSubscription && !this.connectSubscription.closed) {
       this.connectSubscription.unsubscribe();
