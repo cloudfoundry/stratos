@@ -39,6 +39,9 @@ export class EndpointApiError {
               metadata: {
                 httpMethod: action.apiAction.options.method,
                 errorResponse: error,
+                // FIXME We can do a better job at displaying the full url once
+                // the angular 8 HttpClient migration is done.
+                // action.apiAction.options
                 url,
               },
             }),

@@ -13,6 +13,13 @@
     overflow: visible;
     z-index: 1;
   }
+  &__error-message {
+    display: flex;
+    flex: 1;
+  }
+  &__error-dismiss {
+    cursor: pointer;
+  }
   // &__details-link {
   //   &:hover {
   //     font-weight: bold;

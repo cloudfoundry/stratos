@@ -23,8 +23,11 @@
         </a>
       </div>
     </div>
-    <div *ngIf="errorDetails.errors && errorDetails.errors.length ; else noEvents">
-
+    <div class="error-page__errors" *ngIf="errorDetails.errors && errorDetails.errors.length ; else noEvents">
+      <span class="error-page__errors-header">
+        <button mat-button color="warn" (click)="dismissEndpointErrors(errorDetails.endpoint.guid)">Dismiss
+          errors</button>
+      </span>
       <mat-list>
         <mat-card class="error-page__event-row-card" *ngFor="let error of errorDetails.errors">
           <mat-card-header>

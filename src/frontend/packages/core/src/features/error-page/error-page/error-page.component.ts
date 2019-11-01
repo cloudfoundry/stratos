@@ -14,6 +14,7 @@ import { InternalEventState } from '../../../../../store/src/types/internal-even
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { StratosStatus } from '../../../shared/shared.types';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { SendClearEndpointEventsAction } from '../../../../../store/src/actions/internal-events.actions';
 
 @Component({
   selector: 'app-events-page',
@@ -37,6 +38,11 @@ export class ErrorPageComponent implements OnInit {
       }
     };
   }
+
+  public dismissEndpointErrors(endpointGuid: string) {
+    this.store.dispatch(new SendClearEndpointEventsAction(endpointGuid));
+  }
+
   ngOnInit() {
     const endpointId = this.activatedRoute.snapshot.params.endpointId;
     if (endpointId) {
@@ -47,15 +53,14 @@ export class ErrorPageComponent implements OnInit {
         endpointEntitySchema
       );
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, of([endpointId]));
-      this.errorDetails$ = cfEndpointEventMonitor.hasErroredOverTime().pipe(
+      this.errorDetails$ = cfEndpointEventMonitor.hasErroredOverTimeNoPoll().pipe(
         withLatestFrom(endpointMonitor.entity$),
         map(([errors, endpoint]) => {
           return {
             endpoint,
             errors: errors && errors[endpointId] ? errors[endpointId].map(error => this.stringifyErrorResponse(error)) : errors[endpointId]
           };
-        }),
-        first()
+        })
       );
       this.jsonDownloadHref$ = this.errorDetails$.pipe(
         map((info) => {
@@ -64,10 +69,6 @@ export class ErrorPageComponent implements OnInit {
         })
       );
     }
-  }
-
-  private isStringable(obj: any) {
-    return obj !== undefined && obj !== null && (obj.constructor === Object || Array.isArray(obj.constructor));
   }
 
   constructor(

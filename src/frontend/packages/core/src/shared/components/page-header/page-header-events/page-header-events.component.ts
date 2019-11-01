@@ -6,12 +6,12 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { ToggleHeaderEvent } from '../../../../../../store/src/actions/dashboard-actions';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { endpointListKey, EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { endpointEntitySchema } from '../../../../base-entity-schemas';
 import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
+import { SendClearEndpointEventsAction } from '../../../../../../store/src/actions/internal-events.actions';
 
 
 @Component({
@@ -39,7 +39,6 @@ export class PageHeaderEventsComponent implements OnInit {
   @Input()
   public simpleErrorMessage = false;
 
-  public eventMinimized$: Observable<boolean>;
   public errorMessage$: Observable<string>;
   endpointId: any;
 
@@ -47,15 +46,10 @@ export class PageHeaderEventsComponent implements OnInit {
     private internalEventMonitorFactory: InternalEventMonitorFactory,
     private activatedRoute: ActivatedRoute,
     private store: Store<CFAppState>
-  ) {
-    this.eventMinimized$ = this.store.select('dashboard').pipe(
-      map(dashboardState => dashboardState.headerEventMinimized),
-      distinctUntilChanged()
-    );
-  }
+  ) { }
 
-  public toggleEvent() {
-    this.store.dispatch(new ToggleHeaderEvent());
+  public dismissEndpointErrors(endpointGuid: string) {
+    this.store.dispatch(new SendClearEndpointEventsAction(endpointGuid));
   }
 
   ngOnInit() {
@@ -75,9 +69,13 @@ export class PageHeaderEventsComponent implements OnInit {
         cfEndpointEventMonitor.hasErroredOverTime(),
         endpointMonitor.currentPage$
       ).pipe(
-        filter(([errors]) => !!Object.keys(errors).length),
         map(([errors, endpoints]) => {
-          const endpointString = Object.keys(errors)
+          const keys = errors ? Object.keys(errors) : null;
+          if (!keys || !keys.length) {
+            return null;
+          }
+          console.log(keys);
+          const endpointString = keys
             .map(id => endpoints.find(endpoint => {
               return endpoint.guid === id;
             }))

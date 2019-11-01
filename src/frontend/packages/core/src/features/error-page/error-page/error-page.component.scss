@@ -12,6 +12,14 @@
       white-space: pre-wrap;
     }
   }
+  &__errors {
+    display: flex;
+    flex-direction: column;
+  }
+  &__errors-header {
+    display: flex;
+    flex-direction: row-reverse;
+  }
   &__event-row {
     margin-right: 15px;
   }

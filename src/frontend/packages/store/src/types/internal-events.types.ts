@@ -4,6 +4,8 @@ export const SEND_EVENT = '[Internal Event] Send';
 
 export const CLEAR_EVENTS = '[Internal Event] Clear';
 
+export const CLEAR_ENDPOINT_ERROR_EVENTS = '[Internal Event] Clear Endpoint Errors';
+
 export interface InternalEventState<T = {
   [key: string]: any;
 }> {
@@ -33,6 +35,8 @@ export interface InternalEventSubjectState {
 }
 
 export interface InternalEventTypeState {
+  endpoint: InternalEventSubjectState;
+  global: InternalEventSubjectState;
   [type: string]: InternalEventSubjectState;
 }
 
