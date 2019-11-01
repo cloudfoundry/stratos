@@ -1,20 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Observable, of, combineLatest } from 'rxjs';
-import { first, map, filter, withLatestFrom } from 'rxjs/operators';
-
-import { AppState } from '../../../../../store/src/app-state';
-import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
-import { ActivatedRoute } from '@angular/router';
-import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
-import { endpointEntitySchema } from '../../../base-entity-schemas';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
-import { InternalEventState } from '../../../../../store/src/types/internal-events.types';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { StratosStatus } from '../../../shared/shared.types';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable, of } from 'rxjs';
+import { first, map, withLatestFrom } from 'rxjs/operators';
+
 import { SendClearEndpointEventsAction } from '../../../../../store/src/actions/internal-events.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { InternalEventState } from '../../../../../store/src/types/internal-events.types';
+import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
+import { endpointEntitySchema } from '../../../base-entity-schemas';
+import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
+import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
+import { StratosStatus } from '../../../shared/shared.types';
 
 @Component({
   selector: 'app-events-page',
@@ -26,18 +26,6 @@ export class ErrorPageComponent implements OnInit {
   public errorDetails$: Observable<{ endpoint: EndpointModel; errors: InternalEventState[]; }>;
   public icon = StratosStatus.ERROR;
   public jsonDownloadHref$: Observable<SafeUrl>;
-  private stringifyErrorResponse(error: InternalEventState) {
-    return {
-      ...error,
-      metadata: {
-        ...error.metadata,
-        errorResponse: {
-          ...error.metadata.errorResponse,
-          errorResponse: JSON.stringify(error.metadata.errorResponse.errorResponse)
-        }
-      }
-    };
-  }
 
   public dismissEndpointErrors(endpointGuid: string) {
     this.store.dispatch(new SendClearEndpointEventsAction(endpointGuid));
@@ -58,7 +46,7 @@ export class ErrorPageComponent implements OnInit {
         map(([errors, endpoint]) => {
           return {
             endpoint,
-            errors: errors && errors[endpointId] ? errors[endpointId].map(error => this.stringifyErrorResponse(error)) : errors[endpointId]
+            errors: errors ? errors[endpointId] : null
           };
         })
       );
