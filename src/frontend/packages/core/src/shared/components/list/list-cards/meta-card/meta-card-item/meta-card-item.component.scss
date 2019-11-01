@@ -51,7 +51,6 @@
     line-height: 18px;
     position: relative;
     &::after {
-      background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 75%);
       bottom: 0;
       content: '';
       height: 1.2em;

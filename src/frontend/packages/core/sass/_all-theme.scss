@@ -33,6 +33,7 @@
 @import '../src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component.theme';
 @import '../src/shared/components/upload-progress-indicator/upload-progress-indicator.component.theme';
 @import '../src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component.theme';
+@import '../src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component.theme';
 @import '../src/shared/components/start-end-date/start-end-date.component.theme';
 @import '../src/shared/components/metrics-chart/metrics-chart.component.theme';
 @import '../src/shared/components/metrics-range-selector/metrics-range-selector.component.theme';
@@ -148,6 +149,7 @@ $side-nav-light-active: #484848;
   @include page-side-nav-theme($theme, $app-theme);
   @include cf-admin-add-user-warning($theme, $app-theme);
   @include entity-summary-title-theme($theme, $app-theme);
+  @include app-meta-card-item-theme($theme, $app-theme)
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
