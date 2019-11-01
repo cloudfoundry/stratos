@@ -32,6 +32,13 @@ spec:
         - containerPort: 443
           name: https
           protocol: TCP
+        env:
+        - name: CONSOLE_CERT_PATH
+          value: "/{{ .Release.Name }}-cert-volume"
+        volumeMounts:
+        - mountPath: "/{{ .Release.Name }}-cert-volume"
+          name: "{{ .Release.Name }}-cert-volume"
+          readOnly: true
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         name: proxy
@@ -231,7 +238,11 @@ spec:
           secretName: "{{ .Release.Name }}-key-{{ .Release.Revision }}"
       - name: "{{ .Release.Name }}-cert-volume"
         secret:
-          secretName: "{{ .Release.Name }}-cert-secret"
+          {{- if .Values.console.tlsSecretName }}
+          secretName: "{{ .values.console.tlsSecretName }}"
+          {{- else }}
+          secretName: "{{ .Release.Name }}-cert-{{ .Release.Revision }}"
+          {{- end }}
       - name: "{{ .Release.Name }}-db-secret"
         secret:
           secretName: "{{ .Release.Name }}-db-secret"

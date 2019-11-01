@@ -114,10 +114,12 @@ spec:
           value: |
 {{ .Values.consoleCertKey | indent 12 }}
         {{- end }}
+        - name: CONSOLE_TLS_SECRET_NAME
+          value: "{{ default "" .Values.console.tlsSecretName }}"
         - name: CONSOLE_PROXY_CERT_PATH
-          value: "/{{ .Release.Name }}-encryption-key-volume/console.crt" 
+          value: "/{{ .Release.Name }}-encryption-key-volume/console.crt"
         - name: CONSOLE_PROXY_CERT_KEY_PATH
-          value: "/{{ .Release.Name }}-encryption-key-volume/console.key" 
+          value: "/{{ .Release.Name }}-encryption-key-volume/console.key"
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{default "stratos-config-init" .Values.images.configInit}}:{{.Values.consoleVersion}}
         command: ["/config-init.sh"]
         imagePullPolicy: {{.Values.imagePullPolicy}}
@@ -187,8 +189,8 @@ spec:
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
       {{- end }}
-      restartPolicy: "OnFailure"
+      restartPolicy: "Never"
       {{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
       serviceAccountName: "config-init"
       {{- end }}
-      terminationGracePeriodSeconds: 600
+      terminationGracePeriodSeconds: 30

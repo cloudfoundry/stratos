@@ -24,7 +24,8 @@ spec:
     requests:
       storage: 20Mi
 ---
-{{- if and not .Values.mariadb.external and (.Values.mariadb.persistence.enabled (not .Values.mariadb.persistence.existingClaim)) }}
+{{- if (not .Values.mariadb.external) }}
+{{- if and .Values.mariadb.persistence.enabled (not .Values.mariadb.persistence.existingClaim) }}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
@@ -51,4 +52,5 @@ spec:
   resources:
     requests:
       storage: {{ .Values.mariadb.persistence.size | quote }}
+{{- end }}
 {{- end }}

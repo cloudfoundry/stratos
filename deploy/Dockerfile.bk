@@ -15,7 +15,6 @@ RUN chmod +x /srv/jetstream
 FROM splatform/stratos-bk-base:opensuse as prod-build
 RUN zypper in -y curl
 COPY deploy/containers/proxy/entrypoint.sh /entrypoint.sh
-COPY /deploy/db/scripts/run-preflight-job.sh /run-preflight-job.sh
 COPY /deploy/tools/generate_cert.sh /generate_cert.sh
 COPY --from=common-build /srv /srv
 RUN mkdir /srv/templates

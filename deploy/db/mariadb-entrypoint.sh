@@ -40,6 +40,16 @@ EOSQL
 
   echo 'FLUSH PRIVILEGES ;' >> "$tempSqlFile"
   set -- "$@" --init-file="$tempSqlFile"
+else
+  echo "Updating passwords - writing to init-file"
+  tempSqlFile='/tmp/mysql-first-time.sql'
+  cat > "$tempSqlFile" <<-EOSQL
+  use mysql;
+  update user SET PASSWORD=PASSWORD("${MYSQL_ROOT_PASSWORD}") WHERE USER='root';
+  update user SET PASSWORD=PASSWORD("${MYSQL_PASSWORD}") WHERE USER='${MYSQL_USER}';
+  FLUSH PRIVILEGES;
+EOSQL
+  set -- "$@" --init-file="$tempSqlFile"
 fi
 
 chown -R mysql:mysql "$MYSQL_DATADIR"
