@@ -121,12 +121,12 @@ func (ch *CFHosting) Init() error {
 
 		ch.portalProxy.GetConfig().ConsoleConfig = new(interfaces.ConsoleConfig)
 
-		//Force auth endpoint type to remote (CF UAA)
-		ch.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType = "remote"
-
 		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClient = ch.portalProxy.GetConfig().CFClient
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClientSecret = ch.portalProxy.GetConfig().CFClientSecret
+
+		//Set the auth endpoint type for the console
+		ch.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType = ch.portalProxy.GetConfig().AuthEndpointType
 
 		// Ensure that the identifier for an admin is the standard Cloud Foundry one
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = ch.portalProxy.GetConfig().CFAdminIdentifier
