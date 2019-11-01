@@ -16,7 +16,7 @@ import { createEmptyStoreModule } from '../../../../core/test-framework/store-te
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { CardAutoscalerDefaultComponent } from './card-autoscaler-default.component';
 
-fdescribe('CardAutoscalerDefaultComponent', () => {
+describe('CardAutoscalerDefaultComponent', () => {
   let component: CardAutoscalerDefaultComponent;
   let fixture: ComponentFixture<CardAutoscalerDefaultComponent>;
 

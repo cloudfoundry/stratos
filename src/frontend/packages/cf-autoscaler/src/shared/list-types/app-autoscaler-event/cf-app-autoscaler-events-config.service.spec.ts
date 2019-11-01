@@ -1,4 +1,6 @@
 import { CommonModule } from '@angular/common';
+import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpTestingController } from '@angular/common/http/testing';
 import { inject, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -14,11 +16,8 @@ import { generateTestEntityServiceProvider } from '../../../../../core/test-fram
 import { createEmptyStoreModule } from '../../../../../core/test-framework/store-test-helper';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
-import { HttpClient } from 'selenium-webdriver/http';
-import { HttpBackend, HttpClientModule } from '@angular/common/http';
-import { HttpTestingController } from '@angular/common/http/testing';
 
-fdescribe('CfAppAutoscalerEventsConfigService', () => {
+describe('CfAppAutoscalerEventsConfigService', () => {
 
   beforeEach(() => {
     const cfGuid = 'cfGuid';
