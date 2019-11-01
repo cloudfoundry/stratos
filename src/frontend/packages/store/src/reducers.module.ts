@@ -78,7 +78,7 @@ const storeModule = StoreModule.forRoot(
   {
     metaReducers,
     runtimeChecks: {
-      strictStateImmutability: false,
+      strictStateImmutability: true,
       strictActionImmutability: false
     }
   }
