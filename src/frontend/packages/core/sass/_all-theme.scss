@@ -44,6 +44,7 @@
 @import '../src/core/stateful-icon/stateful-icon.component.theme';
 @import '../src/shared/components/markdown-preview/markdown-preview.component.theme';
 @import './components/mat-tabs.theme';
+@import './components/ngx-charts-gauge.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
 @import './mat-themes';
@@ -107,6 +108,7 @@ $side-nav-light-active: #484848;
   @include app-base-page-theme($theme, $app-theme);
   @include app-page-subheader-theme($theme, $app-theme);
   @include app-mat-tabs-theme($theme, $app-theme);
+  @include ngx-charts-gauge($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
   @include app-card-status-theme($theme, $app-theme);
   @include app-usage-gauge-theme($theme, $app-theme);
