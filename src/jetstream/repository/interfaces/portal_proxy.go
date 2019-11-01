@@ -11,7 +11,6 @@ import (
 )
 
 type PortalProxy interface {
-
 	GetHttpClient(skipSSLValidation bool) http.Client
 	GetHttpClientForRequest(req *http.Request, skipSSLValidation bool) http.Client
 	RegisterEndpoint(c echo.Context, fetchInfo InfoFunc) error
@@ -19,7 +18,6 @@ type PortalProxy interface {
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
 	// Auth
-	InitStratosAuthService(t AuthEndpointType) error
 	GetStratosAuthService() StratosAuth
 	ConnectOAuth2(c echo.Context, cnsiRecord CNSIRecord) (*TokenRecord, error)
 	InitEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) TokenRecord
@@ -52,7 +50,7 @@ type PortalProxy interface {
 	RefreshUAAToken(userGUID string) (TokenRecord, error)
 	RefreshUAALogin(username, password string, store bool) error
 	GetUserTokenInfo(tok string) (u *JWTUserTokenInfo, err error)
-	
+
 	// Proxy API requests
 	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
 	DoProxyRequest(requests []ProxyRequestInfo) (map[string]*CNSIRequest, error)
