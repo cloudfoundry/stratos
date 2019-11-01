@@ -1,3 +1,5 @@
+import { HttpClientModule, HttpRequest, HttpXhrBackend } from '@angular/common/http';
+import { HttpTestingController } from '@angular/common/http/testing';
 import { inject, TestBed } from '@angular/core/testing';
 import { Action, Store } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
@@ -23,8 +25,6 @@ import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-
 import { EntityCatalogueEntityConfig, IStratosEndpointDefinition } from './entity-catalogue/entity-catalogue.types';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
-import { HttpClientModule, HttpXhrBackend } from '@angular/common/http';
-import { HttpTestingController } from '@angular/common/http/testing';
 
 function getActionDispatcher(store: Store<any>) {
   return (action: Action) => {
@@ -38,7 +38,7 @@ const entitySchema = new EntitySchema(entityType, endpointType);
 const createAction = (guid: string) => {
   return {
     actions: ['fa', 'k', 'e'],
-    options: {},
+    options: new HttpRequest<any>('GET', 'b'),
     entityType: entitySchema.entityType,
     endpointType: entitySchema.endpointType,
     guid,
@@ -46,17 +46,6 @@ const createAction = (guid: string) => {
   } as ICFAction;
 };
 
-const endpointDefinition: IStratosEndpointDefinition = {
-  type: endpointType,
-  schema: new EntitySchema(
-    endpointType,
-    STRATOS_ENDPOINT_TYPE
-  ),
-  label: 'Endpoint',
-  labelPlural: 'Endpoints',
-  logoUrl: '',
-  authTypes: []
-};
 const catalogueEndpointEntity = new StratosBaseCatalogueEntity({
   type: endpointType,
   schema: new EntitySchema(

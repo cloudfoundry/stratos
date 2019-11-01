@@ -62,7 +62,7 @@ class EntityMonitorFactoryMock {
   }
 }
 
-fdescribe('MetaCardComponent', () => {
+describe('MetaCardComponent', () => {
   const favorite = new UserFavorite<IFavoriteMetadata>('endpoint', 'endpointType', 'entityType');
   const entityConfig = new ComponentEntityMonitorConfig('guid', new EntitySchema('schema', 'endpointType'));
 
