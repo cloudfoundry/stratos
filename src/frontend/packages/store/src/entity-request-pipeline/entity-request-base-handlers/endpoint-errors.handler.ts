@@ -34,7 +34,7 @@ export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher)
         message: 'API request error',
         metadata: {
           url: error.url,
-          httpMethod: action.options.method as string,
+          httpMethod: action.options ? action.options.method as string : '',
           errorResponse: error.jetstreamErrorResponse,
         },
       }),
