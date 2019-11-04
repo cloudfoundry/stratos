@@ -14,9 +14,11 @@ import {
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
 import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
-import { getAPIRequestDataState } from '../../store/src/selectors/api.selectors';
+import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
+import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
 import { AppStoreModule } from '../../store/src/store.module';
+import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
@@ -136,6 +138,37 @@ export class AppModule {
       key: 'pollingEnabledWarning',
       link: '/user-profile'
     });
+    eventService.addEventConfig<{
+      count: number,
+      endpoint: EndpointModel
+    }>({
+      eventTriggered: (state: GeneralEntityAppState) => {
+        const eventState = internalEventStateSelector(state);
+        return Object.entries(eventState.types.endpoint).reduce((res, [eventId, value]) => {
+          const entityConfig = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+          res.push(new GlobalEventData(true, {
+            endpoint: selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state),
+            count: value.length
+          }));
+          return res;
+        }, []);
+        // const res = [];
+        // Object.entries(eventState.types.endpoint).forEach(([eventId, value]) => {
+        //   const entityConfig = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+        //   const endpoint = selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state);
+        //   res.push(new GlobalEventData(true, {
+        //     endpoint,
+        //     count: value.length
+        //   }));
+        // });
+        // return res;
+      },
+      message: data => `There are ${data.count} error/s associated with the endpoint '${data.endpoint.name}'.`,
+      key: 'endpointError',
+      link: data => `/errors/${data.endpoint.guid}`
+    });
+
+
     // This should be brought back in in the future
     // eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
     //   {
