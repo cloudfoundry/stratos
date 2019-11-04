@@ -18,8 +18,8 @@ import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-ca
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { StratosStatus } from '../../shared.types';
 import { FavoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
-import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { TabNavItem } from '../../../../tab-nav.types';
 
 @Component({
   selector: 'app-page-header',
@@ -31,7 +31,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
   public pFavorite: UserFavorite<IFavoriteMetadata>;
-  private pTabs: ISubHeaderTabs[];
+  private pTabs: TabNavItem[];
 
   public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
 
@@ -45,7 +45,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   endpointIds$: Observable<string[]>;
 
   @Input()
-  set tabs(tabs: ISubHeaderTabs[]) {
+  set tabs(tabs: TabNavItem[]) {
     if (tabs) {
       this.pTabs = tabs.map(tab => ({
         ...tab,
