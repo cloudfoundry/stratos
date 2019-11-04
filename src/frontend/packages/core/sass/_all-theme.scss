@@ -105,7 +105,6 @@ $side-nav-light-active: #484848;
   @include steppers-theme($theme, $app-theme);
   @include list-theme($theme, $app-theme);
   @include app-base-page-theme($theme, $app-theme);
-  @include app-page-subheader-theme($theme, $app-theme);
   @include app-mat-tabs-theme($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
   @include app-card-status-theme($theme, $app-theme);
