@@ -6,15 +6,15 @@ tests:
   - it: should have default SMTP configuration
     asserts:
       - equal:
-          path: spec.template.spec.containers[2].name
+          path: spec.template.spec.containers[1].name
           value: proxy
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: SMTP_AUTH
             value: "false"
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: SMTP_HOST
             value: ""
@@ -25,15 +25,15 @@ tests:
       env.SMTP_FROM_ADDRESS: "test@email.com"
     asserts:
       - equal:
-          path: spec.template.spec.containers[2].name
+          path: spec.template.spec.containers[1].name
           value: proxy
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: SMTP_AUTH
             value: "true"
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: SMTP_FROM_ADDRESS
             value: "test@email.com"
@@ -43,15 +43,15 @@ tests:
       env.SMTP_PORT: "4567"
     asserts:
       - equal:
-          path: spec.template.spec.containers[2].name
+          path: spec.template.spec.containers[1].name
           value: proxy
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: SMTP_HOST
             value: "test_host"
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: SMTP_PORT
             value: "4567"
@@ -61,15 +61,15 @@ tests:
       env.SMTP_PASSWORD: "test_password"
     asserts:
       - equal:
-          path: spec.template.spec.containers[2].name
+          path: spec.template.spec.containers[1].name
           value: proxy
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: SMTP_USER
             value: "test_user"
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: SMTP_PASSWORD
             value: "test_password"
@@ -78,10 +78,10 @@ tests:
       console.userInviteSubject: "test subject"
     asserts:
       - equal:
-          path: spec.template.spec.containers[2].name
+          path: spec.template.spec.containers[1].name
           value: proxy
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: INVITE_USER_SUBJECT
             value: "test subject"
@@ -90,10 +90,10 @@ tests:
       console.templatesConfigMapName: "templateCMName"
     asserts:
       - equal:
-          path: spec.template.spec.containers[2].name
+          path: spec.template.spec.containers[1].name
           value: proxy
       - contains:
-          path: spec.template.spec.containers[2].volumeMounts
+          path: spec.template.spec.containers[1].volumeMounts
           content:
             mountPath: /etc/templates/
             name: "RELEASE-NAME-templates"
