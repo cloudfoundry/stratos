@@ -186,7 +186,6 @@ export class ActionOrchestrator<T extends OrchestratedActionBuilders = Orchestra
   public getEntityActionDispatcher(actionDispatcher?: (action: Action) => void) {
     return new EntityActionDispatcherManager<T>(actionDispatcher, this);
   }
-  // TODO should return T[Y]
   public getActionBuilder<Y extends keyof T>(actionType: Y) {
     const actionBuilderForType = this.actionBuilders[actionType];
     if (!actionBuilderForType) {

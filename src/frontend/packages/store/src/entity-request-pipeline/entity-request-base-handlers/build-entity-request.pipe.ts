@@ -19,11 +19,11 @@ export function getRequestTypeFromRequestType(requestType: ApiRequestTypes) {
   return 'GET';
 }
 
+// FIXME Since the angular 8 update, this is no longer needed.
 export const buildRequestEntityPipe = (
   requestType: ApiRequestTypes,
   requestOptions: HttpRequest<any>
 ): HttpRequest<any> => {
-  // TODO Angular 8 this is no longer needed.
   return requestOptions;
 };
 
