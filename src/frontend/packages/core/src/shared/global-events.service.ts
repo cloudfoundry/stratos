@@ -1,8 +1,9 @@
-import { GeneralEntityAppState } from './../../../store/src/app-state';
 import { Injectable } from '@angular/core';
-import { Observable, combineLatest, ReplaySubject } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { map, publishReplay, refCount, tap, startWith, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+
+import { GeneralEntityAppState } from './../../../store/src/app-state';
 import { StratosStatus } from './shared.types';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
@@ -50,6 +51,7 @@ export interface IGlobalEvent {
   key: string;
   type?: GlobalEventTypes;
   stratosStatus?: StratosStatus;
+  read?: boolean;
 }
 @Injectable({
   providedIn: 'root'
@@ -64,12 +66,25 @@ export class GlobalEventService {
 
   private dataCache = new Map<any, Map<any, IGlobalEvent[]>>();
 
+  private readEvents = new Map<string, IGlobalEvent>();
+  private readEventsSubject = new BehaviorSubject<Map<string, IGlobalEvent>>(this.readEvents);
+
   public events$: Observable<IGlobalEvent[]>;
   public priorityType$: Observable<GlobalEventTypes>;
   public priorityStratosStatus$: Observable<StratosStatus>;
+
   public addEventConfig<SelectedState, EventState = SelectedState>(event: IGlobalEventConfig<SelectedState, EventState>) {
     this.eventConfigs.push(event);
     this.eventConfigsSubject.next(this.eventConfigs);
+  }
+
+  public updateEventReadState(event: IGlobalEvent, read: boolean) {
+    if (read && !this.readEvents.has(event.key)) {
+      this.readEvents.set(event.key, event);
+    } else if (!read && this.readEvents.has(event.key)) {
+      this.readEvents.delete(event.key);
+    }
+    this.readEventsSubject.next(this.readEvents);
   }
 
   public filterEvents(eventType: GlobalEventTypes) {
@@ -95,7 +110,7 @@ export class GlobalEventService {
   private getEvent(eventData: any, config: IGlobalEventConfig<any>, appState: GeneralEntityAppState): IGlobalEvent {
     const message = typeof config.message === 'function' ? config.message(eventData, appState) : config.message;
     const link = typeof config.link === 'function' ? config.link(eventData, appState) : config.link;
-    const key = typeof config.key === 'function' ? config.key(eventData, appState) : config.link || config.message;
+    const key = typeof config.key === 'function' ? config.key(eventData, appState) : config.key || config.message;
     const type = config.type || 'warning';
     return {
       message,
@@ -148,6 +163,7 @@ export class GlobalEventService {
     const isEventTriggered = config.eventTriggered(selectedState);
     if (!isEventTriggered) {
       const dataToEventCache = new Map<any, any>();
+      // We should consider changing this, selectedState can be the entire store
       dataToEventCache.set(selectedState, []);
       this.dataCache.set(config, dataToEventCache);
       return [];
@@ -214,7 +230,26 @@ export class GlobalEventService {
   }
 
   constructor(private store: Store<GeneralEntityAppState>) {
-    const eventsAndPriority$ = this.getEventsAndPriorityType();
+    const eventsAndPriority$ = combineLatest([
+      this.getEventsAndPriorityType(),
+      this.readEventsSubject.asObservable()
+    ]).pipe(
+      map(([[events, types], readEvents]) => {
+        // Apply read state. We can't do this in cache as list is recreated on state change
+        events.forEach(event => {
+          event.read = !!readEvents.get(event.key);
+        });
+        // Remove stale read markers
+        readEvents.forEach((a, key) => {
+          const oEvent = events.find(event => event.key === key);
+          if (!oEvent) {
+            this.readEvents.delete(key);
+          }
+        });
+        return [events, types] as [IGlobalEvent[], GlobalEventTypes];
+      })
+    );
+
     this.events$ = eventsAndPriority$.pipe(
       map(eventsAndPriority => eventsAndPriority[0])
     );

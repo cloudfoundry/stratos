@@ -3,13 +3,21 @@
   @include breakpoint(tablet) {
     margin: 0 20%;
   }
+  &__filter {
+    margin-bottom: 10px;
+  }
   &__event-row-icon {
     margin-right: 15px;
   }
-  &__event-row-link {
+  &__event-row-button {
     margin-left: auto;
+    margin-right: 10px;
+    &:last-of-type {
+      margin-right: 0;
+    }
   }
   &__event-message {
+    flex: 1;
     margin: 15px;
   }
   &__event-row-card {
