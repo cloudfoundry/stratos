@@ -9,16 +9,28 @@
   </div>
 </app-page-header>
 <div class="event-page">
-  <mat-list *ngIf="events$ | async as events; last as last ; else noEvents">
+  <mat-button-toggle-group class="event-page__filter" [value]="selectedFilter" aria-label="filter"
+    #group="matButtonToggleGroup" (change)="selectedFilterSubject.next($event.value)">
+    <!-- multiple=true -->
+    <mat-button-toggle value="{{filterValues.ALL}}">All</mat-button-toggle>
+    <mat-button-toggle value="{{filterValues.READ}}">Read</mat-button-toggle>
+    <mat-button-toggle value="{{filterValues.UNREAD}}">Unread</mat-button-toggle>
+  </mat-button-toggle-group>
+  <mat-list *ngIf="events$ | async as events; else noEvents">
     <mat-card class="event-page__event-row-card" *ngFor="let event of events">
       <mat-list-item class="event-page__event-row">
         <app-stateful-icon class="event-page__event-row-icon" [state]="event.stratosStatus">
         </app-stateful-icon>
         <span class="event-page__event-message">{{event.message}}</span>
-        <button class="event-page__event-row-link" *ngIf="event.link" color="primary" mat-flat-button
+        <button class="event-page__event-row-button" *ngIf="event.link" color="primary" mat-flat-button
           [routerLink]="event.link">View</button>
+        <button class="event-page__event-row-button" *ngIf="event.read" color="primary" mat-flat-button
+          (click)="updateReadState(event, false)">Mark as unread</button>
+        <button class="event-page__event-row-button" *ngIf="!event.read" color="primary" mat-flat-button
+          (click)="updateReadState(event, true)">Mark as read</button>
       </mat-list-item>
     </mat-card>
+    <div *ngIf="events.length === 0">There are no events matching the filter.</div>
   </mat-list>
 </div>
 <ng-template #noEvents>

@@ -42,9 +42,9 @@
                 <app-recent-entities class="page-header__history-list" history="true"></app-recent-entities>
               </div>
             </mat-menu>
-            <button *ngIf="eventCount$ | async as eventCount" routerLink="/events" mat-icon-button
-              class="page-header__notification-button">
-              <mat-icon matBadgeColor="warn" [matBadge]="eventCount" class="page-header__notifications-button">
+            <button routerLink="/events" mat-icon-button class="page-header__notification-button">
+              <mat-icon matBadgeColor="warn" [matBadge]="(eventCount$ | async) || ''"
+                class="page-header__notifications-button">
                 notifications
               </mat-icon>
             </button>

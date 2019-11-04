@@ -151,6 +151,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private favoritesConfigMapper: FavoritesConfigMapper
   ) {
     this.eventCount$ = eventService.events$.pipe(
+      map(events => events.filter(event => !event.read)),
       map(events => events.length)
     );
     this.eventPriorityStatus$ = eventService.priorityStratosStatus$;
