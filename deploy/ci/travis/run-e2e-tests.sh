@@ -60,6 +60,8 @@ echo "Chrome version: ${CHROME_VERSION}"
 
 npm run update-webdriver -- --versions.chrome=${CHROME_VERSION}
 
+export STRATOS_E2E_BASE_URL="https://127.0.0.1:5443"
+
 E2E_TARGET="e2e -- --no-webdriver-update --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
 
 # Capture video if configured

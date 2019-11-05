@@ -107,7 +107,7 @@ const fullMinusOtherSuites = globby.sync([
   ...coreSuite.map(file => '!' + file),
 ])
 
-exports.config = {
+const config = {
   allScriptsTimeout: timeout,
   // Exclude the dashboard tests from all suites for now
   exclude: [
@@ -157,7 +157,7 @@ exports.config = {
   jasmineNodeOpts: {
     showColors: true,
     defaultTimeoutInterval: timeout,
-    print: function () {}
+    print: function () { }
   },
   params: secrets,
   onPrepare() {
@@ -234,7 +234,10 @@ exports.config = {
     return defer.promise;
   }
 };
-
+if (process.env['STRATOS_E2E_BASE_URL']) {
+  config.baseUrl = process.env['STRATOS_E2E_BASE_URL'];
+}
+exports.config = config
 // Should we run e2e tests in headless Chrome?
 const headless = secrets.headless || process.env['STRATOS_E2E_HEADLESS'];
 if (headless) {
