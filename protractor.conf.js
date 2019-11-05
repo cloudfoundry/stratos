@@ -157,7 +157,7 @@ const config = {
   jasmineNodeOpts: {
     showColors: true,
     defaultTimeoutInterval: timeout,
-    print: function () { }
+    print: function () {}
   },
   params: secrets,
   onPrepare() {
@@ -231,7 +231,9 @@ const config = {
       .on("error", (err) => {
         defer.reject('Failed to validate Github API Url: ' + err.message);
       });
-    return defer.promise;
+
+    // Print out success, errors fall through
+    return defer.promise.then(res => console.log(res));
   }
 };
 if (process.env['STRATOS_E2E_BASE_URL']) {
