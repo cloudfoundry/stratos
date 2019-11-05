@@ -59,11 +59,15 @@ spec:
               name: "{{ .Release.Name }}-db-secret"
               key: database
         - name: DB_HOST
+          {{- if not .Values.mariadb.external }}
           value: "{{ .Release.Name }}-mariadb"
+          {{- else }}
+          value: {{ .Values.mariadb.host | quote }}
+          {{- end }}
         - name: DB_PORT
-          value: "3306"
+          value: {{ default "3306" .Values.mariadb.port | quote }}
         - name: DATABASE_PROVIDER
-          value: "mysql"
+          value: {{ default "mysql" .Values.mariadb.type | quote }}
         - name: HTTP_CONNECTION_TIMEOUT_IN_SECS
           value: "10"
         - name: HTTP_CLIENT_TIMEOUT_IN_SECS
@@ -115,10 +119,18 @@ spec:
         - name: LOG_LEVEL
           value: {{.Values.console.backendLogLevel}}
         {{- end }}
+        - name: CONSOLE_CLIENT 
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-secret"
+              key: client
+        - name: CONSOLE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-secret"
+              key: clientSecret
         # Local admin user
         {{- if .Values.console.localAdminPassword }}
-        - name: CONSOLE_CLIENT 
-          value: cf
         - name: CONSOLE_ADMIN_SCOPE 
           value: stratos.admin
         - name: SKIP_SSL_VALIDATION 
@@ -130,7 +142,7 @@ spec:
         - name: LOCAL_USER_PASSWORD 
           valueFrom:
             secretKeyRef:
-              name: "{{ .Release.Name }}-db-secret"
+              name: "{{ .Release.Name }}-secret"
               key: localAdminPassword
         - name: LOCAL_USER_SCOPE 
           value: stratos.admin
@@ -139,10 +151,6 @@ spec:
         {{- if or .Values.env.UAA_HOST .Values.env.DOMAIN }}  
         - name: UAA_ENDPOINT 
           value: {{ template "scfUaaEndpoint" . }}
-        - name: CONSOLE_CLIENT 
-          value: cf
-        - name: CONSOLE_CLIENT_SECRET
-          value:
         {{- if .Values.env.DOMAIN }}  
         - name: AUTO_REG_CF_URL
           value: https://api.{{.Values.env.DOMAIN}}
@@ -154,10 +162,6 @@ spec:
         {{- else if .Values.uaa.host }}  
         - name: UAA_ENDPOINT 
           value: {{default "https://" .Values.uaa.protocol}}{{.Values.uaa.host}}:{{.Values.uaa.port}}
-        - name: CONSOLE_CLIENT 
-          value: {{.Values.uaa.consoleClient}}
-        - name: CONSOLE_CLIENT_SECRET 
-          value: {{.Values.uaa.consoleClientSecret}}
         - name: CONSOLE_ADMIN_SCOPE 
           value: {{.Values.uaa.consoleAdminIdentifier}}
         - name: SKIP_SSL_VALIDATION 
@@ -202,9 +206,15 @@ spec:
         - name: SMTP_PORT
           value: {{ default "" .Values.env.SMTP_PORT | quote }}
         - name: SMTP_USER
-          value: {{ default "" .Values.env.SMTP_USER | quote }}
+          valueFrom:
+          secretKeyRef:
+            name: "{{ .Release.Name }}-secret"
+            key: smtpUser
         - name: SMTP_PASSWORD
-          value: {{ default "" .Values.env.SMTP_PASSWORD | quote }}
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-secret"
+              key: smtpPassword
         - name: INVITE_USER_SUBJECT
           value: {{ default "" .Values.console.userInviteSubject | quote }}
         - name: ENABLE_TECH_PREVIEW
@@ -246,6 +256,9 @@ spec:
       - name: "{{ .Release.Name }}-db-secret"
         secret:
           secretName: "{{ .Release.Name }}-db-secret"
+      - name: "{{ .Release.Name }}-secret"
+        secret:
+          secretName: "{{ .Release.Name }}-secret"
       {{- if .Values.console.templatesConfigMapName }}
       - name: {{ .Release.Name }}-templates
         configMap:

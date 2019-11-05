@@ -62,9 +62,6 @@ console:
   # Email subject of the user invitation message 
   userInviteSubject: ~
 
-  # Whether to perform the volume migration job on install/upgrade (migrate to secrets)
-  migrateVolumes: true
-  
   # Enable/disable Tech Preview
   techPreview: false
 
@@ -77,7 +74,6 @@ console:
 images:
   console: stratos-console
   proxy: stratos-jetstream
-  postflight: stratos-postflight-job
   mariadb: stratos-mariadb
   configInit: stratos-config-init
 
@@ -85,7 +81,7 @@ images:
 #storageClass: default
 
 # Database configuration
-mariadb:
+database:
   external: false
   database: console
   user: console
@@ -93,6 +89,15 @@ mariadb:
   userPassword:
   # Leave password blank to auto-generate (not needed for external database)
   rootPassword:
+
+  # DB Host
+  host:
+
+  # Override port (default 3306)
+  port:
+
+  # Override DB type - default is mysql
+  type:
 
   resources:
     requests:
@@ -151,6 +156,11 @@ kube:
     username:
     password:
     email: default
+
+# ================================================================================
+# Values below are for internal use only for SCF compatability - subject to change
+# ================================================================================
+
 services:
   loadbalanced: false
 
