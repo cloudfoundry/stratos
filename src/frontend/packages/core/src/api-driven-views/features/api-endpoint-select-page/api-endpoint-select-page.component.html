@@ -1,1 +1,3 @@
-<p>api-endpoint-select-page works!</p>
+<app-api-entity-type-selector [entityTypes]="connectedEndpointsOfType$ | async"
+  (entitySelected)="endpointSelected($event)">
+</app-api-entity-type-selector>

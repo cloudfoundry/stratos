@@ -85,7 +85,6 @@ export class SshApplicationComponent implements OnInit {
         tap(() => this.connectionStatus.next(1)),
         switchMap(getResponse => getResponse(this.sshInput)),
         catchError((e: Error) => {
-          console.log(e);
           if (e.message !== normalClosureMessage) {
             this.errorMessage = 'Error connecting to web socket';
           }

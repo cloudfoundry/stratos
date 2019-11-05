@@ -11,7 +11,6 @@ import { Subject } from 'rxjs';
 export class ApiEntityTypeSelectorComponent implements OnInit {
   public entityTiles: ITileConfig[];
   @Input() set entityTypes(types: ApiEntityType[]) {
-    console.log(types)
     this.entityTiles = types.map(type => {
       return new ITileConfig(type.title, {
         location: type.imageUrl

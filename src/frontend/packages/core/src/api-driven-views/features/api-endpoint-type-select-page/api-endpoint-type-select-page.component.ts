@@ -6,6 +6,7 @@ import { ApiEntityType } from '../../api-drive-views.types';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { map } from 'rxjs/operators';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-api-endpoint-type-select-page',
@@ -14,9 +15,14 @@ import { map } from 'rxjs/operators';
 })
 export class ApiEndpointTypeSelectPageComponent implements OnInit {
   public connectedEndpointTypes$: Observable<ApiEntityType[]>;
-  constructor(public store: Store<GeneralAppState>) { }
+  constructor(
+    public store: Store<GeneralAppState>,
+    public router: Router,
+    public activeRoute: ActivatedRoute
+  ) { }
   public endpointSelected(endpoint: ApiEntityType) {
     console.log(endpoint);
+    this.router.navigate([endpoint.type], { relativeTo: this.activeRoute });
   }
   ngOnInit() {
     const endpointTypes = entityCatalogue.getAllEndpointTypes();
