@@ -1,3 +1,5 @@
+import { of } from 'rxjs';
+
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { CardTypes } from '../../list-cards/card/card.component';
@@ -17,4 +19,5 @@ export class BaseCfListConfig<T> implements IListConfig<T> {
   getMultiActions = () => [];
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
+  getInitialised = () => of(true);
 }
