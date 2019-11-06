@@ -81,7 +81,7 @@ images:
 #storageClass: default
 
 # Database configuration
-database:
+mariadb:
   external: false
   database: console
   user: console
@@ -112,7 +112,7 @@ uaa:
   protocol: https://
   port: 
   host: 
-  consoleClient:  
+  consoleClient: 
   consoleClientSecret: 
   consoleAdminIdentifier: 
   skipSSLValidation: false

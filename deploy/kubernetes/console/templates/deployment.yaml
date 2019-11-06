@@ -207,9 +207,9 @@ spec:
           value: {{ default "" .Values.env.SMTP_PORT | quote }}
         - name: SMTP_USER
           valueFrom:
-          secretKeyRef:
-            name: "{{ .Release.Name }}-secret"
-            key: smtpUser
+            secretKeyRef:
+              name: "{{ .Release.Name }}-secret"
+              key: smtpUser
         - name: SMTP_PASSWORD
           valueFrom:
             secretKeyRef:
