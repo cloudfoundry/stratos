@@ -44,7 +44,7 @@ import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
 import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
-import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
+import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from './xsrf.module';
 
@@ -75,7 +75,6 @@ export class CustomRouterStateSerializer
     return { url, params, queryParams };
   }
 }
-
 
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
@@ -153,19 +152,9 @@ export class AppModule {
           }));
           return res;
         }, []);
-        // const res = [];
-        // Object.entries(eventState.types.endpoint).forEach(([eventId, value]) => {
-        //   const entityConfig = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
-        //   const endpoint = selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state);
-        //   res.push(new GlobalEventData(true, {
-        //     endpoint,
-        //     count: value.length
-        //   }));
-        // });
-        // return res;
       },
       message: data => `There are ${data.count} error/s associated with the endpoint '${data.endpoint.name}'.`,
-      key: 'endpointError', // TODO: RC Key
+      key: data => `${endpointEventKey}-${data.endpoint.guid}`,
       link: data => `/errors/${data.endpoint.guid}`
     });
 

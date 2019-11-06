@@ -3,16 +3,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { distinctUntilChanged, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { ToggleHeaderEvent } from '../../../../../../store/src/actions/dashboard-actions';
-import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { endpointListKey, EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { endpointEntitySchema } from '../../../../base-entity-schemas';
-import { GlobalEventService, IGlobalEvent } from '../../../global-events.service';
-import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
-import { PaginationMonitor } from '../../../monitors/pagination-monitor';
+import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
 
 
 @Component({
@@ -43,9 +37,9 @@ export class PageHeaderEventsComponent implements OnInit {
   public eventMinimized$: Observable<boolean>;
   public errorMessage$: Observable<string>;
   endpointId: any;
+  private events$: Observable<any>;
 
   constructor(
-    private internalEventMonitorFactory: InternalEventMonitorFactory,
     private activatedRoute: ActivatedRoute,
     private store: Store<CFAppState>,
     private eventService: GlobalEventService,
@@ -57,12 +51,14 @@ export class PageHeaderEventsComponent implements OnInit {
   }
 
   public toggleEvent() { // TODO: RC Rename
-    this.store.dispatch(new ToggleHeaderEvent());
+    this.events$.pipe(
+      first(),
+    ).subscribe((events: IGlobalEvent[]) => {
+      if (events && !!events.length) {
+        events.forEach(event => this.eventService.updateEventReadState(event, true));
+      }
+    });
   }
-
-  // public dismissEndpointErrors(endpointGuid: string) {
-  //   this.store.dispatch(new SendClearEndpointEventsAction(endpointGuid));
-  // }
 
   ngOnInit() {
     this.endpointId = this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.endpointId ?
@@ -71,50 +67,38 @@ export class PageHeaderEventsComponent implements OnInit {
       this.endpointIds$ = observableOf([this.endpointId]);
     }
     if (this.endpointIds$) {
-      const endpointMonitor = new PaginationMonitor<EndpointModel>(
-        this.store,
-        endpointListKey,
-        endpointEntitySchema
-      );
-      const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, this.endpointIds$);
-      // this.errorMessage$ = combineLatest(
-      //   cfEndpointEventMonitor.hasErroredOverTime(),
-      //   endpointMonitor.currentPage$
-      // ).pipe(
-      //   filter(([errors]) => !!Object.keys(errors).length),
-      //   map(([errors, endpoints]) => {
-      //     const endpointString = Object.keys(errors)
-      //       // const keys = errors ? Object.keys(errors) : null;
-      //       // if (!keys || !keys.length) {
-      //       //   return null;
-      //       // }
-      //       // console.log(keys);
-      //       // const endpointString = keys
-      //       .map(id => endpoints.find(endpoint => {
-      //         return endpoint.guid === id;
-      //       }))
-      //       .reduce((message, endpoint, index, { length }) => {
-      //         const endpointName = endpoint.name;
-      //         if (index === 0) {
-      //           return endpointName;
-      //         }
-      //         return index + 1 === length ? `${message} & ${endpointName}` : `${message}, ${endpointName}`;
-      //       }, '');
-      //     return `We've been having trouble communicating with ${endpointString}`;
-      //   })
-      // );
-      this.errorMessage$ = combineLatest(
+      this.events$ = combineLatest(
         this.eventService.events$,
-        endpointMonitor.currentPage$
+        this.endpointIds$,
       ).pipe(
-        map(([events, endpoints]) => {
-          return [events.filter(event => event.key === 'endpointError' && !event.read), endpoints];
+        map(([events, endpointIds]) => {
+          const filteredEvents = events.filter(event => {
+            // Is it an error of type endpoint?
+            if (event.key.startsWith(endpointEventKey)) {
+              const endpointId = this.getEndpointId(event);
+              // Is it an endpoint error for an endpoint we're interested in?
+              const relevantEndpoint = endpointIds.find(id => id === endpointId);
+              const unread = !event.read;
+              return relevantEndpoint && unread;
+            }
+          });
+          return filteredEvents;
         }),
-        filter(([events]) => !!Object.keys(events).length),
-        map(([events, endpoints]: [IGlobalEvent[], EndpointModel[]]) => {
-          return events.length > 1 ? `There are multiple endpoints with errors.` : event[0].message;
+        publishReplay(1),
+        refCount()
+      );
+      this.errorMessage$ = this.events$.pipe(
+        map((events: IGlobalEvent[]) => {
+          if (!events || events.length === 0) {
+            return '';
+          }
+          return events.length > 1 ? `There are multiple endpoints with errors.` : events[0].message;
         })
       );
     }
+  }
+
+  private getEndpointId(event: IGlobalEvent): string {
+    return event.link.split('/')[2];
   }
 }
