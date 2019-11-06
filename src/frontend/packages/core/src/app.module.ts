@@ -146,6 +146,7 @@ export class AppModule {
         const eventState = internalEventStateSelector(state);
         return Object.entries(eventState.types.endpoint).reduce((res, [eventId, value]) => {
           const entityConfig = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+          console.log(selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state));
           res.push(new GlobalEventData(true, {
             endpoint: selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state),
             count: value.length
@@ -164,7 +165,7 @@ export class AppModule {
         // return res;
       },
       message: data => `There are ${data.count} error/s associated with the endpoint '${data.endpoint.name}'.`,
-      key: 'endpointError',
+      key: 'endpointError', // TODO: RC Key
       link: data => `/errors/${data.endpoint.guid}`
     });
 
