@@ -1,6 +1,6 @@
 # Accessing Stratos
 
-Depending on the deployment mode, you may require access to an UAA.
+Depending on the deployment mode, you may require access to an UAA. Stratos also has the option to configure a local user account which removes the need for a UAA in non-Cloud Foundry deployments.
 
 ## Cloud Foundry deployment
 
@@ -9,7 +9,15 @@ Therefore, the login credentials will be the CF credentials for the user. A Clou
 
 ## Kubernetes deployment
 
-In a Kubernetes deployment using Helm, no UAA instance is deployed. Therefore users need to provide their own UAA to against.
+In a Kubernetes deployment using Helm, no UAA instance is deployed. Users have the choice to either provide their own UAA to authenticate against, or alternatively Stratos may be configured at deployment, to use a local user account.
+
+## Docker, single container deployment
+
+The single container deployment does not contain a UAA. The instructions specified for a Kubernetes deployment apply to this, including the local user account option.
+
+## Console Login
+
+### Log in to Stratos With UAA
 
 The Console will start in a setup mode and users will be need to provide the following to complete the setup:
 1. UAA Endpoint
@@ -19,11 +27,17 @@ The Console will start in a setup mode and users will be need to provide the fol
 
 Once the user provides this information, the user will be able to select the scope which should be used to identify a Console admin.
 
-# Docker, single container deployment
+### Log in to Stratos with local user account
 
-The single container deployment does not contain a UAA, and all the instructions specified for a Kubernetes deployment apply to this.
+**Helm deployment**
 
-# Quickly setting up a UAA for development
+With local user account configured, the console will present the login screen on startup. Log in with username: ```admin```, and the password you configured in the Stratos deployment command. The local user account has admin permissions.
+
+**Docker, single container deployment**
+
+Log in to the console using the local user credentials you configured when building/deploying the container.
+
+### Quickly setting up a UAA for development
 
 1. We will setup two containers that are linked to each other
 ```

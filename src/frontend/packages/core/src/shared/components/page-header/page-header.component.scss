@@ -110,6 +110,9 @@ $bottom-index: $top-index - 1;
     display: flex;
     justify-content: center;
   }
+  &__usermenu {
+    padding: 5px 0;
+  }
   &__username {
     align-items: center;
     display: flex;
