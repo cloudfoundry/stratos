@@ -922,6 +922,9 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           name: space.entity.name,
           cfGuid: space.entity.cfGuid,
         }),
+        getLines: () => ([
+          ['Name', (meta) => meta.name],
+        ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid
       }

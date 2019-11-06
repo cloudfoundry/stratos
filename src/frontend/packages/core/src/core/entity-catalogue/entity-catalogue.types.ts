@@ -13,6 +13,8 @@ import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
 import { Omit } from '../utils.service';
+import { GeneralEntityAppState } from '../../../../store/src/app-state';
+import { Store } from '@ngrx/store';
 
 export interface EntityCatalogueEntityConfig {
   entityType: string;
@@ -136,7 +138,7 @@ export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> 
   readonly actionable?: Observable<boolean>;
   readonly disabled?: Observable<boolean>;
 }
-export type EntityRowBuilder<T> = [string, (entityMetadata: T) => string /* | Observable<string> */];
+export type EntityRowBuilder<T> = [string, (entityMetadata: T, store?: Store<GeneralEntityAppState>) => string | Observable<string>];
 
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;

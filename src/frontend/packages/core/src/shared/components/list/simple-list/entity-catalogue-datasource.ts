@@ -43,7 +43,7 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
             },
             getValue: (e: any) => {
               const metaData = catalogueEntity.builders.entityBuilder.getMetadata(e);
-              return builder[1](metaData);
+              return builder[1](metaData, this.store);
             }
           },
           headerCell: () => builder[0],
@@ -59,10 +59,11 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
       ];
     };
     listConfig.getDataSource = () => this;
+    const action = getAllActionBuilder(endpointGuid, paginationKey, extraArgs);
     super({
       store,
-      action: getAllActionBuilder(endpointGuid, paginationKey, extraArgs),
-      paginationKey,
+      action,
+      paginationKey: action.paginationKey,
       schema,
       getRowUniqueId: entity => catalogueEntity.getGuidFromEntity(entity),
       listConfig,
