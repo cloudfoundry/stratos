@@ -3,7 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, first, map, publishReplay, refCount } from 'rxjs/operators';
+import { first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
@@ -34,7 +34,6 @@ export class PageHeaderEventsComponent implements OnInit {
   @Input()
   public simpleErrorMessage = false;
 
-  public eventMinimized$: Observable<boolean>;
   public errorMessage$: Observable<string>;
   endpointId: any;
   private events$: Observable<any>;
@@ -43,14 +42,9 @@ export class PageHeaderEventsComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private store: Store<CFAppState>,
     private eventService: GlobalEventService,
-  ) {
-    this.eventMinimized$ = this.store.select('dashboard').pipe(
-      map(dashboardState => dashboardState.headerEventMinimized),
-      distinctUntilChanged()
-    );
-  }
+  ) { }
 
-  public toggleEvent() { // TODO: RC Rename
+  public markEventsAsRead() {
     this.events$.pipe(
       first(),
     ).subscribe((events: IGlobalEvent[]) => {
@@ -92,7 +86,7 @@ export class PageHeaderEventsComponent implements OnInit {
           if (!events || events.length === 0) {
             return '';
           }
-          return events.length > 1 ? `There are multiple endpoints with errors.` : events[0].message;
+          return events.length > 1 ? `There are multiple endpoints with errors` : events[0].message;
         })
       );
     }

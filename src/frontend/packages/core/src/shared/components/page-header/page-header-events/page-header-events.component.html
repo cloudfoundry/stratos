@@ -1,28 +1,22 @@
-0000({{eventMinimized$ | async}})
-<div>
-  <!-- *ngIf="!(eventMinimized$ | async)" -->
-  AAAA
-  <div *ngIf="errorMessage$ | async as message" class="header-event--error">
-    BBB
-    <div class="header-event__outer">
-      <span class="header-event">
-        <span class="header-event__error-message">
-          <mat-icon class="header-event__error-icon">error</mat-icon>
-          <div class="header-event__message-wrapper">{{ message }} -
-            <span *ngIf="!endpointId">
-              <a class="header-event__details-link" [routerLink]="['/events']">view notifications</a>
-            </span>
-            <span *ngIf="endpointId">
-              <a class="header-event__details-link" [routerLink]="['/errors/', endpointId]">view details</a>
-            </span>
-          </div>
-        </span>
-        <!-- *ngIf="endpointId"  -->
-        <mat-icon class="header-event__error-dismiss" (click)="toggleEvent()">
-          clear
-        </mat-icon>
+<div *ngIf="errorMessage$ | async as message" class="header-event--error">
+  <div class="header-event__outer">
+    <span class="header-event">
+      <span class="header-event__error-message">
+        <mat-icon class="header-event__error-icon">error</mat-icon>
+        <div class="header-event__message-wrapper">{{ message }} -
+          <span *ngIf="!endpointId">
+            <a class="header-event__details-link" [routerLink]="['/events']">view notifications</a>
+          </span>
+          <span *ngIf="endpointId">
+            <a class="header-event__details-link" [routerLink]="['/errors/', endpointId]">view details</a>
+          </span>
+        </div>
       </span>
-    </div>
+      <!-- *ngIf="endpointId"  -->
+      <mat-icon class="header-event__error-dismiss" (click)="markEventsAsRead()">
+        clear
+      </mat-icon>
+    </span>
   </div>
 </div>
 
