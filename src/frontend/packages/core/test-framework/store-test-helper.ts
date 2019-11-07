@@ -191,7 +191,10 @@ function getDefaultInitialTestStratosStoreState() {
       }
     },
     internalEvents: {
-      types: {}
+      types: {
+        global: {},
+        endpoint: {}
+      }
     },
     currentUserRoles: {
       internal: {
