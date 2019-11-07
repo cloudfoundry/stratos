@@ -1,19 +1,24 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
+import { Observable } from 'rxjs';
+import { first, tap } from 'rxjs/operators';
+
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 import { IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
-import { CfCellsDataSource } from './cf-cells-data-source';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { ListViewTypes } from '../../list.component.types';
-import {
-  TableCellBooleanIndicatorComponentConfig,
-  TableCellBooleanIndicatorComponent
-} from '../../list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
-import { BooleanIndicatorType } from '../../../boolean-indicator/boolean-indicator.component';
-import { ITableColumn } from '../../list-table/table.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { CfCellHelper } from '../../../../../features/cloud-foundry/cf-cell.helpers';
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
+import { BooleanIndicatorType } from '../../../boolean-indicator/boolean-indicator.component';
+import {
+  TableCellBooleanIndicatorComponent,
+  TableCellBooleanIndicatorComponentConfig,
+} from '../../list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
+import { ITableColumn } from '../../list-table/table.types';
+import { ListViewTypes } from '../../list.component.types';
+import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
+import { CfCellsDataSource } from './cf-cells-data-source';
 
 
 
@@ -29,6 +34,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
     filter: 'Search by id',
     noEntries: 'There are no cells'
   };
+  private init$: Observable<any>;
 
   private boolIndicatorConfig: TableCellBooleanIndicatorComponentConfig<IMetricVectorResult<IMetricCell>> = {
     // "0 signifies healthy, and 1 signifies unhealthy"
@@ -94,11 +100,21 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
     },
   ];
 
-  constructor(store: Store<AppState>, private activeRouteCfCell: ActiveRouteCfCell) {
+  constructor(
+    store: Store<AppState>,
+    private activeRouteCfCell: ActiveRouteCfCell,
+    paginationMonitorFactory: PaginationMonitorFactory) {
     super();
-    this.dataSource = new CfCellsDataSource(store, activeRouteCfCell.cfGuid, this);
+    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
+    this.init$ = cellHelper.createCellMetricAction(activeRouteCfCell.cfGuid).pipe(
+      first(),
+      tap(action => {
+        this.dataSource = new CfCellsDataSource(store, this, action);
+      })
+    );
   }
 
+  getInitialised = () => this.init$;
   getColumns = () => this.columns;
   getDataSource = () => this.dataSource;
 }

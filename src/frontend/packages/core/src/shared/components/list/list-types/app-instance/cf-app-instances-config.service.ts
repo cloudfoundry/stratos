@@ -10,10 +10,11 @@ import { AppState } from '../../../../../../../store/src/app-state';
 import { entityFactory, metricSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
-import { EndpointsService } from '../../../../../core/endpoints.service';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
+import { CfCellHelper } from '../../../../../features/cloud-foundry/cf-cell.helpers';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { MetricQueryType } from '../../../../services/metrics-range-selector.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
@@ -189,11 +190,12 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private utilsService: UtilsService,
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
-    private endpointsService: EndpointsService,
-    entityServiceFactory: EntityServiceFactory
+    entityServiceFactory: EntityServiceFactory,
+    paginationMonitorFactory: PaginationMonitorFactory
   ) {
+    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
 
-    this.initialised$ = this.endpointsService.hasCellMetrics(appService.cfGuid).pipe(
+    this.initialised$ = cellHelper.hasCellMetrics(appService.cfGuid).pipe(
       map(hasMetrics => {
         if (hasMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);
