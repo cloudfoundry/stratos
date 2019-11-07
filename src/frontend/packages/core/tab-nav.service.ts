@@ -4,11 +4,12 @@ import { observeOn, map, startWith, publishReplay, refCount, tap, filter } from 
 import { Portal } from '@angular/cdk/portal';
 import { Router, NavigationEnd } from '@angular/router';
 import { TabNavItem } from './tab-nav.types';
+import { IPageSideNavTab } from './src/features/dashboard/page-side-nav/page-side-nav.component';
 
 @Injectable()
 export class TabNavService {
-  private tabNavsSubject: BehaviorSubject<TabNavItem[]>;
-  public tabNavs$: Observable<TabNavItem[]>;
+  private tabNavsSubject: BehaviorSubject<IPageSideNavTab[]>;
+  public tabNavs$: Observable<IPageSideNavTab[]>;
 
   private tabHeaderSubject: BehaviorSubject<string>;
   public tabHeader$: Observable<string>;
@@ -19,7 +20,7 @@ export class TabNavService {
   private pageHeaderSubject: BehaviorSubject<Portal<any>>;
   public pageHeader$: Observable<Portal<any>>;
 
-  public setTabs(tabs: TabNavItem[]) {
+  public setTabs(tabs: IPageSideNavTab[]) {
     this.tabNavsSubject.next(tabs);
   }
 
@@ -58,7 +59,7 @@ export class TabNavService {
     );
   }
 
-  public getCurrentTabHeader = (tabs: TabNavItem[]) => {
+  public getCurrentTabHeader = (tabs: IPageSideNavTab[]) => {
     if (!tabs) {
       return null;
     }

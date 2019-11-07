@@ -15,7 +15,7 @@ export class ApiEntityListPageComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    const endpointType = this.route.snapshot.params.endpointType;
+    const endpointType = this.route.parent.snapshot.params.endpointType;
     const entityType = this.route.snapshot.params.entityType;
     this.catalogueEntity = entityCatalogue.getEntity(endpointType, entityType);
   }

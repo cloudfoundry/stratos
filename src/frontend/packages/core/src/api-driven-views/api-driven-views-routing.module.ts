@@ -30,11 +30,11 @@ const routes: Routes = [
   },
   {
     path: ':endpointType/:endpointId',
-    component: ApiEntityTypeSelectPageComponent
-  },
-  {
-    path: ':endpointType/:endpointId/:entityType',
-    component: ApiEntityListPageComponent
+    component: ApiEntityTypeSelectPageComponent,
+    children: [{
+      path: ':entityType',
+      component: ApiEntityListPageComponent
+    }]
   }
 ];
 

@@ -1,5 +1,4 @@
-<app-page-header>
-  Select Entity Type
+<app-page-header [tabs]="tabs">
+  {{ connectedEndpointsOfType$ | async }}
 </app-page-header>
-<app-api-entity-type-selector [entityTypes]="entityTypes" (entitySelected)="entitySelected($event)">
-</app-api-entity-type-selector>
+<router-outlet></router-outlet>
