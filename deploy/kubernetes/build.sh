@@ -216,7 +216,19 @@ pushd ${DEST_HELM_CHART_PATH} > /dev/null
 # Run customization script if there is one
 if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" ]; then
   printf "${YELLOW}${BOLD}Applying Helm Chart customizations${RESET}\n"
-  ${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh "${STRATOS_PATH}"
+  ${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh "${DEST_HELM_CHART_PATH}"
+fi
+
+# Look for custom config metadata with product version metadata
+if [ -f "${STRATOS_PATH}/custom-src/stratos.yaml" ]; then
+  PROD_VERSION=$(cat "${STRATOS_PATH}/custom-src/stratos.yaml" | grep "productVersion")
+  if [ ! -z "${PROD_VERSION}" ]; then
+    PROD_VERSION=$(echo $PROD_VERSION | grep --extended --only-matching '[0-9\.]+')
+    if [ ! -z "${PROD_VERSION}" ]; then
+      echo "Setting appVersion to: ${PROD_VERSION}"
+      sed -i.bak -e 's/appVersion: [0-9\.]*/appVersion: '"${PROD_VERSION}"'/g' ${DEST_HELM_CHART_PATH}/Chart.yaml
+    fi
+  fi
 fi
 
 # Fetch subcharts
