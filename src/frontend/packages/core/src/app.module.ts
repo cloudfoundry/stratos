@@ -144,10 +144,14 @@ export class AppModule {
       eventTriggered: (state: GeneralEntityAppState) => {
         const eventState = internalEventStateSelector(state);
         return Object.entries(eventState.types.endpoint).reduce((res, [eventId, value]) => {
+          const backendErrors = value.filter(error => error.eventCode === '500');
+          if (!backendErrors.length) {
+            return res;
+          }
           const entityConfig = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
           res.push(new GlobalEventData(true, {
             endpoint: selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state),
-            count: value.length
+            count: backendErrors.length
           }));
           return res;
         }, []);
