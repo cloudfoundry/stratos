@@ -8,7 +8,7 @@ echo "==========================================="
 apt-get update
 apt-get install -y curl
 apt-get install -y git
-curl -sL -o ./gimme 1.13.4https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+curl -sL -o ./gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
 chmod +x ./gimme
 eval "$(./gimme 1.13.4)"
 mkdir -p /root/go/bin
