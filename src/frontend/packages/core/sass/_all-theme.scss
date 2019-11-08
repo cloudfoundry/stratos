@@ -43,7 +43,7 @@
 @import '../src/features/user-profile/profile-info/profile-info.component.theme';
 @import '../src/core/stateful-icon/stateful-icon.component.theme';
 @import '../src/shared/components/markdown-preview/markdown-preview.component.theme';
-@import './components/mat-tabs.theme';
+@import './components/mat-snack-bar.theme';
 @import './components/ngx-charts-gauge.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
@@ -107,7 +107,7 @@ $side-nav-light-active: #484848;
   @include list-theme($theme, $app-theme);
   @include app-base-page-theme($theme, $app-theme);
   @include app-page-subheader-theme($theme, $app-theme);
-  @include app-mat-tabs-theme($theme, $app-theme);
+  @include app-mat-snack-bar-theme($theme, $app-theme);
   @include ngx-charts-gauge($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
   @include app-card-status-theme($theme, $app-theme);
