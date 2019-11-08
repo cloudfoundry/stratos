@@ -1,8 +1,8 @@
 import { browser, by, element, promise } from 'protractor';
 import { protractor } from 'protractor/built/ptor';
 
+import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/user.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
-import { CfUser } from '../../frontend/packages/store/src/types/user.types';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';

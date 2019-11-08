@@ -131,8 +131,8 @@ describe('Service Instances Wall', () => {
         browser.getCurrentUrl().then(url => {
           expect(url.endsWith('edit')).toBeTruthy();
         });
-        const createServiceInstance = new CreateMarketplaceServiceInstance();
-        createServiceInstance.stepper.cancel();
+        const createMarketplaceServiceInstance = new CreateMarketplaceServiceInstance();
+        createMarketplaceServiceInstance.stepper.cancel();
         servicesWallPage.isActivePage();
       });
   });

@@ -8,13 +8,14 @@ import { Observable, of, Subscription } from 'rxjs';
 import { delay, filter, first, map, pairwise, switchMap, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
+import { HELM_ENDPOINT_TYPE, helmReleaseEntityKey } from '../helm-entity-factory';
 import { HelmInstall } from '../store/helm.actions';
-import { helmReleaseSchemaKey } from '../store/helm.entities';
 import { HELM_INSTALLING_KEY, HelmInstallValues } from '../store/helm.types';
 
 @Component({
@@ -57,7 +58,7 @@ export class CreateReleaseComponent implements OnInit {
     const chart = this.route.snapshot.params;
     this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
 
-    this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes('k8s');
+    this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
 
     this.details = new FormGroup({
       endpoint: new FormControl('', Validators.required),
@@ -132,10 +133,13 @@ export class CreateReleaseComponent implements OnInit {
     const action = new HelmInstall(values);
     this.store.dispatch(action);
 
+    const releaseEntityConfig = entityCatalogue.getEntity(HELM_ENDPOINT_TYPE, helmReleaseEntityKey);
+
     // Wait for result of request
     return of(true).pipe(
       delay(1),
-      switchMap(() => this.store.select(selectUpdateInfo(helmReleaseSchemaKey, action.guid(), HELM_INSTALLING_KEY))),
+      switchMap(() => releaseEntityConfig.getEntityMonitor(this.store, action.guid()).updatingSection$),
+      map(updatingSection => updatingSection[HELM_INSTALLING_KEY]),
       filter(update => !!update),
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),

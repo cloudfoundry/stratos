@@ -1,14 +1,13 @@
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild, AfterContentInit } from '@angular/core';
-import { MatTabNav, MatButton } from '@angular/material';
-import { fromEvent, interval, Subscription } from 'rxjs';
-import { debounceTime, filter, tap, distinctUntilChanged, delay } from 'rxjs/operators';
-
-import { ISubHeaderTabs } from './page-subheader.types';
-
-import { getScrollBarWidth } from '../../../core/helper-classes/dom-helpers';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild } from '@angular/core';
+import { MatButton, MatTabNav } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../store/src/app-state';
+import { fromEvent, interval, Subscription } from 'rxjs';
+import { debounceTime, delay, filter, tap } from 'rxjs/operators';
+
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { selectSideNavState } from '../../../../../store/src/selectors/dashboard.selectors';
+import { getScrollBarWidth } from '../../../core/helper-classes/dom-helpers';
+import { ISubHeaderTabs } from './page-subheader.types';
 
 @Component({
   selector: 'app-page-subheader',
@@ -65,7 +64,7 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
 
   // ***
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<CFAppState>) {
     // We use this to hide the navbar.
     this.scrollBarWidth = getScrollBarWidth();
     this.className = this.nested ? 'nested-tab' : 'page-subheader';
@@ -75,8 +74,7 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
   }
 
   public ngAfterViewInit() {
-    // TODO: Doing this timeout to fix https://github.com/angular/angular/issues/21788
-    // Remove this when we're happy with the fix - NJ
+    // FIXME: Retest if this is still needed - `NJ Doing this timeout to fix https://github.com/angular/angular/issues/21788` - STRAT-153
     setTimeout(() => {
       this.checkNavOverflow(false);
     });

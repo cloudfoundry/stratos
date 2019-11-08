@@ -3,9 +3,8 @@ import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment-timezone';
-import { Observable } from 'rxjs';
 
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { AutoscalerConstants, PolicyAlert, shiftArray } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateIsAfter,
@@ -39,7 +38,6 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   weekdayOptions = AutoscalerConstants.WeekdayOptions;
   monthdayOptions = AutoscalerConstants.MonthdayOptions;
   editRecurringScheduleForm: FormGroup;
-  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   public currentPolicy: AppAutoscalerPolicyLocal;
   private editIndex = -1;

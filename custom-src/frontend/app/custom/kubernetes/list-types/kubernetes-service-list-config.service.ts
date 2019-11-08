@@ -1,11 +1,9 @@
 import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
-import {
-  KubernetesServicePortsComponent,
-} from './kubernetes-service-ports/kubernetes-service-ports.component';
 import { KubeService } from '../store/kube.types';
 import { defaultHelmKubeListPageSize } from './kube-helm-list-types';
+import { KubernetesServicePortsComponent } from './kubernetes-service-ports/kubernetes-service-ports.component';
 
 
 export abstract class BaseKubernetesServicesListConfig implements IListConfig<KubeService> {
@@ -60,5 +58,4 @@ export abstract class BaseKubernetesServicesListConfig implements IListConfig<Ku
   getSingleActions = () => [];
   getColumns = () => this.columns;
   getMultiFiltersConfigs = () => [];
-
 }

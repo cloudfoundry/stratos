@@ -8,9 +8,9 @@ describe('KubernetesServicePortsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesServicePortsComponent ]
+      declarations: [KubernetesServicePortsComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
-import { PaginationMonitor } from './pagination-monitor';
 import { Store } from '@ngrx/store';
-import { schema as normalizrSchema } from 'normalizr';
-import { AppState } from '../../../../store/src/app-state';
+
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
+import { PaginationMonitor } from './pagination-monitor';
 
 @Injectable()
 export class PaginationMonitorFactory {
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<CFAppState>) { }
 
   private monitorCache: {
     [key: string]: PaginationMonitor
@@ -15,16 +17,21 @@ export class PaginationMonitorFactory {
 
   public create<T = any>(
     paginationKey: string,
-    schema: normalizrSchema.Entity,
+    entityConfig: EntityCatalogueEntityConfig
   ) {
-    const cacheKey = paginationKey + schema.key;
+    const { endpointType, entityType } = entityConfig;
+    const catalogueEntity = entityCatalogue.getEntity(endpointType, entityType);
+    if (!catalogueEntity) {
+      throw new Error(`Could not find catalogue entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
+    }
+    const cacheKey = paginationKey + catalogueEntity.entityKey;
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey] as PaginationMonitor<T>;
     } else {
       const monitor = new PaginationMonitor<T>(
         this.store,
         paginationKey,
-        schema
+        entityConfig
       );
       this.monitorCache[cacheKey] = monitor;
       return monitor;

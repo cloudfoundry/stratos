@@ -5,25 +5,35 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { createBasicStoreModule, registerEntitiesForTesting } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { generateStratosEntities } from '../../base-entity-types';
 import { CoreModule } from '../../core/core.module';
+import { CATALOGUE_ENTITIES, EntityCatalogueFeatureModule } from '../../core/entity-catalogue.module';
+import { entityCatalogue, TestEntityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { SharedModule } from '../../shared/shared.module';
-import { HelmStoreModule } from './helm.store.module';
+import { generateHelmEntities } from './helm-entity-generator';
 import { HelmReleaseHelperService } from './release/tabs/helm-release-helper.service';
-import { monocularEntities } from './store/helm.entities';
 import { HelmReleaseGuid } from './store/helm.types';
 
 @NgModule({
-  imports: [
-    HelmStoreModule
-  ]
+  imports: [{
+    ngModule: EntityCatalogueFeatureModule,
+    providers: [
+      {
+        provide: CATALOGUE_ENTITIES, useFactory: () => {
+          const testEntityCatalogue = entityCatalogue as TestEntityCatalogue;
+          testEntityCatalogue.clear();
+          return [
+            ...generateStratosEntities(),
+            ...generateHelmEntities(),
+          ];
+        }
+      }
+    ]
+  }]
 })
-export class HelmTestingModule {
+export class HelmTestingModule { }
 
-  constructor() {
-    registerEntitiesForTesting(monocularEntities);
-  }
-}
 
 export const HelmReleaseActivatedRouteMock = {
   provide: ActivatedRoute,

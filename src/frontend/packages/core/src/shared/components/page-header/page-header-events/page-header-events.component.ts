@@ -5,10 +5,11 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ToggleHeaderEvent } from '../../../../../../store/src/actions/dashboard-actions';
-import { AppState } from '../../../../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { endpointListKey, EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { endpointEntitySchema } from '../../../../base-entity-schemas';
 import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 
@@ -44,7 +45,7 @@ export class PageHeaderEventsComponent implements OnInit {
   constructor(
     private internalEventMonitorFactory: InternalEventMonitorFactory,
     private activatedRoute: ActivatedRoute,
-    private store: Store<AppState>
+    private store: Store<CFAppState>
   ) {
     this.eventMinimized$ = this.store.select('dashboard').pipe(
       map(dashboardState => dashboardState.headerEventMinimized),
@@ -62,7 +63,9 @@ export class PageHeaderEventsComponent implements OnInit {
     }
     if (this.endpointIds$) {
       const endpointMonitor = new PaginationMonitor<EndpointModel>(
-        this.store, endpointListKey, entityFactory(endpointSchemaKey)
+        this.store,
+        endpointListKey,
+        endpointEntitySchema
       );
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, this.endpointIds$);
       this.errorMessage$ = combineLatest(

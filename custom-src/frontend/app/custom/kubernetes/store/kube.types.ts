@@ -98,8 +98,8 @@ export interface KubernetesApp {
 export interface NodeStatus {
   capacity?: Capacity;
   allocatable?: Allocatable;
-  conditions: Condition[];
-  addresses: Address[];
+  conditions: KubernetesCondition[];
+  addresses: KubernetesAddress[];
   daemonEndpoints?: DaemonEndpoints;
   nodeInfo?: NodeInfo;
   images: Image[];
@@ -133,8 +133,16 @@ export enum ConditionType {
   OutOfDisk = 'OutOfDisk',
   MemoryPressure = 'MemoryPressure',
   DiskPressure = 'DiskPressure',
-  Ready = 'Ready'
+  Ready = 'Ready',
+  PIDPressure = 'PIDPressure'
 }
+export const ConditionTypeLabels = {
+  [ConditionType.Ready]: 'Ready',
+  [ConditionType.OutOfDisk]: 'Out of Disk',
+  [ConditionType.MemoryPressure]: 'Memory Pressure',
+  [ConditionType.DiskPressure]: 'Disk Pressure',
+  [ConditionType.PIDPressure]: 'PID Pressure'
+};
 
 export enum ConditionStatus {
   False = 'False',
@@ -142,7 +150,7 @@ export enum ConditionStatus {
   Unknown = 'Unknown'
 }
 
-export interface Condition {
+export interface KubernetesCondition {
   type: ConditionType;
   status: ConditionStatus;
   lastHeartbeatTime: Date;
@@ -151,10 +159,13 @@ export interface Condition {
   message: string;
 }
 
-export interface Address {
+export interface KubernetesAddress {
   type: string;
   address: string;
 }
+
+export const KubernetesAddressInternal = 'InternalIP';
+export const KubernetesAddressExternal = 'ExternalIP';
 
 export interface KubeletEndpoint {
   Port: number;
@@ -192,6 +203,7 @@ export interface KubernetesPod extends BasicKubeAPIResource {
 export enum KubernetesStatus {
   ACTIVE = 'Active',
   RUNNING = 'Running',
+  FAILED = 'Failed',
 }
 export interface KubernetesNamespace extends BasicKubeAPIResource {
   metadata: Metadata;
@@ -207,7 +219,7 @@ export interface BaseStatus {
 
 export interface PodStatus {
   phase: KubernetesStatus;
-  conditions?: Condition[];
+  conditions?: KubernetesCondition[];
   message?: string;
   reason?: string;
   hostIP?: string;
@@ -217,7 +229,7 @@ export interface PodStatus {
   qosClass?: string;
   initContainerStatuses?: ContainerStatus[];
 }
-export interface Condition {
+export interface KubernetesCondition {
   type: ConditionType;
   status: ConditionStatus;
   lastProbeTime?: any;

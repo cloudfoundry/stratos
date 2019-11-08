@@ -1,10 +1,10 @@
-import { KubernetesBaseTestModules } from './../../../../kubernetes.testing.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KubernetesNodeSummaryCardComponent } from './kubernetes-node-summary-card.component';
 import { BaseKubeGuid } from '../../../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
+import { KubernetesBaseTestModules } from './../../../../kubernetes.testing.module';
+import { KubernetesNodeSummaryCardComponent } from './kubernetes-node-summary-card.component';
 
 describe('KubernetesNodeSummaryCardComponent', () => {
   let component: KubernetesNodeSummaryCardComponent;
