@@ -31,7 +31,9 @@ export class ApiEntityTypeSelectPageComponent implements OnInit {
     const endpointType = this.route.snapshot.params.endpointType;
     const endpointEntity = entityCatalogue.getEndpoint(endpointType);
     const endpointEntities = entityCatalogue.getAllEntitiesForEndpointType(endpointType);
-    const entitiesWithGetMultiple = endpointEntities.filter(entity => entity.actionOrchestrator.hasActionBuilder('getMultiple'));
+    const entitiesWithGetMultiple = endpointEntities.filter(
+      entity => entity.definition.tableConfig && entity.actionOrchestrator.hasActionBuilder('getMultiple')
+    );
     this.connectedEndpointsOfType$ = this.store.select(connectedEndpointsOfTypesSelector(endpointType)).pipe(
       map(endpoints => endpoints[endpointGuid] ? endpoints[endpointGuid].name : 'Entities')
     );
