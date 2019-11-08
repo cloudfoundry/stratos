@@ -1,6 +1,3 @@
-// Fix the color of the underline for the active tab
-// when on a primary backgrdound
-// Need to revist this and check if this is an issue with the Angular Material library
 @mixin app-mat-snack-bar-theme($theme, $app-theme) {
   $is-dark: map-get($theme, is-dark);
   $background-colors: map-get($theme, background);

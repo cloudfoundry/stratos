@@ -102,14 +102,6 @@
                 <mat-button-toggle *ngFor="let theme of themeService.getThemes()" [value]="theme"> {{ theme.label }}
                 </mat-button-toggle>
               </mat-button-toggle-group>
-              <!-- <mat-form-field>
-                <mat-select [value]="themeService.getTheme() | async"
-                  (selectionChange)="themeService.setTheme($event.value)">
-                  <mat-option *ngFor="let theme of themeService.getThemes()" [value]="theme">
-                    {{ theme.label }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field> -->
             </div>
           </div>
         </div>

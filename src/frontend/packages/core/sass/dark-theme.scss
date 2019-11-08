@@ -1,34 +1,7 @@
 .dark-theme {
-  // @import '@angular/material/prebuilt-themes/deeppurple-amber.css';
-  // color: $light-primary-text;
-
-  // .mat-drawer-container {
-  //   background-color: black;
-  //   color: unset;
-  // }
-
-  // .mat-app-background {
-  //   background-color: yellow;
-  //   color: yellow;
-  // }
-
-  .dashboard {
-    // background-color: yellow;
-  }
-  
-  // $dark-primary: mat-palette($mat-yellow);
-  // Base
   $dark-primary: mat-palette($mat-blue);
   $dark-accent: mat-palette($mat-amber, A400, A100, A700);
-
-  // darker blue, links too dark
-  // $dark-primary: mat-palette($mat-indigo);
-  // $dark-accent: mat-palette($mat-blue, A400, A100, A700);
-
-
-
   $dark-warn: mat-palette($mat-red);
-  // $dark-theme: mat-dark-theme($oss-theme-primary, $oss-theme-accent, $oss-theme-warn);
   $dark-theme: mat-dark-theme($dark-primary, $dark-accent, $dark-warn);
 
   $stratos-theme: $dark-theme !default;

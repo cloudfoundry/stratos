@@ -1,6 +1,5 @@
 .meta-card-item-row,
 .meta-card-item-row-top {
-  // $text-color: rgba(0, 0, 0, .6);
   align-items: center;
   display: flex;
   justify-content: space-between;
@@ -20,8 +19,6 @@
 }
 
 .meta-card-item__key {
-  // $text-color: rgba(0, 0, 0, .6);
-  // color: $text-color;
   flex: none;
   font-weight: 300;
   padding-right: 10px;
