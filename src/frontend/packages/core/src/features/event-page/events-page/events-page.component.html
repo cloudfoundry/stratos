@@ -9,14 +9,19 @@
   </div>
 </app-page-header>
 <div class="event-page">
-  <mat-button-toggle-group class="event-page__filter" [value]="selectedFilter" aria-label="filter"
-    #group="matButtonToggleGroup" (change)="selectedFilterSubject.next($event.value)">
-    <!-- multiple=true -->
-    <mat-button-toggle value="{{filterValues.ALL}}">All</mat-button-toggle>
-    <mat-button-toggle value="{{filterValues.READ}}">Read</mat-button-toggle>
+  <mat-button-toggle-group *ngIf="hasReadEvents$ | async ; else defaultHeader" [value]="selectedFilterSubject | async"
+    class="event-page__filter" aria-label="filter" #group="matButtonToggleGroup"
+    (change)="selectedFilterSubject.next($event.value)">
     <mat-button-toggle value="{{filterValues.UNREAD}}">Unread</mat-button-toggle>
+    <mat-button-toggle value="{{filterValues.READ}}">Read</mat-button-toggle>
+    <mat-button-toggle value="{{filterValues.ALL}}">All</mat-button-toggle>
   </mat-button-toggle-group>
-  <mat-list *ngIf="events$ | async as events; else noEvents">
+  <ng-template #defaultHeader>
+    <h2 class="event-page__unread-header">Unread</h2>
+  </ng-template>
+
+  <mat-list class="event-page__list" [ngClass]="{'event-page__list-has-read': hasReadEvents$ | async}"
+    *ngIf="events$ | async as events">
     <mat-card class="event-page__event-row-card" *ngFor="let event of events">
       <mat-list-item class="event-page__event-row">
         <app-stateful-icon class="event-page__event-row-icon" [state]="event.stratosStatus">
@@ -30,9 +35,12 @@
           (click)="updateReadState(event, true)">Mark as read</button>
       </mat-list-item>
     </mat-card>
-    <div *ngIf="events.length === 0">There are no events matching the filter.</div>
+    <mat-card class="event-page__no-event-message" *ngIf="events.length === 0">
+      <mat-list-item [ngSwitch]="selectedFilterSubject | async">
+        <div *ngSwitchCase="filterValues.UNREAD">You have no unread notifications.</div>
+        <div *ngSwitchCase="filterValues.READ">You have no read notifications.</div>
+        <div *ngSwitchDefault>You have no notifications.</div>
+      </mat-list-item>
+    </mat-card>
   </mat-list>
 </div>
-<ng-template #noEvents>
-  <div>There are no events.</div>
-</ng-template>
