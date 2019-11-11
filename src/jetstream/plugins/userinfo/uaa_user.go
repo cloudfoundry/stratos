@@ -67,7 +67,7 @@ func (userInfo *UaaUserInfo) uaa(target string, body []byte) (int, []byte, error
 	// Now get the URL of the request and remove the path to give the path of the API that is being requested
 	url := fmt.Sprintf("%s/%s", uaaEndpoint, target)
 
-	username, err := userInfo.portalProxy.GetUsername(sessionUser)
+	username, err := userInfo.portalProxy.GetStratosAuthService().GetUsername(sessionUser)
 	if err != nil {
 		return http.StatusInternalServerError, nil, err
 	}

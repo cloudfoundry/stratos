@@ -10,6 +10,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	. "github.com/smartystreets/goconvey/convey"
@@ -168,7 +169,7 @@ func TestFindPasswordHash(t *testing.T) {
 		scope    := "stratos.admin"
 		
 		//Hash the password
-		generatedPasswordHash, _ := HashPassword(password)
+		generatedPasswordHash, _ := crypto.HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
@@ -213,7 +214,7 @@ func TestUpdateLastLoginTime(t *testing.T) {
 		scope    := "stratos.admin"
 		
 		//Hash the password
-		generatedPasswordHash, _ := HashPassword(password)
+		generatedPasswordHash, _ := crypto.HashPassword(password)
 
 		//generate a user GUID
 		userGUID := uuid.NewV4().String()
