@@ -16,6 +16,12 @@ import {
   SEND_EVENT,
 } from '../types/internal-events.types';
 import { endpointSchemaKey } from './../helpers/entity-factory';
+import {
+  DISCONNECT_ENDPOINTS_SUCCESS,
+  DisconnectEndpoint,
+  UNREGISTER_ENDPOINTS_SUCCESS,
+  CONNECT_ENDPOINTS_SUCCESS
+} from '../actions/endpoint.actions';
 
 const defaultState: InternalEventsState = {
   types: {
