@@ -60,6 +60,7 @@
 @import '../../cloud-foundry/src/features/cloud-foundry/tabs/cloud-foundry-firehose/cloud-foundry-firehose.component.theme';
 @import '../../cloud-foundry/src/features/service-catalog/service-catalog-page/service-catalog-page.component.theme';
 @import '../../cloud-foundry/src/features/applications/application-wall/application-wall.component.theme';
+@import '../../core/src/features/error-page/error-page/error-page.component.theme.scss';
 
 // Defaults
 $side-nav-light-text: #fff;
@@ -150,6 +151,7 @@ $side-nav-light-active: #484848;
   @include page-side-nav-theme($theme, $app-theme);
   @include cf-admin-add-user-warning($theme, $app-theme);
   @include entity-summary-title-theme($theme, $app-theme);
+  @include error-page-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

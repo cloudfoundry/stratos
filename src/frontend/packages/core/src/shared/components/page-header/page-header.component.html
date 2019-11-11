@@ -77,7 +77,8 @@
             </mat-menu>
           </mat-toolbar>
         </div>
-        <app-page-header-events class="header-events" [endpointIds$]="endpointIds$"></app-page-header-events>
+        <app-page-header-events *ngIf="!hideEndpointErrors" class="header-events" [endpointIds$]="endpointIds$">
+        </app-page-header-events>
       </div>
     </div>
   </div>

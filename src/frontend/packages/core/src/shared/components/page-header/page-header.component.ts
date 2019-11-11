@@ -39,6 +39,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   @Input() hideSideNavButton = false;
 
+  @Input() hideEndpointErrors = false;
+
   @Input() hideMenu = false;
 
   @Input()
