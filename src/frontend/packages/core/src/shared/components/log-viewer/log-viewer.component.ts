@@ -80,6 +80,22 @@ export class LogViewerComponent implements OnInit, OnDestroy {
       share()
     );
 
+    if (this.status) {
+      this.statusSub = this.status.subscribe({
+        next: wsStatus => {
+          console.log(wsStatus)
+          switch (wsStatus) {
+            case 0:
+              this.statusMessage$.next({ message: 'Connecting....' });
+              break;
+            default:
+              this.statusMessage$.next({ message: '' });
+              break;
+          }
+        }
+      });
+    }
+
     // Locked indicates auto-scroll - scroll position is "locked" to the bottom
     // If the user scrolls off the bottom then disable auto-scroll
     this.isLocked$ = observableFromEvent<MouseEvent>(
@@ -163,21 +179,6 @@ export class LogViewerComponent implements OnInit, OnDestroy {
           });
         }
       });
-
-    if (this.status) {
-      this.statusSub = this.status.subscribe({
-        next: wsStatus => {
-          switch (wsStatus) {
-            case 0:
-              this.statusMessage$.next({ message: 'Connecting....' });
-              break;
-            default:
-              this.statusMessage$.next({ message: '' });
-              break;
-          }
-        }
-      });
-    }
   }
 
   public ngOnDestroy(): void {
