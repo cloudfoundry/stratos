@@ -3,7 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { first, map, publishReplay, refCount } from 'rxjs/operators';
+import { first, map, publishReplay, refCount, share } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
@@ -16,15 +16,15 @@ import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../glo
   animations: [
     trigger(
       'eventEnter', [
-      transition(':enter', [
-        style({ opacity: 0 }),
-        animate('250ms ease-in', style({ opacity: 1 }))
-      ]),
-      transition(':leave', [
-        style({ opacity: 1 }),
-        animate('250ms ease-out', style({ opacity: 0 }))
-      ])
-    ]
+        transition(':enter', [
+          style({ opacity: 0 }),
+          animate('250ms ease-in', style({ opacity: 1 }))
+        ]),
+        transition(':leave', [
+          style({ opacity: 1 }),
+          animate('250ms ease-out', style({ opacity: 0 }))
+        ])
+      ]
     )
   ]
 })
@@ -37,7 +37,6 @@ export class PageHeaderEventsComponent implements OnInit {
   public errorMessage$: Observable<string>;
   endpointId: any;
   private events$: Observable<any>;
-
   constructor(
     private activatedRoute: ActivatedRoute,
     private store: Store<CFAppState>,
@@ -82,12 +81,17 @@ export class PageHeaderEventsComponent implements OnInit {
         refCount()
       );
       this.errorMessage$ = this.events$.pipe(
+        // Fixme this emits a lot, we should fix this.
         map((events: IGlobalEvent[]) => {
           if (!events || events.length === 0) {
             return '';
           }
-          return events.length > 1 ? `There are multiple endpoints with errors` : events[0].message;
-        })
+          const endpointErrorKeys = events.reduce((endpointIds, event) => {
+            return endpointIds.add(this.getEndpointId(event));
+          }, new Set<string>());
+          return endpointErrorKeys.size > 1 ? `We've been having trouble communicating with multiple endpoints` : events[0].message;
+        }),
+        share()
       );
     }
   }

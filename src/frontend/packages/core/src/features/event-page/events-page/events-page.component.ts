@@ -69,4 +69,5 @@ export class EventsPageComponent implements OnInit {
   updateReadState(event: IGlobalEvent, read: boolean) {
     this.eventService.updateEventReadState(event, read);
   }
+
 }

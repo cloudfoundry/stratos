@@ -13,13 +13,9 @@
     <div class="error-page__header">
       <div class="error-page__header-left">
         <div class="error-page__endpoint-name-subtitle">Endpoint name</div>
-        <h2>{{errorDetails.endpoint.name}}</h2>
+        <h2 class="error-page__endpoint-name">{{errorDetails.endpoint.name}}</h2>
       </div>
       <div class="error-page__header-right" *ngIf="errorDetails.errors && errorDetails.errors.length">
-        <a mat-icon-button matTooltip="Dismiss errors" aria-label="Dismiss errors"
-          (click)="dismissEndpointErrors(errorDetails.endpoint.guid)">
-          <mat-icon>clear_all</mat-icon>
-        </a>
         <a class="error-page__download" mat-icon-button [href]="jsonDownloadHref$ | async"
           title="Download endpoint error information" download="endpoint-errors.json"
           matTooltip="Download endpoint error information" aria-label="Download endpoint error information">
@@ -28,9 +24,15 @@
       </div>
     </div>
     <div class="error-page__errors" *ngIf="errorDetails.errors && errorDetails.errors.length ; else noEvents">
+      <div class="error-page__error-actions">
+        <button mat-button color="primary" aria-label="Dismiss errors"
+          (click)="dismissEndpointErrors(errorDetails.endpoint.guid)">
+          Dismiss all
+        </button>
+      </div>
       <mat-card class="error-page__event-row-card" *ngFor="let error of errorDetails.errors">
         <mat-card-header>
-          <mat-card-title>
+          <mat-card-title class="error-page__header ">
             <app-stateful-icon class="error-page__event-row-icon" [state]="icon">
             </app-stateful-icon>
             {{ error.timestamp | date:'medium' }}
@@ -57,6 +59,6 @@
     </div>
   </div>
   <ng-template #noEvents>
-    <div>No recent errors</div>
+    <mat-card class="error-page__no-errors-message">No recent errors</mat-card>
   </ng-template>
 </ng-container>

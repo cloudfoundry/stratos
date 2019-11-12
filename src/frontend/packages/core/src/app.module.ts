@@ -157,12 +157,11 @@ export class AppModule {
         }, []);
       },
       message: data => {
-        const part1 = data.count > 1 ? `There are ${data.count} errors` : `There is an error`;
-        const part2 = ` associated with the endpoint '${data.endpoint.name}'`;
-        return part1 + part2;
+        return `We've been having trouble communicating with the endpoint ${data.endpoint.name}`;
       },
       key: data => `${endpointEventKey}-${data.endpoint.guid}`,
-      link: data => `/errors/${data.endpoint.guid}`
+      link: data => `/errors/${data.endpoint.guid}`,
+      type: 'error'
     });
 
 

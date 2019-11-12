@@ -18,6 +18,13 @@
     display: flex;
     flex-direction: column;
   }
+
+  &__error-actions  {
+    display: flex;
+    flex-direction: row-reverse;
+    padding-bottom: 10px;
+  }
+
   &__event-row-card {
     margin-bottom: 15px;
     .mat-card-title {
@@ -37,6 +44,11 @@
     margin-bottom: -20px;
     opacity: .6;
   }
+
+  &__endpoint-name {
+    margin-bottom: 0;
+  }
+  
   &__download {
     float: right;
   }
@@ -46,6 +58,9 @@
   }
   &__header-left {
     flex: 1;
+  }
+  &__no-errors-message {
+    margin-top: 20px;
   }
 
   .app-metadata {
