@@ -47,8 +47,6 @@ export class CloudFoundryFirehoseComponent implements OnInit {
       switchMap((get) => get(new Subject<string>())),
       map((message: string) => message)
     );
-    // TODO Angular 8
-    // this.connectionStatus = connectionStatus;
     this.messages.pipe(
       catchError(e => {
         return [];

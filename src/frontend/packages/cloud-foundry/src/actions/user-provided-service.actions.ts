@@ -149,6 +149,7 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
       `user_provided_service_instances/${guid}`,
       // TODO Make sure this still works after angular 8 update
       // We might need to go back to the if statements
+
       {
         name,
         syslog_drain_url,
