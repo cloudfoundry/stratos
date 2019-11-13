@@ -14,9 +14,11 @@ import {
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
 import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
-import { getAPIRequestDataState } from '../../store/src/selectors/api.selectors';
+import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
+import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
 import { AppStoreModule } from '../../store/src/store.module';
+import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
 import { AppComponent } from './app.component';
@@ -42,7 +44,7 @@ import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
 import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
-import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
+import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from '../xsrf.module';
 
@@ -73,7 +75,6 @@ export class CustomRouterStateSerializer
     return { url, params, queryParams };
   }
 }
-
 
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
@@ -136,6 +137,34 @@ export class AppModule {
       key: 'pollingEnabledWarning',
       link: '/user-profile'
     });
+    eventService.addEventConfig<{
+      count: number,
+      endpoint: EndpointModel
+    }>({
+      eventTriggered: (state: GeneralEntityAppState) => {
+        const eventState = internalEventStateSelector(state);
+        return Object.entries(eventState.types.endpoint).reduce((res, [eventId, value]) => {
+          const backendErrors = value.filter(error => error.eventCode === '500');
+          if (!backendErrors.length) {
+            return res;
+          }
+          const entityConfig = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+          res.push(new GlobalEventData(true, {
+            endpoint: selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state),
+            count: backendErrors.length
+          }));
+          return res;
+        }, []);
+      },
+      message: data => {
+        return `We've been having trouble communicating with the endpoint ${data.endpoint.name}`;
+      },
+      key: data => `${endpointEventKey}-${data.endpoint.guid}`,
+      link: data => `/errors/${data.endpoint.guid}`,
+      type: 'error'
+    });
+
+
     // This should be brought back in in the future
     // eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
     //   {

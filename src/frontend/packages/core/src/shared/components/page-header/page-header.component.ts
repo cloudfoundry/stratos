@@ -3,7 +3,7 @@ import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { Logout } from '../../../../../store/src/actions/auth.actions';
@@ -38,6 +38,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl: TemplateRef<any>;
 
   @Input() hideSideNavButton = false;
+
+  @Input() hideEndpointErrors = false;
 
   @Input() hideMenu = false;
 
@@ -77,7 +79,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   public events$: Observable<IGlobalEvent[]>;
-  public eventCount$: Observable<number>;
+  public unreadEventCount$: Observable<number>;
   public eventPriorityStatus$: Observable<StratosStatus>;
 
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
@@ -150,7 +152,11 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     eventService: GlobalEventService,
     private favoritesConfigMapper: FavoritesConfigMapper
   ) {
-    this.eventCount$ = eventService.events$.pipe(
+    this.events$ = eventService.events$.pipe(
+      startWith([])
+    );
+    this.unreadEventCount$ = eventService.events$.pipe(
+      map(events => events.filter(event => !event.read)),
       map(events => events.length)
     );
     this.eventPriorityStatus$ = eventService.priorityStratosStatus$;

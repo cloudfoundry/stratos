@@ -19,6 +19,16 @@ This can be done by adding the following to the docker run command shown in the 
 ```
 -e SESSION_STORE_SECRET=<alphanumeric secret>
 ```
+## Configuring a local user account in place of a UAA
+
+By default the All-in-one image requires a UAA for user authentication. If this is not desired, the image can be configured to use a Stratos local user account. Edit the file ```deploy/all-in-one/config.all-in-one.properties``` and uncomment the following lines before building the container.
+
+```
+#AUTH_ENDPOINT_TYPE=local
+#LOCAL_USER=localuser
+#LOCAL_USER_PASSWORD=localuserpass
+#LOCAL_USER_SCOPE=stratos.admin
+```
 
 ## Building the container:
 
@@ -43,7 +53,7 @@ Stratos should now be accessible at the following URL:
 
 https://localhost:4443
 
-You will be presented with the Stratos Setup welcome screen - you will need to enter your UAA information to configure Stratos. Once complete, you will be able to login with your credentials.
+If using a UAA, you will be presented with the Stratos Setup welcome screen - you will need to enter your UAA information to configure Stratos. Once complete, you will be able to login with your credentials. If you have configured the container to use a local user account instead of a UAA, log in with the credentials specified in the configuration file.
 
 ## Persisting the Database
 
