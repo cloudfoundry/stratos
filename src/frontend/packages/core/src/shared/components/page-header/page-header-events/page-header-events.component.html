@@ -5,7 +5,7 @@
         <mat-icon class="header-event__error-icon">error</mat-icon>
         <div class="header-event__message-wrapper">{{ message }} -
           <span *ngIf="!endpointId">
-            <a class="header-event__details-link" [routerLink]="['/events']">view notifications</a>
+            <a class="header-event__details-link" [routerLink]="['/events/endpoints']">view details</a>
           </span>
           <span *ngIf="endpointId">
             <a class="header-event__details-link" [routerLink]="['/errors/', endpointId]">view details</a>

@@ -41,7 +41,7 @@ export class ErrorPageComponent implements OnInit {
         endpointEntitySchema
       );
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, of([endpointId]));
-      this.errorDetails$ = cfEndpointEventMonitor.hasErroredOverTimeNoPoll().pipe(
+      this.errorDetails$ = cfEndpointEventMonitor.hasErroredOverTimeNoPoll(30).pipe(
         withLatestFrom(endpointMonitor.entity$),
         map(([errors, endpoint]) => {
           return {

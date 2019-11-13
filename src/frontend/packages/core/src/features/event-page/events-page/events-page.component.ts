@@ -6,6 +6,7 @@ import { first, map, switchMap, tap, distinctUntilChanged, share } from 'rxjs/op
 import { AppState } from '../../../../../store/src/app-state';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
 import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
+import { ActivatedRoute, UrlSegment } from '@angular/router';
 
 export enum EventFilterValues {
   ALL = 'all',
@@ -26,18 +27,31 @@ export class EventsPageComponent implements OnInit {
   public back$: Observable<string>;
   public filterValues = EventFilterValues;
   public selectedFilter = EventFilterValues.UNREAD;
+  public endpointOnly: boolean;
   public selectedFilterSubject = new BehaviorSubject<EventFilterValues>(this.selectedFilter);
-
   constructor(
     private eventService: GlobalEventService,
-    private store: Store<AppState>
-  ) { }
+    private store: Store<AppState>,
+    private activatedRoute: ActivatedRoute
+  ) {
+    const pathSegment = this.activatedRoute.snapshot.url[0];
+    const path = pathSegment ? pathSegment.path : null;
+    this.endpointOnly = path === 'endpoints';
+  }
 
   ngOnInit() {
-    this.unreadEvents$ = this.eventService.events$.pipe(
+    const events$ = this.eventService.events$.pipe(
+      map(events => {
+        if (this.endpointOnly) {
+          return events.filter(event => event.key.split('-')[0] === 'endpointError');
+        }
+        return events;
+      })
+    );
+    this.unreadEvents$ = events$.pipe(
       map(events => events.filter(event => !event.read))
     );
-    this.readEvents$ = this.eventService.events$.pipe(
+    this.readEvents$ = events$.pipe(
       map(events => events.filter(event => event.read))
     );
     this.events$ = this.selectedFilterSubject.pipe(
@@ -48,7 +62,7 @@ export class EventsPageComponent implements OnInit {
           case EventFilterValues.UNREAD:
             return this.unreadEvents$;
           default:
-            return this.eventService.events$;
+            return events$;
         }
       })
     );

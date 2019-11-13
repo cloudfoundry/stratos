@@ -20,6 +20,7 @@ export class GlobalEventData<T = any> {
 
 interface IGlobalEventType {
   type?: GlobalEventTypes;
+  subType?: string;
 }
 
 /**
@@ -46,11 +47,10 @@ export interface IGlobalEventConfig<SelectedState, EventState = SelectedState> e
   link?: ((data?: EventState, appState?: GeneralEntityAppState) => string) | string;
 }
 
-export interface IGlobalEvent {
+export interface IGlobalEvent extends IGlobalEventType {
   message: string;
   link: string;
   key: string;
-  type?: GlobalEventTypes;
   stratosStatus?: StratosStatus;
   read?: boolean;
 }
