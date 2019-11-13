@@ -29,7 +29,6 @@ export interface APIEventState extends InternalEventState {
 }
 
 
-
 export interface InternalEventSubjectState {
   [eventSubjectId: string]: InternalEventState[];
 }

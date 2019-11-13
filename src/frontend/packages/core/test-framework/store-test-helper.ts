@@ -158,7 +158,6 @@ function getDefaultInitialTestStratosStoreState() {
     },
     dashboard: {
       sidenavOpen: true,
-      headerEventMinimized: false,
       timeoutSession: true,
       sideHelpOpen: false,
       sideHelpDocument: '',

@@ -1,5 +1,6 @@
 <app-page-header>
-  <h1>Notifications</h1>
+  <h1 *ngIf="endpointOnly">Endpoint Notifications</h1>
+  <h1 *ngIf="!endpointOnly">Notifications</h1>
   <div class="page-header-right">
     <span>
       <button mat-icon-button matTooltip="Close" [routerLink]="back$ | async">
@@ -36,10 +37,9 @@
       </mat-list-item>
     </mat-card>
     <mat-card class="event-page__no-event-message" *ngIf="events.length === 0">
-      <mat-list-item [ngSwitch]="selectedFilterSubject | async">
-        <div *ngSwitchCase="filterValues.UNREAD">You have no unread notifications.</div>
-        <div *ngSwitchCase="filterValues.READ">You have no read notifications.</div>
-        <div *ngSwitchDefault>You have no notifications.</div>
+      <mat-list-item>
+        <div *ngIf="endpointOnly">You have no unread endpoint notifications.</div>
+        <div *ngIf="!endpointOnly">You have no unread notifications.</div>
       </mat-list-item>
     </mat-card>
   </mat-list>

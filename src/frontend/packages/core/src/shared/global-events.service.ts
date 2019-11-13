@@ -8,6 +8,7 @@ import { StratosStatus } from './shared.types';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
 
+export const endpointEventKey = 'endpointError';
 
 /**
  * Used to build the message or link for an event
@@ -19,6 +20,7 @@ export class GlobalEventData<T = any> {
 
 interface IGlobalEventType {
   type?: GlobalEventTypes;
+  subType?: string;
 }
 
 /**
@@ -45,11 +47,10 @@ export interface IGlobalEventConfig<SelectedState, EventState = SelectedState> e
   link?: ((data?: EventState, appState?: GeneralEntityAppState) => string) | string;
 }
 
-export interface IGlobalEvent {
+export interface IGlobalEvent extends IGlobalEventType {
   message: string;
   link: string;
   key: string;
-  type?: GlobalEventTypes;
   stratosStatus?: StratosStatus;
   read?: boolean;
 }
@@ -158,7 +159,7 @@ export class GlobalEventService {
   }
 
   // We cache the event results by keying them by the selectedState object.
-  private getNewEventsOrCached(config: IGlobalEventConfig<any>, appState: GeneralEntityAppState): IGlobalEvent[] {
+  private getNewTriggeredEventsOrCached(config: IGlobalEventConfig<any>, appState: GeneralEntityAppState): IGlobalEvent[] {
     const selectedState = config.selector ? config.selector(appState) : appState;
     const isEventTriggered = config.eventTriggered(selectedState);
     if (!isEventTriggered) {
@@ -169,25 +170,17 @@ export class GlobalEventService {
       return [];
     }
     if (Array.isArray(isEventTriggered)) {
-      return isEventTriggered.reduce((events, eventData) => {
-        if (!eventData.triggered) {
-          return events;
-        }
-        return [
-          ...events,
-          ...this.getNewEventOrCached(eventData, config, selectedState, appState)
-        ];
-      }, []);
+      return this.getNewEventsOrCached(isEventTriggered.filter(event => event.triggered), config, selectedState, appState);
     }
-    return isEventTriggered.triggered ? this.getNewEventOrCached(isEventTriggered, config, selectedState, appState) : [];
+    return isEventTriggered.triggered ? this.getNewEventsOrCached(isEventTriggered, config, selectedState, appState) : [];
   }
 
-  private getNewEventOrCached(
-    eventData: GlobalEventData,
+  private getNewEventsOrCached(
+    eventData: GlobalEventData | GlobalEventData[],
     config: IGlobalEventConfig<any>,
     selectedState: any,
     appState: GeneralEntityAppState
-  ) {
+  ): IGlobalEvent[] {
     // We will get cached events if the data object matches exactly.
     const cache = this.dataCache.get(config);
     const cachedEvents = cache ? cache.get(selectedState) : null;
@@ -212,7 +205,7 @@ export class GlobalEventService {
       debounceTime(100),
       map(([configs, appState]) => {
         return configs.reduce((eventsAndPriority, config) => {
-          const newEvents = this.getNewEventsOrCached(config, appState);
+          const newEvents = this.getNewTriggeredEventsOrCached(config, appState);
           if (newEvents && newEvents.length) {
             const newHighestPriority = this.getHighestPriorityEventType([
               { type: eventsAndPriority[1] },
