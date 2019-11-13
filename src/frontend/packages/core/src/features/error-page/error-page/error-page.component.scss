@@ -19,7 +19,7 @@
     flex-direction: column;
   }
 
-  &__error-actions  {
+  &__error-actions {
     display: flex;
     flex-direction: row-reverse;
     padding-bottom: 10px;
@@ -48,7 +48,6 @@
   &__endpoint-name {
     margin-bottom: 0;
   }
-  
   &__download {
     float: right;
   }
