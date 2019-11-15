@@ -194,9 +194,7 @@ export class CreateSpace extends BaseSpaceAction {
     this.options = new HttpRequest(
       'POST',
       'spaces',
-      {
-        body: createSpace
-      }
+      createSpace
     );
   }
   actions = [CREATE_SPACE, CREATE_SPACE_SUCCESS, CREATE_SPACE_FAILED];
