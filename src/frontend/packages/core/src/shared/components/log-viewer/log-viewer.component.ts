@@ -83,7 +83,6 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     if (this.status) {
       this.statusSub = this.status.subscribe({
         next: wsStatus => {
-          console.log(wsStatus)
           switch (wsStatus) {
             case 0:
               this.statusMessage$.next({ message: 'Connecting....' });
