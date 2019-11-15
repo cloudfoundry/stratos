@@ -169,7 +169,7 @@ export class DeleteOrganization extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string) {
     super();
     this.options = new HttpRequest(
-      'GET',
+      'DELETE',
       `organizations/${guid}`,
       {
         params: {
