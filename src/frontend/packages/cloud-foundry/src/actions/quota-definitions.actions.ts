@@ -191,7 +191,7 @@ export class AssociateSpaceQuota extends CFStartAction implements ICFAction {
   constructor(public spaceGuid: string, public endpointGuid: string, spaceQuotaGuid: string) {
     super();
     this.options = new HttpRequest(
-      'POST',
+      'PUT',
       `space_quota_definitions/${spaceQuotaGuid}/spaces/${spaceGuid}`,
       {}
     );
