@@ -285,7 +285,7 @@ export class DeleteQuotaDefinition extends CFStartAction implements ICFAction {
           {
             fromObject: {
               recursive: 'true',
-              async: 'true'
+              async: 'false'
             }
           }
         )
