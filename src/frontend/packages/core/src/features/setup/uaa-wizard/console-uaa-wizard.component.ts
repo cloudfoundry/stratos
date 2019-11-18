@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -11,6 +11,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { APP_TITLE } from '../../../core/core.types';
 
 @Component({
   selector: 'app-console-uaa-wizard',
@@ -22,7 +23,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
 
   private clientRedirectURI: string;
 
-  constructor(private store: Store<AppState>, private router: Router) {
+  constructor(private store: Store<AppState>, private router: Router, @Inject(APP_TITLE) public title: string) {
     // Client Redirect URI for SSO
     this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
       (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
