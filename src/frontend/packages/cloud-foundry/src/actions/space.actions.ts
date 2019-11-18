@@ -207,9 +207,7 @@ export class UpdateSpace extends CFStartAction implements ICFAction {
     this.options = new HttpRequest(
       'PUT',
       `spaces/${guid}`,
-      {
-        body: updateSpace
-      }
+      updateSpace
     );
   }
   actions = getActions('Spaces', 'Update Space');
