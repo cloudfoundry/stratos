@@ -46,7 +46,7 @@ import { CustomReuseStrategy } from './route-reuse-stragegy';
 import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
-import { XSRFModule } from './xsrf.module';
+import { XSRFModule } from '../xsrf.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -98,7 +98,7 @@ export class CustomRouterStateSerializer
     LoginModule,
     HomeModule,
     DashboardModule,
-    StoreRouterConnectingModule, // Create action for router navigation
+    StoreRouterConnectingModule.forRoot(), // Create action for router navigation
     AboutModule,
     CustomImportModule,
     XSRFModule,

@@ -18,10 +18,10 @@
 
     this.onRunComplete = function (browser, result) {
       if (process.env['CHECK_TESTS'] === 'true' && this.skipped !== 0) {
-        result.exitCode = 1;
+        // result.exitCode = 1;
         console.log('\x1b[41m\x1b[97m\x1b[1m');
         console.log('');
-        console.log(' ERROR: ' + this.skipped + ' tests were skipped');
+        console.log(' WRANING: ' + this.skipped + ' tests were skipped');
         console.log('');
         console.log(' Check that you have not used fdescribe, fit, xdescribe or xit by mistake');
         console.log('');

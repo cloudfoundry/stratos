@@ -30,7 +30,7 @@ export class MetaCardComponent implements OnDestroy {
   @ContentChildren(MetaCardItemComponent)
   metaItems: QueryList<MetaCardItemComponent>;
 
-  @ContentChild(MetaCardTitleComponent)
+  @ContentChild(MetaCardTitleComponent, { static: true })
   title: MetaCardTitleComponent;
 
   @Input()

@@ -339,14 +339,14 @@ export function createBasicStoreModule(
   return StoreModule.forRoot(
     appReducers,
     {
-      initialState
+      initialState, runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
     }
   );
 }
 
 export function createEmptyStoreModule(): ModuleWithProviders {
   return StoreModule.forRoot(
-    appReducers
+    appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
   );
 }
 

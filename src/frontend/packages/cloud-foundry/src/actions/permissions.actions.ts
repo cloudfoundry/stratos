@@ -1,8 +1,8 @@
-import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
 import { APIResource } from '../../../store/src/types/api.types';
 import { organizationEntityType, spaceEntityType } from '../cf-entity-types';
+import { HttpRequest } from '@angular/common/http';
 
 export const GET_AUDITED_ORG_CURRENT_USER_RELATIONS = '[Current User] Get audited org Relations';
 export const GET_AUDITED_ORG_CURRENT_USER_RELATIONS_SUCCESS = '[Current User] Get audited org Relations success';
@@ -79,13 +79,13 @@ export class GetUserCfRelations implements Action {
 export class GetUserRelations implements Action {
   public type = GET_CURRENT_USER_RELATION;
   public actions: string[];
-  public options: RequestOptions;
+  public options: HttpRequest<any>;
   constructor(public guid: string, public relationType: UserRelationTypes, public endpointGuid: string) {
     const typeOptions = this.types[relationType];
-    this.options = new RequestOptions();
-    this.options.url = `users/${guid}/${relationType}`;
-    this.options.method = 'get';
-
+    this.options = new HttpRequest(
+      'GET',
+      `users/${guid}/${relationType}`
+    );
     this.actions = typeOptions.actions;
     this.type = GET_CURRENT_USER_RELATION;
   }

@@ -19,7 +19,7 @@ export class SimpleListComponent implements OnInit {
   @Input()
   public catalogueEntity: StratosCatalogueEntity;
 
-  @ViewChild(ListHostDirective)
+  @ViewChild(ListHostDirective, { static: true })
   public listHost: ListHostDirective;
 
   private listConfig: ListConfig<any>;

@@ -1,5 +1,4 @@
-import { HttpClient, HttpHandler } from '@angular/common/http';
-import { Http, HttpModule } from '@angular/http';
+import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store, StoreModule } from '@ngrx/store';
@@ -80,7 +79,7 @@ export function generateTestCfUserServiceProvider(guid = testSCFEndpointGuid) {
         entityServiceFactory,
       );
     },
-    deps: [Store, PaginationMonitorFactory, EntityServiceFactory, Http]
+    deps: [Store, PaginationMonitorFactory, EntityServiceFactory, HttpClient]
   };
 }
 
@@ -153,7 +152,7 @@ export function generateCfStoreModules() {
   return [
     CloudFoundryTestingModule,
     StoreModule.forRoot(
-      appReducers,
+      appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } },
       // Do not include initial store here, it's properties will be ignored as they won't have corresponding reducers in appReducers
     )
   ];
@@ -165,7 +164,7 @@ export function generateCfBaseTestModulesNoShared() {
     RouterTestingModule,
     CoreModule,
     NoopAnimationsModule,
-    HttpModule
+    HttpClientModule
   ];
 }
 

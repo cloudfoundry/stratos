@@ -8,12 +8,14 @@ import * as servicesHelpers from '../../../features/service-catalog/services-hel
 import { ServicesService } from '../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../features/service-catalog/services.service.mock';
 import { ServicePlanPublicComponent } from './service-plan-public.component';
+import { getAction } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { EntityService } from '../../../../../core/src/core/entity-service';
 
 const getCfService = {
   waitForEntity$: {
     pipe() { }
   }
-};
+} as unknown as EntityService;
 
 describe('ServicePlanPublicComponent', () => {
   let component: ServicePlanPublicComponent;

@@ -19,7 +19,7 @@ import { AutoscalerEffects } from './store/autoscaler.effects';
 const customRoutes: Routes = [
   {
     path: 'autoscaler',
-    loadChildren: './core/autoscaler.module#AutoscalerModule',
+    loadChildren: () => import('./core/autoscaler.module').then(m => m.AutoscalerModule),
     data: {
       stratosNavigation: {
         text: 'Applications',

@@ -1,5 +1,4 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -13,6 +12,7 @@ import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.c
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect/create-endpoint-connect.component';
 import { CreateEndpointComponent } from './create-endpoint.component';
+import { HttpClientModule } from '@angular/common/http';
 
 // TODO: Fix after metrics has been sorted - STRAT-152
 xdescribe('CreateEndpointComponent', () => {
@@ -34,7 +34,7 @@ xdescribe('CreateEndpointComponent', () => {
         createBasicStoreModule(),
         RouterTestingModule,
         NoopAnimationsModule,
-        HttpModule
+        HttpClientModule
       ],
       providers: [{
         provide: ActivatedRoute,

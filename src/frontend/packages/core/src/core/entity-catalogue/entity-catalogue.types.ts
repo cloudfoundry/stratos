@@ -75,7 +75,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
  *
  * @export
  */
-export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition<EntityCatalogueSchemas> {
+export interface IStratosEndpointDefinition<T = EntityCatalogueSchemas | EntitySchema> extends IStratosBaseEntityDefinition<T> {
   readonly logoUrl: string;
   readonly tokenSharing?: boolean;
   readonly urlValidation?: boolean;

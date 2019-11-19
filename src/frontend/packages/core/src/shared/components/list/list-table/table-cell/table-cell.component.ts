@@ -68,7 +68,7 @@ export const listTableCells = [
   entryComponents: [...listTableCells]
 })
 export class TableCellComponent<T> implements OnInit {
-  @ViewChild('target', { read: ViewContainerRef })
+  @ViewChild('target', { read: ViewContainerRef, static: true })
   target: ViewContainerRef;
   private rcRow: T | MultiActionListEntity;
 
