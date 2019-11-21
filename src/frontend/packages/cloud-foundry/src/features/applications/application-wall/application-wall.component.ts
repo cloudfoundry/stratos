@@ -37,7 +37,6 @@ import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry
   ]
 })
 export class ApplicationWallComponent implements OnDestroy {
-
   public cfIds$: Observable<string[]>;
   private initCfOrgSpaceService: Subscription;
 

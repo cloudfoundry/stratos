@@ -24,7 +24,7 @@ import { safeUnsubscribe } from '../../../core/utils.service';
 })
 export class FileInputComponent implements OnInit, OnDestroy {
 
-  @ViewChild('inputFile') nativeInputFile: ElementRef;
+  @ViewChild('inputFile', { static: true }) nativeInputFile: ElementRef;
 
   @Input() accept: string;
   @Output() onFileSelect: EventEmitter<File> = new EventEmitter();

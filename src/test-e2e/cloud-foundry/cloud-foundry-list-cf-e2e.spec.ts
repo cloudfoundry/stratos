@@ -43,26 +43,28 @@ describe('CF Endpoints Dashboard - ', () => {
     });
   });
 
-  describe('Multiple endpoints - ', e2e.secrets.haveSingleCloudFoundryEndpoint, () => {
-    beforeAll(() => {
-      e2e.setup(ConsoleUserType.admin)
-        .clearAllEndpoints()
-        .registerMultipleCloudFoundries()
-        .connectAllEndpoints();
-    });
-
-    beforeEach(() => {
-      nav.goto(SideNavMenuItem.CloudFoundry);
-      cloudFoundry.waitForPage();
-    });
-
-    it('should be the CF Endpoints page', () => {
-      const list = new ListComponent();
-      list.cards.getCards().then(cards => {
-        expect(cards.length).toBeGreaterThan(1);
-        cards[0].click();
-        expect(cloudFoundry.header.getTitleText()).toBe(cfEndpoint.name);
+  describe('Multiple endpoints - ', () => {
+    if (!e2e.secrets.haveSingleCloudFoundryEndpoint) {
+      beforeAll(() => {
+        e2e.setup(ConsoleUserType.admin)
+          .clearAllEndpoints()
+          .registerMultipleCloudFoundries()
+          .connectAllEndpoints();
       });
-    });
+
+      beforeEach(() => {
+        nav.goto(SideNavMenuItem.CloudFoundry);
+        cloudFoundry.waitForPage();
+      });
+
+      it('should be the CF Endpoints page', () => {
+        const list = new ListComponent();
+        list.cards.getCards().then(cards => {
+          expect(cards.length).toBeGreaterThan(1);
+          cards[0].click();
+          expect(cloudFoundry.header.getTitleText()).toBe(cfEndpoint.name);
+        });
+      });
+    }
   });
 });

@@ -20,7 +20,7 @@ export class EntityActionDispatcher<
 
   constructor(
     private actionDispatcher?: ActionDispatcher,
-    private actionBuilder?: T
+    private actionBuilder?: T | ((...args: Parameters<T>) => ReturnType<T>)
   ) { }
   public dispatch(...args: Parameters<T>) {
     if (this.actionBuilder) {
@@ -49,7 +49,7 @@ export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders 
     );
   }
 
-  public getActionBuilder<Y extends keyof T>(actionType: Y): T[Y] {
+  public getActionBuilder<Y extends keyof T>(actionType: Y) {
     return this.actionOrchestrator.getActionBuilder(actionType);
   }
 
@@ -69,7 +69,7 @@ export class EntityActionDispatcherManager<T extends OrchestratedActionBuilders 
     return this.getActionDispatcher('create').dispatch(...args);
   }
 
-  public dispatchGetAll(...args: Parameters<T['getAll']>) {
+  public dispatchGetMultiple(...args: Parameters<T['getMultiple']>) {
     return this.getActionDispatcher('getMultiple').dispatch(...args);
   }
 

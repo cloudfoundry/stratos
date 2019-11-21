@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientModule, HttpClient, HttpBackend } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { ConnectionBackend, Http, HttpModule } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
@@ -26,16 +24,16 @@ describe('CreateApplicationStep2Component', () => {
         CoreModule,
         SharedModule,
         NoopAnimationsModule,
-        HttpModule,
         HttpClientModule,
         HttpClientTestingModule,
       ],
       providers: [
         {
-          provide: ConnectionBackend,
-          useClass: MockBackend,
+          provide: HttpBackend,
+          useClass: HttpTestingController
+          ,
         },
-        Http
+        HttpClient
       ]
     })
       .compileComponents();

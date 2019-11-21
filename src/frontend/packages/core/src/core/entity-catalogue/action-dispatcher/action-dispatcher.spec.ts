@@ -118,7 +118,7 @@ describe('ActionDispatcher', () => {
     const spy = spyOn(actionBuilders, 'getMultiple');
     const actionOrchestrator = new ActionOrchestrator('getMultiple', actionBuilders);
     const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
-    expect(entityActionDispatcher.dispatchGetAll(endpointGuid, paginationKey)).toBe(true);
+    expect(entityActionDispatcher.dispatchGetMultiple(endpointGuid, paginationKey)).toBe(true);
     expect(spy).toHaveBeenCalledWith(endpointGuid, paginationKey);
   });
 });

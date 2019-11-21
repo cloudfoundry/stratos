@@ -37,7 +37,7 @@ export class UserRoleChip extends ChipComponent {
     });
     confirm.confirm();
     confirm.waitUntilNotShown('Confirmation dialog');
-    return this.waitUntilNotShown('User Role Chip: ' + this.roleText);
+    return this.waitUntilNotShown('User Role Chip still shown: ' + this.roleText);
   }
 }
 

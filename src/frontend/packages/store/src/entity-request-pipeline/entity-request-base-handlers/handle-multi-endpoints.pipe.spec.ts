@@ -76,8 +76,11 @@ describe('handle-multi-endpoint-pipe', () => {
       getTotalPages: () => 4
     })(resData);
     expect(handled.successes.length).toBe(2);
-    expect(handled.successes[0].entities[0]).toBe(endpoint2Res.entities[0]);
-    expect(handled.successes[1].entities[0]).toBe(endpoint4Res.entities[0]);
-    expect(handled.successes[1].entities[1]).toBe(endpoint4Res.entities[0]);
+    expect(handled.successes[0].entities[0].data1).toBe(endpoint2Res.entities[0].data1);
+    expect(handled.successes[0].entities[0].__stratosEndpointGuid__).toBe(endpoint2Guid);
+    expect(handled.successes[1].entities[0].data2).toBe(endpoint4Res.entities[0].data2);
+    expect(handled.successes[1].entities[0].__stratosEndpointGuid__).toBe(endpoint4Guid);
+    expect(handled.successes[1].entities[0].data2).toBe(endpoint4Res.entities[0].data2);
+    expect(handled.successes[1].entities[0].__stratosEndpointGuid__).toBe(endpoint4Guid);
   });
 });
