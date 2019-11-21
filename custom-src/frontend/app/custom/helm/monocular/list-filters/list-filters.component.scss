@@ -1,9 +1,9 @@
-@import '../../theme.scss';
+@import '../../theme';
 
 .list-filters {
-  width: 100%;
-  height: 100%;
   flex: 1;
+  height: 100%;
+  width: 100%;
 
   &_section {
     margin-bottom: 40px;

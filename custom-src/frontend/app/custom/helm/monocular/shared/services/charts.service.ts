@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
@@ -7,6 +6,7 @@ import { LoggerService } from '../../../../../core/logger.service';
 import { Chart } from '../models/chart';
 import { ChartVersion } from '../models/chart-version';
 import { ConfigService } from './config.service';
+import { HttpClient } from '@angular/common/http';
 
 
 
@@ -17,7 +17,7 @@ export class ChartsService {
   cacheCharts: any;
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     config: ConfigService,
     private loggerService: LoggerService
   ) {
@@ -104,8 +104,10 @@ export class ChartsService {
    * @param version Chart version
    * @return An observable that will be a chartReadme
    */
-  getChartReadme(chartVersion: ChartVersion): Observable<Response> {
-    return this.http.get(`${this.hostname}${chartVersion.attributes.readme}`);
+  getChartReadme(chartVersion: ChartVersion): Observable<string> {
+    return this.http.get(`${this.hostname}${chartVersion.attributes.readme}`, {
+      responseType: 'text'
+    });
   }
   /**
    * Get chart versions using the API
@@ -160,9 +162,8 @@ export class ChartsService {
   }
 
 
-  private extractData(res: Response) {
-    const body = res.json();
-    return body.data || {};
+  private extractData(res: { data: any }) {
+    return res.data || {};
   }
 
   private handleError(error: any) {
