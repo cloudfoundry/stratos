@@ -48,7 +48,7 @@ export class ChartsService {
         observer.next(this.cacheCharts[repo]);
       });
     } else {
-      return this.http.get(url).pipe(
+      return this.http.get<{ data: any }>(url).pipe(
         map(r => this.extractData(r)),
         tap((data) => this.storeCache(data, repo)),
         catchError(this.handleError)
@@ -117,7 +117,7 @@ export class ChartsService {
    * @return An observable containing an array of ChartVersions
    */
   getVersions(repo: string, chartName: string): Observable<ChartVersion[]> {
-    return this.http.get(`${this.hostname}/v1/charts/${repo}/${chartName}/versions`).pipe(
+    return this.http.get<{ data: any }>(`${this.hostname}/v1/charts/${repo}/${chartName}/versions`).pipe(
       map(m => this.extractData(m)),
       catchError(this.handleError)
     );

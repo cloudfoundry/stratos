@@ -1,4 +1,4 @@
-@import '../../theme';
+@import '../../theme.scss';
 
 .list-filters {
   flex: 1;
@@ -19,7 +19,7 @@
       opacity: 0.5;
       &.active {
         opacity: 1;
-        color: md-color($monocular-app-primary);
+        color: mat-color($monocular-app-primary);
       }
     }
   }

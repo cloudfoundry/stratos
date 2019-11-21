@@ -1,6 +1,5 @@
-import { HttpClient, HttpHandler } from '@angular/common/http';
+import { HttpClient, HttpHandler, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -60,7 +59,7 @@ export const HelmBaseTestModules = [
   CoreModule,
   createBasicStoreModule(),
   NoopAnimationsModule,
-  HttpModule,
+  HttpClientModule,
   SharedModule
 ];
 
