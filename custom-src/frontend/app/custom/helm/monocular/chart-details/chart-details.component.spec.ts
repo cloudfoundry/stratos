@@ -1,8 +1,7 @@
 import 'hammerjs';
 
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -91,7 +90,6 @@ describe('ChartDetailsComponent', () => {
           BrowserModule,
           // Angulartics2Module,
           RouterTestingModule,
-          HttpModule,
           HttpClientModule,
           ...BaseTestModulesNoShared
         ],
@@ -110,6 +108,7 @@ describe('ChartDetailsComponent', () => {
           EntitySummaryTitleComponent
         ],
         providers: [
+          HttpClient,
           { provide: ChartsService, useValue: new MockChartService() },
           { provide: ConfigService, useValue: { appName: 'appName' } },
           // { provide: SeoService },

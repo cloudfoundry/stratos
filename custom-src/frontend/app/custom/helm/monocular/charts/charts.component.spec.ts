@@ -1,6 +1,5 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
@@ -15,6 +14,8 @@ import { ConfigService } from '../shared/services/config.service';
 import { MenuService } from '../shared/services/menu.service';
 import { ReposService } from '../shared/services/repos.service';
 import { ChartsComponent } from './charts.component';
+import { HttpClient } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 // import { HeaderBarComponent } from '../header-bar/header-bar.component';
 // import { SeoService } from '../shared/services/seo.service';
@@ -22,7 +23,7 @@ describe('Component: Charts', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        HttpModule,
+        HttpClientTestingModule,
         createBasicStoreModule()
       ],
       declarations: [
@@ -34,6 +35,7 @@ describe('Component: Charts', () => {
         // HeaderBarComponent
       ],
       providers: [
+        HttpClient,
         ConfigService,
         MenuService,
         { provide: ChartsService, useValue: new MockChartService() },
