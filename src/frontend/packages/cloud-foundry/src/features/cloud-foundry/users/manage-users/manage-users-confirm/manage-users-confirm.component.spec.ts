@@ -1,5 +1,4 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
@@ -9,6 +8,7 @@ import { CfUserService } from '../../../../../shared/data-services/cf-user.servi
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { UsersRolesConfirmComponent } from './manage-users-confirm.component';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('UsersRolesConfirmComponent', () => {
   let component: UsersRolesConfirmComponent;
@@ -21,7 +21,7 @@ describe('UsersRolesConfirmComponent', () => {
         CoreModule,
         SharedModule,
         NoopAnimationsModule,
-        HttpModule
+        HttpClientModule
       ],
       providers: [
         ActiveRouteCfOrgSpace,

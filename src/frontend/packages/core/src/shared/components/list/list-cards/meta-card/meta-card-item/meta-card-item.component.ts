@@ -20,13 +20,13 @@ export class MetaCardItemComponent implements OnInit {
     'long-text-fixed': 'meta-card-item-long-text-fixed',
   };
   itemStyle = 'meta-card-item-row';
-  @ContentChild(MetaCardKeyComponent)
+  @ContentChild(MetaCardKeyComponent, { static: true })
   key: MetaCardKeyComponent;
 
-  @ContentChild(MetaCardValueComponent)
+  @ContentChild(MetaCardValueComponent, { static: true })
   value: MetaCardValueComponent;
 
-  @ViewChild('content') content: TemplateRef<any>;
+  @ViewChild('content', { static: true }) content: TemplateRef<any>;
 
   @Input() customStyle = this.defaultStyle;
 

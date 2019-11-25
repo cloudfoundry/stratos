@@ -10,7 +10,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
 import {
@@ -107,7 +107,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   ];
   orgDataSource: ITableListDataSource<APIResource<IOrganization>>;
 
-  @ViewChild('spaceRolesTable', { read: ViewContainerRef })
+  @ViewChild('spaceRolesTable', { read: ViewContainerRef, static: true })
   spaceRolesTable: ViewContainerRef;
 
   private wrapperFactory: ComponentFactory<SpaceRolesListWrapperComponent>;

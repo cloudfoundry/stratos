@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -10,6 +9,7 @@ import { CATALOGUE_ENTITIES, EntityCatalogueFeatureModule } from '../../core/ent
 import { entityCatalogue, TestEntityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { SharedModule } from '../../shared/shared.module';
 import { generateKubernetesEntities } from './kubernetes-entity-generator';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   imports: [{
@@ -36,6 +36,6 @@ export const KubernetesBaseTestModules = [
   CoreModule,
   createBasicStoreModule(),
   NoopAnimationsModule,
-  HttpModule,
+  HttpClientModule,
   SharedModule,
 ];

@@ -132,8 +132,8 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
     return eventMonitor.hasErroredOverTime().pipe(
       withLatestFrom(store.select(endpointEntitiesSelector)),
-      tap(([errored, endpoints]) => errored.forEach(id => {
-        if (endpoints[id].connectionStatus === 'connected') {
+      tap(([errored, endpoints]) => Object.keys(errored).forEach(id => {
+        if (endpoints[id] && endpoints[id].connectionStatus === 'connected') {
           rowStateManager.updateRowState(id, {
             error: true,
             message: `We've been having trouble communicating with this endpoint`
@@ -143,8 +143,8 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       )),
       map(([errored]) => errored),
       pairwise(),
-      tap(([oldErrored, newErrored]) => oldErrored.forEach(oldId => {
-        if (!newErrored.find(newId => newId === oldId)) {
+      tap(([oldErrored, newErrored]) => Object.keys(oldErrored).forEach(oldId => {
+        if (!Object.keys(newErrored).find(newId => newId === oldId)) {
           rowStateManager.updateRowState(oldId, {
             error: false,
             message: ''

@@ -75,7 +75,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
  *
  * @export
  */
-export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition<EntityCatalogueSchemas> {
+export interface IStratosEndpointDefinition<T = EntityCatalogueSchemas | EntitySchema> extends IStratosBaseEntityDefinition<T> {
   readonly logoUrl: string;
   readonly tokenSharing?: boolean;
   readonly urlValidation?: boolean;
@@ -136,6 +136,7 @@ export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> 
   readonly actionable?: Observable<boolean>;
   readonly disabled?: Observable<boolean>;
 }
+export type EntityRowBuilder<T> = [string, (entityMetadata: T) => string /* | Observable<string> */];
 
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
@@ -143,7 +144,7 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   // TODO This should be used in the entities schema.
   getGuid(entityMetadata: T): string;
   getLink?(entityMetadata: T): string;
-  getLines?(entityMetadata: T): [string, string | Observable<string>][];
+  getLines?(): EntityRowBuilder<T>[];
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,
     plural: string
@@ -172,4 +173,3 @@ export interface IStratosEntityData<T extends IEntityMetadata = IEntityMetadata>
 export interface IStratosEntityStatusData<Y extends IEntityMetadata = IEntityMetadata> extends IStratosEntityData<Y> {
   status$?: Observable<StratosStatus>;
 }
-

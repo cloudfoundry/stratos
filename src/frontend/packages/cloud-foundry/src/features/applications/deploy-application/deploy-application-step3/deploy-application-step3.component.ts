@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -79,11 +79,10 @@ export class DeployApplicationStep3Component implements OnDestroy {
       this.appGuid = guid;
 
       // Update the root app wall list
-      this.appCatalogueEntity.actionDispatchManager.dispatchGetAll(
+      this.appCatalogueEntity.actionDispatchManager.dispatchGetMultiple(
         null,
         CfAppsDataSource.paginationKey,
-        CfAppsDataSource.includeRelations,
-        true
+        CfAppsDataSource.includeRelations
       );
       // this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
       // Pre-fetch the app env vars
@@ -140,7 +139,6 @@ export class DeployApplicationStep3Component implements OnDestroy {
     }
 
     this.initDeployer();
-
     // Start deploying
     this.deployer.open();
     if (fsDeployer) {

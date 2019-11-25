@@ -1,6 +1,4 @@
-import { RequestMethod } from '@angular/http';
 import { Store } from '@ngrx/store';
-
 import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { pathGet } from '../../../../core/src/core/utils.service';
@@ -93,16 +91,6 @@ export function getRequestTypeFromMethod(action: EntityRequestAction): ApiReques
       return 'update';
     }
     if (method === 'delete') {
-      return 'delete';
-    }
-  } else if (typeof method === 'number') {
-    if (method === RequestMethod.Post) {
-      return 'create';
-    }
-    if (method === RequestMethod.Put) {
-      return 'update';
-    }
-    if (method === RequestMethod.Delete) {
       return 'delete';
     }
   }

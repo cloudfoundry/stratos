@@ -10,7 +10,6 @@ require (
 	github.com/SermoDigital/jose v0.9.1
 	github.com/aws/aws-sdk-go v1.17.5
 	github.com/chai2010/gettext-go v0.0.0-20170215093142-bf70f2a70fb1 // indirect
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces v0.0.0-00010101000000-000000000000
 	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v1.13.1 // indirect
@@ -75,7 +74,7 @@ require (
 
 replace (
 	github.com/SermoDigital/jose => github.com/SermoDigital/jose v0.9.2-0.20180104203859-803625baeddc
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces => ../../repository/interfaces
+	github.com/cloudfoundry-incubator/stratos/src/jetstream => ../..
 	github.com/helm/monocular/chartsvc => ../monocular/chartsvc
 	github.com/kubernetes-sigs/aws-iam-authenticator => github.com/kubernetes-sigs/aws-iam-authenticator v0.3.1-0.20190111160901-390d9087a4bc
 	github.com/russross/blackfriday v2.0.0+incompatible => github.com/russross/blackfriday v1.5.2

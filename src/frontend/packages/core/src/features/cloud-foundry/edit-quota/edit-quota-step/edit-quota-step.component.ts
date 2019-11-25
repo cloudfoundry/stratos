@@ -42,7 +42,7 @@ export class EditQuotaStepComponent implements OnDestroy {
   quotaSubscription: Subscription;
   quota: IQuotaDefinition;
 
-  @ViewChild('form')
+  @ViewChild('form', { static: false })
   form: QuotaDefinitionFormComponent;
 
   constructor(

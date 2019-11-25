@@ -7,12 +7,11 @@ import { ActionHistoryDump } from '../../../../../store/src/actions/action-histo
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
-import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
-
+import { TabNavItem } from '../../../../tab-nav.types';
 
 export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
-export interface SideNavItem extends ISubHeaderTabs {
+export interface SideNavItem extends TabNavItem {
   label: string;
   /**
    * deprecated

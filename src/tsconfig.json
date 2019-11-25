@@ -1,6 +1,9 @@
 {
   "compileOnSave": false,
   "preserveWhitespaces": "off",
+  "angularCompilerOptions": {
+    "preserveSymlinks": true
+  },
   "compilerOptions": {
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
@@ -9,7 +12,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "es5",
-    "module": "es2015",
+    "module": "commonjs",
     "types": [
       "hammerjs",
       "jasmine",

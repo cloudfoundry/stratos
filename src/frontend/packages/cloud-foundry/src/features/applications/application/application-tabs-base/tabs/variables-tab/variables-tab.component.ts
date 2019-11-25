@@ -16,6 +16,7 @@ import {
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-list-config.service';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { ApplicationService } from '../../../../application.service';
+import { stratosEndpointGuidKey } from '../../../../../../../../store/src/entity-request-pipeline/pipeline.types';
 
 export interface VariableTabAllEnvVarType {
   name: string;
@@ -72,7 +73,7 @@ export class VariablesTabComponent implements OnInit {
     const result = new Array<VariableTabAllEnvVarType>();
 
     Object.keys(allEnvVars[0].entity).forEach(envVarType => {
-      if (envVarType === 'cfGuid') {
+      if (envVarType === 'cfGuid' || envVarType === stratosEndpointGuidKey) {
         return;
       }
       const envVars = allEnvVars[0].entity[envVarType];

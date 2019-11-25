@@ -42,9 +42,9 @@ export class CreateReleaseComponent implements OnInit {
   details: FormGroup;
   overrides: FormGroup;
 
-  @ViewChild('releaseNameInputField') releaseNameInputField: ElementRef;
-  @ViewChild('overridesYamlTextArea') overridesYamlTextArea: ElementRef;
-  @ViewChild(MatTextareaAutosize) overridesYamlAutosize: MatTextareaAutosize;
+  @ViewChild('releaseNameInputField', { static: true }) releaseNameInputField: ElementRef;
+  @ViewChild('overridesYamlTextArea', { static: true }) overridesYamlTextArea: ElementRef;
+  @ViewChild(MatTextareaAutosize, { static: false }) overridesYamlAutosize: MatTextareaAutosize;
 
   public valuesYaml = '';
 
