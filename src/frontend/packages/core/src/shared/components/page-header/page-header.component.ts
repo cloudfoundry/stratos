@@ -49,7 +49,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     if (tabs) {
       this.pTabs = tabs.map(tab => ({
         ...tab,
-        link: this.router.createUrlTree([tab.link], {
+        link: tab.link === '-' ? null : this.router.createUrlTree([tab.link], {
           relativeTo: this.route
         }).toString()
       }));
@@ -63,7 +63,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       this.tabNavService.setHeader(header);
     }
   }
-
 
   @Input() showUnderFlow = false;
 

@@ -3,19 +3,16 @@ package kubernetes
 import (
 	"errors"
 	"io/ioutil"
-	"path"
+	"os"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
 	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"k8s.io/cli-runtime/pkg/resource"
 	"k8s.io/client-go/discovery"
-	cached "k8s.io/client-go/discovery/cached"
-	"k8s.io/client-go/kubernetes"
+	diskcached "k8s.io/client-go/discovery/cached/disk"
+	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-	"k8s.io/kubectl/pkg/validation"
 
 	restclient "k8s.io/client-go/rest"
 
@@ -28,56 +25,64 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 )
 
+// HelmConfiguration stores any resources that need to be cleaned up after use
+type HelmConfiguration struct {
+	Folder string
+}
+
+// Cleanup any resources associated with the Helm configuration
+func (f *HelmConfiguration) Cleanup() {
+	if len(f.Folder) > 0 {
+		os.RemoveAll(f.Folder)
+	}
+}
+
 // GetHelmConfiguration - gets a Helm V3 client for using it as a client library
-func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, namespace string) (*action.Configuration, error) {
+func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, namespace string) (*action.Configuration, *HelmConfiguration, error) {
 	// Need to get a config object for the target endpoint
 	var p = c.portalProxy
 
+	hc := &HelmConfiguration{}
+
 	cnsiRecord, err := p.GetCNSIRecord(endpointGUID)
 	if err != nil {
-		return nil, errors.New("Helm: Can not get endpoint record")
+		return nil, hc, errors.New("Helm: Can not get endpoint record")
 	}
 
 	tokenRecord, ok := p.GetCNSITokenRecord(endpointGUID, userID)
 	if !ok {
-		return nil, errors.New("Helm: Can not get user token for endpoint")
+		return nil, hc, errors.New("Helm: Can not get user token for endpoint")
 	}
 
 	kubeconfigcontents, err := c.GetKubeConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRecord)
 	if err != nil {
 		log.Errorf("Helm: Could not get kubeconfig for endpoint: %s", err)
-		return nil, errors.New("Can not get Kubernetes config for specified endpoint")
+		return nil, hc, errors.New("Can not get Kubernetes config for specified endpoint")
 	}
 
 	// TODO: Some auth schemes needs to have the token refreshed - so we should do that first
 	// to ensure it is valid when we use it subsequently
 
-	// Temporary folder
-	//tempDir, err := ioutil.TempDir("", "helm-client-")
-
-	tempDir := "/Users/nwm/helm-client"
-	kubeConfigPath := path.Join(tempDir, "kubeconfig")
-
-	// Write kubeconfig to this folder
-	err = ioutil.WriteFile(kubeConfigPath, []byte(kubeconfigcontents), 0644)
+	hc.Folder, err = ioutil.TempDir("", "helm-client-")
 	if err != nil {
-		log.Errorf("Helm: Could not get kubeconfig for endpoint: %s", err)
-		return nil, errors.New("Can not get Kubernetes config for specified endpoint")
+		log.Error("Unable to create temporary folder")
 	}
+
+	rcg := newJetStreamRCGetter([]byte(kubeconfigcontents), hc.Folder)
 
 	var nopLogger = func(a string, b ...interface{}) {
 		log.Infof(a, b)
 	}
 
 	var actionConfig action.Configuration
-	kubeconfig := kube.GetConfig(kubeConfigPath, "kube", namespace)
+	// kubeconfig := kube.GetConfig(kubeConfigPath, "kube", namespace)
 
-	kc := kube.New(kubeconfig)
+	kc := kube.New(rcg)
 	kc.Log = nopLogger
 
 	clientset, err := kc.Factory.KubernetesClientSet()
 	if err != nil {
-		return nil, err
+		return nil, hc, err
 	}
 
 	var store *storage.Storage
@@ -85,168 +90,70 @@ func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, nam
 	d.Log = nopLogger
 	store = storage.Init(d)
 
-	actionConfig.RESTClientGetter = kubeconfig
+	actionConfig.RESTClientGetter = rcg
 	actionConfig.KubeClient = kc
 	actionConfig.Releases = store
 	actionConfig.Log = nopLogger
 
-	return &actionConfig, nil
+	return &actionConfig, hc, nil
 }
 
-//defer os.RemoveAll(tempDir)
-
-// Create a temporary folder, write out a kubeconfig and configure using that file
-
-// kubeClient is *kubernetes.Clientset
-// 	kubeClient, err := kubernetes.NewForConfig(config)
-// 	if err != nil {
-// 		log.Errorf("Helm: Could not get kube client: %s", err)
-// 		return nil, err
-// 	}
-
-// 	// What do we have?
-// 	// kubeClient is *kubernetes.Clientset
-// 	// config is *restclient.Config
-
-// 	var actionConfig action.Configuration
-
-// 	// TODO: Check this
-// 	kubeconfig := newJetStreamRCGictionFactory(config, kubeClient)
-
-// 	// We only work for Helm 3 storing info in secrets (not config maps)
-// 	var store *storage.Storage
-// 	d := driver.NewSecrets(kubeClient.CoreV1().Secrets(namespace))
-// 	store = storage.Init(d)
-
-// 	factory := newFictionFactory(kubeClient, kubeconfig, namespace)
-
-// 	var nopLogger = func(a string, b ...interface{}) {
-// 		log.Infof(a, b)
-// 	}
-
-// 	client := &kube.Client{
-// 		Factory: factory,
-// 		Log:     nopLogger,
-// 	}
-
-// 	actionConfig.RESTClientGetter = kubeconfig
-// 	actionConfig.KubeClient = client
-// 	actionConfig.Releases = store
-// 	//actionConfig.Log = log//
-
-// 	return &actionConfig, nil
-// }
-
-type fictionFactory struct {
-	kubeClient *kubernetes.Clientset
-	getter     genericclioptions.RESTClientGetter
-	namespace  string
+type jetStreamRestClientGetter struct {
+	clientConfig clientcmd.ClientConfig
+	tempFolder   string
 }
 
-func newFictionFactory(kubeClient *kubernetes.Clientset, getter genericclioptions.RESTClientGetter, namespace string) kube.Factory {
+func newJetStreamRCGetter(kubeconfig []byte, tempFolder string) *jetStreamRestClientGetter {
 
-	f := &fictionFactory{
-		kubeClient: kubeClient,
-		getter:     getter,
-		namespace:  namespace,
+	clientConfig, err := clientcmd.NewClientConfigFromBytes(kubeconfig)
+	if err != nil {
+		log.Error(err)
 	}
-	return f
-}
 
-// ToRawKubeConfigLoader return kubeconfig loader as-is
-func (f *fictionFactory) ToRawKubeConfigLoader() clientcmd.ClientConfig {
-	log.Warn("Was NOT expecting this to be used: ToRawKubeConfigLoader")
-	return newFictionClientConfig(f.namespace)
-}
-
-// KubernetesClientSet gives you back an external clientset
-func (f *fictionFactory) KubernetesClientSet() (*kubernetes.Clientset, error) {
-	log.Warn("KubernetesClientSet requested")
-	return f.kubeClient, nil
-}
-
-// 	// NewBuilder returns an object that assists in loading objects from both disk and the server
-// 	// and which implements the common patterns for CLI interactions with generic resources.
-// 	NewBuilder() *resource.Builder
-
-func (f *fictionFactory) NewBuilder() *resource.Builder {
-	return resource.NewBuilder(f.getter)
-}
-
-// 	// Returns a schema that can validate objects stored on disk.
-// 	Validator(validate bool) (validation.Schema, error)
-
-func (f *fictionFactory) Validator(validate bool) (validation.Schema, error) {
-	log.Fatal("Was NOT expecting this to be used: Validator")
-	return nil, nil
-}
-
-type jetStreamRCG struct {
-	config     *restclient.Config
-	kubeClient *kubernetes.Clientset
-}
-
-func newJetStreamRCGictionFactory(config *restclient.Config, kubeClient *kubernetes.Clientset) *jetStreamRCG {
-
-	f := &jetStreamRCG{
-		config:     config,
-		kubeClient: kubeClient,
+	f := &jetStreamRestClientGetter{
+		clientConfig: clientConfig,
+		tempFolder:   tempFolder,
 	}
 	return f
 }
 
 // ToRESTConfig returns restconfig
-func (f *jetStreamRCG) ToRESTConfig() (*restclient.Config, error) {
-	log.Warn("Was NOT expecting this to be used: ToRESTConfig")
-	return f.config, nil
+func (f *jetStreamRestClientGetter) ToRESTConfig() (*restclient.Config, error) {
+	return f.clientConfig.ClientConfig()
+}
+
+// ToRawKubeConfigLoader binds config flag values to config overrides
+// Returns an interactive clientConfig if the password flag is enabled,
+// or a non-interactive clientConfig otherwise.
+func (f *jetStreamRestClientGetter) ToRawKubeConfigLoader() clientcmd.ClientConfig {
+	return f.clientConfig
 }
 
 // ToDiscoveryClient returns discovery client
-func (f *jetStreamRCG) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error) {
-	return cached.NewMemCacheClient(f.kubeClient.Discovery()), nil
-}
-
-// ToRESTMapper returns a restmapper
-func (f *jetStreamRCG) ToRESTMapper() (meta.RESTMapper, error) {
-	log.Fatal("Was NOT expecting this to be used: ToRESTMapper")
-	return nil, nil
-}
-
-// ToRawKubeConfigLoader return kubeconfig loader as-is
-func (f *jetStreamRCG) ToRawKubeConfigLoader() clientcmd.ClientConfig {
-	log.Fatal("Was NOT expecting this to be used: ToRawKubeConfigLoader")
-	return nil
-}
-
-type fictionClientConfig struct {
-	namespace string
-}
-
-func newFictionClientConfig(namespace string) *fictionClientConfig {
-
-	f := &fictionClientConfig{
-		namespace: namespace,
+func (f *jetStreamRestClientGetter) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error) {
+	config, err := f.ToRESTConfig()
+	if err != nil {
+		return nil, err
 	}
-	return f
+
+	// The more groups you have, the more discovery requests you need to make.
+	// given 25 groups (our groups + a few custom resources) with one-ish version each, discovery needs to make 50 requests
+	// double it just so we don't end up here again for a while.  This config is only used for discovery.
+	config.Burst = 100
+
+	httpCacheDir := f.tempFolder
+	discoveryCacheDir := f.tempFolder
+	return diskcached.NewCachedDiscoveryClientForConfig(config, discoveryCacheDir, httpCacheDir, time.Duration(10*time.Minute))
 }
 
-// RawConfig returns the merged result of all overrides
-func (f *fictionClientConfig) RawConfig() (clientcmdapi.Config, error) {
-	log.Fatal("Was NOT expecting this to be used: RawConfig")
-	c := clientcmdapi.NewConfig()
-	return *c, nil
-}
+// ToRESTMapper returns a mapper.
+func (f *jetStreamRestClientGetter) ToRESTMapper() (meta.RESTMapper, error) {
+	discoveryClient, err := f.ToDiscoveryClient()
+	if err != nil {
+		return nil, err
+	}
 
-// ClientConfig returns a complete client config
-func (f *fictionClientConfig) ClientConfig() (*restclient.Config, error) {
-	log.Warn("Was NOT expecting this to be used: ClientConfig")
-	return nil, nil
-}
-
-func (f *fictionClientConfig) Namespace() (string, bool, error) {
-	return f.namespace, false, nil
-}
-
-func (f *fictionClientConfig) ConfigAccess() clientcmd.ConfigAccess {
-	return clientcmd.NewDefaultClientConfigLoadingRules()
+	mapper := restmapper.NewDeferredDiscoveryRESTMapper(discoveryClient)
+	expander := restmapper.NewShortcutExpander(mapper, discoveryClient)
+	return expander, nil
 }

@@ -1,3 +1,8 @@
+import {
+  KUBERNETES_ENDPOINT_TYPE,
+  kubernetesPodsEntityType,
+  kubernetesServicesEntityType,
+  kubernetesEntityFactory} from '../../kubernetes/kubernetes-entity-factory';
 import { Action } from '@ngrx/store';
 
 import { EntityRequestAction } from '../../../../../store/src/types/request.types';
@@ -5,12 +10,12 @@ import {
   HELM_ENDPOINT_TYPE,
   helmEntityFactory,
   helmReleaseEntityKey,
-  helmReleasePodEntityType,
-  helmReleaseServiceEntityType,
   helmReleaseStatusEntityType,
   helmVersionsEntityType,
+  helmReleaseGraphEntityType,
   monocularChartsEntityType,
 } from '../helm-entity-factory';
+
 import { PaginatedAction } from './../../../../../store/src/types/pagination.types';
 import { HelmInstallValues } from './helm.types';
 
@@ -41,6 +46,10 @@ export const GET_HELM_RELEASE_SERVICES_FAILURE = '[Helm] Get Release Services Fa
 export const HELM_INSTALL = '[Helm] Install';
 export const HELM_INSTALL_SUCCESS = '[Helm] Install Success';
 export const HELM_INSTALL_FAILURE = '[Helm] Install Failure';
+
+export const UPDATE_HELM_RELEASE_STATUS = '[Helm] Update Release Status [WS]';
+export const UPDATE_HELM_RELEASE_STATUS_SUCCESS = '[Helm] Update Release Status [WS] Success';
+export const UPDATE_HELM_RELEASE_STATUS_FAILURE  = '[Helm] Update Release Status [WS] Failure';
 
 export interface MonocularPaginationAction extends PaginatedAction, EntityRequestAction { }
 
@@ -124,6 +133,23 @@ export class GetHelmReleaseStatus implements EntityRequestAction {
   ];
 }
 
+// Never dispateched - just used for look-up
+// Don't know why I need an action for this rather than an entity type?
+export class GetHelmReleaseGraph implements EntityRequestAction {
+  key: string;
+  constructor(
+    public endpointGuid: string,
+    public releaseTitle: string
+  ) {
+    this.key = `${endpointGuid}-${releaseTitle}`;
+  }
+  type = this.constructor.name;
+  endpointType = HELM_ENDPOINT_TYPE;
+  entity = helmEntityFactory(helmReleaseGraphEntityType);
+  entityType = helmReleaseGraphEntityType;
+  actions = [this.type];
+}
+
 export class GetHelmReleasePods implements MonocularPaginationAction {
   constructor(
     public endpointGuid: string,
@@ -132,9 +158,9 @@ export class GetHelmReleasePods implements MonocularPaginationAction {
     this.paginationKey = `${endpointGuid}/${releaseTitle}/pods`;
   }
   type = GET_HELM_RELEASE_PODS;
-  endpointType = HELM_ENDPOINT_TYPE;
-  entityType = helmReleasePodEntityType;
-  entity = [helmEntityFactory(helmReleasePodEntityType)];
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
+  entityType = kubernetesPodsEntityType;
+  entity = [kubernetesEntityFactory(kubernetesPodsEntityType)];
   actions = [
     GET_HELM_RELEASE_PODS,
     GET_HELM_RELEASE_PODS_SUCCESS,
@@ -158,9 +184,9 @@ export class GetHelmReleaseServices implements MonocularPaginationAction {
     this.paginationKey = `${endpointGuid}/${releaseTitle}/services`;
   }
   type = GET_HELM_RELEASE_SERVICES;
-  endpointType = HELM_ENDPOINT_TYPE;
-  entityType = helmReleaseServiceEntityType;
-  entity = [helmEntityFactory(helmReleaseServiceEntityType)];
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
+  entityType = kubernetesServicesEntityType;
+  entity = [kubernetesEntityFactory(kubernetesServicesEntityType)];
   actions = [
     GET_HELM_RELEASE_SERVICES,
     GET_HELM_RELEASE_SERVICES_SUCCESS,
@@ -180,4 +206,10 @@ export class HelmInstall implements Action {
   constructor(public values: HelmInstallValues) { }
   type = HELM_INSTALL;
   public guid = () => '<New Release>' + this.values.releaseName;
+}
+
+export class HelmUpdateRelease implements Action {
+  constructor(public values: any) { }
+  type = UPDATE_HELM_RELEASE_STATUS;
+  // public guid = () => '<New Release>' + this.values.releaseName;
 }

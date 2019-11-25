@@ -1,0 +1,20 @@
+<ngx-graph
+  class="chart-container"
+  (zoomChange)="onZoomChanged($event)"
+  [links]="links"
+  [nodes]="nodes"
+  [update$]="update$"
+>
+<!--
+<ng-template #nodeTemplate let-node>
+    <svg:g class="node" xmlns="http://www.w3.org/2000/xhtml" width="150" height="100">
+    <svg:foreignObject width="150" height="100">
+      <xhtml:div class="cardContainer" xmlns="http://www.w3.org/1999/xhtml">
+        <label class="name">{{node.label}}</label>
+        <label>{{node.data.kind}}</label>
+      </xhtml:div>
+    </svg:foreignObject>
+  </svg:g>
+</ng-template>
+</ngx-graph>
+-->

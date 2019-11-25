@@ -21,13 +21,13 @@
           </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Status">{{ release.status }}</app-metadata-item>
           <app-metadata-item class="chart-details__item" label="First Deployed">
-            {{ release.firstDeployed | date:'medium' }}
+            {{ release.info.firstDeployed | date:'medium' }}
           </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Last Deployed">
-            {{ release.lastDeployed | date:'medium' }}
+            {{ release.info.lastDeployed | date:'medium' }}
           </app-metadata-item>
         </div>
-        <app-tile-grid>
+        <!-- <app-tile-grid>
           <app-tile-group *ngIf="chartData$ | async as chartData">
             <app-tile>
               <mat-card class="full-card">
@@ -41,7 +41,7 @@
               </mat-card>
             </app-tile>
           </app-tile-group>
-        </app-tile-grid>
+        </app-tile-grid> -->
       </div>
     </app-entity-summary-title>
 

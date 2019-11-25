@@ -1,8 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { combineLatest, Observable, ReplaySubject, of as obsOf, Subject, BehaviorSubject } from 'rxjs';
+import { map, startWith, catchError, share, filter } from 'rxjs/operators';
+
+import websocketConnect from 'rxjs-websockets';
 
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
@@ -14,6 +16,7 @@ import { ConfirmationDialogConfig } from '../../../../../shared/components/confi
 import { ConfirmationDialogService } from '../../../../../shared/components/confirmation-dialog.service';
 import { HELM_ENDPOINT_TYPE, helmReleaseEntityKey } from '../../../helm-entity-factory';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
+import { HelmReleaseStatus } from '../../../store/helm.types';
 
 @Component({
   selector: 'app-helm-release-summary-tab',
@@ -61,7 +64,10 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     private logService: LoggerService
   ) {
 
-    const releaseStatus$ = this.helmReleaseHelper.fetchReleaseStatus();
+    //const releaseStatus$ = this.helmReleaseHelper.fetchReleaseStatus();
+
+    const releaseStatus$ = new BehaviorSubject<HelmReleaseStatus>({} as HelmReleaseStatus);
+    //.helmReleaseHelper.fetchReleaseStatus();
 
     this.isBusy$ = combineLatest([
       this.helmReleaseHelper.isFetching$,
@@ -74,25 +80,63 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       startWith(true)
     );
 
+    // console.log("Connecting to web socket");
+
+    // const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/');
+    // const host = window.location.host;
+    // const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    // const streamUrl = (
+    //   `${protocol}://${host}/pp/v1/helm/releases/${endpointAndName}`
+    // );
+    // console.log(streamUrl);
+
+    // const data = new Subject<string>();
+    // const connection = websocketConnect(
+    //   streamUrl,
+    //   data
+    // );
+
+    // const messages = connection.messages.pipe(
+    //   catchError(e => {
+    //     if (e.type === 'error') {
+    //       console.log(e);
+    //     }
+    //     return [];
+    //   }));
+
+    // const connectionStatus = connection.connectionStatus;
+
+    // messages.subscribe(jsonString => {
+    //   console.log('Got message ....');
+
+    //   const messageObj = JSON.parse(jsonString);
+    //   if (messageObj) {
+    //     console.log(messageObj);
+    //   }
+
+    // });
+
+
     // Async fetch release status
-    this.chartData$ = releaseStatus$.pipe(
-      map(data => ({
-        podsChartData: Object.keys(data.pods.status).map(status => ({
-          name: status,
-          value: data.pods.status[status]
-        })),
-        containersChartData: [
-          {
-            name: 'Ready',
-            value: data.pods.ready
-          },
-          {
-            name: 'Not Ready',
-            value: data.pods.containers - data.pods.ready
-          }
-        ]
-      }))
-    );
+    // this.chartData$ = obsOf({});
+    // this.chartData$ = releaseStatus$.pipe(
+    //   map(data => ({
+    //     podsChartData: Object.keys(data.pods.status).map(status => ({
+    //       name: status,
+    //       value: data.pods.status[status]
+    //     })),
+    //     containersChartData: [
+    //       {
+    //         name: 'Ready',
+    //         value: data.pods.ready
+    //       },
+    //       {
+    //         name: 'Not Ready',
+    //         value: data.pods.containers - data.pods.ready
+    //       }
+    //     ]
+    //   }))
+    // );
   }
 
   private startDelete() {

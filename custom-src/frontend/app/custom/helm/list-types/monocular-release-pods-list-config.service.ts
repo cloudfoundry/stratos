@@ -9,6 +9,12 @@ import { IListConfig, ListViewTypes } from '../../../shared/components/list/list
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
 import { HelmReleasePod } from '../store/helm.types';
 import { HelmReleasePodsDataSource } from './monocular-release-pods-list-source';
+import {
+  KubernetesPodStatusComponent
+} from '../../kubernetes/list-types/kubernetes-pods/kubernetes-pod-status/kubernetes-pod-status.component';
+import {
+  KubernetesPodReadinessComponent
+} from '../../kubernetes/list-types/kubernetes-pods/kubernetes-pod-readiness/kubernetes-pod-readiness.component';
 
 @Injectable()
 export class HelmReleasePodsListConfig implements IListConfig<HelmReleasePod> {
@@ -21,34 +27,36 @@ export class HelmReleasePodsListConfig implements IListConfig<HelmReleasePod> {
       columnId: 'name',
       headerCell: () => 'Name',
       cellDefinition: {
-        valuePath: 'name'
+        valuePath: 'metadata.name'
       },
       sort: {
         type: 'sort',
         orderKey: 'name',
-        field: 'name'
+        field: 'metadata.name'
       },
       cellFlex: '4'
     },
     {
       columnId: 'status',
       headerCell: () => 'Status',
-      cellDefinition: {
-        valuePath: 'status'
-      },
+      cellComponent: KubernetesPodStatusComponent,
+      // cellDefinition: {
+      //   valuePath: 'status.phase'
+      // },
       sort: {
         type: 'sort',
         orderKey: 'status',
-        field: 'status'
+        field: 'status.phase'
       },
       cellFlex: '1'
     },
     {
       columnId: 'ready',
       headerCell: () => 'Ready',
-      cellDefinition: {
-        valuePath: 'ready'
-      },
+      cellComponent: KubernetesPodReadinessComponent,
+      // cellDefinition: {
+      //   valuePath: 'ready'
+      // },
       sort: {
         type: 'sort',
         orderKey: 'ready',

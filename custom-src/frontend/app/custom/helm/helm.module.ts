@@ -1,3 +1,4 @@
+import { HelmReleaseResourceGraphComponent } from './release/tabs/helm-release-resource-graph/helm-release-resource-graph.component';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
@@ -39,6 +40,9 @@ import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
 import { HelmConfigurationComponent } from './tabs/configuration-tab/helm-configuration.component';
 import { HelmReleasesTabComponent } from './tabs/releases-tab/releases-tab.component';
 import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.component';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
+import { KubernetesModule } from '../kubernetes/kubernetes.module';
+import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 @NgModule({
   imports: [
@@ -47,6 +51,9 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     SharedModule,
     HelmRoutingModule,
     CreateReleaseModule,
+    NgxJsonViewerModule,
+    KubernetesModule,
+    NgxGraphModule,
   ],
   declarations: [
     PanelComponent,
@@ -77,7 +84,8 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     HelmReleaseValuesTabComponent,
     HelmReleasePodsTabComponent,
     HelmReleaseServicesTabComponent,
-    HelmServicePortsComponent
+    HelmServicePortsComponent,
+    HelmReleaseResourceGraphComponent,
   ],
   providers: [
     ChartsService,

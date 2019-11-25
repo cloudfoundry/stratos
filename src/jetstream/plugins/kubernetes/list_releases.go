@@ -1,23 +1,65 @@
 package kubernetes
 
 import (
-	//"encoding/json"
+	"encoding/json"
+	"fmt"
+
 	//"fmt"
 
-	"bytes"
-
+	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	// "k8s.io/client-go/kubernetes"
 	// "k8s.io/client-go/rest"
 	"helm.sh/helm/v3/pkg/action"
+	// "helm.sh/helm/v3/pkg/release"
+
 	// "k8s.io/helm/pkg/kube"
 
-	yaml "gopkg.in/yaml.v2"
-
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/helm"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
+
+// type helmReleaseInfo struct {
+// 	*release.Release
+// 	Extra     string                `json:"extra"`
+// 	Resources []helmReleaseResource `json:"resources"`
+// }
+
+// type helmReleaseResource struct {
+// 	Kind       string `json:"kind"`
+// 	APIVersion string `json:"apiVersion"`
+// 	Name       string `json:"name"`
+// }
+
+type ResourceResponse struct {
+	Kind string          `json:"kind"`
+	Data json.RawMessage `json:"data"`
+}
+
+// type KubeResource struct {
+// 	Kind       string `yaml:"kind"`
+// 	APIVersion string `yaml:"apiVersion"`
+// 	Metadata   struct {
+// 		Name string `yaml:"name"`
+// 	} `yaml:"metadata"`
+// 	Spec interface{} `yaml:"spec"`
+// }
+
+// type kubeAPIJob struct {
+// 	Kind       string
+// 	APIVersion string
+// 	Name       string
+// 	Namespace  string
+// 	Endpoint   string
+// 	User       string
+// }
+
+// type KubeAPIJobResult struct {
+// 	helm.KubeResourceJob
+// 	StatusCode int
+// 	Data       json.RawMessage
+// }
 
 type kubeReleasesData struct {
 	Endpoint  string `json:"endpoint"`
@@ -40,14 +82,6 @@ type kubeReleasesData struct {
 // 		Version    string `json:"version"`
 // 	} `json:"chart"`
 // }
-
-type KubeResource struct {
-	Kind       string `yaml:"kind"`
-	ApiVersion string `yaml:"apiVersion"`
-	Metadata   struct {
-		Name string `yaml:"name"`
-	} `yaml:"metadata"`
-}
 
 type kubeReleasesResponse map[string]kubeReleasesData
 
@@ -76,12 +110,14 @@ func (c *KubernetesSpecification) listReleases(ep *interfaces.ConnectedEndpoint,
 
 	log.Debugf("listReleases: START: %s", ep.GUID)
 
-	config, err := c.GetHelmConfiguration(ep.GUID, ep.Account, "")
+	config, hc, err := c.GetHelmConfiguration(ep.GUID, ep.Account, "")
 	if err != nil {
 		log.Errorf("Helm: ListReleases could not get a Helm Configuration: %s", err)
 		done <- response
 		return
 	}
+
+	defer hc.Cleanup()
 
 	list := action.NewList(config)
 
@@ -103,6 +139,8 @@ func (c *KubernetesSpecification) listReleases(ep *interfaces.ConnectedEndpoint,
 }
 
 // GetRelease will get release status for the given release
+// This is a web socket request and will return info over the websocket
+// polling until disconnected
 func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 
 	// TODO: I think this needs to know the namespace that the release is in ?!
@@ -112,11 +150,13 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 	release := ec.Param("name")
 	userID := ec.Get("user_id").(string)
 
-	config, err := c.GetHelmConfiguration(endpointGUID, userID, "")
+	config, hc, err := c.GetHelmConfiguration(endpointGUID, userID, "")
 	if err != nil {
 		log.Errorf("Helm: GetRelease could not get a Helm Configuration: %s", err)
 		return err
 	}
+
+	defer hc.Cleanup()
 
 	status := action.NewStatus(config)
 	res, err := status.Run(release)
@@ -125,58 +165,106 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 		return err
 	}
 
+	// Upgrade to a web socket
+	ws, pingTicker, err := interfaces.UpgradeToWebSocket(ec)
+	if err != nil {
+		return err
+	}
+	defer ws.Close()
+	defer pingTicker.Stop()
+
+	// ws is the websocket ready for use
+
+	// Write the release info first - we will then go fetch the status of evertyhing in the release and send
+	// this back incrementally
+
 	// Parse the manifest
 	log.Info("Got release")
-	log.Infof("%s", res.Manifest)
+	rel := helm.NewHelmRelease(res, endpointGUID, userID)
+	log.Info("Done")
 
-	r := bytes.NewReader([]byte(res.Manifest))
+	graph := helm.NewHelmReleaseGraph(rel)
 
-	dec := yaml.NewDecoder(r)
-	var t KubeResource
-	for dec.Decode(&t) == nil {
-		log.Infof("Resource: %s - %s", t.Kind, t.Metadata.Name)
-	}
+	id := fmt.Sprintf("%s-%s", endpointGUID, rel.Namespace)
 
-	return ec.JSON(200, res)
+	// Send over the namespace details of the release
+	sendResource(ws, "ReleasePrefix", id)
+
+	graph.ParseManifest(rel.KubeResources)
+
+	// Send the manifest for the release
+	sendResource(ws, "Manifest", rel.HelmManifest)
+
+	// // Send the manifest for the release
+	// sendResource(ws, "Test", rel.HelmManifest)
+
+	// Send the graph as we have it now
+	sendResource(ws, "Graph", graph)
+
+	// Loop over this until the web socket is closed
+
+	// Get the pods first and send those
+	pods := rel.GetPods(c.portalProxy)
+	sendResource(ws, "Pods", pods)
+
+	//graph.Generate(pods)
+
+	// Send the manifest for the release again (ReplicaSets will now be added)
+	sendResource(ws, "Manifest", rel.Resources)
+
+	// Send the manifest for the release again (ReplicaSets will now be added)
+	sendResource(ws, "Manifest2", rel.HelmManifest)
+
+	// Now get all of the resources in the manifest
+	all := rel.GetResources(c.portalProxy)
+	sendResource(ws, "Resources", all)
+
+	// Now we have everything, so loop, polling to get status
+	// for {
+
+	// 	log.Warn("Polling for release - wait 10 seconds")
+	// 	time.Sleep(10 * time.Second)
+
+	// 	log.Warn("Polling for release ....")
+
+	// 	// Pods
+	// 	pods := rel.GetPods(c.portalProxy)
+	// 	err = sendResource(ws, "Pods", pods)
+	// 	log.Error(err)
+
+	// 	// Now get all of the resources in the manifest
+	// 	all := rel.GetResources(c.portalProxy)
+	// 	err = sendResource(ws, "Resources", all)
+	// 	log.Error(err)
+	// }
+
+	log.Error("****************************************************************************************************")
+	log.Error("RELEASE POLLER HAS FINISHED")
+	log.Error("****************************************************************************************************")
+
+	ws.Close()
+
+	return nil
 }
 
-// // ListReleases will list the helm releases for all endpoints
-// func (c *KubernetesSpecification) aListReleases(ec echo.Context) error {
+func sendResource(ws *websocket.Conn, kind string, data interface{}) error {
 
-// 	// Need to get a config object for the target endpoint
-// 	// endpointGUID := ec.Param("endpoint")
-// 	userID := ec.Get("user_id").(string)
+	var err error
+	var txt []byte
+	if txt, err = json.Marshal(data); err == nil {
+		resp := ResourceResponse{
+			Kind: kind,
+			Data: json.RawMessage(txt),
+		}
 
-// 	// Get the config maps directly - don't go via Tiller
+		if txt, err = json.Marshal(resp); err == nil {
+			if ws.WriteMessage(websocket.TextMessage, txt); err == nil {
+				return nil
+			}
 
-// 	requests := c.makeKubeProxyRequest(userID, "GET", "/api/v1/configmaps?labelSelector=OWNER%3DTILLER")
-// 	responses, _ := c.portalProxy.DoProxyRequest(requests)
-// 	return c.portalProxy.SendProxiedResponse(ec, responses)
-// }
+			log.Info(err)
+		}
+	}
 
-// func (c *KubernetesSpecification) makeKubeProxyRequest(userID, method, uri string) []interfaces.ProxyRequestInfo {
-
-// 	var p = c.portalProxy
-// 	eps, err := p.ListEndpointsByUser(userID)
-// 	if err != nil {
-// 		return nil
-// 	}
-
-// 	// Construct the metadata for proxying
-// 	requests := make([]interfaces.ProxyRequestInfo, 0)
-// 	for _, endpoint := range eps {
-// 		if endpoint.CNSIType == "k8s" {
-// 			req := interfaces.ProxyRequestInfo{}
-// 			req.UserGUID = userID
-// 			req.ResultGUID = endpoint.GUID
-// 			req.EndpointGUID = endpoint.GUID
-// 			req.Method = method
-
-// 			uri, _ := url.Parse(uri)
-// 			req.URI = uri
-// 			requests = append(requests, req)
-// 		}
-// 	}
-
-// 	return requests
-// }
+	return err
+}

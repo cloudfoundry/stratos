@@ -204,6 +204,7 @@ export enum KubernetesStatus {
   ACTIVE = 'Active',
   RUNNING = 'Running',
   FAILED = 'Failed',
+  PENDING = 'Pending'
 }
 export interface KubernetesNamespace extends BasicKubeAPIResource {
   metadata: Metadata;

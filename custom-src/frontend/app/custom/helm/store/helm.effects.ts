@@ -17,7 +17,6 @@ import {
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../environments/environment';
 import { HELM_ENDPOINT_TYPE, helmReleaseEntityKey } from '../helm-entity-factory';
-import { parseHelmReleaseStatus } from '../release/tabs/helm-release-helper.service';
 import {
   GET_HELM_RELEASE_PODS,
   GET_HELM_RELEASE_SERVICES,
@@ -163,17 +162,25 @@ export class HelmEffects {
             result: []
           } as NormalizedResponse;
 
-          const status = parseHelmReleaseStatus(response.info.status.resources);
+          const status = {};
 
-          this.updateReleasePods(action, status);
+          // TODO
 
-          this.updateReleaseServices(action, status);
+          // this.updateReleasePods(action, status);
+
+          // this.updateReleaseServices(action, status);
 
           // Go through each endpoint ID
           const newStatus: HelmReleaseStatus = {
             endpointId: action.endpointGuid,
             releaseTitle: action.releaseTitle,
-            ...status
+            ...status,
+            pods: [],
+            fields: [],
+            data: {
+              'v1/Pod': {},
+              'v1/Service': {}
+            }
           };
           processedData.entities[entityKey][action.key] = newStatus;
           processedData.result.push(action.key);
@@ -182,11 +189,11 @@ export class HelmEffects {
     })
   );
 
-  @Effect()
-  fetchHelmReleasePods$ = this.actions$.pipe(
-    ofType<GetHelmReleasePods>(GET_HELM_RELEASE_PODS),
-    mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
-  );
+  // @Effect()
+  // fetchHelmReleasePods$ = this.actions$.pipe(
+  //   ofType<GetHelmReleasePods>(GET_HELM_RELEASE_PODS),
+  //   mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
+  // );
 
   @Effect()
   fetchHelmReleaseServices$ = this.actions$.pipe(

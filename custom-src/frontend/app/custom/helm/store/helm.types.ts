@@ -44,13 +44,17 @@ export interface HelmRelease {
   lastDeployed: Date;
   firstDeployed: Date;
   info: {
-    status: {
-      notes: string;
-    }
+    last_deployed: Date;
+    first_deployed: Date;
+    notes: string;
+    status: string;
   };
   config: {
     raw: string;
   };
+  chart: {
+    values: any;
+  }
 }
 
 export interface HelmReleaseStatus {
@@ -92,6 +96,11 @@ export interface HelmReleaseService {
   releaseTitle: string;
   name: string;
   kubeService$?: Observable<KubeService>;
+}
+
+export interface HelmReleaseGraph {
+  endpointId: string;
+  releaseTitle: string;
 }
 
 export function isHelmReleaseService(obj: any): HelmReleaseService {

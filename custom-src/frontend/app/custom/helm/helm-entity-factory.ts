@@ -8,6 +8,7 @@ import {
   HelmReleaseStatus,
   HelmVersion,
   MonocularChart,
+  HelmReleaseGraph,
 } from './store/helm.types';
 
 export const monocularChartsEntityType = 'monocularCharts';
@@ -17,6 +18,7 @@ export const helmVersionsEntityType = 'helmVersions';
 export const helmReleaseStatusEntityType = 'helmReleaseStatus';
 export const helmReleasePodEntityType = 'helmReleasePod';
 export const helmReleaseServiceEntityType = 'helmReleaseService';
+export const helmReleaseGraphEntityType = 'helmReleaseGraph';
 
 export const getMonocularChartId = (entity: MonocularChart) => entity.id;
 export const getHelmReleaseId = (entity: HelmRelease) => entity.endpointId;
@@ -24,6 +26,7 @@ export const getHelmVersionId = (entity: HelmVersion) => entity.endpointId;
 export const getHelmReleaseStatusId = (entity: HelmReleaseStatus) => entity.endpointId;
 export const getHelmReleasePodId = (entity: HelmReleasePod) => entity.name;
 export const getHelmReleaseServiceId = (entity: HelmReleaseService) => entity.name;
+export const getHelmReleaseGraphId = (entity: HelmReleaseGraph) => entity.endpointId;
 
 export const HELM_ENDPOINT_TYPE = 'helm';
 
@@ -83,6 +86,12 @@ entityCache[helmReleaseServiceEntityType] = new HelmEntitySchema(
   helmReleaseServiceEntityType,
   {},
   { idAttribute: getHelmReleaseServiceId }
+);
+
+entityCache[helmReleaseGraphEntityType] = new HelmEntitySchema(
+  helmReleaseGraphEntityType,
+  {},
+  { idAttribute: getHelmReleaseGraphId }
 );
 
 export function helmEntityFactory(key: string): EntitySchema {

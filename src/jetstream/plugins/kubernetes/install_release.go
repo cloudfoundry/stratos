@@ -81,10 +81,12 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	endpointGUID := params.Endpoint
 	userGUID := ec.Get("user_id").(string)
 
-	config, err := c.GetHelmConfiguration(endpointGUID, userGUID, params.Namespace)
+	config, hc, err := c.GetHelmConfiguration(endpointGUID, userGUID, params.Namespace)
 	if err != nil {
 		return fmt.Errorf("Could not get Helm Configuration for endpoint: %v+", err)
 	}
+
+	defer hc.Cleanup()
 
 	// if _, err := chartutil.LoadRequirements(chart); err == nil {
 	// 	log.Debug("Chart requirements loaded")
@@ -159,11 +161,13 @@ func (c *KubernetesSpecification) DeleteRelease(ec echo.Context) error {
 
 	userGUID := ec.Get("user_id").(string)
 
-	config, err := c.GetHelmConfiguration(endpointGUID, userGUID, "")
+	config, hc, err := c.GetHelmConfiguration(endpointGUID, userGUID, "")
 	if err != nil {
 		log.Errorf("Helm: ListReleases could not get a Helm Configuration: %s", err)
 		return err
 	}
+
+	defer hc.Cleanup()
 
 	uninstall := action.NewUninstall(config)
 

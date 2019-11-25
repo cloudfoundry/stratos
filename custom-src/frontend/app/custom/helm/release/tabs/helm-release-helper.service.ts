@@ -6,8 +6,8 @@ import { map } from 'rxjs/operators';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { PaginationMonitor } from '../../../../shared/monitors/pagination-monitor';
 import { helmEntityFactory, helmReleaseEntityKey } from '../../helm-entity-factory';
-import { GetHelmReleases, GetHelmReleaseStatus } from '../../store/helm.actions';
-import { HelmRelease, HelmReleaseGuid, HelmReleaseStatus } from '../../store/helm.types';
+import { GetHelmReleases, GetHelmReleaseStatus, GetHelmReleaseGraph } from '../../store/helm.actions';
+import { HelmRelease, HelmReleaseGuid, HelmReleaseStatus, HelmReleaseGraph } from '../../store/helm.types';
 import { AppState } from './../../../../../../store/src/app-state';
 import {
   getPaginationObservables,
@@ -51,114 +51,16 @@ export class HelmReleaseHelperService {
       map(entity => entity.entity)
     );
   }
-}
 
-export const parseHelmReleaseStatus = (res: string): HelmReleaseStatus => {
-  const lines = res.split('\n');
-  const result = {
-    pods: {},
-    fields: [],
-    data: {
-      'v1/Pod': {},
-      'v1/Service': {}
-    }
-  };
+  public fetchReleaseGraph(): Observable<HelmReleaseGraph> {
+    // Get helm release
+    const action = new GetHelmReleaseGraph(this.endpointGuid, this.releaseTitle);
 
-  // Process
-  let i = 0;
-  while (i < lines.length) {
-    if (lines[i].indexOf('==>') === 0) {
-      // Got a resource type
-      const resType = getResourceName(lines[i].substr(4));
-      // Read fields
-      i++;
-      i = readFields(result, lines, i);
-      i = readResType(result, resType, lines, i);
-    } else {
-      i++;
-    }
+    console.log(action);
+
+    return this.esf.create<HelmReleaseGraph>(action.key, action).waitForEntity$.pipe(
+      map(entity => entity.entity)
+    );
   }
 
-  calculateStats(result);
-  return result;
-};
-
-function getResourceName(name: string): string {
-  const parts = name.trim().split('(');
-  return parts[0].trim();
-}
-
-function readFields(result, lines, i): number {
-  let read = result.fields.length === 0;
-  if (!read && lines[i].length === 0) {
-    i++;
-    read = true;
-  }
-
-  if (lines[i].indexOf('NAME') === 0) {
-    read = true;
-  }
-
-  if (read) {
-    const params = lines[i].replace(/  +/g, ' ');
-    result.fields = params.split(' ');
-    i++;
-  }
-  return i;
-}
-
-function readResType(result, resType, lines, i): number {
-  const data = result.data;
-  data[resType] = [];
-  while (i < lines.length) {
-    if (lines[i].length === 0) {
-      return i + 1;
-    }
-    let values = lines[i];
-    values = values.replace(/  +/g, ' ');
-    const value = {};
-    values.split(' ').forEach((v, index) => {
-      let p = result.fields[index].trim();
-      p = p.toLowerCase();
-      value[p] = v.trim();
-    });
-    data[resType].push(value);
-    i++;
-  }
-
-  return i;
-}
-
-function calculateStats(res) {
-  // Calculate Pod Stats
-  if (!!res.data['v1/Pod']) {
-    calculatePodStats(res, res.data['v1/Pod']);
-  }
-}
-
-function calculatePodStats(data, pods) {
-  data.pods = {
-    status: {},
-    containers: 0,
-    ready: 0,
-  };
-
-  pods.forEach(pod => {
-    let count = data.pods.status[pod.status];
-    if (!count) {
-      count = 0;
-    }
-    data.pods.status[pod.status] = count + 1;
-
-    // Parse the ready state if running
-    if (pod.status === 'Running') {
-      const readyParts = pod.ready.split('/');
-      if (readyParts.length === 2) {
-        const ready = parseInt(readyParts[0], 10);
-        const total = parseInt(readyParts[1], 10);
-        data.pods.ready += ready;
-        data.pods.containers += total;
-      }
-    }
-  });
 }

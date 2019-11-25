@@ -1,8 +1,5 @@
 <div *ngIf="values$ | async as values; else noValues">
-  <app-code-block codeBlockStyle="pre">
-    <pre [innerHtml]="values">
-      </pre>
-  </app-code-block>
+  <ngx-json-viewer [json]="values"></ngx-json-viewer>
 </div>
 <ng-template #noValues>
   <app-no-content-message [icon]="'list'" [firstLine]="'There are no release values'"></app-no-content-message>

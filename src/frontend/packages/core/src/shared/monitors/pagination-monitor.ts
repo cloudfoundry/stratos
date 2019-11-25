@@ -228,6 +228,8 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       schema
     );
 
+    console.log(schema);
+
     const allEntitiesObservable$ = this.store.select(getAPIRequestDataState);
 
     const entities$ = pagination$.pipe(

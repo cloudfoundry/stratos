@@ -20,8 +20,8 @@ export class HelmReleaseNotesTabComponent {
 
     this.notes$ = helmReleaseHelper.release$.pipe(
       map(release => {
-        if (release.info.status.notes) {
-          return this.colorizer.ansiColorsToHtml(release.info.status.notes);
+        if (release.info.notes) {
+          return this.colorizer.ansiColorsToHtml(release.info.notes);
         } else {
           return '';
         }

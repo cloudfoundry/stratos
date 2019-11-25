@@ -1,3 +1,4 @@
+import { DashboardBaseComponent } from './../features/dashboard/dashboard-base/dashboard-base.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -22,6 +23,7 @@ const kubernetes: Routes = [
     path: 'monocular',
     loadChildren: './helm/helm.module#HelmModule',
     data: {
+      reuseRoute: true,
       stratosNavigation: {
         text: 'Helm',
         matIcon: 'helm',

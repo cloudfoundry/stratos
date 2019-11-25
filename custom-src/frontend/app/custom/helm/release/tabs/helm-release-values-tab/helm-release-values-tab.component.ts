@@ -16,13 +16,7 @@ export class HelmReleaseValuesTabComponent {
   constructor(public helmReleaseHelper: HelmReleaseHelperService) {
 
     this.values$ = helmReleaseHelper.release$.pipe(
-      map(release => {
-        if (release.config.raw) {
-          return this.hidePasswords(release.config.raw);
-        } else {
-          return '';
-        }
-      })
+      map(release => release.chart.values)
     );
   }
 
