@@ -320,6 +320,18 @@ entries:
     version: 3122b385c98bdf7f997801373496cdd556d5093b
   metrics:
   - apiVersion: v1
+    appVersion: 1.5.1
+    created: "2019-11-25T18:02:22.539204696Z"
+    description: A Helm chart for Stratos Metrics
+    digest: 5cce31dfed9165918282b0b58060b88cdcacb32984e8f9ed6ae75e9f7c58bfe7
+    icon: https://raw.githubusercontent.com/SUSE/stratos-metrics/master/icon.svg
+    name: metrics
+    sources:
+    - https://github.com/SUSE/stratos-metrics
+    urls:
+    - https://github.com/cloudfoundry-incubator/stratos/releases/download/1.1.1-rc.1/metrics-helm-chart-1.1.1-rc.1-2fa6cdf.tgz
+    version: 1.1.1-rc.1
+  - apiVersion: v1
     appVersion: 1.4.1
     created: "2019-09-03T14:40:27.56867952Z"
     description: A Helm chart for Stratos Metrics
@@ -400,4 +412,4 @@ entries:
     urls:
     - https://github.com/SUSE/stratos-metrics/releases/download/1.0.0/console-metrics-helm-chart-v1.0.0-ddbf0c5.tgz
     version: 1.0.0
-generated: "2019-10-31T16:09:56.490436177Z"
+generated: "2019-11-25T18:02:22.527576727Z"
