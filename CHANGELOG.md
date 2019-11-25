@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.6.1
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/2.6.0...2.6.1)
+
+This release contains two fixes:
+
+**Fixes:**
+
+- Update metric used for cells [\#4009](https://github.com/cloudfoundry/stratos/pull/4009)
+- Fix incorrect SSO behaviour following 2.4.0 --> 2.6.0 upgrade [\#4015](https://github.com/cloudfoundry/stratos/pull/4015)
+
 ## 2.6.0
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/2.5.0...2.6.0)
