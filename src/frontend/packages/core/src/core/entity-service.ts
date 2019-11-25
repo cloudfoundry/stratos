@@ -30,9 +30,13 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
 
 const dispatcherFactory = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => (updatingKey?: string) => {
   if (updatingKey) {
-    action.updatingKey = updatingKey;
+    store.dispatch({
+      ...action,
+      updatingKey
+    });
+  } else {
+    store.dispatch(action);
   }
-  store.dispatch(action);
 };
 
 /**

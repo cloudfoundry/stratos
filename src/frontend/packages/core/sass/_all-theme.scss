@@ -11,7 +11,6 @@
 @import '../src//shared/components/code-block/code-block.component.theme';
 @import '../src/shared/components/list/list-cards/cards.components.theme';
 @import '../src/shared/components/dialog-error/dialog-error.component.theme';
-@import '../src/shared/components/page-subheader/page-subheader.component.theme';
 @import '../src/shared/components/cards/card-status/card-status.component.theme';
 @import '../src/shared/components/usage-gauge/usage-gauge.component.theme';
 @import '../src/shared/components/ssh-viewer/ssh-viewer.component.theme';
@@ -62,6 +61,7 @@
 @import '../../cloud-foundry/src/features/cloud-foundry/tabs/cloud-foundry-firehose/cloud-foundry-firehose.component.theme';
 @import '../../cloud-foundry/src/features/service-catalog/service-catalog-page/service-catalog-page.component.theme';
 @import '../../cloud-foundry/src/features/applications/application-wall/application-wall.component.theme';
+@import '../../core/src/features/error-page/error-page/error-page.component.theme.scss';
 
 // Defaults
 $side-nav-light-text: #fff;
@@ -109,6 +109,7 @@ $side-nav-light-active: #484848;
   @include app-page-subheader-theme($theme, $app-theme);
   @include app-mat-snack-bar-theme($theme, $app-theme);
   @include ngx-charts-gauge($theme, $app-theme);
+  // @include app-mat-tabs-theme($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
   @include app-card-status-theme($theme, $app-theme);
   @include app-usage-gauge-theme($theme, $app-theme);
@@ -151,15 +152,14 @@ $side-nav-light-active: #484848;
   @include page-side-nav-theme($theme, $app-theme);
   @include cf-admin-add-user-warning($theme, $app-theme);
   @include entity-summary-title-theme($theme, $app-theme);
-  @include app-meta-card-item-theme($theme, $app-theme)
+  @include app-meta-card-item-theme($theme, $app-theme);
+  @include error-page-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
   @if ($nav-theme) {
     @return $nav-theme;
-  }
-
-  @else {
+  } @else {
     // Use default palette for side navigation
     @return (background: $side-nav-light-bg, background-top: $side-nav-light-bg, text: darken($side-nav-light-text, 10%), active: $side-nav-light-active, active-text: $side-nav-light-text, hover: $side-nav-light-hover, hover-text: $side-nav-light-text);
   }
@@ -168,9 +168,7 @@ $side-nav-light-active: #484848;
 @function app-generate-status-theme($theme, $status-theme: null) {
   @if ($status-theme) {
     @return $status-theme;
-  }
-
-  @else {
+  } @else {
     $warn: map-get($theme, warn);
     $primary: map-get($theme, primary);
     $white: #fff; // Use default palette for status

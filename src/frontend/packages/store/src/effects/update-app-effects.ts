@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
@@ -16,7 +15,6 @@ import { WrapperRequestActionSuccess } from '../types/request.types';
 export class UpdateAppEffects {
 
   constructor(
-    private http: Http,
     private actions$: Actions
   ) {
   }

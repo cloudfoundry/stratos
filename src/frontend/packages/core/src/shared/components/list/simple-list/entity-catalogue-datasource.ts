@@ -18,6 +18,7 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
     { endpointGuid, paginationKey = catalogueEntity.entityKey + '-list', extraArgs }: GetMultipleActionConfig,
     store: Store<any>,
   ) {
+    const tableConfig = catalogueEntity.definition.tableConfig;
     const schema = catalogueEntity.getSchema();
     const getAllActionBuilder = catalogueEntity.actionOrchestrator.getActionBuilder('getMultiple');
     if (!getAllActionBuilder) {
@@ -27,23 +28,24 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
     listConfig.viewType = ListViewTypes.TABLE_ONLY;
     listConfig.isLocal = true;
     listConfig.enableTextFilter = true;
+    const title = !tableConfig || tableConfig && tableConfig.showHeader ? catalogueEntity.definition.labelPlural : null;
     listConfig.text = {
-      title: catalogueEntity.definition.labelPlural,
       noEntries: `There are no ${catalogueEntity.definition.labelPlural.toLowerCase()}`
     };
+    if (title) {
+      listConfig.text.title = title;
+    }
     listConfig.getColumns = () => {
-      const linBuilders = catalogueEntity.builders.entityBuilder.getLines ? catalogueEntity.builders.entityBuilder.getLines() : [];
+      const linBuilders = tableConfig ? tableConfig.rowBuilders : [];
       return [
         ...linBuilders.map((builder, i) => ({
           columnId: builder[0],
           cellDefinition: {
             getLink: (e: any) => {
-              const metaData = catalogueEntity.builders.entityBuilder.getMetadata(e);
-              return catalogueEntity.builders.entityBuilder.getLink ? catalogueEntity.builders.entityBuilder.getLink(metaData) : null;
+              return null;
             },
             getValue: (e: any) => {
-              const metaData = catalogueEntity.builders.entityBuilder.getMetadata(e);
-              return builder[1](metaData);
+              return builder[1](e, this.store);
             }
           },
           headerCell: () => builder[0],
@@ -59,10 +61,11 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
       ];
     };
     listConfig.getDataSource = () => this;
+    const action = getAllActionBuilder(endpointGuid, paginationKey, extraArgs);
     super({
       store,
-      action: getAllActionBuilder(endpointGuid, paginationKey, extraArgs),
-      paginationKey,
+      action,
+      paginationKey: action.paginationKey,
       schema,
       getRowUniqueId: entity => catalogueEntity.getGuidFromEntity(entity),
       listConfig,

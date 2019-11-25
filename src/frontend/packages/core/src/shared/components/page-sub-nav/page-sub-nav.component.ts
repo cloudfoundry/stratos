@@ -8,7 +8,7 @@ import { TabNavService } from '../../../../tab-nav.service';
   styleUrls: ['./page-sub-nav.component.scss']
 })
 export class PageSubNavComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('subNavTmpl') subNavTmpl: TemplateRef<any>;
+  @ViewChild('subNavTmpl', { static: true }) subNavTmpl: TemplateRef<any>;
 
   constructor(private tabNavService: TabNavService) { }
 

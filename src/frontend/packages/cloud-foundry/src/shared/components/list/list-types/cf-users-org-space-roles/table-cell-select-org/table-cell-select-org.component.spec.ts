@@ -1,5 +1,4 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
@@ -11,6 +10,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { TableCellSelectOrgComponent } from './table-cell-select-org.component';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('TableCellSelectOrgComponent', () => {
   let component: TableCellSelectOrgComponent;
@@ -22,7 +22,7 @@ describe('TableCellSelectOrgComponent', () => {
         ...generateCfStoreModules(),
         CoreModule,
         NoopAnimationsModule,
-        HttpModule
+        HttpClientModule
       ],
       providers: [
         CfUserServiceTestProvider,

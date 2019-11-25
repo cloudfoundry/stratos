@@ -1,5 +1,4 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -18,6 +17,7 @@ import {
 } from './manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
 import { UsersRolesSelectComponent } from './manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './manage-users.component';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('UsersRolesComponent', () => {
   let component: UsersRolesComponent;
@@ -31,7 +31,7 @@ describe('UsersRolesComponent', () => {
         SharedModule,
         NoopAnimationsModule,
         RouterTestingModule,
-        HttpModule
+        HttpClientModule
       ],
       providers: [
         {

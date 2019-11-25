@@ -1,6 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { HttpModule } from '@angular/http';
 import { EffectsModule } from '@ngrx/effects';
 
 import { ActionHistoryEffect } from './effects/action-history.effects';
@@ -33,7 +32,6 @@ import { AppReducersModule } from './reducers.module';
   ],
   imports: [
     AppReducersModule,
-    HttpModule,
     HttpClientModule,
     EffectsModule.forRoot([
       DashboardEffect,

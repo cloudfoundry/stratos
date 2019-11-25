@@ -105,10 +105,10 @@ export class DeployApplicationStep2Component
   // Local FS data when file or folder upload
   // @Input('fsSourceData') fsSourceData;
 
-  @ViewChild('sourceSelectionForm') sourceSelectionForm: NgForm;
+  @ViewChild('sourceSelectionForm', { static: true }) sourceSelectionForm: NgForm;
   subscriptions: Array<Subscription> = [];
 
-  @ViewChild('fsChooser') fsChooser;
+  @ViewChild('fsChooser', { static: false }) fsChooser;
   public selectedSourceType: SourceType = null;
 
   ngOnDestroy(): void {

@@ -4,7 +4,7 @@ import { BaseEndpointAuth } from '../../features/endpoints/endpoint-auth';
 import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './entity-catalogue-entity';
 import { TestEntityCatalogue } from './entity-catalogue.service';
-import { IStratosEndpointDefinition } from './entity-catalogue.types';
+import { IStratosEndpointDefinition, EntityCatalogueSchemas } from './entity-catalogue.types';
 
 describe('EntityCatalogueService', () => {
   let entityCatalogue: TestEntityCatalogue;
@@ -133,7 +133,7 @@ describe('EntityCatalogueService', () => {
       ]
     };
     entityCatalogue.register(new StratosCatalogueEndpointEntity(definition));
-    const expected: IStratosEndpointDefinition = {
+    const expected: IStratosEndpointDefinition<EntityCatalogueSchemas> = {
       ...subtypeDefinition,
       icon: 'cloud_foundry',
       iconFont: 'stratos-icons',

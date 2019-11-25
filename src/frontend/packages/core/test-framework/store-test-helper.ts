@@ -158,7 +158,6 @@ function getDefaultInitialTestStratosStoreState() {
     },
     dashboard: {
       sidenavOpen: true,
-      headerEventMinimized: false,
       timeoutSession: true,
       sideHelpOpen: false,
       sideHelpDocument: '',
@@ -193,7 +192,10 @@ function getDefaultInitialTestStratosStoreState() {
       }
     },
     internalEvents: {
-      types: {}
+      types: {
+        global: {},
+        endpoint: {}
+      }
     },
     currentUserRoles: {
       internal: {
@@ -338,14 +340,14 @@ export function createBasicStoreModule(
   return StoreModule.forRoot(
     appReducers,
     {
-      initialState
+      initialState, runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
     }
   );
 }
 
 export function createEmptyStoreModule(): ModuleWithProviders {
   return StoreModule.forRoot(
-    appReducers
+    appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
   );
 }
 

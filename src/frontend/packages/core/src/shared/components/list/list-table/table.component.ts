@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatSort, Sort } from '@angular/material';
+import { MatSort, Sort } from '@angular/material/sort';
 import { combineLatest as observableCombineLatest, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -37,7 +37,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
 
   private uberSub: Subscription;
 
-  @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input() hideTable = false;
