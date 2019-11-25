@@ -43,6 +43,7 @@ const appRoutes: Routes = [
           }
         }
       },
+      { path: 'entity-list', loadChildren: () => import('./api-driven-views/api-driven-views.module').then(m => m.ApiDrivenViewsModule) },
       {
         path: 'applications',
         loadChildren: () => import('../../cloud-foundry/src/features/applications/applications.module').then(m => m.ApplicationsModule),
@@ -75,7 +76,9 @@ const appRoutes: Routes = [
         }]
       },
       {
-        path: 'marketplace', loadChildren: () => import('../../cloud-foundry/src/features/service-catalog/service-catalog.module').then(m => m.ServiceCatalogModule),
+        path: 'marketplace',
+        loadChildren: () => import('../../cloud-foundry/src/features/service-catalog/service-catalog.module')
+          .then(m => m.ServiceCatalogModule),
         data: {
           stratosNavigation: {
             label: 'Marketplace',
@@ -86,7 +89,8 @@ const appRoutes: Routes = [
         },
       },
       {
-        path: 'services', loadChildren: () => import('../../cloud-foundry/src/features/services/services.module').then(m => m.ServicesModule),
+        path: 'services',
+        loadChildren: () => import('../../cloud-foundry/src/features/services/services.module').then(m => m.ServicesModule),
         data: {
           stratosNavigation: {
             label: 'Services',
@@ -98,7 +102,8 @@ const appRoutes: Routes = [
         },
       },
       {
-        path: 'cloud-foundry', loadChildren: () => import('../../cloud-foundry/src/features/cloud-foundry/cloud-foundry.module').then(m => m.CloudFoundryModule),
+        path: 'cloud-foundry',
+        loadChildren: () => import('../../cloud-foundry/src/features/cloud-foundry/cloud-foundry.module').then(m => m.CloudFoundryModule),
         data: {
           stratosNavigation: {
             label: 'Cloud Foundry',
@@ -126,7 +131,7 @@ const appRoutes: Routes = [
   {
     path: '**',
     component: PageNotFoundComponentComponent
-  }
+  },
 ];
 
 @NgModule({
