@@ -108,11 +108,13 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
     public spaceGuid: string,
     public params: object,
     public tags: string[],
+    httpMethod = 'POST',
+    url = 'service_instances'
   ) {
     super();
     this.options = new HttpRequest(
-      'POST',
-      `service_instances`,
+      httpMethod,
+      url,
       {
         name,
         space_guid: spaceGuid,
@@ -148,16 +150,7 @@ export class UpdateServiceInstance extends CreateServiceInstance {
     public params: object,
     public tags: string[],
   ) {
-    super(endpointGuid, guid, name, servicePlanGuid, spaceGuid, params, tags);
-    this.options = new HttpRequest(
-      'PUT',
-      `${this.options.url}/${this.guid}`,
-      {
-        params: {
-          accepts_incomplete: 'true'
-        }
-      }
-    );
+    super(endpointGuid, guid, name, servicePlanGuid, spaceGuid, params, tags, 'PUT', `service_instances/${guid}`);
     this.actions = getActions('Service Instances', 'Update Service Instance');
   }
   updatingKey = UpdateServiceInstance.updateServiceInstance;

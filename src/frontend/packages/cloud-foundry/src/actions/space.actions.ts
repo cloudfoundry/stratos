@@ -194,9 +194,7 @@ export class CreateSpace extends BaseSpaceAction {
     this.options = new HttpRequest(
       'POST',
       'spaces',
-      {
-        body: createSpace
-      }
+      createSpace
     );
   }
   actions = [CREATE_SPACE, CREATE_SPACE_SUCCESS, CREATE_SPACE_FAILED];
@@ -209,9 +207,7 @@ export class UpdateSpace extends CFStartAction implements ICFAction {
     this.options = new HttpRequest(
       'PUT',
       `spaces/${guid}`,
-      {
-        body: updateSpace
-      }
+      updateSpace
     );
   }
   actions = getActions('Spaces', 'Update Space');

@@ -158,7 +158,6 @@ function getDefaultInitialTestStratosStoreState() {
     },
     dashboard: {
       sidenavOpen: true,
-      headerEventMinimized: false,
       timeoutSession: true,
       sideHelpOpen: false,
       sideHelpDocument: '',
@@ -192,7 +191,10 @@ function getDefaultInitialTestStratosStoreState() {
       }
     },
     internalEvents: {
-      types: {}
+      types: {
+        global: {},
+        endpoint: {}
+      }
     },
     currentUserRoles: {
       internal: {

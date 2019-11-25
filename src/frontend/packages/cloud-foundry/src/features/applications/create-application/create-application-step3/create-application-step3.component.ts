@@ -137,7 +137,7 @@ export class CreateApplicationStep3Component implements OnInit {
   associateRoute(appGuid: string, routeGuid: string, endpointGuid: string): Observable<RequestInfoState> {
     const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
-    const assignRouteAction = actionBuilder(appGuid, routeGuid, endpointGuid);
+    const assignRouteAction = actionBuilder(endpointGuid, routeGuid, appGuid);
     this.store.dispatch(assignRouteAction);
     return this.wrapObservable(this.store.select(selectCfRequestInfo(applicationEntityType, appGuid)),
       'Application and route created. Could not associated route with app');

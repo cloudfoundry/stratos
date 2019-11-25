@@ -139,7 +139,6 @@ export class DeployApplicationStep3Component implements OnDestroy {
     }
 
     this.initDeployer();
-
     // Start deploying
     this.deployer.open();
     if (fsDeployer) {
