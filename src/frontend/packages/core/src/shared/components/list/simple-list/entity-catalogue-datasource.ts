@@ -36,9 +36,9 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
       listConfig.text.title = title;
     }
     listConfig.getColumns = () => {
-      const linBuilders = tableConfig ? tableConfig.rowBuilders : [];
+      const linBuilders = tableConfig ? tableConfig.columnBuilders : [];
       return [
-        ...linBuilders.map((builder, i) => ({
+        ...linBuilders.map((builder, i) => (Array.isArray(builder) ? {
           columnId: builder[0],
           cellDefinition: {
             getLink: (e: any) => {
@@ -49,7 +49,7 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
             }
           },
           headerCell: () => builder[0],
-        })),
+        } : builder)),
         createTableColumnFavorite(row => {
           return new UserFavorite(
             catalogueEntity.getEndpointGuidFromEntity(row),

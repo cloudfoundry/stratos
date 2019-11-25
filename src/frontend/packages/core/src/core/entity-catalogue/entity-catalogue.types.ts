@@ -15,6 +15,7 @@ import { EndpointAuthTypeConfig } from '../extension/extension-types';
 import { Omit } from '../utils.service';
 import { GeneralEntityAppState } from '../../../../store/src/app-state';
 import { Store } from '@ngrx/store';
+import { ITableColumn } from '../../shared/components/list/list-table/table.types';
 
 export interface EntityCatalogueEntityConfig {
   entityType: string;
@@ -102,7 +103,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogueSchemas | EntityS
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
 export interface EntityTableConfig<T = any> {
-  rowBuilders: EntityRowBuilder<T>[];
+  columnBuilders: (EntityRowBuilder<T> | ITableColumn<T>)[];
   showHeader?: boolean;
 }
 /**

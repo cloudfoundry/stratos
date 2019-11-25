@@ -20,6 +20,21 @@ import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes-entity-factory';
 import { generateKubernetesEntities } from './kubernetes-entity-generator';
 import { KubernetesStoreModule } from './kubernetes.store.module';
 import { KubeHealthCheck } from './store/kubernetes.actions';
+import { KubernetesNodeCapacityComponent } from './list-types/kubernetes-nodes/kubernetes-node-capacity/kubernetes-node-capacity.component';
+import { KubernetesPodTagsComponent } from './list-types/kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';
+import { AppLinkComponent } from './list-types/kubernetes-apps/app-link/app-link.component';
+import { KubernetesNodeLinkComponent } from './list-types/kubernetes-nodes/kubernetes-node-link/kubernetes-node-link.component';
+import { KubernetesNodeIpsComponent } from './list-types/kubernetes-nodes/kubernetes-node-ips/kubernetes-node-ips.component';
+import { KubernetesNodeLabelsComponent } from './list-types/kubernetes-nodes/kubernetes-node-labels/kubernetes-node-labels.component';
+import { KubernetesNodePressureComponent } from './list-types/kubernetes-nodes/kubernetes-node-pressure/kubernetes-node-pressure.component';
+import { KubernetesLabelsCellComponent } from './list-types/kubernetes-labels-cell/kubernetes-labels-cell.component';
+import { ConditionCellComponent } from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
+import { KubernetesNamespaceLinkComponent } from './list-types/kubernetes-namespaces/kubernetes-namespace-link/kubernetes-namespace-link.component';
+import { KubeAppcreatedDateComponent } from './list-types/kubernetes-apps/kube-appcreated-date/kube-appcreated-date.component';
+import { KubeNamespacePodCountComponent } from './list-types/kubernetes-namespaces/kube-namespace-pod-count/kube-namespace-pod-count.component';
+import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
+import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-count/node-pod-count.component';
+import { KubernetesServicePortsComponent } from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
 
 
 @NgModule({
@@ -37,6 +52,21 @@ import { KubeHealthCheck } from './store/kubernetes.actions';
     KubernetesGKEAuthFormComponent,
   ],
   entryComponents: [
+    KubernetesNodeCapacityComponent,
+    KubernetesPodTagsComponent,
+    AppLinkComponent,
+    KubernetesNodeLinkComponent,
+    KubernetesNodeIpsComponent,
+    KubernetesNodeLabelsComponent,
+    KubernetesNodePressureComponent,
+    KubernetesLabelsCellComponent,
+    ConditionCellComponent,
+    KubernetesNamespaceLinkComponent,
+    KubeAppcreatedDateComponent,
+    KubeNamespacePodCountComponent,
+    PodNameLinkComponent,
+    NodePodCountComponent,
+    KubernetesServicePortsComponent,
     KubernetesCertsAuthFormComponent,
     KubernetesAWSAuthFormComponent,
     KubernetesConfigAuthFormComponent,

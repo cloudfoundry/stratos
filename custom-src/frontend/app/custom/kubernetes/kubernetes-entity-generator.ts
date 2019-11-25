@@ -7,7 +7,7 @@ import {
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity,
 } from '../../core/entity-catalogue/entity-catalogue-entity';
-import { StratosEndpointExtensionDefinition } from '../../core/entity-catalogue/entity-catalogue.types';
+import { StratosEndpointExtensionDefinition, IStratosEntityDefinition } from '../../core/entity-catalogue/entity-catalogue.types';
 import { EndpointAuthTypeConfig, EndpointType } from '../../core/extension/extension-types';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
@@ -37,7 +37,20 @@ import {
   KubernetesPod,
   KubernetesStatefulSet,
   KubeService,
+  ConditionType,
 } from './store/kube.types';
+import { podActionBuilders } from './entity-action-builders/pod-action-builders';
+import { nodeActionBuilders } from './entity-action-builders/node-action-builders';
+import { getContainerLengthSort, getConditionSort } from './list-types/kube-sort.helper';
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { KubernetesNodeLinkComponent } from './list-types/kubernetes-nodes/kubernetes-node-link/kubernetes-node-link.component';
+import { KubernetesNodeIpsComponent } from './list-types/kubernetes-nodes/kubernetes-node-ips/kubernetes-node-ips.component';
+import { KubernetesNodeLabelsComponent } from './list-types/kubernetes-nodes/kubernetes-node-labels/kubernetes-node-labels.component';
+import { ConditionCellComponent } from './list-types/kubernetes-nodes/condition-cell/condition-cell.component';
+import { KubernetesNodePressureComponent } from './list-types/kubernetes-nodes/kubernetes-node-pressure/kubernetes-node-pressure.component';
+import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-count/node-pod-count.component';
+import { KubernetesNodeCapacityComponent } from './list-types/kubernetes-nodes/kubernetes-node-capacity/kubernetes-node-capacity.component';
+import { KubernetesNodesListFilterKeys } from './list-types/kubernetes-nodes/kubernetes-nodes-list-config.service';
 
 const enum KubeEndpointAuthTypes {
   CERT_AUTH = 'kube-cert-auth',
@@ -176,12 +189,80 @@ function generateStatefulSetsEntity(endpointDefinition: StratosEndpointExtension
 }
 
 function generatePodsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition<EntitySchema, KubernetesPod> = {
     type: kubernetesPodsEntityType,
     schema: kubernetesEntityFactory(kubernetesPodsEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    icon: 'adjust',
+    label: 'Pod',
+    labelPlural: 'Pods',
+    tableConfig: {
+      columnBuilders: [
+        ['Name', (pod: KubernetesPod) => pod.metadata.name],
+        {
+          columnId: 'containers', headerCell: () => 'No. of Containers',
+          cellDefinition: {
+            valuePath: 'spec.containers.length'
+          },
+          sort: getContainerLengthSort,
+          cellFlex: '2',
+        },
+        {
+          columnId: 'namespace', headerCell: () => 'Namespace',
+          cellDefinition: {
+            valuePath: 'metadata.namespace'
+          },
+          sort: {
+            type: 'sort',
+            orderKey: 'namespace',
+            field: 'metadata.namespace'
+          },
+          cellFlex: '5',
+        },
+        {
+          columnId: 'node', headerCell: () => 'Node',
+          cellDefinition: {
+            valuePath: 'spec.nodeName'
+          },
+          sort: {
+            type: 'sort',
+            orderKey: 'node',
+            field: 'spec.nodeName'
+          },
+          cellFlex: '5',
+        },
+        {
+          columnId: 'status', headerCell: () => 'Status',
+          cellDefinition: {
+            valuePath: 'status.phase'
+          },
+          sort: {
+            type: 'sort',
+            orderKey: 'status',
+            field: 'status.phase'
+          },
+          cellFlex: '5',
+        },
+        {
+          columnId: 'container-status', headerCell: () => `Ready Containers`,
+          cellDefinition: {
+            getValue: (row) => {
+              if (row.status.phase === 'Failed') {
+                return `0 / ${row.spec.containers.length}`;
+              }
+              const readyPods = row.status.containerStatuses.filter(status => status.ready).length;
+              const allContainers = row.status.containerStatuses.length;
+              return `${readyPods} / ${allContainers}`;
+            }
+          },
+          cellFlex: '5',
+        },
+      ]
+    }
   };
-  return new StratosCatalogueEntity<IFavoriteMetadata, KubernetesPod>(definition);
+  return new StratosCatalogueEntity<IFavoriteMetadata, KubernetesPod>(definition, {
+    actionBuilders: podActionBuilders
+  });
 }
 
 function generateDeploymentsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -194,12 +275,72 @@ function generateDeploymentsEntity(endpointDefinition: StratosEndpointExtensionD
 }
 
 function generateNodesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: kubernetesNodesEntityType,
     schema: kubernetesEntityFactory(kubernetesNodesEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Node',
+    labelPlural: 'Nodes',
+    icon: 'developer_board',
+    tableConfig: {
+      columnBuilders: [
+        {
+          columnId: 'name', headerCell: () => 'Name',
+          cellComponent: KubernetesNodeLinkComponent,
+          sort: {
+            type: 'sort',
+            orderKey: 'name',
+            field: 'metadata.name'
+          },
+          cellFlex: '5',
+        },
+        {
+          columnId: 'ips', headerCell: () => 'IPs',
+          cellComponent: KubernetesNodeIpsComponent,
+          cellFlex: '1',
+        },
+        {
+          columnId: 'labels', headerCell: () => 'Labels',
+          cellComponent: KubernetesNodeLabelsComponent,
+          cellFlex: '1',
+        },
+        {
+          columnId: 'ready', headerCell: () => 'Ready',
+          cellConfig: {
+            conditionType: ConditionType.Ready
+          },
+          cellComponent: ConditionCellComponent,
+
+          sort: getConditionSort(ConditionType.Ready),
+          cellFlex: '2',
+        },
+        {
+          columnId: 'condition', headerCell: () => 'Condition',
+          cellComponent: KubernetesNodePressureComponent,
+          cellFlex: '2',
+        },
+        {
+          columnId: 'numPods', headerCell: () => 'No. of Pods',
+          cellComponent: NodePodCountComponent,
+          cellFlex: '2',
+        },
+        {
+          columnId: 'capacity', headerCell: () => 'Capacity',
+          cellComponent: KubernetesNodeCapacityComponent,
+          cellFlex: '4',
+        },
+        // Display labels as the usual chip list
+        // {
+        //   columnId: 'labels', headerCell: () => 'Labels',
+        //   cellComponent: KubernetesLabelsCellComponent,
+        //   cellFlex: '6',
+        // },
+      ]
+    }
   };
-  return new StratosCatalogueEntity<IFavoriteMetadata, KubernetesNode>(definition);
+  return new StratosCatalogueEntity<IFavoriteMetadata, KubernetesNode>(definition, {
+    actionBuilders: nodeActionBuilders
+  });
 }
 
 function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {

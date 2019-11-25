@@ -866,7 +866,7 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
     labelPlural: 'Applications',
     endpoint: endpointDefinition,
     tableConfig: {
-      rowBuilders: [
+      columnBuilders: [
         ['Name', (entity) => entity.entity.name],
         ['Creation Date', (entity) => entity.metadata.created_at]
       ]

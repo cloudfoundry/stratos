@@ -10,11 +10,13 @@ import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue
 })
 export class ApiEntityListPageComponent implements OnInit {
   public catalogueEntity: StratosBaseCatalogueEntity;
+  public endpointGuid: string;
   constructor(
     public route: ActivatedRoute
   ) { }
 
   ngOnInit() {
+    this.endpointGuid = this.route.parent.snapshot.params.endpointId;
     const endpointType = this.route.parent.snapshot.params.endpointType;
     const entityType = this.route.snapshot.params.entityType;
     this.catalogueEntity = entityCatalogue.getEntity(endpointType, entityType);

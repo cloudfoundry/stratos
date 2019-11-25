@@ -401,15 +401,16 @@ export class KubernetesEffects {
         return [
           new WrapperRequestActionSuccess(processesData, action)
         ];
-      }), catchError(error => [
-        new WrapperRequestActionFailed(error.message, action, 'fetch', {
-          endpointIds: [action.kubeGuid],
-          url: error.url || url,
-          eventCode: error.status ? error.status + '' : '500',
-          message: 'Kubernetes API request error',
-          error
-        })
-      ]));
+      }));
+    // , catchError(error => [
+    //   new WrapperRequestActionFailed(error.message, action, 'fetch', {
+    //     endpointIds: [action.kubeGuid],
+    //     url: error.url || url,
+    //     eventCode: error.status ? error.status + '' : '500',
+    //     message: 'Kubernetes API request error',
+    //     error
+    //   })
+    // ])
   }
 
   private processSingleItemAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T>) {

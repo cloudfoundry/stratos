@@ -20,6 +20,9 @@ export class SimpleListComponent implements OnInit {
   @Input()
   public catalogueEntity: StratosCatalogueEntity;
 
+  @Input()
+  public endpointGuid: string;
+
   @ViewChild(ListHostDirective, { static: true })
   public listHost: ListHostDirective;
 
@@ -42,7 +45,7 @@ export class SimpleListComponent implements OnInit {
     viewContainerRef.clear();
     const dataSource = new CatalogueEntityDrivenListDataSource<any>(
       this.catalogueEntity,
-      endpointGuid ? { endpointGuid } : {},
+      this.endpointGuid ? { endpointGuid: this.endpointGuid } : {},
       this.store,
     );
     const componentRef = viewContainerRef.createComponent(
