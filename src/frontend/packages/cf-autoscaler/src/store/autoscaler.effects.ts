@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
@@ -36,6 +37,7 @@ import {
   AutoscalerPaginationParams,
   AutoscalerQuery,
   CREATE_APP_AUTOSCALER_POLICY,
+  CreateAppAutoscalerPolicyAction,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
@@ -47,18 +49,16 @@ import {
   GetAppAutoscalerScalingHistoryAction,
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
-  CreateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
 import {
   AppAutoscalerEvent,
   AppAutoscalerFetchPolicyFailedResponse,
   AppAutoscalerMetricData,
   AppAutoscalerMetricDataLocal,
+  AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppScalingTrigger,
-  AppAutoscalerPolicy,
 } from './app-autoscaler.types';
-import { HttpClient } from '@angular/common/http';
 
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
@@ -138,8 +138,10 @@ export class AutoscalerEffects {
     mergeMap(action => {
       const actionType = 'update';
       this.store.dispatch(new StartRequestAction(action, actionType));
-      return this.http
-        .put<AppAutoscalerPolicy>(`${commonPrefix}/apps/${action.guid}/policy`, {
+      return this.http.put<AppAutoscalerPolicy>(
+        `${commonPrefix}/apps/${action.guid}/policy`,
+        autoscalerTransformMapToArray(action.policy),
+        {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
           mergeMap(response => {
@@ -172,7 +174,7 @@ export class AutoscalerEffects {
       const actionType = 'delete';
       this.store.dispatch(new StartRequestAction(action, actionType));
       return this.http
-        .get(`${commonPrefix}/apps/${action.guid}/policy`, {
+        .delete(`${commonPrefix}/apps/${action.guid}/policy`, {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
           mergeMap(response => {
@@ -287,24 +289,26 @@ export class AutoscalerEffects {
     this.store.dispatch(new StartRequestAction(action, actionType));
     const entity = entityCatalogue.getEntity(action);
     return this.http
-      .put<AppAutoscalerPolicy>(`${commonPrefix}/apps/${action.guid}/policy`, {
-        headers: this.addHeaders(action.endpointGuid),
-        body: autoscalerTransformMapToArray(action.policy)
-      }).pipe(
-        mergeMap(response => {
-          const policyInfo = autoscalerTransformArrayToMap(response);
-          const mappedData = {
-            entities: { [entity.entityKey]: {} },
-            result: []
-          } as NormalizedResponse;
-          this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
-          return [
-            new WrapperRequestActionSuccess(mappedData, action, actionType)
-          ];
-        }),
-        catchError(err => [
-          new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), action, actionType)
-        ]));
+      .put<AppAutoscalerPolicy>(
+        `${commonPrefix}/apps/${action.guid}/policy`,
+        autoscalerTransformMapToArray(action.policy),
+        {
+          headers: this.addHeaders(action.endpointGuid),
+        }).pipe(
+          mergeMap(response => {
+            const policyInfo = autoscalerTransformArrayToMap(response);
+            const mappedData = {
+              entities: { [entity.entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
+            return [
+              new WrapperRequestActionSuccess(mappedData, action, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), action, actionType)
+          ]));
   }
 
   private fetchPolicy(
