@@ -81,7 +81,7 @@ export class InternalEventMonitor {
       return errorObject;
     }, {});
   }
-  public hasErroredOverTime(minutes = 5) {
+  public hasErroredOverTime(minutes = 30) {
     const interval$ = newNonAngularInterval(this.ngZone, 30000).pipe(
       startWith(-1)
     );
@@ -90,7 +90,7 @@ export class InternalEventMonitor {
     );
   }
 
-  public hasErroredOverTimeNoPoll(minutes = 5) {
+  public hasErroredOverTimeNoPoll(minutes = 30) {
     return this.events$.pipe(
       map(state => this.getErrorsOverTimePeriod(state, minutes))
     );

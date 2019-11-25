@@ -1,14 +1,16 @@
 @import '../../../../sass/mixins';
 .error-page {
   @include breakpoint(tablet) {
-    margin: 0 20%;
+    margin: 0 10%;
   }
+
   &__json-response {
     border-radius: 4px;
-    line-height: 35px;
-    margin: 10px 20px;
-    padding: 20px;
+    line-height: 25px;
+    margin: 10px 0;
+    padding: 5px 10px;
     pre {
+      margin: 0;
       white-space: pre-wrap;
     }
   }
@@ -16,37 +18,35 @@
     display: flex;
     flex-direction: column;
   }
-  &__errors-header {
+
+  &__error-actions {
     display: flex;
     flex-direction: row-reverse;
+    padding-bottom: 10px;
   }
-  &__event-row {
-    margin-right: 15px;
-  }
-  &__event-key {
-    font-size: 15px;
-    margin: 15px 15px 0;
-    opacity: .6;
-  }
-  &__event-value {
-    margin: 2px 15px 20px;
-  }
+
   &__event-row-card {
     margin-bottom: 15px;
+    .mat-card-title {
+      align-items: center;
+      display: flex;
+    }
+  }
+  &__event-row-icon {
+    padding-right: 10px;
   }
   &__event-message {
     font-family: monospace;
     font-size: 14px;
     line-height: 25px;
   }
-  &___event-row-card {
-    align-items: center;
-    display: flex;
-    flex-direction: row;
-  }
   &__endpoint-name-subtitle {
     margin-bottom: -20px;
     opacity: .6;
+  }
+
+  &__endpoint-name {
+    margin-bottom: 0;
   }
   &__download {
     float: right;
@@ -57,5 +57,22 @@
   }
   &__header-left {
     flex: 1;
+  }
+  &__no-errors-message {
+    margin-top: 20px;
+  }
+
+  .app-metadata {
+    display: flex;
+    flex-direction: row;
+    &__two-cols {
+      padding-right: 40px;
+      app-metadata-item:first-child {
+        margin-top: 0;
+      }
+    }
+    app-metadata-item {
+      margin-bottom: 0;
+    }
   }
 }

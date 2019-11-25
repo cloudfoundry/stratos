@@ -13,51 +13,52 @@
     <div class="error-page__header">
       <div class="error-page__header-left">
         <div class="error-page__endpoint-name-subtitle">Endpoint name</div>
-        <h2>{{errorDetails.endpoint.name}}</h2>
+        <h2 class="error-page__endpoint-name">{{errorDetails.endpoint.name}}</h2>
       </div>
-      <div class="error-page__header-right">
-        <a class="error-page__download" *ngIf="errorDetails.errors && errorDetails.errors.length" mat-icon-button
-          [href]="jsonDownloadHref$ | async" title="Download endpoint error information" download="endpoint-errors.json"
+      <div class="error-page__header-right" *ngIf="errorDetails.errors && errorDetails.errors.length">
+        <a class="error-page__download" mat-icon-button [href]="jsonDownloadHref$ | async"
+          title="Download endpoint error information" download="endpoint-errors.json"
           matTooltip="Download endpoint error information" aria-label="Download endpoint error information">
           <mat-icon>cloud_download</mat-icon>
         </a>
       </div>
     </div>
     <div class="error-page__errors" *ngIf="errorDetails.errors && errorDetails.errors.length ; else noEvents">
-      <span class="error-page__errors-header">
-        <button mat-button color="warn" (click)="dismissEndpointErrors(errorDetails.endpoint.guid)">Dismiss
-          errors</button>
-      </span>
-      <mat-list>
-        <mat-card class="error-page__event-row-card" *ngFor="let error of errorDetails.errors">
-          <mat-card-header>
-            <div mat-card-avatar>
-              <app-stateful-icon class="error-page__event-row-icon" [state]="icon">
-              </app-stateful-icon>
+      <div class="error-page__error-actions">
+        <button mat-button color="primary" aria-label="Dismiss errors"
+          (click)="dismissEndpointErrors(errorDetails.endpoint.guid)">
+          Dismiss all
+        </button>
+      </div>
+      <mat-card class="error-page__event-row-card" *ngFor="let error of errorDetails.errors">
+        <mat-card-header>
+          <mat-card-title class="error-page__header ">
+            <app-stateful-icon class="error-page__event-row-icon" [state]="icon">
+            </app-stateful-icon>
+            {{ error.timestamp | date:'medium' }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-metadata-item label="Endpoint Response">
+            <div matLine class="error-page__json-response 1error-page__event-value error-page__event-message">
+              <pre>{{ (error.metadata.errorResponse.errorResponse || '-') | json }}</pre>
             </div>
-            <mat-card-title>{{ error.timestamp | date:'medium' }}</mat-card-title>
-          </mat-card-header>
-          <div>
-            <div class="error-page__event-row">
-              <div matLine class="error-page__event-key">Endpoint Response</div>
-              <div matLine class="error-page__json-response error-page__event-value error-page__event-message">
-                <pre>{{ error.metadata.errorResponse.errorResponse || '-' }}</pre>
-              </div>
-              <div matLine class="error-page__event-key">Jetstream Response</div>
-              <div matLine class="error-page__event-value error-page__event-message">{{ error.message }}</div>
-              <div matLine class="error-page__event-key">URL</div>
-              <div matLine class="error-page__event-value">{{ error.metadata.url || '-' }}</div>
-              <div matLine class="error-page__event-key">HTTP Method</div>
-              <div matLine class="error-page__event-value">{{ error.metadata.httpMethod }}</div>
-              <div matLine class="error-page__event-key">HTTP Code</div>
-              <div matLine class="error-page__event-value">{{ error.eventCode }}</div>
+          </app-metadata-item>
+          <app-metadata-item label="Jetstream Response">{{ error.message }}</app-metadata-item>
+          <app-metadata-item label="URL">{{ error.metadata.url || '-' }}</app-metadata-item>
+          <div class="app-metadata">
+            <div class="app-metadata__two-cols">
+              <app-metadata-item label="HTTP Method">{{ error.metadata.httpMethod }}</app-metadata-item>
+            </div>
+            <div class="app-metadata__two-cols">
+              <app-metadata-item label="HTTP Code">{{ error.eventCode }}</app-metadata-item>
             </div>
           </div>
-        </mat-card>
-      </mat-list>
+        </mat-card-content>
+      </mat-card>
     </div>
   </div>
   <ng-template #noEvents>
-    <div>No recent errors</div>
+    <mat-card class="error-page__no-errors-message">No recent errors</mat-card>
   </ng-template>
 </ng-container>

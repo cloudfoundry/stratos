@@ -2,12 +2,12 @@ import { Action } from '@ngrx/store';
 import * as moment from 'moment';
 
 import {
-  SEND_EVENT,
-  InternalEventSeverity,
+  CLEAR_ENDPOINT_ERROR_EVENTS,
   CLEAR_EVENTS,
+  InternalEventSeverity,
   InternalEventState,
   InternalEventStateMetadata,
-  CLEAR_ENDPOINT_ERROR_EVENTS
+  SEND_EVENT,
 } from '../types/internal-events.types';
 
 export class SendEventAction<T = InternalEventStateMetadata> implements Action {

@@ -133,7 +133,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     return eventMonitor.hasErroredOverTime().pipe(
       withLatestFrom(store.select(endpointEntitiesSelector)),
       tap(([errored, endpoints]) => Object.keys(errored).forEach(id => {
-        if (endpoints[id].connectionStatus === 'connected') {
+        if (endpoints[id] && endpoints[id].connectionStatus === 'connected') {
           rowStateManager.updateRowState(id, {
             error: true,
             message: `We've been having trouble communicating with this endpoint`

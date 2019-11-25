@@ -4,18 +4,14 @@ import {
   DISABLE_SIDE_NAV_MOBILE_MODE,
   ENABLE_POLLING,
   ENABLE_SIDE_NAV_MOBILE_MODE,
-  OPEN_SIDE_NAV,
-  SET_HEADER_EVENT,
-  SetHeaderEvent,
-  SetPollingEnabledAction,
-  SHOW_SIDE_HELP,
-  TOGGLE_SIDE_NAV,
-} from '../actions/dashboard-actions';
-import {
   HYDRATE_DASHBOARD_STATE,
   HydrateDashboardStateAction,
+  OPEN_SIDE_NAV,
+  SetPollingEnabledAction,
   SetSessionTimeoutAction,
+  SHOW_SIDE_HELP,
   TIMEOUT_SESSION,
+  TOGGLE_SIDE_NAV,
 } from '../actions/dashboard-actions';
 
 export interface DashboardState {

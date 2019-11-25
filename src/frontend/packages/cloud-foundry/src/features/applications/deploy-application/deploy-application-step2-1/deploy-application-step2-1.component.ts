@@ -31,7 +31,7 @@ export class DeployApplicationStep21Component {
   validate: Observable<boolean>;
   selectedCommit$: Observable<GitCommit>;
 
-  @ViewChild('target', { read: ViewContainerRef })
+  @ViewChild('target', { read: ViewContainerRef, static: true })
   target: ViewContainerRef;
   wrapperFactory: ComponentFactory<CommitListWrapperComponent>;
   wrapperRef: ComponentRef<CommitListWrapperComponent>;

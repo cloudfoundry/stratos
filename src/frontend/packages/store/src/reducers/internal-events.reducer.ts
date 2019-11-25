@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { SendClearEventAction, SendEventAction, SendClearEndpointEventsAction } from '../actions/internal-events.actions';
+import { SendClearEndpointEventsAction, SendClearEventAction, SendEventAction } from '../actions/internal-events.actions';
 import {
   CLEAR_EVENTS,
   GLOBAL_EVENT,

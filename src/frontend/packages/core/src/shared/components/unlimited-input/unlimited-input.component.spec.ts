@@ -15,7 +15,7 @@ import { UnlimitedInputComponent } from './unlimited-input.component';
     </form>`
 })
 class WrapperComponent {
-  @ViewChild(UnlimitedInputComponent)
+  @ViewChild(UnlimitedInputComponent, { static: true })
   unlimitedInput: UnlimitedInputComponent;
   formGroup: FormGroup;
 
@@ -40,7 +40,7 @@ describe('UnlimitedInputComponent', () => {
         CoreModule,
       ],
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

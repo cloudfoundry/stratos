@@ -46,7 +46,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   @Output() stateOut = new EventEmitter<StackedInputActionUpdate>();
   @Output() remove = new EventEmitter<any>();
 
-  @ViewChild('inputElement') inputElement: ElementRef;
+  @ViewChild('inputElement', { static: true }) inputElement: ElementRef;
 
   public result = StackedInputActionResult;
   public emailFormControl = new FormControl('', [Validators.required, Validators.email, this.uniqueValidator.bind(this)]);

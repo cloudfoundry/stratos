@@ -85,13 +85,13 @@ describe('TableComponent', () => {
       disconnect: () => null,
       isTableLoading$: observableOf(false)
     };
-    @ViewChild('basicColumnsTable')
+    @ViewChild('basicColumnsTable', { static: true })
     public basicColumnsTable: TableComponent<any>;
-    @ViewChild('selectionColumnsTable')
+    @ViewChild('selectionColumnsTable', { static: true })
     public selectionColumnsTable: TableComponent<any>;
-    @ViewChild('actionColumnsTable')
+    @ViewChild('actionColumnsTable', { static: true })
     public actionColumnsTable: TableComponent<any>;
-    @ViewChild('actionAndSelectionColumnsTable')
+    @ViewChild('actionAndSelectionColumnsTable', { static: true })
     public actionAndSelectionColumnsTable: TableComponent<any>;
   }
   let component: TableHostComponent;

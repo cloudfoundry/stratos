@@ -11,7 +11,6 @@
 @import '../src//shared/components/code-block/code-block.component.theme';
 @import '../src/shared/components/list/list-cards/cards.components.theme';
 @import '../src/shared/components/dialog-error/dialog-error.component.theme';
-@import '../src/shared/components/page-subheader/page-subheader.component.theme';
 @import '../src/shared/components/cards/card-status/card-status.component.theme';
 @import '../src/shared/components/usage-gauge/usage-gauge.component.theme';
 @import '../src/shared/components/ssh-viewer/ssh-viewer.component.theme';
@@ -107,7 +106,6 @@ $side-nav-light-active: #484848;
   @include steppers-theme($theme, $app-theme);
   @include list-theme($theme, $app-theme);
   @include app-base-page-theme($theme, $app-theme);
-  @include app-page-subheader-theme($theme, $app-theme);
   @include app-mat-tabs-theme($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
   @include app-card-status-theme($theme, $app-theme);

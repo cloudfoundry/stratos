@@ -3,15 +3,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { first, map, publishReplay, refCount, share } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { endpointListKey, EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { endpointEntitySchema } from '../../../../base-entity-schemas';
-import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
-import { PaginationMonitor } from '../../../monitors/pagination-monitor';
-import { SendClearEndpointEventsAction } from '../../../../../../store/src/actions/internal-events.actions';
+import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
 
 
 @Component({
@@ -41,15 +36,21 @@ export class PageHeaderEventsComponent implements OnInit {
 
   public errorMessage$: Observable<string>;
   endpointId: any;
-
+  private events$: Observable<any>;
   constructor(
-    private internalEventMonitorFactory: InternalEventMonitorFactory,
     private activatedRoute: ActivatedRoute,
-    private store: Store<CFAppState>
+    private store: Store<CFAppState>,
+    private eventService: GlobalEventService,
   ) { }
 
-  public dismissEndpointErrors(endpointGuid: string) {
-    this.store.dispatch(new SendClearEndpointEventsAction(endpointGuid));
+  public markEventsAsRead() {
+    this.events$.pipe(
+      first(),
+    ).subscribe((events: IGlobalEvent[]) => {
+      if (events && !!events.length) {
+        events.forEach(event => this.eventService.updateEventReadState(event, true));
+      }
+    });
   }
 
   ngOnInit() {
@@ -59,36 +60,43 @@ export class PageHeaderEventsComponent implements OnInit {
       this.endpointIds$ = observableOf([this.endpointId]);
     }
     if (this.endpointIds$) {
-      const endpointMonitor = new PaginationMonitor<EndpointModel>(
-        this.store,
-        endpointListKey,
-        endpointEntitySchema
-      );
-      const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, this.endpointIds$);
-      this.errorMessage$ = combineLatest(
-        cfEndpointEventMonitor.hasErroredOverTime(),
-        endpointMonitor.currentPage$
+      this.events$ = combineLatest(
+        this.eventService.events$,
+        this.endpointIds$,
       ).pipe(
-        map(([errors, endpoints]) => {
-          const keys = errors ? Object.keys(errors) : null;
-          if (!keys || !keys.length) {
-            return null;
+        map(([events, endpointIds]) => {
+          const filteredEvents = events.filter(event => {
+            // Is it an error of type endpoint?
+            if (event.key.startsWith(endpointEventKey)) {
+              const endpointId = this.getEndpointId(event);
+              // Is it an endpoint error for an endpoint we're interested in?
+              const relevantEndpoint = endpointIds.find(id => id === endpointId);
+              const unread = !event.read;
+              return relevantEndpoint && unread;
+            }
+          });
+          return filteredEvents;
+        }),
+        publishReplay(1),
+        refCount()
+      );
+      this.errorMessage$ = this.events$.pipe(
+        // Fixme this emits a lot, we should fix this.
+        map((events: IGlobalEvent[]) => {
+          if (!events || events.length === 0) {
+            return '';
           }
-          console.log(keys);
-          const endpointString = keys
-            .map(id => endpoints.find(endpoint => {
-              return endpoint.guid === id;
-            }))
-            .reduce((message, endpoint, index, { length }) => {
-              const endpointName = endpoint.name;
-              if (index === 0) {
-                return endpointName;
-              }
-              return index + 1 === length ? `${message} & ${endpointName}` : `${message}, ${endpointName}`;
-            }, '');
-          return `We've been having trouble communicating with ${endpointString}`;
-        })
+          const endpointErrorKeys = events.reduce((endpointIds, event) => {
+            return endpointIds.add(this.getEndpointId(event));
+          }, new Set<string>());
+          return endpointErrorKeys.size > 1 ? `We've been having trouble communicating with multiple endpoints` : events[0].message;
+        }),
+        share()
       );
     }
+  }
+
+  private getEndpointId(event: IGlobalEvent): string {
+    return event.link.split('/')[2];
   }
 }
