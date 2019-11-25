@@ -302,7 +302,6 @@ import { EndpointsListConfigService } from './components/list/list-types/endpoin
     EntitySummaryTitleComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    TileSelectorComponent,
     AppNameUniqueDirective,
     PollingIndicatorComponent,
     UnlimitedInputComponent,

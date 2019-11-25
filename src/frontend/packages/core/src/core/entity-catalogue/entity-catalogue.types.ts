@@ -13,6 +13,8 @@ import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
 import { Omit } from '../utils.service';
+import { GeneralEntityAppState } from '../../../../store/src/app-state';
+import { Store } from '@ngrx/store';
 
 export interface EntityCatalogueEntityConfig {
   entityType: string;
@@ -66,6 +68,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
   readonly parentType?: string;
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
   readonly paginationConfig?: PaginationPageIteratorConfig;
+  readonly tableConfig?: EntityTableConfig<any>;
 }
 
 
@@ -98,7 +101,10 @@ export interface IStratosEndpointDefinition<T = EntityCatalogueSchemas | EntityS
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
-
+export interface EntityTableConfig<T = any> {
+  rowBuilders: EntityRowBuilder<T>[];
+  showHeader?: boolean;
+}
 /**
  * Static information describing a stratos entity.
  *
@@ -136,7 +142,7 @@ export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> 
   readonly actionable?: Observable<boolean>;
   readonly disabled?: Observable<boolean>;
 }
-export type EntityRowBuilder<T> = [string, (entityMetadata: T) => string /* | Observable<string> */];
+export type EntityRowBuilder<T> = [string, (entity: T, store?: Store<GeneralEntityAppState>) => string | Observable<string>];
 
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
