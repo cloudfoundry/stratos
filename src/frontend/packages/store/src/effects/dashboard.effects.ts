@@ -16,9 +16,9 @@ export class DashboardEffect {
 
   @Effect({ dispatch: false }) hydrate$ = this.actions$.pipe(
     ofType<HydrateDashboardStateAction>(HYDRATE_DASHBOARD_STATE),
-    map(({ dashboardState }) => {
+    map(() => {
       // Ensure the previous theme is applied
-      this.themeService.initialize(dashboardState.themeKey);
+      this.themeService.initialize();
     })
   );
 }

@@ -97,9 +97,9 @@
               <div class="user-profile__option-header">
                 Theme
               </div>
-              <mat-button-toggle-group [value]="themeService.getTheme() | async"
+              <mat-button-toggle-group [value]="(themeService.getTheme() | async).key"
                 (change)="themeService.setTheme($event.value)" name="theme" aria-label="Theme">
-                <mat-button-toggle *ngFor="let theme of themeService.getThemes()" [value]="theme"> {{ theme.label }}
+                <mat-button-toggle *ngFor="let theme of themeService.getThemes()" [value]="theme.key"> {{ theme.label }}
                 </mat-button-toggle>
               </mat-button-toggle-group>
             </div>
