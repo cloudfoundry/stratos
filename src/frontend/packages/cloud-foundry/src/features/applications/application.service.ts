@@ -91,21 +91,9 @@ export class ApplicationService {
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
-    this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
-      appGuid,
-      createGetApplicationAction(appGuid, cfGuid)
-    );
-    const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
-    const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
-    const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
-    this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
-      appGuid,
-      getAppSummaryAction
-    );
-
-    this.constructCoreObservables();
-    this.constructAmalgamatedObservables();
-    this.constructStatusObservables();
+    if (cfGuid && appGuid) {
+      this.initialize(cfGuid, appGuid);
+    }
   }
 
   // NJ: This needs to be cleaned up. So much going on!
@@ -159,6 +147,27 @@ export class ApplicationService {
         return appStateService.get(app, appInstancesPages);
       })
     ).pipe(publishReplay(1), refCount());
+  }
+
+  public initialize(cfGuid, appGuid) {
+    this.cfGuid = cfGuid;
+    this.appGuid = appGuid;
+
+    this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
+      appGuid,
+      createGetApplicationAction(appGuid, cfGuid)
+    );
+    const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
+    const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
+    const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
+    this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
+      appGuid,
+      getAppSummaryAction
+    );
+
+    this.constructCoreObservables();
+    this.constructAmalgamatedObservables();
+    this.constructStatusObservables();
   }
 
   private constructCoreObservables() {

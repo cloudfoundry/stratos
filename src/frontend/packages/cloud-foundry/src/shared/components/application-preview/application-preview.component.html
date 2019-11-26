@@ -1,0 +1,68 @@
+<app-sidepanel-preview [title]="title">
+  <app-tile-grid fit="true" *ngIf="applicationService.application$ | async as appSvc">
+    <app-tile-group>
+      <app-tile>
+        <div class="cf-space-usage">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Summary</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <app-tile-group *ngIf="applicationService.appOrg$ | async as appOrg">
+                <app-tile>
+                  <app-metadata-item label="Cloud Foundry">
+                    <a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid]"
+                      matTooltip="CF API URL: {{ getFullEndpointApiUrl(appSvc.cf) }}">{{ appSvc.cf?.name}}</a>
+                  </app-metadata-item>
+                  <app-metadata-item label="Cloud Foundry">
+                    <a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid]"
+                      matTooltip="CF API URL: {{ getFullEndpointApiUrl(appSvc.cf) }}">{{ appSvc.cf?.name}}</a>
+                  </app-metadata-item>
+                </app-tile>
+                <app-tile class="app-metadata__two-cols">
+                  <app-metadata-item label="SSH Access">
+                    {{ sshStatus$ | async }}
+                  </app-metadata-item>
+                  <app-metadata-item label="Organization">
+                    <a
+                      [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
+                  </app-metadata-item>
+                </app-tile>
+                <app-tile class="app-metadata__two-cols">
+                  <app-metadata-item label="CLI Info" class="cli-link">
+                    <a [routerLink]="['/applications/' + appSvc.cf?.guid + '/' + appSvc.app?.metadata.guid + '/cli']">View</a>
+                  </app-metadata-item>
+                  <app-metadata-item *ngIf="applicationService.appSpace$ | async as appSpace" label="Space">
+                    <a
+                      [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
+                  </app-metadata-item>
+                </app-tile>
+              </app-tile-group>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </app-tile>
+    </app-tile-group>
+
+    <app-tile-group>
+      <app-tile>
+        <app-card-number-metric icon="memory" label="Memory Usage" value="{{ appSvc.app.entity.memory | mbToHumanSize }}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric icon="storage" label="Disk Quota" value="{{ appSvc.app.entity.disk_quota | mbToHumanSize }}"></app-card-number-metric>
+      </app-tile>
+    </app-tile-group>
+
+    <app-tile-group>
+      <app-tile>
+        <app-card-number-metric iconFont="stratos-icons" icon="service" label="Service Instances"
+          value="{{ (applicationService.appSummary$ | async)?.entity?.services?.length || '0' }}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Routes"
+          value="{{ (applicationService.appSummary$ | async)?.entity?.routes?.length || '0' }}"></app-card-number-metric>
+      </app-tile>
+    </app-tile-group>
+    <app-tile-group></app-tile-group>
+  </app-tile-grid>
+</app-sidepanel-preview>
