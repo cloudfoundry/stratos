@@ -190,7 +190,7 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 	// Send over the namespace details of the release
 	sendResource(ws, "ReleasePrefix", id)
 
-	graph.ParseManifest(rel.KubeResources)
+	graph.ParseManifest(rel)
 
 	// Send the manifest for the release
 	sendResource(ws, "Manifest", rel.HelmManifest)
@@ -208,12 +208,10 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 	sendResource(ws, "Pods", pods)
 
 	//graph.Generate(pods)
+	graph.ParseManifest(rel)
 
 	// Send the manifest for the release again (ReplicaSets will now be added)
-	sendResource(ws, "Manifest", rel.Resources)
-
-	// Send the manifest for the release again (ReplicaSets will now be added)
-	sendResource(ws, "Manifest2", rel.HelmManifest)
+	sendResource(ws, "Manifest", rel.HelmManifest)
 
 	// Now get all of the resources in the manifest
 	all := rel.GetResources(c.portalProxy)

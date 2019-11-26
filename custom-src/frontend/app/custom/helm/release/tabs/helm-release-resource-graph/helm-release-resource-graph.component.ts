@@ -27,17 +27,34 @@ export class HelmReleaseResourceGraphComponent implements OnInit {
       console.log(g);
 
       const newNodes = [];
-      Object.values(g.nodes).forEach((node: any) => newNodes.push({
-        id: node.id,
-        label: node.label,
-        data: {...node.data},
-      }));
+      Object.values(g.nodes).forEach((node: any) => {
+        newNodes.push({
+          id: node.id,
+          label: node.label,
+          data: {
+            ...node.data,
+            color: this.getColor(node.data.kind),
+            fill: this.getColor(node.data.kind),
+          },
+        });
+      });
+      console.log('------------');
+      console.log(newNodes);
       this.nodes = newNodes;
       this.update$.next(true);
     });
    }
 
   ngOnInit() { }
+
+  private getColor(resourceType: string): string {
+    switch (resourceType) {
+      case 'Secret':
+        return 'red';
+      default:
+        return 'blue';
+    }
+  }
 
   public onZoomChanged(e) {
     console.log(e);

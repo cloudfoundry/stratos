@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"reflect"
+
 	//	"io"
 	"strings"
 
@@ -90,6 +92,7 @@ func NewHelmRelease(info *release.Release, endpoint, user string) *HelmRelease {
 	}
 	r.ResourceNames = make(map[string]bool)
 	r.HelmManifest = make([]runtime.Object, 0)
+	r.KubeResources = make([]KubeResource, 0)
 
 	r.parseManifest()
 	return r
@@ -146,6 +149,10 @@ func getResourceIdentifier(typeMeta metav1.TypeMeta, objectMeta metav1.ObjectMet
 	return fmt.Sprintf("%s-%s-%s", typeMeta.Kind, typeMeta.APIVersion, objectMeta.Name)
 }
 
+func getResourceId(kind, apiVersion, name string) string {
+	return fmt.Sprintf("%s-%s-%s", kind, apiVersion, name)
+}
+
 // process a yaml resource from the helm manifest
 func (r *HelmRelease) processResource(obj runtime.Object) {
 
@@ -158,37 +165,44 @@ func (r *HelmRelease) processResource(obj runtime.Object) {
 		log.Info("CAN MARSHAL TO JSON")
 		var t KubeResource
 		if json.Unmarshal(j, &t) == nil {
-			log.Infof("Got resource: %s : %s", t.Kind, t.Metadata.Name)
-
-			// Store the kube resource
 			r.KubeResources = append(r.KubeResources, t)
-
-			// Make a note of the resource name for lookup
-			//r.ResourceNames[getResourceIdentifier()] = true
-
-			// TODO: r.Resources
+			log.Infof("Got resource: %s : %s", t.Kind, t.Metadata.Name)
 
 			if t.Kind == "Deployment" || t.Kind == "StatefulSet" || t.Kind == "DaemonSet" {
 				log.Warnf("Getting selectors for %s", t.Kind)
 				r.processDeployment(t, obj)
 			}
-			r.addJobForResource(t)
+			r.addJobForResource(t.Kind, t.APIVersion, t.Metadata.Name)
 		} else {
 			log.Error("NO GO")
 		}
 	}
 }
 
-func (r *HelmRelease) addJobForResource(t KubeResource) {
+// func (r *HelmRelease) addJobForResource(t KubeResource) {
+// 	job := KubeResourceJob{
+// 		ID:         fmt.Sprintf("%s-%s#Pods", t.Kind, t.Metadata.Name),
+// 		Endpoint:   r.Endpoint,
+// 		User:       r.User,
+// 		Namespace:  r.Namespace,
+// 		Name:       t.Metadata.Name,
+// 		URL:        getRestURL(r.Namespace, t),
+// 		APIVersion: t.APIVersion,
+// 		Kind:       t.Kind,
+// 	}
+// 	r.Jobs = append(r.Jobs, job)
+// }
+
+func (r *HelmRelease) addJobForResource(kind, apiVersion, name string) {
 	job := KubeResourceJob{
-		ID:         fmt.Sprintf("%s-%s#Pods", t.Kind, t.Metadata.Name),
+		ID:         fmt.Sprintf("%s-%s#Pods", kind, name),
 		Endpoint:   r.Endpoint,
 		User:       r.User,
 		Namespace:  r.Namespace,
-		Name:       t.Metadata.Name,
-		URL:        getRestURL(r.Namespace, t),
-		APIVersion: t.APIVersion,
-		Kind:       t.Kind,
+		Name:       name,
+		URL:        getRestURL(r.Namespace, kind, apiVersion, name),
+		APIVersion: apiVersion,
+		Kind:       kind,
 	}
 	r.Jobs = append(r.Jobs, job)
 }
@@ -224,7 +238,6 @@ func (r *HelmRelease) processPodSelector(kres KubeResource, selector *metav1.Lab
 	}
 
 	r.PodJobs = append(r.PodJobs, job)
-
 }
 
 // See: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
@@ -269,6 +282,17 @@ func (r *HelmRelease) GetPods(jetstream interfaces.PortalProxy) []v1.Pod {
 		err := json.Unmarshal(j.Data, &list)
 		if err == nil {
 			for _, pod := range list.Items {
+				log.Info(reflect.TypeOf(pod))
+				// Add a kube resource for the pod
+				res := KubeResource{
+					Kind: pod.Kind,
+					APIVersion: pod.APIVersion,
+				}
+				res.Metadata.Name = pod.Name
+				log.Info("POD")
+				log.Infof("%+v", res)
+				r.KubeResources = append(r.KubeResources, res)
+				r.Resources = append(r.Resources, &res)
 				podList = append(podList, pod)
 				r.processPodOwners(pod)
 			}
@@ -284,6 +308,7 @@ func (r *HelmRelease) GetPods(jetstream interfaces.PortalProxy) []v1.Pod {
 func (r *HelmRelease) processPodOwners(pod v1.Pod) {
 	for _, owner := range pod.ObjectMeta.OwnerReferences {
 		if owner.Kind == "ReplicaSet" {
+			// This is an incompelte ReplicaSet, but enough for us to use to go get more metadata
 			resource := appsv1.ReplicaSet{}
 			resource.TypeMeta = metav1.TypeMeta{
 				Kind:       owner.Kind,
@@ -295,18 +320,28 @@ func (r *HelmRelease) processPodOwners(pod v1.Pod) {
 			}
 			identifier := getResourceIdentifier(resource.TypeMeta, resource.ObjectMeta)
 			if _, ok := r.ResourceNames[identifier]; !ok {
-				r.Resources = append(r.Resources, resource)
+				r.Resources = append(r.Resources, &resource)
 				//r.HelmResources = append(r.HelmResources, resource)
 
 				r.ResourceNames[identifier] = true
+				r.KubeResources = append(r.KubeResources, r.getKubeResource(resource.TypeMeta, resource.ObjectMeta))
 
-				// TODO: Need a KubrResource
-				// r.addJobForResource(resource)
+				// TODO: Need a KubeResource
+				r.addJobForResource(owner.Kind, owner.APIVersion, owner.Name)
 			}
 		} else {
 			log.Warn("Unexpected Pod owner kind: %s", owner.Kind)
 		}
 	}
+}
+
+func (r *HelmRelease) getKubeResource(typeMeta metav1.TypeMeta, objectMeta metav1.ObjectMeta) KubeResource {
+	kres := KubeResource{
+		Kind:       typeMeta.Kind,
+		APIVersion: typeMeta.APIVersion,
+	}
+	kres.Metadata.Name = objectMeta.Name
+	return kres
 }
 
 func (r *HelmRelease) GetResources(jetstream interfaces.PortalProxy) []json.RawMessage {
@@ -365,14 +400,13 @@ func (r *HelmRelease) restWorker(jetstream interfaces.PortalProxy, id int, jobs 
 	}
 }
 
-func getRestURL(namespace string, resource KubeResource) string {
+func getRestURL(namespace, kind, apiVersion, name string) string {
 	var restURL string
 	base := "api"
-	name := resource.Metadata.Name
-	if len(strings.Split(resource.APIVersion, "/")) > 1 {
+	if len(strings.Split(apiVersion, "/")) > 1 {
 		base = "apis"
 		name += "/status"
 	}
-	restURL = fmt.Sprintf("/%s/%s/namespaces/%s/%ss/%s", base, resource.APIVersion, namespace, strings.ToLower(resource.Kind), name)
+	restURL = fmt.Sprintf("/%s/%s/namespaces/%s/%ss/%s", base, apiVersion, namespace, strings.ToLower(kind), name)
 	return restURL
 }
