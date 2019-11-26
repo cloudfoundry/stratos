@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ShowSideHelp } from '../../../../../../store/src/actions/dashboard-actions';
 import { EndpointOnlyAppState } from '../../../../../../store/src/app-state';
 import { EndpointsService } from '../../../../core/endpoints.service';
 import { IStepperStep, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
@@ -31,7 +30,8 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   }
 
   showHelp() {
-    this.store.dispatch(new ShowSideHelp(this.helpDocumentUrl));
+    // this.panelPreviewService.show(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
+    // this.store.dispatch(new ShowSideHelp(MarkdownPreviewComponent, { setDocumentUrl: this.helpDocumentUrl }));
   }
 
   onEnter = (data: ConnectEndpointConfig) => {

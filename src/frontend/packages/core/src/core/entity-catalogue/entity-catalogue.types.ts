@@ -1,5 +1,7 @@
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { GeneralEntityAppState } from '../../../../store/src/app-state';
 import {
   ApiErrorMessageHandler,
   PreApiRequest,
@@ -13,8 +15,6 @@ import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
 import { Omit } from '../utils.service';
-import { GeneralEntityAppState } from '../../../../store/src/app-state';
-import { Store } from '@ngrx/store';
 
 export interface EntityCatalogueEntityConfig {
   entityType: string;
@@ -149,6 +149,7 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getStatusObservable?(entity: Y): Observable<StratosStatus>;
   // TODO This should be used in the entities schema.
   getGuid(entityMetadata: T): string;
+  getPreviewableComponent?(): object;
   getLink?(entityMetadata: T): string;
   getLines?(): EntityRowBuilder<T>[];
   getSubTypeLabels?(entityMetadata: T): {

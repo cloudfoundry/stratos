@@ -1,12 +1,14 @@
-@mixin app-markdown-preview-theme($theme, $app-theme) {
+@mixin app-sidepanel-preview-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
 
-  .markdown-preview__header {
+  .sidepanel-preview__header {
     background-color: mat-color($primary);
     color: mat-contrast($primary, 500);
   }
 
-  .markdown-preview__content {
+  .sidepanel-preview__content {
+    background-color: map-get($app-theme, app-background-color);
+
     > h1:first-child {
       height: 0;
       margin: 0;

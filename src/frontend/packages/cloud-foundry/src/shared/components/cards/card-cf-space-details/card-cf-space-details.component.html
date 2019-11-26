@@ -31,7 +31,7 @@
         </div>
         <div class="app-metadata__two-cols">
           <app-metadata-item label="SSH Access">
-            {{ allowSshStatus$ | async }}
+            {{ cfSpaceService.allowSshStatus$ | async }}
           </app-metadata-item>
           <app-metadata-item label="Created At">
             {{ ((cfSpaceService.space$ | async)?.entity?.metadata?.created_at) | date: 'medium' }}

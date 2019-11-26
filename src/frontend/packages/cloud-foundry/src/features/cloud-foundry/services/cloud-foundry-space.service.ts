@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
@@ -15,12 +15,14 @@ import {
 import { SpaceUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
 import { IApp, IOrgQuotaDefinition, IRoute, ISpace, ISpaceQuotaDefinition } from '../../../../../core/src/core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
@@ -28,8 +30,6 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -48,6 +48,7 @@ export class CloudFoundrySpaceService {
    */
   spaceQuotaDefinition$: Observable<ISpaceQuotaDefinition>;
   allowSsh$: Observable<string>;
+  allowSshStatus$: Observable<string>;
   totalMem$: Observable<number>;
   routes$: Observable<APIResource<IRoute>[]>;
   serviceInstancesCount$: Observable<number>;
@@ -71,18 +72,20 @@ export class CloudFoundrySpaceService {
     private cfOrgService: CloudFoundryOrganizationService
   ) {
 
-    this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
-    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
-    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    const spaceGuid = activeRouteCfOrgSpace.spaceGuid;
+    const orgGuid = activeRouteCfOrgSpace.orgGuid;
+    const cfGuid = activeRouteCfOrgSpace.cfGuid;
 
-    this.initialiseObservables();
+    if (cfGuid && orgGuid && spaceGuid) {
+      this.initialize(cfGuid, orgGuid, spaceGuid);
+    }
   }
 
-  public fetchApps() {
-    this.cfEndpointService.fetchApps();
-  }
+  public initialize(cfGuid: string, orgGuid: string, spaceGuid: string) {
+    this.cfGuid = cfGuid;
+    this.orgGuid = orgGuid;
+    this.spaceGuid = spaceGuid;
 
-  private initialiseObservables() {
     this.initialiseSpaceObservables();
     this.initialiseAppObservables();
 
@@ -126,7 +129,7 @@ export class CloudFoundrySpaceService {
           this.spaceGuid,
           getSpaceAction
         );
-        return spaceEntityService.entityObs$.pipe(filter(o => !!o && !!o.entity));
+        return spaceEntityService.waitForEntity$;
       }),
       publishReplay(1),
       refCount()
@@ -142,6 +145,7 @@ export class CloudFoundrySpaceService {
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid, this.spaceGuid);
     this.routes$ = this.space$.pipe(map(o => o.entity.entity.routes));
     this.allowSsh$ = this.space$.pipe(map(o => o.entity.entity.allow_ssh ? 'true' : 'false'));
+    this.allowSshStatus$ = this.allowSsh$.pipe(map(status => status === 'false' ? 'Disabled' : 'Enabled'));
     this.spaceQuotaDefinition$ = this.space$.pipe(
       map(q => q.entity.entity.space_quota_definition ? q.entity.entity.space_quota_definition.entity : null)
     );
@@ -211,9 +215,9 @@ export class CloudFoundrySpaceService {
     return CloudFoundryEndpointService.fetchAppCount(
       this.store,
       this.paginationMonitorFactory,
-      this.activeRouteCfOrgSpace.cfGuid,
-      this.activeRouteCfOrgSpace.orgGuid,
-      this.activeRouteCfOrgSpace.spaceGuid
+      this.cfGuid,
+      this.orgGuid,
+      this.spaceGuid
     );
   }
 }

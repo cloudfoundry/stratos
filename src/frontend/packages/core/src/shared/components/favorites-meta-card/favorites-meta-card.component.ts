@@ -7,10 +7,15 @@ import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   RemoveUserFavoriteAction,
 } from '../../../../../store/src/actions/user-favourites-actions/remove-user-favorite-action';
-import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import {
+  endpointEntitiesSelector,
+  endpointsEntityRequestDataSelector,
+} from '../../../../../store/src/selectors/endpoint.selectors';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { userFavoritesEntitySchema } from '../../../base-entity-schemas';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
+import { PanelPreviewService } from '../../services/panel-preview.service';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
@@ -97,7 +102,33 @@ export class FavoritesMetaCardComponent {
     }
   }
 
-  constructor(private store: Store<CFAppState>, private confirmDialog: ConfirmationDialogService) { }
+  constructor(
+    private store: Store<CFAppState>,
+    private confirmDialog: ConfirmationDialogService,
+    private panelPreviewService: PanelPreviewService
+  ) { }
+
+  previewPanel() {
+    const catalogueEntity = entityCatalogue.getEntity(this.favorite.endpointType, this.favorite.entityType);
+    const previewComponent = catalogueEntity.builders.entityBuilder.getPreviewableComponent();
+
+    // TODO: use 'endpoint' as constant
+    if (this.favorite.entityType === 'endpoint') {
+      const entity$ = this.store.select(endpointsEntityRequestDataSelector(this.favorite.endpointId));
+      this.panelPreviewService.show(previewComponent, {
+        title: this.favorite.metadata.name,
+        entity$,
+        cfGuid: this.favorite.endpointId
+      });
+    } else {
+      this.panelPreviewService.show(previewComponent, {
+        title: this.favorite.metadata.name,
+        cfGuid: this.favorite.metadata.cfGuid,
+        orgGuid: this.favorite.metadata.orgGuid,
+        guid: this.favorite.metadata.guid
+      });
+    }
+  }
 
   public setConfirmation(prettyName: string, favorite: UserFavorite<IFavoriteMetadata>) {
     this.confirmation = new ConfirmationDialogConfig(
