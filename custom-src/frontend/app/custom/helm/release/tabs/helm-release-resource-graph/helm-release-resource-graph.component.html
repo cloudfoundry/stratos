@@ -1,9 +1,23 @@
+<app-page-sub-nav>
+  <button mat-button name="fit" (click)="fitGraph()" matTooltip="Fit">
+    <mat-icon>aspect_ratio</mat-icon>
+    <span>Fit</span>
+  </button>
+  <button mat-button name="toggle" (click)="toggleLayout()" matTooltip="Toggle Layout">
+    <mat-icon>aspect_ratio</mat-icon>
+    <span>Toggle</span>
+  </button>
+</app-page-sub-nav>
+
+
 <ngx-graph
   class="chart-container"
   (zoomChange)="onZoomChanged($event)"
   [links]="links"
   [nodes]="nodes"
   [update$]="update$"
+  [zoomToFit$]="fit$"
+  [layout]="layout"
 >
 <ng-template #nodeTemplate let-node>
   <svg:g class="node">
@@ -11,9 +25,12 @@
       [attr.width]="node.dimension.width"
       [attr.height]="node.dimension.height"
       [attr.fill]="node.data.fill"
+      class="node"></svg:rect>
     />
-    <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">
-      {{node.label}}
+    <svg:text alignment-baseline="central"
+    [attr.fill]="node.data.text"
+    [attr.x]="10" [attr.y]="node.dimension.height / 2">
+      {{node.label}} ({{node.data.kind}})
     </svg:text>
   </svg:g>
 </ng-template>

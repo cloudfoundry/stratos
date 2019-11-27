@@ -190,10 +190,10 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 	// Send over the namespace details of the release
 	sendResource(ws, "ReleasePrefix", id)
 
-	graph.ParseManifest(rel)
+	//graph.ParseManifest(rel)
 
 	// Send the manifest for the release
-	sendResource(ws, "Manifest", rel.HelmManifest)
+	sendResource(ws, "Resources", rel.GetResources())
 
 	// // Send the manifest for the release
 	// sendResource(ws, "Test", rel.HelmManifest)
@@ -204,18 +204,22 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 	// Loop over this until the web socket is closed
 
 	// Get the pods first and send those
-	pods := rel.GetPods(c.portalProxy)
-	sendResource(ws, "Pods", pods)
+	rel.UpdatePods(c.portalProxy)
+	sendResource(ws, "Pods", rel.GetPods())
 
 	//graph.Generate(pods)
-	graph.ParseManifest(rel)
+	//graph.ParseManifest(rel)
+	sendResource(ws, "Graph", graph)
 
 	// Send the manifest for the release again (ReplicaSets will now be added)
-	sendResource(ws, "Manifest", rel.HelmManifest)
+	sendResource(ws, "Manifest", rel.GetResources())
 
 	// Now get all of the resources in the manifest
-	all := rel.GetResources(c.portalProxy)
-	sendResource(ws, "Resources", all)
+	rel.UpdateResources(c.portalProxy)
+	sendResource(ws, "Resources", rel.GetResources())
+
+	graph.ParseManifest(rel)
+	sendResource(ws, "Graph", graph)
 
 	// Now we have everything, so loop, polling to get status
 	// for {

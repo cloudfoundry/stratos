@@ -131,7 +131,8 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
           graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
           console.log(graph);
-          this.addResource(helmReleaseGraphEntityType, graph, prefix, HELM_ENDPOINT_TYPE);
+          console.log(prefix);
+          this.addResource(helmReleaseGraphEntityType, graph, `${graph.endpointId}-${graph.releaseTitle}`, HELM_ENDPOINT_TYPE);
         } else if (messageObj.kind === 'Manifest' ||  messageObj.kind === 'Resources') {
           // Store all of the services
           const manifest = messageObj.data;

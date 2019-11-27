@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { PaginationMonitor } from '../../../../shared/monitors/pagination-monitor';
@@ -56,9 +56,14 @@ export class HelmReleaseHelperService {
     // Get helm release
     const action = new GetHelmReleaseGraph(this.endpointGuid, this.releaseTitle);
 
+    console.log('fetchReleaseGraph');
     console.log(action);
 
     return this.esf.create<HelmReleaseGraph>(action.key, action).waitForEntity$.pipe(
+      tap(e => {
+        console.log('ENTITY HELMRELEASEGRAPH');
+        console.log(e);
+      }),
       map(entity => entity.entity)
     );
   }

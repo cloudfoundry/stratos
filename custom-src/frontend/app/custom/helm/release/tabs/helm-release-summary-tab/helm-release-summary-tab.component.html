@@ -21,10 +21,10 @@
           </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Status">{{ release.status }}</app-metadata-item>
           <app-metadata-item class="chart-details__item" label="First Deployed">
-            {{ release.info.firstDeployed | date:'medium' }}
+            {{ release.info.first_deployed | date:'medium' }}
           </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Last Deployed">
-            {{ release.info.lastDeployed | date:'medium' }}
+            {{ release.info.last_deployed | date:'medium' }}
           </app-metadata-item>
         </div>
         <!-- <app-tile-grid>

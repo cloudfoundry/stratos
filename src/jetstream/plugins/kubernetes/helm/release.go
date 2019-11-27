@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-
 	"reflect"
 
 	//	"io"
@@ -13,74 +12,41 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/release"
-	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-
-	// kyaml "k8s.io/apimachinery/pkg/util/yaml"
+	appsv1 "k8s.io/api/apps/v1"
+	appsv1beta1 "k8s.io/api/apps/v1beta1"
+	appsv1beta2 "k8s.io/api/apps/v1beta2"
+	extv1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/client-go/kubernetes/scheme"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
+// HelmRelease represents a Helm Release deployed via Helm
 type HelmRelease struct {
 	*release.Release
-	Endpoint      string            `json:"-"`
-	User          string            `json:"-"`
-	Extra         string            `json:"extra"`
-	HelmManifest  []runtime.Object  `json:"helmManifest"`
-	Resources     []interface{}     `json:"resources"`
-	KubeResources []KubeResource    `json:"-"`
-	ResourceNames map[string]bool   `json:"-"`
-	Jobs          []KubeResourceJob `json:"-"`
-	PodJobs       []KubeResourceJob `json:"-"`
+	Endpoint string `json:"-"`
+	User     string `json:"-"`
+	Resources map[string]KubeResource `json:"resources"`
+	Jobs    []KubeResourceJob `json:"-"`
+	PodJobs []KubeResourceJob `json:"-"`
 }
 
+// KubeResource is a simple struct to pull out core common metadata for a Kube resource
 type KubeResource struct {
 	Kind       string `yaml:"kind" json:"kind"`
 	APIVersion string `yaml:"apiVersion" json:"apiVersion"`
 	Metadata   struct {
 		Name string `yaml:"name" json:"name"`
 	} `yaml:"metadata" json:"metadata"`
-	Spec interface{} `yaml:"spec"`
+	Resource interface{} `yaml:"resource"`
+	Manifest bool
 }
 
-// type KubeLabelSelectorRequirement struct {
-// 	Key      string                       `yaml:"key"`
-// 	Operator metav1.LabelSelectorOperator `yaml:"operator"`
-// 	Values   []string                     `yaml:values"`
-// }
-
-// type KubeDeploymentResource struct {
-// 	Spec struct {
-// 		Selector struct {
-// 			MatchLabels map[string]string `yaml:"matchLabels"`
-// 			// matchExpressions is a list of label selector requirements. The requirements are ANDed.
-// 			// +optional
-// 			MatchExpressions []KubeLabelSelectorRequirement `yaml:"matchExpressions"`
-// 		} `yaml:"selector"`
-// 	} `yaml:"spec"`
-// }
-
-// KubeResourceJob = Resource(s) that we need to go and fetch
-type KubeResourceJob struct {
-	ID         string
-	Kind       string
-	APIVersion string
-	Name       string
-	Namespace  string
-	Endpoint   string
-	User       string
-	URL        string
-	Parent     string
-}
-
-// KubeResourceJobResult is the result from a job
-type KubeResourceJobResult struct {
-	KubeResourceJob
-	StatusCode int
-	Data       json.RawMessage
+func (r *KubeResource) getID() string {
+	return fmt.Sprintf("%s-%s-%s", r.Kind, r.APIVersion, r.Metadata.Name)
 }
 
 // NewHelmRelease represents extended info about a Helm Release
@@ -90,19 +56,15 @@ func NewHelmRelease(info *release.Release, endpoint, user string) *HelmRelease {
 		Endpoint: endpoint,
 		User:     user,
 	}
-	r.ResourceNames = make(map[string]bool)
-	r.HelmManifest = make([]runtime.Object, 0)
-	r.KubeResources = make([]KubeResource, 0)
-
+	r.Resources = make(map[string]KubeResource)
 	r.parseManifest()
 	return r
 }
 
+// Parse the release manifest from the Helm release
 func (r *HelmRelease) parseManifest() {
-	// Parse the release manifest from the Helm release
 	reader := bytes.NewReader([]byte(r.Manifest))
 	buffer := bufio.NewReader(reader)
-
 	var bufr strings.Builder
 	for {
 		line, err := buffer.ReadString('\n')
@@ -111,26 +73,10 @@ func (r *HelmRelease) parseManifest() {
 			if len(data) > 0 {
 				decode := scheme.Codecs.UniversalDeserializer().Decode
 				obj, _, err := decode([]byte(bufr.String()), nil, nil)
-
 				if err != nil {
-					log.Error(fmt.Sprintf("Error while decoding YAML object. Err was: %s", err))
+					log.Error(fmt.Sprintf("Helm Manifest Parser: Error while decoding YAML object. Err was: %s", err))
 				} else {
 					r.processResource(obj)
-
-					// // TODO: Should be an easier way of doing this?
-					// j, err := json.Marshal(obj)
-					// if err != nil {
-					// 	log.Info("Can not marshal to JSON")
-					// } else {
-					// 	log.Info("CAN MARSHAL TO JSON")
-					// 	var t KubeResource
-					// 	if json.Unmarshal(j, &t) == nil {
-					// 		log.Warn("YES - GOT IT AS A KUBE RESOURCE")
-					// 		log.Warn(t.Metadata.Name)
-					// 	} else {
-					// 		log.Error("NO GO")
-					// 	}
-					// }
 				}
 
 				bufr.Reset()
@@ -149,49 +95,49 @@ func getResourceIdentifier(typeMeta metav1.TypeMeta, objectMeta metav1.ObjectMet
 	return fmt.Sprintf("%s-%s-%s", typeMeta.Kind, typeMeta.APIVersion, objectMeta.Name)
 }
 
-func getResourceId(kind, apiVersion, name string) string {
-	return fmt.Sprintf("%s-%s-%s", kind, apiVersion, name)
+func (r *HelmRelease) setResource(res KubeResource) {
+	r.Resources[res.getID()] = res
+}
+
+// GetResources gets all fo the resources for the release
+func (r *HelmRelease) GetResources() []interface{} {
+	var resources []interface{}
+	for _, res := range r.Resources {
+		resources = append(resources, res.Resource)
+	}
+	return resources
+}
+
+// GetPods gets the pod resources for the release
+func (r *HelmRelease) GetPods() []interface{} {
+	var resources []interface{}
+	for _, res := range r.Resources {
+		if res.Kind == "Pod" {
+			resources = append(resources, res.Resource)
+		}
+	}
+	return resources
 }
 
 // process a yaml resource from the helm manifest
 func (r *HelmRelease) processResource(obj runtime.Object) {
-
-	r.HelmManifest = append(r.HelmManifest, obj)
-	r.Resources = append(r.Resources, obj)
-
-	// TODO: Should be an easier way of doing this?
 	j, err := json.Marshal(obj)
 	if err == nil {
-		log.Info("CAN MARSHAL TO JSON")
 		var t KubeResource
 		if json.Unmarshal(j, &t) == nil {
-			r.KubeResources = append(r.KubeResources, t)
+			t.Resource = obj
+			t.Manifest = true
+			r.setResource(t)
 			log.Infof("Got resource: %s : %s", t.Kind, t.Metadata.Name)
-
 			if t.Kind == "Deployment" || t.Kind == "StatefulSet" || t.Kind == "DaemonSet" {
-				log.Warnf("Getting selectors for %s", t.Kind)
-				r.processDeployment(t, obj)
+				r.processDeployment(t)
 			}
 			r.addJobForResource(t.Kind, t.APIVersion, t.Metadata.Name)
 		} else {
-			log.Error("NO GO")
+			log.Error("Helm Release Manifest: Could not parse Kubernetes resource")
 		}
 	}
 }
-
-// func (r *HelmRelease) addJobForResource(t KubeResource) {
-// 	job := KubeResourceJob{
-// 		ID:         fmt.Sprintf("%s-%s#Pods", t.Kind, t.Metadata.Name),
-// 		Endpoint:   r.Endpoint,
-// 		User:       r.User,
-// 		Namespace:  r.Namespace,
-// 		Name:       t.Metadata.Name,
-// 		URL:        getRestURL(r.Namespace, t),
-// 		APIVersion: t.APIVersion,
-// 		Kind:       t.Kind,
-// 	}
-// 	r.Jobs = append(r.Jobs, job)
-// }
 
 func (r *HelmRelease) addJobForResource(kind, apiVersion, name string) {
 	job := KubeResourceJob{
@@ -207,20 +153,25 @@ func (r *HelmRelease) addJobForResource(kind, apiVersion, name string) {
 	r.Jobs = append(r.Jobs, job)
 }
 
-func (r *HelmRelease) processDeployment(kres KubeResource, obj runtime.Object) {
-	switch o := obj.(type) {
+func (r *HelmRelease) processDeployment(kres KubeResource) {
+	switch o := kres.Resource.(type) {
 	case *appsv1.Deployment:
-		log.Warn("Deployment")
-		log.Info(o.Spec.Selector)
+		r.processPodSelector(kres, o.Spec.Selector)
+	case *appsv1beta1.Deployment:
+		r.processPodSelector(kres, o.Spec.Selector)
+	case *appsv1beta2.Deployment:
+		r.processPodSelector(kres, o.Spec.Selector)
+	case *extv1beta1.Deployment:
 		r.processPodSelector(kres, o.Spec.Selector)
 	case *appsv1.StatefulSet:
-		log.Warn("Statefulset")
+		r.processPodSelector(kres, o.Spec.Selector)
+	case *appsv1beta2.StatefulSet:
 		r.processPodSelector(kres, o.Spec.Selector)
 	case *appsv1.DaemonSet:
-		log.Warn("DaemonSet")
 		r.processPodSelector(kres, o.Spec.Selector)
 	default:
 		// Ignore
+		log.Errorf("Ignoring: deployment type: %s", reflect.TypeOf(o))
 	}
 }
 
@@ -236,70 +187,37 @@ func (r *HelmRelease) processPodSelector(kres KubeResource, selector *metav1.Lab
 		User:      r.User,
 		Namespace: r.Namespace,
 	}
-
 	r.PodJobs = append(r.PodJobs, job)
 }
 
-// See: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-func podSelectorToQueryString(selector *metav1.LabelSelector) string {
-
-	qs := "?labelSelector="
-	ml := ""
-	sep := ""
-
-	// Match labels
-	for k, v := range selector.MatchLabels {
-		fmt.Printf("key[%s] value[%s]\n", k, v)
-		if len(ml) > 0 {
-			sep = ","
-		}
-
-		ml = fmt.Sprintf("%s%s%s%%3D%s", ml, sep, k, v)
-	}
-
-	// Now add set based match expressions
-	for _, v := range selector.MatchExpressions {
-		if len(ml) > 0 {
-			sep = ","
-		}
-		ml = fmt.Sprintf("%s%s%s+%s+%%28%s%%s29", ml, sep, v.Key, v.Operator, strings.Join(v.Values, "%%2C"))
-	}
-
-	if len(ml) > 0 {
-		return fmt.Sprintf("%s%s", qs, ml)
-	}
-
-	return ""
-}
-
-func (r *HelmRelease) GetPods(jetstream interfaces.PortalProxy) []v1.Pod {
-	var podList []v1.Pod
-
+// UpdatePods will run the jobs needed to get the pods
+// This uses the selectors to find the pods - so new pods should be picked up
+func (r *HelmRelease) UpdatePods(jetstream interfaces.PortalProxy) {
 	// This will be an array of pod lists
-	res := r.runJobs(jetstream, r.PodJobs)
+	runner := NewKubeAPIJob(jetstream, r.PodJobs)
+	res := runner.Run()
 	for _, j := range res {
 		var list v1.PodList
 		err := json.Unmarshal(j.Data, &list)
 		if err == nil {
 			for _, pod := range list.Items {
-				log.Info(reflect.TypeOf(pod))
 				// Add a kube resource for the pod
 				res := KubeResource{
-					Kind: pod.Kind,
-					APIVersion: pod.APIVersion,
+					Kind:       "Pod",
+					APIVersion: "v1",
 				}
 				res.Metadata.Name = pod.Name
-				log.Info("POD")
-				log.Infof("%+v", res)
-				r.KubeResources = append(r.KubeResources, res)
-				r.Resources = append(r.Resources, &res)
-				podList = append(podList, pod)
+				res.Manifest = false
+
+				podCopy := &v1.Pod{}
+				*podCopy = pod
+				res.Resource = podCopy
+
+				r.setResource(res)
 				r.processPodOwners(pod)
 			}
 		}
 	}
-
-	return podList
 }
 
 // Pods can be owned by a ReplicaSet - these are not represented in the manifest, as they
@@ -319,14 +237,17 @@ func (r *HelmRelease) processPodOwners(pod v1.Pod) {
 				Namespace: r.Namespace,
 			}
 			identifier := getResourceIdentifier(resource.TypeMeta, resource.ObjectMeta)
-			if _, ok := r.ResourceNames[identifier]; !ok {
-				r.Resources = append(r.Resources, &resource)
-				//r.HelmResources = append(r.HelmResources, resource)
+			if _, ok := r.Resources[identifier]; !ok {
+				// Create a Kube Resource for the ReplicaSet
+				res := KubeResource{
+					Kind:       resource.Kind,
+					APIVersion: resource.APIVersion,
+				}
+				res.Metadata.Name = resource.Name
+				res.Manifest = false
+				res.Resource = &resource
+				r.setResource(res)
 
-				r.ResourceNames[identifier] = true
-				r.KubeResources = append(r.KubeResources, r.getKubeResource(resource.TypeMeta, resource.ObjectMeta))
-
-				// TODO: Need a KubeResource
 				r.addJobForResource(owner.Kind, owner.APIVersion, owner.Name)
 			}
 		} else {
@@ -335,68 +256,41 @@ func (r *HelmRelease) processPodOwners(pod v1.Pod) {
 	}
 }
 
-func (r *HelmRelease) getKubeResource(typeMeta metav1.TypeMeta, objectMeta metav1.ObjectMeta) KubeResource {
-	kres := KubeResource{
-		Kind:       typeMeta.Kind,
-		APIVersion: typeMeta.APIVersion,
-	}
-	kres.Metadata.Name = objectMeta.Name
-	return kres
-}
+// func (r *HelmRelease) getKubeResource(typeMeta metav1.TypeMeta, objectMeta metav1.ObjectMeta) KubeResource {
+// 	kres := KubeResource{
+// 		Kind:       typeMeta.Kind,
+// 		APIVersion: typeMeta.APIVersion,
+// 	}
+// 	kres.Metadata.Name = objectMeta.Name
+// 	return kres
+// }
 
-func (r *HelmRelease) GetResources(jetstream interfaces.PortalProxy) []json.RawMessage {
-	var resourceList []json.RawMessage
-
+func (r *HelmRelease) UpdateResources(jetstream interfaces.PortalProxy) {
 	// This will be an array of resources
-	res := r.runJobs(jetstream, r.Jobs)
+	runner := NewKubeAPIJob(jetstream, r.Jobs)
+	res := runner.Run()
 	for _, j := range res {
-		resourceList = append(resourceList, j.Data)
-	}
 
-	return resourceList
-}
+		// TODO: If the status was 404, then we should remove the resource
 
-func (r *HelmRelease) runJobs(jetstream interfaces.PortalProxy, jobs []KubeResourceJob) []KubeResourceJobResult {
-	count := len(jobs)
-	var res []KubeResourceJobResult
-
-	kubeJobs := make(chan KubeResourceJob, count)
-	kubeResults := make(chan KubeResourceJobResult, count)
-
-	for w := 1; w <= 4; w++ {
-		go r.restWorker(jetstream, w, kubeJobs, kubeResults)
-	}
-
-	for _, j := range jobs {
-		kubeJobs <- j
-	}
-
-	close(kubeJobs)
-
-	var v KubeResourceJobResult
-
-	for a := 1; a <= count; a++ {
-		v = <-kubeResults
-		res = append(res, v)
-	}
-
-	return res
-}
-
-func (r *HelmRelease) restWorker(jetstream interfaces.PortalProxy, id int, jobs <-chan KubeResourceJob, results chan<- KubeResourceJobResult) {
-	for j := range jobs {
-		response, err := jetstream.DoProxySingleRequest(j.Endpoint, j.User, "GET", j.URL, nil, nil)
-		log.Info(response.StatusCode)
-		res := KubeResourceJobResult{
-			KubeResourceJob: j,
-			StatusCode:      response.StatusCode,
-			Data:            json.RawMessage(response.Response),
+		// Add a kube resource for the pod
+		res := KubeResource{
+			Kind:       j.Kind,
+			APIVersion: j.APIVersion,
 		}
+		res.Metadata.Name = j.Name
 
-		if err != nil {
-			log.Error("COULD NOT MAKE API REQUEST")
+		// TODO: This should carry over
+		res.Manifest = false
+
+		decode := scheme.Codecs.UniversalDeserializer().Decode
+		obj, _, err := decode(j.Data, nil, nil)
+		if err == nil {
+			res.Resource = obj
+			r.setResource(res)
+		} else {
+			log.Error("Could not parse resource")
 		}
-		results <- res
 	}
 }
 
