@@ -50,7 +50,8 @@ function getRequestObservable(
   httpClient: PipelineHttpClient,
   action: PaginatedAction,
   request: HttpRequest<any>,
-  paginationPageIterator?: PaginationPageIterator
+  nonJetstreamRequest: boolean,
+  paginationPageIterator?: PaginationPageIterator,
 ): Observable<PagedJetstreamResponse> {
   const initialRequest = makeRequestEntityPipe(
     httpClient,
@@ -63,7 +64,7 @@ function getRequestObservable(
     console.warn('Action requires all request pages but no page flattener was given.');
   }
   if (!action.flattenPagination || !paginationPageIterator) {
-    return initialRequest.pipe(map(response => singleRequestToPaged(response)));
+    return initialRequest.pipe(map(response => singleRequestToPaged(response, nonJetstreamRequest)));
   }
   return paginationPageIterator.mergeAllPagesEntities();
 }
@@ -99,8 +100,8 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   const request = prePaginatedRequestFunction ?
     prePaginatedRequestFunction(requestFromStore, completePaginationAction, catalogueEntity, appState) :
     requestFromStore;
-
-  const handleMultiEndpointsPipe = isJetstreamRequest(entity.definition) ?
+  const jetstreamRequest = isJetstreamRequest(entity.definition);
+  const handleMultiEndpointsPipe = jetstreamRequest ?
     handleJetstreamResponsePipeFactory(
       completePaginationAction.options.url,
       flattenerConfig
@@ -122,7 +123,8 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
         httpClient,
         completePaginationAction,
         requestObject,
-        pageIterator
+        !jetstreamRequest,
+        pageIterator,
       ).pipe(
         // Convert { [endpointGuid]: <raw response> } to { { errors: [], successes: [] } }
         map(handleMultiEndpointsPipe),

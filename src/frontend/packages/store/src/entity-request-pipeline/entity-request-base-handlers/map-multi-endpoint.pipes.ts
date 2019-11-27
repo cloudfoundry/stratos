@@ -48,7 +48,7 @@ function getEntities(
             [newGuid]: entity
           };
         }, {}
-      ) : Object.values(endpointResponse.normalizedEntities[entityKey]);
+      ) : Object.values(endpointResponse.normalizedEntities.entities[entityKey]);
       return {
         ...newEntities,
         [entityKey]: entities

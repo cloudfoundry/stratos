@@ -52,7 +52,7 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
     action.endpointGuid,
     action.externalRequest
   ).pipe(
-    map(response => isJetstreamEntityRequest ? singleRequestToPaged(response) : response),
+    map(response => singleRequestToPaged(response, !isJetstreamEntityRequest)),
     // Convert { [endpointGuid]: <raw response> } to { { errors: [], successes: [] } }
     map(handleMultiEndpointsPipe),
     // Convert { { errors: [], successes: [] } } to { response: NoramlisedResponse, success: boolean }

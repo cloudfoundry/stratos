@@ -41,9 +41,6 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
         ...linBuilders.map((builder, i) => (Array.isArray(builder) ? {
           columnId: builder[0],
           cellDefinition: {
-            getLink: (e: any) => {
-              return null;
-            },
             getValue: (e: any) => {
               return builder[1](e, this.store);
             }

@@ -16,9 +16,12 @@ export function getSuccessMapper(catalogueEntity: StratosBaseCatalogueEntity) {
   return definition.successfulRequestDataMapper || definition.endpoint.globalSuccessfulRequestDataMapper || null;
 }
 
-export function singleRequestToPaged(response: JetstreamResponse<any>): PagedJetstreamResponse {
+export function singleRequestToPaged(response: JetstreamResponse<any>, nonJetstreamRequest: boolean): PagedJetstreamResponse {
   if (!response) {
     return null;
+  }
+  if (nonJetstreamRequest) {
+    return response;
   }
   return Object.keys(response).reduce((mapped, endpointKey) => {
     const page = response[endpointKey];

@@ -21,7 +21,6 @@ export class ApiEndpointTypeSelectPageComponent implements OnInit {
     public activeRoute: ActivatedRoute
   ) { }
   public endpointSelected(endpoint: ApiEntityType) {
-    console.log(endpoint);
     this.router.navigate([endpoint.type], { relativeTo: this.activeRoute });
   }
   ngOnInit() {
