@@ -16,7 +16,7 @@ export function getSuccessMapper(catalogueEntity: StratosBaseCatalogueEntity) {
   return definition.successfulRequestDataMapper || definition.endpoint.globalSuccessfulRequestDataMapper || null;
 }
 
-export function singleRequestToPaged(response: JetstreamResponse<any>, nonJetstreamRequest: boolean): PagedJetstreamResponse {
+export function singleRequestToPaged(response: JetstreamResponse<any>, nonJetstreamRequest?: boolean): PagedJetstreamResponse {
   if (!response) {
     return null;
   }

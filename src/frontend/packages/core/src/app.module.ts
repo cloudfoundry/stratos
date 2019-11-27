@@ -47,6 +47,7 @@ import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from '../xsrf.module';
+import { ExampleApiPackageModule } from '../../example-api/example-api.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -89,6 +90,7 @@ export class CustomRouterStateSerializer
     EntityCatalogueModule.forFeature(generateStratosEntities),
     RouteModule,
     CloudFoundryPackageModule,
+    ExampleApiPackageModule,
     AppStoreModule,
     BrowserModule,
     SharedModule,

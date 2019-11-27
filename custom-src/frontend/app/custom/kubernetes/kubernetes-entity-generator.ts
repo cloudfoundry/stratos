@@ -112,54 +112,56 @@ const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig } = {
   }
 };
 
+export const k8EndpointDefinition: StratosEndpointExtensionDefinition = {
+  type: KUBERNETES_ENDPOINT_TYPE,
+  label: 'Kubernetes',
+  labelPlural: 'Kubernetes',
+  icon: 'kubernetes',
+  iconFont: 'stratos-icons',
+  logoUrl: '/core/assets/custom/kubernetes.svg',
+  urlValidation: undefined,
+  authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CERT_AUTH]],
+  renderPriority: 4,
+  subTypes: [{
+    type: 'caasp',
+    label: 'SUSE CaaS Platform',
+    authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG]],
+    logoUrl: '/core/assets/custom/caasp.png',
+    renderPriority: 5
+  }, {
+    type: 'aks',
+    label: 'Azure AKS',
+    authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG_AZ]],
+    logoUrl: '/core/assets/custom/aks.svg',
+    renderPriority: 6
+  }, {
+    type: 'eks',
+    label: 'Amazon EKS',
+    authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.AWS_IAM]],
+    logoUrl: '/core/assets/custom/eks.svg',
+    renderPriority: 6
+  }, {
+    type: 'gke',
+    label: 'Google Kubernetes Engine',
+    authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.GKE]],
+    logoUrl: '/core/assets/custom/gke.svg',
+    renderPriority: 6
+  }],
+};
+
 export function generateKubernetesEntities(): StratosBaseCatalogueEntity[] {
-  const endpointDefinition: StratosEndpointExtensionDefinition = {
-    type: KUBERNETES_ENDPOINT_TYPE,
-    label: 'Kubernetes',
-    labelPlural: 'Kubernetes',
-    icon: 'kubernetes',
-    iconFont: 'stratos-icons',
-    logoUrl: '/core/assets/custom/kubernetes.svg',
-    urlValidation: undefined,
-    authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CERT_AUTH]],
-    renderPriority: 4,
-    subTypes: [{
-      type: 'caasp',
-      label: 'SUSE CaaS Platform',
-      authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG]],
-      logoUrl: '/core/assets/custom/caasp.png',
-      renderPriority: 5
-    }, {
-      type: 'aks',
-      label: 'Azure AKS',
-      authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG_AZ]],
-      logoUrl: '/core/assets/custom/aks.svg',
-      renderPriority: 6
-    }, {
-      type: 'eks',
-      label: 'Amazon EKS',
-      authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.AWS_IAM]],
-      logoUrl: '/core/assets/custom/eks.svg',
-      renderPriority: 6
-    }, {
-      type: 'gke',
-      label: 'Google Kubernetes Engine',
-      authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.GKE]],
-      logoUrl: '/core/assets/custom/gke.svg',
-      renderPriority: 6
-    }],
-  };
+
   return [
-    generateEndpointEntity(endpointDefinition),
-    generateAppEntity(endpointDefinition),
-    generateStatefulSetsEntity(endpointDefinition),
-    generatePodsEntity(endpointDefinition),
-    generateDeploymentsEntity(endpointDefinition),
-    generateNodesEntity(endpointDefinition),
-    generateNamespacesEntity(endpointDefinition),
-    generateServicesEntity(endpointDefinition),
-    generateDashboardEntity(endpointDefinition),
-    generateMetricEntity(endpointDefinition)
+    generateEndpointEntity(k8EndpointDefinition),
+    generateAppEntity(k8EndpointDefinition),
+    generateStatefulSetsEntity(k8EndpointDefinition),
+    generatePodsEntity(k8EndpointDefinition),
+    generateDeploymentsEntity(k8EndpointDefinition),
+    generateNodesEntity(k8EndpointDefinition),
+    generateNamespacesEntity(k8EndpointDefinition),
+    generateServicesEntity(k8EndpointDefinition),
+    generateDashboardEntity(k8EndpointDefinition),
+    generateMetricEntity(k8EndpointDefinition)
   ];
 }
 

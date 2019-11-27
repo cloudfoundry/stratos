@@ -128,7 +128,6 @@ import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
-import { CfApplicationState } from './store/types/application.types';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 
 export interface CFBasePipelineRequestActionMeta {
@@ -137,97 +136,98 @@ export interface CFBasePipelineRequestActionMeta {
   flatten?: boolean;
 }
 
-export function generateCFEntities(): StratosBaseCatalogueEntity[] {
-  const endpointDefinition: StratosEndpointExtensionDefinition = {
-    urlValidationRegexString: urlValidationExpression,
-    type: CF_ENDPOINT_TYPE,
-    label: 'Cloud Foundry',
-    labelPlural: 'Cloud Foundry',
-    icon: 'cloud_foundry',
-    iconFont: 'stratos-icons',
-    logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
-    authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
-    listDetailsComponent: CfEndpointDetailsComponent,
-    renderPriority: 1,
-    globalPreRequest: (request, action) => {
-      return addCfRelationParams(request, action);
-    },
-    globalPrePaginationRequest: (request, action, catalogueEntity, appState) => {
-      const rWithRelations = addCfRelationParams(request, action);
-      return addCfQParams(rWithRelations, action, catalogueEntity, appState);
-    },
-    globalSuccessfulRequestDataMapper: (data, endpointGuid, guid) => {
-      if (data) {
-        if (data.entity) {
-          data.entity.cfGuid = endpointGuid;
-          data.entity.guid = guid;
-        } else {
-          data.cfGuid = endpointGuid;
-          data.guid = guid;
-        }
+export const cfEndpointDefinition: StratosEndpointExtensionDefinition = {
+  urlValidationRegexString: urlValidationExpression,
+  type: CF_ENDPOINT_TYPE,
+  label: 'Cloud Foundry',
+  labelPlural: 'Cloud Foundry',
+  icon: 'cloud_foundry',
+  iconFont: 'stratos-icons',
+  logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
+  authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
+  listDetailsComponent: CfEndpointDetailsComponent,
+  renderPriority: 1,
+  globalPreRequest: (request, action) => {
+    return addCfRelationParams(request, action);
+  },
+  globalPrePaginationRequest: (request, action, catalogueEntity, appState) => {
+    const rWithRelations = addCfRelationParams(request, action);
+    return addCfQParams(rWithRelations, action, catalogueEntity, appState);
+  },
+  globalSuccessfulRequestDataMapper: (data, endpointGuid, guid) => {
+    if (data) {
+      if (data.entity) {
+        data.entity.cfGuid = endpointGuid;
+        data.entity.guid = guid;
+      } else {
+        data.cfGuid = endpointGuid;
+        data.guid = guid;
       }
-      return data;
-    },
-    globalErrorMessageHandler: (errors: JetstreamError<CfErrorResponse>[]) => {
-      if (!errors || errors.length === 0) {
-        return 'No errors in response';
-      }
-
-      if (errors.length === 1) {
-        return getCfError(errors[0].jetstreamErrorResponse);
-      }
-
-      return errors.reduce((message, error) => {
-        message += `\n${getCfError(error.jetstreamErrorResponse)}`;
-        return message;
-      }, 'Multiple Cloud Foundry Errors. ');
-    },
-    paginationConfig: {
-      getEntitiesFromResponse: (response: CFResponse) => response.resources,
-      getTotalPages: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>
-        // Input is keyed per endpoint. Value per endpoint can either be a response or a number of responses (one per page)
-        Object.values(responseWithPages).reduce((max, response: CFResponse | CFResponse[]) => {
-          const resp = (response[0] || response);
-          return max > resp.total_pages ? max : resp.total_pages;
-        }, 0),
-      getTotalEntities: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>
-        Object.values(responseWithPages).reduce((all, response: CFResponse | CFResponse[]) => {
-          return all + (response[0] || response).total_results;
-        }, 0),
-      getPaginationParameters: (page: number) => ({ page: page + '' })
     }
-  };
+    return data;
+  },
+  globalErrorMessageHandler: (errors: JetstreamError<CfErrorResponse>[]) => {
+    if (!errors || errors.length === 0) {
+      return 'No errors in response';
+    }
+
+    if (errors.length === 1) {
+      return getCfError(errors[0].jetstreamErrorResponse);
+    }
+
+    return errors.reduce((message, error) => {
+      message += `\n${getCfError(error.jetstreamErrorResponse)}`;
+      return message;
+    }, 'Multiple Cloud Foundry Errors. ');
+  },
+  paginationConfig: {
+    getEntitiesFromResponse: (response: CFResponse) => response.resources,
+    getTotalPages: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>
+      // Input is keyed per endpoint. Value per endpoint can either be a response or a number of responses (one per page)
+      Object.values(responseWithPages).reduce((max, response: CFResponse | CFResponse[]) => {
+        const resp = (response[0] || response);
+        return max > resp.total_pages ? max : resp.total_pages;
+      }, 0),
+    getTotalEntities: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>
+      Object.values(responseWithPages).reduce((all, response: CFResponse | CFResponse[]) => {
+        return all + (response[0] || response).total_results;
+      }, 0),
+    getPaginationParameters: (page: number) => ({ page: page + '' })
+  }
+};
+
+export function generateCFEntities(): StratosBaseCatalogueEntity[] {
   return [
-    generateCfEndpointEntity(endpointDefinition),
-    generateCfApplicationEntity(endpointDefinition),
-    generateCfSpaceEntity(endpointDefinition),
-    generateCfOrgEntity(endpointDefinition),
-    generateFeatureFlagEntity(endpointDefinition),
-    generateStackEntity(endpointDefinition),
-    generateRouteEntity(endpointDefinition),
-    generateEventEntity(endpointDefinition),
-    generateGitBranchEntity(endpointDefinition),
-    generateGitRepoEntity(endpointDefinition),
-    generateGitCommitEntity(endpointDefinition),
-    generateCFDomainEntity(endpointDefinition),
-    generateCFUserEntity(endpointDefinition),
-    generateCFServiceInstanceEntity(endpointDefinition),
-    generateCFServicePlanEntity(endpointDefinition),
-    generateCFServiceEntity(endpointDefinition),
-    generateCFServiceBindingEntity(endpointDefinition),
-    generateCFSecurityGroupEntity(endpointDefinition),
-    generateCFServicePlanVisibilityEntity(endpointDefinition),
-    generateCFServiceBrokerEntity(endpointDefinition),
-    generateCFBuildPackEntity(endpointDefinition),
-    generateCFAppStatsEntity(endpointDefinition),
-    generateCFUserProvidedServiceInstanceEntity(endpointDefinition),
-    generateCFInfoEntity(endpointDefinition),
-    generateCFPrivateDomainEntity(endpointDefinition),
-    generateCFSpaceQuotaEntity(endpointDefinition),
-    generateCFAppSummaryEntity(endpointDefinition),
-    generateCFAppEnvVarEntity(endpointDefinition),
-    generateCFQuotaDefinitionEntity(endpointDefinition),
-    generateCFMetrics(endpointDefinition)
+    generateCfEndpointEntity(cfEndpointDefinition),
+    generateCfApplicationEntity(cfEndpointDefinition),
+    generateCfSpaceEntity(cfEndpointDefinition),
+    generateCfOrgEntity(cfEndpointDefinition),
+    generateFeatureFlagEntity(cfEndpointDefinition),
+    generateStackEntity(cfEndpointDefinition),
+    generateRouteEntity(cfEndpointDefinition),
+    generateEventEntity(cfEndpointDefinition),
+    generateGitBranchEntity(cfEndpointDefinition),
+    generateGitRepoEntity(cfEndpointDefinition),
+    generateGitCommitEntity(cfEndpointDefinition),
+    generateCFDomainEntity(cfEndpointDefinition),
+    generateCFUserEntity(cfEndpointDefinition),
+    generateCFServiceInstanceEntity(cfEndpointDefinition),
+    generateCFServicePlanEntity(cfEndpointDefinition),
+    generateCFServiceEntity(cfEndpointDefinition),
+    generateCFServiceBindingEntity(cfEndpointDefinition),
+    generateCFSecurityGroupEntity(cfEndpointDefinition),
+    generateCFServicePlanVisibilityEntity(cfEndpointDefinition),
+    generateCFServiceBrokerEntity(cfEndpointDefinition),
+    generateCFBuildPackEntity(cfEndpointDefinition),
+    generateCFAppStatsEntity(cfEndpointDefinition),
+    generateCFUserProvidedServiceInstanceEntity(cfEndpointDefinition),
+    generateCFInfoEntity(cfEndpointDefinition),
+    generateCFPrivateDomainEntity(cfEndpointDefinition),
+    generateCFSpaceQuotaEntity(cfEndpointDefinition),
+    generateCFAppSummaryEntity(cfEndpointDefinition),
+    generateCFAppEnvVarEntity(cfEndpointDefinition),
+    generateCFQuotaDefinitionEntity(cfEndpointDefinition),
+    generateCFMetrics(cfEndpointDefinition)
   ];
 }
 
