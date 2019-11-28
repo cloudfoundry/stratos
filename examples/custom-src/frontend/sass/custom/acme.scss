@@ -11,7 +11,7 @@ $acme-blue: #073155;
 $acme-side-nav: $acme-secondary;
 $acme-side-nav-active: #003358;
 
-.stratos {
+body.stratos {
   app-page-subheader {
     .page-subheader {
       background-color: #fff;
@@ -67,5 +67,20 @@ $acme-side-nav-active: #003358;
   // Show the text Stratos beneath the Acme logo
   .stratos-title > .stratos-title__header {
     display: inline-block;
+  }
+
+  .dark-theme {
+    $dark-primary: $acme-theme-primary;
+    $dark-accent: $acme-theme-primary;
+    $dark-warn: mat-palette($mat-red);
+    $dark-theme: mat-dark-theme($dark-primary, $dark-accent, $dark-warn);
+
+    $stratos-theme: $dark-theme;
+    $stratos-nav-theme: null !default;
+    $stratos-status-theme: null !default;
+
+    @include angular-material-theme($dark-theme);
+    @include app-theme($stratos-theme, $stratos-nav-theme, $stratos-status-theme);
+
   }
 }
