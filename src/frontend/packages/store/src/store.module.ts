@@ -1,6 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { HttpModule } from '@angular/http';
 import { EffectsModule } from '@ngrx/effects';
 
 import { ActionHistoryEffect } from './effects/action-history.effects';
@@ -32,7 +31,6 @@ import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-clien
   ],
   imports: [
     AppReducersModule,
-    HttpModule,
     HttpClientModule,
     EffectsModule.forRoot([
       APIEffect,

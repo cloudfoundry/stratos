@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
@@ -57,7 +56,6 @@ export function createFailedGithubRequestMessage(error: any, logger: LoggerServi
 @Injectable()
 export class DeployAppEffects {
   constructor(
-    private http: Http,
     private actions$: Actions,
     private store: Store<CFAppState>,
     private logger: LoggerService,

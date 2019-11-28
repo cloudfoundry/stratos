@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
@@ -56,7 +55,6 @@ export class CfUserService {
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private entityServiceFactory: EntityServiceFactory,
-    private http: Http,
   ) { }
 
   getUsers = (endpointGuid: string, filterEmpty = true): Observable<APIResource<CfUser>[]> =>

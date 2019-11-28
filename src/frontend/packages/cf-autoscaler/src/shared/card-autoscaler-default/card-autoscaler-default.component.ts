@@ -17,7 +17,7 @@ import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 })
 export class CardAutoscalerDefaultComponent implements OnInit {
 
-  @ViewChild('instanceField') instanceField: ElementRef;
+  @ViewChild('instanceField', { static: false }) instanceField: ElementRef;
 
   constructor(
     public appService: ApplicationService,

@@ -41,7 +41,7 @@ export interface EntityCatalogueBuilders<
   actionBuilders?: AB;
 }
 type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |
-  IStratosEndpointDefinition |
+  IStratosEndpointDefinition<EntityCatalogueSchemas> |
   IStratosBaseEntityDefinition<EntityCatalogueSchemas>;
 export class StratosBaseCatalogueEntity<
   T extends IEntityMetadata = IEntityMetadata,
@@ -118,7 +118,7 @@ export class StratosBaseCatalogueEntity<
    * If no schemaKey is provided then the default schema will be returned
    */
   public getSchema(schemaKey?: string) {
-    const catalogueSchema = this.definition.schema;
+    const catalogueSchema = this.definition.schema as EntityCatalogueSchemas;
     if (!schemaKey || this.isEndpoint) {
       return catalogueSchema.default;
     }
@@ -260,7 +260,7 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
     ]
   } as IStratosEntityBuilder<IEndpointFavMetadata, EndpointModel>;
   // This is needed here for typing
-  public definition: IStratosEndpointDefinition;
+  public definition: IStratosEndpointDefinition<EntityCatalogueSchemas>;
   constructor(
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
     getLink?: (metadata: IEndpointFavMetadata) => string

@@ -30,7 +30,7 @@ export class CreateSpaceQuotaStepComponent {
   orgGuid: string;
   spaceQuotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
 
-  @ViewChild('form')
+  @ViewChild('form', { static: true })
   form: SpaceQuotaDefinitionFormComponent;
 
   constructor(
