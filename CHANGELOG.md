@@ -4,10 +4,13 @@
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/2.6.0...2.6.1)
 
-This release contains two fixes:
+This release contains a few fixes:
 
 **Fixes:**
 
+- Helm Chart does not work with Kubernetes 1.16 [\#4022](https://github.com/cloudfoundry/stratos/issues/4022)
+- Generated Ingress certificates during Kubernetes deployment are empty [\#4006](https://github.com/cloudfoundry/stratos/issues/4006)
+- Kubernetes Ingress certificate is incorrectly set [\#4005](https://github.com/cloudfoundry/stratos/issues/4005)
 - Update metric used for cells [\#4009](https://github.com/cloudfoundry/stratos/pull/4009)
 - Fix incorrect SSO behaviour following 2.4.0 --> 2.6.0 upgrade [\#4015](https://github.com/cloudfoundry/stratos/pull/4015)
 
