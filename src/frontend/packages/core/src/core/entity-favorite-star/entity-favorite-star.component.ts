@@ -61,7 +61,7 @@ export class EntityFavoriteStarComponent {
     }
   }
 
-  private pToggleFavorite = (res?: any) => {
+  private pToggleFavorite = () => {
     this.userFavoriteManager.toggleFavorite(this.pFavourite);
   }
 }

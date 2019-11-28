@@ -40,7 +40,6 @@ export class SimpleListComponent implements OnInit {
   ngOnInit() {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ListComponent);
     const urlParams = this.route.snapshot.params;
-    const endpointGuid = urlParams.endpointId || urlParams.endpointGuid;
     const viewContainerRef = this.listHost.viewContainerRef;
     viewContainerRef.clear();
     const dataSource = new CatalogueEntityDrivenListDataSource<any>(

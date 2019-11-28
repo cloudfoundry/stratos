@@ -1,11 +1,8 @@
 import {
-  IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../core/src/core/entity-catalogue/entity-catalogue.types';
 import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from '../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { cfEndpointDefinition } from '../cloud-foundry/src/cf-entity-generator';
 import { EntitySchema } from '../store/src/helpers/entity-schema';
-import { ExampleApiPost } from './example-api-entity.types';
 import { exampleApiPostActionBuilders } from './example-api.action-builders';
 import { k8EndpointDefinition } from '../core/src/custom/kubernetes/kubernetes-entity-generator';
 
@@ -98,7 +95,14 @@ const generateExamplePostEntity = (endpointDefinition: StratosEndpointExtensionD
       }
     },
     {
-      actionBuilders: exampleApiPostActionBuilders
+      actionBuilders: exampleApiPostActionBuilders,
+      entityBuilder: {
+        getMetadata: ent => ({
+          name: ent.title,
+          guid: ent.id.toString()
+        }),
+        getGuid: metadata => metadata.guid,
+      }
     }
   );
 };

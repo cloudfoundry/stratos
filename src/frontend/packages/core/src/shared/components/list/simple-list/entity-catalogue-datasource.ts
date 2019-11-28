@@ -5,6 +5,7 @@ import { ListConfig, ListViewTypes } from '../list.component.types';
 import { createTableColumnFavorite } from '../list-table/table-cell-favorite/table-cell-favorite.component';
 import { UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
 import { EntityPipelineEntity, } from '../../../../../../store/src/entity-request-pipeline/pipeline.types';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 
 export interface GetMultipleActionConfig {
   endpointGuid?: string;
@@ -37,7 +38,7 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
     }
     listConfig.getColumns = () => {
       const linBuilders = tableConfig ? tableConfig.columnBuilders : [];
-      return [
+      const columns = [
         ...linBuilders.map((builder, i) => (Array.isArray(builder) ? {
           columnId: builder[0],
           cellDefinition: {
@@ -46,16 +47,22 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
             }
           },
           headerCell: () => builder[0],
-        } : builder)),
-        createTableColumnFavorite(row => {
-          return new UserFavorite(
-            catalogueEntity.getEndpointGuidFromEntity(row),
-            catalogueEntity.endpointType,
-            catalogueEntity.definition.type,
-            catalogueEntity.getGuidFromEntity(row),
-          );
-        })
+        } : builder))
       ];
+      if (catalogueEntity.builders.entityBuilder) {
+        return [
+          ...columns,
+          createTableColumnFavorite(row => {
+            return new UserFavorite(
+              endpointGuid ? endpointGuid : catalogueEntity.getEndpointGuidFromEntity(row),
+              catalogueEntity.endpointType,
+              catalogueEntity.definition.type,
+              catalogueEntity.getGuidFromEntity(row),
+            );
+          })
+        ]
+      }
+      return columns;
     };
     listConfig.getDataSource = () => this;
     const action = getAllActionBuilder(endpointGuid, paginationKey, extraArgs);

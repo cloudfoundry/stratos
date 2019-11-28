@@ -89,13 +89,14 @@ export class FavoritesConfigMapper {
           menuItems: null
         };
       }
-      const linesBuilders = catalogueEntity.builders.entityBuilder.getLines ? catalogueEntity.builders.entityBuilder.getLines() : [];
+      const { getLines, getLink, getActions } = catalogueEntity.builders.entityBuilder;
+      const linesBuilders = getLines ? getLines() : [];
       return {
         lines: linesBuilders.map(builder => ([builder[0], builder[1](entity)])) as [string, string | Observable<string>][],
         type: catalogueEntity.definition.type,
-        routerLink: catalogueEntity.builders.entityBuilder.getLink(entity),
+        routerLink: getLink ? getLink(entity) : '',
         name: entity.name,
-        menuItems: catalogueEntity.builders.entityBuilder.getActions ? catalogueEntity.builders.entityBuilder.getActions(entity) : null
+        menuItems: getActions ? getActions(entity) : null
       };
     };
   }
