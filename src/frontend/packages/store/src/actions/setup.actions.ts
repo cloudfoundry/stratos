@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { UaaSetupData } from '../types/uaa-setup.types';
+import { UaaSetupData, LocalAdminSetupData } from '../types/uaa-setup.types';
 
 export const SETUP_UAA = '[Setup] Setup UAA';
 export const SETUP_UAA_SAVE = '[Setup] Setup UAA save';
@@ -8,7 +8,7 @@ export const SETUP_UAA_FAILED = '[Setup] Setup UAA failed';
 
 export class SetupUAA implements Action {
   constructor(
-    public setupData: UaaSetupData
+    public setupData: UaaSetupData | LocalAdminSetupData
   ) { }
   type = SETUP_UAA;
 }

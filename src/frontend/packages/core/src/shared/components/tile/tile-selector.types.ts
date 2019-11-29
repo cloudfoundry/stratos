@@ -14,7 +14,8 @@ export class ITileConfig<T extends ITileData = ITileData> {
     public label: string | number,
     public graphic: ITileGraphic,
     public data?: T,
-    public hidden = false
+    public hidden = false,
+    public description = ''
   ) { }
 }
 

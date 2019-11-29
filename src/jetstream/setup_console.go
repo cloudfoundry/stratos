@@ -31,6 +31,15 @@ const (
 
 func parseConsoleConfigFromForm(c echo.Context) (*interfaces.ConsoleConfig, error) {
 	consoleConfig := new(interfaces.ConsoleConfig)
+
+	// Local admin user configuration?
+	password := c.FormValue("local_admin_password")
+	if len(password) > 0 {
+		consoleConfig.LocalUserPassword = password
+		consoleConfig.AuthEndpointType = "local"
+		return consoleConfig, nil
+	}
+
 	url, err := url.Parse(c.FormValue("uaa_endpoint"))
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "Invalid UAA Endpoint value")
@@ -60,7 +69,7 @@ func parseConsoleConfigFromForm(c echo.Context) (*interfaces.ConsoleConfig, erro
 
 // Check the initial parameter set and fetch the list of available scopes
 // This does not persist the configuration to the database at this stage
-func (p *portalProxy) setupConsoleCheck(c echo.Context) error {
+func (p *portalProxy) saveConsoleSetupDataUAA(c echo.Context) error {
 
 	// Check if already set up
 	if p.GetConfig().ConsoleConfig.IsSetupComplete() {
@@ -113,6 +122,42 @@ func (p *portalProxy) setupConsoleCheck(c echo.Context) error {
 }
 
 func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
+
+	if interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType] == interfaces.Local {
+		return saveLocalUserConsoleConfig(consoleRepo, consoleConfig)
+	}
+
+	return saveUAAConsoleConfig(consoleRepo, consoleConfig)
+}
+
+func saveLocalUserConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
+
+	log.Info("saveLocalUserConsoleConfig")
+
+	if err := consoleRepo.SetValue(systemGroupName, "AUTH_ENDPOINT_TYPE", "local"); err != nil {
+		return err
+	}
+
+	if err := consoleRepo.SetValue(systemGroupName, "CONSOLE_ADMIN_SCOPE", "stratos.admin"); err != nil {
+		return err
+	}
+
+	if err := consoleRepo.SetValue(systemGroupName, "LOCAL_USER", "admin"); err != nil {
+		return err
+	}
+
+	if err := consoleRepo.SetValue(systemGroupName, "LOCAL_USER_SCOPE", "stratos.admin"); err != nil {
+		return err
+	}
+
+	if err := consoleRepo.SetValue(systemGroupName, "LOCAL_USER_PASSWORD", consoleConfig.LocalUserPassword); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func saveUAAConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
 	log.Debugf("Saving ConsoleConfig: %+v", consoleConfig)
 
 	if err := consoleRepo.SetValue(systemGroupName, "UAA_ENDPOINT", consoleConfig.UAAEndpoint.String()); err != nil {
@@ -147,7 +192,7 @@ func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *int
 }
 
 // Save the console setup
-func (p *portalProxy) setupConsole(c echo.Context) error {
+func (p *portalProxy) saveConsoleSetupData(c echo.Context) error {
 
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -344,6 +389,8 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 		showStratosConfig(consoleConfig)
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
+		portalProxy.Config.AuthEndpointType = consoleConfig.AuthEndpointType
+		portalProxy.InitStratosAuthService(interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType])
 	}
 
 	return consoleConfig.IsSetupComplete()
