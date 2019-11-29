@@ -1,10 +1,8 @@
 import { ActionReducer, Store } from '@ngrx/store';
-import { normalize } from 'normalizr';
 
 import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../../../store/src/entity-request-pipeline/pipeline.types';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../../../store/src/types/request.types';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
@@ -89,8 +87,8 @@ export class StratosBaseCatalogueEntity<
       }
       return newSchema;
     }, {
-        default: entitySchemas.default
-      });
+      default: entitySchemas.default
+    });
   }
 
   private getEndpointType(definition: IStratosBaseEntityDefinition) {
@@ -217,13 +215,6 @@ export class StratosBaseCatalogueEntity<
 
   }
 
-  public getNormalizedEntityData(entities: Y | Y[], schemaKey?: string): NormalizedResponse<Y> {
-    const schema = this.getSchema(schemaKey);
-    if (Array.isArray(entities)) {
-      return normalize(entities, [schema]);
-    }
-    return normalize(entities, schema);
-  }
 }
 
 export class StratosCatalogueEntity<
