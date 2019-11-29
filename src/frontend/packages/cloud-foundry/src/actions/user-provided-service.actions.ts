@@ -1,3 +1,5 @@
+import { HttpRequest } from '@angular/common/http';
+
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
@@ -10,7 +12,6 @@ import {
   organizationEntityType,
   serviceBindingEntityType,
   spaceEntityType,
-  spaceWithOrgEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../cf-entity-types';
 import {
@@ -19,10 +20,9 @@ import {
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
-import { HttpRequest } from '@angular/common/http';
 
 export const getUserProvidedServiceInstanceRelations = [
-  createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceWithOrgEntityType),
+  createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceEntityType),
   createEntityRelationKey(spaceEntityType, organizationEntityType),
   createEntityRelationKey(userProvidedServiceInstanceEntityType, serviceBindingEntityType),
   createEntityRelationKey(serviceBindingEntityType, applicationEntityType)
