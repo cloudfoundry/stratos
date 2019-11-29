@@ -21,7 +21,6 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
   ) {
     super();
     this.entityType = child.entityType;
-    this.schemaKey = child.entity.schemaKey;
     this.options = new HttpRequest(
       'GET',
       url.startsWith('/v2/') ? url.substring(4, url.length) : url,
@@ -33,7 +32,6 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
   }
   entity: RequestActionEntity;
   entityType: string;
-  schemaKey: string;
   isId = relationActionId;
   actions = [
     '[Fetch Relations] Start',
