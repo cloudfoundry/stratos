@@ -75,7 +75,7 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
     super();
     this.options = new HttpRequest(
       'GET',
-      'spsace'
+      'space'
     );
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
