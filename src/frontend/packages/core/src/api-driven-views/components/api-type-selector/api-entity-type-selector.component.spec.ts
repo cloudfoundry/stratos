@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ApiEntityType } from '../../api-drive-views.types';
 import { SharedModule } from '../../../shared/shared.module';
+import { ApiEntityType } from '../../api-drive-views.types';
 import { ApiEntityTypeSelectorComponent } from './api-entity-type-selector.component';
 
-fdescribe('ApiEntityTypeSelectorComponent', () => {
+describe('ApiEntityTypeSelectorComponent', () => {
   let component: ApiEntityTypeSelectorComponent;
   let fixture: ComponentFixture<ApiEntityTypeSelectorComponent>;
 
