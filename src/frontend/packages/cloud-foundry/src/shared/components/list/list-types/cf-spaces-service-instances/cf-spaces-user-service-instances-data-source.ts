@@ -1,19 +1,18 @@
 import { Store } from '@ngrx/store';
 
-import { GetAllUserProvidedServices } from '../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   organizationEntityType,
   serviceBindingEntityType,
   spaceEntityType,
-  spaceWithOrgEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -22,11 +21,12 @@ import {
   IListConfig,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { UserProvidedServiceActionBuilder } from '../../../../../entity-action-builders/user-provided-service.action-builders';
+import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import {
+  UserProvidedServiceActionBuilder,
+} from '../../../../../entity-action-builders/user-provided-service.action-builders';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfSpacesUserServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
@@ -38,7 +38,7 @@ export class CfSpacesUserServiceInstancesDataSource extends ListDataSource<APIRe
     const actionBuilder = userProvidedServiceEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
     const action = actionBuilder(cfGuid, spaceGuid, paginationKey,
       [
-        createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceWithOrgEntityType),
+        createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceEntityType),
         createEntityRelationKey(spaceEntityType, organizationEntityType),
         createEntityRelationKey(userProvidedServiceInstanceEntityType, serviceBindingEntityType),
         createEntityRelationKey(serviceBindingEntityType, applicationEntityType)

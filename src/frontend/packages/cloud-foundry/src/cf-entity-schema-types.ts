@@ -33,9 +33,10 @@ export class CFEntitySchema extends EntitySchema {
     definition?: Schema,
     options?: schema.EntityOptions,
     relationKey?: string,
-    excludeFromRecursiveDelete?: string[]
+    excludeFromRecursiveDelete?: string[],
+    schemaKey?: string
   ) {
-    super(entityKey, CF_ENDPOINT_TYPE, definition, options, relationKey, null, excludeFromRecursiveDelete);
+    super(entityKey, CF_ENDPOINT_TYPE, definition, options, relationKey, schemaKey, excludeFromRecursiveDelete);
   }
 }
 
@@ -124,7 +125,8 @@ export class CFApplicationEntitySchema extends CFEntitySchema {
 export class CFSpaceEntitySchema extends CFEntitySchema {
   constructor(
     definition?: Schema,
-    relationKey?: string
+    relationKey?: string,
+    schemaKey?: string
   ) {
     super(spaceEntityType, definition, { idAttribute: getAPIResourceGuid }, relationKey, [
       domainEntityType,
@@ -133,6 +135,6 @@ export class CFSpaceEntitySchema extends CFEntitySchema {
       servicePlanEntityType,
       // App Related
       stackEntityType
-    ]);
+    ], schemaKey);
   }
 }
