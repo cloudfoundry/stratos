@@ -244,7 +244,7 @@ const SpaceWithOrgsEntitySchema = new CFSpaceEntitySchema({
     apps: [ApplicationWithoutSpaceEntitySchema],
     organization: OrganizationsWithoutSpaces,
   }
-}, null, spaceWithOrgEntityType);
+}, spaceWithOrgEntityType);
 entityCache[spaceWithOrgEntityType] = SpaceWithOrgsEntitySchema;
 
 
@@ -286,7 +286,7 @@ const ApplicationEntitySchema = new CFApplicationEntitySchema(
           service_instances: [ServiceInstancesWithNoBindingsSchema],
           organization: OrganizationsWithoutSpaces,
         }
-      }, null, spaceWithOrgEntityType),
+      }),
       routes: [RouteNoAppsSchema],
       service_bindings: [ServiceBindingsSchema]
     }
@@ -328,24 +328,24 @@ const CFUserSchema = new CFUserEntitySchema({
     audited_spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.AUDITED_SPACES)],
   }
 }, {
-  idAttribute: getAPIResourceGuid,
-  processStrategy: (user: APIResource<CfUser>) => {
-    if (user.entity.username) {
-      return user;
-    }
-    const entity = {
-      ...user.entity,
-      username: user.metadata.guid
-    };
-
-    return user.metadata ? {
-      entity,
-      metadata: user.metadata
-    } : {
-        entity
+    idAttribute: getAPIResourceGuid,
+    processStrategy: (user: APIResource<CfUser>) => {
+      if (user.entity.username) {
+        return user;
+      }
+      const entity = {
+        ...user.entity,
+        username: user.metadata.guid
       };
-  }
-});
+
+      return user.metadata ? {
+        entity,
+        metadata: user.metadata
+      } : {
+          entity
+        };
+    }
+  });
 entityCache[cfUserEntityType] = CFUserSchema;
 
 
