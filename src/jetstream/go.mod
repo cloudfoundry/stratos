@@ -50,7 +50,7 @@ require (
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
-	github.com/mattn/go-sqlite3 v1.10.0
+	github.com/mattn/go-sqlite3 v1.13.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/moby/moby v1.13.1 // indirect
