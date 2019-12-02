@@ -23,9 +23,24 @@
     <app-meta-card-key>Applications Attached</app-meta-card-key>
     <app-meta-card-value>{{ serviceInstanceEntity.entity.service_bindings?.length }} </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item>
-    <app-meta-card-key>Last Updated</app-meta-card-key>
-    <app-meta-card-value>{{ serviceInstanceEntity.entity.last_operation?.updated_at | date:'medium' }}
+  <app-meta-card-item *ngIf="serviceInstanceEntity.entity.last_operation as lo">
+    <app-meta-card-key>Last Operation</app-meta-card-key>
+    <app-meta-card-value>
+      <div class="service-instance-card__op">
+        <div class="service-instance-card__op--row1">
+          {{lo.type | titlecase }}
+          <app-boolean-indicator *ngIf="lo.state==='in progress'; else normalIndicator"
+            class="service-instance-card__op--item" [isTrue]="true" type="progress-progress" [subtle]="false"
+            [showText]="false"></app-boolean-indicator>
+          <ng-template #normalIndicator>
+            <app-boolean-indicator class="service-instance-card__op--item" [isTrue]="lo.state==='succeeded'"
+              type="yes-no" [subtle]="false" [showText]="false">
+            </app-boolean-indicator>
+          </ng-template>
+          <span class="service-instance-card__op--item" *ngIf="!!lo.description">({{lo.description}}) </span>
+        </div>
+        <div class="service-instance-card__op--row2">{{ lo.updated_at | date:'medium' }}</div>
+      </div>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
