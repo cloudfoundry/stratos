@@ -9,5 +9,5 @@
   <div class="tile-selector__content">
     <h3>{{ tile.label }}</h3>
   </div>
-  <div class="tile-selector__description" *ngIf="tile.description">{{ tile.description }}</div>
+  <div class="tile-selector__description" *ngIf="tile && tile.description">{{ tile.description }}</div>
 </div>
