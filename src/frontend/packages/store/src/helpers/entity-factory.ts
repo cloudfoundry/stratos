@@ -3,6 +3,7 @@ import { Schema, schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource } from '../types/api.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
+
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
 export const spaceSchemaKey = 'space';
@@ -129,6 +130,9 @@ const DomainSchema = new EntitySchema(domainSchemaKey, {}, {
 });
 entityCache[domainSchemaKey] = DomainSchema;
 
+const ServiceBrokerSchema = new EntitySchema(serviceBrokerSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[serviceBrokerSchemaKey] = ServiceBrokerSchema;
+
 const ServiceSchema = new EntitySchema(serviceSchemaKey, {
   entity: {
     service_plans: [new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid })]
@@ -241,8 +245,8 @@ const SpaceSchema = new EntitySchema(spaceSchemaKey, {
     apps: [ApplicationWithoutSpaceEntitySchema]
   }
 }, {
-    idAttribute: getAPIResourceGuid
-  });
+  idAttribute: getAPIResourceGuid
+});
 entityCache[spaceSchemaKey] = SpaceSchema;
 
 const PrivateDomainsSchema = new EntitySchema(privateDomainsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
@@ -352,9 +356,6 @@ const orgUserEntity = {
   }
 };
 
-const ServiceBrokerSchema = new EntitySchema(serviceBrokerSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[serviceBrokerSchemaKey] = ServiceBrokerSchema;
-
 function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema {
   return new EntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
 }
@@ -370,24 +371,24 @@ const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
     audited_spaces: [createUserOrgSpaceSchema(spaceSchemaKey, {}, CfUserRoleParams.AUDITED_SPACES)],
   }
 }, {
-    idAttribute: getAPIResourceGuid,
-    processStrategy: (user: APIResource<CfUser>) => {
-      if (user.entity.username) {
-        return user;
-      }
-      const entity = {
-        ...user.entity,
-        username: user.metadata.guid
-      };
-
-      return user.metadata ? {
-        entity,
-        metadata: user.metadata
-      } : {
-          entity
-        };
+  idAttribute: getAPIResourceGuid,
+  processStrategy: (user: APIResource<CfUser>) => {
+    if (user.entity.username) {
+      return user;
     }
-  });
+    const entity = {
+      ...user.entity,
+      username: user.metadata.guid
+    };
+
+    return user.metadata ? {
+      entity,
+      metadata: user.metadata
+    } : {
+        entity
+      };
+  }
+});
 entityCache[cfUserSchemaKey] = CFUserSchema;
 
 

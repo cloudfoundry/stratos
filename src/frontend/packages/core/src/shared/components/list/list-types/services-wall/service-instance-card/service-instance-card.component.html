@@ -20,6 +20,10 @@
     <app-meta-card-value>{{ serviceInstanceEntity.entity.service_plan?.entity.name}} </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
+    <app-meta-card-key>Service Broker</app-meta-card-key>
+    <app-meta-card-value>{{(serviceBroker$ | async)?.entity.name }} </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
     <app-meta-card-key>Applications Attached</app-meta-card-key>
     <app-meta-card-value>{{ serviceInstanceEntity.entity.service_bindings?.length }} </app-meta-card-value>
   </app-meta-card-item>
