@@ -5,7 +5,9 @@ import { map } from 'rxjs/operators';
 
 import { EndpointOnlyAppState } from '../../../../../../store/src/app-state';
 import { EndpointsService } from '../../../../core/endpoints.service';
+import { MarkdownPreviewComponent } from '../../../../shared/components/markdown-preview/markdown-preview.component';
 import { IStepperStep, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { PanelPreviewService } from '../../../../shared/services/panel-preview.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../../connect.service';
 
 
@@ -25,13 +27,13 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
 
   constructor(
     private store: Store<EndpointOnlyAppState>,
-    private endpointsService: EndpointsService
+    private endpointsService: EndpointsService,
+    private panelPreviewService: PanelPreviewService,
   ) {
   }
 
   showHelp() {
-    // this.panelPreviewService.show(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
-    // this.store.dispatch(new ShowSideHelp(MarkdownPreviewComponent, { setDocumentUrl: this.helpDocumentUrl }));
+    this.panelPreviewService.show(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
   }
 
   onEnter = (data: ConnectEndpointConfig) => {

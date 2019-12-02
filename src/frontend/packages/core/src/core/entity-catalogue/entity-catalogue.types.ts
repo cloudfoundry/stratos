@@ -149,6 +149,7 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getStatusObservable?(entity: Y): Observable<StratosStatus>;
   // TODO This should be used in the entities schema.
   getGuid(entityMetadata: T): string;
+  // TODO find a way to attach this to PreviewableComponent
   getPreviewableComponent?(): object;
   getLink?(entityMetadata: T): string;
   getLines?(): EntityRowBuilder<T>[];
