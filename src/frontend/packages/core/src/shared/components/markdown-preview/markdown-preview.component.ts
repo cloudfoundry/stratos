@@ -35,7 +35,6 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
   ) { }
 
   setProps(props: { [key: string]: any }) {
-    console.log('props', props);
     this.setDocumentUrl = props.documentUrl;
   }
 

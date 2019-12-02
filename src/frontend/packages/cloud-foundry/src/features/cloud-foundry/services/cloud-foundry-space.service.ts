@@ -103,6 +103,10 @@ export class CloudFoundrySpaceService {
     this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid, this.spaceGuid);
   }
 
+  public fetchApps() {
+    this.cfEndpointService.fetchApps();
+  }
+
   private initialiseSpaceObservables() {
     this.space$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {

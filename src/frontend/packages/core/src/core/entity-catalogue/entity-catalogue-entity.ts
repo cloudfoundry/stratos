@@ -255,7 +255,7 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
   constructor(
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
     getLink?: (metadata: IEndpointFavMetadata) => string,
-    // TODO: attach to PreviewableComponent
+    // TODO find a way to attach this to PreviewableComponent
     getPreviewableComponent?: () => object
   ) {
     const fullEntity = {

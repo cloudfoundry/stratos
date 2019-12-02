@@ -1,6 +1,7 @@
 import { ComponentFactory, ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { asapScheduler, BehaviorSubject, Observable, Subject } from 'rxjs';
-import { observeOn, publishReplay, refCount } from 'rxjs/operators';
+import { filter, observeOn, publishReplay, refCount, tap } from 'rxjs/operators';
 
 @Injectable()
 export class PanelPreviewService {
@@ -9,9 +10,14 @@ export class PanelPreviewService {
 
   private container: ViewContainerRef;
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver) {
+  constructor(
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private router: Router,
+  ) {
     this.openedSubject = new BehaviorSubject(false);
     this.opened$ = this.observeSubject(this.openedSubject);
+
+    this.setupRouterListener();
   }
 
   public setContainer(container: ViewContainerRef) {
@@ -55,6 +61,13 @@ export class PanelPreviewService {
   public clear() {
     this.container.clear();
     this.openedSubject.next(false);
+  }
+
+  private setupRouterListener() {
+    this.router.events.pipe(
+      filter(() => !!this.container),
+      tap((e) => this.hide()))
+      .subscribe();
   }
 
   private observeSubject(subject: Subject<any>) {
