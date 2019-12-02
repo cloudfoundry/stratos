@@ -128,6 +128,7 @@ import { RoutingIndicatorComponent } from './components/routing-indicator/routin
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import { SchemaFormComponent } from './components/schema-form/schema-form.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
+import { ServiceInstanceLastOpComponent } from './components/service-instance-last-op/service-instance-last-op.component';
 import { ServicePlanPriceComponent } from './components/service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
 import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
@@ -303,6 +304,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     SnackBarReturnComponent,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
+    ServiceInstanceLastOpComponent
   ],
   exports: [
     FormsModule,
