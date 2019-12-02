@@ -1,14 +1,14 @@
 import { Component, Input, EventEmitter, Output } from '@angular/core';
-import { ITileConfig } from '../tile/tile-selector.types';
+import { ITileConfig, ITileIconConfig, ITileImgConfig, ITileData } from '../tile/tile-selector.types';
 
 @Component({
   selector: 'app-tile-selector-tile',
   templateUrl: './tile-selector-tile.component.html',
   styleUrls: ['./tile-selector-tile.component.scss']
 })
-export class TileSelectorTileComponent {
+export class TileSelectorTileComponent<Y = ITileIconConfig | ITileImgConfig> {
 
-  @Input() tile: ITileConfig;
+  @Input() tile: ITileConfig<ITileData, Y>;
 
   @Input() active: boolean;
 
