@@ -6,7 +6,7 @@ RUN useradd -ms /bin/bash stratos && \
     chgrp -R users /home/stratos
 
 RUN cd / && wget https://nodejs.org/dist/v12.13.0/node-v12.13.0-linux-x64.tar.xz && \
-    tar -xf node-v12.13.0-linux-x64.tar.xz
+    tar -xf node-v12.13.0-linux-x64.tar.xz && \
     rm node-v12.3.0-linux-x64.tar.xz
 ENV USER=stratos
 ENV PATH=$PATH:/node-v12.13.0-linux-x64/bin
