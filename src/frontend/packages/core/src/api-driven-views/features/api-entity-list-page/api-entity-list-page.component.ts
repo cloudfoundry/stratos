@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { StratosBaseCatalogueEntity } from '../../../core/entity-catalogue/entity-catalogue-entity';
+
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { ListEntityConfig } from '../../../shared/components/list/list-generics/helpers/action-or-config-helpers';
 
 @Component({
   selector: 'app-api-entity-list-page',
@@ -9,7 +10,7 @@ import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue
   styleUrls: ['./api-entity-list-page.component.scss']
 })
 export class ApiEntityListPageComponent implements OnInit {
-  public catalogueEntity: StratosBaseCatalogueEntity;
+  public config: ListEntityConfig;
   constructor(
     public route: ActivatedRoute
   ) { }
@@ -17,7 +18,19 @@ export class ApiEntityListPageComponent implements OnInit {
   ngOnInit() {
     const endpointType = this.route.parent.snapshot.params.endpointType;
     const entityType = this.route.snapshot.params.entityType;
-    this.catalogueEntity = entityCatalogue.getEntity(endpointType, entityType);
+    const a = entityCatalogue.getEntity(endpointType, entityType);
+    // All these missing properties will need wiring in for CF case, maybe only endpointGuid for k8s?
+    this.config = {
+      endpointGuid: null,
+      entityConfig: {
+        endpointType: a.endpointType,
+        entityType: a.entityKey,
+        schemaKey: null,
+        subType: null
+      },
+      extraArgs: null,
+      paginationKey: null
+    };
   }
 
 }

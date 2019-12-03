@@ -1,3 +1,5 @@
+import { Store } from '@ngrx/store';
+
 import { EntityPipelineEntity } from '../../../../../../../store/src/entity-request-pipeline/pipeline.types';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { StratosBaseCatalogueEntity } from '../../../../../core/entity-catalogue/entity-catalogue-entity';
@@ -6,32 +8,33 @@ import { ListConfig, ListViewTypes } from '../../list.component.types';
 
 export class CatalogueEntityDrivenListConfig<T extends EntityPipelineEntity> extends ListConfig<T> {
   constructor(
-    catalogueEntity: StratosBaseCatalogueEntity
+    catalogueEntity: StratosBaseCatalogueEntity,
+    store: Store<any>
   ) {
     super();
 
+    const tableConfig = catalogueEntity.definition.tableConfig;
     this.viewType = ListViewTypes.TABLE_ONLY;
     this.isLocal = true;
     this.enableTextFilter = true;
+    const title = !tableConfig || tableConfig && tableConfig.showHeader ? catalogueEntity.definition.labelPlural : null;
     this.text = {
-      title: catalogueEntity.definition.labelPlural,
       noEntries: `There are no ${catalogueEntity.definition.labelPlural.toLowerCase()}`
     };
+    if (title) {
+      this.text.title = title;
+    }
     this.getColumns = () => {
-      const linBuilders = catalogueEntity.builders.entityBuilder && catalogueEntity.builders.entityBuilder.getLines ?
-        catalogueEntity.builders.entityBuilder.getLines() :
-        [];
+      const linBuilders = tableConfig ? tableConfig.rowBuilders : [];
       return [
         ...linBuilders.map((builder, i) => ({
           columnId: builder[0],
           cellDefinition: {
             getLink: (e: any) => {
-              const metaData = catalogueEntity.builders.entityBuilder.getMetadata(e);
-              return catalogueEntity.builders.entityBuilder.getLink ? catalogueEntity.builders.entityBuilder.getLink(metaData) : null;
+              return null;
             },
             getValue: (e: any) => {
-              const metaData = catalogueEntity.builders.entityBuilder.getMetadata(e);
-              return builder[1](metaData);
+              return builder[1](e, store);
             }
           },
           headerCell: () => builder[0],

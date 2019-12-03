@@ -42,7 +42,7 @@ export class ActionOrConfigListConfigProvider<T, A = T> implements ListConfigPro
 
     const { catalogueEntity } = ListActionOrConfigHelpers.createListAction(this.actionOrConfig);
     this.listConfig = {
-      ...new CatalogueEntityDrivenListConfig<T>(catalogueEntity),
+      ...new CatalogueEntityDrivenListConfig<T>(catalogueEntity, this.store),
       ...(this.overrideListConfig || {})
     };
     const dsConfig = ListActionOrConfigHelpers.createDataSourceConfig<A, T>(
