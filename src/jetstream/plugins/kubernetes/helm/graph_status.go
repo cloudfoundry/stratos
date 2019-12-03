@@ -17,6 +17,22 @@ const (
 	NodeNone    NodeStatus = "none"
 )
 
+func mapDeploymentStatus(replicas, ready, available, unavailable int32) NodeStatus {
+	if replicas == ready {
+		return NodeOK
+	}
+
+	if unavailable > 0 {
+		return NodeError
+	}
+
+	if replicas != unavailable {
+		return NodeWarn
+	}
+
+	return NodeWarn
+}
+
 func mapReplicaSetStatus(status appsv1.ReplicaSetStatus) NodeStatus {
 	if status.Replicas == status.ReadyReplicas {
 		return NodeOK

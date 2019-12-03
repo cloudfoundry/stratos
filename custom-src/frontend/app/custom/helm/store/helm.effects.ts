@@ -98,13 +98,14 @@ export class HelmEffects {
             return;
           }
           endpointData.forEach((data) => {
+            console.log('Got helm release');
             console.log(data);
             const helmRelease: HelmRelease = {
               ...data,
               endpointId: endpoint
             };
-            // Release name is unique for an endpoint
-            const id = endpoint + ':' + data.name;
+            // Release name is unique for an endpoint - for Helm 3, include the namespace
+            const id = endpoint + ':' + data.namespace + ':' + data.name;
             helmRelease.guid = id;
             // Make a note of the guid of the endpoint for the release
             helmRelease.status = mapHelmStatus(data.info.status);

@@ -1,8 +1,6 @@
 <div class="entity-summary">
-  <img *ngIf="imagePath" class="entity-summary__logo" title="{{ title }}'s image'" src="{{ imagePath }}" />
   <div class="entity-summary__header-section">
-    <img class="entity-summary__inline-logo" title="{{ title }}'s image'" *ngIf="inlineImagePath"
-      src="{{ inlineImagePath }}">
+    <img *ngIf="imagePath" class="entity-summary__logo" title="{{ title }}'s image'" src="{{ imagePath }}">
     <div class="entity-summary__header-inner">
       <div class="entity-summary__header-wrapper">
         <h1 class="entity-summary__header">{{ title }} </h1>

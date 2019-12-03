@@ -72,20 +72,18 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
     { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' }
   ];
   constructor(
-    private helmRelease: HelmReleaseGuid,
     public helmReleaseHelper: HelmReleaseHelperService,
     private store: Store<AppState>,
   ) {
-    const guid = this.helmRelease.guid;
-    this.title = guid.split(':')[1];
+    this.title = this.helmReleaseHelper.releaseTitle;
 
     console.log('RELEASE BASE - CREATE NEW');
 
-    const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/');
+    const releaseRef = this.helmReleaseHelper.guidAsUrlFragment();
     const host = window.location.host;
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const streamUrl = (
-      `${protocol}://${host}/pp/v1/helm/releases/${endpointAndName}`
+      `${protocol}://${host}/pp/v1/helm/releases/${releaseRef}`
     );
     console.log(streamUrl);
 
@@ -97,7 +95,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
 
     const messages = connection.messages.pipe(
       catchError(e => {
-        console.log('WS Erorr');
+        console.log('WS Error');
         console.log(e);
         if (e.type === 'error') {
           console.log(e);
@@ -107,10 +105,9 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
 
     let prefix = '';
     this.sub = messages.subscribe(jsonString => {
-      console.log('Got message ....');
-
       const messageObj = JSON.parse(jsonString);
       if (messageObj) {
+        console.log('Got message .... ' + messageObj.kind);
         console.log(messageObj);
 
         // this.store.dispatch(new HelmUpdateRelease(messageObj));
@@ -130,8 +127,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           const graph = messageObj.data;
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
           graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
-          console.log(graph);
-          console.log(prefix);
           this.addResource(helmReleaseGraphEntityType, graph, `${graph.endpointId}-${graph.releaseTitle}`, HELM_ENDPOINT_TYPE);
         } else if (messageObj.kind === 'Manifest' ||  messageObj.kind === 'Resources') {
           // Store all of the services

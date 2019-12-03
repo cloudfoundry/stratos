@@ -143,14 +143,15 @@ func (c *KubernetesSpecification) listReleases(ep *interfaces.ConnectedEndpoint,
 // polling until disconnected
 func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 
-	// TODO: I think this needs to know the namespace that the release is in ?!
-
 	// Need to get a config object for the target endpoint
 	endpointGUID := ec.Param("endpoint")
 	release := ec.Param("name")
+	namespace := ec.Param("namespace")
 	userID := ec.Get("user_id").(string)
 
-	config, hc, err := c.GetHelmConfiguration(endpointGUID, userID, "")
+	log.Infof("GET RELEASE: %s %s %s", endpointGUID, namespace, release)
+
+	config, hc, err := c.GetHelmConfiguration(endpointGUID, userID, namespace)
 	if err != nil {
 		log.Errorf("Helm: GetRelease could not get a Helm Configuration: %s", err)
 		return err

@@ -111,8 +111,8 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
         };
       default:
         return {
-          bg: 'cyan',
-          fg: 'black'
+          bg: '#5a9cb0',
+          fg: 'white'
         };
     }
   }

@@ -22,6 +22,7 @@ export class HelmReleaseHelperService {
 
   public guid: string;
   public endpointGuid: string;
+  public namespace: string;
   public releaseTitle: string;
 
   constructor(
@@ -30,7 +31,8 @@ export class HelmReleaseHelperService {
     private esf: EntityServiceFactory
   ) {
     this.guid = helmReleaseGuid.guid;
-    this.releaseTitle = this.guid.split(':')[1];
+    this.releaseTitle = this.guid.split(':')[2];
+    this.namespace = this.guid.split(':')[1];
     this.endpointGuid = this.guid.split(':')[0];
 
     const action = new GetHelmReleases();
@@ -41,6 +43,10 @@ export class HelmReleaseHelperService {
     this.release$ = svc.entities$.pipe(
       map((items: HelmRelease[]) => items.find(item => item.guid === this.guid))
     );
+  }
+
+  public guidAsUrlFragment(): string {
+    return this.guid.replace(':', '/').replace(':', '/');
   }
 
   public fetchReleaseStatus(): Observable<HelmReleaseStatus> {
@@ -61,7 +67,7 @@ export class HelmReleaseHelperService {
 
     return this.esf.create<HelmReleaseGraph>(action.key, action).waitForEntity$.pipe(
       tap(e => {
-        console.log('ENTITY HELMRELEASEGRAPH');
+        console.log('ENTITY HELM RELEASE GRAPH');
         console.log(e);
       }),
       map(entity => entity.entity)

@@ -5,13 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/helm/monocular/chartsvc"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
+	"sigs.k8s.io/yaml"
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
 const chartCollection = "charts"
@@ -97,10 +101,17 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	// }
 
 	log.Warn("Got values")
-
-	n := make(map[string]interface{})
-
 	log.Warn(params.Values)
+
+	userSuppliedValues := map[string]interface{}{}
+	if err := yaml.Unmarshal([]byte(params.Values), &userSuppliedValues); err != nil {
+		// Could not parse the user's values
+		return err
+	}
+
+	log.Infof("%+v", userSuppliedValues)
+
+	log.Warn("Installing.....")
 
 	install := action.NewInstall(config)
 	install.ReleaseName = params.Name
@@ -110,7 +121,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	// Generate Name ?
 	// Atomic?
 
-	release, err := install.Run(chart, n)
+	release, err := install.Run(chart, userSuppliedValues)
 	if err != nil {
 		log.Error(err)
 		return fmt.Errorf("Could not install Helm Chart: %v+", err)
@@ -156,14 +167,15 @@ func (c *KubernetesSpecification) DeleteRelease(ec echo.Context) error {
 
 	endpointGUID := ec.Param("endpoint")
 	releaseName := ec.Param("name")
+	namespace := ec.Param("namespace")
 
 	// I think we're going to need the namespace
 
 	userGUID := ec.Get("user_id").(string)
 
-	config, hc, err := c.GetHelmConfiguration(endpointGUID, userGUID, "")
+	config, hc, err := c.GetHelmConfiguration(endpointGUID, userGUID, namespace)
 	if err != nil {
-		log.Errorf("Helm: ListReleases could not get a Helm Configuration: %s", err)
+		log.Errorf("Helm: DeleteRelease could not get a Helm Configuration: %s", err)
 		return err
 	}
 
@@ -171,10 +183,15 @@ func (c *KubernetesSpecification) DeleteRelease(ec echo.Context) error {
 
 	uninstall := action.NewUninstall(config)
 
+	log.Warnf("%+v", config)
+	log.Warnf("%+v", uninstall)
+
 	deleteResponse, err := uninstall.Run(releaseName)
 	if err != nil {
-		return fmt.Errorf("Could not delete Helm Release: %v+", err)
+		return interfaces.NewJetstreamError(http.StatusInternalServerError, "Could not delete Helm Release")
 	}
+
+	log.Warnf("%+v", deleteResponse)
 
 	return ec.JSON(200, deleteResponse)
 }

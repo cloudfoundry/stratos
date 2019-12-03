@@ -116,6 +116,7 @@ import { SimpleListComponent } from './components/list/simple-list/simple-list.c
 import { ListHostDirective } from './components/list/simple-list/list-host.directive';
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
+import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
 
 /* tslint:disable:max-line-length */
 
@@ -216,6 +217,7 @@ import { EndpointsListConfigService } from './components/list/list-types/endpoin
     SnackBarReturnComponent,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
+    JsonViewerComponent,
     SimpleListComponent,
     ListHostDirective,
   ],
@@ -302,9 +304,11 @@ import { EndpointsListConfigService } from './components/list/list-types/endpoin
     EntitySummaryTitleComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
+    TileSelectorComponent,
     AppNameUniqueDirective,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
+    JsonViewerComponent,
     SimpleListComponent,
     ListHostDirective
   ],

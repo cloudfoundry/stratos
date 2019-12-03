@@ -7,9 +7,6 @@ export function helmReleaseReducer(state: any = defaultState, action) {
     case UPDATE_HELM_RELEASE_STATUS:
       return {
         ...state,
-        pods: {
-          test: '123'
-        }
       };
   }
 }

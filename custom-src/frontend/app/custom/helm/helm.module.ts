@@ -40,7 +40,6 @@ import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
 import { HelmConfigurationComponent } from './tabs/configuration-tab/helm-configuration.component';
 import { HelmReleasesTabComponent } from './tabs/releases-tab/releases-tab.component';
 import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.component';
-import { NgxJsonViewerModule } from 'ngx-json-viewer';
 import { KubernetesModule } from '../kubernetes/kubernetes.module';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 
@@ -51,7 +50,6 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
     SharedModule,
     HelmRoutingModule,
     CreateReleaseModule,
-    NgxJsonViewerModule,
     KubernetesModule,
     NgxGraphModule,
   ],

@@ -80,43 +80,6 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       startWith(true)
     );
 
-    // console.log("Connecting to web socket");
-
-    // const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/');
-    // const host = window.location.host;
-    // const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    // const streamUrl = (
-    //   `${protocol}://${host}/pp/v1/helm/releases/${endpointAndName}`
-    // );
-    // console.log(streamUrl);
-
-    // const data = new Subject<string>();
-    // const connection = websocketConnect(
-    //   streamUrl,
-    //   data
-    // );
-
-    // const messages = connection.messages.pipe(
-    //   catchError(e => {
-    //     if (e.type === 'error') {
-    //       console.log(e);
-    //     }
-    //     return [];
-    //   }));
-
-    // const connectionStatus = connection.connectionStatus;
-
-    // messages.subscribe(jsonString => {
-    //   console.log('Got message ....');
-
-    //   const messageObj = JSON.parse(jsonString);
-    //   if (messageObj) {
-    //     console.log(messageObj);
-    //   }
-
-    // });
-
-
     // Async fetch release status
     // this.chartData$ = obsOf({});
     // this.chartData$ = releaseStatus$.pipe(
@@ -158,9 +121,9 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   public deleteRelease() {
     this.confirmDialog.open(this.deleteReleaseConfirmation, () => {
       // Make the http request to delete the release
-      const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/');
+      const releaseRef = this.helmReleaseHelper.guidAsUrlFragment();
       this.startDelete();
-      this.httpClient.delete(`/pp/v1/helm/releases/${endpointAndName}`).subscribe({
+      this.httpClient.delete(`/pp/v1/helm/releases/${releaseRef}`).subscribe({
         error: (err: any) => {
           this.endDelete();
           this.store.dispatch(new ShowSnackBar('Failed to delete release', 'Close'));
