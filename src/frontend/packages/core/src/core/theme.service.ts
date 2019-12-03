@@ -51,9 +51,9 @@ export class ThemeService {
 
       // If at some point in the future we need to adjust theme on OS change at run time we should look into this. Unfortunately was unable
       // to test (only way I could change scheme from light to dark was in FF and about:config `ui.systemUsesDarkTheme` integer 1)
-      // window.matchMedia('(prefers-color-scheme: dark)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
-      // window.matchMedia('(prefers-color-scheme: light)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
-      // window.matchMedia('(prefers-color-scheme: no-preference)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
+      window.matchMedia('(prefers-color-scheme: light)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
+      window.matchMedia('(prefers-color-scheme: no-preference)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
     }
   }
 
@@ -122,13 +122,13 @@ export class ThemeService {
   /**
    * Update theme given changes in OS theme settings
    */
-  // private updateFollowingOsThemeChange() {
-  //   this.osThemeInfo.isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  //   this.osThemeInfo.isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
-  //   this.osThemeInfo.isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches;
+  private updateFollowingOsThemeChange() {
+    this.osThemeInfo.isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    this.osThemeInfo.isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches;
+    this.osThemeInfo.isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches;
 
-  //   this.store.select(selectDashboardState).pipe(
-  //     first()
-  //   ).subscribe(dashboardState => dashboardState.themeKey === osTheme.key && this.setTheme(osTheme.key));
-  // }
+    this.store.select(selectDashboardState).pipe(
+      first()
+    ).subscribe(dashboardState => dashboardState.themeKey === osTheme.key && this.setTheme(osTheme.key));
+  }
 }

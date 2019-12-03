@@ -4,9 +4,22 @@
 @import './mat-colors';
 
 // Custom theme support
-@import './dark-theme';
 @import './custom';
 
+.dark-theme {
+  // Dark Theme defaults
+  $dark-primary: mat-palette($mat-blue);
+  $dark-accent: mat-palette($mat-amber, A400, A100, A700);
+  $dark-warn: mat-palette($mat-red);
+  $dark-theme: mat-dark-theme($dark-primary, $dark-accent, $dark-warn);
+
+  $stratos-dark-theme: $dark-theme !default;
+  $stratos-dark-nav-theme: null !default;
+  $stratos-dark-status-theme: null !default;
+
+  @include angular-material-theme($stratos-dark-theme);
+  @include app-theme($stratos-dark-theme, $stratos-dark-nav-theme, $stratos-dark-status-theme);
+}
 
 .default {
   // Themes palettes and colors
@@ -24,6 +37,7 @@
   @include app-theme($stratos-theme, $stratos-nav-theme, $stratos-status-theme);
 }
 
+$stratos-dark-theme-supported: true !default;
 
 // Create the theme
 @include mat-core;
