@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../../../test-framework/core-test.helper';
 import { EndpointListHelper } from '../endpoint-list.helpers';
 import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details.component';
 

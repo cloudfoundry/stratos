@@ -1,6 +1,10 @@
 import { Action } from '@ngrx/store';
 
-import { BasePaginatedAction, PaginationClientFilter, PaginationParam } from '../types/pagination.types';
+import {
+  EntityCatalogueEntityConfig,
+  extractEntityCatalogueEntityConfig,
+} from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { PaginationClientFilter, PaginationParam } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const CLEAR_PAGINATION_OF_ENTITY = '[Pagination] Clear pagination of entity';
@@ -25,48 +29,62 @@ export function getPaginationKey(type: string, id: string, endpointGuid?: string
   return endpointGuid ? `${endpointGuid}:${key}` : key;
 }
 
-export class ClearPaginationOfType implements Action {
-  constructor(public entityKey: string) {
+abstract class BasePaginationAction {
+  public entityConfig: EntityCatalogueEntityConfig;
+
+  constructor(pEntityConfig: Partial<EntityCatalogueEntityConfig>) {
+    this.entityConfig = extractEntityCatalogueEntityConfig(pEntityConfig);
+  }
+}
+
+export class ClearPaginationOfType extends BasePaginationAction implements Action {
+  constructor(pEntityConfig: Partial<EntityCatalogueEntityConfig>) {
+    super(pEntityConfig);
   }
   type = CLEAR_PAGINATION_OF_TYPE;
 }
 
-export class ClearPaginationOfEntity implements Action {
-  constructor(public entityKey: string, public entityGuid, public paginationKey?: string) {
+export class ClearPaginationOfEntity extends BasePaginationAction implements Action {
+  constructor(pEntityConfig: Partial<EntityCatalogueEntityConfig>, public entityGuid: string, public paginationKey?: string) {
+    super(pEntityConfig);
   }
   type = CLEAR_PAGINATION_OF_ENTITY;
 }
 
-export class ResetPagination implements BasePaginatedAction {
-  constructor(public entityKey: string, public paginationKey: string) {
+export class ResetPagination extends BasePaginationAction implements Action {
+  constructor(pEntityConfig: Partial<EntityCatalogueEntityConfig>, public paginationKey: string) {
+    super(pEntityConfig);
   }
   type = RESET_PAGINATION;
 }
 
-export class CreatePagination implements BasePaginatedAction {
+export class CreatePagination extends BasePaginationAction implements Action {
   /**
    * @param seed The pagination key for the section we should use as a seed when creating the new pagination section.
    */
-  constructor(public entityKey: string, public paginationKey: string, public seed?: string) {
+  constructor(pEntityConfig: Partial<EntityCatalogueEntityConfig>, public paginationKey: string, public seed?: string) {
+    super(pEntityConfig);
   }
   type = CREATE_PAGINATION;
 }
 
 
-export class ClearPages implements BasePaginatedAction {
-  constructor(public entityKey: string, public paginationKey: string) {
+export class ClearPages extends BasePaginationAction implements Action {
+  constructor(pEntityConfig: Partial<EntityCatalogueEntityConfig>, public paginationKey: string) {
+    super(pEntityConfig);
   }
   type = CLEAR_PAGES;
 }
 
-export class SetPage implements BasePaginatedAction {
+export class SetPage extends BasePaginationAction implements Action {
   constructor(
-    public entityKey: string,
+    pEntityConfig: Partial<EntityCatalogueEntityConfig>,
     public paginationKey: string,
     public pageNumber: number,
     public keepPages = false,
     public forceLocalPage = false
   ) {
+    super(pEntityConfig);
     if (forceLocalPage) {
       keepPages = true;
     }
@@ -74,99 +92,108 @@ export class SetPage implements BasePaginatedAction {
   type = SET_PAGE;
 }
 
-export class SetResultCount implements BasePaginatedAction {
+export class SetResultCount extends BasePaginationAction implements Action {
   constructor(
-    public entityKey: string,
+    pEntityConfig: Partial<EntityCatalogueEntityConfig>,
     public paginationKey: string,
     public count: number
   ) {
+    super(pEntityConfig);
   }
   type = SET_RESULT_COUNT;
 }
 
-export class SetClientPageSize implements BasePaginatedAction {
+export class SetClientPageSize extends BasePaginationAction implements Action {
   constructor(
-    public entityKey: string,
+    pEntityConfig: Partial<EntityCatalogueEntityConfig>,
     public paginationKey: string,
     public pageSize: number,
   ) {
+    super(pEntityConfig);
   }
   type = SET_CLIENT_PAGE_SIZE;
 }
 
-export class SetClientPage implements BasePaginatedAction {
+export class SetClientPage extends BasePaginationAction implements Action {
   constructor(
-    public entityKey: string,
+    pEntityConfig: Partial<EntityCatalogueEntityConfig>,
     public paginationKey: string,
     public pageNumber: number,
   ) {
+    super(pEntityConfig);
   }
   type = SET_CLIENT_PAGE;
 }
 
-export class SetClientFilter implements BasePaginatedAction {
+export class SetClientFilter extends BasePaginationAction implements Action {
   constructor(
-    public entityKey: string,
+    pEntityConfig: Partial<EntityCatalogueEntityConfig>,
     public paginationKey: string,
     public filter: PaginationClientFilter,
   ) {
+    super(pEntityConfig);
   }
   type = SET_CLIENT_FILTER;
 }
 
-export class SetParams implements BasePaginatedAction {
+export class SetParams extends BasePaginationAction implements Action {
   constructor(
-    public entityKey: string,
+    pEntityConfig: Partial<EntityCatalogueEntityConfig>,
     public paginationKey: string,
     public params: PaginationParam,
     public keepPages = false,
     public overwrite = false,
   ) {
+    super(pEntityConfig);
   }
   type = SET_PARAMS;
 }
 
-export class SetInitialParams implements SetParams {
+export class SetInitialParams extends BasePaginationAction implements Action, SetParams {
   constructor(
-    public entityKey: string,
+    pEntityConfig: Partial<EntityCatalogueEntityConfig>,
     public paginationKey: string,
     public params: PaginationParam,
     public keepPages = false,
     public overwrite = false,
   ) {
+    super(pEntityConfig);
   }
   type = SET_INITIAL_PARAMS;
 }
 
-export class AddParams implements BasePaginatedAction {
+export class AddParams extends BasePaginationAction implements Action {
   constructor(
-    public entityKey: string,
+    pEntityConfig: Partial<EntityCatalogueEntityConfig>,
     public paginationKey: string,
     public params: PaginationParam,
     public keepPages = false
   ) {
+    super(pEntityConfig);
   }
   type = ADD_PARAMS;
 }
 
-export class RemoveParams implements BasePaginatedAction {
+export class RemoveParams extends BasePaginationAction implements Action {
   constructor(
-    public entityKey: string,
+    pEntityConfig: Partial<EntityCatalogueEntityConfig>,
     public paginationKey: string,
     public params: string[],
     public qs: string[],
     public keepPages = false
   ) {
+    super(pEntityConfig);
   }
   type = REMOVE_PARAMS;
 }
 
-export class UpdatePaginationMaxedState implements Action {
+export class UpdatePaginationMaxedState implements Action, EntityCatalogueEntityConfig {
   type = UPDATE_MAXED_STATE;
   constructor(
     public max: number,
     public allEntities: number,
-    public entityKey: string,
+    public entityType: string,
+    public endpointType: string,
     public paginationKey: string,
     public forcedEntityKey?: string
   ) { }

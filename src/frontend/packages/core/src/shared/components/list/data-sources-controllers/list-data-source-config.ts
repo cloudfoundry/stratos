@@ -1,9 +1,8 @@
-import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
+import { Action, Store } from '@ngrx/store';
 import { Observable, OperatorFunction } from 'rxjs';
 
-import { AppState } from '../../../../../../store/src/app-state';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-factory';
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 import { IListConfig } from '../list.component.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
@@ -36,19 +35,13 @@ export class MultiActionConfig {
  * @export
  */
 export class ActionSchemaConfig {
-  /**
-   * Creates an instance of ActionSchemaConfig.
-   * @param [prettyName] The value that will be shown in the entity dropdown.
-   */
   constructor(
     public paginationAction: PaginatedAction,
-    public schemaKey: string,
-    public prettyName?: string
   ) { }
 }
 
 export interface IListDataSourceConfig<A, T> {
-  store: Store<AppState>;
+  store: Store<CFAppState>;
   /**
    * An action that, when called, will populate the entries required to show the current state of the list. For example, this action will
    * be dispatched when the page number changes in a non-local list.
@@ -91,14 +84,25 @@ export interface IListDataSourceConfig<A, T> {
   /**
    * Optional list configuration
    */
-  listConfig?: IListConfig<T>;
+  listConfig: IListConfig<T>;
 
   /**
    * A function that will be called when the list is destroyed.
    */
   destroy?: () => void;
 
+  /**
+   * A function that will be called instead of the default refresh
+   */
   refresh?: () => void;
+
+  /**
+   * A function that will be called instead of the default update metrics action
+   *
+   * This will only be called when metrics-range-selector component is enabled/used
+   */
+  handleTimeWindowChange?: (action: Action) => void;
+
   /**
    * A function which fetches an observable containing a specific row's state
    *

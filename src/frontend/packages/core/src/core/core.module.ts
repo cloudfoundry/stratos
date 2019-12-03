@@ -11,7 +11,6 @@ import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
 import { ClickStopPropagationDirective } from './click-stop-propagation.directive';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
-import { Customizations } from './customizations.types';
 import { DisableRouterLinkDirective } from './disable-router-link.directive';
 import { DotContentComponent } from './dot-content/dot-content.component';
 import { EndpointsService } from './endpoints.service';
@@ -22,6 +21,7 @@ import { InfinityPipe } from './infinity.pipe';
 import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component';
 import { LoggerService } from './logger.service';
 import { MDAppModule } from './md.module';
+import { NotSetupGuardService } from './not-setup-guard.service';
 import { PageHeaderService } from './page-header-service/page-header.service';
 import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
 import { SafeImgPipe } from './safe-img.pipe';
@@ -63,6 +63,7 @@ import { WindowRef } from './window-ref/window-ref.service';
   ],
   providers: [
     AuthGuardService,
+    NotSetupGuardService,
     PageHeaderService,
     EventWatcherService,
     WindowRef,
@@ -71,7 +72,6 @@ import { WindowRef } from './window-ref/window-ref.service';
     EndpointsService,
     UserService,
     EntityServiceFactory,
-    { provide: Customizations, useValue: {} },
     CurrentUserPermissionsService
   ],
   declarations: [
@@ -95,5 +95,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     LogOutDialogComponent
   ],
 })
-export class CoreModule { }
+export class CoreModule {
+  constructor() { }
+
+}
 

@@ -1,0 +1,46 @@
+<div class="cf-space-usage">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Summary</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="app-metadata">
+        <div class="app-metadata__two-cols">
+          <app-metadata-item label="User Space Role/s">
+            {{ (cfSpaceService.userRole$ | async) }}
+          </app-metadata-item>
+          <app-metadata-item label="Quota Definition">
+            <ng-container
+              *ngIf="(cfSpaceService.spaceQuotaDefinition$ | async) as spaceQuotaDefinition; else fallBackQuota">
+              <a [routerLink]="cfSpaceService.quotaLink$ | async">
+                {{ spaceQuotaDefinition.name }}
+              </a>
+            </ng-container>
+            <ng-template #fallBackQuota>
+              None assigned
+              <span *ngIf="cfSpaceService.quotaDefinition$ | async as quotaDefinition"> - <a
+                  [routerLink]="" (click)="goToOrgQuota($event)">view organization's quota</a>
+              </span>
+            </ng-template>
+          </app-metadata-item>
+          <app-metadata-item label="Provision Paid Services">
+            <app-boolean-indicator [isTrue]="(cfSpaceService.quotaDefinition$ | async)?.non_basic_services_allowed"
+              type="yes-no">
+            </app-boolean-indicator>
+          </app-metadata-item>
+        </div>
+        <div class="app-metadata__two-cols">
+          <app-metadata-item label="SSH Access">
+            {{ allowSshStatus$ | async }}
+          </app-metadata-item>
+          <app-metadata-item label="Created At">
+            {{ ((cfSpaceService.space$ | async)?.entity?.metadata?.created_at) | date: 'medium' }}
+          </app-metadata-item>
+          <app-metadata-item label="Updated At">
+            {{ ((cfSpaceService.space$ | async)?.entity?.metadata?.updated_at) | date: 'medium' }}
+          </app-metadata-item>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

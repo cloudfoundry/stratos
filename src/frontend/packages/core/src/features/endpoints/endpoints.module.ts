@@ -15,7 +15,7 @@ import { EndpointsRoutingModule } from './endpoints.routing';
     CoreModule,
     SharedModule,
     EndpointsRoutingModule,
-    CreateEndpointModule
+    CreateEndpointModule,
   ],
   declarations: [
     EndpointsPageComponent,

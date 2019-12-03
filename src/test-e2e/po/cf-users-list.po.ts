@@ -1,9 +1,10 @@
-import { ListComponent } from './list.po';
-import { promise, by, ElementFinder } from 'protractor';
+import { browser, by, ElementFinder, promise } from 'protractor';
+
+import { ChipComponent } from './chip.po';
 import { ChipsComponent } from './chips.po';
 import { Component } from './component.po';
-import { ChipComponent } from './chip.po';
 import { ConfirmDialogComponent } from './confirm-dialog';
+import { ListComponent } from './list.po';
 
 interface CfUserRoles {
   [orgName: string]: {
@@ -36,7 +37,7 @@ export class UserRoleChip extends ChipComponent {
     });
     confirm.confirm();
     confirm.waitUntilNotShown('Confirmation dialog');
-    return this.waitUntilNotShown('User Role Chip: ' + this.roleText);
+    return this.waitUntilNotShown('User Role Chip still shown: ' + this.roleText);
   }
 }
 
@@ -78,5 +79,17 @@ export class CFUsersListComponent extends ListComponent {
     }
     chipString += roleName;
     return new UserRoleChip(userRolesCell.getCellWithText(chipString).getComponent(), chipString);
+  }
+
+  getInviteUserButton(): ElementFinder {
+    return browser.element(by.css('.invite-user-details__button'));
+  }
+
+  getInviteUserButtonComponent(): Component {
+    return new Component(this.getInviteUserButton());
+  }
+
+  inviteUser(): promise.Promise<any> {
+    return this.getInviteUserButton().click();
   }
 }

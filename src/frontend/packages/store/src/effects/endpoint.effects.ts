@@ -4,6 +4,8 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
@@ -32,13 +34,13 @@ import { SendClearEventAction } from '../actions/internal-events.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
-import { AppState } from '../app-state';
+import { DispatchOnlyAppState } from '../app-state';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
-import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
+import { EndpointModel } from '../types/endpoint.types';
 import {
-  IRequestAction,
+  EntityRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
@@ -56,7 +58,7 @@ export class EndpointsEffect {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<DispatchOnlyAppState>
   ) { }
 
   @Effect() getAllEndpointsBySystemInfo$ = this.actions$.pipe(
@@ -67,13 +69,14 @@ export class EndpointsEffect {
   @Effect() getAllEndpoints$ = this.actions$.pipe(
     ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS),
     mergeMap(action => {
+      const endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
       const { associatedAction } = action;
       const actionType = 'fetch';
       const endpoints = action.payload.endpoints;
       // Data is an array of endpoints
       const mappedData = {
         entities: {
-          [endpointStoreNames.type]: {}
+          [endpointEntityKey]: {}
         },
         result: []
       } as NormalizedResponse<EndpointModel>;
@@ -81,7 +84,7 @@ export class EndpointsEffect {
       Object.keys(endpoints).forEach((type: string) => {
         const endpointsForType = endpoints[type];
         Object.values(endpointsForType).forEach(endpointInfo => {
-          mappedData.entities[endpointStoreNames.type][endpointInfo.guid] = {
+          mappedData.entities[endpointEntityKey][endpointInfo.guid] = {
             ...endpointInfo,
             connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
             registered: !!endpointInfo.user,
@@ -111,14 +114,34 @@ export class EndpointsEffect {
       }
 
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
-      const params: HttpParams = new HttpParams({
-        fromObject: {
-          ...action.authValues as any,
+
+      let fromObject: any;
+      let body = action.body as any;
+
+      if (action.body) {
+        fromObject = {
+          ...action.authValues,
           cnsi_guid: action.guid,
           connect_type: action.authType,
-          system_shared: action.systemShared,
-        },
-        // Fix for #angular/18261
+          system_shared: action.systemShared
+        };
+      } else {
+        // If no body, then we will put the auth values in the body, not in the URL
+        fromObject = {
+          cnsi_guid: action.guid,
+          connect_type: action.authType,
+          system_shared: action.systemShared
+        };
+
+        // Encode auth values in the body
+        body = new FormData();
+        Object.keys(action.authValues).forEach(key => {
+          body.set(key, action.authValues[key]);
+        });
+      }
+
+      const params: HttpParams = new HttpParams({
+        fromObject,
         encoder: new BrowserStandardEncoder()
       });
 
@@ -129,7 +152,7 @@ export class EndpointsEffect {
         null,
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
         action.endpointType,
-        action.body,
+        body,
         response => response && response.error && response.error.error ? response.error.error : 'Could not connect, please try again'
       );
     }));
@@ -194,18 +217,20 @@ export class EndpointsEffect {
         /* tslint:disable-next-line:no-string-literal  */
         paramsObj['sub_type'] = action.endpointSubType;
       }
-      const params: HttpParams = new HttpParams({
-        fromObject: paramsObj
+      // Encode auth values in the body, not the query string
+      const body: any = new FormData();
+      Object.keys(paramsObj).forEach(key => {
+        body.set(key, paramsObj[key]);
       });
 
       return this.doEndpointAction(
         apiAction,
         '/pp/v1/register/' + action.endpointType,
-        params,
+        new HttpParams({}),
         'create',
         [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED],
         action.endpointType,
-        null,
+        body,
         this.processRegisterError
       );
     }));
@@ -213,31 +238,33 @@ export class EndpointsEffect {
   private processRegisterError(e: HttpErrorResponse): string {
     let message = 'There was a problem creating the endpoint. ' +
       `Please ensure the endpoint address is correct and try again` +
-      `${e.error.error ? '(' + e.error.error + ').' : '.'}`;
+      `${e.error.error ? ' (' + e.error.error + ').' : '.'}`;
     if (e.status === 403) {
       message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted"`;
     }
     return message;
   }
   private getEndpointUpdateAction(guid: string, type: string, updatingKey: string) {
+    const entityType = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
     return {
-      entityKey: endpointStoreNames.type,
+      entityType,
       guid,
       type,
       updatingKey,
-    } as IRequestAction;
+    } as EntityRequestAction;
   }
 
   private getEndpointDeleteAction(guid, type) {
+    const entityType = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
     return {
-      entityKey: endpointStoreNames.type,
+      entityType,
       guid,
       type,
-    } as IRequestAction;
+    } as EntityRequestAction;
   }
 
   private doEndpointAction(
-    apiAction: IRequestAction | PaginatedAction,
+    apiAction: EntityRequestAction | PaginatedAction,
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
@@ -246,6 +273,7 @@ export class EndpointsEffect {
     body?: string,
     errorMessageHandler?: (e: any) => string,
   ) {
+    const endpointEntityKey = entityCatalogue.getEntityKey(apiAction);
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
@@ -261,7 +289,7 @@ export class EndpointsEffect {
         }
 
         if (apiActionType === 'delete') {
-          actions.push(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
+          actions.push(new ClearPaginationOfEntity(apiAction, apiAction.guid));
           actions.push(new GetUserFavoritesAction());
         }
 
@@ -269,7 +297,7 @@ export class EndpointsEffect {
           actions.push(new GetSystemInfo());
           response = {
             entities: {
-              [endpointSchemaKey]: {
+              [endpointEntityKey]: {
                 [endpoint.guid]: endpoint
               }
             },
@@ -278,7 +306,7 @@ export class EndpointsEffect {
         }
 
         if (apiAction.updatingKey === EndpointsEffect.disconnectingKey || apiActionType === 'create' || apiActionType === 'delete') {
-          actions.push(this.clearEndpointInternalEvents(apiAction.guid));
+          actions.push(this.clearEndpointInternalEvents(apiAction.guid, endpointEntityKey));
         }
 
         actions.push(new WrapperRequestActionSuccess(response, apiAction, apiActionType, null, null, endpoint ? endpoint.guid : null));
@@ -296,9 +324,9 @@ export class EndpointsEffect {
       }));
   }
 
-  private clearEndpointInternalEvents(guid: string) {
+  private clearEndpointInternalEvents(guid: string, endpointEntityKey: string) {
     return new SendClearEventAction(
-      endpointSchemaKey,
+      endpointEntityKey,
       guid,
       {
         clean: true

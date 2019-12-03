@@ -1,8 +1,7 @@
-import { metricSchemaKey } from '../helpers/entity-factory';
-import { PaginatedAction } from '../types/pagination.types';
-import { IRequestAction } from '../types/request.types';
+import { metricEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { environment } from '../../../core/src/environments/environment';
 import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
+import { EntityRequestAction } from '../types/request.types';
 
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
@@ -38,8 +37,8 @@ export class MetricQueryConfig {
   ) { }
 }
 
-
-export class MetricsAction implements IRequestAction {
+// FIXME: Final solution for Metrics - STRAT-152
+export class MetricsAction implements EntityRequestAction {
   constructor(
     guid: string,
     public endpointGuid: string,
@@ -47,11 +46,13 @@ export class MetricsAction implements IRequestAction {
     public url: string,
     public windowValue: string = null,
     public queryType: MetricQueryType = MetricQueryType.QUERY,
-    isSeries = true) {
+    isSeries = true,
+    public endpointType: string) {
     this.guid = MetricsAction.buildMetricKey(guid, query, isSeries, queryType, windowValue);
   }
   public guid: string;
-  entityKey = metricSchemaKey;
+
+  entityType = metricEntityType;
   type = METRICS_START;
   directApi = false;
 
@@ -70,7 +71,8 @@ export class MetricsChartAction extends MetricsAction {
     guid: string,
     endpointGuid: string,
     query: MetricQueryConfig,
-    url: string
+    url: string,
+    endpointType: string
   ) {
     super(
       guid,
@@ -79,77 +81,9 @@ export class MetricsChartAction extends MetricsAction {
       url,
       null,
       MetricQueryType.RANGE_QUERY,
-      true
+      true,
+      endpointType
     );
   }
-}
-
-export class FetchCFMetricsAction extends MetricsAction {
-  constructor(
-    guid: string,
-    cfGuid: string,
-    public query: MetricQueryConfig,
-    queryType: MetricQueryType = MetricQueryType.QUERY,
-    isSeries = true) {
-    super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf`, null, queryType, isSeries);
-  }
-}
-
-export class FetchCFCellMetricsAction extends MetricsAction {
-  constructor(
-    cfGuid: string,
-    cellId: string,
-    public query: MetricQueryConfig,
-    queryType: MetricQueryType = MetricQueryType.QUERY,
-    isSeries = true) {
-    super(cfGuid + '-' + cellId, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/cells`, null, queryType, isSeries);
-  }
-}
-
-export class FetchCFMetricsPaginatedAction extends FetchCFMetricsAction implements PaginatedAction {
-  constructor(guid: string, cfGuid: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
-    super(guid, cfGuid, query, queryType);
-    this.paginationKey = this.guid;
-  }
-  actions = [];
-  paginationKey: string;
-  initialParams = {
-    'order-direction': 'desc',
-    'order-direction-field': 'id',
-  };
-}
-
-export class FetchCFCellMetricsPaginatedAction extends FetchCFCellMetricsAction implements PaginatedAction {
-  constructor(cfGuid: string, cellId: string, public query: MetricQueryConfig, queryType: MetricQueryType = MetricQueryType.QUERY) {
-    super(cfGuid, cellId, query, queryType);
-    this.paginationKey = this.guid;
-  }
-  actions = [];
-  paginationKey: string;
-  initialParams = {
-    'order-direction': 'desc',
-    'order-direction-field': 'id',
-  };
-}
-
-export class FetchApplicationMetricsAction extends MetricsAction {
-  constructor(
-    guid: string,
-    cfGuid: string,
-    query: MetricQueryConfig,
-    queryType: MetricQueryType = MetricQueryType.RANGE_QUERY,
-    isSeries = true) {
-    super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`, null, queryType, isSeries);
-  }
-
-}
-export class FetchApplicationChartMetricsAction extends MetricsChartAction {
-  constructor(
-    guid: string,
-    cfGuid: string,
-    query: MetricQueryConfig, ) {
-    super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`);
-  }
-
 }
 

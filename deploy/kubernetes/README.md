@@ -14,16 +14,17 @@ The following guide details how to deploy Stratos in Kubernetes.
 - [Accessing the Console](#accessing-the-console)
 - [Advanced Topics](#advanced-topics)
   * [Using a Load Balancer](#using-a-load-balancer)
+  * [Using an Ingress Controller](#ingress)
   * [Specifying an External IP](#specifying-an-external-ip)
   * [Upgrading your deployment](#upgrading-your-deployment)
   * [Specifying UAA configuration](#specifying-uaa-configuration)
+  * [Configuring a local user account](#configuring-a-local-user-account)
   * [Specifying a custom Storage Class](#specifying-a-custom-storage-class)
     + [Providing Storage Class override](#providing-storage-class-override)
     + [Create a default Storage Class](#create-a-default-storage-class)
   * [Deploying Stratos with your own TLS certificates](#deploying-stratos-with-your-own-tls-certificates)
   * [Using with a Secure Image Repostiory](#using-with-a-secure-image-repository)
   * [Installing Nightly Release](#installing-a-nightly-release)
-  * [Configuring Stratos to use an Ingress controller](./ingress)
 <!-- /TOC -->
 
 ## Requirements
@@ -75,11 +76,13 @@ You can deploy Stratos from one of three different sources:
 1. Using an archive file containing a given release of our Helm chart
 1. Using the latest Helm chart directly from out GitHub repository
 
+> **Note**: By default each deployment method deploys Stratos with its default user authentication mechanism - which requires a UAA. If you wish to use Stratos without the requirement for a UAA component, use the deployment commands from the following section below: [Configuring a local user account](#configuring-a-local-user-account). All other steps for each deployment method remain the same, as detailed in the following sections.
+
 ### Deploy using the Helm repository
 
 Add the Helm repository to your helm installation
 ```
-helm repo add stratos https://cloudfoundry-incubator.github.io/stratos
+helm repo add stratos https://cloudfoundry.github.io/stratos
 ```
 Check the repository was successfully added by searching for the `console`
 ```
@@ -102,7 +105,7 @@ After the install, you should be able to access the Console in a web browser by 
 
 ### Deploy using an archive of the Helm Chart
 
-Helm chart archives are available for Stratos releases from our GitHub repository, under releases - see https://github.com/cloudfoundry-incubator/stratos/releases.
+Helm chart archives are available for Stratos releases from our GitHub repository, under releases - see https://github.com/cloudfoundry/stratos/releases.
 
 Download the appropriate release `console-helm-chart.X.Y.Z.tgz` from the GitHub repository and unpack the archive to a local folder. The Helm Chart will be extracted to a sub-folder named `console`.
 
@@ -119,7 +122,7 @@ helm install console --namespace=console --name my-console
 Clone the Stratos GitHub repository:
 
 ```
-git clone https://github.com/cloudfoundry-incubator/stratos.git
+git clone https://github.com/cloudfoundry/stratos.git
 ```
 
 Open a terminal and cd to the `deploy/kubernetes` directory:
@@ -178,6 +181,26 @@ If your Kubernetes deployment supports automatic configuration of a load balance
 helm install stratos/console --namespace=console --name my-console --set console.service.type=LoadBalancer
 ```
 
+### Using an Ingress Controller
+
+If your Kubernetes Cluster supports Ingress, you can expose Stratos through Ingress by supplying the appropriate ingress configuration when installing.
+
+This configuration is described below:
+
+|Parameter|Description|Default|
+|----|---|---|
+|console.service.ingress.enabled|Enables ingress|false|
+|console.service.ingress.annotations|Annotations to be added to the ingress resource.|{}|
+|console.service.ingress.extraLabels|Additional labels to be added to the ingress resource.|{}|
+|console.service.ingress.host|The host name that will be used for the Stratos service.||
+|console.service.ingress.secretName|The existing TLS secret that contains the certificate for ingress.||
+
+You must provide `console.service.ingress.host` when enabling ingress.
+
+By default a certificate will be generated for TLS. You can provide your own certificate by creating a secret and specifying this with `console.service.ingress.secretName`.
+
+> Note: If you do not supply `console.service.ingress.host` but do supply `env.DOMAIN` then the host `console.[env.DOMAIN]` will be used.
+
 ### Specifying an External IP
 
 If the kubernetes cluster supports external IPs for services (see [ Service External IPs](https://kubernetes.io/docs/concepts/services-networking/service/#external-ips)), then the following arguments can be provided. In this following example the dashboard will be available at `https://192.168.100.100:5000`.
@@ -227,6 +250,30 @@ To install Stratos with the above specified configuration:
 ```
 $ helm install stratos/console -f uaa-config.yaml
 ```
+
+### Configuring a local user account
+
+This allows for deployment without a UAA. To enable the local user account, supply a password for the local user in the deployment command, as follows. All other steps for each deployment method should be followed as in the preceding sections above.
+
+To deploy using our Helm repository:
+
+```
+helm install stratos/console --namespace=console --name my-console --set console.localAdminPassword=<password>
+```
+
+To deploy using an archive file containing a given release of our Helm chart
+
+```
+helm install console --namespace=console --name my-console --set console.localAdminPassword=<password>
+```
+
+To deploy using the latest Helm chart directly from out GitHub repository
+
+```
+$ helm install console --namespace console --name my-console --set console.localAdminPassword=<password>
+```
+
+For console access via the local user account see: [*Accessing the Console*](#accessing-the-console)
 
 ### Specifying a custom Storage Class 
 
@@ -351,3 +398,4 @@ Install
 ```
 helm install stratos/console --namespace=console --name my-console --version 2.0.0-dev-9a5611dc
 ```
+

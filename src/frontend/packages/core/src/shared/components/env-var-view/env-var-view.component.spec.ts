@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { EnvVarViewComponent } from './env-var-view.component';
+import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
 import { CodeBlockComponent } from '../code-block/code-block.component';
-import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { EnvVarViewComponent } from './env-var-view.component';
 
 describe('EnvVarViewComponent', () => {
   let component: EnvVarViewComponent;

@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -6,6 +7,7 @@ import { ActionState } from '../../../../../store/src/reducers/api-request-reduc
 import {
   defaultClientPaginationPageSize,
 } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
+import { ITimeRange } from '../../services/metrics-range-selector.types';
 import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { CardTypes } from './list-cards/card/card.component';
@@ -90,7 +92,23 @@ export interface IListConfig<T> {
   /**
    * For metrics based data show a metrics range selector
    */
-  showMetricsRange?: boolean;
+  showCustomTime?: boolean;
+  /**
+   * Custom time window to show in metrics range selector
+   */
+  customTimeWindows?: ITimeRange[];
+  /**
+   * Custom time window validation for metrics range selector
+   */
+  customTimeValidation?: (start: moment.Moment, end: moment.Moment) => string;
+  /**
+   * Custom time polling interval. Falsy for disabled.
+   */
+  customTimePollingInterval?: number;
+  /**
+   * When enabled set the initial value
+   */
+  customTimeInitialValue?: string;
 }
 
 export interface IListMultiFilterConfig {
@@ -150,7 +168,7 @@ export interface IMultiListAction<T> extends IOptionalAction<T> {
   /**
    * Return true if the selection should be cleared
    */
-  action: (items: T[]) => boolean | Observable<ActionState>;
+  action: (items?: T[]) => boolean | Observable<ActionState>;
 }
 
 export interface IGlobalListAction<T> extends IOptionalAction<T> {

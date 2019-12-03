@@ -162,7 +162,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		_, r, err := ws.ReadMessage()
 		if err != nil {
 			log.Error("Error reading message from web socket")
-			log.Warnf("%v+", err)
+			log.Warnf("%+v", err)
 			return err
 		}
 
@@ -293,7 +293,7 @@ func getSSHCode(authorizeEndpoint, clientID, token string, skipSSLValidation boo
 
 	resp, err := httpClientWithoutRedirects.Do(authorizeReq)
 	if resp != nil {
-		log.Infof("%v+", resp)
+		log.Infof("%+v", resp)
 	}
 	if err == nil {
 		return "", errors.New("Authorization server did not redirect with one time code")

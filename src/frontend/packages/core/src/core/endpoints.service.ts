@@ -5,7 +5,7 @@ import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { filter, first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
 import { RouterNav } from '../../../store/src/actions/router.actions';
-import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
+import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import {
   endpointEntitiesSelector,
@@ -13,8 +13,8 @@ import {
   endpointStatusSelector,
 } from '../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
-import { EndpointHealthCheck, endpointHealthChecks } from '../../endpoints-health-checks';
-import { getEndpointType } from '../features/endpoints/endpoint-helpers';
+import { EndpointHealthCheck, EndpointHealthChecks } from '../../endpoints-health-checks';
+import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 import { UserService } from './user.service';
 
 
@@ -31,23 +31,29 @@ export class EndpointsService implements CanActivate {
     if (!endpoint) {
       return '';
     }
-    const ext = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-    if (ext && ext.homeLink) {
-      return ext.homeLink(endpoint.guid).join('/');
+    const catalogueEntity = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+    const metadata = catalogueEntity.builders.entityBuilder.getMetadata(endpoint);
+    if (catalogueEntity) {
+      return catalogueEntity.builders.entityBuilder.getLink(metadata);
     }
     return '';
   }
 
   constructor(
-    private store: Store<AppState>,
-    private userService: UserService
+    private store: Store<EndpointOnlyAppState>,
+    private userService: UserService,
+    private endpointHealthChecks: EndpointHealthChecks
   ) {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => {
-        const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-        return epType.doesNotSupportConnect ||
+        const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+        if (!epType.definition) {
+          return false;
+        }
+        const epEntity = epType.definition;
+        return epEntity.unConnectable ||
           endpoint.connectionStatus === 'connected' ||
           endpoint.connectionStatus === 'checking';
       }))
@@ -62,11 +68,11 @@ export class EndpointsService implements CanActivate {
   }
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {
-    endpointHealthChecks.registerHealthCheck(healthCheck);
+    this.endpointHealthChecks.registerHealthCheck(healthCheck);
   }
 
   public checkEndpoint(endpoint: EndpointModel) {
-    endpointHealthChecks.checkEndpoint(endpoint);
+    this.endpointHealthChecks.checkEndpoint(endpoint);
   }
 
   public checkAllEndpoints() {
@@ -114,7 +120,7 @@ export class EndpointsService implements CanActivate {
       }));
   }
 
-  hasMetrics(endpointId: string) {
+  hasMetrics(endpointId: string): Observable<boolean> {
     return this.store.select(endpointsEntityRequestDataSelector(endpointId)).pipe(
       filter(endpoint => !!endpoint),
       map(endpoint => endpoint.metricsAvailable),
@@ -139,8 +145,8 @@ export class EndpointsService implements CanActivate {
       map(ep => {
         return Object.values(ep)
           .filter(endpoint => {
-            const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-            return endpoint.cnsi_type === type && (epType.doesNotSupportConnect || endpoint.connectionStatus === 'connected');
+            const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
+            return endpoint.cnsi_type === type && (epType.unConnectable || endpoint.connectionStatus === 'connected');
           });
       })
     );

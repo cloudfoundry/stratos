@@ -2,8 +2,8 @@ import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
+import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
 import { UtilsService } from '../../../../core/utils.service';
 import { StratosStatus } from '../../../shared.types';
 import { determineCardStatus } from '../card-status/card-status.component';
@@ -24,6 +24,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() value: string;
   @Input() showUsage = false;
   @Input() textOnly = false;
+  @Input() labelAtTop = false;
   @Input() link: () => void | string;
 
   formattedValue: string;
@@ -31,8 +32,9 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   usage: string;
 
   status$ = new BehaviorSubject<StratosStatus>(StratosStatus.NONE);
+  isUnlimited: boolean;
 
-  constructor(private utils: UtilsService, private store: Store<AppState>) { }
+  constructor(private utils: UtilsService, private store: Store<CFAppState>) { }
 
   ngOnInit() {
     this.format();
@@ -56,7 +58,14 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   }
 
   handleValue() {
-    this.formattedValue = this.formatForUnits(this.value);
+    const value = parseInt(this.value, 10);
+    this.isUnlimited = false;
+    if (value === -1) {
+      this.formattedValue = 'Unlimited';
+      this.isUnlimited = true;
+    } else {
+      this.formattedValue = this.formatForUnits(this.value);
+    }
 
     if (!this.limit) {
       return;
@@ -70,7 +79,6 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
       this.formattedLimit = '∞';
       this.usage = '';
     } else {
-      const value = parseInt(this.value, 10);
       this.formattedLimit = this.formatForUnits(this.limit);
       this.usage = this.showUsage ? (100 * value / limit).toFixed(2) : '';
     }

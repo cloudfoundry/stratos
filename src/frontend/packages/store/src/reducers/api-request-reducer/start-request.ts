@@ -1,4 +1,7 @@
-import { IStartRequestAction, IRequestAction } from '../../types/request.types';
+import { isNullOrUndefined } from 'util';
+
+import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { IStartRequestAction } from '../../types/request.types';
 import {
   getEntityRequestState,
   mergeUpdatingState,
@@ -7,10 +10,11 @@ import {
 } from './request-helpers';
 
 export function startRequest(state, action: IStartRequestAction) {
-  if (!action.apiAction.guid) {
+  if (isNullOrUndefined(action.apiAction.guid)) {
     return state;
+
   }
-  const apiAction = action.apiAction as IRequestAction;
+  const apiAction = action.apiAction as BaseEntityRequestAction;
   let requestState = getEntityRequestState(state, apiAction);
 
   if (apiAction.updatingKey) {
@@ -29,5 +33,5 @@ export function startRequest(state, action: IStartRequestAction) {
       action.requestType
     );
   }
-  return setEntityRequestState(state, requestState, action.apiAction);
+  return setEntityRequestState(state, requestState, apiAction);
 }

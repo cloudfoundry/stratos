@@ -5,8 +5,8 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, throwError as observableThrowError, timer as observableTimer } from 'rxjs';
 import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
 
-import { AppState } from '../../../../store/src/app-state';
-import { selectNewAppState } from '../../../../store/src/effects/create-app-effects';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { selectNewAppState } from '../../../../cloud-foundry/src/store/effects/create-app-effects';
 import { environment } from '../../environments/environment.prod';
 
 
@@ -51,7 +51,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
   @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.total_results > 0;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private http: HttpClient,
   ) {
     if (!this.appApplicationNameUnique) {

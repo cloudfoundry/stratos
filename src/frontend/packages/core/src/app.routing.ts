@@ -14,20 +14,26 @@ import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain
 import { ConsoleUaaWizardComponent } from './features/setup/uaa-wizard/console-uaa-wizard.component';
 import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page.component';
 import { SharedModule } from './shared/shared.module';
+import { NotSetupGuardService } from './core/not-setup-guard.service';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'uaa', component: ConsoleUaaWizardComponent },
+  {
+    path: 'uaa',
+    component: ConsoleUaaWizardComponent,
+    canActivate: [NotSetupGuardService]
+  },
   { path: 'upgrade', component: UpgradePageComponent },
   { path: 'domainMismatch', component: DomainMismatchComponent },
-  { path: 'login', loadChildren: './features/login/login.module#LoginModule' },
+  { path: 'login', loadChildren: () => import('./features/login/login.module').then(m => m.LoginModule) },
   {
     path: '',
     component: DashboardBaseComponent,
     canActivate: [AuthGuardService, EndpointsService],
     children: [
       {
-        path: 'home', component: HomePageComponent,
+        path: 'home',
+        component: HomePageComponent,
         data: {
           stratosNavigation: {
             label: 'Home',
@@ -37,13 +43,15 @@ const appRoutes: Routes = [
           }
         }
       },
+      { path: 'entity-list', loadChildren: () => import('./api-driven-views/api-driven-views.module').then(m => m.ApiDrivenViewsModule) },
       {
         path: 'applications',
-        loadChildren: './features/applications/applications.module#ApplicationsModule',
+        loadChildren: () => import('../../cloud-foundry/src/features/applications/applications.module').then(m => m.ApplicationsModule),
         data: {
           stratosNavigation: {
             label: 'Applications',
             matIcon: 'apps',
+            requiresEndpointType: 'cf',
             position: 20
           }
         },
@@ -60,48 +68,59 @@ const appRoutes: Routes = [
         },
         children: [{
           path: '',
-          loadChildren: './features/endpoints/endpoints.module#EndpointsModule',
+          loadChildren: () => import('./features/endpoints/endpoints.module').then(m => m.EndpointsModule),
         },
         {
           path: 'metrics',
-          loadChildren: './features/metrics/metrics.module#MetricsModule',
+          loadChildren: () => import('./features/metrics/metrics.module').then(m => m.MetricsModule),
         }]
       },
       {
-        path: 'marketplace', loadChildren: './features/service-catalog/service-catalog.module#ServiceCatalogModule',
+        path: 'marketplace',
+        loadChildren: () => import('../../cloud-foundry/src/features/service-catalog/service-catalog.module')
+          .then(m => m.ServiceCatalogModule),
         data: {
           stratosNavigation: {
             label: 'Marketplace',
             matIcon: 'store',
+            requiresEndpointType: 'cf',
             position: 30
           }
         },
       },
       {
-        path: 'services', loadChildren: './features/services/services.module#ServicesModule',
+        path: 'services',
+        loadChildren: () => import('../../cloud-foundry/src/features/services/services.module').then(m => m.ServicesModule),
         data: {
           stratosNavigation: {
             label: 'Services',
             matIcon: 'service',
             matIconFont: 'stratos-icons',
+            requiresEndpointType: 'cf',
             position: 40
           }
         },
       },
       {
-        path: 'cloud-foundry', loadChildren: './features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
+        path: 'cloud-foundry',
+        loadChildren: () => import('../../cloud-foundry/src/features/cloud-foundry/cloud-foundry.module').then(m => m.CloudFoundryModule),
         data: {
           stratosNavigation: {
             label: 'Cloud Foundry',
             matIcon: 'cloud_foundry',
             matIconFont: 'stratos-icons',
+            requiresEndpointType: 'cf',
             position: 50
           }
         },
       },
-      { path: 'about', loadChildren: './features/about/about.module#AboutModule' },
-      { path: 'user-profile', loadChildren: './features/user-profile/user-profile.module#UserProfileModule' },
-      { path: 'events', loadChildren: './features/event-page/event-page.module#EventPageModule' },
+      { path: 'about', loadChildren: () => import('./features/about/about.module').then(m => m.AboutModule) },
+      { path: 'user-profile', loadChildren: () => import('./features/user-profile/user-profile.module').then(m => m.UserProfileModule) },
+      { path: 'events', loadChildren: () => import('./features/event-page/event-page.module').then(m => m.EventPageModule) },
+      {
+        path: 'errors/:endpointId',
+        loadChildren: () => import('./features/error-page/error-page.module').then(m => m.ErrorPageModule)
+      },
     ]
   },
   {
@@ -112,7 +131,7 @@ const appRoutes: Routes = [
   {
     path: '**',
     component: PageNotFoundComponentComponent
-  }
+  },
 ];
 
 @NgModule({

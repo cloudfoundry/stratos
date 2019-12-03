@@ -28,7 +28,10 @@ export class StepperComponent extends Component {
   }
 
   next() {
-    return this.nextButton().click();
+    const nextButton = this.nextButton();
+    // Although locally this might not seem needed it's needed in travis
+    browser.executeScript('arguments[0].scrollIntoView(true)', nextButton.getWebElement());
+    return nextButton.click();
   }
 
   cancel() {

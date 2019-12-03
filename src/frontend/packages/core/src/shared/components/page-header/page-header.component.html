@@ -42,14 +42,15 @@
                 <app-recent-entities class="page-header__history-list" history="true"></app-recent-entities>
               </div>
             </mat-menu>
-            <button *ngIf="eventCount$ | async as eventCount" routerLink="/events" mat-icon-button
+            <button *ngIf="(events$ | async).length > 0" routerLink="/events" mat-icon-button
               class="page-header__notification-button">
-              <mat-icon matBadgeColor="warn" [matBadge]="eventCount" class="page-header__notifications-button">
+              <mat-icon matBadgeColor="warn" [matBadge]="(unreadEventCount$ | async) || ''"
+                class="page-header__notifications-button">
                 notifications
               </mat-icon>
             </button>
-            <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button" mat-icon-button
-              [matMenuTriggerFor]="menu">
+            <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button page-header__usermenu"
+              mat-icon-button [matMenuTriggerFor]="menu">
               <div class="page-header__menu-button-icon"> {{ userNameFirstLetter$ | async }} </div>
             </button>
             <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
@@ -77,7 +78,8 @@
             </mat-menu>
           </mat-toolbar>
         </div>
-        <app-page-header-events class="header-events" [endpointIds$]="endpointIds$"></app-page-header-events>
+        <app-page-header-events *ngIf="!hideEndpointErrors" class="header-events" [endpointIds$]="endpointIds$">
+        </app-page-header-events>
       </div>
     </div>
   </div>

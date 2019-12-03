@@ -4,6 +4,7 @@ import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFPage } from '../po/cf-page.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
@@ -15,7 +16,7 @@ import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { ApplicationBasePage } from './po/application-page.po';
-import { CreateApplication } from './po/create-application.po';
+import { DeployApplication } from './po/deploy-app.po';
 
 let nav: SideNavigation;
 let appWall: ApplicationsPage;
@@ -52,7 +53,7 @@ describe('Application Deploy -', () => {
   });
 
   beforeAll(() => {
-    return cfHelper.fetchDefaultStack(e2e.secrets.getDefaultCFEndpoint()).then(stack => defaultStack = stack);
+    return cfHelper.fetchDefaultCFEndpointStack().then(stack => defaultStack = stack);
   });
 
   afterAll(() => {
@@ -61,24 +62,16 @@ describe('Application Deploy -', () => {
 
   describe('Deploy process - ', () => {
 
-    let originalTimeout = 40000;
     beforeAll(() => nav.goto(SideNavMenuItem.Applications));
 
     // Might take a bit longer to deploy the app than the global default timeout allows
-    beforeEach(function() {
-      originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
-    });
-
-    afterEach(function() {
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-    });
+    extendE2ETestTime(120000);
 
     // Allow up to 2 minutes for the application to be deployed
     describe('Should deploy app from GitHub', () => {
 
       const loggingPrefix = 'Application Deploy: Deploy from Github:';
-      let deployApp;
+      let deployApp: DeployApplication;
 
       beforeAll(() => {
         // Should be on deploy app modal

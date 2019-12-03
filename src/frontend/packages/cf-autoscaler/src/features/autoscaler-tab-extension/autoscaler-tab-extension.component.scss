@@ -1,0 +1,95 @@
+.autoscaler-tab {
+  display: flex;
+  position: relative;
+  width: 100%;
+  &__actions {
+    bottom: 10px;
+    padding-top: 0;
+    position: absolute;
+    right: 24px;
+    text-align: right;
+  }
+  .mat-header-cell:first-of-type {
+    padding-left: unset;
+  }
+  .autoscaler-tab-table-no-record {
+    margin-top: .5em;
+  }
+
+  &__latest-metrics {
+    flex: 2;
+    min-height: 200px;
+  }
+}
+
+
+.app-metadata {
+  display: flex;
+  flex-direction: row;
+  &__two-cols {
+    padding-right: 40px;
+    app-metadata-item:first-child {
+      margin-top: 0;
+    }
+  }
+  app-metadata-item {
+    margin-bottom: 0;
+  }
+}
+
+.app-metadata-table {
+  display: block;
+  padding-bottom: 8px;
+}
+
+.app-autoscaler-tile-grid-100 {
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  td {
+    padding-left: .5em;
+  }
+}
+
+.autoscaler-tile-events {
+  flex-direction: column;
+
+  &__no-policy {
+    align-items: center;
+    display: flex;
+    margin-bottom: 12px;
+    padding: 14px;
+  }
+
+  &__header {
+    display: flex;
+    flex: 1;
+    height: 40px;
+    justify-content: space-between;
+    padding-top: 0;
+
+    mat-card-title {
+      margin-bottom: 0;
+    }
+
+    button {
+      margin-right: -10px;
+      margin-top: -10px;
+    }
+  }
+}
+.nav-button-with-text {
+  margin: 0 10px 0 0;
+  padding: 0 5px;
+
+  &__span {
+    align-items: center;
+    display: flex;
+  }
+
+  &__icon {
+    margin-right: 5px;
+  }
+}

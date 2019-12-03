@@ -1,5 +1,7 @@
+import { browser, by, element, ElementFinder, promise, protractor } from 'protractor';
+
+import { e2e } from '../../e2e';
 import { Component } from '../../po/component.po';
-import { ElementFinder, element, by, promise, protractor, browser } from 'protractor';
 
 const until = protractor.ExpectedConditions;
 
@@ -31,13 +33,18 @@ export class CardAppStatus extends Component {
   }
 
 
-  waitForStatus(status: string): promise.Promise<any> {
+  waitForStatus(status: string, timeout = 40000): promise.Promise<any> {
     // This wait should cover the time between app entity created, app deployed, stratos poll gap and status change
-    return browser.wait(until.textToBePresentInElement(this.getStatusLabel(), status), 40000);
+    return browser.wait(until.textToBePresentInElement(this.getStatusLabel(), status), timeout)
+      .catch(err => {
+        return this.getStatusLabel().getText()
+          .then(text => e2e.log(`Timed out waiting for status '${status}', last status was '${text}'`))
+          .then(() => { throw err; });
+      });
   }
 
-  waitForSubStatus(subStatus: string): promise.Promise<any> {
+  waitForSubStatus(subStatus: string, timeout = 40000): promise.Promise<any> {
     // This wait should cover the time between app entity created, app deployed, stratos poll gap and status change
-    return browser.wait(until.textToBePresentInElement(this.getStatusSubLabel(), subStatus), 40000);
+    return browser.wait(until.textToBePresentInElement(this.getStatusSubLabel(), subStatus), timeout);
   }
 }

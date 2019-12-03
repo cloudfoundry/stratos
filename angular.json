@@ -28,7 +28,8 @@
             ],
             "styles": [
               "src/frontend/packages/core/src/styles.scss",
-              "node_modules/xterm/dist/xterm.css"
+              "src/frontend/packages/cf-autoscaler/src/styles.scss",
+              "node_modules/xterm/css/xterm.css"
             ],
             "scripts": []
           },
@@ -43,10 +44,12 @@
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
-              "fileReplacements": [{
-                "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-              }]
+              "fileReplacements": [
+                {
+                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                  "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+                }
+              ]
             }
           }
         },
@@ -75,7 +78,7 @@
       }
     },
     "stratos-e2e": {
-      "root": "",
+      "root": "e2e",
       "sourceRoot": "",
       "projectType": "application",
       "architect": {
@@ -114,16 +117,19 @@
               }
             ],
             "styles": [
-              "src/frontend/packages/core/src/styles.css"
+              "src/frontend/packages/core/src/styles.css",
+              "src/frontend/packages/cf-autoscaler/src/styles.css"
             ],
             "scripts": []
           },
           "configurations": {
             "production": {
-              "fileReplacements": [{
-                "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-              }],
+              "fileReplacements": [
+                {
+                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                  "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+                }
+              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -183,11 +189,16 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": ["src/tsconfig.json"],
+            "tsConfig": [
+              "src/tsconfig.json"
+            ],
             "tslintConfig": "src/frontend/packages/core/tslint.json",
             "files": [
               "src/frontend/packages/core/src/**/*.ts",
               "src/frontend/packages/core/src/custom/**/*.ts"
+            ],
+            "exclude": [
+              "!src/frontend/packages/core/**"
             ]
           }
         }
@@ -217,9 +228,16 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": ["src/tsconfig.json"],
+            "tsConfig": [
+              "src/tsconfig.json"
+            ],
             "tslintConfig": "src/frontend/packages/store/tslint.json",
-            "files": ["src/frontend/packages/store/src/**/*.ts"]
+            "files": [
+              "src/frontend/packages/store/src/**/*.ts"
+            ],
+            "exclude": [
+              "!src/frontend/packages/store/**"
+            ]
           }
         }
       }
@@ -248,9 +266,16 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": ["src/tsconfig.json"],
+            "tsConfig": [
+              "src/tsconfig.json"
+            ],
             "tslintConfig": "src/frontend/packages/store-helpers/tslint.json",
-            "files": ["src/frontend/packages/store-helpers/src/**/*.ts"]
+            "files": [
+              "src/frontend/packages/store-helpers/src/**/*.ts"
+            ],
+            "exclude": [
+              "!src/frontend/packages/store-helpers/**"
+            ]
           }
         }
       }
@@ -279,9 +304,54 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": ["src/tsconfig.json"],
+            "tsConfig": [
+              "src/tsconfig.json"
+            ],
             "tslintConfig": "src/frontend/packages/cloud-foundry/tslint.json",
-            "files": ["src/frontend/packages/cloud-foundry/src/**/*.ts"]
+            "files": [
+              "src/frontend/packages/cloud-foundry/src/**/*.ts"
+            ],
+            "exclude": [
+              "!src/frontend/packages/cloud-foundry/**"
+            ]
+          }
+        }
+      }
+    },
+    "cf-autoscaler": {
+      "root": "src/frontend/packages/cf-autoscaler",
+      "sourceRoot": "src/frontend/packages/cf-autoscaler/src",
+      "projectType": "library",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.lib.json",
+            "project": "src/frontend/packages/cf-autoscaler/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/frontend/packages/cf-autoscaler/src/test.ts",
+            "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.spec.json",
+            "karmaConfig": "src/frontend/packages/cf-autoscaler/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "src/tsconfig.json"
+            ],
+            "tslintConfig": "src/frontend/packages/cf-autoscaler/tslint.json",
+            "files": [
+              "src/frontend/packages/cf-autoscaler/src/**/*.ts"
+            ],
+            "exclude": [
+              "!src/frontend/packages/cf-autoscaler/**"
+            ]
           }
         }
       }
@@ -296,5 +366,8 @@
     "@schematics/angular:directive": {
       "prefix": "app"
     }
+  },
+  "cli": {
+    "defaultCollection": "@nrwl/angular"
   }
 }

@@ -1,6 +1,9 @@
-import { IRequestTypeState } from '../../app-state';
+import { isNullOrUndefined } from 'util';
+
+import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { BaseRequestState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
-import { IRequestAction, ISuccessRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
+import { ISuccessRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
 import {
   createRequestStateFromResponse,
   getEntityRequestState,
@@ -8,10 +11,12 @@ import {
   mergeUpdatingState,
   setEntityRequestState,
 } from './request-helpers';
+import { defaultDeletingActionState } from './types';
 
-export function succeedRequest(state: IRequestTypeState, action: ISuccessRequestAction) {
-  if (action.apiAction.guid) {
-    const apiAction = action.apiAction as IRequestAction;
+
+export function succeedRequest(state: BaseRequestState, action: ISuccessRequestAction) {
+  if (!isNullOrUndefined(action.apiAction.guid)) {
+    const apiAction = action.apiAction as BaseEntityRequestAction;
     const successAction = action as WrapperRequestActionSuccess;
     const requestSuccessState = getEntityRequestState(state, apiAction);
     if (apiAction.updatingKey) {
@@ -24,7 +29,7 @@ export function succeedRequest(state: IRequestTypeState, action: ISuccessRequest
           message: successAction.updatingMessage || '',
         }
       );
-    } else if (action.requestType === 'delete' && !action.apiAction.updatingKey) {
+    } else if (action.requestType === 'delete' && !apiAction.updatingKey) {
       requestSuccessState.deleting = mergeObject(requestSuccessState.deleting, {
         busy: false,
         deleted: true
@@ -36,9 +41,15 @@ export function succeedRequest(state: IRequestTypeState, action: ISuccessRequest
       requestSuccessState.response = successAction.response;
     }
 
+    if (action.requestType !== 'delete') {
+      requestSuccessState.deleting = {
+        ...defaultDeletingActionState
+      };
+    }
+
     const newState = mergeState(
       createRequestStateFromResponse(successAction.response, state),
-      setEntityRequestState(state, requestSuccessState, action.apiAction)
+      setEntityRequestState(state, requestSuccessState, action.apiAction as BaseEntityRequestAction)
     );
 
     return newState;

@@ -14,7 +14,8 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { AppState } from '../../../../store/src/app-state';
+import { AppState, GeneralRequestDataState } from '../../../../store/src/app-state';
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import {
   ActionState,
   getDefaultActionState,
@@ -23,19 +24,20 @@ import {
   UpdatingSection,
 } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../../../store/src/selectors/api.selectors';
-import { IRequestDataState } from '../../../../store/src/types/entity.types';
+import { selectDashboardState } from '../../../../store/src/selectors/dashboard.selectors';
 
 
 export class EntityMonitor<T = any> {
+
   constructor(
     private store: Store<AppState>,
     public id: string,
     public entityKey: string,
-    public schema: normalizrSchema.Entity,
+    public schema: EntitySchema,
     startWithNull = true
   ) {
     const defaultRequestState = getDefaultRequestState();
-    this.entityRequest$ = store.select(selectRequestInfo(entityKey, id)).pipe(
+    this.entityRequest$ = store.select(selectRequestInfo(this.entityKey, id)).pipe(
       map(request => request ? request : defaultRequestState),
       distinctUntilChanged(),
       startWith(defaultRequestState),
@@ -51,11 +53,9 @@ export class EntityMonitor<T = any> {
       distinctUntilChanged()
     );
 
-    this.apiRequestData$ = this.store.select(getAPIRequestDataState).pipe(publishReplay(1), refCount());
-
     const entity$ = this.getEntityObservable(
-      schema,
-      store.select(selectEntity<T>(entityKey, id)),
+      this.schema,
+      store.select(selectEntity<T>(this.entityKey, id)),
       this.entityRequest$,
       store.select(getAPIRequestDataState),
     );
@@ -68,7 +68,6 @@ export class EntityMonitor<T = any> {
   private updatingSectionObservableCache: {
     [key: string]: Observable<ActionState>
   } = {};
-  private apiRequestData$: Observable<IRequestDataState>;
   public updatingSection$: Observable<UpdatingSection>;
   /**
    * An observable that emit the entity from the store.
@@ -109,7 +108,7 @@ export class EntityMonitor<T = any> {
     schema: normalizrSchema.Entity,
     entitySelect$: Observable<T>,
     entityRequestSelect$: Observable<RequestInfoState>,
-    entities$: Observable<IRequestDataState>
+    entities$: Observable<GeneralRequestDataState>
   ): Observable<T> => {
     return combineLatest(
       entitySelect$,
@@ -134,23 +133,28 @@ export class EntityMonitor<T = any> {
    * @param updateKey - The store updating key for the poll
    */
   poll(interval = 10000, action: () => void, getActionState: (request: RequestInfoState) => ActionState) {
+    const pollingEnabled$ = this.store.select(selectDashboardState).pipe(
+      map(dashboardState => dashboardState.pollingEnabled)
+    );
     return observableInterval(interval)
       .pipe(
         tag('poll'),
         withLatestFrom(
           this.entity$,
-          this.entityRequest$
+          this.entityRequest$,
+          pollingEnabled$
         ),
-        map(([poll, resource, requestState]) => ({
+        map(([, resource, requestState, pollingEnabled]) => ({
           resource,
-          updatingSection: getActionState(requestState)
+          updatingSection: getActionState(requestState),
+          pollingEnabled
         })),
-        tap(({ resource, updatingSection }) => {
-          if (!updatingSection || !updatingSection.busy) {
+        tap(({ updatingSection, pollingEnabled }) => {
+          if (pollingEnabled && (!updatingSection || !updatingSection.busy)) {
             action();
           }
         }),
-        filter(({ resource, updatingSection }) => {
+        filter(({ updatingSection }) => {
           return !!updatingSection;
         }),
         share()

@@ -62,14 +62,14 @@ export abstract class Page {
     });
   }
 
-  waitForPage() {
+  waitForPage(timeout = 20000) {
     expect(this.navLink.startsWith('/')).toBeTruthy('navLink should start with a /');
-    return browser.wait(until.urlIs(this.getUrl()), 20000, `Failed to wait for page with navlink '${this.navLink}'`);
+    return browser.wait(until.urlIs(this.getUrl()), timeout, `Failed to wait for page with navlink '${this.navLink}'`);
   }
 
-  waitForPageDataLoaded() {
+  waitForPageDataLoaded(timeout = 20000) {
     this.waitForPage();
-    return browser.wait(until.stalenessOf(element(by.tagName('app-loading-page'))), 20000);
+    return browser.wait(until.stalenessOf(element(by.tagName('app-loading-page'))), timeout);
   }
 
   waitForPageOrChildPage() {

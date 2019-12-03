@@ -46,10 +46,11 @@ This will do the following:
 Get SCf UAA Endpoint
 */}}
 {{- define "scfUaaEndpoint" -}}
+{{- $uaa_zone := default "scf" .Values.env.UAA_ZONE -}}
 {{- if and .Values.env.DOMAIN (not .Values.env.UAA_HOST) -}}
-{{- printf "https://scf.uaa.%s:%v" .Values.env.DOMAIN .Values.env.UAA_PORT -}}
+{{- printf "https://%s.uaa.%s:%v" $uaa_zone .Values.env.DOMAIN .Values.env.UAA_PORT -}}
 {{- else if .Values.env.UAA_HOST -}}
-{{- printf "https://scf.%s:%v" .Values.env.UAA_HOST .Values.env.UAA_PORT -}}
+{{- printf "https://%s.%s:%v" $uaa_zone .Values.env.UAA_HOST .Values.env.UAA_PORT -}}
 {{- end -}}
 {{- end -}}
 
@@ -103,4 +104,32 @@ Generate self-signed certificate
 {{- $cert := genSignedCert ( include "console.certName" . ) nil $altNames 365 $ca -}}
 tls.crt: {{ $cert.Cert | b64enc }}
 tls.key: {{ $cert.Key | b64enc }}
+{{- end -}}
+
+
+{{/*
+Ingress Host from .Values.console.service
+*/}}
+{{- define "ingress.host.value" -}}
+{{- if .Values.console.service -}}
+{{- if .Values.console.service.ingress -}}
+{{- if .Values.console.service.ingress.host -}}
+{{ .Values.console.service.ingress.host }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Ingress Host:
+*/}}
+{{- define "ingress.host" -}}
+{{ $host := (include "ingress.host.value" .) }}
+{{- if $host -}}
+{{ $host | quote }}
+{{- else if .Values.env.DOMAIN -}}
+{{ print "console." .Values.env.DOMAIN }}
+{{- else -}}
+{{ required "Host name is required" $host | quote }}
+{{- end -}}
 {{- end -}}

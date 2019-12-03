@@ -1,5 +1,0 @@
-<ng-container *ngIf="service?.multipleConnectedEndpoints$ | async">
-  <a [routerLink]="service?.getCfURL()">{{ service?.getCfName() | async }}</a> /
-</ng-container>
-<a [routerLink]="service?.getOrgURL()">{{ service?.getOrgName() | async}}</a> /
-<a [routerLink]="service?.getSpaceURL()" [queryParams]="spaceBreadCrumbs">{{ service?.getSpaceName()  | async}}</a>

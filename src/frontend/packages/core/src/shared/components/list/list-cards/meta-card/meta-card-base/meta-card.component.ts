@@ -1,15 +1,13 @@
-import { Component, ContentChild, ContentChildren, Input, QueryList } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList } from '@angular/core';
+import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../../../store/src/app-state';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { LoggerService } from '../../../../../../core/logger.service';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
-import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
+import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
-import { StratosStatus, ComponentEntityMonitorConfig } from '../../../../../shared.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
+import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
@@ -27,12 +25,12 @@ export interface MetaCardMenuItem {
   templateUrl: './meta-card.component.html',
   styleUrls: ['./meta-card.component.scss']
 })
-export class MetaCardComponent {
+export class MetaCardComponent implements OnDestroy {
 
   @ContentChildren(MetaCardItemComponent)
   metaItems: QueryList<MetaCardItemComponent>;
 
-  @ContentChild(MetaCardTitleComponent)
+  @ContentChild(MetaCardTitleComponent, { static: true })
   title: MetaCardTitleComponent;
 
   @Input()
@@ -44,37 +42,37 @@ export class MetaCardComponent {
   @Input()
   public confirmFavoriteRemoval = false;
 
-  userFavoriteManager: UserFavoriteManager;
-
   @Input()
   statusIcon = true;
+
   @Input()
   statusIconByTitle = false;
+
   @Input()
   statusIconTooltip: string;
+
   @Input()
   statusBackground = false;
+
+  @Input()
+  clickAction: () => void = null;
 
   @Input()
   set entityConfig(entityConfig: ComponentEntityMonitorConfig) {
     if (entityConfig) {
       const entityMonitor = this.entityMonitorFactory.create(
         entityConfig.guid,
-        entityConfig.schema.key,
         entityConfig.schema
       );
       this.isDeleting$ = entityMonitor.isDeletingEntity$;
       if (!this.favorite) {
-        entityMonitor.entity$.pipe(
+        this.entityMonitorSub = entityMonitor.entity$.pipe(
           first(),
-          tap(entity => this.favorite = getFavoriteFromCfEntity(entity, entityConfig.schema.key))
+          tap(entity => this.favorite = getFavoriteFromCfEntity(entity, entityConfig.schema.key, this.favoritesConfigMapper))
         ).subscribe();
       }
     }
-
   }
-
-  public isDeleting$: Observable<boolean> = observableOf(false);
 
   @Input('actionMenu')
   set actionMenu(actionMenu: MetaCardMenuItem[]) {
@@ -83,8 +81,12 @@ export class MetaCardComponent {
         if (!menuItem.can) {
           menuItem.can = observableOf(true);
         }
+        if (!menuItem.disabled) {
+          menuItem.disabled = observableOf(false);
+        }
         return menuItem;
       });
+
       this.showMenu$ = combineLatest(actionMenu.map(menuItem => menuItem.can)).pipe(
         map(cans => cans.some(can => can))
       );
@@ -94,31 +96,18 @@ export class MetaCardComponent {
     return this.pActionMenu;
   }
 
-  private pActionMenu: MetaCardMenuItem[];
-  public showMenu$: Observable<boolean>;
+  entityMonitorSub: Subscription;
 
-  @Input()
-  clickAction: () => void = null;
+  public showMenu$: Observable<boolean>;
+  public isDeleting$: Observable<boolean> = observableOf(false);
+  private pActionMenu: MetaCardMenuItem[];
 
   constructor(
     private entityMonitorFactory: EntityMonitorFactory,
-    store: Store<AppState>,
-    private logger: LoggerService
-  ) {
-    if (this.actionMenu) {
-      this.actionMenu = this.actionMenu.map(element => {
-        if (!element.disabled) {
-          element.disabled = observableOf(false);
-        }
-        return element;
-      });
-    }
-    this.userFavoriteManager = new UserFavoriteManager(store, logger);
-  }
+    private favoritesConfigMapper: FavoritesConfigMapper,
+  ) { }
 
-  cancelPropagation = (event) => {
-    event.cancelBubble = true;
-    event.stopPropagation();
+  ngOnDestroy() {
+    safeUnsubscribe(this.entityMonitorSub);
   }
-
 }
