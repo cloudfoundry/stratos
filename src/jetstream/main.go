@@ -33,10 +33,10 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
@@ -504,6 +504,19 @@ func loadPortalConfig(pc interfaces.PortalConfig, env *env.VarSet) (interfaces.P
 		pc.HTTPClientTimeoutMutatingInSecs = pc.HTTPClientTimeoutInSecs
 	}
 
+	if len(pc.AuthEndpointType) == 0 {
+		//Default to "remote" if AUTH_ENDPOINT_TYPE is not set
+		pc.AuthEndpointType = string(interfaces.Remote)
+	} else {
+		val, endpointTypeSupported := interfaces.AuthEndpointTypes[pc.AuthEndpointType]
+		if endpointTypeSupported {
+			pc.AuthEndpointType = string(val)
+		} else {
+			return pc, fmt.Errorf("AUTH_ENDPOINT_TYPE: %v is not valid. Must be set to local or remote (defaults to remote)", val)
+		}
+	}
+
+	log.Debugf("Portal config auth endpoint type initialised to: %v", pc.AuthEndpointType)
 	return pc, nil
 }
 
@@ -600,6 +613,15 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		Handler:  pp.doHttpBasicFlowRequest,
 		UserInfo: pp.GetCNSIUserFromBasicToken,
 	})
+
+	err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.AuthEndpointType])
+	if err != nil {
+		log.Warnf("Defaulting to UAA authentication: %v", err)
+		err = pp.InitStratosAuthService(interfaces.Remote)
+		if err != nil {
+			log.Fatalf("Could not initialise auth service. %v", err)
+		}
+	}
 
 	// OIDC
 	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
@@ -780,19 +802,16 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		pp.POST("/v1/setup/check", p.setupConsoleCheck)
 	}
 
-	pp.POST("/v1/auth/login/uaa", p.stratosLoginHandler)
-	pp.POST("/v1/auth/logout", p.logout)
+	loginAuthGroup := pp.Group("/v1/auth")
+	loginAuthGroup.POST("/login/uaa", p.StratosAuthService.Login)
+	loginAuthGroup.POST("/logout", p.StratosAuthService.Logout)
 
 	// SSO Routes will only respond if SSO is enabled
-	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
-	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
-
-	// Local User login/logout
-	// pp.POST("/v1/auth/local_login", p.localLogin)
-	// pp.POST("/v1/auth/local_logout", p.logout)
+	loginAuthGroup.GET("/sso_login", p.initSSOlogin)
+	loginAuthGroup.GET("/sso_logout", p.ssoLogoutOfUAA)
 
 	// Callback is used by both login to Stratos and login to an Endpoint
-	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
+	loginAuthGroup.GET("/sso_login_callback", p.ssoLoginToUAA)
 
 	// Version info
 	pp.GET("/v1/version", p.getVersions)
@@ -811,17 +830,19 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		e.Use(middlewarePlugin.SessionEchoMiddleware)
 	}
 
+	sessionAuthGroup := sessionGroup.Group("/auth")
+
 	// Connect to endpoint
-	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
+	sessionAuthGroup.POST("/login/cnsi", p.loginToCNSI)
 
 	// Connect to Enpoint (SSO)
-	sessionGroup.GET("/auth/login/cnsi", p.ssoLoginToCNSI)
+	sessionAuthGroup.GET("/login/cnsi", p.ssoLoginToCNSI)
 
 	// Disconnect endpoint
-	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
+	sessionAuthGroup.POST("/logout/cnsi", p.logoutOfCNSI)
 
 	// Verify Session
-	sessionGroup.GET("/auth/session/verify", p.verifySession)
+	sessionAuthGroup.GET("/session/verify", p.verifySession)
 
 	// CNSI operations
 	sessionGroup.GET("/cnsis", p.listCNSIs)
@@ -931,6 +952,7 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 // EchoV2DefaultHTTPErrorHandler ensures we get V2 error behaviour
 // i.e. no wrapping in 'message' JSON object
 func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
+
 	code := http.StatusInternalServerError
 	msg := http.StatusText(code)
 	if he, ok := err.(*echo.HTTPError); ok {
@@ -954,7 +976,9 @@ func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
 		}
 	}
 
-	if err != nil {
+	//Only log if there is a message to log
+	he, _ := err.(*echo.HTTPError)
+	if err != nil && he.Message.(string) != "" {
 		c.Logger().Error(err)
 	}
 }

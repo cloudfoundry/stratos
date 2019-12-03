@@ -21,7 +21,7 @@ export class CodeBlockComponent implements OnInit {
   copySuccessful = false;
   copySuccessWait = false;
 
-  @ViewChild('preBlock') code: ElementRef;
+  @ViewChild('preBlock', { static: true }) code: ElementRef;
 
 
   ngOnInit() {

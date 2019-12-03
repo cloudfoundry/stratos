@@ -1,5 +1,5 @@
 import { DataSource } from '@angular/cdk/table';
-import { SortDirection } from '@angular/material';
+import { SortDirection } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,

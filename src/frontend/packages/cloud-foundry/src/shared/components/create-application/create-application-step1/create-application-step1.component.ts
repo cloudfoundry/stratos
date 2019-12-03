@@ -32,7 +32,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   public hasSpaces$: Observable<boolean>;
   public hasOrgs$: Observable<boolean>;
 
-  @ViewChild('cfForm')
+  @ViewChild('cfForm', { static: true })
   cfForm: NgForm;
 
   @Input() isRedeploy = false;

@@ -1,9 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientModule, HttpClient, HttpBackend } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ConnectionBackend, Http, HttpModule } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
 import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
@@ -26,17 +24,16 @@ describe('CommitListWrapperComponent', () => {
         CommonModule,
         CoreModule,
         SharedModule,
-        HttpModule,
         HttpClientModule,
         HttpClientTestingModule
       ],
       providers: [
         DatePipe,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        Http,
+        HttpClient,
         {
-          provide: ConnectionBackend,
-          useClass: MockBackend
+          provide: HttpBackend,
+          useClass: HttpTestingController
         }
       ]
     })

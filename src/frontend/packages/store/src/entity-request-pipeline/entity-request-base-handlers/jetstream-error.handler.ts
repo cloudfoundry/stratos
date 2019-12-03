@@ -3,7 +3,7 @@ import { SendEventAction } from '../../actions/internal-events.actions';
 import { RecursiveDeleteFailed } from '../../effects/recursive-entity-delete.effect';
 import { endpointSchemaKey } from '../../helpers/entity-factory';
 import { ApiRequestTypes, getFailApiRequestActions } from '../../reducers/api-request-reducer/request-helpers';
-import { InternalEventSeverity } from '../../types/internal-events.types';
+import { InternalEventSeverity, InternalEventStateMetadata } from '../../types/internal-events.types';
 import { EntityRequestAction } from '../../types/request.types';
 import { ActionDispatcher } from '../entity-request-pipeline.types';
 import { PipelineHttpClient } from '../pipline-http-client.service';
@@ -21,12 +21,13 @@ export function jetstreamErrorHandler(
   const endpointIds: string[] = endpointString.split(',');
   endpointIds.forEach(endpoint =>
     actionDispatcher(
-      new SendEventAction(endpointSchemaKey, endpoint, {
+      new SendEventAction<InternalEventStateMetadata>(endpointSchemaKey, endpoint, {
         eventCode: error.status ? error.status + '' : '500',
         severity: InternalEventSeverity.ERROR,
         message: 'Jetstream API request error',
         metadata: {
-          error,
+          httpMethod: action.options.method as string,
+          errorResponse: error,
           url: error.url || action.options.url,
         },
       }),

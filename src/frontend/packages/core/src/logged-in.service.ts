@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, NgZone } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
@@ -95,7 +95,7 @@ export class LoggedInService {
             this.store.select(selectDashboardState),
             this.store.select(s => s.auth)
           ),
-          tap(([i, dashboardState, authState]) => {
+          tap(([, dashboardState, authState]) => {
             this.ngZone.run(() => {
               this._checkSession(dashboardState, authState);
             });

@@ -1,5 +1,4 @@
 import { inject, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import {
@@ -7,6 +6,7 @@ import {
   generateTestCfEndpointServiceProvider,
 } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserService } from './cf-user.service';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('CfUserService', () => {
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe('CfUserService', () => {
       imports: [
         ...generateCfStoreModules(),
         SharedModule,
-        HttpModule
+        HttpClientModule
       ],
       providers: [
         ...generateTestCfEndpointServiceProvider()
