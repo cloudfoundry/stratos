@@ -68,7 +68,7 @@ export class ApplicationBasePage extends CFPage {
     return this.header.getTitleText();
   }
 
-  public delete(appName: string): DeleteApplication {
+  public delete(): DeleteApplication {
     const deleteApp = new DeleteApplication(this.cfGuid, this.appGuid);
     this.subHeader.clickIconButton('delete');
     deleteApp.waitForPage();
