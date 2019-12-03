@@ -44,7 +44,8 @@ describe('Application Deploy -', () => {
   const deployRes = createApplicationDeployTests();
   const { testApp, testAppName, appDetails } = deployRes;
 
-  describe('Tab Tests -', () => {
+  describe('Tab Tests (app status independent) -', () => {
+    // These tests don't rely on the app status
 
     beforeAll(() => {
       // Should be deployed, no web-socket open, so we can wait for angular again
@@ -107,109 +108,117 @@ describe('Application Deploy -', () => {
     });
   });
 
-  it('App Summary', () => {
-    // Does app to be fully started
-    const appSummary = new ApplicationPageSummaryTab(appDetails.cfGuid, appDetails.appGuid);
-    appSummary.goToSummaryTab();
+  describe('Tab Tests (app status dependent) -', () => {
 
-    appSummary.cardStatus.getStatus().then(res => {
-      expect(res.status).toBe('Deployed');
-      expect(res.subStatus).toBe('Online');
+    it('App Summary', () => {
+      // Does app to be fully started
+      const appSummary = new ApplicationPageSummaryTab(appDetails.cfGuid, appDetails.appGuid);
+      appSummary.goToSummaryTab();
+
+      appSummary.cardStatus.getStatus().then(res => {
+        expect(res.status).toBe('Deployed');
+        expect(res.subStatus).toBe('Online');
+      });
+
+      appSummary.cardInstances.waitForRunningInstancesText('1 / 1');
+
+      const cfName = e2e.secrets.getDefaultCFEndpoint().name;
+      const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
+      const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
+
+      expect(appSummary.cardCfInfo.cf.getValue()).toBe(cfName);
+      expect(appSummary.cardCfInfo.org.getValue()).toBe(orgName);
+      expect(appSummary.cardCfInfo.space.getValue()).toBe(spaceName);
+
+      expect(appSummary.cardUptime.getTitle()).not.toBe('Application is not running');
+      expect(appSummary.cardUptime.getUptime().isDisplayed()).toBeTruthy();
+      expect(appSummary.cardUptime.getUptimeText()).not.toBeNull();
+
+      expect(appSummary.cardInfo.memQuota.getValue()).toBe('16 MB');
+      expect(appSummary.cardInfo.diskQuota.getValue()).toBe('64 MB');
+      expect(appSummary.cardInfo.appState.getValue()).toBe('STARTED');
+      expect(appSummary.cardInfo.packageState.getValue()).toBe('STAGED');
+      expect(appSummary.cardInfo.services.getValue()).toBe('0');
+      expect(appSummary.cardInfo.routes.getValue()).toBe('1');
+
+      expect(appSummary.cardCfInfo.cf.getValue()).toBe(cfName);
+      expect(appSummary.cardCfInfo.org.getValue()).toBe(orgName);
+      expect(appSummary.cardCfInfo.space.getValue()).toBe(spaceName);
+
+      expect(appSummary.cardBuildInfo.buildPack.getValue()).toBe('binary_buildpack');
+      expect(appSummary.cardBuildInfo.stack.getValue()).toBe(testAppStack || defaultStack);
+
+      appSummary.cardDeployInfo.waitForTitle('Deployment Info');
+      appSummary.cardDeployInfo.github.waitUntilShown('Waiting for GitHub deployment information');
+      expect(appSummary.cardDeployInfo.github.isDisplayed()).toBeTruthy();
+      appSummary.cardDeployInfo.github.getValue().then(commitHash => {
+        expect(commitHash).toBeDefined();
+        expect(commitHash.length).toBe(8);
+      });
+
     });
 
-    appSummary.cardInstances.waitForRunningInstancesText('1 / 1');
+    it('Instances Tab', () => {
+      // Does app to be fully started
+      const appInstances = new ApplicationPageInstancesTab(appDetails.cfGuid, appDetails.appGuid);
+      appInstances.goToInstancesTab();
 
-    expect(appSummary.cardUptime.getTitle()).not.toBe('Application is not running');
-    expect(appSummary.cardUptime.getUptime().isDisplayed()).toBeTruthy();
-    expect(appSummary.cardUptime.getUptimeText()).not.toBeNull();
+      appInstances.cardStatus.getStatus().then(res => {
+        expect(res.status).toBe('Deployed');
+        expect(res.subStatus).toBe('Online');
+      });
 
-    expect(appSummary.cardInfo.memQuota.getValue()).toBe('16 MB');
-    expect(appSummary.cardInfo.diskQuota.getValue()).toBe('64 MB');
-    expect(appSummary.cardInfo.appState.getValue()).toBe('STARTED');
-    expect(appSummary.cardInfo.packageState.getValue()).toBe('STAGED');
-    expect(appSummary.cardInfo.services.getValue()).toBe('0');
-    expect(appSummary.cardInfo.routes.getValue()).toBe('1');
+      appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
 
-    const cfName = e2e.secrets.getDefaultCFEndpoint().name;
-    const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
-    const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
+      expect(appInstances.cardUsage.getTitleElement().isPresent()).toBeFalsy();
+      expect(appInstances.cardUsage.getUsageTable().isDisplayed()).toBeTruthy();
 
-    expect(appSummary.cardCfInfo.cf.getValue()).toBe(cfName);
-    expect(appSummary.cardCfInfo.org.getValue()).toBe(orgName);
-    expect(appSummary.cardCfInfo.space.getValue()).toBe(spaceName);
+      expect(appInstances.list.empty.getDefault().isPresent()).toBeFalsy();
+      expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
 
-    expect(appSummary.cardBuildInfo.buildPack.getValue()).toBe('binary_buildpack');
-    expect(appSummary.cardBuildInfo.stack.getValue()).toBe(testAppStack || defaultStack);
-
-    appSummary.cardDeployInfo.waitForTitle('Deployment Info');
-    appSummary.cardDeployInfo.github.waitUntilShown('Waiting for GitHub deployment information');
-    expect(appSummary.cardDeployInfo.github.isDisplayed()).toBeTruthy();
-    appSummary.cardDeployInfo.github.getValue().then(commitHash => {
-      expect(commitHash).toBeDefined();
-      expect(commitHash.length).toBe(8);
     });
 
-  });
+    it('Routes Tab', () => {
+      const appRoutes = new ApplicationPageRoutesTab(appDetails.cfGuid, appDetails.appGuid);
+      appRoutes.goToRoutesTab();
 
-  it('Instances Tab', () => {
-    // Does app to be fully started
-    const appInstances = new ApplicationPageInstancesTab(appDetails.cfGuid, appDetails.appGuid);
-    appInstances.goToInstancesTab();
-
-    appInstances.cardStatus.getStatus().then(res => {
-      expect(res.status).toBe('Deployed');
-      expect(res.subStatus).toBe('Online');
+      expect(appRoutes.list.empty.getDefault().isPresent()).toBeFalsy();
+      expect(appRoutes.list.empty.getCustom().getComponent().isPresent()).toBeFalsy();
+      appRoutes.list.table.getCell(0, 1).getText().then((route: string) => {
+        expect(route).not.toBeNull();
+        expect(route.length).toBeGreaterThan(testAppName.length);
+        const randomRouteStyleAppName = testAppName.replace(/[\.:]/g, '');
+        expect(route.startsWith(randomRouteStyleAppName.substring(0, randomRouteStyleAppName.length - 11), 7)).toBeTruthy();
+      });
+      appRoutes.list.table.getCell(0, 2).getText().then((tcpRoute: string) => {
+        expect(tcpRoute).not.toBeNull();
+        expect(tcpRoute).toBe('highlight_off');
+      });
     });
 
-    appInstances.cardInstances.waitForRunningInstancesText('1 / 1');
+    it('Events Tab', () => {
+      // Does app to be fully started
+      const appEvents = new ApplicationPageEventsTab(appDetails.cfGuid, appDetails.appGuid);
+      appEvents.goToEventsTab();
 
-    expect(appInstances.cardUsage.getTitleElement().isPresent()).toBeFalsy();
-    expect(appInstances.cardUsage.getUsageTable().isDisplayed()).toBeTruthy();
+      expect(appEvents.list.empty.isDisplayed()).toBeFalsy();
+      expect(appEvents.list.isTableView()).toBeTruthy();
+      expect(appEvents.list.getTotalResults()).toBeGreaterThanOrEqual(3);
+      // Ensure that the earliest events are at the top
+      appEvents.list.table.toggleSort('Timestamp');
 
-    expect(appInstances.list.empty.getDefault().isPresent()).toBeFalsy();
-    expect(appInstances.list.table.getCell(0, 1).getText()).toBe('RUNNING');
-
-  });
-
-  it('Routes Tab', () => {
-    const appRoutes = new ApplicationPageRoutesTab(appDetails.cfGuid, appDetails.appGuid);
-    appRoutes.goToRoutesTab();
-
-    expect(appRoutes.list.empty.getDefault().isPresent()).toBeFalsy();
-    expect(appRoutes.list.empty.getCustom().getComponent().isPresent()).toBeFalsy();
-    appRoutes.list.table.getCell(0, 1).getText().then((route: string) => {
-      expect(route).not.toBeNull();
-      expect(route.length).toBeGreaterThan(testAppName.length);
-      const randomRouteStyleAppName = testAppName.replace(/[\.:]/g, '');
-      expect(route.startsWith(randomRouteStyleAppName.substring(0, randomRouteStyleAppName.length - 11), 7)).toBeTruthy();
+      const currentUser = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
+      // Create
+      expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\ncreate');
+      expect(appEvents.list.table.getCell(0, 2).getText()).toBe(`person\n${currentUser}`);
+      // Map Route
+      expect(appEvents.list.table.getCell(1, 1).getText()).toBe('audit\napp\nmap-route');
+      expect(appEvents.list.table.getCell(1, 2).getText()).toBe(`person\n${currentUser}`);
+      // Update (route)
+      expect(appEvents.list.table.getCell(2, 1).getText()).toBe('audit\napp\nupdate');
+      expect(appEvents.list.table.getCell(2, 2).getText()).toBe(`person\n${currentUser}`);
     });
-    appRoutes.list.table.getCell(0, 2).getText().then((tcpRoute: string) => {
-      expect(tcpRoute).not.toBeNull();
-      expect(tcpRoute).toBe('highlight_off');
-    });
-  });
 
-  it('Events Tab', () => {
-    // Does app to be fully started
-    const appEvents = new ApplicationPageEventsTab(appDetails.cfGuid, appDetails.appGuid);
-    appEvents.goToEventsTab();
-
-    expect(appEvents.list.empty.isDisplayed()).toBeFalsy();
-    expect(appEvents.list.isTableView()).toBeTruthy();
-    expect(appEvents.list.getTotalResults()).toBeGreaterThanOrEqual(2);
-    // Ensure that the earliest events are at the top
-    appEvents.list.table.toggleSort('Timestamp');
-
-    const currentUser = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
-    // Create
-    expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\ncreate');
-    expect(appEvents.list.table.getCell(0, 2).getText()).toBe(`person\n${currentUser}`);
-    // Map Route
-    expect(appEvents.list.table.getCell(1, 1).getText()).toBe('audit\napp\nmap-route');
-    expect(appEvents.list.table.getCell(1, 2).getText()).toBe(`person\n${currentUser}`);
-    // Update (route)
-    expect(appEvents.list.table.getCell(2, 1).getText()).toBe('audit\napp\nupdate');
-    expect(appEvents.list.table.getCell(2, 2).getText()).toBe(`person\n${currentUser}`);
   });
 
   describe('Instance scaling', () => {
