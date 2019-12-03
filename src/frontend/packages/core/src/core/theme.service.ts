@@ -7,6 +7,7 @@ import { first, map } from 'rxjs/operators';
 import { SetThemeAction } from '../../../store/src/actions/dashboard-actions';
 import { DashboardOnlyAppState } from '../../../store/src/app-state';
 import { selectDashboardState } from '../../../store/src/selectors/dashboard.selectors';
+import { StyleService } from './style.service';
 
 export interface StratosTheme {
   key: string;
@@ -41,20 +42,13 @@ export class ThemeService {
     isLightMode: window.matchMedia('(prefers-color-scheme: light)').matches,
     isNotSpecified: window.matchMedia('(prefers-color-scheme: no-preference)').matches
   };
-  private themes: StratosTheme[] = [lightTheme, darkTheme];
+  private themes: StratosTheme[] = [lightTheme];
 
-  constructor(private store: Store<DashboardOnlyAppState>, private overlayContainer: OverlayContainer) {
-    this.osThemeInfo.supports = this.osThemeInfo.isDarkMode || this.osThemeInfo.isLightMode || this.osThemeInfo.isNotSpecified;
-
-    if (this.osThemeInfo.supports) {
-      this.themes.push(osTheme);
-
-      // If at some point in the future we need to adjust theme on OS change at run time we should look into this. Unfortunately was unable
-      // to test (only way I could change scheme from light to dark was in FF and about:config `ui.systemUsesDarkTheme` integer 1)
-      window.matchMedia('(prefers-color-scheme: dark)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
-      window.matchMedia('(prefers-color-scheme: light)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
-      window.matchMedia('(prefers-color-scheme: no-preference)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
-    }
+  constructor(
+    private store: Store<DashboardOnlyAppState>,
+    private overlayContainer: OverlayContainer,
+    private styleService: StyleService) {
+    this.initialiseStratosThemeInfo();
   }
 
   getThemes(): StratosTheme[] {
@@ -80,11 +74,35 @@ export class ThemeService {
     this.getTheme().pipe(first()).subscribe(theme => this.setOverlay(theme));
   }
 
+  private initialiseStratosThemeInfo() {
+    const hasDarkTheme = this.styleService.hasSelector('.dark-theme-supported');
+
+    if (hasDarkTheme) {
+      this.themes.push(darkTheme);
+
+      this.initialiseOsThemeInfo();
+    }
+
+  }
+
+  private initialiseOsThemeInfo() {
+    this.osThemeInfo.supports = this.osThemeInfo.isDarkMode || this.osThemeInfo.isLightMode || this.osThemeInfo.isNotSpecified;
+
+    if (this.osThemeInfo.supports) {
+      this.themes.push(osTheme);
+
+      // Watch for changes at run time
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
+      window.matchMedia('(prefers-color-scheme: light)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
+      window.matchMedia('(prefers-color-scheme: no-preference)').addListener(e => e.matches && this.updateFollowingOsThemeChange());
+    }
+  }
+
   /**
    * Find a theme in a safe way with fall backs
    */
   private findTheme(themeKey: string): StratosTheme {
-    if (themeKey === osTheme.key) {
+    if (themeKey === osTheme.key && this.getThemes().find(theme => theme.key === osTheme.key)) {
       return this.getOsTheme() || lightTheme;
     }
     return this.getThemes().find(theme => theme.key === themeKey) || lightTheme;
@@ -118,7 +136,6 @@ export class ThemeService {
     this.overlayContainer.getContainerElement().classList.add(newTheme.styleName);
   }
 
-  // See usages, might be needed in the future
   /**
    * Update theme given changes in OS theme settings
    */

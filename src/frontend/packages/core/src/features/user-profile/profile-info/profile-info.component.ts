@@ -32,6 +32,7 @@ export class ProfileInfoComponent implements OnInit {
   userProfile$: Observable<UserProfileInfo>;
 
   primaryEmailAddress$: Observable<string>;
+  hasMultipleThemes: boolean;
 
   private sessionDialogConfig = new ConfirmationDialogConfig(
     'Disable session timeout',
@@ -69,6 +70,8 @@ export class ProfileInfoComponent implements OnInit {
     this.primaryEmailAddress$ = this.userProfile$.pipe(
       map((profile: UserProfileInfo) => userProfileService.getPrimaryEmailAddress(profile))
     );
+
+    this.hasMultipleThemes = themeService.getThemes().length > 1;
   }
 
   ngOnInit() {
