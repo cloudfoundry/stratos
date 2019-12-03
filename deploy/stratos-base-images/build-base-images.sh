@@ -124,7 +124,8 @@ build_and_push_image() {
         ARG="${SQUASH_ARGS}"
     fi
     set -x
-    docker build ${ARG} . -f $docker_file  -t ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
+    # Always remove intermediate containers
+    docker build --force-rm ${ARG} . -f $docker_file  -t ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
     if [ ! -z ${PUSH_IMAGES} ]; then
         docker push ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
     fi
