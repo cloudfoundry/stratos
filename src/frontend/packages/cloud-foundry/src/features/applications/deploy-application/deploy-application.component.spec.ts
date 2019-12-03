@@ -1,8 +1,6 @@
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientModule, HttpClient, HttpBackend } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { ConnectionBackend, Http, HttpModule } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -52,10 +50,10 @@ describe('DeployApplicationComponent', () => {
         CfOrgSpaceDataService,
         ApplicationEnvVarsHelper,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        Http,
+        HttpClient,
         {
-          provide: ConnectionBackend,
-          useClass: MockBackend
+          provide: HttpBackend,
+          useClass: HttpTestingController
         },
         TabNavService
       ],
@@ -68,7 +66,7 @@ describe('DeployApplicationComponent', () => {
         NoopAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule,
-        HttpModule,
+        HttpClientModule,
         CloudFoundryComponentsModule
       ]
     })

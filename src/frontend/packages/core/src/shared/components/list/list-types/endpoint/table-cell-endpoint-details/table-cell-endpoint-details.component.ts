@@ -25,7 +25,7 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
   @Input() component: Type<EndpointListDetailsComponent>;
 
   private endpointDetails: ViewContainerRef;
-  @ViewChild('target', { read: ViewContainerRef }) set target(content: ViewContainerRef) {
+  @ViewChild('target', { read: ViewContainerRef, static: true }) set target(content: ViewContainerRef) {
     this.endpointDetails = content;
   }
 

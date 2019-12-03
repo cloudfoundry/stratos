@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import {
   IService,
   IServiceBinding,
@@ -127,6 +128,8 @@ import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
+import { CfApplicationState } from './store/types/application.types';
+import { EntitySchema } from '../../store/src/helpers/entity-schema';
 
 export interface CFBasePipelineRequestActionMeta {
   includeRelations?: string[];
@@ -856,12 +859,18 @@ function generateCfEndpointEntity(endpointDefinition: StratosEndpointExtensionDe
 }
 
 function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const applicationDefinition: IStratosEntityDefinition = {
+  const applicationDefinition: IStratosEntityDefinition<EntitySchema, APIResource<IApp>> = {
     type: applicationEntityType,
     schema: cfEntityFactory(applicationEntityType),
     label: 'Application',
     labelPlural: 'Applications',
     endpoint: endpointDefinition,
+    tableConfig: {
+      rowBuilders: [
+        ['Name', (entity) => entity.entity.name],
+        ['Creation Date', (entity) => entity.metadata.created_at]
+      ]
+    }
   };
 
   return new StratosCatalogueEntity<IAppFavMetadata, APIResource<IApp>>(
@@ -875,10 +884,14 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getMetadata: app => ({
           guid: app.metadata.guid,
           cfGuid: app.entity.cfGuid,
+          createdAt: moment(app.metadata.created_at).format('LLL'),
           name: app.entity.name,
         }),
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
+        getLines: () => ([
+          ['Creation  Date', (meta) => meta.createdAt]
+        ])
       },
       actionBuilders: applicationActionBuilder
     },
@@ -912,6 +925,9 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           name: space.entity.name,
           cfGuid: space.entity.cfGuid,
         }),
+        getLines: () => ([
+          ['Name', (meta) => meta.name],
+        ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid
       }

@@ -1,11 +1,10 @@
-import { RequestOptions, URLSearchParams } from '@angular/http';
-
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { serviceBindingEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
+import { HttpRequest, HttpParams } from '@angular/common/http';
 
 export const DELETE_SERVICE_BINDING_ACTION = '[ Service Instances ] Delete Service Binding';
 export const DELETE_SERVICE_BINDING_ACTION_SUCCESS = '[ Service Instances ] Delete Service Binding success';
@@ -24,14 +23,15 @@ export class CreateServiceBinding extends CFStartAction implements ICFAction {
     public params: object,
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `service_bindings`;
-    this.options.method = 'post';
-    this.options.body = {
-      app_guid: appGuid,
-      service_instance_guid: serviceInstanceGuid,
-      parameters: params ? params : null,
-    };
+    this.options = new HttpRequest(
+      'POST',
+      `service_bindings`,
+      {
+        app_guid: appGuid,
+        service_instance_guid: serviceInstanceGuid,
+        parameters: params ? params : null,
+      }
+    );
   }
   actions = [
     CREATE_SERVICE_BINDING_ACTION,
@@ -41,17 +41,23 @@ export class CreateServiceBinding extends CFStartAction implements ICFAction {
   entity = [cfEntityFactory(serviceBindingEntityType)];
   public endpointType = 'cf';
   entityType = serviceBindingEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class DeleteServiceBinding extends CFStartAction implements ICFAction {
   constructor(public endpointGuid: string, public guid: string, public serviceInstanceGuid: string) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `service_bindings/${guid}`;
-    this.options.method = 'delete';
-    this.options.params = new URLSearchParams();
-    this.options.params.set('async', 'false');
+    this.options = new HttpRequest(
+      'DELETE',
+      `service_bindings/${guid}`,
+      {
+        params: new HttpParams({
+          fromObject: {
+            async: 'false'
+          }
+        })
+      }
+    );
     // Note: serviceInstanceGuid is used by the reducer to update the relevant serviceInstanceGuid, its not required for the action itself.
   }
   actions = [
@@ -61,21 +67,22 @@ export class DeleteServiceBinding extends CFStartAction implements ICFAction {
   ];
   entity = [cfEntityFactory(serviceBindingEntityType)];
   entityType = serviceBindingEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   removeEntityOnDelete = true;
 }
 
 export class FetchAllServiceBindings extends CFStartAction implements PaginatedAction {
   constructor(public endpointGuid: string, public paginationKey: string, public includeRelations = [], public populateMissing = false) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = 'service_bindings';
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      'service_bindings'
+    );
   }
   actions = getActions('Service Bindings', 'Get All');
   entity = [cfEntityFactory(serviceBindingEntityType)];
   entityType = serviceBindingEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams: PaginationParam = {
     'order-direction': 'asc',
     page: 1,

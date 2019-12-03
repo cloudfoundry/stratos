@@ -60,7 +60,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   selectedPlan$: Observable<APIResource<IServicePlan>>;
   selectedPlanAccessibility$ = new BehaviorSubject<StratosStatus>(null);
   cSIHelperService: CreateServiceInstanceHelper;
-  @ViewChild('noplans', { read: ViewContainerRef })
+  @ViewChild('noplans', { read: ViewContainerRef, static: true })
   noPlansDiv: ViewContainerRef;
 
   validate = new BehaviorSubject<boolean>(false);

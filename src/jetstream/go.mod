@@ -21,7 +21,6 @@ require (
 	github.com/cloudfoundry-community/go-cfenv v1.17.0
 	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular v0.0.0-00010101000000-000000000000
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/bosh-cli v5.4.0+incompatible // indirect
 	github.com/cloudfoundry/bosh-utils v0.0.0-20190206192830-9a0affed2bf1 // indirect
 	github.com/cloudfoundry/cli-plugin-repo v0.0.0-20190220174354-ecf721ef3813 // indirect
@@ -49,9 +48,13 @@ require (
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/labstack/echo v3.3.10+incompatible
+	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
+	github.com/mattn/go-colorable v0.1.4 // indirect
+	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/mholt/archiver v3.1.1+incompatible
+	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/moby/moby v1.13.1 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
@@ -67,6 +70,7 @@ require (
 	github.com/tedsuo/rata v1.0.0 // indirect
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5 // indirect
 	github.com/ulikunitz/xz v0.5.6 // indirect
+	github.com/valyala/fasttemplate v1.1.0 // indirect
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2 // indirect
@@ -77,8 +81,6 @@ require (
 	gopkg.in/yaml.v2 v2.2.4
 	k8s.io/kubernetes v1.16.3 // indirect
 )
-
-replace github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces => ./repository/interfaces
 
 replace github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes => ./plugins/kubernetes
 

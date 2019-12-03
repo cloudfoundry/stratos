@@ -107,7 +107,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
 
   private mobileSub: Subscription;
 
-  @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
+  @ViewChild('sidenav', { static: false }) set sidenav(drawer: MatDrawer) {
     this.drawer = drawer;
     if (!this.closeSub) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
@@ -119,7 +119,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     }
   }
 
-  @ViewChild('content') public content;
+  @ViewChild('content', { static: true }) public content;
 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
 

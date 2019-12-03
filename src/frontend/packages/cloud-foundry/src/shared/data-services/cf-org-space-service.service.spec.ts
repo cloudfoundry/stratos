@@ -1,10 +1,10 @@
 import { inject, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceDataService } from './cf-org-space-service.service';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('EndpointOrgSpaceServiceService', () => {
 
@@ -15,7 +15,7 @@ describe('EndpointOrgSpaceServiceService', () => {
         ...generateCfStoreModules(),
         SharedModule,
         CoreModule,
-        HttpModule,
+        HttpClientModule,
       ]
     });
   });
