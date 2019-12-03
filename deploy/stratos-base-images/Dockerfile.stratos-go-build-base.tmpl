@@ -15,9 +15,9 @@ RUN zypper -n ref && \
     zypper clean -a && \
     rm -f /var/log/zypper.log /var/log/zypp/history
 
-RUN wget https://storage.googleapis.com/golang/go1.12.4.linux-amd64.tar.gz && \
-    tar -xzf go1.12.4.linux-amd64.tar.gz -C /usr/local/ && \
-    rm go1.12.4.linux-amd64.tar.gz && \
+RUN wget https://storage.googleapis.com/golang/go1.13.4.linux-amd64.tar.gz && \
+    tar -xzf go1.13.4.linux-amd64.tar.gz -C /usr/local/ && \
+    rm go1.13.4.linux-amd64.tar.gz && \
     mkdir -p /home/stratos/go/bin && \
     mkdir -p /home/stratos/go/src
     
@@ -33,10 +33,10 @@ RUN curl https://glide.sh/get | sh
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 {{#IS_SLE}}
-RUN zypper rr smt_internal
-RUN zypper rr smt_internal_update
-RUN zypper rr smt_internal_sdk
-RUN zypper rr smt_internal_server
+RUN zypper rr  smt_internal
+RUN zypper rr  smt_internal_update
+RUN zypper rr  smt_internal_sdk
+RUN zypper rr  smt_internal_server
 {{/IS_SLE}}
 
 WORKDIR /home/stratos/go

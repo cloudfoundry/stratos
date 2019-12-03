@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterContentInit, Input, ViewEncapsulation, HostBinding, ElementRef, Renderer } from '@angular/core';
+import { Component, OnInit, AfterContentInit, Input, ViewEncapsulation, HostBinding } from '@angular/core';
 
 @Component({
   selector: 'app-tile',

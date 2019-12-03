@@ -3,8 +3,8 @@ import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { NEVER, Observable, Subject } from 'rxjs';
-import websocketConnect from 'rxjs-websockets';
-import { catchError, filter, share } from 'rxjs/operators';
+import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
+import { catchError, share, switchMap, map, first, startWith, debounceTime } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { LoggerService } from '../../../../../../../../core/src/core/logger.service';
@@ -27,10 +27,10 @@ export interface LogItem {
 })
 export class LogStreamTabComponent implements OnInit {
   public messages: Observable<string>;
-
+  private connectionStatusSubject = new Subject<number>();
   public connectionStatus: Observable<number>;
-  @ViewChild('searchFilter') searchFilter: NgModel;
 
+  @ViewChild('searchFilter', { static: false }) searchFilter: NgModel;
 
   filter;
 
@@ -45,6 +45,7 @@ export class LogStreamTabComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.connectionStatusSubject.next(0);
     if (!this.applicationService.cfGuid || !this.applicationService.appGuid) {
       this.messages = NEVER;
     } else {
@@ -53,18 +54,29 @@ export class LogStreamTabComponent implements OnInit {
         this.applicationService.cfGuid
         }/apps/${this.applicationService.appGuid}/stream`;
 
-      const { messages, connectionStatus } = websocketConnect(streamUrl, new Subject<string>());
-      messages.pipe(catchError(e => {
+      const socket$ = makeWebSocketObservable(streamUrl).pipe(catchError(e => {
         this.logService.error(
           'Error while connecting to socket: ' + JSON.stringify(e)
         );
         return [];
       }),
         share(),
-        filter(data => !!data && data.length));
+      );
 
-      this.messages = messages;
-      this.connectionStatus = connectionStatus;
+      this.messages = socket$.pipe(
+        switchMap((getResponses: GetWebSocketResponses) => {
+          return getResponses(new Subject<string>());
+        }),
+        map((message: string) => message),
+      );
+
+      this.connectionStatus = socket$.pipe(
+        first(),
+        map(() => 1),
+        startWith(0),
+        // Ensure the connection message doesn't flash onscreen.
+        debounceTime(250)
+      );
     }
   }
 

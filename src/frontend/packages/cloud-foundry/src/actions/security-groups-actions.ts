@@ -1,11 +1,10 @@
-import { RequestOptions } from '@angular/http';
-
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { securityGroupEntityType, spaceEntityType } from '../cf-entity-types';
 import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
+import { HttpRequest } from '@angular/common/http';
 
 export class GetAllSecurityGroups extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
@@ -17,14 +16,15 @@ export class GetAllSecurityGroups extends CFStartAction implements PaginatedActi
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `security_groups`;
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      `security_groups`
+    );
   }
   actions = getActions('Security Groups', 'Fetch all');
   entity = [cfEntityFactory(securityGroupEntityType)];
   entityType = securityGroupEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams = {
     page: 1,
     'results-per-page': 100,

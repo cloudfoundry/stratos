@@ -1,5 +1,4 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
@@ -10,6 +9,7 @@ import { CfUserServiceTestProvider } from '../../../../../core/test-framework/us
 import { ActiveRouteCfOrgSpace } from '../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import { CfRoleCheckboxComponent } from './cf-role-checkbox.component';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('CfRoleCheckboxComponent', () => {
   let component: CfRoleCheckboxComponent;
@@ -21,7 +21,7 @@ describe('CfRoleCheckboxComponent', () => {
         ...generateCfStoreModules(),
         CoreModule,
         NoopAnimationsModule,
-        HttpModule
+        HttpClientModule
       ],
       providers: [
         CfUserServiceTestProvider,

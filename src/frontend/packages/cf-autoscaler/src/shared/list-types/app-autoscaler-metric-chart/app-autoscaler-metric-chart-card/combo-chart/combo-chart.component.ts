@@ -27,7 +27,7 @@ import { curveLinear } from 'd3-shape';
 })
 export class AppAutoscalerComboChartComponent extends BaseChartComponent {
 
-  @ViewChild(LineSeriesComponent) lineSeriesComponent: LineSeriesComponent;
+  @ViewChild(LineSeriesComponent, { static: false }) lineSeriesComponent: LineSeriesComponent;
 
   @Input() curve: any = curveLinear;
   @Input() legend = false;
@@ -60,8 +60,8 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
 
-  @ContentChild('tooltipTemplate') tooltipTemplate: TemplateRef<any>;
-  @ContentChild('seriesTooltipTemplate') seriesTooltipTemplate: TemplateRef<any>;
+  @ContentChild('tooltipTemplate', { static: true }) tooltipTemplate: TemplateRef<any>;
+  @ContentChild('seriesTooltipTemplate', { static: true }) seriesTooltipTemplate: TemplateRef<any>;
 
   dims: ViewDimensions;
   xScale: any;

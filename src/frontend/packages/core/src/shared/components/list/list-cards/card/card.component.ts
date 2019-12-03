@@ -47,7 +47,7 @@ export class CardComponent<T> {
     this.componentCreator({ item });
   }
 
-  @ViewChild('target', { read: ViewContainerRef }) target: ViewContainerRef;
+  @ViewChild('target', { read: ViewContainerRef, static: true }) target: ViewContainerRef;
 
   cardComponent: CardCell<T>;
 

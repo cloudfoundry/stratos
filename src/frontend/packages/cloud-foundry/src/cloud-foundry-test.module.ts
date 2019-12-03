@@ -1,6 +1,5 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgModule } from '@angular/core';
-import { HttpModule } from '@angular/http';
 import { EffectsModule } from '@ngrx/effects';
 
 import { generateASEntities } from '../../cf-autoscaler/src/store/autoscaler-entity-generator';
@@ -34,7 +33,6 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
     EffectsModule.forRoot([]),
     CloudFoundryStoreModule,
     HttpClientTestingModule,
-    HttpModule,
   ],
   providers: [
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },

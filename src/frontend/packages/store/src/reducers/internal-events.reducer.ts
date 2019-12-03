@@ -1,14 +1,21 @@
 import { Action } from '@ngrx/store';
 
-import { SendClearEventAction, SendEventAction } from '../actions/internal-events.actions';
+import { SendClearEndpointEventsAction, SendClearEventAction, SendEventAction } from '../actions/internal-events.actions';
 import {
   CLEAR_EVENTS,
   GLOBAL_EVENT,
   InternalEventsState,
   InternalEventState,
   SEND_EVENT,
+  CLEAR_ENDPOINT_ERROR_EVENTS,
 } from '../types/internal-events.types';
 import { endpointSchemaKey } from './../helpers/entity-factory';
+import {
+  DISCONNECT_ENDPOINTS_SUCCESS,
+  DisconnectEndpoint,
+  UNREGISTER_ENDPOINTS_SUCCESS,
+  CONNECT_ENDPOINTS_SUCCESS
+} from '../actions/endpoint.actions';
 
 const defaultState: InternalEventsState = {
   types: {
@@ -29,6 +36,16 @@ export function internalEventReducer(state: InternalEventsState = defaultState, 
     }
     case CLEAR_EVENTS: {
       return clearEvents(state, action as SendClearEventAction);
+    }
+    case CLEAR_ENDPOINT_ERROR_EVENTS: {
+      const clearEndpointAction = action as SendClearEndpointEventsAction;
+      return clearEndpointEvents(state, clearEndpointAction.endpointGuid);
+    }
+    case DISCONNECT_ENDPOINTS_SUCCESS:
+    case UNREGISTER_ENDPOINTS_SUCCESS:
+    case CONNECT_ENDPOINTS_SUCCESS: {
+      const clearEndpointAction = action as DisconnectEndpoint;
+      return clearEndpointEvents(state, clearEndpointAction.guid);
     }
   }
   return state;
@@ -51,8 +68,29 @@ function setSubjectEvents(state: InternalEventsState, eventSubjectId: string, ev
   return newState;
 }
 
+function clearEndpointEvents(state: InternalEventsState, endpointGuid: string): InternalEventsState {
+  if (state.types.endpoint[endpointGuid]) {
+    const {
+      [endpointGuid]: cleared,
+      ...endpoint
+    } = state.types.endpoint;
+    return {
+      ...state,
+      types: {
+        ...state.types,
+        endpoint
+      }
+    };
+  } else {
+    return state;
+  }
+}
+
 function clearEvents(state: InternalEventsState, clearAction: SendClearEventAction) {
   const { eventSubjectId, eventType, params } = clearAction;
+  if (params.endpointGuid) {
+
+  }
   const events = getEvents(state, eventSubjectId, eventType);
   const filteredEvents = clearAction.params.clean ? [] : events.filter((event: InternalEventState) => {
     if (params.timestamp) {

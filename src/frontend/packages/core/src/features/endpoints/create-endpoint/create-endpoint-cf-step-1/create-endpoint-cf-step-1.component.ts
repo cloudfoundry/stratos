@@ -38,15 +38,15 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   validate: Observable<boolean>;
 
-  @ViewChild('form') form: NgForm;
-  @ViewChild('nameField') nameField: NgModel;
-  @ViewChild('urlField') urlField: NgModel;
-  @ViewChild('skipSllField') skipSllField: NgModel;
-  @ViewChild('ssoAllowedField') ssoAllowedField: NgModel;
+  @ViewChild('form', { static: true }) form: NgForm;
+  @ViewChild('nameField', { static: true }) nameField: NgModel;
+  @ViewChild('urlField', { static: true }) urlField: NgModel;
+  @ViewChild('skipSllField', { static: true }) skipSllField: NgModel;
+  @ViewChild('ssoAllowedField', { static: false }) ssoAllowedField: NgModel;
 
   // Optional Client ID and Client Secret
-  @ViewChild('clientIDField') clientIDField: NgModel;
-  @ViewChild('clientSecretField') clientSecretField: NgModel;
+  @ViewChild('clientIDField', { static: false }) clientIDField: NgModel;
+  @ViewChild('clientSecretField', { static: false }) clientSecretField: NgModel;
 
   urlValidation: string;
 
