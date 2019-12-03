@@ -1,5 +1,4 @@
 import { HttpRequest } from '@angular/common/http';
-import { RequestOptions } from '@angular/http';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
@@ -58,7 +57,7 @@ export type MakeEntityRequestPipe<
 
 export type BuildEntityRequestPipe = (
   requestType: ApiRequestTypes,
-  requestOptions: RequestOptions | HttpRequest<any>,
+  requestOptions: HttpRequest<any>,
   catalogueEntity: StratosBaseCatalogueEntity,
   store: Store<any>,
 ) => HttpRequest<any> | Observable<HttpRequest<any>>;

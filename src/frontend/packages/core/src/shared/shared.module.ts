@@ -304,7 +304,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     EntitySummaryTitleComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    TileSelectorComponent,
     AppNameUniqueDirective,
     PollingIndicatorComponent,
     UnlimitedInputComponent,

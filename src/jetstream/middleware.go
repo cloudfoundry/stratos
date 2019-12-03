@@ -184,7 +184,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		userID, err := p.GetSessionValue(c, "user_id")
 		if err == nil {
 			// check their admin status in UAA
-			u, err := p.GetStratosUser(userID.(string))
+			u, err := p.StratosAuthService.GetUser(userID.(string))
 			if err != nil {
 				return c.NoContent(http.StatusUnauthorized)
 			}

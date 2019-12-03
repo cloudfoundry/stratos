@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
@@ -17,6 +16,7 @@ import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../../actions/github.act
 import { CFAppState } from '../../cf-app-state';
 import { gitRepoEntityType } from '../../cf-entity-types';
 import { createFailedGithubRequestMessage } from './deploy-app.effects';
+import { HttpClient } from '@angular/common/http';
 
 // TODO: Remove this in favour of action builder config.
 // https://github.com/cloudfoundry-incubator/stratos/issues/3770
@@ -26,7 +26,6 @@ export class GithubEffects {
   // See github commit action builder for an example,
   // https://github.com/cloudfoundry-incubator/stratos/issues/3770
   constructor(
-    private http: Http,
     private actions$: Actions,
     private store: Store<CFAppState>,
     private scmService: GitSCMService,

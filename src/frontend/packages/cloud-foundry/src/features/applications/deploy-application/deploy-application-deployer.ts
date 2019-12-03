@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
-import { catchError, combineLatest, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
+import { catchError, combineLatest, filter, first, map, mergeMap, share, tap, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
@@ -133,16 +133,14 @@ export class DeployApplicationDeployer {
         );
 
         this.inputStream = new Subject<string>();
-        this.messages = websocketConnect(streamUrl, this.inputStream)
-          .messages.pipe(
+        this.messages = websocketConnect(streamUrl)
+          .pipe(
+            switchMap((get) => get(this.inputStream)),
             catchError(e => {
               return [];
             }),
-            map(message => {
-              const json = JSON.parse(message);
-              return json;
-            }),
             filter(l => !!l),
+            map(log => JSON.parse(log)),
             tap((log) => {
               // Deal with control messages
               if (log.type !== SocketEventTypes.DATA) {

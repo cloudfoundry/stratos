@@ -1,6 +1,6 @@
 import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { JsonPointer } from 'stratos-angular6-json-schema-form';

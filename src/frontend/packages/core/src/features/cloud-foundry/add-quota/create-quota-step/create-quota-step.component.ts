@@ -28,7 +28,7 @@ export class CreateQuotaStepComponent {
   cfGuid: string;
   quotaForm: FormGroup;
 
-  @ViewChild('form')
+  @ViewChild('form', { static: true })
   form: QuotaDefinitionFormComponent;
 
   constructor(
