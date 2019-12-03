@@ -24,7 +24,7 @@ func init() {
 
 		// Need cnsi_guid to not be NULL in order to be able to create this primary key
 		addTokensPrimaryKey := "ALTER TABLE tokens ADD CONSTRAINT PK_Tokens PRIMARY KEY (user_guid, cnsi_guid, token_guid);"
-		_, err := txn.Exec(addTokensPrimaryKey)
+		_, err = txn.Exec(addTokensPrimaryKey)
 		if err != nil {
 			return err
 		}
