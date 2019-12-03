@@ -1,9 +1,8 @@
 import { ActionReducer, Store } from '@ngrx/store';
-import { normalize } from 'normalizr';
 
 import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../../../store/src/entity-request-pipeline/pipeline.types';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../../../store/src/types/request.types';
 import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
@@ -28,7 +27,6 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from './entity-catalogue.types';
-import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../../../store/src/entity-request-pipeline/pipeline.types';
 
 export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata,
@@ -89,8 +87,8 @@ export class StratosBaseCatalogueEntity<
       }
       return newSchema;
     }, {
-        default: entitySchemas.default
-      });
+      default: entitySchemas.default
+    });
   }
 
   private getEndpointType(definition: IStratosBaseEntityDefinition) {
@@ -217,13 +215,6 @@ export class StratosBaseCatalogueEntity<
 
   }
 
-  public getNormalizedEntityData(entities: Y | Y[], schemaKey?: string): NormalizedResponse<Y> {
-    const schema = this.getSchema(schemaKey);
-    if (Array.isArray(entities)) {
-      return normalize(entities, [schema]);
-    }
-    return normalize(entities, schema);
-  }
 }
 
 export class StratosCatalogueEntity<
@@ -263,7 +254,9 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
   public definition: IStratosEndpointDefinition<EntityCatalogueSchemas>;
   constructor(
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
-    getLink?: (metadata: IEndpointFavMetadata) => string
+    getLink?: (metadata: IEndpointFavMetadata) => string,
+    // TODO find a way to attach this to PreviewableComponent
+    getPreviewableComponent?: () => object
   ) {
     const fullEntity = {
       ...entity,
@@ -274,7 +267,8 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
     super(fullEntity, {
       entityBuilder: {
         ...StratosCatalogueEndpointEntity.baseEndpointRender,
-        getLink: getLink || StratosCatalogueEndpointEntity.baseEndpointRender.getLink
+        getLink: getLink || StratosCatalogueEndpointEntity.baseEndpointRender.getLink,
+        getPreviewableComponent,
       }
     });
   }

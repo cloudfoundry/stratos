@@ -10,10 +10,6 @@ export const SET_HEADER_EVENT = '[Dashboard] Set header event';
 export const ENABLE_SIDE_NAV_MOBILE_MODE = '[Dashboard] Enable mobile nav';
 export const DISABLE_SIDE_NAV_MOBILE_MODE = '[Dashboard] Disable mobile nav';
 
-export const SHOW_SIDE_HELP = '[Dashboard] Show side help';
-export const CLOSE_SIDE_HELP = '[Dashboard] Close side help';
-
-
 export const TIMEOUT_SESSION = '[Dashboard] Timeout Session';
 export const ENABLE_POLLING = '[Dashboard] Enable Polling';
 
@@ -34,15 +30,6 @@ export class CloseSideNav implements Action {
 export class ToggleSideNav implements Action {
   constructor() { }
   type = TOGGLE_SIDE_NAV;
-}
-
-export class ShowSideHelp implements Action {
-  constructor(public document: string) { }
-  type = SHOW_SIDE_HELP;
-}
-
-export class CloseSideHelp implements Action {
-  type = CLOSE_SIDE_HELP;
 }
 
 export class SetHeaderEvent implements Action {

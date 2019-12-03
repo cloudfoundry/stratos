@@ -1,13 +1,14 @@
 import {
   endpointSchemaKey,
   entityFactory,
+  systemInfoSchemaKey,
   userFavouritesSchemaKey,
   userProfileSchemaKey,
-  systemInfoSchemaKey,
 } from '../../store/src/helpers/entity-factory';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 
 export const STRATOS_ENDPOINT_TYPE = 'stratos';
+export const ENDPOINT_TYPE = 'endpoint';
 
 class StratosEntitySchema extends EntitySchema {
   constructor(entityType: string) {
