@@ -1,3 +1,5 @@
+import { of } from 'rxjs';
+
 import {
   IListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
@@ -19,4 +21,5 @@ export class BaseCfListConfig<T> implements IListConfig<T> {
   getMultiActions = () => [];
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
+  getInitialised = () => of(true);
 }
