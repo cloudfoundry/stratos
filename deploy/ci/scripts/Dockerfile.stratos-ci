@@ -6,7 +6,7 @@
 # Default Image used to run tasks - contains Helm
 
 # Builder for the github release tool
-FROM splatform/stratos-go-build-base:opensuse as go-base
+FROM splatform/stratos-go-build-base:leap15_1 as go-base
 RUN export GOPATH=/home/stratos/go && \
     mkdir -p ${GOPATH} && \
     go get github.com/aktau/github-release
