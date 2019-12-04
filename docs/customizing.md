@@ -50,7 +50,7 @@ In this file you can set any or all of the following variables:
 |---|---|
 |$stratos-theme|The main theme to use for Stratos|
 |$stratos-nav-theme|Theme to use for the side navigation panel|
-$stratos-status-theme|Theme to use for displaying status in Stratos|
+|$stratos-status-theme|Theme to use for displaying status in Stratos|
 
 Note that you do not have to specify all of these - defaults will be used if they are not set.
 
@@ -70,6 +70,24 @@ $suse-app-theme: mat-light-theme($suse-app-primary, $suse-app-primary, $suse-the
 
 // Set this theme as the one to use
 $stratos-theme: $suse-app-theme;
+```
+
+#### Creating or disabling the Dark theme
+
+You can also change the Dark theme, if you wish, by defining the following variables:
+
+|Variable|Purpose|
+|---|---|
+|$stratos-dark-theme|The dark theme to use for Stratos|
+|$stratos-dark-nav-theme|Dark theme to use for the side navigation panel|
+|$stratos-dark-status-theme|Dark theme to use for displaying status in Stratos|
+
+Note that minimally you must supply `stratos-dark-theme` to create a dark theme.
+
+By default a dark theme is assumed to be available and the default will be used if not overridden. You can disable dark theme support in the UI by setting the following variable in your `custom.scss`:
+
+```
+$stratos-dark-theme-supported: false;
 ```
 
 ### Changing Styles

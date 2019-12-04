@@ -164,7 +164,8 @@ function getDefaultInitialTestStratosStoreState() {
       isMobile: false,
       isMobileNavOpen: false,
       sideNavPinned: false,
-      pollingEnabled: true
+      pollingEnabled: true,
+      themeKey: null
     },
     actionHistory: [],
     lists: {},
