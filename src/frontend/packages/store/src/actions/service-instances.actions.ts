@@ -110,6 +110,8 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
     this.options.params = new URLSearchParams();
     this.options.params.set('accepts_incomplete', 'true');
     this.options.method = 'post';
+    this.options.headers = new Headers();
+    this.options.headers.set('x-cap-long-running', 'true');
     this.options.body = {
       name,
       space_guid: spaceGuid,

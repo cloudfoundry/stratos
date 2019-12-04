@@ -13,6 +13,8 @@ applications:
 #       CF_API_FORCE_SECURE: true
 # Turn on backend debugging
 #       LOG_LEVEL: debug
+# Turn on staging debugging in stratos-buildpack
+# STRATOS_BP_DEBUG: true #Remove line to turn off debugging
 
 # User provided services can also be used to set environment properties:
 #   env:
