@@ -33,7 +33,7 @@ export class ChartDetailsReadmeComponent {
     return this.chartsService.getChartReadme(currentVersion).pipe(
       map(resp => {
         this.loading = false;
-        return markdown(resp.text(), {
+        return markdown(resp, {
           renderer: this.renderer
         });
       }),

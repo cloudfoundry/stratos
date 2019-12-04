@@ -102,5 +102,8 @@ import { Title } from '@angular/platform-browser';
     LogOutDialogComponent
   ],
 })
-export class CoreModule { }
+export class CoreModule {
+  constructor() { }
+
+}
 

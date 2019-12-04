@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment-timezone';
 import { of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { autoscalerTransformArrayToMap } from '../../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';

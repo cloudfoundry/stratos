@@ -1,10 +1,9 @@
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CodeBlockComponent } from './code-block.component';
-import { DOCUMENT } from '@angular/common';
-import { CommonModule } from '@angular/common';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
+import { CodeBlockComponent } from './code-block.component';
 
 describe('CodeBlockComponent', () => {
   let component: CodeBlockComponent;
@@ -17,6 +16,7 @@ describe('CodeBlockComponent', () => {
       ],
       imports: [
         CoreModule,
+        CoreTestingModule,
         createBasicStoreModule(),
       ]
     })

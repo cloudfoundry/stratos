@@ -1,19 +1,21 @@
+import { Inject, Optional } from '@angular/core';
 import { compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import { ValidateEntitiesStart } from '../../../store/src/actions/request.actions';
-import { AppState } from '../../../store/src/app-state';
-import {
-  RequestInfoState,
-  RequestSectionKeys,
-  TRequestTypeKeys,
-  UpdatingSection,
-} from '../../../store/src/reducers/api-request-reducer/types';
+import { GeneralEntityAppState } from '../../../store/src/app-state';
+import { ActionDispatcher } from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import { RequestInfoState, UpdatingSection } from '../../../store/src/reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from '../../../store/src/selectors/api.selectors';
 import { EntityInfo } from '../../../store/src/types/api.types';
-import { ICFAction, IRequestAction } from '../../../store/src/types/request.types';
+import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
+import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { EntityActionBuilderEntityConfig } from './entity-catalogue/entity-catalogue.types';
+
+export const ENTITY_INFO_HANDLER = '__ENTITY_INFO_HANDLER__';
+
+export type EntityInfoHandler = (action: EntityRequestAction, actionDispatcher: ActionDispatcher) => (entityInfo: EntityInfo) => void;
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   if (!entityRequestInfo) {
@@ -22,34 +24,41 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   return entityRequestInfo.fetching ||
     entityRequestInfo.error ||
     entityRequestInfo.deleting.busy ||
-    entityRequestInfo.deleting.deleted ||
-    entityRequestInfo.updating._root_.busy;
+    entityRequestInfo.deleting.deleted;
+  // TODO: RC test removal of updating._root_.busy
 }
+
+const dispatcherFactory = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => (updatingKey?: string) => {
+  if (updatingKey) {
+    store.dispatch({
+      ...action,
+      updatingKey
+    });
+  } else {
+    store.dispatch(action);
+  }
+};
 
 /**
  * Designed to be used in a service factory provider
  */
 export class EntityService<T = any> {
-
+  public action: EntityRequestAction;
   constructor(
-    private store: Store<AppState>,
+    store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
-    public action: IRequestAction,
-    public validateRelations = true,
-    public entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
+    actionOrConfig: EntityRequestAction | EntityActionBuilderEntityConfig,
+    @Optional() @Inject(ENTITY_INFO_HANDLER) entityInfoHandlerBuilder?: EntityInfoHandler
   ) {
-    this.actionDispatch = (updatingKey?: string) => {
-      if (updatingKey) {
-        action.updatingKey = updatingKey;
-      }
-      this.store.dispatch(action);
-    };
+    this.action = this.getAction(actionOrConfig);
+    const actionInfoHandler = entityInfoHandlerBuilder ? entityInfoHandlerBuilder(
+      this.action, (action) => store.dispatch(action)
+    ) : () => { };
+    this.actionDispatch = dispatcherFactory(store, this.action);
 
     this.updateEntity = () => {
       this.actionDispatch(this.refreshKey);
     };
-
-    let validated = false;
 
     this.updatingSection$ = entityMonitor.updatingSection$;
     this.isDeletingEntity$ = entityMonitor.isDeletingEntity$;
@@ -60,19 +69,7 @@ export class EntityService<T = any> {
     ).pipe(
       publishReplay(1),
       refCount(),
-      tap((entityInfo: EntityInfo) => {
-        if (!entityInfo || entityInfo.entity) {
-          if ((!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo))) {
-            return;
-          }
-          validated = true;
-          store.dispatch(new ValidateEntitiesStart(
-            action as ICFAction,
-            [entityInfo.entity.metadata.guid],
-            false
-          ));
-        }
-      })
+      tap(actionInfoHandler)
     );
 
     this.waitForEntity$ = this.entityObs$.pipe(
@@ -134,11 +131,31 @@ export class EntityService<T = any> {
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
-    return entity && !isEntityBlocked(entityRequestInfo);
+    const isBlocked = isEntityBlocked(entityRequestInfo);
+    return entity && !isBlocked;
   }
 
   private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {
     return !entityRequestInfo || (!entity && !isEntityBlocked(entityRequestInfo));
+  }
+
+  private getAction(dispatcherConfigOrAction: EntityActionBuilderEntityConfig | EntityRequestAction) {
+    const action = dispatcherConfigOrAction as EntityRequestAction;
+    if (action.type) {
+      return action;
+    } else {
+      const {
+        // TODO: Schema should be passed to the action builders #3846.
+        schemaKey,
+        entityGuid,
+        endpointGuid,
+        actionMetadata = {},
+        entityType,
+        endpointType
+      } = dispatcherConfigOrAction as EntityActionBuilderEntityConfig;
+      const actionBuilder = entityCatalogue.getEntity(endpointType, entityType).actionOrchestrator.getActionBuilder('get');
+      return actionBuilder(entityGuid, endpointGuid, actionMetadata);
+    }
   }
 
   /**
@@ -151,5 +168,4 @@ export class EntityService<T = any> {
       getEntityUpdateSections
     ));
   }
-
 }

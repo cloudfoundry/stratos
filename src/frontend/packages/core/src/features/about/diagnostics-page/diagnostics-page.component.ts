@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { SessionData } from '../../../../../store/src/types/auth.types';
 
@@ -35,7 +35,10 @@ export class DiagnosticsPageComponent implements OnInit {
   public gitBranchLink: string;
   public gitCommitLink: string;
 
-  constructor(private meta: Meta, private store: Store<AppState>) { }
+  constructor(
+    private meta: Meta,
+    private store: Store<GeneralEntityAppState>,
+  ) { }
 
   ngOnInit() {
 

@@ -4,7 +4,6 @@ go 1.12
 
 require (
 	bitbucket.org/liamstask/goose v0.0.0-20150115234039-8488cc47d90c
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces v0.0.0-00010101000000-000000000000
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/helm/monocular v1.4.0
 	github.com/helm/monocular/chartrepo v0.0.0-00010101000000-000000000000
@@ -20,7 +19,7 @@ require (
 )
 
 replace (
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces => ../../repository/interfaces
+	github.com/cloudfoundry-incubator/stratos/src/jetstream => ../..
 	github.com/helm/monocular/chartrepo => ./chart-repo
 	github.com/helm/monocular/chartsvc => ./chartsvc
 )

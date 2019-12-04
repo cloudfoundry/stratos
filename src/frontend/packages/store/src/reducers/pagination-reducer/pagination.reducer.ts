@@ -1,3 +1,6 @@
+import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
 import {
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,
@@ -8,10 +11,12 @@ import {
   CLEAR_PAGES,
   CLEAR_PAGINATION_OF_ENTITY,
   CLEAR_PAGINATION_OF_TYPE,
+  ClearPaginationOfType,
   CREATE_PAGINATION,
   REMOVE_PARAMS,
   RESET_PAGINATION,
   SET_CLIENT_FILTER,
+  SET_CLIENT_FILTER_KEY,
   SET_CLIENT_PAGE,
   SET_CLIENT_PAGE_SIZE,
   SET_INITIAL_PARAMS,
@@ -34,6 +39,7 @@ import { paginationMaxReached } from './pagination-reducer-max-reached';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { getDefaultPaginationEntityState, paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
+import { paginationSetClientFilterKey } from './pagination-reducer-set-client-filter-key';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
 import { paginationSetClientPageSize } from './pagination-reducer-set-client-page-size';
 import { paginationSetPage } from './pagination-reducer-set-page';
@@ -45,16 +51,9 @@ import { paginationPageBusy } from './pagination-reducer-update';
 import { paginationFailure } from './pagination-reducer.failure';
 import { getActionPaginationEntityKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
 
-// Initialized when all entity types have been registered
-export let defaultPaginationState = {};
-
-export function setDefaultPaginationState(state: any) {
-  defaultPaginationState = state;
-}
-
 const getPaginationUpdater = (types: [string, string, string]) => {
   const [requestType, successType, failureType] = types;
-  return (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState => {
+  return (state: PaginationEntityState = getDefaultPaginationEntityState(), action): PaginationEntityState => {
     switch (action.type) {
       case requestType:
         return paginationStart(state, action);
@@ -79,6 +78,8 @@ const getPaginationUpdater = (types: [string, string, string]) => {
         return paginationSetClientPage(state, action);
       case SET_CLIENT_FILTER:
         return paginationSetClientFilter(state, action);
+      case SET_CLIENT_FILTER_KEY:
+        return paginationSetClientFilterKey(state, action);
       case SET_PAGE_BUSY:
         return paginationPageBusy(state, action);
       default:
@@ -93,14 +94,17 @@ export function createPaginationReducer(types: [string, string, string]) {
 
 function paginationReducer(updatePagination) {
   return (state, action) => {
-    state = state || defaultPaginationState;
     return paginate(action, state, updatePagination);
   };
 }
 
-function paginate(action, state, updatePagination) {
+function paginate(action, state = {}, updatePagination) {
   if (action.type === ApiActionTypes.API_REQUEST_START) {
     return state;
+  }
+
+  if (action.type === InitCatalogueEntitiesAction.ACTION_TYPE) {
+    return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {}, state);
   }
 
   if (action.type === CREATE_PAGINATION) {
@@ -116,7 +120,8 @@ function paginate(action, state, updatePagination) {
   }
 
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
-    const clearEntityType = action.entityKey || 'application';
+    const clearAction = action as ClearPaginationOfType;
+    const clearEntityType = entityCatalogue.getEntityKey(clearAction.entityConfig.endpointType, clearAction.entityConfig.entityType);
     return paginationClearAllTypes(state, [clearEntityType], getDefaultPaginationEntityState());
   }
 
@@ -142,18 +147,27 @@ function isEndpointAction(action) {
     action.type === UNREGISTER_ENDPOINTS;
 }
 
+function logMissing(missing: string, allKeys: any) {
+  console.warn(
+    `Missing ${missing} in store`,
+    allKeys
+  );
+}
+
 function enterPaginationReducer(state: PaginationState, action, updatePagination) {
   const actionType = getActionType(action);
-  const key = getActionPaginationEntityKey(action);
+  const entityKey = getActionPaginationEntityKey(action);
   const paginationKey = getPaginationKeyFromAction(action);
-
-  if (actionType && key && paginationKey) {
+  if (actionType && entityKey && paginationKey) {
     const newState = { ...state };
-    const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);
-    if (state[key][paginationKey] === updatedPaginationState) {
+    if (!newState[entityKey]) {
+      logMissing(`entity type ''`, Object.keys(newState));
+    }
+    const updatedPaginationState = updatePagination(newState[entityKey][paginationKey], action, actionType);
+    if (state[entityKey][paginationKey] === updatedPaginationState) {
       return state;
     }
-    newState[key] = mergeState(newState[key], {
+    newState[entityKey] = mergeState(newState[entityKey], {
       [paginationKey]: updatedPaginationState
     });
     return newState;

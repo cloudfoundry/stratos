@@ -4,6 +4,7 @@ import { TableCellStatusDirective } from './table-cell-status.directive';
 import { listTableCells, TableCellComponent } from './table-cell/table-cell.component';
 import { TableRowComponent } from './table-row/table-row.component';
 import { TableComponent } from './table.component';
+import { Observable } from 'rxjs';
 
 export interface ICellAsyncValue {
   pathToObs: string;
@@ -18,7 +19,7 @@ export interface ICellDefinition<T> {
   // Dot separated path to get the value from the row
   valuePath?: string;
   // Takes president over valuePath
-  getValue?: (row: T, schemaKey?: string) => string;
+  getValue?: (row: T, schemaKey?: string) => string | Observable<string>;
   // Should the value of getLink be used in a href or routerLink
   externalLink?: boolean;
   // Automatically turns the cell into a link

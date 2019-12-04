@@ -125,7 +125,7 @@ describe('Application Wall Tests -', () => {
 
   function createPageSizeSelectId(): string {
     // The ctrl is hidden inside a mat-paginator, the id will change depending on other selects on page
-    return hasCfFilter ? 'mat-select-4' : 'mat-select-3';
+    return hasCfFilter ? 'mat-select-5' : 'mat-select-4';
   }
 
   function tearDown(orgName: string) {

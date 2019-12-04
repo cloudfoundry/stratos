@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
+import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../core/src/environments/environment';
 import { AppState } from '../../../store/src/app-state';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
@@ -13,7 +14,7 @@ import {
   resultPerPageParamDefault,
 } from '../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
-import { APIResource, NormalizedResponse, PaginationResponse } from '../../../store/src/types/api.types';
+import { APIResource, NormalizedResponse } from '../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../store/src/types/pagination.types';
 import {
   StartRequestAction,
@@ -35,7 +36,6 @@ import {
   AutoscalerPaginationParams,
   AutoscalerQuery,
   CREATE_APP_AUTOSCALER_POLICY,
-  CreateAppAutoscalerPolicyAction,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
@@ -47,6 +47,7 @@ import {
   GetAppAutoscalerScalingHistoryAction,
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
+  CreateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
 import {
   AppAutoscalerEvent,
@@ -55,7 +56,9 @@ import {
   AppAutoscalerMetricDataLocal,
   AppAutoscalerPolicyLocal,
   AppScalingTrigger,
+  AppAutoscalerPolicy,
 } from './app-autoscaler.types';
+import { HttpClient } from '@angular/common/http';
 
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
@@ -67,7 +70,7 @@ function createAutoscalerRequestMessage(requestType: string, error: { status: st
 @Injectable()
 export class AutoscalerEffects {
   constructor(
-    private http: Http,
+    private http: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>,
   ) { }
@@ -78,19 +81,17 @@ export class AutoscalerEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType));
-      const options = new RequestOptions();
-      options.url = `${commonPrefix}/info`;
-      options.method = 'get';
-      options.headers = this.addHeaders(action.endpointGuid);
       return this.http
-        .request(new Request(options)).pipe(
-          mergeMap(response => {
-            const autoscalerInfo = response.json();
+        .get(`${commonPrefix}/info`, {
+          headers: this.addHeaders(action.endpointGuid)
+        }).pipe(
+          mergeMap(autoscalerInfo => {
+            const entityKey = entityCatalogue.getEntityKey(action);
             const mappedData = {
-              entities: { [action.entityKey]: {} },
+              entities: { [entityKey]: {} },
               result: []
             } as NormalizedResponse;
-            this.transformData(action.entityKey, mappedData, action.endpointGuid, autoscalerInfo);
+            this.transformData(entityKey, mappedData, action.endpointGuid, autoscalerInfo);
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
@@ -106,19 +107,17 @@ export class AutoscalerEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType));
-      const options = new RequestOptions();
-      options.url = `${commonPrefix}/health`;
-      options.method = 'get';
-      options.headers = this.addHeaders(action.endpointGuid);
       return this.http
-        .request(new Request(options)).pipe(
-          mergeMap(response => {
-            const healthInfo = response.json();
+        .get(`${commonPrefix}/health`, {
+          headers: this.addHeaders(action.endpointGuid)
+        }).pipe(
+          mergeMap(healthInfo => {
+            const entity = entityCatalogue.getEntity(action);
             const mappedData = {
-              entities: { [action.entityKey]: {} },
+              entities: { [entity.entityKey]: {} },
               result: []
             } as NormalizedResponse;
-            this.transformData(action.entityKey, mappedData, action.endpointGuid, healthInfo);
+            this.transformData(entity.entityKey, mappedData, action.endpointGuid, healthInfo);
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
@@ -136,7 +135,29 @@ export class AutoscalerEffects {
   @Effect()
   updateAppAutoscalerPolicy$ = this.actions$.pipe(
     ofType<UpdateAppAutoscalerPolicyAction>(UPDATE_APP_AUTOSCALER_POLICY),
-    mergeMap(action => this.createUpdatePolicy(action, 'update')));
+    mergeMap(action => {
+      const actionType = 'update';
+      this.store.dispatch(new StartRequestAction(action, actionType));
+      return this.http
+        .put<AppAutoscalerPolicy>(`${commonPrefix}/apps/${action.guid}/policy`, {
+          headers: this.addHeaders(action.endpointGuid)
+        }).pipe(
+          mergeMap(response => {
+            const policyInfo = autoscalerTransformArrayToMap(response);
+            const entity = entityCatalogue.getEntity(action);
+            const mappedData = {
+              entities: { [entity.entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
+            return [
+              new WrapperRequestActionSuccess(mappedData, action, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), action, actionType)
+          ]));
+    }));
 
   @Effect()
   getAppAutoscalerPolicy$ = this.actions$.pipe(
@@ -150,18 +171,17 @@ export class AutoscalerEffects {
     mergeMap(action => {
       const actionType = 'delete';
       this.store.dispatch(new StartRequestAction(action, actionType));
-      const options = new RequestOptions();
-      options.url = `${commonPrefix}/apps/${action.guid}/policy`;
-      options.method = 'delete';
-      options.headers = this.addHeaders(action.endpointGuid);
       return this.http
-        .request(new Request(options)).pipe(
+        .get(`${commonPrefix}/apps/${action.guid}/policy`, {
+          headers: this.addHeaders(action.endpointGuid)
+        }).pipe(
           mergeMap(response => {
+            const entity = entityCatalogue.getEntity(action);
             const mappedData = {
-              entities: { [action.entityKey]: {} },
+              entities: { [entity.entityKey]: {} },
               result: []
             } as NormalizedResponse;
-            this.transformData(action.entityKey, mappedData, action.guid, { enabled: false });
+            this.transformData(entity.entityKey, mappedData, action.guid, { enabled: false });
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
@@ -185,13 +205,10 @@ export class AutoscalerEffects {
       const actionType = 'fetch';
       const paginatedAction = action as PaginatedAction;
       this.store.dispatch(new StartRequestAction(action, actionType));
-      const options = new RequestOptions();
-      options.url = `${commonPrefix}/apps/${action.guid}/event`;
-      options.method = 'get';
-      options.headers = this.addHeaders(action.endpointGuid);
+      const entity = entityCatalogue.getEntity(action);
       // Set params from store
       const paginationState = selectPaginationState(
-        action.entityKey,
+        entity.entityKey,
         paginatedAction.paginationKey,
       )(state);
       const paginationParams = this.getPaginationParams(paginationState);
@@ -199,39 +216,29 @@ export class AutoscalerEffects {
         ? paginationState.currentPage
         : 1;
       const { metricConfig, ...trimmedPaginationParams } = paginationParams;
-      options.params = this.buildParams(action.initialParams, trimmedPaginationParams, action.params);
-      if (!options.params.has(resultPerPageParam)) {
-        options.params.set(
-          resultPerPageParam,
-          resultPerPageParamDefault.toString(),
-        );
+      const params = this.buildParams(action.initialParams, trimmedPaginationParams, action.params);
+      if (!params[resultPerPageParam]) {
+        params[resultPerPageParam] = resultPerPageParamDefault.toString();
       }
-      if (options.params.has('order-direction-field')) {
-        options.params.delete('order-direction-field');
-      }
-      if (options.params.has('order-direction')) {
-        options.params.set('order', options.params.get('order-direction'));
-        options.params.delete('order-direction');
-      }
-      if (metricConfig && metricConfig.params) {
-        options.params.set('start-time', metricConfig.params.start + '000000000');
-        options.params.set('end-time', metricConfig.params.end + '000000000');
-      } else if (action.query && action.query.params) {
-        options.params.set('start-time', action.query.params.start + '000000000');
-        options.params.set('end-time', action.query.params.end + '000000000');
-      }
+      const {
+        ['order-direction-field']: removed,
+        ...cleanParams
+      } = params;
+
       return this.http
-        .request(new Request(options)).pipe(
-          mergeMap(response => {
-            const histories = response.json();
+        .get<PaginationResponse<AppAutoscalerEvent>>(`${commonPrefix}/apps/${action.guid}/event`, {
+          headers: this.addHeaders(action.endpointGuid),
+          params: cleanParams
+        }).pipe(
+          mergeMap(histories => {
             const mappedData = {
-              entities: { [action.entityKey]: {} },
+              entities: { [entity.entityKey]: {} },
               result: []
             } as NormalizedResponse;
             if (action.normalFormat) {
-              this.transformData(action.entityKey, mappedData, action.guid, histories);
+              this.transformData(entity.entityKey, mappedData, action.guid, histories);
             } else {
-              this.transformEventData(action.entityKey, mappedData, action.guid, histories);
+              this.transformEventData(entity.entityKey, mappedData, action.guid, histories);
             }
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType, histories.total_results, histories.total_pages)
@@ -248,25 +255,21 @@ export class AutoscalerEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType));
-      const options = new RequestOptions();
-      options.url = `${commonPrefix}/${action.url}`;
-      options.method = 'get';
-      options.headers = this.addHeaders(action.endpointGuid);
-      options.params = this.buildParams(action.initialParams, action.params);
-      if (options.params.has('order-direction')) {
-        options.params.set('order', options.params.get('order-direction'));
-        options.params.delete('order-direction');
-      }
+      const params = this.buildParams(action.initialParams, action.params);
+      const entity = entityCatalogue.getEntity(action);
       return this.http
-        .request(new Request(options)).pipe(
+        .get<PaginationResponse<AppAutoscalerMetricData>>(`${commonPrefix}/${action.url}`, {
+          headers: this.addHeaders(action.endpointGuid),
+          params
+        }).pipe(
           mergeMap(response => {
-            const data: PaginationResponse<AppAutoscalerMetricData> = response.json();
+            const data = response;
             const mappedData = {
-              entities: { [action.entityKey]: {} },
+              entities: { [entity.entityKey]: {} },
               result: []
             } as NormalizedResponse;
             this.addMetric(
-              action.entityKey, mappedData, action.guid, action.metricName, data, parseInt(action.initialParams['start-time'], 10),
+              entity.entityKey, mappedData, action.guid, action.metricName, data, parseInt(action.initialParams['start-time'], 10),
               parseInt(action.initialParams['end-time'], 10), action.skipFormat, action.trigger);
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
@@ -282,20 +285,19 @@ export class AutoscalerEffects {
     actionType: ApiRequestTypes = 'create'
   ): Observable<Action> {
     this.store.dispatch(new StartRequestAction(action, actionType));
-    const options = new RequestOptions();
-    options.url = `${commonPrefix}/apps/${action.guid}/policy`;
-    options.method = 'put';
-    options.headers = this.addHeaders(action.endpointGuid);
-    options.body = autoscalerTransformMapToArray(action.policy);
+    const entity = entityCatalogue.getEntity(action);
     return this.http
-      .request(new Request(options)).pipe(
+      .put<AppAutoscalerPolicy>(`${commonPrefix}/apps/${action.guid}/policy`, {
+        headers: this.addHeaders(action.endpointGuid),
+        body: autoscalerTransformMapToArray(action.policy)
+      }).pipe(
         mergeMap(response => {
-          const policyInfo = autoscalerTransformArrayToMap(response.json());
+          const policyInfo = autoscalerTransformArrayToMap(response);
           const mappedData = {
-            entities: { [action.entityKey]: {} },
+            entities: { [entity.entityKey]: {} },
             result: []
           } as NormalizedResponse;
-          this.transformData(action.entityKey, mappedData, action.guid, policyInfo);
+          this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
           return [
             new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
@@ -310,31 +312,31 @@ export class AutoscalerEffects {
     getPolicyTriggerAction?: GetAppAutoscalerPolicyTriggerAction): Observable<Action> {
     const actionType = 'fetch';
     this.store.dispatch(new StartRequestAction(getPolicyAction, actionType));
-    const options = new RequestOptions();
-    options.url = `${commonPrefix}/apps/${getPolicyAction.guid}/policy`;
-    options.method = 'get';
-    options.headers = this.addHeaders(getPolicyAction.endpointGuid);
     return this.http
-      .request(new Request(options)).pipe(
+      .get<AppAutoscalerPolicy>(`${commonPrefix}/apps/${getPolicyAction.guid}/policy`, {
+        headers: this.addHeaders(getPolicyAction.endpointGuid)
+      }).pipe(
         mergeMap(response => {
-          const policyInfo = autoscalerTransformArrayToMap(response.json());
+          const actionEntity = entityCatalogue.getEntity(getPolicyAction);
+          const policyInfo = autoscalerTransformArrayToMap(response);
           const mappedData = {
-            entities: { [getPolicyAction.entityKey]: {} },
+            entities: { [actionEntity.entityKey]: {} },
             result: []
           } as NormalizedResponse;
-          this.transformData(getPolicyAction.entityKey, mappedData, getPolicyAction.guid, policyInfo);
+          this.transformData(actionEntity.entityKey, mappedData, getPolicyAction.guid, policyInfo);
 
           const res = [
             new WrapperRequestActionSuccess(mappedData, getPolicyAction, actionType)
           ];
 
           if (getPolicyTriggerAction) {
+            const triggerEntity = entityCatalogue.getEntity(getPolicyTriggerAction);
             const mappedPolicyData = {
-              entities: { [getPolicyTriggerAction.entityKey]: {} },
+              entities: { [triggerEntity.entityKey]: {} },
               result: []
             } as NormalizedResponse;
             this.transformTriggerData(
-              getPolicyTriggerAction.entityKey,
+              triggerEntity.entityKey,
               mappedPolicyData,
               policyInfo,
               getPolicyTriggerAction.query,
@@ -432,40 +434,53 @@ export class AutoscalerEffects {
   }
 
   addHeaders(cfGuid: string) {
-    const headers = new Headers();
-    headers.set('x-cap-api-host', 'autoscaler');
-    headers.set('x-cap-passthrough', 'true');
-    headers.set('x-cap-cnsi-list', cfGuid);
-    return headers;
+    return {
+      'x-cap-api-host': 'autoscaler',
+      'x-cap-passthrough': 'true',
+      'x-cap-cnsi-list': cfGuid
+    };
   }
 
-  buildParams(initialParams: AutoscalerPaginationParams, params?: PaginationParam, paginationParams?: AutoscalerPaginationParams) {
-    const searchParams = new URLSearchParams();
-    if (initialParams) {
-      Object.keys(initialParams).forEach((key) => {
-        searchParams.set(key, initialParams[key]);
-      });
+  buildParams(initialParams: AutoscalerPaginationParams, params: PaginationParam = {}, paginationParams?: AutoscalerPaginationParams) {
+    const stringifiedParams = this.stringifyPagParams(params);
+    const stringifiedPagParams = this.stringifyPagParams(paginationParams);
+    const stringifiedInitialParams = this.stringifyPagParams(initialParams);
+
+    const {
+      ['order-direction']: order = null,
+      ...cleanParams
+    } = {
+      ...stringifiedInitialParams,
+      ...stringifiedParams,
+      ...(stringifiedPagParams || {}),
+    } as { [key: string]: string | string[] };
+    if (order) {
+      cleanParams.order = order;
     }
-    if (params) {
-      Object.keys(params).forEach((key) => {
-        searchParams.set(key, params[key]);
-      });
+    return cleanParams;
+  }
+
+  stringifyPagParams(params: PaginationParam) {
+    if (!params) {
+      return {};
     }
-    if (paginationParams) {
-      Object.keys(paginationParams).forEach((key) => {
-        searchParams.set(key, paginationParams[key]);
-      });
-    }
-    return searchParams;
+    return Object.keys(params).reduce((pagParams, key) => {
+      if (params.hasOwnProperty(key)) {
+        const value = params[key];
+        if (Array.isArray(value)) {
+          pagParams[key] = value;
+        } else {
+          pagParams[key] = String(value);
+        }
+      }
+      return pagParams;
+    }, {} as { [key: string]: string | string[] });
   }
 
   getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
     return paginationState
       ? {
         ...paginationState.params,
-        q: [
-          ...(paginationState.params.q || [])
-        ],
         page: paginationState.currentPage.toString(),
       }
       : {};

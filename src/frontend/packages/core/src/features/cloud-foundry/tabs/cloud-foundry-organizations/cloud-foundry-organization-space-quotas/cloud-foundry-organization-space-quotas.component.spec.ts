@@ -1,11 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TabNavService } from '../../../../../../tab-nav.service';
+import { CFBaseTestModules } from '../../../../../../../cloud-foundry/test-framework/cf-test-helper';
 import {
-  BaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '../../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
+import { TabNavService } from '../../../../../../tab-nav.service';
 import {
   CfSpaceQuotasListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-list-config.service';
@@ -19,7 +19,7 @@ describe('CloudFoundryOrganizationSpaceQuotasComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationSpaceQuotasComponent],
       providers: [CfSpaceQuotasListConfigService, generateTestCfEndpointServiceProvider(), TabNavService, DatePipe],
-      imports: [...BaseTestModules]
+      imports: [...CFBaseTestModules]
     })
       .compileComponents();
   }));

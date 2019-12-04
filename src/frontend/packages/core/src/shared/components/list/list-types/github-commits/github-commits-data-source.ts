@@ -1,18 +1,21 @@
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
-import { FetchCommits } from '../../../../../../../store/src/actions/deploy-applications.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { EntitySchema, gitCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GitCommit } from '../../../../../../../store/src/types/git.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { CFEntitySchema } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
+import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
+import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 
 
-export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommit>> {
-  store: Store<AppState>;
+
+export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
+  store: Store<CFAppState>;
 
   /**
    * Creates an instance of GithubCommitsDataSource.
@@ -20,14 +23,21 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommi
    * @param sha Branch name, tag, etc
    */
   constructor(
-    store: Store<AppState>,
-    listConfig: IListConfig<APIResource<GitCommit>>,
+    store: Store<CFAppState>,
+    listConfig: IListConfig<GitCommit>,
     scm: GitSCM,
     projectName: string,
     sha: string,
     commitSha?: string,
   ) {
-    const action = new FetchCommits(scm, projectName, sha);
+    const gitCommitEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
+    const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const fetchCommitAction = fetchCommitActionBuilder(sha, null, {
+      scm,
+      projectName,
+      commitId: sha
+    }) as PaginatedAction;
+    const action = fetchCommitAction;
     const paginationKey = action.paginationKey;
     const rowsState = observableOf(commitSha ? {
       [commitSha]: {
@@ -37,8 +47,8 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GitCommi
     super({
       store,
       action,
-      schema: new EntitySchema(gitCommitSchemaKey),
-      getRowUniqueId: object => object.entity.sha,
+      schema: new CFEntitySchema(gitCommitEntityType),
+      getRowUniqueId: (object: GitCommit) => object.sha,
       paginationKey,
       isLocal: true,
       transformEntities: [],

@@ -1,13 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KubernetesNodeConditionCardComponent } from './kubernetes-node-condition-card.component';
-import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
-import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { BaseKubeGuid } from '../../../../kubernetes-page.types';
-import { KubernetesNodeConditionComponent } from './kubernetes-node-condition/kubernetes-node-condition.component';
 import { KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
+import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
+import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
+import { KubernetesNodeConditionCardComponent } from './kubernetes-node-condition-card.component';
+import { KubernetesNodeConditionComponent } from './kubernetes-node-condition/kubernetes-node-condition.component';
 
-xdescribe('KubernetesNodeConditionCardComponent', () => {
+// TODO: RC xdescribed
+describe('KubernetesNodeConditionCardComponent', () => {
   let component: KubernetesNodeConditionCardComponent;
   let fixture: ComponentFixture<KubernetesNodeConditionCardComponent>;
 

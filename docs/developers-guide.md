@@ -26,7 +26,7 @@ using Visual Studio Code. If you feel comfortable with these and are happy with 
 ### Set up Dependencies
 
 * Set up a Stratos backend - The frontend cannot run without a backend. Both backend and frontend exist in this same repo.
-  * Don't need to make changes to the backend code? To set up a backend run through the [deploy section](https://github.com/cloudfoundry-incubator/stratos/blob/master/deploy/README.md),
+  * Don't need to make changes to the backend code? To set up a backend run through the [deploy section](https://github.com/cloudfoundry/stratos/blob/master/deploy/README.md),
     choose a deployment method and bring one up. These deployments will bring up the entire backend, including api service and database
     along with a V2 frontend.
   * Need to make changes to the backend code? Follow the below [Backend Development](#Backend-Development) set up guide
@@ -40,7 +40,7 @@ Configuration information can be found in two places
 * `./proxy.conf.js`
   * In new forks this is missing and needs to be created using `./proxy.conf.template.js` as a template.
   * Contains the address of the backend. Which will either be...
-     * If the backend is deployed via the instructions in the [deploy section](https://github.com/cloudfoundry-incubator/stratos/blob/master/deploy/README.md)
+     * If the backend is deployed via the instructions in the [deploy section](https://github.com/cloudfoundry/stratos/blob/master/deploy/README.md)
        the url will be the same address as the V1 console's frontend address. For instance `https://localhost` would translate to
         ```
         const PROXY_CONFIG = {
@@ -182,7 +182,11 @@ We use Go Modules for dependency management.
 You will need the following installed/available:
 
 * go 1.12 or later.
-* UAA instance - you will need a UAA running for authentication
+
+*For authentication, **either***
+
+* A UAA instance
+* A local user account 
 
 ### Building the back-end
 
@@ -213,6 +217,13 @@ or an overrides file.
 
 ##### Environment variable
 
+If you wish to use a local user account, ensure you have set the following environment variables:
+
+- `AUTH_ENDPOINT_TYPE=local`
+- `LOCAL_USER` - The username for the local user
+- `LOCAL_USER_PASSWORD` - The password for the local user
+- `LOCAL_USER_SCOPE=stratos.admin` - This gives the local user admin permissions. Currently other roles are not available.
+
 If you have a custom uaa, ensure you have set the following environment variables:
 
 - `UAA_ENDPOINT`- the URL of your UAA
@@ -231,7 +242,20 @@ To easily persist configuration settings copy `src/jetstream/default.config.prop
 configuration from this file in preference to the default config file, if it exists. You can also modify individual configuration settings
 by setting the corresponding environment variable.
 
-#### Configure via Stratos
+##### To configure a local user account via config file
+
+In `src/jetstream/config.properties` uncomment the following lines:
+
+```
+AUTH_ENDPOINT_TYPE=local
+LOCAL_USER=localuser
+LOCAL_USER_PASSWORD=localuserpass
+LOCAL_USER_SCOPE=stratos.admin
+```
+
+Load the Stratos UI and proceed to log in using the configured credentials.
+
+#### To configure UAA via Stratos
 
 1. Go through the `Config File` step above and comment out the `UAA_ENDPOINT` with a `#` in the new `config.properties` file.
 1. If any previous configuration attempt has been made reset your database as described above.

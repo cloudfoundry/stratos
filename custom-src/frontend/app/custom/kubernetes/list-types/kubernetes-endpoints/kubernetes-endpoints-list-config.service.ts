@@ -8,7 +8,9 @@ import { BaseEndpointsDataSource } from '../../../../shared/components/list/list
 import {
   EndpointCardComponent,
 } from '../../../../shared/components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
-import { endpointColumns } from '../../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
+import {
+  EndpointsListConfigService,
+} from '../../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { EntityMonitorFactory } from '../../../../shared/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../shared/monitors/internal-event-monitor.factory';
@@ -36,8 +38,9 @@ export class KubernetesEndpointsListConfigService implements IListConfig<Endpoin
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
+    endpointsListConfigService: EndpointsListConfigService
   ) {
-    this.columns = endpointColumns.filter(column => {
+    this.columns = endpointsListConfigService.columns.filter(column => {
       return column.columnId !== 'type';
     });
     this.dataSource = new KubernetesEndpointsDataSource(

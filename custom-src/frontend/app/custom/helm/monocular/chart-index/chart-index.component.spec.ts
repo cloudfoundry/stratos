@@ -1,4 +1,3 @@
-/* tslint:disable:no-unused-variable */
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -13,6 +12,7 @@ import { ConfigService } from '../shared/services/config.service';
 import { MenuService } from '../shared/services/menu.service';
 import { ChartIndexComponent } from './chart-index.component';
 
+/* tslint:disable:no-unused-variable */
 // import { HeaderBarComponent } from '../header-bar/header-bar.component';
 // import { MainHeaderComponent } from '../main-header/main-header.component';
 // import { SeoService } from '../shared/services/seo.service';

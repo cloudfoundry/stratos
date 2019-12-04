@@ -18,7 +18,6 @@ require (
 	github.com/cloudfoundry-community/go-cfenv v1.17.0
 	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular v0.0.0-00010101000000-000000000000
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/bosh-cli v5.4.0+incompatible // indirect
 	github.com/cloudfoundry/bosh-utils v0.0.0-20190206192830-9a0affed2bf1 // indirect
 	github.com/cloudfoundry/cli-plugin-repo v0.0.0-20190220174354-ecf721ef3813 // indirect
@@ -43,12 +42,16 @@ require (
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/kubeapps/common v0.0.0-20181107174310-61d8eb6f11b4
 	github.com/labstack/echo v3.3.10+incompatible
+	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/lib/pq v1.1.0 // indirect
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/mailru/easyjson v0.0.0-20190221075403-6243d8e04c3f // indirect
+	github.com/mattn/go-colorable v0.1.4 // indirect
+	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/mholt/archiver v3.1.1+incompatible
+	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/moby/moby v1.13.1 // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/nwmac/sqlitestore v0.0.0-20180824125213-7d2ab221fb3f
@@ -58,6 +61,7 @@ require (
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20190222223459-a17d461953aa
 	github.com/ulikunitz/xz v0.5.6 // indirect
+	github.com/valyala/fasttemplate v1.1.0 // indirect
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
@@ -67,8 +71,6 @@ require (
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 )
-
-replace github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces => ./repository/interfaces
 
 replace github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes => ./plugins/kubernetes
 

@@ -12,7 +12,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { SessionData } from '../../../../../store/src/types/auth.types';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
@@ -28,8 +28,8 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   versionNumber$: Observable<string>;
   userIsAdmin$: Observable<boolean>;
 
-  @ViewChild('aboutInfoContainer', { read: ViewContainerRef }) aboutInfoContainer;
-  @ViewChild('supportInfoContainer', { read: ViewContainerRef }) supportInfoContainer;
+  @ViewChild('aboutInfoContainer', { read: ViewContainerRef, static: true }) aboutInfoContainer;
+  @ViewChild('supportInfoContainer', { read: ViewContainerRef, static: true }) supportInfoContainer;
 
   aboutInfoComponentRef: ComponentRef<any>;
   componentRef: ComponentRef<any>;
@@ -37,7 +37,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   customizations: CustomizationsMetadata;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<GeneralEntityAppState>,
     private resolver: ComponentFactoryResolver,
     cs: CustomizationService
   ) {

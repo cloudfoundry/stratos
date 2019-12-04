@@ -8,7 +8,7 @@
   }
 
   &__option {
-    padding-bottom: 40px;
+    padding-bottom: 20px;
     mat-radio-button {
       &:first-of-type {
         padding-right: 12px;
@@ -25,10 +25,9 @@
     margin-bottom: 30px;
   }
   &__subtext {
-    font-size: 13px;
+    font-size: 15px;
     margin: 2px 0 0 24px;
     opacity: .5;
-    position: absolute;
   }
   &__checkbox {
     position: relative;

@@ -1,24 +1,25 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount } from 'rxjs/operators';
 
+import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
+import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
+import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
-import { ApplicationMonitorService } from '../../../../core/src/features/applications/application-monitor.service';
-import { ApplicationService } from '../../../../core/src/features/applications/application.service';
-import { getGuids } from '../../../../core/src/features/applications/application/application-base.component';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/app-state';
-import { applicationSchemaKey, entityFactory } from '../../../../store/src/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
@@ -38,11 +39,7 @@ import {
   AppAutoscalerScalingHistory,
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
-import {
-  appAutoscalerAppMetricSchemaKey,
-  appAutoscalerPolicySchemaKey,
-  appAutoscalerScalingHistorySchemaKey,
-} from '../../store/autoscaler.store.module';
+import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
 
 @StratosTab({
   type: StratosTabType.Application,
@@ -131,11 +128,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
-      appAutoscalerPolicySchemaKey,
-      entityFactory(appAutoscalerPolicySchemaKey),
       this.applicationService.appGuid,
-      new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid),
-      false
+      new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
     );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
       map(({ entity }) => entity ? entity.entity : null),
@@ -155,18 +149,15 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     );
 
     this.scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
-      createEntityRelationPaginationKey(applicationSchemaKey, this.applicationService.appGuid, 'latest'),
+      createEntityRelationPaginationKey(applicationEntityType, this.applicationService.appGuid, 'latest'),
       this.applicationService.appGuid,
       this.applicationService.cfGuid,
       true,
       this.paramsHistory
     );
     this.appAutoscalerScalingHistoryService = this.entityServiceFactory.create(
-      appAutoscalerScalingHistorySchemaKey,
-      entityFactory(appAutoscalerScalingHistorySchemaKey),
       this.applicationService.appGuid,
-      this.scalingHistoryAction,
-      false
+      this.scalingHistoryAction
     );
     this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(
       map(({ entity }) => entity && entity.entity),
@@ -203,7 +194,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        entityFactory(appAutoscalerAppMetricSchemaKey)
+        autoscalerEntityFactory(appAutoscalerAppMetricEntityType)
       )
     }, false).entities$;
   }
@@ -274,10 +265,11 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   detachPolicy(): Observable<ActionState> {
-    this.store.dispatch(
-      new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
-    );
-    return this.store.select(selectDeletionInfo(appAutoscalerPolicySchemaKey, this.applicationService.appGuid)).pipe(
+    const action = new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid);
+    this.store.dispatch(action);
+    const entityKey = entityCatalogue.getEntityKey(action);
+
+    return this.store.select(selectDeletionInfo(entityKey, this.applicationService.appGuid)).pipe(
       pairwise(),
       filter(([oldV, newV]) => oldV.busy && !newV.busy),
       map(([, newV]) => newV)

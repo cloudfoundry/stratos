@@ -3,14 +3,13 @@ import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { SafeResourceUrl } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { combineLatest, interval, Observable, Subscription } from 'rxjs';
-import { map, startWith, tap } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
-import { getEndpointType } from '../../../../features/endpoints/endpoint-helpers';
 import {
   IChartThresholds,
   ISimpleUsageChartData,
@@ -21,6 +20,7 @@ import { GetKubernetesNodes, GetKubernetesPods } from '../../store/kubernetes.ac
 import { KubernetesNode } from './../../../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
 import { KubernetesPod } from './../../store/kube.types';
 import { GetKubernetesApps } from './../../store/kubernetes.actions';
+
 interface IValueLabels {
   usedLabel?: string;
   remainingLabel?: string;
@@ -49,9 +49,13 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   };
   public endpointDetails$: Observable<IEndpointDetails> = this.kubeEndpointService.endpoint$.pipe(
     map(endpoint => {
-      const { imagePath, label } = getEndpointType(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
+      const endpointConfig = entityCatalogue.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
+      const { logoUrl, label } = endpointConfig.definition;
+      // const { imagePath, label } = entityCatalogue.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
+
+      // const { imagePath, label } = getEndpointType(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
       return {
-        imagePath,
+        imagePath: logoUrl,
         label,
         name: endpoint.entity.name,
       };
@@ -104,7 +108,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   private getPaginationObservable(action: PaginatedAction) {
     const paginationMonitor = this.paginationMonitorFactory.create(
       action.paginationKey,
-      entityFactory(action.entityKey)
+      action
     );
 
     this.ngZone.runOutsideAngular(() => {

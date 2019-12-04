@@ -1,3 +1,4 @@
+import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   LocalPaginationHelpers,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
@@ -5,14 +6,15 @@ import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 
 export function paginationMaxReached(state: PaginationState, action: UpdatePaginationMaxedState): PaginationState {
-  if (!state[action.entityKey] || !state[action.entityKey][action.paginationKey]) {
+  const entityKey = entityCatalogue.getEntityKey(action);
+  if (!state[entityKey] || !state[entityKey][action.paginationKey]) {
     return state;
   }
   const requestSection = LocalPaginationHelpers.getEntityPageRequest(
-    state[action.entityKey][action.paginationKey],
-    action.forcedEntityKey || action.entityKey
+    state[entityKey][action.paginationKey],
+    action.forcedEntityKey || entityKey
   );
-  const { maxedMode: oldMaxedMode } = state[action.entityKey][action.paginationKey];
+  const { maxedMode: oldMaxedMode } = state[entityKey][action.paginationKey];
   const { pageNumber, pageRequest } = requestSection;
   const { maxed: oldCurrentlyMaxed = false } = pageRequest;
   const newCurrentlyMaxed = action.allEntities >= action.max;
@@ -28,12 +30,12 @@ export function paginationMaxReached(state: PaginationState, action: UpdatePagin
   }
 
   const entityState: PaginationEntityTypeState = {
-    ...state[action.entityKey],
+    ...state[entityKey],
     [action.paginationKey]: {
-      ...state[action.entityKey][action.paginationKey],
+      ...state[entityKey][action.paginationKey],
       // currentlyMaxed: newCurrentlyMaxed,
       pageRequests: {
-        ...state[action.entityKey][action.paginationKey].pageRequests,
+        ...state[entityKey][action.paginationKey].pageRequests,
         [pageNumber]: {
           ...pageRequest,
           maxed: newCurrentlyMaxed
@@ -45,6 +47,6 @@ export function paginationMaxReached(state: PaginationState, action: UpdatePagin
   };
   return {
     ...state,
-    [action.entityKey]: entityState
+    [entityKey]: entityState
   };
 }

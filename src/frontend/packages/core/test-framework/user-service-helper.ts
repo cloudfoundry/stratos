@@ -1,13 +1,14 @@
+import { HttpBackend, HttpClient } from '@angular/common/http';
+import { HttpTestingController } from '@angular/common/http/testing';
 
-import { ConnectionBackend, Http } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
-import { CfUserService } from '../src/shared/data-services/cf-user.service';
+import { CfUserService } from '../../cloud-foundry/src/shared/data-services/cf-user.service';
+
 
 export const CfUserServiceTestProvider = [
   CfUserService,
   {
-    provide: ConnectionBackend,
-    useClass: MockBackend
+    provide: HttpBackend,
+    useClass: HttpTestingController
   },
-  Http
+  HttpClient
 ];

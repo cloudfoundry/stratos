@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../core/src/features/applications/application.service';
+import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
 @Component({

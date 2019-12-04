@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, asapScheduler, Observable, Subject, combineLatest } from 'rxjs';
-import { observeOn, map, startWith, withLatestFrom, publishReplay, refCount, tap, filter } from 'rxjs/operators';
+import { observeOn, map, startWith, publishReplay, refCount, tap, filter } from 'rxjs/operators';
 import { Portal } from '@angular/cdk/portal';
 import { Router, NavigationEnd } from '@angular/router';
-import { ISubHeaderTabs } from './src/shared/components/page-subheader/page-subheader.types';
+import { TabNavItem } from './tab-nav.types';
+import { IPageSideNavTab } from './src/features/dashboard/page-side-nav/page-side-nav.component';
 
 @Injectable()
 export class TabNavService {
-  private tabNavsSubject: BehaviorSubject<ISubHeaderTabs[]>;
-  public tabNavs$: Observable<ISubHeaderTabs[]>;
+  private tabNavsSubject: BehaviorSubject<IPageSideNavTab[]>;
+  public tabNavs$: Observable<IPageSideNavTab[]>;
 
   private tabHeaderSubject: BehaviorSubject<string>;
   public tabHeader$: Observable<string>;
@@ -19,7 +20,7 @@ export class TabNavService {
   private pageHeaderSubject: BehaviorSubject<Portal<any>>;
   public pageHeader$: Observable<Portal<any>>;
 
-  public setTabs(tabs: ISubHeaderTabs[]) {
+  public setTabs(tabs: IPageSideNavTab[]) {
     this.tabNavsSubject.next(tabs);
   }
 
@@ -58,7 +59,7 @@ export class TabNavService {
     );
   }
 
-  public getCurrentTabHeader = (tabs: ISubHeaderTabs[]) => {
+  public getCurrentTabHeader = (tabs: IPageSideNavTab[]) => {
     if (!tabs) {
       return null;
     }

@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./out-tsc/lib",
+    "outDir": "./out-tsc",
     "target": "es2015",
     "module": "es2015",
     "moduleResolution": "node",
@@ -23,6 +23,7 @@
     "strictMetadataEmit": true,
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true,
-    "enableResourceInlining": true
+    "enableResourceInlining": true,
+    "preserveSymlinks": true,
   }
 }
