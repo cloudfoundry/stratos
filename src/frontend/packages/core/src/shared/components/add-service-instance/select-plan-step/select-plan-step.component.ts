@@ -63,6 +63,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   subscription: Subscription;
   stepperForm: FormGroup;
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
+  displayNames: { [guid: string]: string } = {};
 
   constructor(
     private store: Store<AppState>,
@@ -98,6 +99,7 @@ export class SelectPlanStepComponent implements OnDestroy {
         }
       }),
       map(visiblePlans => visiblePlans.map(populateServicePlanExtraTyped)),
+      map(plans => plans.sort((a, b) => this.getDisplayName(a).localeCompare(this.getDisplayName(b)))),
       publishReplay(1),
       refCount(),
     );
@@ -105,8 +107,8 @@ export class SelectPlanStepComponent implements OnDestroy {
     this.selectedPlan$ = observableCombineLatest(
       this.stepperForm.statusChanges.pipe(startWith(true)),
       this.servicePlans$).pipe(
-        filter(([valid, servicePlans]) => !!servicePlans && servicePlans.length > 0),
-        map(([valid, servicePlans]) => {
+        filter(([, servicePlans]) => !!servicePlans && servicePlans.length > 0),
+        map(([, servicePlans]) => {
           return servicePlans.filter(s => s.metadata.guid === this.stepperForm.controls.servicePlans.value)[0];
         }),
         filter(selectedServicePlan => !!selectedServicePlan),
@@ -122,7 +124,12 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   }
 
-  getDisplayName = (selectedPlan: APIResource<IServicePlan>) => getServicePlanName(selectedPlan.entity);
+  getDisplayName = (selectedPlan: APIResource<IServicePlan>) => {
+    if (!this.displayNames[selectedPlan.metadata.guid]) {
+      this.displayNames[selectedPlan.metadata.guid] = getServicePlanName(selectedPlan.entity);
+    }
+    return this.displayNames[selectedPlan.metadata.guid];
+  }
 
   onEnter = () => {
     this.subscription = this.servicePlans$.pipe(
