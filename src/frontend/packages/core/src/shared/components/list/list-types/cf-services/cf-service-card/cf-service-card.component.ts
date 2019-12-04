@@ -21,7 +21,8 @@ export interface ServiceTag {
 @Component({
   selector: 'app-cf-service-card',
   templateUrl: './cf-service-card.component.html',
-  styleUrls: ['./cf-service-card.component.scss']
+  styleUrls: ['./cf-service-card.component.scss'],
+  providers: [EntityServiceFactory]
 })
 export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   serviceEntity: APIResource<IService>;
