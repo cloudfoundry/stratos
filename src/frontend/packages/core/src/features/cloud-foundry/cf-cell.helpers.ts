@@ -15,6 +15,7 @@ import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monit
 import { MetricQueryType } from '../../shared/services/metrics-range-selector.types';
 import { endpointHasMetricsByAvailable } from '../endpoints/endpoint-helpers';
 
+
 export class CfCellHelper {
 
   constructor(
