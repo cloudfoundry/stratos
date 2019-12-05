@@ -56,7 +56,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   @Output() authType = new EventEmitter<EndpointAuthTypeConfig>();
 
   // Component reference for the dynamically created auth form
-  @ViewChild('authForm', { read: ViewContainerRef })
+  @ViewChild('authForm', { read: ViewContainerRef, static: true })
   public container: ViewContainerRef;
 
   public endpointForm: FormGroup;

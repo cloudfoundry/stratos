@@ -11,8 +11,7 @@ import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-
 import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
 import { PaginationFlattenerConfig } from '../helpers/paginated-request-helpers';
-import { PaginatedAction } from '../types/pagination.types';
-import { buildRequestEntityPipe } from './entity-request-base-handlers/build-entity-request.pipe';
+import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import {
   handleJetstreamResponsePipeFactory,
   handleNonJetstreamResponsePipeFactory
@@ -27,8 +26,9 @@ import {
 } from './entity-request-pipeline.types';
 import { getPaginationParamsPipe } from './pagination-request-base-handlers/get-params.pipe';
 import { PaginationPageIterator } from './pagination-request-base-handlers/pagination-iterator.pipe';
-import { mergeHttpParams, singleRequestToPaged, isJetstreamRequest } from './pipeline-helpers';
+import { singleRequestToPaged, isJetstreamRequest } from './pipeline-helpers';
 import { PipelineHttpClient } from './pipline-http-client.service';
+import { selectPaginationState } from '../selectors/pagination.selectors';
 
 function getRequestObjectObservable(request: HttpRequest<any> | Observable<HttpRequest<any>>): Observable<HttpRequest<any>> {
   return isObservable(request) ? request : of(request);
@@ -37,6 +37,13 @@ function getRequestObjectObservable(request: HttpRequest<any> | Observable<HttpR
 function getPrePaginatedRequestFunction(catalogueEntity: StratosBaseCatalogueEntity) {
   const definition = catalogueEntity.definition as IStratosEntityDefinition;
   return definition.prePaginationRequest || definition.endpoint.globalPrePaginationRequest || null;
+}
+
+function getCompletePaginationAction(action: PaginatedAction, state: PaginationEntityState) {
+  return state && state.currentPage ? {
+    ...action,
+    pageNumber: state.currentPage
+  } : action;
 }
 
 function getRequestObservable(
@@ -75,22 +82,30 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   const flattenerConfig = entity.definition.paginationConfig ?
     entity.definition.paginationConfig :
     entity.definition.endpoint ? entity.definition.endpoint.paginationConfig : null;
-  const paramsFromStore = getPaginationParamsPipe(action, catalogueEntity, appState);
-  const requestFromAction = buildRequestEntityPipe(requestType, action.options);
-  const allParams = mergeHttpParams(paramsFromStore, requestFromAction.params);
+
+  // Get pagination state from the store
+  const paginationState = selectPaginationState(
+    catalogueEntity.entityKey,
+    action.paginationKey,
+  )(appState);
+
+  const paramsFromStore = getPaginationParamsPipe(action, paginationState);
+
+  const completePaginationAction = getCompletePaginationAction(action, paginationState);
+  const requestFromAction = completePaginationAction.options;
   const requestFromStore = requestFromAction.clone({
-    params: allParams
+    params: paramsFromStore
   });
   const request = prePaginatedRequestFunction ?
-    prePaginatedRequestFunction(requestFromStore, action, catalogueEntity, appState) :
+    prePaginatedRequestFunction(requestFromStore, completePaginationAction, catalogueEntity, appState) :
     requestFromStore;
 
   const handleMultiEndpointsPipe = isJetstreamRequest(entity.definition) ?
     handleJetstreamResponsePipeFactory(
-      action.options.url,
+      completePaginationAction.options.url,
       flattenerConfig
     ) : handleNonJetstreamResponsePipeFactory(
-      action.options.url,
+      completePaginationAction.options.url,
       entity.definition.nonJetstreamRequestHandler,
       flattenerConfig
     );
@@ -102,10 +117,10 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
     first(),
     switchMap(requestObject => {
       const pageIterator = flattenerConfig ?
-        new PaginationPageIterator(httpClient, requestObject, action, actionDispatcher, flattenerConfig) : null;
+        new PaginationPageIterator(httpClient, requestObject, completePaginationAction, actionDispatcher, flattenerConfig) : null;
       return getRequestObservable(
         httpClient,
-        action,
+        completePaginationAction,
         requestObject,
         pageIterator
       ).pipe(
@@ -113,7 +128,7 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
         map(handleMultiEndpointsPipe),
         // Convert { { errors: [], successes: [] } } to { response: NoramlisedResponse, success: boolean }
         map(multiEndpointResponses => mapMultiEndpointResponses(
-          action,
+          completePaginationAction,
           catalogueEntity,
           requestType,
           multiEndpointResponses,

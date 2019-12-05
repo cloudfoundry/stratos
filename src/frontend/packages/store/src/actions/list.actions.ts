@@ -1,4 +1,4 @@
-import { SortDirection } from '@angular/material';
+import { SortDirection } from '@angular/material/sort';
 import { Action } from '@ngrx/store';
 
 import { defaultClientPaginationPageSize } from '../reducers/pagination-reducer/pagination-reducer-reset-pagination';
@@ -20,6 +20,7 @@ export class ListFilter {
   items: {
     [key: string]: any;
   };
+  filterKey?: string;
 }
 
 export const ListStateActionTypes = {

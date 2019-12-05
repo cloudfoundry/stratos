@@ -1,5 +1,4 @@
 import { HttpRequest } from '@angular/common/http';
-import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
 import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
@@ -17,6 +16,7 @@ export interface PaginationClientFilter {
   items: {
     [key: string]: any;
   };
+  filterKey?: string;
 }
 
 export interface PaginationClientPagination {
@@ -71,7 +71,7 @@ export interface PaginatedAction extends BasePaginatedAction, EntityRequestActio
   flattenPaginationMax?: number;
   initialParams?: PaginationParam;
   pageNumber?: number;
-  options?: RequestOptions | HttpRequest<any>;
+  options?: HttpRequest<any>;
   skipValidation?: boolean;
   // Internal, used for local multi action lists
   __forcedPageNumber__?: number;

@@ -7,6 +7,6 @@ import { ChangeDetectionStrategy, Component, TemplateRef, ViewChild } from '@ang
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetaCardValueComponent {
-  @ViewChild(TemplateRef)
+  @ViewChild(TemplateRef, { static: true })
   content: TemplateRef<any>;
 }

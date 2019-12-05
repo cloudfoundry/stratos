@@ -1,5 +1,5 @@
 import { DataSource } from '@angular/cdk/table';
-import { SortDirection } from '@angular/material';
+import { SortDirection } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -454,7 +454,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     return this.pagination$.pipe(
       map(pag => ({
         string: this.isLocal ? pag.clientPagination.filter.string : this.getFilterFromParams(pag),
-        items: { ...pag.clientPagination.filter.items }
+        items: { ...pag.clientPagination.filter.items },
+        filterKey: pag.clientPagination.filter.filterKey,
       })),
       tag('list-filter')
     );

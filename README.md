@@ -75,3 +75,4 @@ Tested with Browserstack
 ## License
 
 The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE).
+

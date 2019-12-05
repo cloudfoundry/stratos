@@ -17,6 +17,7 @@ class VisibilityStatusConstant {
 export class PageVisible {
   private hidden: string;
   private visibilityState: string;
+  // private visibilityChanged: string;
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.defineBrowserSupport();
@@ -30,6 +31,20 @@ export class PageVisible {
     return VisibilityStatusConstant.HIDDEN === this.getVisibilityState() || this.isHidden();
   }
 
+  // nowVisible(): Observable<any> {
+  //   return this.getVisibility().pipe(
+  //     startWith(false),
+  //     pairwise(),
+  //     filter(([oldV, newV]) => oldV === false && newV === true)
+  //   );
+  // }
+
+  // getVisibility(): Observable<boolean> {
+  //   return fromEvent(document, this.visibilityChanged).pipe(
+  //     map(() => this.isPageVisible())
+  //   );
+  // }
+
   private isHidden(): boolean {
     return document[this.hidden];
   }
@@ -42,12 +57,15 @@ export class PageVisible {
     if (typeof document[HiddenKeyConstant.DEFAULT] !== 'undefined') { // Opera 12.10 and Firefox 18 and later support
       this.hidden = HiddenKeyConstant.DEFAULT;
       this.visibilityState = 'visibilityState';
+      // this.visibilityChanged = 'visibilitychange';
     } else if (typeof document[HiddenKeyConstant.MS] !== 'undefined') {
       this.hidden = HiddenKeyConstant.MS;
       this.visibilityState = 'msVisibilityState';
+      // this.visibilityChanged = 'msvisibilitychange';
     } else if (typeof document[HiddenKeyConstant.WEB_KIT] !== 'undefined') {
       this.hidden = HiddenKeyConstant.WEB_KIT;
       this.visibilityState = 'webkitVisibilityState';
+      // this.visibilityChanged = 'webkitvisibilitychange';
     }
   }
 }

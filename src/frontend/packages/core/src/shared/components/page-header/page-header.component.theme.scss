@@ -7,6 +7,7 @@
   $error: map-get($status-colors, danger);
   $warning: map-get($status-colors, warning);
   $info: lighten($primmary-color, 20%);
+  $subdued: map-get($app-theme, subdued-color);
   .page-header {
     &__warning-count {
       background-color: mat-color($primary);
@@ -17,6 +18,12 @@
     }
     &__menu-separator {
       background-color: mat-color($foreground, divider);
+    }
+    &__menu-inner {
+      color: mat-contrast($primary, 500);
+    }
+    &__history {
+      color: $subdued;
     }
     &__underflow {
       background-color: mat-color($primary);

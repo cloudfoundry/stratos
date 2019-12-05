@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { TabNavItem } from '../../../../tab-nav.types';
 
-import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 
 @Component({
   selector: 'app-nested-tabs',
@@ -10,7 +10,7 @@ import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 export class NestedTabsComponent implements OnInit {
 
   @Input()
-  tabs: ISubHeaderTabs[];
+  tabs: TabNavItem[];
   constructor() {
 
   }

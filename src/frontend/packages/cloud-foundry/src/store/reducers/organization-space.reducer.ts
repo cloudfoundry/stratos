@@ -41,7 +41,7 @@ function addSpaceToOrg(
   }
 
   const newSpaces = [
-    ...orgToModify.entity.spaces,
+    ...(orgToModify.entity.spaces || []),
     newSpace.metadata.guid
   ];
   const mergedOrg = applySpacesToOrg(orgToModify, newSpaces);

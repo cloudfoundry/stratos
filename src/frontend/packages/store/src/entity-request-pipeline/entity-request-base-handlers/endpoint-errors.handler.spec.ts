@@ -10,7 +10,7 @@ import { JetstreamError } from './handle-multi-endpoints.pipe';
 
 
 describe('endpoint-error-handler', () => {
-  it('correct actions are fried', (done) => {
+  it('correct actions are fired', (done) => {
     const entityType = 'key';
 
     const entity = new StratosBaseCatalogueEntity({

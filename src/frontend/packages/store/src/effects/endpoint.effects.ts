@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -274,11 +274,8 @@ export class EndpointsEffect {
     errorMessageHandler?: (e: any) => string,
   ) {
     const endpointEntityKey = entityCatalogue.getEntityKey(apiAction);
-    const headers = new HttpHeaders();
-    headers.set('Content-Type', 'application/x-www-form-urlencoded');
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
     return this.http.post(url, body || {}, {
-      headers,
       params
     }).pipe(
       mergeMap((endpoint: EndpointModel) => {

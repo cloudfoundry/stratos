@@ -1,5 +1,3 @@
-import { RequestOptions, URLSearchParams } from '@angular/http';
-
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
@@ -14,6 +12,7 @@ import {
 } from '../cf-entity-types';
 import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
+import { HttpRequest } from '@angular/common/http';
 
 export class GetServicePlanServiceInstances extends CFStartAction implements PaginatedAction {
   constructor(
@@ -31,15 +30,15 @@ export class GetServicePlanServiceInstances extends CFStartAction implements Pag
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `service_plan/${servicePlanGuid}/service_instances`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `service_plan/${servicePlanGuid}/service_instances`
+    );
   }
   actions = getActions('Service Plan', 'Get service instances');
   entity = [cfEntityFactory(serviceInstancesEntityType)];
   entityType = serviceInstancesEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
