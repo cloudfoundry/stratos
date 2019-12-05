@@ -17,8 +17,7 @@ import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 
-export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
-export const UPDATE_SERVICE_INSTANCE_SUCCESS = getActions('Service Instances', 'Update Service Instance')[1];
+export const  DELETE_SERVICE_INSTANCE_ACTIONS = getActions('Service Instances', 'Delete Service Instance');
 export const getServiceInstanceRelations = [
   createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
   createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
@@ -86,8 +85,9 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
     this.options.params.set('async', 'false');
     this.options.params.set('recursive', 'true');
     this.options.headers = new Headers();
+    this.options.headers.set('x-cap-long-running', 'true');
   }
-  actions = getActions('Service Instances', 'Delete Service Instance');
+  actions = DELETE_SERVICE_INSTANCE_ACTIONS;
   entity = [entityFactory(serviceInstancesSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;

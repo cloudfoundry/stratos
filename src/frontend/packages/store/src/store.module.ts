@@ -21,6 +21,7 @@ import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect'
 import { RequestEffect } from './effects/request.effects';
 import { RouteEffect } from './effects/route.effects';
 import { RouterEffect } from './effects/router.effects';
+import { ServiceInstanceEffects } from './effects/service-instance.effects';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { SnackBarEffects } from './effects/snackBar.effects';
 import { SystemEffects } from './effects/system.effects';
@@ -65,7 +66,8 @@ import { AppStoreExtensionsModule } from './store.extensions.module';
       RecursiveDeleteEffect,
       AppEffects,
       RouteEffect,
-      UserFavoritesEffect
+      UserFavoritesEffect,
+      ServiceInstanceEffects
     ])
   ]
 })

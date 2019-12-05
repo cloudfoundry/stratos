@@ -322,11 +322,12 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*in
 }
 
 func makeLongRunningTimeoutError() []byte {
+	description := "Long Running Operation still active"
 	var errorStatus = &PassthroughErrorStatus{
 		StatusCode: http.StatusAccepted,
-		Status:     "Long Running Operation still active",
+		Status:     description,
 	}
-	errorResponse := []byte(fmt.Sprint("{\"longRunningTimeout\": true}"))
+	errorResponse := []byte(fmt.Sprint("{\"longRunningTimeout\": true, \"description\": \"" + description + "\", \"error_code\": \"longRunningTimeout\"}"))
 	passthroughError := &PassthroughError{}
 	passthroughError.Error = errorStatus
 	passthroughError.ErrorResponse = (*json.RawMessage)(&errorResponse)
