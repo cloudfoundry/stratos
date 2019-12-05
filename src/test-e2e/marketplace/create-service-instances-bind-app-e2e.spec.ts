@@ -52,7 +52,7 @@ describe('Create Service Instance with binding', () => {
         .then(metaCardRows => {
           expect(metaCardRows[1].value).toBe(servicesSecrets.publicService.name);
           expect(metaCardRows[2].value).toBe('shared');
-          expect(metaCardRows[3].value).toBe('1');
+          expect(metaCardRows[4].value).toBe('1');
         });
 
     });
