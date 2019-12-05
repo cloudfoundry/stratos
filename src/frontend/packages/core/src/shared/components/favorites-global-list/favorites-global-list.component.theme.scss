@@ -1,0 +1,8 @@
+@mixin favorites-global-list-theme($theme, $app-theme) {
+  $foreground: map-get($theme, foreground);
+  .favorite-list {
+    &__seperator {
+      border-bottom: 1px solid mat-color($foreground, divider);
+    }
+  }
+}

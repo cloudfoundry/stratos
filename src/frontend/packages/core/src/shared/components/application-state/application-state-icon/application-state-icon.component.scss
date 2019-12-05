@@ -1,0 +1,8 @@
+.app-state-icon {
+  display: flex;
+  flex-direction: row;
+  .mat-progress-spinner {
+    height: 25px;
+    width: 25px;
+  }
+}

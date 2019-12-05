@@ -1,0 +1,10 @@
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+  <h1>{{ podName }}</h1>
+  <div class="page-header-right">
+  </div>
+</app-page-header>
+
+<app-metrics-parent-range-selector>
+  <app-metrics-chart *ngFor="let config of instanceMetricConfigs" [metricsConfig]="config[0]" [chartConfig]="config[1]">
+  </app-metrics-chart>
+</app-metrics-parent-range-selector>

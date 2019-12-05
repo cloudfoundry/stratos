@@ -1,6 +1,0 @@
-{
-  "frontend": {
-    "root": "plugins/cf-app-push",
-    "base": "frontend"
-  }
-}

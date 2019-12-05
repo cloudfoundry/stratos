@@ -1,0 +1,6 @@
+<div *ngIf="notes$ | async as notes; else noNotes" class="helm-release-notes">
+  <div [innerHtml]="notes"></div>
+</div>
+<ng-template #noNotes>
+  <app-no-content-message [icon]="'subject'" [firstLine]="'There are no release notes'"></app-no-content-message>
+</ng-template>

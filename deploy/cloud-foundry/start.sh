@@ -2,7 +2,7 @@
 
 set -e
 
-echo "Starting Stratos UI"
+echo "Starting Stratos"
 
 CF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TOP_LEVEL=${CF_DIR}/../../
@@ -22,11 +22,11 @@ function handleGooseResult {
 # Only migrate on instance index 0
 if [ "$CF_INSTANCE_INDEX" -eq "0" ]; then
   echo "Attempting to migrate database"
-  ./stratos-dbmigrator -cf --path ${DB_CONF_DIR} up
+  ./jetstream -cf --path ${DB_CONF_DIR} up
   handleGooseResult
 else
   echo "Skipping DB migration => not index 0 ($CF_INSTANCE_INDEX)"  
 fi
 
 echo "Starting..."
-./portal-proxy
+./jetstream

@@ -1,0 +1,13 @@
+:host {
+  flex: 1;
+}
+
+.select-plan {
+  &__details {
+    max-width: 450px;
+
+    &__additional {
+      margin-block-start: 0;
+    }
+  }
+}

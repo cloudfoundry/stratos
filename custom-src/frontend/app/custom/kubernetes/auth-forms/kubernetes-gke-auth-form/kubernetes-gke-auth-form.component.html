@@ -1,0 +1,8 @@
+<div [formGroup]="formGroup" class="kube-gke-auth">
+  <div formGroupName="authValues" class="kube-gke-auth__form">
+    <span>Select an `Application Default Credentials' file:</span>
+    <app-file-input placeholder="gkeconfig" fileFormControlName="gkeconfig">
+    </app-file-input>
+    <input matInput formControlName="gkeconfig" hidden=true>
+  </div>
+</div>

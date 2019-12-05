@@ -1,0 +1,10 @@
+// Hyperlinks
+@mixin app-hyperlinks($theme, $app-theme) {
+  $primary: map-get($theme, primary);
+  a {
+    color: mat-color($primary);
+    &:hover {
+      color: mat-color($primary, 700);
+    }
+  }
+}

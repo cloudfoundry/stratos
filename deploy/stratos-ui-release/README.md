@@ -23,10 +23,10 @@ The rest of the instruction assume that a BOSH lite environment is being used to
 
     ```
     $ cd deploy/stratos-ui-release/src
-    $ ln -s ../../../ stratos-ui
+    $ ln -s ../../../ stratos
     ```
 
-4. Build the Stratos UI BOSH release from `deploy/stratos-ui/release`
+4. Build the Stratos UI BOSH release from `deploy/stratos-ui-release`
     ```
     $ bosh create-release
     ```
@@ -35,7 +35,7 @@ The rest of the instruction assume that a BOSH lite environment is being used to
 
 5. After a successful build, upload the release to your director.
     ```
-    $ bosh -e vbox upload-release -d stratos-ui
+    $ bosh -e vbox upload-release -d stratos
     ```
 
 6. Deploy the release
@@ -80,20 +80,24 @@ The rest of the instruction assume that a BOSH lite environment is being used to
     To deploy you deployment manifest execute the following.
 
     ```
-    $ bosh -e vbox -d stratos-ui deploy bosh-lite/deployment.yml
+    $ bosh -e vbox -d stratos deploy bosh-lite/deployment.yml
     ```
 
 7. List deployment
 
     List deployment to get the IP address of the frontend to access the Console. In the following example to access the Console the address is `https://10.0.16.4`.
+    If you are unable to reach the IP 10.0.16.4, a route may have to be setup.
+    ```
+     sudo ip route add   10.244.0.0/16 via 192.168.50.6 
+    ```
 
     ```
-    09:10 $ bosh -e vbox -d stratos-ui instances
+    09:10 $ bosh -e vbox -d stratos instances
     Using environment '192.168.50.6' as client 'admin'
 
     Task 22. Done
 
-    Deployment 'stratos-ui'
+    Deployment 'stratos'
 
     Instance                                       Process State  AZ  IPs
     backend/68580d76-a241-4de2-b246-82d0a184c9bb   running        -   10.0.16.103

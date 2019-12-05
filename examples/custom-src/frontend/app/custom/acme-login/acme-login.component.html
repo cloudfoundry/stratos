@@ -1,0 +1,33 @@
+<app-intro-screen class="acme-login login__busy" [ngClass]="{'acme-login__busy': busy$ | async }">
+  <mat-card class="login__card mat-elevation-z">
+    <app-stratos-title></app-stratos-title>
+    <div class="acme-login__body">
+      <div class="acme-login__form-outer" [ngClass]="{'acme-login-sso': ssoLogin}">
+        <form class="acme-login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
+          <mat-form-field *ngIf="!ssoLogin">
+            <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
+          </mat-form-field>
+          <mat-form-field *ngIf="!ssoLogin">
+            <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
+          </mat-form-field>
+          <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!ssoLogin && !loginForm.valid">Login</button>
+        </form>
+      </div>
+      <div class="acme-login__loading">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </div>
+    </div>
+  </mat-card>
+  <div class="acme-login-message" [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
+      {{ message }}
+  </div>
+  <div class="acme-login__footer">
+    <div class="acme-login__copyright">
+      <span *ngIf="config.copyright" [innerHTML]="config.copyright"></span>
+    </div>
+    <div class="acme-login__logo">
+      <img src="/core/assets/custom/acme_logo.png">
+    </div>
+  </div>
+</app-intro-screen>
+

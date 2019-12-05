@@ -4,7 +4,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: "{{ .Release.Name }}-encryption-key-volume"
   labels:
-    app:  "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "console-encryption-volume"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
   annotations:
   {{- if .Values.storageClass }}
     volume.beta.kubernetes.io/storage-class: {{ .Values.storageClass | quote }}
@@ -26,7 +30,11 @@ apiVersion: v1
 metadata:
   name: console-mariadb
   labels:
-    app:  "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "console-mariadb-volume"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
   annotations:
   {{- if .Values.mariadb.persistence.storageClass }}
     volume.beta.kubernetes.io/storage-class: {{ .Values.mariadb.persistence.storageClass | quote }}
@@ -50,7 +58,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: "{{ .Release.Name }}-upgrade-volume"
   labels:
-    app:  "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "console-upgrade-volume"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
   annotations:
   {{- if .Values.storageClass }}
     volume.beta.kubernetes.io/storage-class: {{ .Values.storageClass | quote }}

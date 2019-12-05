@@ -1,5 +1,13 @@
-FROM  {{GO_BUILD_BASE}}
+FROM {{GO_BUILD_BASE}}
 
-RUN cd / && wget https://nodejs.org/dist/v6.11.4/node-v6.11.4-linux-x64.tar.xz && \
-tar -xf node-v6.11.4-linux-x64.tar.xz
-ENV PATH $PATH:/node-v6.11.4-linux-x64/bin
+RUN useradd -ms /bin/bash stratos && \
+    mkdir -p /home/stratos && \
+    chown -R stratos /home/stratos && \
+    chgrp -R users /home/stratos
+
+RUN cd / && wget https://nodejs.org/dist/v8.11.2/node-v8.11.2-linux-x64.tar.xz && \
+    tar -xf node-v8.11.2-linux-x64.tar.xz
+ENV USER=stratos
+ENV PATH=$PATH:/node-v8.11.2-linux-x64/bin
+USER stratos
+WORKDIR /home/stratos

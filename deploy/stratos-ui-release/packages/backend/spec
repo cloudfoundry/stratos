@@ -5,7 +5,5 @@ dependencies:
 - golang
 
 files:
-- stratos-ui/{package.json,plugins.json,bower.json,gulpfile.js}
-- stratos-ui/{build,components}/**/*
-- stratos-ui/deploy/db/migrations/**/*.go
-- stratos-ui/deploy/db/sqlite_schema.sql
+- stratos/{package.json,package-lock.json,plugins.json,gulpfile.js}
+- stratos/{build,src}/**/*
