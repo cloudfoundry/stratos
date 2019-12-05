@@ -1,4 +1,4 @@
-IMAGE_REPO ?= quay.io/helmpack/chartsvc
+IMAGE_REPO ?= docker.io/kreinecke/suse-fdb-chartsvc
 IMAGE_TAG ?= latest
 
 docker-build:
