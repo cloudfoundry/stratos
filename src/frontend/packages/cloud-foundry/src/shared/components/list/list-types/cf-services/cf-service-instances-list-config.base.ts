@@ -13,6 +13,12 @@ import {
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
+  TableCellServiceLastOpComponent,
+} from '../../../../../../../core/src/shared/components/list/list-types/cf-spaces-service-instances/table-cell-service-last-op/table-cell-service-last-op.component';
+import {
+  TableCellServiceComponent,
+} from '../../../../../../../core/src/shared/components/list/list-types/cf-spaces-service-instances/table-cell-service/table-cell-service.component';
+import {
   defaultPaginationPageSizeOptionsTable,
   IListAction,
   IListConfig,
@@ -32,10 +38,6 @@ import {
 import {
   TableCellServiceInstanceTagsComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
-import {
-  TableCellServiceLastOpComponent,
-} from '../cf-spaces-service-instances/table-cell-service-last-op/table-cell-service-last-op.component';
-import { TableCellServiceComponent } from '../cf-spaces-service-instances/table-cell-service/table-cell-service.component';
 
 interface CanCache {
   [spaceGuid: string]: Observable<boolean>;

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-import { userProvidedServiceInstanceSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { TableCellCustom } from '../../../list.types';
@@ -22,6 +22,6 @@ export class TableCellServiceLastOpComponent extends TableCellCustom<APIResource
   }
 
   ngOnInit() {
-    this.isUserProvidedServiceInstance = this.entityKey === userProvidedServiceInstanceSchemaKey;
+    this.isUserProvidedServiceInstance = this.entityKey === userProvidedServiceInstanceEntityType;
   }
 }

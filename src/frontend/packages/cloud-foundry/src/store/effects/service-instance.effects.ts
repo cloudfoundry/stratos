@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
-import { LongRunningOperationsService } from '../../../core/src/shared/services/long-running-op.service';
-import { DELETE_SERVICE_INSTANCE_ACTIONS, GetServiceInstance } from '../actions/service-instances.actions';
-import { APISuccessOrFailedAction } from '../types/request.types';
+import { LongRunningOperationsService } from '../../../../core/src/shared/services/long-running-op.service';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { DELETE_SERVICE_INSTANCE_ACTIONS, GetServiceInstance } from '../../actions/service-instances.actions';
 
 
 @Injectable()

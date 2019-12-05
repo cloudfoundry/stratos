@@ -2,16 +2,16 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { GetServiceBroker } from '../../../../../../../../store/src/actions/service-broker.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 import {
-  entityFactory,
-  serviceBrokerSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../../../../../../../store/src/helpers/entity-factory';
+  serviceBrokerEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../../../../../cloud-foundry/src/cf-entity-types';
+import { getCfService } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceBroker, IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { getCfService } from '../../../../../../features/service-catalog/services-helper';
 import { TableCellCustom } from '../../../list.types';
 
 @Component({
@@ -35,7 +35,7 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
   }
 
   ngOnInit() {
-    this.isUserProvidedServiceInstance = this.entityKey === userProvidedServiceInstanceSchemaKey;
+    this.isUserProvidedServiceInstance = this.entityKey === userProvidedServiceInstanceEntityType;
 
     const service$ = getCfService(this.row.entity.service_guid, this.row.entity.cfGuid, this.entityServiceFactory).waitForEntity$.pipe(
       filter(s => !!s),
@@ -60,14 +60,12 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
       first(),
       switchMap(service => {
         const brokerGuid = service.entity.entity.service_broker_guid;
+        const serviceBrokerEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
+        const actionBuilder = serviceBrokerEntity.actionOrchestrator.getActionBuilder('get');
+        const getServiceBrokersAction = actionBuilder(brokerGuid, service.entity.entity.cfGuid);
         return this.entityServiceFactory.create<APIResource<IServiceBroker>>(
-          serviceBrokerSchemaKey,
-          entityFactory(serviceBrokerSchemaKey),
           brokerGuid,
-          new GetServiceBroker(
-            brokerGuid,
-            service.entity.entity.cfGuid
-          )
+          getServiceBrokersAction
         ).waitForEntity$.pipe(
           map(a => a.entity),
           filter(res => !!res),
