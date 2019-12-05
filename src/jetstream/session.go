@@ -16,7 +16,6 @@ import (
 
 const (
 
-
 	// XSRFTokenHeader - XSRF Token Header name
 	XSRFTokenHeader = "X-Xsrf-Token"
 	// XSRFTokenSessionName - XSRF Token Session name
@@ -32,12 +31,7 @@ const (
 	jetstreamSessionName              = "console-session"
 	jetStreamSessionContextKey        = "jetstream-session"
 	jetStreamSessionContextUpdatedKey = "jetstream-session-updated"
-
 )
-
-
-
-
 
 // SessionValueNotFound - Error returned when a requested key was not found in the session
 type SessionValueNotFound struct {
@@ -254,6 +248,11 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 	} else {
 
+		// Still need to extend the expires_on of the Session (set session will save session, in save we update `expires_on`)
+		if err = p.setSessionValues(c, nil); err != nil {
+			return err
+		}
+
 		err = p.handleSessionExpiryHeader(c)
 		if err != nil {
 			return err
@@ -272,6 +271,6 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 			return err
 		}
 	}
-	
+
 	return err
 }

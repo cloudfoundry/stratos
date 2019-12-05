@@ -15,6 +15,7 @@ import (
 var (
 	cellQueryWhiteList = []string{
 		"firehose_value_metric_rep_unhealthy_cell",
+		"firehose_value_metric_rep_garden_health_check_failed",
 		"firehose_value_metric_rep_capacity_remaining_containers",
 		"firehose_value_metric_rep_capacity_remaining_disk",
 		"firehose_value_metric_rep_capacity_remaining_memory",
@@ -205,6 +206,5 @@ func (m *MetricsSpecification) getCloudFoundryCellMetrics(c echo.Context) error 
 	}
 
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
-
 	return m.makePrometheusRequest(c, cnsiList, "")
 }
