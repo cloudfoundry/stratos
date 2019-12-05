@@ -47,10 +47,9 @@ tests:
       - equal:
           path: kind
           value: "Secret"
-      - equal:
+      - isNotEmpty:
           path: data.tls\.crt
-          value: ""
-      - equal:
+      - isNotEmpty:
           path: data.tls\.key
           value: ""
   - it: should create secret with specified values
@@ -147,6 +146,7 @@ tests:
       - equal:
           path: metadata.annotations
           value:
+            kubernetes.io/ingress.allow-http: "false"
             kubernetes.io/ingress.class: "nginx"
             nginx.ingress.kubernetes.io/secure-backends: "true"
             nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
@@ -171,6 +171,7 @@ tests:
       - equal:
           path: metadata.annotations
           value:
+            kubernetes.io/ingress.allow-http: "false"
             kubernetes.io/ingress.class: "nginx"
             nginx.ingress.kubernetes.io/secure-backends: "true"
             nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
@@ -196,6 +197,7 @@ tests:
           path: metadata.annotations
           value:
             test-annotation: "test"
+            kubernetes.io/ingress.allow-http: "false"
             kubernetes.io/ingress.class: "nginx"
             nginx.ingress.kubernetes.io/secure-backends: "true"
             nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"

@@ -106,6 +106,24 @@ tls.crt: {{ $cert.Cert | b64enc }}
 tls.key: {{ $cert.Key | b64enc }}
 {{- end -}}
 
+{{/*
+Generate self-signed certificate for ingress if needed
+*/}}
+{{- define "console.generateIngressCertificate" -}}
+{{- $altNames := list (printf "%s" .Values.console.service.ingress.host) (printf "%s.%s" (include "console.certName" .) .Release.Namespace ) ( printf "%s.%s.svc" (include "console.certName" .) .Release.Namespace ) -}}
+{{- $ca := genCA "stratos-ca" 365 -}}
+{{- $cert := genSignedCert ( include "console.certName" . ) nil $altNames 365 $ca -}}
+{{- if .Values.console.service.ingress.tls.crt }}
+  tls.crt: {{ .Values.console.service.ingress.tls.crt | b64enc | quote }}
+{{- else }}
+  tls.crt: {{ $cert.Cert | b64enc | quote }}
+{{- end -}}
+{{- if .Values.console.service.ingress.tls.key }}
+  tls.key: {{ .Values.console.service.ingress.tls.key | b64enc | quote }}
+{{- else }}
+  tls.key: {{ $cert.Key | b64enc | quote }}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Ingress Host from .Values.console.service
