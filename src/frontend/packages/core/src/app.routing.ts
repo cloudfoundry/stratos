@@ -67,14 +67,14 @@ const appRoutes: Routes = [
           }
         },
         children: [{
-          path: '',
-          loadChildren: () => import('./features/endpoints/endpoints.module').then(m => m.EndpointsModule),
-        },
-        {
           path: 'metrics',
           loadChildren: () => import('./features/metrics/metrics.module').then(m => m.MetricsModule),
+        },
+        {
+          path: '',
+          loadChildren: () => import('./features/endpoints/endpoints.module').then(m => m.EndpointsModule),
         }]
-      },
+      },    
       {
         path: 'marketplace',
         loadChildren: () => import('../../cloud-foundry/src/features/service-catalog/service-catalog.module')

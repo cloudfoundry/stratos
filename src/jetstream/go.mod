@@ -78,7 +78,7 @@ require (
 	golang.org/x/crypto v0.0.0-20191028145041-f83a4685e152
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
-	gopkg.in/yaml.v2 v2.2.4
+	gopkg.in/yaml.v2 v2.2.7
 	k8s.io/kubernetes v1.16.3 // indirect
 )
 

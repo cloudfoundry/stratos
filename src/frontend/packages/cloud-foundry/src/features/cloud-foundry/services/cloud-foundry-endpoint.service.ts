@@ -59,10 +59,8 @@ export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): n
   return 0;
 }
 
-
 @Injectable()
 export class CloudFoundryEndpointService {
-
   hasSSHAccess$: Observable<boolean>;
   totalMem$: Observable<number>;
   paginationSubscription: any;

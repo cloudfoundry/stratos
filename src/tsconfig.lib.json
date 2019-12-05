@@ -12,7 +12,10 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "types": [],
-    "lib": ["dom", "es2015"]
+    "lib": [
+      "dom",
+      "es2015"
+    ]
   },
   "angularCompilerOptions": {
     "annotateForClosureCompiler": true,
@@ -20,6 +23,7 @@
     "strictMetadataEmit": true,
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true,
-    "enableResourceInlining": true
+    "enableResourceInlining": true,
+    "preserveSymlinks": true,
   }
 }

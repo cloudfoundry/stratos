@@ -1,9 +1,9 @@
 @import '../../theme.scss';
 
 .list-filters {
-  width: 100%;
-  height: 100%;
   flex: 1;
+  height: 100%;
+  width: 100%;
 
   &_section {
     margin-bottom: 40px;
@@ -19,7 +19,7 @@
       opacity: 0.5;
       &.active {
         opacity: 1;
-        color: md-color($monocular-app-primary);
+        color: mat-color($monocular-app-primary);
       }
     }
   }

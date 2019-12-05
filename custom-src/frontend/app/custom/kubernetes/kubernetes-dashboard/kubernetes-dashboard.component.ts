@@ -32,7 +32,7 @@ import { KubernetesService } from '../services/kubernetes.service';
 export class KubernetesDashboardTabComponent implements OnInit {
 
   private pKubeDash: ElementRef;
-  @ViewChild('kubeDash', { read: ElementRef }) set kubeDash(kubeDash: ElementRef) {
+  @ViewChild('kubeDash', { read: ElementRef, static: true }) set kubeDash(kubeDash: ElementRef) {
     if (!this.pKubeDash) {
       this.pKubeDash = kubeDash;
       // Need to look at this process again. In tests this is never hit, leading to null references to kubeDash

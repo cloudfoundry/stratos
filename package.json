@@ -64,7 +64,6 @@
     "@ngrx/store": "^8.3.0",
     "@ngrx/store-devtools": "^8.3.0",
     "@swimlane/ngx-charts": "^12.0.1",
-    "@swimlane/ngx-graph": "^6.2.0",
     "@types/moment-timezone": "^0.5.12",
     "@types/marked": "^0.6.5",
     "angular2-virtual-scroll": "^0.4.16",

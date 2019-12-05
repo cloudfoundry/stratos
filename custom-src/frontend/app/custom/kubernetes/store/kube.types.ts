@@ -269,7 +269,7 @@ export interface PodSpec {
   tolerations?: Toleration[];
   hostNetwork?: boolean;
   initContainers: InitContainer[];
-  nodeSelector?: NodeSelector;
+  // nodeSelector?: NodeSelector;
 }
 export interface InitContainer {
   name: string;
