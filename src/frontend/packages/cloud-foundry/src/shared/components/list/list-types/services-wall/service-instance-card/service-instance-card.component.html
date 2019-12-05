@@ -13,19 +13,26 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Service</app-meta-card-key>
-    <app-meta-card-value>{{ getServiceName() }} </app-meta-card-value>
+    <app-meta-card-value><a [routerLink]="getServiceUrl()">{{ getServiceName() }}</a>
+    </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Service Plan</app-meta-card-key>
     <app-meta-card-value>{{ serviceInstanceEntity.entity.service_plan?.entity.name}} </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
+    <app-meta-card-key>Service Broker</app-meta-card-key>
+    <app-meta-card-value>{{(serviceBroker$ | async)?.entity.name }} </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
     <app-meta-card-key>Applications Attached</app-meta-card-key>
     <app-meta-card-value>{{ serviceInstanceEntity.entity.service_bindings?.length }} </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item>
-    <app-meta-card-key>Last Updated</app-meta-card-key>
-    <app-meta-card-value>{{ serviceInstanceEntity.entity.last_operation?.updated_at | date:'medium' }}
+  <app-meta-card-item *ngIf="serviceInstanceEntity.entity.last_operation as lo">
+    <app-meta-card-key>Last Operation</app-meta-card-key>
+    <app-meta-card-value>
+      <app-service-instance-last-op [serviceInstance]="serviceInstanceEntity" [alignRight]="true">
+      </app-service-instance-last-op>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
