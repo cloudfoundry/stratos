@@ -9,14 +9,16 @@
   top: 0;
   width: 100%;
 }
+
 .stratos-initial-load-spinner-logo {
   position: absolute;
   height: 60px;
 }
+
 .stratos-initial-load-spinner {
   animation: stratos-initial-load-animate 1s infinite linear;
   box-sizing: border-box;
-  border: 5px solid rgba(86, 107, 121,0.45);
+  border: 5px solid rgba(86, 107, 121, 0.45);
   border-radius: 50%;
   border-top-color: #00B2E2;
   display: inline-block;
@@ -29,6 +31,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(359deg);
   }
