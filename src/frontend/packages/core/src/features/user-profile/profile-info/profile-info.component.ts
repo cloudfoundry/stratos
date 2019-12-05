@@ -7,10 +7,11 @@ import { SetPollingEnabledAction, SetSessionTimeoutAction } from '../../../../..
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
+import { ThemeService } from '../../../core/theme.service';
+import { UserService } from '../../../core/user.service';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { UserProfileService } from '../user-profile.service';
-import { UserService } from '../../../core/user.service';
 
 @Component({
   selector: 'app-profile-info',
@@ -31,6 +32,7 @@ export class ProfileInfoComponent implements OnInit {
   userProfile$: Observable<UserProfileInfo>;
 
   primaryEmailAddress$: Observable<string>;
+  hasMultipleThemes: boolean;
 
   private sessionDialogConfig = new ConfirmationDialogConfig(
     'Disable session timeout',
@@ -60,6 +62,7 @@ export class ProfileInfoComponent implements OnInit {
     private store: Store<DashboardOnlyAppState>,
     private confirmDialog: ConfirmationDialogService,
     public userService: UserService,
+    public themeService: ThemeService
   ) {
     this.isError$ = userProfileService.isError$;
     this.userProfile$ = userProfileService.userProfile$;
@@ -67,6 +70,8 @@ export class ProfileInfoComponent implements OnInit {
     this.primaryEmailAddress$ = this.userProfile$.pipe(
       map((profile: UserProfileInfo) => userProfileService.getPrimaryEmailAddress(profile))
     );
+
+    this.hasMultipleThemes = themeService.getThemes().length > 1;
   }
 
   ngOnInit() {

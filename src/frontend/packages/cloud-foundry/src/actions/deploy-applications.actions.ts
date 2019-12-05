@@ -9,7 +9,7 @@ import { GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/de
 import { GitBranch, GitCommit } from '../store/types/git.types';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
-export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
+export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Project exists';
 export const PROJECT_DOESNT_EXIST = '[Deploy App] Project Doesn\'t exist';
 export const PROJECT_FETCH_FAILED = '[Deploy App] Project Fetch Failed';
 export const PROJECT_EXISTS = '[Deploy App] Project exists';

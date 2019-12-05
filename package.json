@@ -1,6 +1,6 @@
 {
   "name": "stratos",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "description": "Stratos Console",
   "main": "index.js",
   "scripts": {
@@ -92,7 +92,7 @@
     "@nrwl/angular": "8.5.2"
   },
   "engines": {
-    "node": "8.11.2"
+    "node": "12.13.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.803.7",

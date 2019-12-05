@@ -30,7 +30,7 @@ using Visual Studio Code. If you feel comfortable with these and are happy with 
     choose a deployment method and bring one up. These deployments will bring up the entire backend, including api service and database
     along with a V2 frontend.
   * Need to make changes to the backend code? Follow the below [Backend Development](#Backend-Development) set up guide
-* Install [NodeJs](https://nodejs.org) (minimum node version 8.11.3)
+* Install [NodeJs](https://nodejs.org) (minimum node version 12.13.0)
 * Install [Angular CLI](https://cli.angular.io/) - `npm install -g @angular/cli`
 
 ### Configuration

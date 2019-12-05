@@ -69,7 +69,7 @@ require (
 	google.golang.org/appengine v1.5.0 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.0.0-00010101000000-000000000000
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.7
 )
 
 replace github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes => ./plugins/kubernetes
