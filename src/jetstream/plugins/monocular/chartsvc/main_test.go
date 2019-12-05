@@ -23,10 +23,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	fdb "github.com/helm/monocular/cmd/chartsvc/foundationdb"
-	datastore "github.com/helm/monocular/cmd/chartsvc/foundationdb/datastore"
-	"github.com/helm/monocular/cmd/chartsvc/models"
-	"github.com/helm/monocular/cmd/chartsvc/utils"
+	fdb "github.com/helm/monocular/chartsvc/foundationdb"
+	datastore "github.com/helm/monocular/chartsvc/foundationdb/datastore"
+	"github.com/helm/monocular/chartsvc/models"
+	"github.com/helm/monocular/chartsvc/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/stretchr/testify/assert"

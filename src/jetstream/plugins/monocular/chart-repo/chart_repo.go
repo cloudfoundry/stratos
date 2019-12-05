@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package chartrepo
+package main
 
 import (
 	"os"
 
-	"github.com/helm/monocular/cmd/chart-repo/utils"
+	"github.com/helm/monocular/chartrepo/utils"
 
 	"github.com/spf13/cobra"
 )

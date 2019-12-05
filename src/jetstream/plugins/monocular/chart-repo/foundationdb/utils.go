@@ -29,8 +29,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/helm/monocular/cmd/chart-repo/common"
-	"github.com/helm/monocular/cmd/chart-repo/utils"
+	"github.com/helm/monocular/chartrepo/common"
+	"github.com/helm/monocular/chartrepo/utils"
 
 	"github.com/disintegration/imaging"
 	log "github.com/sirupsen/logrus"

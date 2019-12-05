@@ -26,9 +26,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/helm/monocular/cmd/chartsvc/foundationdb/datastore"
-	"github.com/helm/monocular/cmd/chartsvc/models"
-	"github.com/helm/monocular/cmd/chartsvc/utils"
+	"github.com/helm/monocular/chartsvc/foundationdb/datastore"
+	"github.com/helm/monocular/chartsvc/models"
+	"github.com/helm/monocular/chartsvc/utils"
 
 	"github.com/disintegration/imaging"
 	"github.com/stretchr/testify/assert"

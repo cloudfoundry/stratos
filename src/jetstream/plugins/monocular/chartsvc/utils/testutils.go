@@ -19,7 +19,8 @@ package utils
 import (
 	"bytes"
 	"image/color"
-	"github.com/helm/monocular/cmd/chartsvc/models"
+
+	"github.com/helm/monocular/chartsvc/models"
 
 	"github.com/disintegration/imaging"
 )

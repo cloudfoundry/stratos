@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package chartrepo
+package main
 
 import (
-	"github.com/helm/monocular/cmd/chart-repo/foundationdb"
+	"github.com/helm/monocular/chartrepo/foundationdb"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

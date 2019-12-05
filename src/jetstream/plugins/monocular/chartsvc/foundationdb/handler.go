@@ -24,9 +24,9 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/helm/monocular/cmd/chartsvc/foundationdb/datastore"
-	"github.com/helm/monocular/cmd/chartsvc/models"
-	"github.com/helm/monocular/cmd/chartsvc/utils"
+	"github.com/helm/monocular/chartsvc/foundationdb/datastore"
+	"github.com/helm/monocular/chartsvc/models"
+	"github.com/helm/monocular/chartsvc/utils"
 
 	"github.com/gorilla/mux"
 	"github.com/kubeapps/common/response"

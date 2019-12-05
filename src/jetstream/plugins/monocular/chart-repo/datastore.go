@@ -1,16 +1,18 @@
-package chartrepo
+package main
 
 import (
 	"bytes"
+
+	"github.com/helm/monocular/chartrepo/common"
 )
 
 type ChartRepoDatastore interface {
 	DeleteRepo(string) error
 
 	// ImportCharts will import all charts - must be for same repo - and remove and charts not in the imported set
-	ImportCharts([]Chart) error
+	ImportCharts([]common.Chart) error
 
-	StoreChartIcon(Chart, bytes.Buffer) error
+	StoreChartIcon(common.Chart, bytes.Buffer) error
 
-	StoreChartFiles(string, ChartFiles) error
+	StoreChartFiles(string, common.ChartFiles) error
 }

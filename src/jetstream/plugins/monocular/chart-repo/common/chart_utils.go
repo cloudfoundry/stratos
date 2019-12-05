@@ -26,7 +26,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"github.com/helm/monocular/cmd/chart-repo/utils"
+	"github.com/helm/monocular/chartrepo/utils"
 	"net/http"
 	"net/url"
 	"os"

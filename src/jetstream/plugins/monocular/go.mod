@@ -19,6 +19,7 @@ require (
 )
 
 replace (
+	github.com/cloudfoundry-incubator/stratos => ../../../..
 	github.com/cloudfoundry-incubator/stratos/src/jetstream => ../..
 	github.com/helm/monocular/chartrepo => ./chart-repo
 	github.com/helm/monocular/chartsvc => ./chartsvc

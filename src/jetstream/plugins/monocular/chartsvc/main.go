@@ -30,8 +30,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	fdb "github.com/helm/monocular/cmd/chartsvc/foundationdb"
-	fdbDatastore "github.com/helm/monocular/cmd/chartsvc/foundationdb/datastore"
+	fdb "github.com/helm/monocular/chartsvc/foundationdb"
+	fdbDatastore "github.com/helm/monocular/chartsvc/foundationdb/datastore"
 )
 
 const pathPrefix = "/v1"
