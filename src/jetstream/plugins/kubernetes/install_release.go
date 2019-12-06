@@ -111,8 +111,6 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 		return err
 	}
 
-	log.Infof("%+v", userSuppliedValues)
-
 	log.Warn("Installing.....")
 
 	install := action.NewInstall(config)
@@ -126,7 +124,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	// Generate Name ?
 	// Atomic?
 
-	release, err := install.Run(chart, nil)
+	release, err := install.Run(chart, userSuppliedValues)
 	if err != nil {
 		log.Error(err)
 		return fmt.Errorf("Could not install Helm Chart: %v+", err)
