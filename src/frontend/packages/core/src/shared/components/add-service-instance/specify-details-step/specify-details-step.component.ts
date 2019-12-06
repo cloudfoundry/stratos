@@ -49,7 +49,7 @@ import { APIResource, NormalizedResponse } from '../../../../../../store/src/typ
 import { CreateServiceInstanceState } from '../../../../../../store/src/types/create-service-instance.types';
 import { IServiceInstance, IServicePlan } from '../../../../core/cf-api-svc.types';
 import { pathGet, safeStringToObj } from '../../../../core/utils.service';
-import { LongRunningOperationsService } from '../../../services/long-running-op.service';
+import { LongRunningCfOperationsService } from '../../../services/long-running-cf-op.service';
 import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -119,7 +119,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private csiGuidsService: CsiGuidsService,
     public modeService: CsiModeService,
-    public longRunningOpService: LongRunningOperationsService
+    public longRunningOpService: LongRunningCfOperationsService
   ) {
     this.setupForms();
 
@@ -281,13 +281,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.setupValidate();
   }
 
-  private handleUpdateServiceResult(request: RequestInfoState): Observable<StepOnNextResult> {
+  private handleUpdateServiceResult(request: RequestInfoState, state: CreateServiceInstanceState): Observable<StepOnNextResult> {
     const updatingInfo = request.updating[UpdateServiceInstance.updateServiceInstance];
     if (!updatingInfo) {
       // This isn't an update
     } else if (this.longRunningOpService.isLongRunning(updatingInfo)) {
       // This request has taken too long for the browser/jetstream and is on going. Treat this as a success
-      this.longRunningOpService.handleLongRunningUpdateService();
+      this.longRunningOpService.handleLongRunningUpdateService(state.serviceInstanceGuid, state.cfGuid);
     } else if (updatingInfo.error) {
       // The request has errored, report this back
       return observableOf({ success: false, message: `Failed to update service instance: ${updatingInfo.message}` });
@@ -349,7 +349,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       first(),
       switchMap(([request, state]) => {
 
-        const handleEditServiceResult = this.handleUpdateServiceResult(request);
+        const handleEditServiceResult = this.handleUpdateServiceResult(request, state);
         if (handleEditServiceResult) {
           return handleEditServiceResult;
         }
