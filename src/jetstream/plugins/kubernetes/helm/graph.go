@@ -9,6 +9,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
+	appsv1beta1 "k8s.io/api/apps/v1beta1"
+	appsv1beta2 "k8s.io/api/apps/v1beta2"
 	extv1beta1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -75,12 +77,27 @@ func (r *HelmReleaseGraph) ParseManifest(release *HelmRelease) {
 			target := getShortResourceId(o.Kind, o.Name)
 			r.ParseResourceOwners(target, o.OwnerReferences)
 			node.Data.Status = mapDeploymentStatus(o.Status.Replicas, o.Status.ReadyReplicas, o.Status.AvailableReplicas, o.Status.UnavailableReplicas)
-			log.Warnf("Status %s => %s", o.Name, node.Data.Status)
+		case *appsv1beta1.Deployment:
+			target := getShortResourceId(o.Kind, o.Name)
+			r.ParseResourceOwners(target, o.OwnerReferences)
+			node.Data.Status = mapDeploymentStatus(o.Status.Replicas, o.Status.ReadyReplicas, o.Status.AvailableReplicas, o.Status.UnavailableReplicas)
+		case *appsv1beta2.Deployment:
+			target := getShortResourceId(o.Kind, o.Name)
+			r.ParseResourceOwners(target, o.OwnerReferences)
+			node.Data.Status = mapDeploymentStatus(o.Status.Replicas, o.Status.ReadyReplicas, o.Status.AvailableReplicas, o.Status.UnavailableReplicas)
 		case *extv1beta1.Deployment:
 			target := getShortResourceId(o.Kind, o.Name)
 			r.ParseResourceOwners(target, o.OwnerReferences)
 			node.Data.Status = mapDeploymentStatus(o.Status.Replicas, o.Status.ReadyReplicas, o.Status.AvailableReplicas, o.Status.UnavailableReplicas)
-			log.Warnf("Status %s => %s", o.Name, node.Data.Status)
+		case *appsv1.StatefulSet:
+			target := getShortResourceId(o.Kind, o.Name)
+			r.ParseResourceOwners(target, o.OwnerReferences)
+		case *appsv1beta2.StatefulSet:
+			target := getShortResourceId(o.Kind, o.Name)
+			r.ParseResourceOwners(target, o.OwnerReferences)
+		case *appsv1beta1.StatefulSet:
+			target := getShortResourceId(o.Kind, o.Name)
+			r.ParseResourceOwners(target, o.OwnerReferences)
 		case *appsv1.ReplicaSet:
 			target := getShortResourceId(o.Kind, o.Name)
 			r.ParseResourceOwners(target, o.OwnerReferences)
@@ -94,7 +111,7 @@ func (r *HelmReleaseGraph) ParseManifest(release *HelmRelease) {
 			target := getShortResourceId(item.Kind, o.Name)
 			r.ProcessService(target, item, o.Spec)
 		default:
-			log.Errorf("Unknown type: %s", reflect.TypeOf(o))
+			log.Errorf("Graph: Unknown type: %s", reflect.TypeOf(o))
 		}
 
 		// Add or replace the node in the map

@@ -167,6 +167,8 @@ func (r *HelmRelease) processDeployment(kres KubeResource) {
 		r.processPodSelector(kres, o.Spec.Selector)
 	case *appsv1beta2.StatefulSet:
 		r.processPodSelector(kres, o.Spec.Selector)
+	case *appsv1beta1.StatefulSet:
+		r.processPodSelector(kres, o.Spec.Selector)
 	case *appsv1.DaemonSet:
 		r.processPodSelector(kres, o.Spec.Selector)
 	default:
