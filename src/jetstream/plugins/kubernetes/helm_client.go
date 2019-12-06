@@ -13,7 +13,6 @@ import (
 	diskcached "k8s.io/client-go/discovery/cached/disk"
 	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
 	restclient "k8s.io/client-go/rest"
 
@@ -55,7 +54,7 @@ func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, nam
 		return nil, hc, errors.New("Helm: Can not get user token for endpoint")
 	}
 
-	kubeconfigcontents, err := c.GetKubeConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRecord)
+	kubeconfigcontents, err := c.GetKubeConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRecord, namespace)
 	if err != nil {
 		log.Errorf("Helm: Could not get kubeconfig for endpoint: %s", err)
 		return nil, hc, errors.New("Can not get Kubernetes config for specified endpoint")
@@ -105,27 +104,6 @@ type jetStreamRestClientGetter struct {
 	tempFolder   string
 }
 
-type jetstreamClientConfig struct {
-	clientConfig clientcmd.ClientConfig
-	namespace    string
-}
-
-func (f *jetstreamClientConfig) RawConfig() (clientcmdapi.Config, error) {
-	return f.clientConfig.RawConfig()
-}
-
-func (f *jetstreamClientConfig) ClientConfig() (*restclient.Config, error) {
-	return f.clientConfig.ClientConfig()
-}
-
-func (f *jetstreamClientConfig) Namespace() (string, bool, error) {
-	return f.namespace, false, nil
-}
-
-func (f *jetstreamClientConfig) ConfigAccess() clientcmd.ConfigAccess {
-	return f.ConfigAccess()
-}
-
 func newJetStreamRCGetter(kubeconfig []byte, tempFolder string, namespace string) *jetStreamRestClientGetter {
 
 	clientConfig, err := clientcmd.NewClientConfigFromBytes(kubeconfig)
@@ -133,17 +111,8 @@ func newJetStreamRCGetter(kubeconfig []byte, tempFolder string, namespace string
 		log.Error(err)
 	}
 
-	jsClientConfig := &jetstreamClientConfig{
-		clientConfig: clientConfig,
-		namespace:    namespace,
-	}
-
-	log.Warn("newJetStreamRCGetter")
-	ns, b, er := jsClientConfig.Namespace()
-	log.Warnf("%s %b %+v", ns, b, er)
-
 	f := &jetStreamRestClientGetter{
-		clientConfig: jsClientConfig,
+		clientConfig: clientConfig,
 		tempFolder:   tempFolder,
 	}
 	return f

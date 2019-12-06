@@ -47,7 +47,7 @@ func (c *KubernetesSpecification) GetConfigForEndpoint(masterURL string, token i
 
 }
 
-func (c *KubernetesSpecification) GetKubeConfigForEndpoint(masterURL string, token interfaces.TokenRecord) (string, error) {
+func (c *KubernetesSpecification) GetKubeConfigForEndpoint(masterURL string, token interfaces.TokenRecord, namespace string) (string, error) {
 
 	name := "config-0"
 	clusterName := "cluster-0"
@@ -83,6 +83,7 @@ contexts:
 - context:
 		cluster: kube
 		user: kube
+		%s
 	name: kube
 clusters:
 - cluster:
@@ -95,6 +96,11 @@ users:
 - name: kube
 	user:
 `
+
+	nsReplace := ""
+	if len(namespace) > 0 {
+		nsReplace = fmt.Sprintf("namespace: %s", namespace)
+	}
 
 	space := regexp.MustCompile(`\t`)
 	s := space.ReplaceAllString(str, "  ")
@@ -109,7 +115,7 @@ users:
 		s = fmt.Sprintf("%s    client-key-data: %s\n", s, base64.StdEncoding.EncodeToString(authInfo.ClientKeyData))
 	}
 
-	return fmt.Sprintf(s, masterURL), err
+	return fmt.Sprintf(s, nsReplace, masterURL), err
 }
 
 func (c *KubernetesSpecification) addAuthInfoForEndpoint(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
