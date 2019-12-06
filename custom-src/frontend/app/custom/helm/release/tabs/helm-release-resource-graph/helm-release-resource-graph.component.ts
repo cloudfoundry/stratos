@@ -2,6 +2,8 @@ import { Node, Edge } from '@swimlane/ngx-graph';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 import { Subject, Subscription } from 'rxjs';
+import { PanelPreviewService } from '../../../../../shared/services/panel-preview.service';
+import { HelmReleaseResourcePreviewComponent } from './helm-release-resource-preview/helm-release-resource-preview.component';
 
 interface Colors {
   bg: string;
@@ -36,7 +38,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   private graph: Subscription;
 
-  constructor(private helper: HelmReleaseHelperService) { }
+  constructor(private helper: HelmReleaseHelperService, private previewPanel: PanelPreviewService) { }
 
   ngOnInit() {
 
@@ -77,6 +79,19 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     if (this.graph) {
       this.graph.unsubscribe();
     }
+  }
+
+  // Open side panel when node is clicked
+  public onNodeClick(node: any) {
+    console.log('Node was clicked')
+    console.log(node);
+
+    this.previewPanel.show(
+      HelmReleaseResourcePreviewComponent,
+      {
+        node
+      }
+    );
   }
 
   public fitGraph() {

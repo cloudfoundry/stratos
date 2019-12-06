@@ -325,7 +325,6 @@ import { JsonViewerComponent } from './components/json-viewer/json-viewer.compon
     ApplicationStateService,
     EndpointListHelper,
     EndpointsListConfigService,
-    PanelPreviewService,
     // CfUserService,
     ConfirmationDialogService,
     EntityMonitorFactory,

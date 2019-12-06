@@ -12,6 +12,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { HELM_ENDPOINT_TYPE } from './helm-entity-factory';
 import { generateHelmEntities } from './helm-entity-generator';
 import { HelmStoreModule } from './helm.store.module';
+import { HelmReleaseResourcePreviewComponent } from './release/tabs/helm-release-resource-graph/helm-release-resource-preview/helm-release-resource-preview.component';
 
 @NgModule({
   imports: [
@@ -20,7 +21,13 @@ import { HelmStoreModule } from './helm.store.module';
     CommonModule,
     SharedModule,
     HelmStoreModule,
-  ]
+  ],
+  declarations: [
+    HelmReleaseResourcePreviewComponent,
+  ],
+  entryComponents: [
+    HelmReleaseResourcePreviewComponent,
+  ]  
 })
 export class HelmSetupModule {
   constructor(

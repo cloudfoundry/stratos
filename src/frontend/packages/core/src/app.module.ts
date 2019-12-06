@@ -47,6 +47,7 @@ import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
 import { XSRFModule } from '../xsrf.module';
+import { PanelPreviewService } from './shared/services/panel-preview.service';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -110,6 +111,7 @@ export class CustomRouterStateSerializer
     LoggedInService,
     ExtensionService,
     DynamicExtensionRoutes,
+    PanelPreviewService,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy }
