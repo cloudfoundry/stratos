@@ -15,6 +15,7 @@ import {
   helmReleaseGraphEntityType,
   helmVersionsEntityType,
   monocularChartsEntityType,
+  helmReleaseResourceEntityType,
 } from './helm-entity-factory';
 import {
   HelmRelease,
@@ -24,6 +25,7 @@ import {
   HelmVersion,
   MonocularChart,
   HelmReleaseGraph,
+  HelmReleaseResource,
 } from './store/helm.types';
 
 
@@ -50,6 +52,7 @@ export function generateHelmEntities(): StratosBaseCatalogueEntity[] {
     generateReleasePodEntity(endpointDefinition),
     generateReleaseServiceEntity(endpointDefinition),
     generateReleaseGraphEntity(endpointDefinition),
+    generateReleaseResourceEntity(endpointDefinition),
   ];
 }
 
@@ -123,4 +126,12 @@ function generateReleaseGraphEntity(endpointDefinition: StratosEndpointExtension
   return new StratosCatalogueEntity<IFavoriteMetadata, HelmReleaseGraph>(definition);
 }
 
+function generateReleaseResourceEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  const definition = {
+    type: helmReleaseResourceEntityType,
+    schema: helmEntityFactory(helmReleaseResourceEntityType),
+    endpoint: endpointDefinition
+  };
+  return new StratosCatalogueEntity<IFavoriteMetadata, HelmReleaseResource>(definition);
+}
 

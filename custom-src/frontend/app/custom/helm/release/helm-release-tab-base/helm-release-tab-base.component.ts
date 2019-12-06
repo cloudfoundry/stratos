@@ -1,4 +1,4 @@
-import { HELM_ENDPOINT_TYPE } from './../../helm-entity-factory';
+import { HELM_ENDPOINT_TYPE, helmReleaseResourceEntityType } from './../../helm-entity-factory';
 import { GetHelmReleaseServices } from './../../store/helm.actions';
 import { entityCatalogue } from './../../../../core/entity-catalogue/entity-catalogue.service';
 import { Component, OnDestroy } from '@angular/core';
@@ -155,6 +155,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           );
           const svcs = [];
 
+          // Store ALL resources for the release
           manifest.forEach(resource => {
             if (resource.kind === 'Service' && prefix) {
               console.log(`Service: ${prefix}-${resource.metadata.name}`);
@@ -165,6 +166,12 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           if (svcs.length > 0) {
             this.populateList(releaseServicesAction, svcs, (svc) => `${prefix}-${svc.metadata.name}`);
           }
+
+          const resources = {...manifest};
+          resources.endpointId = this.helmReleaseHelper.endpointGuid;
+          resources.releaseTitle = this.helmReleaseHelper.releaseTitle;
+          this.addResource(helmReleaseResourceEntityType,
+            resources, `${resources.endpointId}-${resources.releaseTitle}`, HELM_ENDPOINT_TYPE);
         }
       }
     });

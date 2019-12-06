@@ -103,6 +103,8 @@ export interface HelmReleaseGraph {
   releaseTitle: string;
 }
 
+export type HelmReleaseResource = any;
+
 export function isHelmReleaseService(obj: any): HelmReleaseService {
   if (obj && obj.kubeService$) {
     return obj as HelmReleaseService;

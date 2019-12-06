@@ -14,6 +14,7 @@ import {
   helmVersionsEntityType,
   helmReleaseGraphEntityType,
   monocularChartsEntityType,
+  helmReleaseResourceEntityType,
 } from '../helm-entity-factory';
 
 import { PaginatedAction } from './../../../../../store/src/types/pagination.types';
@@ -149,6 +150,24 @@ export class GetHelmReleaseGraph implements EntityRequestAction {
   entityType = helmReleaseGraphEntityType;
   actions = [this.type];
 }
+
+// Never dispateched - just used for look-up
+// Don't know why I need an action for this rather than an entity type?
+export class GetHelmReleaseResource implements EntityRequestAction {
+  key: string;
+  constructor(
+    public endpointGuid: string,
+    public releaseTitle: string
+  ) {
+    this.key = `${endpointGuid}-${releaseTitle}`;
+  }
+  type = this.constructor.name;
+  endpointType = HELM_ENDPOINT_TYPE;
+  entity = helmEntityFactory(helmReleaseResourceEntityType);
+  entityType = helmReleaseResourceEntityType;
+  actions = [this.type];
+}
+
 
 export class GetHelmReleasePods implements MonocularPaginationAction {
   constructor(

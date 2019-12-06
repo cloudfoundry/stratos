@@ -6,8 +6,8 @@ import { map, tap } from 'rxjs/operators';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { PaginationMonitor } from '../../../../shared/monitors/pagination-monitor';
 import { helmEntityFactory, helmReleaseEntityKey } from '../../helm-entity-factory';
-import { GetHelmReleases, GetHelmReleaseStatus, GetHelmReleaseGraph } from '../../store/helm.actions';
-import { HelmRelease, HelmReleaseGuid, HelmReleaseStatus, HelmReleaseGraph } from '../../store/helm.types';
+import { GetHelmReleases, GetHelmReleaseStatus, GetHelmReleaseGraph, GetHelmReleaseResource } from '../../store/helm.actions';
+import { HelmRelease, HelmReleaseGuid, HelmReleaseStatus, HelmReleaseGraph, HelmReleaseResource } from '../../store/helm.types';
 import { AppState } from './../../../../../../store/src/app-state';
 import {
   getPaginationObservables,
@@ -74,4 +74,11 @@ export class HelmReleaseHelperService {
     );
   }
 
+  public fetchReleaseResources(): Observable<HelmReleaseResource> {
+    // Get helm release
+    const action = new GetHelmReleaseResource(this.endpointGuid, this.releaseTitle);
+    return this.esf.create<HelmReleaseResource>(action.key, action).waitForEntity$.pipe(
+      map(entity => entity.entity)
+    );
+  }
 }

@@ -69,6 +69,21 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     const releaseStatus$ = new BehaviorSubject<HelmReleaseStatus>({} as HelmReleaseStatus);
     //.helmReleaseHelper.fetchReleaseStatus();
 
+
+    this.helmReleaseHelper.fetchReleaseResources().subscribe((g: any) => {
+      if (g) {
+        console.log('SUMMARY');
+        console.log(g);
+
+        Object.values(g).forEach((r: any) => console.log(r.kind));
+      }
+      // const resKinds = {};
+      // g.forEach(r => {
+      //   console.log(r);
+      // });
+    });
+
+
     this.isBusy$ = combineLatest([
       this.helmReleaseHelper.isFetching$,
       releaseStatus$,

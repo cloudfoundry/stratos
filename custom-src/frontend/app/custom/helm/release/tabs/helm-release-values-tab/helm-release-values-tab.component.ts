@@ -13,6 +13,8 @@ export class HelmReleaseValuesTabComponent {
 
   public values$: Observable<string>;
 
+  public viewType = 'user';
+
   constructor(public helmReleaseHelper: HelmReleaseHelperService) {
 
     this.values$ = helmReleaseHelper.release$.pipe(
