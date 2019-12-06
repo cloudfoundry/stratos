@@ -1,20 +1,17 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
-import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
 // TODO: Move file to CF package (#3769)
-
 export class CfCellsDataSource
   extends ListDataSource<IMetricVectorResult<IMetricCell>, IMetrics<IMetricVectorResult<IMetricCell>>> {
 
@@ -23,14 +20,11 @@ export class CfCellsDataSource
   static cellHealthyPath = 'value.1';
   static cellDeploymentPath = 'metric.bosh_deployment';
 
-  constructor(store: Store<CFAppState>, cfGuid: string, listConfig: IListConfig<IMetricVectorResult<IMetricCell>>) {
-    const action = new FetchCFCellMetricsPaginatedAction(
-      cfGuid,
-      cfGuid,
-      new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),
-      MetricQueryType.QUERY
-    );
-
+  constructor(
+    store: Store<CFAppState>,
+    listConfig: IListConfig<IMetricVectorResult<IMetricCell>>,
+    action: FetchCFCellMetricsPaginatedAction
+  ) {
     super({
       store,
       action,

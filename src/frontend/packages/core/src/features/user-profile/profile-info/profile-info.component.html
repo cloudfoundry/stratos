@@ -92,6 +92,18 @@
                 polling may result in some pages showing out-of-date information.</div>
             </div>
           </div>
+          <div class="user-profile__option" *ngIf="hasMultipleThemes">
+            <div class="user-profile__option-inner">
+              <div class="user-profile__option-header">
+                Theme
+              </div>
+              <mat-button-toggle-group [value]="(themeService.getTheme() | async).key"
+                (change)="themeService.setTheme($event.value)" name="theme" aria-label="Theme">
+                <mat-button-toggle *ngFor="let theme of themeService.getThemes()" [value]="theme.key"> {{ theme.label }}
+                </mat-button-toggle>
+              </mat-button-toggle-group>
+            </div>
+          </div>
         </div>
       </mat-card>
       <mat-card *ngIf="profile.origin === 'uaa'">

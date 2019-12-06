@@ -39,7 +39,7 @@ downloadReleaseFile() {
   local parser=". | map(select(.tag_name == \"$VERSION\"))[0].assets | map(select(.name == \"$FILE\"))[0].id"
   
   # Get release information from GitHub
-  curl -H "Authorization: token $TOKEN" -H "Accept: application/vnd.github.v3.raw" -s $GITHUB/repos/$REPO/releases > releases.json
+  curl -L -H "Authorization: token $TOKEN" -H "Accept: application/vnd.github.v3.raw" -s $GITHUB/repos/$REPO/releases > releases.json
   if [ $? -ne 0 ]; then
     echo "Could not download release information for ${REPO}"
     exit 1

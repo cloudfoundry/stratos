@@ -16,21 +16,25 @@ export class ApiEntityListPageComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    const endpointType = this.route.parent.snapshot.params.endpointType;
+    const endpointType = this.route.parent ? this.route.parent.snapshot.params.endpointType : null;
     const entityType = this.route.snapshot.params.entityType;
-    const a = entityCatalogue.getEntity(endpointType, entityType);
-    // All these missing properties will need wiring in for CF case, maybe only endpointGuid for k8s?
-    this.config = {
-      endpointGuid: null,
-      entityConfig: {
-        endpointType: a.endpointType,
-        entityType: a.entityKey,
-        schemaKey: null,
-        subType: null
-      },
-      extraArgs: null,
-      paginationKey: null
-    };
+    const entityConfig = entityCatalogue.getEntity(endpointType, entityType);
+    if (entityConfig) {
+      // All these missing properties will need wiring in for CF case, maybe only endpointGuid for k8s?
+      this.config = {
+        endpointGuid: null,
+        entityConfig: {
+          endpointType: entityConfig.endpointType,
+          entityType: entityConfig.entityKey,
+          schemaKey: null,
+          subType: null
+        },
+        extraArgs: null,
+        paginationKey: null
+      };
+    } else {
+      console.warn(`Failed to find entity for. Endpoint Type: ${endpointType}. Entity Type: ${entityType}`);
+    }
   }
 
 }

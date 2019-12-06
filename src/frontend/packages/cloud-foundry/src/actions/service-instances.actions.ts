@@ -84,11 +84,13 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
       'DELETE',
       `service_instances/${guid}`,
       {
-        params: {
-          accepts_incomplete: 'true',
-          async: 'false',
-          recursive: 'true'
-        }
+        params: new HttpParams({
+          fromObject: {
+            accepts_incomplete: 'true',
+            async: 'false',
+            recursive: 'true'
+          }
+        })
       }
     );
   }

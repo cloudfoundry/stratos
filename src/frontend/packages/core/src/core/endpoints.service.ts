@@ -2,18 +2,15 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
-import { filter, first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
+import { first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
-import {
-  endpointEntitiesSelector,
-  endpointsEntityRequestDataSelector,
-  endpointStatusSelector,
-} from '../../../store/src/selectors/endpoint.selectors';
+import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthCheck, EndpointHealthChecks } from '../../endpoints-health-checks';
+import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
 import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
 import { UserService } from './user.service';
 
@@ -121,11 +118,7 @@ export class EndpointsService implements CanActivate {
   }
 
   hasMetrics(endpointId: string): Observable<boolean> {
-    return this.store.select(endpointsEntityRequestDataSelector(endpointId)).pipe(
-      filter(endpoint => !!endpoint),
-      map(endpoint => endpoint.metricsAvailable),
-      first()
-    );
+    return endpointHasMetricsByAvailable(this.store, endpointId);
   }
 
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {

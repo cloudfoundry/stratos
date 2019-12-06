@@ -17,7 +17,7 @@ export class ListViewComponent<T> implements OnInit {
 
   @Input() config: ListConfigProvider<T>;
 
-  @ViewChild(ListHostDirective)
+  @ViewChild(ListHostDirective, { static: true })
   public listHost: ListHostDirective;
 
   private componentRef: ComponentRef<ListComponent<unknown>>;

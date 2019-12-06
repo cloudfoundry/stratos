@@ -18,7 +18,7 @@ import {
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 import { createDefaultUserRelations } from './user.actions.helpers';
-import { HttpRequest } from '@angular/common/http';
+import { HttpRequest, HttpHeaders } from '@angular/common/http';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
 export const GET_ORGANIZATION_SUCCESS = '[Organization] Get one success';
@@ -172,10 +172,10 @@ export class DeleteOrganization extends CFStartAction implements ICFAction {
       'DELETE',
       `organizations/${guid}`,
       {
-        params: {
+        params: new HttpHeaders({
           recursive: 'true',
           async: 'false'
-        }
+        })
       }
     );
   }
