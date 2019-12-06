@@ -63,6 +63,8 @@ export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): n
 export class CloudFoundryEndpointService {
   hasSSHAccess$: Observable<boolean>;
   totalMem$: Observable<number>;
+  description$: Observable<string>;
+  apiUrl$: Observable<string>;
   paginationSubscription: any;
   appsPagObs: PaginationObservables<APIResource<IApp>>;
   usersCount$: Observable<number | null>;
@@ -98,6 +100,7 @@ export class CloudFoundryEndpointService {
       }) as PaginatedAction;
     return getAllOrganizationsAction;
   }
+
   static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
@@ -138,7 +141,14 @@ export class CloudFoundryEndpointService {
     private endpointService: EndpointsService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
-    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    const cfGuid = activeRouteCfOrgSpace.cfGuid;
+    if (cfGuid) {
+      this.initialize(cfGuid);
+    }
+  }
+
+  public initialize(cfGuid) {
+    this.cfGuid = cfGuid;
     this.getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid) as GetAllOrganizations;
     this.getAllAppsAction = new GetAllApplications(createEntityRelationPaginationKey('cf', this.cfGuid), this.cfGuid);
 
@@ -197,6 +207,14 @@ export class CloudFoundryEndpointService {
     );
     this.totalMem$ = this.appsPagObs.entities$.pipe(map(apps => this.getMetricFromApps(apps, 'memory')));
 
+    this.apiUrl$ = this.endpoint$.pipe(
+      map(endpoint => this.getApiEndpointUrl(endpoint.entity.api_endpoint))
+    );
+
+    this.description$ = this.info$.pipe(
+      map(entity => this.getDescription(entity))
+    );
+
     this.connected$ = this.endpoint$.pipe(
       map(p => p.entity.connectionStatus === 'connected')
     );
@@ -254,6 +272,28 @@ export class CloudFoundryEndpointService {
 
   fetchApps() {
     this.store.dispatch(this.getAllAppsAction);
+  }
+
+  private getApiEndpointUrl(apiEndpoint) {
+    const path = apiEndpoint.Path ? `/${apiEndpoint.Path}` : '';
+    return `${apiEndpoint.Scheme}://${apiEndpoint.Host}${path}`;
+  }
+
+  private getMetadataFromInfo(entity: EntityInfo<APIResource<ICfV2Info>>) {
+    return entity && entity.entity && entity.entity.entity ? entity.entity.entity : null;
+  }
+
+  private getDescription(entity: EntityInfo<APIResource<ICfV2Info>>): string {
+    const metadata = this.getMetadataFromInfo(entity);
+    if (metadata) {
+      if (metadata.description) {
+        return metadata.description + (metadata.build ? ` (${metadata.build})` : '');
+      }
+      if (metadata.support === 'pcfdev@pivotal.io') {
+        return 'PCF Dev';
+      }
+    }
+    return '-';
   }
 
   hasCellMetrics(endpointId: string): Observable<boolean> {

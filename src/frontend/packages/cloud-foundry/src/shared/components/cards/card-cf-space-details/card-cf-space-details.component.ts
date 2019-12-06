@@ -1,8 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 import {
   CloudFoundrySpaceService,
@@ -18,7 +17,6 @@ import { AppState } from '../../../../../../store/src/app-state';
   styleUrls: ['./card-cf-space-details.component.scss']
 })
 export class CardCfSpaceDetailsComponent implements OnDestroy {
-  allowSshStatus$: Observable<string>;
   quotaLinkSub: Subscription;
 
   constructor(
@@ -26,9 +24,6 @@ export class CardCfSpaceDetailsComponent implements OnDestroy {
     private store: Store<AppState>,
     private router: Router
   ) {
-    this.allowSshStatus$ = cfSpaceService.allowSsh$.pipe(
-      map(status => status === 'false' ? 'Disabled' : 'Enabled')
-    );
   }
 
   goToOrgQuota() {

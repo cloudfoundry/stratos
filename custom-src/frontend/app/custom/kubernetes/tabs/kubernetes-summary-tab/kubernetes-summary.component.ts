@@ -17,8 +17,6 @@ import {
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { GetKubernetesNodes, GetKubernetesPods } from '../../store/kubernetes.actions';
-import { KubernetesNode } from './../../../../../../../../../custom-src/frontend/app/custom/kubernetes/store/kube.types';
-import { KubernetesPod } from './../../store/kube.types';
 import { GetKubernetesApps } from './../../store/kubernetes.actions';
 
 interface IValueLabels {
@@ -95,7 +93,6 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
   public isLoading$: Observable<boolean>;
 
-
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
     public httpClient: HttpClient,
@@ -103,6 +100,72 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private ngZone: NgZone
   ) {
+  }
+
+  ngOnInit() {
+    const guid = this.kubeEndpointService.baseKube.guid;
+
+    const podCountAction = new GetKubernetesPods(guid);
+    const nodeCountAction = new GetKubernetesNodes(guid);
+    const appCountAction = new GetKubernetesApps(guid);
+    const applications$ = this.getPaginationObservable(appCountAction);
+    const pods$ = this.getPaginationObservable(podCountAction);
+    const nodes$ = this.getPaginationObservable(nodeCountAction);
+
+    this.podCount$ = this.kubeEndpointService.getCountObservable(pods$);
+    this.nodeCount$ = this.kubeEndpointService.getCountObservable(nodes$);
+    this.appCount$ = this.kubeEndpointService.getCountObservable(applications$);
+
+    this.podCapacity$ = this.kubeEndpointService.getPodCapacity(nodes$, pods$);
+    this.diskPressure$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'DiskPressure', {
+      usedLabel: 'Nodes with disk pressure',
+      remainingLabel: 'Nodes with no disk pressure',
+      unknownLabel: 'Nodes with unknown disk pressure',
+      warningText: 'Nodes with unknown disk pressure found'
+    });
+    this.memoryPressure$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'MemoryPressure', {
+      usedLabel: 'Nodes with memory pressure',
+      remainingLabel: 'Nodes with no memory pressure',
+      unknownLabel: 'Nodes with unknown memory pressure',
+      warningText: 'Nodes with unknown memory pressure found'
+    });
+    this.outOfDisk$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'OutOfDisk', {
+      usedLabel: 'Nodes that are out of disk space',
+      remainingLabel: 'Nodes that have disk space remaining',
+      unknownLabel: 'Nodes with unknown remaining disk space',
+      warningText: 'Nodes with unknown remaining disk space found'
+    });
+    this.networkUnavailable$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'NetworkUnavailable', {
+      usedLabel: 'Nodes with available networks',
+      remainingLabel: 'Nodes with unavailable networks',
+      unknownLabel: 'Nodes with unknown networks availability',
+      warningText: 'Nodes with unknown networks availability found'
+    }, 'False');
+    this.nodesReady$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'Ready', {
+      usedLabel: 'Nodes are ready',
+      remainingLabel: 'Nodes are not ready',
+      unknownLabel: 'Nodes with unknown ready status',
+      warningText: `Nodes with unknown ready status found`
+    });
+    this.dashboardLink = `/kubernetes/${guid}/dashboard`;
+
+    this.kubeNodeVersions$ = this.kubeEndpointService.getNodeKubeVersions(nodes$).pipe(startWith('-'));
+
+    this.isLoading$ = combineLatest([
+      this.endpointDetails$,
+      this.podCount$,
+      this.nodeCount$,
+      this.appCount$,
+      this.podCapacity$,
+      this.diskPressure$,
+      this.memoryPressure$,
+      this.outOfDisk$,
+      this.nodesReady$,
+      this.networkUnavailable$,
+    ]).pipe(
+      map(() => false),
+      startWith(true),
+    );
   }
 
   private getPaginationObservable(action: PaginatedAction) {
@@ -126,142 +189,6 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
       action,
       paginationMonitor
     }).entities$;
-  }
-
-  private getCountObservable(entities$: Observable<any[]>) {
-    return entities$.pipe(
-      map(entities => entities.length),
-      startWith(null)
-    );
-  }
-  private getPodCapacity(nodes$: Observable<KubernetesNode[]>, pods$: Observable<KubernetesPod[]>) {
-    return combineLatest(nodes$, pods$).pipe(
-      map(([nodes, pods]) => ({
-        total: nodes.reduce((cap, node) => {
-          return cap + parseInt(node.status.capacity.pods, 10);
-        }, 0),
-        used: pods.length
-      }))
-    );
-  }
-
-  private getNodeStatusCount(
-    nodes$: Observable<KubernetesNode[]>,
-    conditionType: string,
-    valueLabels: IValueLabels = {},
-    countStatus = 'True'
-  ) {
-    return nodes$.pipe(
-      map(nodes => {
-        const total = nodes.length;
-        const { unknown, unavailable, used } = nodes.reduce((cap, node) => {
-          const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
-          if (!conditionStatus || !conditionStatus.status) {
-            ++cap.unavailable;
-          } else {
-            if (conditionStatus.status === countStatus) {
-              ++cap.used;
-            } else if (conditionStatus.status === 'Unknown') {
-              ++cap.unknown;
-            }
-          }
-          return cap;
-        }, { unavailable: 0, used: 0, unknown: 0 });
-        const result = {
-          total,
-          supported: total !== unavailable,
-          // Depends on K8S version as to what is supported
-          unavailable,
-          used,
-          unknown,
-          ...valueLabels
-        };
-        result.supported = result.total !== result.unavailable;
-        return result;
-      })
-    );
-  }
-
-  private getNodeKubeVersions(nodes$: Observable<KubernetesNode[]>) {
-    return nodes$.pipe(
-      map(nodes => {
-        const versions = {};
-        nodes.forEach(node => {
-          const v = node.status.nodeInfo.kubeletVersion;
-          if (!versions[v]) {
-            versions[v] = v;
-          }
-        });
-        return Object.keys(versions).join(',');
-      })
-    );
-  }
-
-
-  ngOnInit() {
-    const guid = this.kubeEndpointService.baseKube.guid;
-
-    const podCountAction = new GetKubernetesPods(guid);
-    const nodeCountAction = new GetKubernetesNodes(guid);
-    const appCountAction = new GetKubernetesApps(guid);
-    const applications$ = this.getPaginationObservable(appCountAction);
-    const pods$ = this.getPaginationObservable(podCountAction);
-    const nodes$ = this.getPaginationObservable(nodeCountAction);
-
-    this.podCount$ = this.getCountObservable(pods$);
-    this.nodeCount$ = this.getCountObservable(nodes$);
-    this.appCount$ = this.getCountObservable(applications$);
-
-    this.podCapacity$ = this.getPodCapacity(nodes$, pods$);
-    this.diskPressure$ = this.getNodeStatusCount(nodes$, 'DiskPressure', {
-      usedLabel: 'Nodes with disk pressure',
-      remainingLabel: 'Nodes with no disk pressure',
-      unknownLabel: 'Nodes with unknown disk pressure',
-      warningText: 'Nodes with unknown disk pressure found'
-    });
-    this.memoryPressure$ = this.getNodeStatusCount(nodes$, 'MemoryPressure', {
-      usedLabel: 'Nodes with memory pressure',
-      remainingLabel: 'Nodes with no memory pressure',
-      unknownLabel: 'Nodes with unknown memory pressure',
-      warningText: 'Nodes with unknown memory pressure found'
-    });
-    this.outOfDisk$ = this.getNodeStatusCount(nodes$, 'OutOfDisk', {
-      usedLabel: 'Nodes that are out of disk space',
-      remainingLabel: 'Nodes that have disk space remaining',
-      unknownLabel: 'Nodes with unknown remaining disk space',
-      warningText: 'Nodes with unknown remaining disk space found'
-    });
-    this.networkUnavailable$ = this.getNodeStatusCount(nodes$, 'NetworkUnavailable', {
-      usedLabel: 'Nodes with available networks',
-      remainingLabel: 'Nodes with unavailable networks',
-      unknownLabel: 'Nodes with unknown networks availability',
-      warningText: 'Nodes with unknown networks availability found'
-    }, 'False');
-    this.nodesReady$ = this.getNodeStatusCount(nodes$, 'Ready', {
-      usedLabel: 'Nodes are ready',
-      remainingLabel: 'Nodes are not ready',
-      unknownLabel: 'Nodes with unknown ready status',
-      warningText: `Nodes with unknown ready status found`
-    });
-    this.dashboardLink = `/kubernetes/${guid}/dashboard`;
-
-    this.kubeNodeVersions$ = this.getNodeKubeVersions(nodes$).pipe(startWith('-'));
-
-    this.isLoading$ = combineLatest([
-      this.endpointDetails$,
-      this.podCount$,
-      this.nodeCount$,
-      this.appCount$,
-      this.podCapacity$,
-      this.diskPressure$,
-      this.memoryPressure$,
-      this.outOfDisk$,
-      this.nodesReady$,
-      this.networkUnavailable$,
-    ]).pipe(
-      map(() => false),
-      startWith(true),
-    );
   }
 
   ngOnDestroy() {

@@ -1,5 +1,4 @@
 import {
-  CLOSE_SIDE_HELP,
   CLOSE_SIDE_NAV,
   DISABLE_SIDE_NAV_MOBILE_MODE,
   ENABLE_POLLING,
@@ -7,11 +6,12 @@ import {
   HYDRATE_DASHBOARD_STATE,
   HydrateDashboardStateAction,
   OPEN_SIDE_NAV,
+  SET_HEADER_EVENT,
   SET_STRATOS_THEME,
+  SetHeaderEvent,
   SetPollingEnabledAction,
   SetSessionTimeoutAction,
   SetThemeAction,
-  SHOW_SIDE_HELP,
   TIMEOUT_SESSION,
   TOGGLE_SIDE_NAV,
 } from '../actions/dashboard-actions';
@@ -23,8 +23,7 @@ export interface DashboardState {
   isMobile: boolean;
   isMobileNavOpen: boolean;
   sideNavPinned: boolean;
-  sideHelpOpen: boolean;
-  sideHelpDocument: string;
+  headerEventMinimized: boolean;
   themeKey: string;
 }
 
@@ -35,8 +34,7 @@ export const defaultDashboardState: DashboardState = {
   isMobile: false,
   isMobileNavOpen: false,
   sideNavPinned: true,
-  sideHelpOpen: false,
-  sideHelpDocument: null,
+  headerEventMinimized: false,
   themeKey: null
 };
 
@@ -61,10 +59,11 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       return { ...state, isMobile: true, isMobileNavOpen: false };
     case DISABLE_SIDE_NAV_MOBILE_MODE:
       return { ...state, isMobile: false, isMobileNavOpen: false };
-    case SHOW_SIDE_HELP:
-      return { ...state, sideHelpOpen: true, sideHelpDocument: action.document };
-    case CLOSE_SIDE_HELP:
-      return { ...state, sideHelpOpen: false, sideHelpDocument: '' };
+    case SET_HEADER_EVENT:
+      const setHeaderEvent = action as SetHeaderEvent;
+      return {
+        ...state, headerEventMinimized: setHeaderEvent.minimised
+      };
     case TIMEOUT_SESSION:
       const timeoutSessionAction = action as SetSessionTimeoutAction;
       return {

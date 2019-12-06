@@ -36,15 +36,12 @@ import {
 import {
   CloudFoundryQuotasComponent,
 } from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
-import { EndpointListHelper } from '../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
-import {
-  EndpointsListConfigService,
-} from '../../../../core/src/shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { CloudFoundryComponentsModule } from '../../shared/components/components.module';
 import {
   CFEndpointsListConfigService,
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
+import { ApplicationService } from '../applications/application.service';
 import { AddOrganizationComponent } from './add-organization/add-organization.component';
 import {
   CreateOrganizationStepComponent,
@@ -64,6 +61,7 @@ import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { QuotaDefinitionComponent } from './quota-definition/quota-definition.component';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
+import { CloudFoundrySpaceService } from './services/cloud-foundry-space.service';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition/space-quota-definition.component';
 import { CfAdminAddUserWarningComponent } from './tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
@@ -228,6 +226,8 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
       provide: ActiveRouteCfCell,
       useValue: {}
     },
+    ApplicationService,
+    CloudFoundrySpaceService,
     CloudFoundryOrganizationService,
     CloudFoundryEndpointService,
     // CfRolesService,

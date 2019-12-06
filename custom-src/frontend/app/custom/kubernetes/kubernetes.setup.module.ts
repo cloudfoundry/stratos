@@ -16,9 +16,12 @@ import {
   KubernetesConfigAuthFormComponent,
 } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
+import { KubernetesEndpointPreviewComponent } from './kubernetes-endpoint-preview/kubernetes-endpoint-preview.component';
 import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes-entity-factory';
 import { generateKubernetesEntities } from './kubernetes-entity-generator';
+import { BaseKubeGuid } from './kubernetes-page.types';
 import { KubernetesStoreModule } from './kubernetes.store.module';
+import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 import { KubeHealthCheck } from './store/kubernetes.actions';
 
 
@@ -28,19 +31,25 @@ import { KubeHealthCheck } from './store/kubernetes.actions';
     CoreModule,
     CommonModule,
     SharedModule,
-    KubernetesStoreModule,
+    KubernetesStoreModule
   ],
   declarations: [
     KubernetesCertsAuthFormComponent,
     KubernetesAWSAuthFormComponent,
     KubernetesConfigAuthFormComponent,
     KubernetesGKEAuthFormComponent,
+    KubernetesEndpointPreviewComponent,
+  ],
+  providers: [
+    BaseKubeGuid,
+    KubernetesEndpointService,
   ],
   entryComponents: [
     KubernetesCertsAuthFormComponent,
     KubernetesAWSAuthFormComponent,
     KubernetesConfigAuthFormComponent,
     KubernetesGKEAuthFormComponent,
+    KubernetesEndpointPreviewComponent,
   ]
 })
 export class KubernetesSetupModule {

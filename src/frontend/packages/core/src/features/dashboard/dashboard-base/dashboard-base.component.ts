@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
-import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -13,12 +13,7 @@ import { cfInfoEntityType } from '../../../../../cloud-foundry/src/cf-entity-typ
 import {
   CfInfoDefinitionActionBuilders,
 } from '../../../../../cloud-foundry/src/entity-action-builders/cf-info.action-builders';
-import {
-  CloseSideHelp,
-  CloseSideNav,
-  DisableMobileNav,
-  EnableMobileNav,
-} from '../../../../../store/src/actions/dashboard-actions';
+import { CloseSideNav, DisableMobileNav, EnableMobileNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
@@ -29,6 +24,7 @@ import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { IEntityMetadata } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { PanelPreviewService } from '../../../shared/services/panel-preview.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
 
@@ -39,16 +35,28 @@ import { SideNavItem } from './../side-nav/side-nav.component';
   styleUrls: ['./dashboard-base.component.scss']
 })
 
-export class DashboardBaseComponent implements OnInit, OnDestroy {
+export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
   public activeTabLabel$: Observable<string>;
   public subNavData$: Observable<[string, Portal<any>]>;
   public isMobile$: Observable<boolean>;
   public sideNavMode$: Observable<string>;
   public sideNavMode: string;
   public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean }>;
-  public rightNavState$: Observable<{ opened: boolean; documentUrl: string; }>;
+  public rightNavState$: Observable<{ opened: boolean, component?: object, props?: object }>;
   private dashboardState$: Observable<DashboardState>;
+  public noMargin$: Observable<boolean>;
+  private closeSub: Subscription;
+  private mobileSub: Subscription;
   private drawer: MatDrawer;
+  public iconModeOpen = false;
+  public sideNavWidth = 54;
+
+  sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
+  sideNaveMode = 'side';
+
+  @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer: ViewContainerRef;
+
+  @ViewChild('content', { static: false }) public content;
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -59,6 +67,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService,
     private ngZone: NgZone,
+    public panelPreviewService: PanelPreviewService,
     private cs: CustomizationService
   ) {
     this.noMargin$ = this.router.events.pipe(
@@ -89,23 +98,10 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
         }
       })
     );
-    this.rightNavState$ = this.dashboardState$.pipe(
-      map(state => ({
-        opened: !!state.sideHelpDocument && state.sideHelpOpen,
-        documentUrl: state.sideHelpDocument
-      }))
-    );
+
     this.mobileSub = this.isMobile$
       .subscribe(isMobile => isMobile ? this.store.dispatch(new EnableMobileNav()) : this.store.dispatch(new DisableMobileNav()));
   }
-
-  public helpDocumentUrl: string;
-
-  private closeSub: Subscription;
-
-  public noMargin$: Observable<boolean>;
-
-  private mobileSub: Subscription;
 
   @ViewChild('sidenav', { static: false }) set sidenav(drawer: MatDrawer) {
     this.drawer = drawer;
@@ -119,15 +115,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     }
   }
 
-  @ViewChild('content', { static: true }) public content;
-
-  sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
-
-  sideNaveMode = 'side';
-
-  public iconModeOpen = false;
-  public sideNavWidth = 54;
-
   public redrawSideNav() {
     // We need to do this to ensure there isn't a space left behind
     // when going from mobile to desktop
@@ -138,6 +125,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
 
   dispatchRelations() {
     this.store.dispatch(new GetCurrentUsersRelations());
+  }
+
+  sideHelpClosed() {
+    this.panelPreviewService.hide();
+  }
+
+  ngAfterViewInit() {
+    this.panelPreviewService.setContainer(this.previewPanelContainer);
   }
 
   ngOnInit() {
@@ -171,10 +166,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
       }
     }
     return false;
-  }
-
-  public sideHelpClosed() {
-    this.store.dispatch(new CloseSideHelp());
   }
 
   private getNavigationRoutes(): SideNavItem[] {

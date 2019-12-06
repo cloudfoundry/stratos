@@ -82,6 +82,7 @@ import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.comp
 import { PollingIndicatorComponent } from './components/polling-indicator/polling-indicator.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
+import { SidepanelPreviewComponent } from './components/sidepanel-preview/sidepanel-preview.component';
 import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
 import { SnackBarReturnComponent } from './components/snackbar-return/snackbar-return.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
@@ -115,6 +116,7 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
+import { PanelPreviewService } from './services/panel-preview.service';
 import { UserPermissionDirective } from './user-permission.directive';
 import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
 
@@ -212,7 +214,6 @@ import { JsonViewerComponent } from './components/json-viewer/json-viewer.compon
     BreadcrumbsComponent,
     PageSubNavSectionComponent,
     EntitySummaryTitleComponent,
-    MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
     SnackBarReturnComponent,
     PollingIndicatorComponent,
@@ -220,6 +221,7 @@ import { JsonViewerComponent } from './components/json-viewer/json-viewer.compon
     JsonViewerComponent,
     SimpleListComponent,
     ListHostDirective,
+    SidepanelPreviewComponent
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -302,7 +304,6 @@ import { JsonViewerComponent } from './components/json-viewer/json-viewer.compon
     AppNameUniqueDirective,
     SimpleUsageChartComponent,
     EntitySummaryTitleComponent,
-    MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
     TileSelectorComponent,
     AppNameUniqueDirective,
@@ -310,18 +311,21 @@ import { JsonViewerComponent } from './components/json-viewer/json-viewer.compon
     UnlimitedInputComponent,
     JsonViewerComponent,
     SimpleListComponent,
-    ListHostDirective
+    ListHostDirective,
+    SidepanelPreviewComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,
     EnvVarViewComponent,
-    SnackBarReturnComponent
+    SnackBarReturnComponent,
+    MarkdownPreviewComponent,
   ],
   providers: [
     ListConfig,
     ApplicationStateService,
     EndpointListHelper,
     EndpointsListConfigService,
+    PanelPreviewService,
     // CfUserService,
     ConfirmationDialogService,
     EntityMonitorFactory,
