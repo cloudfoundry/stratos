@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"time"
+
 	//"fmt"
 
 	"github.com/gorilla/websocket"
@@ -222,24 +224,40 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 	graph.ParseManifest(rel)
 	sendResource(ws, "Graph", graph)
 
+	stopchan := make(chan bool)
+
+	go readLoop(ws, stopchan)
+
 	// Now we have everything, so loop, polling to get status
-	// for {
+	for {
+		log.Warn("Polling for release - wait 10 seconds")
 
-	// 	log.Warn("Polling for release - wait 10 seconds")
-	// 	time.Sleep(10 * time.Second)
+		select {
+		case <-stopchan:
+			log.Error("***  RELEASE POLLER HAS FINISHED")
+			log.Error("****************************************************************************************************")
+			ws.Close()
+			return nil
+		case <-time.After(10 * time.Second):
+			break
+		}
 
-	// 	log.Warn("Polling for release ....")
+		log.Warn("Polling for release ....")
 
-	// 	// Pods
-	// 	pods := rel.GetPods(c.portalProxy)
-	// 	err = sendResource(ws, "Pods", pods)
-	// 	log.Error(err)
+		// Pods
+		rel.UpdatePods(c.portalProxy)
+		sendResource(ws, "Pods", rel.GetPods())
 
-	// 	// Now get all of the resources in the manifest
-	// 	all := rel.GetResources(c.portalProxy)
-	// 	err = sendResource(ws, "Resources", all)
-	// 	log.Error(err)
-	// }
+		graph.ParseManifest(rel)
+		sendResource(ws, "Graph", graph)
+
+		// Now get all of the resources in the manifest
+		rel.UpdateResources(c.portalProxy)
+		sendResource(ws, "Resources", rel.GetResources())
+
+		graph.ParseManifest(rel)
+		sendResource(ws, "Graph", graph)
+	}
 
 	log.Error("****************************************************************************************************")
 	log.Error("RELEASE POLLER HAS FINISHED")
@@ -248,6 +266,17 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 	ws.Close()
 
 	return nil
+}
+
+func readLoop(c *websocket.Conn, stopchan chan<- bool) {
+	for {
+		if _, _, err := c.NextReader(); err != nil {
+			log.Error("WEB SOCKET HAS BEEN CLOSED")
+			c.Close()
+			close(stopchan)
+			break
+		}
+	}
 }
 
 func sendResource(ws *websocket.Conn, kind string, data interface{}) error {

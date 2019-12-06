@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"fmt"
+	"sync"
 
 	//	"k8s.io/client-go/rest"
 
@@ -29,6 +30,7 @@ type KubeProxyResponse struct {
 // KubeProxyResponses represents response from multiple proxy requests to the Kube API
 type KubeProxyResponses map[string]interface{}
 
+
 // ProxyKubernetesAPI proxies an API request to all of the user's connected Kubernetes endpoints
 func (c *KubernetesSpecification) ProxyKubernetesAPI(userID string, f KubeProxyFunc) (KubeProxyResponses, error) {
 
@@ -39,11 +41,15 @@ func (c *KubernetesSpecification) ProxyKubernetesAPI(userID string, f KubeProxyF
 		return nil, fmt.Errorf("Could not get endpints Client for endpoint: %v+", err)
 	}
 
+
+	// TODO: Endpoint must be connected
 	for _, endpoint := range eps {
 		if endpoint.CNSIType == "k8s" {
 			k8sList = append(k8sList, endpoint)
 		}
 	}
+
+	mapMutex := sync.RWMutex{}
 
 	// Check that we actually have some
 	// TODO
@@ -55,11 +61,13 @@ func (c *KubernetesSpecification) ProxyKubernetesAPI(userID string, f KubeProxyF
 	responses := make(KubeProxyResponses)
 	for range k8sList {
 		res := <-done
+		mapMutex.RLock()
 		if res.Error == nil {
 			responses[res.Endpoint] = res.Result
 		} else {
 			responses[res.Endpoint] = res.Error
 		}
+		mapMutex.RUnlock()
 	}
 
 	return responses, nil

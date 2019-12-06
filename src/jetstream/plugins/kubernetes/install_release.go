@@ -50,6 +50,8 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 		return fmt.Errorf("Could not get Create Release Parameters: %v+", err)
 	}
 
+	log.Warn("%+v", params)
+
 	chartID := fmt.Sprintf("%s/%s", params.Chart.Repository, params.Chart.Name)
 
 	log.Info("Installing release")
@@ -116,12 +118,15 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	install := action.NewInstall(config)
 	install.ReleaseName = params.Name
 	install.Namespace = params.Namespace
+
+	log.Warnf("%+v", install)
+
 	// Set timeout
 	// Wait?
 	// Generate Name ?
 	// Atomic?
 
-	release, err := install.Run(chart, userSuppliedValues)
+	release, err := install.Run(chart, nil)
 	if err != nil {
 		log.Error(err)
 		return fmt.Errorf("Could not install Helm Chart: %v+", err)

@@ -7,8 +7,8 @@ import { Observable, Subject, Subscription } from 'rxjs';
 
 import { HelmReleaseGuid, HelmReleasePod } from '../../store/helm.types';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
-import { catchError } from 'rxjs/operators';
-import websocketConnect, { Connection } from 'rxjs-websockets';
+import { catchError, switchMap, share, map, first, debounceTime, startWith } from 'rxjs/operators';
+import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../../../../../store/src/app-state';
 import {
@@ -23,6 +23,7 @@ import { PipelineResult } from '../../../../../../store/src/entity-request-pipel
 import { GetHelmReleasePods } from '../../store/helm.actions';
 import { EntityCatalogueEntityConfig } from '../../../../core/entity-catalogue/entity-catalogue.types';
 import { helmReleaseGraphEntityType } from '../../helm-entity-factory';
+import { LoggerService } from '../../../../core/logger.service';
 
 type IDGetterFunction = (data: any) => string;
 
@@ -51,7 +52,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
 
   private sub: Subscription;
 
-  private connection: Connection;
+  //private connection: Connection;
 
   public breadcrumbs = [{
     breadcrumbs: [
@@ -74,6 +75,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   constructor(
     public helmReleaseHelper: HelmReleaseHelperService,
     private store: Store<AppState>,
+    private logService: LoggerService
   ) {
     this.title = this.helmReleaseHelper.releaseTitle;
 
@@ -87,13 +89,27 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
     );
     console.log(streamUrl);
 
-    const data = new Subject<string>();
-    const connection = websocketConnect(
-      streamUrl,
-      data
+    // const data = new Subject<string>();
+    // const connection = websocketConnect(
+    //   streamUrl,
+    //   data
+    // );
+
+
+    const socket$ = makeWebSocketObservable(streamUrl).pipe(catchError(e => {
+      this.logService.error(
+        'Error while connecting to socket: ' + JSON.stringify(e)
+      );
+      return [];
+    }),
+      share(),
     );
 
-    const messages = connection.messages.pipe(
+    const messages = socket$.pipe(
+      switchMap((getResponses: GetWebSocketResponses) => {
+        return getResponses(new Subject<string>());
+      }),
+      map((message: string) => message),
       catchError(e => {
         console.log('WS Error');
         console.log(e);
@@ -101,7 +117,8 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           console.log(e);
         }
         return [];
-      }));
+      })
+    );
 
     let prefix = '';
     this.sub = messages.subscribe(jsonString => {

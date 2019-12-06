@@ -13,6 +13,7 @@ import (
 	diskcached "k8s.io/client-go/discovery/cached/disk"
 	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
 	restclient "k8s.io/client-go/rest"
 
@@ -68,7 +69,7 @@ func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, nam
 		log.Error("Unable to create temporary folder")
 	}
 
-	rcg := newJetStreamRCGetter([]byte(kubeconfigcontents), hc.Folder)
+	rcg := newJetStreamRCGetter([]byte(kubeconfigcontents), hc.Folder, namespace)
 
 	var nopLogger = func(a string, b ...interface{}) {
 		log.Infof(a, b)
@@ -94,6 +95,7 @@ func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, nam
 	actionConfig.KubeClient = kc
 	actionConfig.Releases = store
 	actionConfig.Log = nopLogger
+	//actionConfig.
 
 	return &actionConfig, hc, nil
 }
@@ -103,15 +105,45 @@ type jetStreamRestClientGetter struct {
 	tempFolder   string
 }
 
-func newJetStreamRCGetter(kubeconfig []byte, tempFolder string) *jetStreamRestClientGetter {
+type jetstreamClientConfig struct {
+	clientConfig clientcmd.ClientConfig
+	namespace    string
+}
+
+func (f *jetstreamClientConfig) RawConfig() (clientcmdapi.Config, error) {
+	return f.clientConfig.RawConfig()
+}
+
+func (f *jetstreamClientConfig) ClientConfig() (*restclient.Config, error) {
+	return f.clientConfig.ClientConfig()
+}
+
+func (f *jetstreamClientConfig) Namespace() (string, bool, error) {
+	return f.namespace, false, nil
+}
+
+func (f *jetstreamClientConfig) ConfigAccess() clientcmd.ConfigAccess {
+	return f.ConfigAccess()
+}
+
+func newJetStreamRCGetter(kubeconfig []byte, tempFolder string, namespace string) *jetStreamRestClientGetter {
 
 	clientConfig, err := clientcmd.NewClientConfigFromBytes(kubeconfig)
 	if err != nil {
 		log.Error(err)
 	}
 
-	f := &jetStreamRestClientGetter{
+	jsClientConfig := &jetstreamClientConfig{
 		clientConfig: clientConfig,
+		namespace:    namespace,
+	}
+
+	log.Warn("newJetStreamRCGetter")
+	ns, b, er := jsClientConfig.Namespace()
+	log.Warnf("%s %b %+v", ns, b, er)
+
+	f := &jetStreamRestClientGetter{
+		clientConfig: jsClientConfig,
 		tempFolder:   tempFolder,
 	}
 	return f

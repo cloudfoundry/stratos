@@ -26,9 +26,6 @@ require (
 	github.com/cloudfoundry/cli-plugin-repo v0.0.0-20190220174354-ecf721ef3813 // indirect
 	github.com/cloudfoundry/noaa v2.1.0+incompatible
 	github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4
-	github.com/coreos/bbolt v1.3.3 // indirect
-	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
-	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/cppforlife/go-patch v0.2.0 // indirect
 	github.com/domodwyer/mailyak v3.1.1+incompatible
 	github.com/dsnet/compress v0.0.0-20171208185109-cc9eb1d7ad76 // indirect
@@ -43,7 +40,6 @@ require (
 	github.com/gorilla/sessions v1.1.3
 	github.com/gorilla/websocket v1.4.0
 	github.com/govau/cf-common v0.0.7
-	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0 // indirect
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
@@ -54,32 +50,30 @@ require (
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/mitchellh/mapstructure v1.1.2 // indirect
+	github.com/miekg/dns v1.1.4 // indirect
 	github.com/moby/moby v1.13.1 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/nwmac/sqlitestore v0.0.0-20180824125213-7d2ab221fb3f
+	github.com/opencontainers/runc v1.0.0-rc2.0.20190611121236-6cc515888830 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/poy/eachers v0.0.0-20181020210610-23942921fe77 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
 	github.com/smartystreets/goconvey v1.6.4
-	github.com/soheilhy/cmux v0.1.4 // indirect
 	github.com/tedsuo/ifrit v0.0.0-20191009134036-9a97d0632f00 // indirect
 	github.com/tedsuo/rata v1.0.0 // indirect
-	github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5 // indirect
 	github.com/ulikunitz/xz v0.5.6 // indirect
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2 // indirect
-	go.etcd.io/bbolt v1.3.3 // indirect
 	golang.org/x/crypto v0.0.0-20191028145041-f83a4685e152
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
 	gopkg.in/yaml.v2 v2.2.7
-	k8s.io/kubernetes v1.16.3 // indirect
+	k8s.io/apiextensions-apiserver v0.0.0 // indirect
+	k8s.io/kubectl v0.0.0 // indirect
 )
 
 replace github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes => ./plugins/kubernetes
