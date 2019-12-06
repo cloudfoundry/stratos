@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
@@ -15,11 +15,31 @@ export class HelmReleaseValuesTabComponent {
 
   public viewType = 'user';
 
+  private viewTypeSubject = new Subject<boolean>('user');
+
+  // Observable boolean streams
+  public viewType$ = this.viewTypeSubject.asObservable();  
+
   constructor(public helmReleaseHelper: HelmReleaseHelperService) {
 
-    this.values$ = helmReleaseHelper.release$.pipe(
-      map(release => release.chart.values)
+    this.values$ = combineLatest(
+      this.viewType$,
+      helmReleaseHelper.release$
+    ).pipe(
+      map(([vtype, release]) => {
+        console.log('HELLO');
+        console.log(vtype);
+        console.log(release);
+
+        return release.chart.values;
+      })
     );
+  }
+
+  public viewTypeChange(viewType: string) {
+    this.viewType = viewType;
+    this.viewTypeSubject.next(viewType);
+
   }
 
   private hidePasswords(values: string): string {

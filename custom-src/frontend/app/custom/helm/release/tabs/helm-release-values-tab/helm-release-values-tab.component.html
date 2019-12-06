@@ -1,7 +1,7 @@
 <app-page-sub-nav>
 
   <mat-button-toggle-group class="toolbar" [value]="viewType"
-    (change)="themeService.setTheme($event.value)" name="view" aria-label="View">
+    (change)="viewTypeChange($event.value)" name="view" aria-label="View">
     <mat-button-toggle value="user">User</mat-button-toggle>
     <mat-button-toggle value="chart">Chart</mat-button-toggle>
     <mat-button-toggle value="combined">Combined</mat-button-toggle>
