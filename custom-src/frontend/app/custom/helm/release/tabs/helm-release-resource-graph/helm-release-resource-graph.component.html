@@ -19,14 +19,16 @@
   [layout]="layout"
 >
   <ng-template #nodeTemplate let-node>
-    <svg:g class="node">
+    <svg:g class="node ">
       <svg:rect
         [attr.width]="node.dimension.width"
         [attr.height]="node.dimension.height"
         [attr.fill]="node.data.fill"
         class="node"></svg:rect>
       />
-      <svg:text alignment-baseline="central"
+      <svg:text
+      class="no-style"
+      alignment-baseline="central"
       [attr.fill]="node.data.text"
       [attr.x]="10" [attr.y]="node.dimension.height / 2">
         {{node.label}} ({{node.data.kind}})
