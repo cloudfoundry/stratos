@@ -21,6 +21,7 @@ import { AppStoreModule } from '../../store/src/store.module';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
+import { XSRFModule } from '../xsrf.module';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
@@ -46,7 +47,6 @@ import { CustomReuseStrategy } from './route-reuse-stragegy';
 import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
-import { XSRFModule } from '../xsrf.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -144,7 +144,10 @@ export class AppModule {
       eventTriggered: (state: GeneralEntityAppState) => {
         const eventState = internalEventStateSelector(state);
         return Object.entries(eventState.types.endpoint).reduce((res, [eventId, value]) => {
-          const backendErrors = value.filter(error => error.eventCode === '500');
+          const backendErrors = value.filter(error => {
+            const eventCode = parseInt(error.eventCode, 10);
+            return eventCode >= 500;
+          });
           if (!backendErrors.length) {
             return res;
           }
@@ -157,7 +160,9 @@ export class AppModule {
         }, []);
       },
       message: data => {
-        return `We've been having trouble communicating with the endpoint ${data.endpoint.name}`;
+        const part1 = data.count > 1 ? `There are ${data.count} errors` : `There is an error`;
+        const part2 = ` associated with the endpoint '${data.endpoint.name}'`;
+        return part1 + part2;
       },
       key: data => `${endpointEventKey}-${data.endpoint.guid}`,
       link: data => `/errors/${data.endpoint.guid}`,
