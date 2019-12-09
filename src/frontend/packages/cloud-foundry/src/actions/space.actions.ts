@@ -24,7 +24,7 @@ import { CFStartAction } from './cf-action.types';
 import { GetAllOrgUsers } from './organization.actions';
 import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
-import { HttpRequest } from '@angular/common/http';
+import { HttpRequest, HttpParams } from '@angular/common/http';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -75,7 +75,7 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
     super();
     this.options = new HttpRequest(
       'GET',
-      'spsace'
+      'space'
     );
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
@@ -177,10 +177,12 @@ export class DeleteSpace extends BaseSpaceAction {
       'DELETE',
       `spaces/${guid}`,
       {
-        params: {
-          recursive: 'true',
-          async: 'false'
-        }
+        params: new HttpParams({
+          fromObject: {
+            recursive: 'true',
+            async: 'false'
+          }
+        })
       }
     );
   }

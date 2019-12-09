@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "10.16.3"
+  - "12.13.0"
 sudo: required
 dist: bionic
 services:
@@ -39,7 +39,7 @@ jobs:
       before_script:
         - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
         - chmod +x ~/bin/gimme
-        - eval "$(gimme 1.12.4)"
+        - eval "$(gimme 1.13.4)"
         - go get -u golang.org/x/lint/golint
       script:
         - golint src/jetstream/...
@@ -61,7 +61,7 @@ jobs:
       before_script:
         - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
         - chmod +x ~/bin/gimme
-        - eval "$(gimme 1.12.4)"
+        - eval "$(gimme 1.13.4)"
       script:
         - npm run test-backend
     - name: Helm Chart Unit Tests

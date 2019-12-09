@@ -32,13 +32,14 @@ export class ApiEntityTypeSelectPageComponent implements OnInit {
     const endpointEntity = entityCatalogue.getEndpoint(endpointType);
     const endpointEntities = entityCatalogue.getAllEntitiesForEndpointType(endpointType);
     const entitiesWithGetMultiple = endpointEntities.filter(
-      entity => entity.definition.tableConfig && entity.actionOrchestrator.hasActionBuilder('getMultiple')
+      entity => entity && entity.definition.tableConfig && entity.actionOrchestrator.hasActionBuilder('getMultiple')
     );
     this.connectedEndpointsOfType$ = this.store.select(connectedEndpointsOfTypesSelector(endpointType)).pipe(
       map(endpoints => endpoints[endpointGuid] ? endpoints[endpointGuid].name : 'Entities')
     );
-
-    this.tabNavService.setHeader(endpointEntity.definition.label);
+    if (endpointEntity) {
+      this.tabNavService.setHeader(endpointEntity.definition.label);
+    }
     this.tabs = entitiesWithGetMultiple.map(entity => {
       return {
         link: entity.type,

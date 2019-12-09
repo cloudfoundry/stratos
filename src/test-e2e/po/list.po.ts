@@ -39,7 +39,7 @@ export class ListTableComponent extends Component {
     ).first();
 
     browser.wait(until.presenceOf(cell));
-    return cell.element(by.xpath('ancestor::app-table-row'));;
+    return cell.element(by.xpath('ancestor::app-table-row'));
   }
 
   // Get the data in the table
@@ -385,11 +385,11 @@ export class ListPaginationComponent extends Component {
   }
 
   getPageSize(customCtrlName?: string): promise.Promise<string> {
-    return this.getPageSizeForm().getText(customCtrlName || 'mat-select-1');
+    return this.getPageSizeForm().getText(customCtrlName || 'mat-select-2');
   }
 
   setPageSize(pageSize, customCtrlName?: string): promise.Promise<void> {
-    const name = customCtrlName || 'mat-select-1';
+    const name = customCtrlName || 'mat-select-2';
     return this.getPageSizeForm().fill({ [name]: pageSize });
   }
 
