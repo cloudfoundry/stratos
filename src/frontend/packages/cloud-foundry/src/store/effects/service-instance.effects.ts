@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
-import { LongRunningCfOperationsService } from '../../../../core/src/shared/services/long-running-cf-op.service';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 import { DELETE_SERVICE_INSTANCE_ACTIONS } from '../../actions/service-instances.actions';
+import { LongRunningCfOperationsService } from '../../shared/data-services/long-running-cf-op.service';
 
 
 

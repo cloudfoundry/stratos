@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { GetServiceInstance } from '../../../../store/src/actions/service-instances.actions';
+import { LongRunningOperationsService } from '../../../../core/src/shared/services/long-running-op.service';
 import { ShowSnackBar } from '../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../store/src/app-state';
-import { LongRunningOperationsService } from './long-running-op.service';
+import { GetServiceInstance } from '../../actions/service-instances.actions';
 
 @Injectable()
 export class LongRunningCfOperationsService extends LongRunningOperationsService {
