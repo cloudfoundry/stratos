@@ -38,24 +38,24 @@ import {
   serviceInstancesEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
+import { IServiceInstance, IServicePlan } from '../../../../../../core/src/core/cf-api-svc.types';
+import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { pathGet, safeStringToObj } from '../../../../../../core/src/core/utils.service';
+import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { LongRunningCfOperationsService } from '../../../../../../core/src/shared/services/long-running-cf-op.service';
+import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
 import {
   selectCreateServiceInstance,
   selectCreateServiceInstanceSpaceGuid,
-} from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
+} from '../../../../store/selectors/create-service-instance.selectors';
+import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
 import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
-import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
-import { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
-import { IServiceInstance, IServicePlan } from '../../../../../../core/src/core/cf-api-svc.types';
-import { LongRunningOperationsService } from '../../../../../../core/src/shared/services/long-running-op.service';
-import { pathGet, safeStringToObj } from '../../../../../../core/src/core/utils.service';
-import { RequestInfoState, getDefaultRequestState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 
 
 @Component({
@@ -119,7 +119,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private csiGuidsService: CsiGuidsService,
     public modeService: CsiModeService,
-    public longRunningOpService: LongRunningOperationsService
+    public longRunningOpService: LongRunningCfOperationsService
   ) {
     this.setupForms();
 
@@ -281,13 +281,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.setupValidate();
   }
 
-  private handleUpdateServiceResult(request: RequestInfoState): Observable<StepOnNextResult> {
+  private handleUpdateServiceResult(request: RequestInfoState, state: CreateServiceInstanceState): Observable<StepOnNextResult> {
     const updatingInfo = request.updating[UpdateServiceInstance.updateServiceInstance];
     if (!updatingInfo) {
       // This isn't an update
     } else if (this.longRunningOpService.isLongRunning(updatingInfo)) {
       // This request has taken too long for the browser/jetstream and is on going. Treat this as a success
-      this.longRunningOpService.handleLongRunningUpdateService();
+      this.longRunningOpService.handleLongRunningUpdateService(state.serviceInstanceGuid, state.cfGuid);
     } else if (updatingInfo.error) {
       // The request has errored, report this back
       return observableOf({ success: false, message: `Failed to update service instance: ${updatingInfo.message}` });
@@ -352,7 +352,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       first(),
       switchMap(([request, state]) => {
 
-        const handleEditServiceResult = this.handleUpdateServiceResult(request);
+        const handleEditServiceResult = this.handleUpdateServiceResult(request, state);
         if (handleEditServiceResult) {
           return handleEditServiceResult;
         }

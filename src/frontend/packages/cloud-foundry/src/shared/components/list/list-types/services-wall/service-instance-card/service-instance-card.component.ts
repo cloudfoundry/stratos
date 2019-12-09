@@ -1,17 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  serviceBrokerEntityType,
-  serviceInstancesEntityType,
-} from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { IServiceBroker, IServiceExtra, IServiceInstance } from '../../../../../../../../core/src/core/cf-api-svc.types';
+import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
+import { IServiceInstance } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
@@ -21,8 +16,13 @@ import { CardCell } from '../../../../../../../../core/src/shared/components/lis
 import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/services/cf-org-space-label.service';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
+import {
+  getServiceBrokerName,
+  getServiceName,
+  getServicePlanName,
+  getServiceSummaryUrl,
+} from '../../../../../../features/service-catalog/services-helper';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 
 @Component({
@@ -82,19 +82,11 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           row.entity.space_guid);
       }
 
-      if (!this.serviceBroker$) {
-        const brokerGuid = this.serviceInstanceEntity.entity.service.entity.service_broker_guid;
-
-        const serviceBrokerEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
-        const actionBuilder = serviceBrokerEntity.actionOrchestrator.getActionBuilder('get');
-        const getServiceBrokersAction = actionBuilder(brokerGuid, this.cfGuid);
-        this.serviceBroker$ = this.entityServiceFactory.create<APIResource<IServiceBroker>>(
-          brokerGuid,
-          getServiceBrokersAction
-        ).waitForEntity$.pipe(
-          map(a => a.entity),
-          filter(res => !!res),
-          first()
+      if (!this.serviceBrokerName$) {
+        this.serviceBrokerName$ = getServiceBrokerName(
+          this.serviceInstanceEntity.entity.service.entity.service_broker_guid,
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.entityServiceFactory
         );
       }
     }
@@ -119,7 +111,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   entityConfig: ComponentEntityMonitorConfig;
 
   cfOrgSpace: CfOrgSpaceLabelService;
-  serviceBroker$: Observable<APIResource<IServiceBroker>>;
+  serviceBrokerName$: Observable<string>;
 
   detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
@@ -143,21 +135,19 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   )
 
   getServiceName = () => {
-    const serviceEntity = this.serviceInstanceEntity.entity.service;
-    let extraInfo: IServiceExtra = null;
-    try {
-      extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
-    } catch (e) { }
-    let displayName = serviceEntity.entity ? serviceEntity.entity.label : '';
-    if (extraInfo && extraInfo.displayName) {
-      displayName = extraInfo.displayName;
+    return getServiceName(this.serviceInstanceEntity.entity.service);
+  }
+
+  getServicePlanName = () => {
+    if (!this.serviceInstanceEntity.entity.service_plan) {
+      return null;
     }
-    return displayName;
+    return getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity);
   }
 
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
-  getServiceUrl = () =>
-    `/marketplace/${this.serviceInstanceEntity.entity.cfGuid}/${this.serviceInstanceEntity.entity.service.entity.guid}/summary`
-
+  getServiceUrl = () => {
+    return getServiceSummaryUrl(this.serviceInstanceEntity.entity.cfGuid, this.serviceInstanceEntity.entity.service.entity.guid);
+  }
 }

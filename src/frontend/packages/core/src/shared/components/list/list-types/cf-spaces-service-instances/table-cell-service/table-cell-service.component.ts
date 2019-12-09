@@ -7,9 +7,12 @@ import {
   serviceBrokerEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { getCfService } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
+import {
+  getCfService,
+  getServiceName,
+} from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceBroker, IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { IServiceBroker, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { TableCellCustom } from '../../../list.types';
@@ -42,14 +45,7 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
     );
 
     this.serviceName$ = service$.pipe(
-      map(s => {
-        let serviceLabel = s.entity.entity.label || 'User Provided';
-        try {
-          const extraInfo: IServiceExtra = s.entity.entity.extra ? JSON.parse(s.entity.entity.extra) : null;
-          serviceLabel = extraInfo && extraInfo.displayName ? extraInfo.displayName : serviceLabel;
-        } catch (e) { }
-        return serviceLabel;
-      })
+      map(s => this.isUserProvidedServiceInstance ? 'User Provided' : getServiceName(s.entity))
     );
 
     this.serviceUrl$ = service$.pipe(
