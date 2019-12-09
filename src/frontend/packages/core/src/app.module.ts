@@ -161,7 +161,7 @@ export class AppModule {
       },
       message: data => {
         const part1 = data.count > 1 ? `There are ${data.count} errors` : `There is an error`;
-        const part2 = ` associated with the endpoint '${data.endpoint.name}'`;
+        const part2 = data.endpoint ? ` associated with the endpoint '${data.endpoint.name}'` : ` associated with multiple endpoints`;
         return part1 + part2;
       },
       key: data => `${endpointEventKey}-${data.endpoint.guid}`,
