@@ -1,8 +1,8 @@
 FROM golang:1.12 as builder
-COPY . /go/src/github.com/helm/monocular
-WORKDIR /go/src/github.com/helm/monocular
+COPY . /go/src/github.com/helm/monocular/chart-repo
+WORKDIR /go/src/github.com/helm/monocular/chart-repo
 ARG VERSION
-RUN GO111MODULE=on GOPROXY=https://gocenter.io CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags "-X main.version=$VERSION" ./chart-repo
+RUN GO111MODULE=on GOPROXY=https://gocenter.io CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags "-X main.version=$VERSION" .
 FROM scratch
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/src/github.com/helm/monocular/chart-repo /chart-repo
