@@ -49,6 +49,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     datetime: true
   };
   private action: CreateAppAutoscalerPolicyAction | UpdateAppAutoscalerPolicyAction;
+  private createUpdateTest: string;
 
   constructor(
     public applicationService: ApplicationService,
@@ -73,9 +74,10 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     this.action = this.isCreate ?
       new CreateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy) :
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy);
+    this.createUpdateTest = this.isCreate ? 'create policy' : 'update policy';
     this.updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
-      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
+      this.action
     );
   }
 
@@ -83,7 +85,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     if (this.validateGlobalSetting()) {
       return observableOf({
         success: false,
-        message: `Could not update policy: ${PolicyAlert.alertInvalidPolicyTriggerScheduleEmpty}`,
+        message: `Could not ${this.createUpdateTest}: ${PolicyAlert.alertInvalidPolicyTriggerScheduleEmpty}`,
       });
     }
     this.action.policy = this.currentPolicy;
@@ -96,7 +98,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
       map(request => ({
         success: !request.error,
         redirect: !request.error,
-        message: request.error ? `Could not update policy${request.message ? `: ${request.message}` : ''}` : null
+        message: request.error ? `Could not ${this.createUpdateTest}${request.message ? `: ${request.message}` : ''}` : null
       })),
       first(),
     );

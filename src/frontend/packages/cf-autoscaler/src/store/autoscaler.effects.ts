@@ -316,7 +316,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('update policy', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('create policy', err), action, actionType)
           ]));
   }
 
