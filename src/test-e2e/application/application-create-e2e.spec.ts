@@ -9,12 +9,14 @@ import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationBasePage } from './po/application-page.po';
 
-describe('Application Create', function () {
+describe('Application Create', () => {
 
   let nav: SideNavigation;
   let appWall: ApplicationsPage;
   let applicationE2eHelper: ApplicationE2eHelper;
-  let cfGuid, app: APIResource<IApp>;
+  let cfGuid;
+  let testAppName;
+  let app: APIResource<IApp>;
 
   beforeAll(() => {
     nav = new SideNavigation();
@@ -31,11 +33,11 @@ describe('Application Create', function () {
   // Fetch the default cf, org and space up front. This saves time later
   beforeAll(() => applicationE2eHelper.cfHelper.updateDefaultCfOrgSpace());
 
-  beforeEach(() => nav.goto(SideNavMenuItem.Applications));
+  it('Should reach applications tab', () => nav.goto(SideNavMenuItem.Applications));
 
   it('Should create app', () => {
     const testTime = (new Date()).toISOString();
-    const testAppName = ApplicationE2eHelper.createApplicationName(testTime);
+    testAppName = ApplicationE2eHelper.createApplicationName(testTime);
 
     // Press '+' button
     const baseCreateAppStep = appWall.clickCreateApp();
@@ -75,14 +77,19 @@ describe('Application Create', function () {
     // Wait for the stepper to exit
     createAppStepper.waitUntilNotShown();
 
+  });
+
+  it('Should reach application summary page', () => {
     // Determine the app guid and confirm we're on the app summary page
-    browser.wait(applicationE2eHelper.fetchAppInDefaultOrgSpace(testAppName).then((res) => {
-      expect(res.app).not.toBe(null);
-      app = res.app;
-      cfGuid = res.cfGuid;
-      const appSummaryPage = new ApplicationBasePage(res.cfGuid, app.metadata.guid);
-      appSummaryPage.waitForPage();
-    }));
+    browser.wait(
+      applicationE2eHelper.fetchAppInDefaultOrgSpace(testAppName).then((res) => {
+        expect(res.app).not.toBe(null);
+        app = res.app;
+        cfGuid = res.cfGuid;
+        const appSummaryPage = new ApplicationBasePage(res.cfGuid, app.metadata.guid);
+        appSummaryPage.waitForPage();
+      })
+    );
 
   });
 

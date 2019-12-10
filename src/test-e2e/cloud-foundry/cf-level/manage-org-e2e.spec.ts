@@ -10,7 +10,7 @@ import { OrgFormPage } from './org-form-page.po';
 describe('Manage Organization', () => {
   let e2eSetup;
   let orgFormPage: OrgFormPage;
-  let cfTopLevelPage: CfTopLevelPage;
+  let cfTopLevelPage: CfTopLevelPage = new CfTopLevelPage();
   let cfOrgLevelPage: CfOrgLevelPage;
   let cfHelper: CFHelpers;
   let cfGuid: string;
@@ -26,7 +26,9 @@ describe('Manage Organization', () => {
       .connectAllEndpoints(ConsoleUserType.admin)
       .loginAs(ConsoleUserType.admin)
       .getInfo(ConsoleUserType.admin);
+  });
 
+  beforeAll(() => {
     return protractor.promise.controlFlow().execute(() => {
       const defaultCf = e2e.secrets.getDefaultCFEndpoint();
       // Only available until after `info` call has completed as part of setup
@@ -44,10 +46,6 @@ describe('Manage Organization', () => {
     });
   });
 
-  beforeEach(() => {
-    cfTopLevelPage = new CfTopLevelPage();
-  });
-
   describe('#create', () => {
     beforeEach(() => {
       orgFormPage = new OrgFormPage(`/cloud-foundry/${cfGuid}/add-org`);
@@ -57,18 +55,18 @@ describe('Manage Organization', () => {
 
     it('- should reach create organization page', () => {
       expect(orgFormPage.isActivePage()).toBeTruthy();
+
+      // should go to organizations when cancelled
+      orgFormPage.stepper.cancel();
+      expect(cfTopLevelPage.subHeader.getTitleText()).toBe('Organizations');
     });
 
     it('- should create organization with default quota', () => {
       orgFormPage.stepper.setOrg(orgName);
       orgFormPage.submit();
       orgFormPage.stepper.waitUntilNotShown();
-      cfTopLevelPage.clickOnCard(orgName);
-    });
-
-    it('- should go to organizations when canceled', () => {
-      orgFormPage.stepper.cancel();
       expect(cfTopLevelPage.subHeader.getTitleText()).toBe('Organizations');
+      cfTopLevelPage.clickOnCard(orgName);
     });
 
     it('- should validate org name', () => {
@@ -93,21 +91,20 @@ describe('Manage Organization', () => {
   });
 
   describe('#destroy', () => {
-    beforeEach(() => {
+    it('- Go To Org', () => {
       cfTopLevelPage = CfTopLevelPage.forEndpoint(cfGuid);
       cfTopLevelPage.navigateTo();
       cfTopLevelPage.goToOrgTab();
     });
 
     it('- should delete org', () => {
-      expect(element(by.tagName('app-cards')).getText()).toContain(secondOrgName);
       cfTopLevelPage.deleteOrg(secondOrgName);
       expect(element(by.tagName('app-cards')).getText()).not.toContain(secondOrgName);
     });
   });
 
   describe('#show', () => {
-    beforeEach(() => {
+    it('- Go To Org', () => {
       cfTopLevelPage = CfTopLevelPage.forEndpoint(cfGuid);
       cfTopLevelPage.navigateTo();
       cfTopLevelPage.goToOrgTab();
@@ -128,7 +125,7 @@ describe('Manage Organization', () => {
   });
 
   describe('#update', () => {
-    beforeEach(() => {
+    it('- Go To Org', () => {
       cfTopLevelPage = CfTopLevelPage.forEndpoint(cfGuid);
       cfTopLevelPage.navigateTo();
       cfTopLevelPage.goToOrgTab();
