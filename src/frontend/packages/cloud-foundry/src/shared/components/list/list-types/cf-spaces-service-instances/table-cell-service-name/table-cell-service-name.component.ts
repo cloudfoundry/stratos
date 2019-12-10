@@ -6,7 +6,7 @@ import { filter, map } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IServiceExtra } from '../../../../../../../../core/src/core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { getCfService } from '../../../../../../features/service-catalog/services-helper';
 

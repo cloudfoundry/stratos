@@ -5,7 +5,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import {
   ApplicationEnvVarsHelper,
 } from '../../../../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import {
   ApplicationStateService,
 } from '../../../../../core/src/shared/components/application-state/application-state.service';

@@ -10,7 +10,7 @@ import {
   userFavoritesEntitySchema,
   userProfileEntitySchema,
 } from './base-entity-schemas';
-import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './core/entity-catalogue/entity-catalogue-entity';
+import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from '../../store/src/entity-catalog/entity-catalogue-entity';
 import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
 
 //

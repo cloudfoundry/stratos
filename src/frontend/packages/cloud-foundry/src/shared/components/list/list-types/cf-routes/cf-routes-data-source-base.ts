@@ -6,7 +6,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IRoute } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../../../../core/src/core/utils.service';
 import {
   ListPaginationMultiFilterChange,
@@ -17,7 +17,7 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { PaginationMonitor } from '../../../../../../../core/src/shared/monitors/pagination-monitor';
-import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
+import { CFListDataSource } from '../../../../cf-list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';

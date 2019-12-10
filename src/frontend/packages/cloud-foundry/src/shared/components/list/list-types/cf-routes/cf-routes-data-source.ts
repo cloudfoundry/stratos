@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { IRoute } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import {
   IListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';

@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogueEntity } from '../../entity-catalog/entity-catalogue-entity';
 import { SendEventAction } from '../../actions/internal-events.actions';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { InternalEventSeverity } from '../../types/internal-events.types';

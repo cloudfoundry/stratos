@@ -14,8 +14,8 @@ import {
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';

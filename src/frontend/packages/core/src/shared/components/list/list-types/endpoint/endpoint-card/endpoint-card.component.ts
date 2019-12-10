@@ -16,8 +16,8 @@ import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-sta
 import { SetHeaderEvent } from '../../../../../../../../store/src/actions/dashboard-actions';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
-import { StratosCatalogueEndpointEntity } from '../../../../../../core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { StratosCatalogueEndpointEntity } from '../../../../../../../../store/src/entity-catalog/entity-catalogue-entity';
+import { entityCatalogue } from '../../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import {
   coreEndpointListDetailsComponents,

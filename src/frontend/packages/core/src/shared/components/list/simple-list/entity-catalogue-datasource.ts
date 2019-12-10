@@ -1,6 +1,6 @@
 import { ListDataSource } from '../data-sources-controllers/list-data-source';
 import { Store } from '@ngrx/store';
-import { StratosBaseCatalogueEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogueEntity } from '../../../../../../store/src/entity-catalog/entity-catalogue-entity';
 import { ListConfig, ListViewTypes } from '../list.component.types';
 import { createTableColumnFavorite } from '../list-table/table-cell-favorite/table-cell-favorite.component';
 import { UserFavorite } from '../../../../../../store/src/types/user-favorites.types';

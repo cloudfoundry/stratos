@@ -10,8 +10,8 @@ import {
   QuotaDefinitionActionBuilder,
 } from '../../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
 import { quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';

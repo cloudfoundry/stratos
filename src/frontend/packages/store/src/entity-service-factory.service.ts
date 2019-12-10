@@ -1,11 +1,11 @@
 import { Inject, Injectable, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { GeneralEntityAppState } from '../../../store/src/app-state';
-import { EntityRequestAction } from '../../../store/src/types/request.types';
-import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
-import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
-import { EntityActionBuilderEntityConfig } from './entity-catalogue/entity-catalogue.types';
+import { GeneralEntityAppState } from './app-state';
+import { EntityRequestAction } from './types/request.types';
+import { EntityMonitorFactory } from '../../core/src/shared/monitors/entity-monitor.factory.service';
+import { entityCatalogue } from './entity-catalog/entity-catalogue.service';
+import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalogue.types';
 import { ENTITY_INFO_HANDLER, EntityInfoHandler, EntityService } from './entity-service';
 
 @Injectable()

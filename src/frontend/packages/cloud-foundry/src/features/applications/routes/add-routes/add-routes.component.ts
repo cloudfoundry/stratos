@@ -15,8 +15,8 @@ import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/ent
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
 import { IDomain, ISpace } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
+import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { pathGet } from '../../../../../../core/src/core/utils.service';
 import {
   StepOnNextFunction,

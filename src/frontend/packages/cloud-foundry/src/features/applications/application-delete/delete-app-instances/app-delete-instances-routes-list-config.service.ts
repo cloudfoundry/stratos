@@ -13,11 +13,11 @@ import {
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { IServiceBinding } from '../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { QParam } from '../../../../../../store/src/q-param';
+import { QParam } from '../../../../shared/q-param';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import {

@@ -1,4 +1,4 @@
-import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogueEntity } from './entity-catalog/entity-catalogue-entity';
 import { Action } from '@ngrx/store';
 
 export class InitCatalogueEntitiesAction implements Action {

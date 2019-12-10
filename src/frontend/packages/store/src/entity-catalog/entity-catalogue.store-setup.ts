@@ -1,4 +1,4 @@
-import { IRequestTypeState } from '../../../../store/src/app-state';
+import { IRequestTypeState } from '../app-state';
 import { entityCatalogue } from './entity-catalogue.service';
 
 // FIXME: These should be removed/come from the entity catalogue - STRAT-151

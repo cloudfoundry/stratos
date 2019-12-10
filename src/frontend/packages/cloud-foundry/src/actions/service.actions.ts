@@ -1,4 +1,4 @@
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';

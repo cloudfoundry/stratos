@@ -15,7 +15,7 @@ import {
   populateServicePlanExtraTyped,
 } from '../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { IServicePlan } from '../../../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';

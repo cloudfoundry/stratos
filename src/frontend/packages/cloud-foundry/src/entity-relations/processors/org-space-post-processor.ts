@@ -10,7 +10,7 @@ import {
   spaceEntityType,
 } from '../../cf-entity-types';
 import { getCFEntityKey } from '../../cf-entity-helpers';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
 import { APIResponse } from '../../../../store/src/actions/request.actions';
 import { GeneralEntityAppState, GeneralRequestDataState, IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';

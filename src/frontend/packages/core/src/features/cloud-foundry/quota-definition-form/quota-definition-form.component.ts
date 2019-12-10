@@ -14,10 +14,10 @@ import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-facto
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { IEntityMetadata } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { QuotaDefinitionActionBuilder } from '../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 
 export interface QuotaFormValues {

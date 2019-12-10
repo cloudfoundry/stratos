@@ -19,7 +19,7 @@ import {
   FavoritesConfigMapper,
   TFavoriteMapperFunction,
 } from '../shared/components/favorites-meta-card/favorite-config-mapper';
-import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
 import { LoggerService } from './logger.service';
 
 export interface IFavoriteEntity {

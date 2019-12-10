@@ -2,9 +2,9 @@ import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { StratosBaseCatalogueEntity } from '../entity-catalog/entity-catalogue-entity';
+import { entityCatalogue } from '../entity-catalog/entity-catalogue.service';
+import { IStratosEntityDefinition } from '../entity-catalog/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
 import { EntityRequestAction } from '../types/request.types';
 import { buildRequestEntityPipe } from './entity-request-base-handlers/build-entity-request.pipe';

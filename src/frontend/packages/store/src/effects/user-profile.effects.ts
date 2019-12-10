@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
 import { userProfileEntitySchema } from '../../../core/src/base-entity-schemas';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../entity-catalog/entity-catalogue.service';
 import { environment } from '../../../core/src/environments/environment';
 import {
   FetchUserProfileAction,

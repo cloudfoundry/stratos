@@ -27,8 +27,8 @@ import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
 

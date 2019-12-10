@@ -1,5 +1,5 @@
 import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
 import { CreateSpace, DeleteSpace, GetAllSpaces, GetSpace, UpdateSpace } from '../actions/space.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';

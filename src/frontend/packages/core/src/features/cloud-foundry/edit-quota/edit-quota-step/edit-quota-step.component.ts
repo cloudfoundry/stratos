@@ -17,9 +17,9 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../../../../cloud-foundr
 import { AppState } from '../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../core/cf-api.types';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../core/entity-catalogue/entity-catalogue.types';
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';

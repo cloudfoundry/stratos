@@ -1,4 +1,4 @@
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogueEntity } from '../../entity-catalog/entity-catalogue-entity';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../../actions/pagination.actions';
 import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
 import { WrapperRequestActionSuccess } from '../../types/request.types';

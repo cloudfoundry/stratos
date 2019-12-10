@@ -6,11 +6,11 @@ import { DeleteUserProvidedInstance } from '../../../../cloud-foundry/src/action
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { IServiceBinding } from '../../../../core/src/core/cf-api-svc.types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
 import {
   EntityCatalogueEntityConfig,
   IEntityMetadata,
-} from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+} from '../../../../store/src/entity-catalog/entity-catalogue.types';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';

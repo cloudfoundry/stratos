@@ -15,7 +15,7 @@ import { EndpointModel } from '../../../../../../../store/src/types/endpoint.typ
 import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { LoggerService } from '../../../../../core/logger.service';
 import {
   ConnectEndpointDialogComponent,

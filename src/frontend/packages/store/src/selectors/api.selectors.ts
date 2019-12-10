@@ -1,7 +1,7 @@
 import { compose } from '@ngrx/store';
 
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogueHelpers } from '../entity-catalog/entity-catalogue.helper';
+import { EntityCatalogueEntityConfig } from '../entity-catalog/entity-catalogue.types';
 import { GeneralEntityAppState, IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState } from '../app-state';
 import { ActionState, RequestInfoState, UpdatingSection } from '../reducers/api-request-reducer/types';
 import { APIResource } from '../types/api.types';

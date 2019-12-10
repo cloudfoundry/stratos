@@ -27,12 +27,12 @@ import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEndpointEntity,
   StratosCatalogueEntity,
-} from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
+} from '../../store/src/entity-catalog/entity-catalogue-entity';
+import { entityCatalogue } from '../../store/src/entity-catalog/entity-catalogue.service';
 import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
-} from '../../core/src/core/entity-catalogue/entity-catalogue.types';
+} from '../../store/src/entity-catalog/entity-catalogue.types';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import {

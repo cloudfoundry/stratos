@@ -1,7 +1,7 @@
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogueEntityConfig } from '../../../store/src/entity-catalog/entity-catalogue.types';
 import { getPaginationKey } from '../../../store/src/actions/pagination.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { GeneralEntityAppState, GeneralRequestDataState, IRequestTypeState } from '../../../store/src/app-state';

@@ -5,15 +5,15 @@ import {
   PreApiRequest,
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
-} from '../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+} from '../entity-request-pipeline/entity-request-pipeline.types';
 import {
   PaginationPageIteratorConfig,
-} from '../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { StratosStatus } from '../../shared/shared.types';
-import { EndpointAuthTypeConfig } from '../extension/extension-types';
-import { Omit } from '../utils.service';
-import { GeneralEntityAppState } from '../../../../store/src/app-state';
+} from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
+import { EntitySchema } from '../helpers/entity-schema';
+import { StratosStatus } from '../../../core/src/shared/shared.types';
+import { EndpointAuthTypeConfig } from '../../../core/src/core/extension/extension-types';
+import { Omit } from '../../../core/src/core/utils.service';
+import { GeneralEntityAppState } from '../app-state';
 import { Store } from '@ngrx/store';
 
 export interface EntityCatalogueEntityConfig {

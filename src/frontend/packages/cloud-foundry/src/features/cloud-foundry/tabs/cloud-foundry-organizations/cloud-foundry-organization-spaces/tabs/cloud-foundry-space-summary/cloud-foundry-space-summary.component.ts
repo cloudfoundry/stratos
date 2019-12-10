@@ -5,7 +5,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../../../../../../../../core/src/core/current-user-permissions.config';
-import { entityCatalogue } from '../../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import {
   ConfirmationDialogService,

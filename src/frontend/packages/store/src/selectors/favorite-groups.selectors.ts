@@ -1,7 +1,7 @@
 import { compose } from '@ngrx/store';
 
 import { STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../entity-catalog/entity-catalogue.service';
 import { deriveEndpointFavoriteFromFavorite } from '../../../core/src/core/user-favorite-helpers';
 import { IRequestEntityTypeState, InternalAppState } from '../app-state';
 import { IUserFavoriteGroup, IUserFavoritesGroups, IUserFavoritesGroupsState } from '../types/favorite-groups.types';

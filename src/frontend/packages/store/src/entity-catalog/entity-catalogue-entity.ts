@@ -1,15 +1,15 @@
 import { ActionReducer, Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 
-import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { NormalizedResponse } from '../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { APISuccessOrFailedAction, EntityRequestAction } from '../../../../store/src/types/request.types';
-import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites.types';
-import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
-import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
-import { EntityMonitor } from '../../shared/monitors/entity-monitor';
+import { AppState, IRequestEntityTypeState } from '../app-state';
+import { EntitySchema } from '../helpers/entity-schema';
+import { NormalizedResponse } from '../types/api.types';
+import { EndpointModel } from '../types/endpoint.types';
+import { APISuccessOrFailedAction, EntityRequestAction } from '../types/request.types';
+import { IEndpointFavMetadata } from '../types/user-favorites.types';
+import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
+import { getFullEndpointApiUrl } from '../../../core/src/features/endpoints/endpoint-helpers';
+import { EntityMonitor } from '../../../core/src/shared/monitors/entity-monitor';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { EntityActionDispatcherManager } from './action-dispatcher/action-dispatcher';
 import {
@@ -28,7 +28,7 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from './entity-catalogue.types';
-import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../../../store/src/entity-request-pipeline/pipeline.types';
+import { EntityPipelineEntity, stratosEndpointGuidKey } from '../entity-request-pipeline/pipeline.types';
 
 export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata,

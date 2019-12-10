@@ -4,8 +4,8 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
+import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import {
   StackedInputActionResult,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';

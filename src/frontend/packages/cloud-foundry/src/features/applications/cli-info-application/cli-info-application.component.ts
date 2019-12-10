@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { EntityService } from '../../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
+import { EntityService } from '../../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { getFullEndpointApiUrl } from '../../../../../core/src/features/endpoints/endpoint-helpers';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';

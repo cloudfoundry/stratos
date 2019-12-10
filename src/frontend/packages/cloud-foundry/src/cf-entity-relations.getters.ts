@@ -1,13 +1,13 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
-import { StratosBaseCatalogueEntity } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { StratosBaseCatalogueEntity } from '../../store/src/entity-catalog/entity-catalogue-entity';
+import { entityCatalogue } from '../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../store/src/entity-catalog/entity-catalogue.types';
 import { InternalAppState } from '../../store/src/app-state';
 import {
   getPaginationParams,
 } from '../../store/src/entity-request-pipeline/pagination-request-base-handlers/get-params.pipe';
-import { QParam } from '../../store/src/q-param';
+import { QParam } from './shared/q-param';
 import { selectPaginationState } from '../../store/src/selectors/pagination.selectors';
 import { isPaginatedAction, PaginatedAction, PaginationParam } from '../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../store/src/types/request.types';

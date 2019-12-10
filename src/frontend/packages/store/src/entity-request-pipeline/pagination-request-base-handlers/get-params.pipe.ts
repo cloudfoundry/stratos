@@ -1,6 +1,6 @@
 import { HttpParams } from '@angular/common/http';
 
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogueEntity } from '../../entity-catalog/entity-catalogue-entity';
 import { InternalAppState } from '../../app-state';
 import { resultPerPageParam, resultPerPageParamDefault } from '../../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../../selectors/pagination.selectors';

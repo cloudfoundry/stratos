@@ -22,8 +22,8 @@ import {
   ScopeStrings,
 } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
-import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
-import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
+import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from '../../../store/src/entity-catalogue-test.module';
+import { EntityCatalogueEntityConfig } from '../../../store/src/entity-catalog/entity-catalogue.types';
 
 const ffSchema = cfEntityFactory(featureFlagEntityType);
 

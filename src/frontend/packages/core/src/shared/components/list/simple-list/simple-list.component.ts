@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, ChangeDetectorRef, NgZone, ComponentFactoryResolver, ViewChild, Injector } from '@angular/core';
-import { StratosCatalogueEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
+import { StratosCatalogueEntity } from '../../../../../../store/src/entity-catalog/entity-catalogue-entity';
 import { ListComponent } from '../list.component';
 import { ListConfig, ListViewTypes } from '../list.component.types';
 import { ListHostDirective } from './list-host.directive';

@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
 
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { IEntityMetadata } from '../../../../../../../store/src/entity-catalog/entity-catalogue.types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
-import { QParam, QParamJoiners } from '../../../../../../../store/src/q-param';
+import { QParam, QParamJoiners } from '../../../../q-param';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';

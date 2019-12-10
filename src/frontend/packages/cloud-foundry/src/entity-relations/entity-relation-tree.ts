@@ -1,5 +1,5 @@
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
 
 /**
  * A structure which represents the tree like layout of entity dependencies. For example organization --> space --> routes

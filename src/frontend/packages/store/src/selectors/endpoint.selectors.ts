@@ -1,7 +1,7 @@
 import { compose, createSelector } from '@ngrx/store';
 
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { EntityCatalogueHelpers } from '../entity-catalog/entity-catalogue.helper';
 import { InternalAppState, IRequestEntityTypeState } from '../app-state';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { EndpointModel, EndpointState } from '../types/endpoint.types';

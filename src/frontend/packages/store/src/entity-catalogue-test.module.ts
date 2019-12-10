@@ -3,11 +3,11 @@ import { ReducerManager, Store } from '@ngrx/store';
 
 import {
   requestDataReducerFactory,
-} from '../../../store/src/reducers/api-request-data-reducer/request-data-reducer.factory';
-import { chainApiReducers, requestActions } from '../../../store/src/reducers/api-request-reducers.generator.helpers';
+} from './reducers/api-request-data-reducer/request-data-reducer.factory';
+import { chainApiReducers, requestActions } from './reducers/api-request-reducers.generator.helpers';
 import { InitCatalogueEntitiesAction } from './entity-catalogue.actions';
-import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue, TestEntityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { StratosBaseCatalogueEntity } from './entity-catalog/entity-catalogue-entity';
+import { entityCatalogue, TestEntityCatalogue } from './entity-catalog/entity-catalogue.service';
 
 export const TEST_CATALOGUE_ENTITIES = '__TEST_CATALOGUE_ENTITIES__';
 

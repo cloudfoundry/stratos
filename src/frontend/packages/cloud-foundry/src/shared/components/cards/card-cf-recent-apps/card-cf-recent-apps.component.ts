@@ -9,7 +9,7 @@ import {
   CloudFoundryEndpointService,
 } from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { IApp } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { appStatsEntityType } from '../../../../cf-entity-types';

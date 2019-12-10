@@ -1,4 +1,4 @@
-import { EntityCatalogueHelpers } from '../../core/src/core/entity-catalogue/entity-catalogue.helper';
+import { EntityCatalogueHelpers } from '../../store/src/entity-catalog/entity-catalogue.helper';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 
 export function getCFEntityKey(type: string) {

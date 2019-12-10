@@ -3,8 +3,8 @@ import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { isEntityBlocked } from '../../../core/src/core/entity-service';
+import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
+import { isEntityBlocked } from '../../../store/src/entity-service';
 import { pathGet } from '../../../core/src/core/utils.service';
 import { environment } from '../../../core/src/environments/environment';
 import { SetInitialParams } from '../../../store/src/actions/pagination.actions';

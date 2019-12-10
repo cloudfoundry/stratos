@@ -9,7 +9,7 @@ import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { TabNavService } from '../../../../tab-nav.service';
-import { EntityCatalogueModule } from '../../../core/entity-catalogue.module';
+import { EntityCatalogueModule } from '../../../../../store/src/entity-catalogue.module';
 import { generateStratosEntities } from '../../../base-entity-types';
 
 describe('ApiEndpointTypeSelectPageComponent', () => {

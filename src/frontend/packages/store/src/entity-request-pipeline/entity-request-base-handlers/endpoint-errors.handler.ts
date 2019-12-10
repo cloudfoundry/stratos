@@ -1,4 +1,4 @@
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogueEntity } from '../../entity-catalog/entity-catalogue-entity';
 import { SendEventAction } from '../../actions/internal-events.actions';
 import { endpointSchemaKey } from '../../helpers/entity-factory';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';

@@ -3,8 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { endpointEntitySchema } from '../../../../../core/src/base-entity-schemas';
-import { EntityCatalogueHelpers } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
-import { EntityCatalogueEntityConfig } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogueHelpers } from '../../../../../store/src/entity-catalog/entity-catalogue.helper';
+import { EntityCatalogueEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { testSCFEndpoint, testSCFEndpointGuid } from '../../../../../core/test-framework/store-test-helper';
 import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations-spec-helper';

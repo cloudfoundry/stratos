@@ -1,4 +1,4 @@
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogueEntity } from '../../entity-catalog/entity-catalogue-entity';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { EntityRequestAction } from '../../types/request.types';
 import { startEntityHandler } from './start-entity-request.handler';

@@ -9,8 +9,8 @@ import {
   ISpace,
   ISpaceQuotaDefinition,
 } from '../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
+import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';

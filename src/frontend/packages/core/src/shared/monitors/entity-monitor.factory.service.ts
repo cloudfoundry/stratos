@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../../../store/src/entity-catalog/entity-catalogue.types';
 import { EntityMonitor } from './entity-monitor';
 
 @Injectable()

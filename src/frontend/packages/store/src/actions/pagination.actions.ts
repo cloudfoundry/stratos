@@ -3,7 +3,7 @@ import { Action } from '@ngrx/store';
 import {
   EntityCatalogueEntityConfig,
   extractEntityCatalogueEntityConfig,
-} from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+} from '../entity-catalog/entity-catalogue.types';
 import { PaginationClientFilter, PaginationParam } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';

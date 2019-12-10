@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 import { switchMap } from 'rxjs/operators';
 
-import { StratosCatalogueEndpointEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosCatalogueEndpointEntity } from '../../entity-catalog/entity-catalogue-entity';
 import { MakeEntityRequestPipe } from '../entity-request-pipeline.types';
 
 export const makeRequestEntityPipe: MakeEntityRequestPipe = (

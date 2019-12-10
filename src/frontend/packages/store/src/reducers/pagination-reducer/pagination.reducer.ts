@@ -1,6 +1,6 @@
-import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
+import { InitCatalogueEntitiesAction } from '../../entity-catalogue.actions';
+import { entityCatalogue } from '../../entity-catalog/entity-catalogue.service';
+import { getDefaultStateFromEntityCatalogue } from '../../entity-catalog/entity-catalogue.store-setup';
 import {
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,

@@ -1,6 +1,5 @@
 import { RemoveParams } from '../../actions/pagination.actions';
 import { PaginationEntityState } from '../../types/pagination.types';
-import { QParam } from '../../q-param';
 
 export function paginationRemoveParams(state: PaginationEntityState, action: RemoveParams) {
 

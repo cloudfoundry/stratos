@@ -22,15 +22,15 @@ import {
 import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityService } from '../../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
+import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityService } from '../../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
+import { QParam, QParamJoiners } from '../../../shared/q-param';
 import {
   getPaginationObservables,
   PaginationObservables,

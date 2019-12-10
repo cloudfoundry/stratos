@@ -7,7 +7,7 @@ import { filter, first, map } from 'rxjs/operators';
 import { getIdFromRoute } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { MetricsAPIAction, MetricsAPITargets } from '../../../../../store/src/actions/metrics-api.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { EndpointIcon } from '../../endpoints/endpoint-helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';

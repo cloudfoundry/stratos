@@ -11,8 +11,8 @@ import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-sta
 import { applicationEntityType, appStatsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppSummary } from '../../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityService } from '../../../../../../../../core/src/core/entity-service';
+import { entityCatalogue } from '../../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { getFullEndpointApiUrl } from '../../../../../../../../core/src/features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';

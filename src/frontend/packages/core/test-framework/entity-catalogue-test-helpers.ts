@@ -1,6 +1,6 @@
-import { StratosBaseCatalogueEntity } from '../src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
+import { StratosBaseCatalogueEntity } from '../..store/src/entity-catalog/entity-catalogue-entity';
+import { entityCatalogue } from '../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../store/src/entity-catalog/entity-catalogue.types';
 
 export interface EntityCatalogueHelperConfig {
   catalogueEntities?: [EntityCatalogueEntityConfig, StratosBaseCatalogueEntity][];

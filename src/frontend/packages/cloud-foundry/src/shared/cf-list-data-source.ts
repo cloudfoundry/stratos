@@ -1,4 +1,4 @@
-import { ListDataSource } from '../../core/src/shared/components/list/data-sources-controllers/list-data-source';
+import { ListDataSource } from '../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { QParam } from './q-param';
 
 export abstract class CFListDataSource<T, A = T> extends ListDataSource<T, A> {

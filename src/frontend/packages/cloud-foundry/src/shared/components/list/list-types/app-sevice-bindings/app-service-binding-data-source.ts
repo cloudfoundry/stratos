@@ -15,7 +15,7 @@ import {
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { getRowMetadata } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { IServiceBinding } from '../../../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';

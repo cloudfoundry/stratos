@@ -7,9 +7,9 @@ import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
 import { FetchBranchesForProject } from '../../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { GitCommit, GitRepo } from '../../../../../../../../cloud-foundry/src/store/types/git.types';
-import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityService } from '../../../../../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
+import { entityCatalogue } from '../../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityService } from '../../../../../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../../../core/src/shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';

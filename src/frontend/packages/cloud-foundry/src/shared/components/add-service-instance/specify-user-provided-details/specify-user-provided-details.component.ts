@@ -23,7 +23,7 @@ import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { IUserProvidedServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { safeUnsubscribe, urlValidationExpression } from '../../../../../../core/src/core/utils.service';
 import { environment } from '../../../../../../core/src/environments/environment';
 import {

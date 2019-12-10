@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import {
   ApplicationStateIconComponent,
 } from '../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';

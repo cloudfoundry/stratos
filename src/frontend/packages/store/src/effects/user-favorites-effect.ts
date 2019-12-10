@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../entity-catalog/entity-catalogue.service';
 import { UserFavoriteManager } from '../../../core/src/core/user-favorite-manager';
 import { environment } from '../../../core/src/environments/environment.prod';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';

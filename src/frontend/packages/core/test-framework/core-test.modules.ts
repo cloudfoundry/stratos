@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 
 import { generateStratosEntities } from '../../core/src/base-entity-types';
-import { CATALOGUE_ENTITIES, EntityCatalogueFeatureModule } from '../../core/src/core/entity-catalogue.module';
-import { entityCatalogue, TestEntityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CATALOGUE_ENTITIES, EntityCatalogueFeatureModule } from '../../store/src/entity-catalogue.module';
+import { entityCatalogue, TestEntityCatalogue } from '../../store/src/entity-catalog/entity-catalogue.service';
 
 @NgModule({
   imports: [

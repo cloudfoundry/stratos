@@ -5,12 +5,12 @@ import { first, map } from 'rxjs/operators';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { selectSessionData } from '../../../../../../store/src/reducers/auth.reducer';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 import { Observable } from 'rxjs';
-import { IStratosEndpointDefinition } from '../../../../core/entity-catalogue/entity-catalogue.types';
+import { IStratosEndpointDefinition } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
 
 interface ICreateEndpointTilesData extends ITileData {
   type: string;

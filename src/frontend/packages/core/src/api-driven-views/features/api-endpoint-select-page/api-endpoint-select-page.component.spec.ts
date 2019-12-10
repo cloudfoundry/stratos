@@ -7,7 +7,7 @@ import { CoreModule } from '../../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { TabNavService } from '../../../../tab-nav.service';
-import { EntityCatalogueModule } from '../../../core/entity-catalogue.module';
+import { EntityCatalogueModule } from '../../../../../store/src/entity-catalogue.module';
 import { generateStratosEntities } from '../../../base-entity-types';
 
 describe('ApiEndpointSelectPageComponent', () => {

@@ -1,8 +1,8 @@
 import { HttpRequest } from '@angular/common/http';
 import { Action } from '@ngrx/store';
 
-import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
+import { EntityCatalogueEntityConfig } from '../entity-catalog/entity-catalogue.types';
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
 import { EntitySchema } from '../helpers/entity-schema';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';

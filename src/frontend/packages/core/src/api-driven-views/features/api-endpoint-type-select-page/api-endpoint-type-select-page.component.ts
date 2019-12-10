@@ -3,7 +3,7 @@ import { GeneralAppState } from '../../../../../store/src/app-state';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { ApiEntityType } from '../../api-drive-views.types';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { map } from 'rxjs/operators';
 import { Router, ActivatedRoute } from '@angular/router';

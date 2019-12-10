@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
-import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
-import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
+import { InitCatalogueEntitiesAction } from '../../entity-catalogue.actions';
+import { getDefaultStateFromEntityCatalogue } from '../../entity-catalog/entity-catalogue.store-setup';
 import {
   RECURSIVE_ENTITY_RESET,
   RECURSIVE_ENTITY_SET_DELETED,

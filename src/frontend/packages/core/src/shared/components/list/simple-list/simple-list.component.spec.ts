@@ -4,10 +4,10 @@ import { SimpleListComponent } from './simple-list.component';
 import { SharedModule } from '../../../shared.module';
 import { CoreModule } from '../../../../core/core.module';
 import { AppReducersModule } from '../../../../../../store/src/reducers.module';
-import { StratosCatalogueEntity, StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
-import { StratosEndpointExtensionDefinition } from '../../../../core/entity-catalogue/entity-catalogue.types';
+import { StratosCatalogueEntity, StratosCatalogueEndpointEntity } from '../../../../../../store/src/entity-catalog/entity-catalogue-entity';
+import { StratosEndpointExtensionDefinition } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
-import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../core/entity-catalogue-test.module';
+import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../../../store/src/entity-catalogue-test.module';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 

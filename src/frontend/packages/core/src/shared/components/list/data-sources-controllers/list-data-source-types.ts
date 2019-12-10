@@ -6,7 +6,7 @@ import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.a
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
 import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
-import { EntityCatalogueEntityConfig } from '../../../../core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogueEntityConfig } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 
 export interface IEntitySelectItem {

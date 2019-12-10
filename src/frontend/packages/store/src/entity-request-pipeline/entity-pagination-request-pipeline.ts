@@ -6,9 +6,9 @@ import { first, map, switchMap } from 'rxjs/operators';
 import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEntity,
-} from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+} from '../entity-catalog/entity-catalogue-entity';
+import { entityCatalogue } from '../entity-catalog/entity-catalogue.service';
+import { IStratosEntityDefinition } from '../entity-catalog/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
 import { PaginationFlattenerConfig } from '../helpers/paginated-request-helpers';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';

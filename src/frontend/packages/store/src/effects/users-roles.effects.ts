@@ -15,7 +15,7 @@ import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { OrgUserRoleNames } from '../../../cloud-foundry/src/store/types/user.types';
 import { CfRoleChange } from '../../../cloud-foundry/src/store/types/users-roles.types';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../entity-catalog/entity-catalogue.service';
 import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
 import { SessionDataEndpoint } from '../types/auth.types';

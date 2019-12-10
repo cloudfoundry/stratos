@@ -38,8 +38,8 @@ import {
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
-import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
-import { EntityServiceFactory } from '../../core/entity-service-factory.service';
+import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
 @Injectable()

@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEndpointEntity,
-} from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+} from '../entity-catalog/entity-catalogue-entity';
 import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, InternalAppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';

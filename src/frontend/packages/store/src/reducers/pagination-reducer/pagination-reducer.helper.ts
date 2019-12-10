@@ -14,7 +14,7 @@ import {
 } from 'rxjs/operators';
 
 import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../entity-catalog/entity-catalogue.service';
 import { sortStringify } from '../../../../core/src/core/utils.service';
 import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
 import { SetInitialParams } from '../../actions/pagination.actions';

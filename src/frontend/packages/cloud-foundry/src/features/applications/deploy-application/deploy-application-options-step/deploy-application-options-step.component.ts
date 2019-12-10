@@ -14,7 +14,7 @@ import { stackEntityType } from '../../../../../../cloud-foundry/src/cf-entity-t
 import { selectCfDetails } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { OverrideAppDetails } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

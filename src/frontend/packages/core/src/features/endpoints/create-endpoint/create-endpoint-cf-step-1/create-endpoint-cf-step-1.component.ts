@@ -15,8 +15,8 @@ import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-fa
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
 import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
-import { StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { StratosCatalogueEndpointEntity } from '../../../../../../store/src/entity-catalog/entity-catalogue-entity';
+import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getFullEndpointApiUrl } from '../../endpoint-helpers';

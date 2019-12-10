@@ -1,6 +1,6 @@
-import { IRequestEntityTypeState } from '../../../../store/src/app-state';
-import { ExtraApiReducers } from '../../../../store/src/reducers/api-request-reducers.generator.helpers';
-import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
+import { IRequestEntityTypeState } from '../app-state';
+import { ExtraApiReducers } from '../reducers/api-request-reducers.generator.helpers';
+import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
 import {
   StratosBaseCatalogueEntity,

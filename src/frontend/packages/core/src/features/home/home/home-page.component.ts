@@ -10,7 +10,7 @@ import { UserFavorite } from '../../../../../store/src/types/user-favorites.type
 import { EndpointsService } from '../../../core/endpoints.service';
 import { LoggerService } from '../../../core/logger.service';
 import { UserFavoriteManager } from '../../../core/user-favorite-manager';
-import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
+import { EntityCatalogueHelpers } from '../../../../../store/src/entity-catalog/entity-catalogue.helper';
 
 @Component({
   selector: 'app-home-page',

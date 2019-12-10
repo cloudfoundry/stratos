@@ -11,7 +11,7 @@ import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthCheck, EndpointHealthChecks } from '../../endpoints-health-checks';
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
-import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
 import { UserService } from './user.service';
 
 

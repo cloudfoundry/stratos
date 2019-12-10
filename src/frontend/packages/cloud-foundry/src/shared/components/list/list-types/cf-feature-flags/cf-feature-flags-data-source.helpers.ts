@@ -3,7 +3,7 @@ import { featureFlagEntityType } from '../../../../../../../cloud-foundry/src/cf
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 

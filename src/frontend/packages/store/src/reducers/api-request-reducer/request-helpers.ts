@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { StratosBaseCatalogueEntity } from '../../entity-catalog/entity-catalogue-entity';
+import { entityCatalogue } from '../../entity-catalog/entity-catalogue.service';
 import { pathGet } from '../../../../core/src/core/utils.service';
 import { APIResponse } from '../../actions/request.actions';
 import { BaseRequestState, GeneralAppState } from '../../app-state';
@@ -17,7 +17,7 @@ import {
   WrapperRequestActionSuccess,
 } from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
-import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
 
 export function getEntityRequestState(
   state: BaseRequestState,

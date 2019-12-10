@@ -7,7 +7,7 @@ import { CFEntitySchema } from '../../../../../../../cloud-foundry/src/cf-entity
 import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';

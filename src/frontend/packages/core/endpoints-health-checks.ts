@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { EndpointModel } from '../store/src/types/endpoint.types';
-import { entityCatalogue } from './src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../store/src/entity-catalog/entity-catalogue.service';
 
 
 export class EndpointHealthCheck {

@@ -5,9 +5,9 @@ import { map } from 'rxjs/internal/operators/map';
 import { GetAllEndpoints } from '../../../../../../../../store/src/actions/endpoint.actions';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { TableCellCustom } from '../../../list.types';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 
 export interface RowWithEndpointId {
   endpointId: string;

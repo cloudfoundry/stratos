@@ -2,7 +2,7 @@ import { HttpRequest } from '@angular/common/http';
 import { combineLatest, Observable, of, range } from 'rxjs';
 import { map, mergeMap, reduce } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../entity-catalog/entity-catalogue.service';
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { PaginatedAction } from '../../types/pagination.types';
 import {

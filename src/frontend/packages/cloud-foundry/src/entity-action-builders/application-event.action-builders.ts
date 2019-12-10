@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAllAppEvents } from '../actions/app-event.actions';
 
 export interface ApplicationEventActionBuilders extends OrchestratedActionBuilders {

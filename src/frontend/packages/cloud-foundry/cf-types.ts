@@ -1,4 +1,4 @@
-import { EntityCatalogueEntityConfig } from '../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogueEntityConfig } from '../store/src/entity-catalog/entity-catalogue.types';
 
 export const CF_ENDPOINT_TYPE = 'cf';
 

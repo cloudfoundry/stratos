@@ -7,10 +7,10 @@ import {
   UserFavorite,
   UserFavoriteEndpoint,
 } from '../../../../../store/src/types/user-favorites.types';
-import { StratosBaseCatalogueEntity } from '../../../core/entity-catalogue/entity-catalogue-entity';
-import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata, IStratosEntityDefinition } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { StratosBaseCatalogueEntity } from '../../../../../store/src/entity-catalog/entity-catalogue-entity';
+import { EntityCatalogueHelpers } from '../../../../../store/src/entity-catalog/entity-catalogue.helper';
+import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { IEntityMetadata, IStratosEntityDefinition } from '../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';

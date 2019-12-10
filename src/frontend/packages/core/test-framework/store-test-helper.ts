@@ -15,8 +15,8 @@ import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { BaseEntityValues } from '../../store/src/types/entity.types';
 import { WrapperRequestActionSuccess } from '../../store/src/types/request.types';
 import { endpointEntitySchema } from '../src/base-entity-schemas';
-import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../store/src/entity-catalog/entity-catalogue.types';
 
 export const testSCFEndpointGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 const testSCFSessionEndpoint: SessionDataEndpoint = {

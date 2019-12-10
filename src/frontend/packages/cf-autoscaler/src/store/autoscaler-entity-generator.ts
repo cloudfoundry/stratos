@@ -5,8 +5,8 @@ import { IOrganization } from '../../../core/src/core/cf-api.types';
 import {
   StratosBaseCatalogueEntity,
   StratosCatalogueEntity,
-} from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { IStratosEndpointDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+} from '../../../store/src/entity-catalog/entity-catalogue-entity';
+import { IStratosEndpointDefinition } from '../../../store/src/entity-catalog/entity-catalogue.types';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import {

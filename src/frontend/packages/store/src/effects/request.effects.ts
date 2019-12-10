@@ -5,7 +5,7 @@ import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators
 
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { validateEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../entity-catalog/entity-catalogue.service';
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { UtilsService } from '../../../core/src/core/utils.service';
 import { ClearPaginationOfEntity, ClearPaginationOfType, SET_PAGE_BUSY } from '../actions/pagination.actions';

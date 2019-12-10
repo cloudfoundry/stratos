@@ -4,9 +4,9 @@ import { Store } from '@ngrx/store';
 import {
   EntityCatalogueTestModuleManualStore,
   TEST_CATALOGUE_ENTITIES,
-} from '../../../core/src/core/entity-catalogue-test.module';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+} from '../../../store/src/entity-catalogue-test.module';
+import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../../store/src/entity-catalog/entity-catalogue.types';
 import { environment } from '../../../core/src/environments/environment';
 import {
   createBasicStoreModule,

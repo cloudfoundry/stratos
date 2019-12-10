@@ -1,7 +1,7 @@
 import { HttpParams } from '@angular/common/http';
 
-import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { StratosBaseCatalogueEntity } from '../entity-catalog/entity-catalogue-entity';
+import { IStratosEntityDefinition } from '../entity-catalog/entity-catalogue.types';
 import { JetstreamResponse, PagedJetstreamResponse } from './entity-request-pipeline.types';
 
 export function isJetstreamRequest(definition: IStratosEntityDefinition): boolean {

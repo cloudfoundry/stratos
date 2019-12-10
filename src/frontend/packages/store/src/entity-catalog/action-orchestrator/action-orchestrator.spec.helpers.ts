@@ -1,6 +1,6 @@
 import { ActionOrchestrator } from './action-orchestrator';
-import { EntityRequestAction } from '../../../../../store/src/types/request.types';
-import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import { EntityRequestAction } from '../../types/request.types';
+import { PaginatedAction } from '../../types/pagination.types';
 
 const BASE_ACTIONS = [
   'get',

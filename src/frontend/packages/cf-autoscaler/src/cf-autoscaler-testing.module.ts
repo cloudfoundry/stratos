@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 
 import { generateCFEntities } from '../../cloud-foundry/src/cf-entity-generator';
-import { CATALOGUE_ENTITIES, EntityCatalogueFeatureModule } from '../../core/src/core/entity-catalogue.module';
-import { entityCatalogue, TestEntityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CATALOGUE_ENTITIES, EntityCatalogueFeatureModule } from '../../store/src/entity-catalogue.module';
+import { entityCatalogue, TestEntityCatalogue } from '../../store/src/entity-catalog/entity-catalogue.service';
 import { generateASEntities } from './store/autoscaler-entity-generator';
 
 @NgModule({

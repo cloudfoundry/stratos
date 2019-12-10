@@ -24,7 +24,7 @@ import {
   UserProfileInfoUpdates,
 } from '../../../../store/src/types/user-profile.types';
 import { userProfileEntitySchema } from '../../base-entity-schemas';
-import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
 
 

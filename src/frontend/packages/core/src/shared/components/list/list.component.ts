@@ -53,8 +53,8 @@ import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pa
 import { GeneralAppState } from '../../../../../store/src/app-state';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
   EntitySelectConfig,

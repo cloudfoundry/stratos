@@ -1,4 +1,4 @@
-import { QParam, QParamJoiners } from '../../../store/src/q-param';
+import { QParam, QParamJoiners } from '../shared/q-param';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { appEventEntityType } from '../cf-entity-types';

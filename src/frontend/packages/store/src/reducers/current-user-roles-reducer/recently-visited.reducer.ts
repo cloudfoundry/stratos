@@ -10,7 +10,7 @@ import {
 import { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
 import { IRecentlyVisitedState } from '../../types/recently-visited.types';
 import { addNewHit, cleanRecentsList, getDefaultRecentState } from './recently-visited.reducer.helpers';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../entity-catalog/entity-catalogue.service';
 import { STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
 import { endpointSchemaKey } from '../../helpers/entity-factory';
 

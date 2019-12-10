@@ -24,7 +24,7 @@ import {
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { UserProvidedServiceActionBuilder } from '../../../../../entity-action-builders/user-provided-service.action-builders';
 

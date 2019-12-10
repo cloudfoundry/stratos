@@ -1,6 +1,6 @@
 import { Action, Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../store/src/app-state';
+import { AppState } from '../../app-state';
 import {
   ActionOrchestrator,
   OrchestratedActionBuilder,

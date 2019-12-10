@@ -1,8 +1,8 @@
 import { Action } from '@ngrx/store';
 
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { IStratosEntityDefinition } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { StratosBaseCatalogueEntity } from '../../entity-catalog/entity-catalogue-entity';
+import { entityCatalogue } from '../../entity-catalog/entity-catalogue.service';
+import { IStratosEntityDefinition } from '../../entity-catalog/entity-catalogue.types';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../types/api.types';
 import { EntityRequestAction } from '../../types/request.types';

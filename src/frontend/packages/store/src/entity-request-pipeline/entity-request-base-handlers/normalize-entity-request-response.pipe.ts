@@ -1,4 +1,4 @@
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogueEntity } from '../../entity-catalog/entity-catalogue-entity';
 import { MultiEndpointResponse } from './handle-multi-endpoints.pipe';
 
 // TODO: Type the output of this pipe. #3976

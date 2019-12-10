@@ -7,7 +7,7 @@ import { of } from 'rxjs';
 
 import { CloudFoundryComponentsModule } from '../../cloud-foundry/src/shared/components/components.module';
 import { CoreModule } from '../../core/src/core/core.module';
-import { EntityCatalogueModule } from '../../core/src/core/entity-catalogue.module';
+import { EntityCatalogueModule } from '../../store/src/entity-catalogue.module';
 import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
 import { AutoscalerModule } from './core/autoscaler.module';

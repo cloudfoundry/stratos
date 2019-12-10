@@ -10,8 +10,8 @@ import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata
 import { IApp, IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityService } from '../../../../../../core/src/core/entity-service';
+import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { EntityService } from '../../../../../../store/src/entity-service';
 import {
   getActionsFromExtensions,
   getTabsFromExtensions,

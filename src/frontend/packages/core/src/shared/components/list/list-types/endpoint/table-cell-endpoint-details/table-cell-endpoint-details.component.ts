@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { TableCellCustom } from '../../../list.types';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 

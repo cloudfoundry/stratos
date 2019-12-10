@@ -5,8 +5,8 @@ import { Store } from '@ngrx/store';
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
   getPaginationAction,
-} from '../../../../../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator.spec.helpers';
-import { EntityCatalogueEntityConfig } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+} from '../../../../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator.spec.helpers';
+import { EntityCatalogueEntityConfig } from '../../../../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
   ApplicationStateService,

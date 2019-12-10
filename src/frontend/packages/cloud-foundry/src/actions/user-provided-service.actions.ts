@@ -1,7 +1,7 @@
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogueEntityConfig } from '../../../store/src/entity-catalog/entity-catalogue.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
-import { QParam, QParamJoiners } from '../../../store/src/q-param';
+import { QParam, QParamJoiners } from '../shared/q-param';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';

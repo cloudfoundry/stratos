@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { EntityRequestAction } from '../../../../../store/src/types/request.types';
+import { EntityRequestAction } from '../../types/request.types';
 import { ActionOrchestrator, OrchestratedActionBuilders } from '../action-orchestrator/action-orchestrator';
 import { getPaginationAction, getRequestAction } from '../action-orchestrator/action-orchestrator.spec.helpers';
 import { EntityActionDispatcherManager } from './action-dispatcher';

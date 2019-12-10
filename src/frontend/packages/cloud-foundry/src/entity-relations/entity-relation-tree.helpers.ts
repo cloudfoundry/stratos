@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
 import { ActionState } from '../../../store/src/reducers/api-request-reducer/types';
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';

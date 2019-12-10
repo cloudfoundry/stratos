@@ -14,7 +14,7 @@ import {
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../../../core/src/core/dispatch-sequencer';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import {
   distinctPageUntilChanged,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -24,7 +24,7 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MultiActionListEntity } from '../../../../../../../core/src/shared/monitors/pagination-monitor';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
+import { CFListDataSource } from '../../../../cf-list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';

@@ -4,7 +4,7 @@ import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.serv
 import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { TableRowStateManager } from './list-table/table-row/table-row-state-manager';
-import { EntityCatalogueEntityConfig } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogueEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalogue.types';
 
 export type ListRowStateSetUpManager = (
   paginationMonitor: PaginationMonitor<any>,

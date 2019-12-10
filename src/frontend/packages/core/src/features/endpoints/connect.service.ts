@@ -23,7 +23,7 @@ import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../../s
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { EndpointsService } from '../../core/endpoints.service';
-import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
 import { EndpointType } from '../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../core/utils.service';
 

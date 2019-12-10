@@ -1,10 +1,10 @@
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { Action } from '@ngrx/store';
 
-import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
-import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { EntityRequestAction, StartAction } from '../../../../../store/src/types/request.types';
-import { Omit } from '../../utils.service';
+import { EntitySchema } from '../../helpers/entity-schema';
+import { PaginatedAction } from '../../types/pagination.types';
+import { EntityRequestAction, StartAction } from '../../types/request.types';
+import { Omit } from '../../../../core/src/core/utils.service';
 import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 
 export interface ActionBuilderAction extends EntityRequestAction {

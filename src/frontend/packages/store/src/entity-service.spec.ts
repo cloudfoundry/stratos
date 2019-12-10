@@ -4,25 +4,25 @@ import { inject, TestBed } from '@angular/core/testing';
 import { Action, Store } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { APIResponse } from '../../../store/src/actions/request.actions';
-import { GeneralAppState } from '../../../store/src/app-state';
+import { APIResponse } from './actions/request.actions';
+import { GeneralAppState } from './app-state';
 import {
   failedEntityHandler,
-} from '../../../store/src/entity-request-pipeline/entity-request-base-handlers/fail-entity-request.handler';
-import { PipelineResult } from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
-import { completeApiRequest, startApiRequest } from '../../../store/src/reducers/api-request-reducer/request-helpers';
-import { NormalizedResponse } from '../../../store/src/types/api.types';
-import { EntityRequestAction, ICFAction } from '../../../store/src/types/request.types';
-import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
-import { createEntityStore, TestStoreEntity } from '../../test-framework/store-test-helper';
-import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
-import { ENTITY_SERVICE } from '../shared/entity.tokens';
-import { EntityMonitor } from '../shared/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
+} from './entity-request-pipeline/entity-request-base-handlers/fail-entity-request.handler';
+import { PipelineResult } from './entity-request-pipeline/entity-request-pipeline.types';
+import { EntitySchema } from './helpers/entity-schema';
+import { completeApiRequest, startApiRequest } from './reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from './types/api.types';
+import { EntityRequestAction, ICFAction } from './types/request.types';
+import { generateTestEntityServiceProvider } from '../../core/test-framework/entity-service.helper';
+import { createEntityStore, TestStoreEntity } from '../../core/test-framework/store-test-helper';
+import { STRATOS_ENDPOINT_TYPE } from '../../core/src/base-entity-schemas';
+import { ENTITY_SERVICE } from '../../core/src/shared/entity.tokens';
+import { EntityMonitor } from '../../core/src/shared/monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../core/src/shared/monitors/entity-monitor.factory.service';
 import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
-import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
-import { EntityCatalogueEntityConfig, IStratosEndpointDefinition } from './entity-catalogue/entity-catalogue.types';
+import { StratosBaseCatalogueEntity } from './entity-catalog/entity-catalogue-entity';
+import { EntityCatalogueEntityConfig, IStratosEndpointDefinition } from './entity-catalog/entity-catalogue.types';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
 

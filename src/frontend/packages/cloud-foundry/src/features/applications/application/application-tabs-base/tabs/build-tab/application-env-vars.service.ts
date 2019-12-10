@@ -6,7 +6,7 @@ import { GetAppEnvVarsAction } from '../../../../../../../../cloud-foundry/src/a
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalogue } from '../../../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   getPaginationObservables,
