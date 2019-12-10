@@ -300,7 +300,7 @@ export class ListHeaderComponent extends Component {
   }
 
   getRefreshListButtonAnimated(): ElementFinder {
-    return this.getRefreshListButton().element(by.css('.refresh-icon.refreshing'));
+    return this.getRefreshListButton().element(by.css('.poll-icon.polling'));
   }
 
   refresh() {
@@ -309,7 +309,7 @@ export class ListHeaderComponent extends Component {
   }
 
   isRefreshing(): promise.Promise<boolean> {
-    return this.getRefreshListButton().element(by.css('.refresh-icon')).getCssValue('animation-play-state').then(state =>
+    return this.getRefreshListButton().element(by.css('.poll-icon')).getCssValue('animation-play-state').then(state =>
       state === 'running'
     );
   }
