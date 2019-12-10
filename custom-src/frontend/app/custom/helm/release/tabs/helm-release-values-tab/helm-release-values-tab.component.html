@@ -1,6 +1,6 @@
 <app-page-sub-nav>
 
-  <mat-button-toggle-group class="toolbar" [value]="viewType"
+  <mat-button-toggle-group class="toolbar" [value]="viewType$ | async"
     (change)="viewTypeChange($event.value)" name="view" aria-label="View">
     <mat-button-toggle value="user">User</mat-button-toggle>
     <mat-button-toggle value="chart">Chart</mat-button-toggle>

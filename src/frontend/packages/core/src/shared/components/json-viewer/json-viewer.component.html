@@ -15,7 +15,8 @@
       <span *ngIf="!segment.expanded || !isExpandable(segment)" class="segment-value">{{ segment.description }}</span>
     </section>
     <section *ngIf="segment.expanded && isExpandable(segment)" class="children">
-      <app-json-viewer [json]="segment.value" [expanded]="expanded"></app-json-viewer>
+      <app-json-viewer root="false" [json]="segment.value" [expanded]="expanded"></app-json-viewer>
     </section>
   </section>
+  <div *ngIf="root !== 'false' && segments.length === 0">Nothing to show</div>
 </section>

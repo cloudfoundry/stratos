@@ -8,10 +8,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
 	appsv1beta2 "k8s.io/api/apps/v1beta2"
+	batchv1 "k8s.io/api/batch/v1"
+	v1 "k8s.io/api/core/v1"
 	extv1beta1 "k8s.io/api/extensions/v1beta1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -53,14 +55,11 @@ func (r *HelmReleaseGraph) AddLink(source, target string) {
 		Target: target,
 	}
 	r.Links[link.ID] = link
-	log.Warnf("Adding link %s -> %s", source, target)
+	log.Debugf("Adding link %s -> %s", source, target)
 }
 
 // ParseManifest
 func (r *HelmReleaseGraph) ParseManifest(release *HelmRelease) {
-
-	log.Warnf("Graph:: Parse ManifestL %d", len(release.Resources))
-
 	for _, item := range release.Resources {
 		log.Warn(item.Kind)
 
@@ -110,8 +109,15 @@ func (r *HelmReleaseGraph) ParseManifest(release *HelmRelease) {
 		case *v1.Service:
 			target := getShortResourceId(item.Kind, o.Name)
 			r.ProcessService(target, item, o.Spec)
+		case *batchv1.Job:
+			target := getShortResourceId(item.Kind, o.Name)
+			r.ParseResourceOwners(target, o.OwnerReferences)
+			r.ProcessServiceAccount(target, o.Spec.Template)
+		case *rbacv1.RoleBinding:
+			target := getShortResourceId(item.Kind, o.Name)
+			r.ParseRoleBinding(target, o)
 		default:
-			log.Errorf("Graph: Unknown type: %s", reflect.TypeOf(o))
+			log.Debugf("Graph: Unknown type: %s", reflect.TypeOf(o))
 		}
 
 		// Add or replace the node in the map
@@ -127,8 +133,6 @@ func (r *HelmReleaseGraph) ParseManifest(release *HelmRelease) {
 			r.generateTemporaryNode(link.Target)
 		}
 	}
-
-	log.Warn("End parse graph")
 }
 
 func (r *HelmReleaseGraph) generateTemporaryNode(id string) {
@@ -165,7 +169,6 @@ func (r *HelmReleaseGraph) ParseResourceOwners(id string, owners []metav1.OwnerR
 func (r *HelmReleaseGraph) ProcessPod(id string, res KubeResource, spec v1.PodSpec, status v1.PodStatus) {
 	// Look through volumes
 	// name and: PersistentVolumeClaim.ClaimName or Secret.SecretName
-	log.Warnf("Processing Pod Volumes for %s", id)
 	for _, volume := range spec.Volumes {
 		if volume.VolumeSource.PersistentVolumeClaim != nil {
 			ref := fmt.Sprintf("PersistentVolumeClaim-%s", volume.VolumeSource.PersistentVolumeClaim.ClaimName)
@@ -226,15 +229,32 @@ func (r *HelmReleaseGraph) ProcessService(id string, res KubeResource, spec v1.S
 		for _, item := range r.Release.Resources {
 			switch o := item.Resource.(type) {
 			case *v1.Pod:
-				log.Warnf("Pod %s", o.Name)
-
 				if labelsMatch(spec.Selector, o.Labels) {
-					log.Error("GOT A POD FOR THE SERVICE: %s", o.Name)
-
 					podID := fmt.Sprintf("Pod-%s", o.Name)
 					r.AddLink(podID, id)
 				}
 			}
 		}
 	}
+}
+
+func (r *HelmReleaseGraph) ProcessServiceAccount(id string, template v1.PodTemplateSpec) {
+	if len(template.Spec.ServiceAccountName) > 0 {
+		svcAccountID := fmt.Sprintf("ServiceAccount-%s", template.Spec.ServiceAccountName)
+		r.AddLink(id, svcAccountID)
+	} else if len(template.Spec.DeprecatedServiceAccount) > 0 {
+		svcAccountID := fmt.Sprintf("ServiceAccount-%s", template.Spec.DeprecatedServiceAccount)
+		r.AddLink(id, svcAccountID)
+	}
+}
+
+func (r *HelmReleaseGraph) ParseRoleBinding(id string, roleBinding *rbacv1.RoleBinding) {
+	for _, subject := range roleBinding.Subjects {
+		// TODO: Only match those with the same namespace ????
+		subjectID := fmt.Sprintf("%s-%s", subject.Kind, subject.Name)
+		r.AddLink(id, subjectID)
+	}
+
+	roleRefID := fmt.Sprintf("%s-%s", roleBinding.RoleRef.Kind, roleBinding.RoleRef.Name)
+	r.AddLink(id, roleRefID)
 }

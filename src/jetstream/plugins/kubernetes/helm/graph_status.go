@@ -51,6 +51,12 @@ func mapContainerStatus(status v1.PodStatus, name string) NodeStatus {
 			if cstat.Ready {
 				return NodeOK
 			} else {
+				// Could be a pod that has completed
+				if cstat.State.Terminated != nil {
+					if cstat.State.Terminated.ExitCode == 0 && cstat.State.Terminated.Reason == "Completed" {
+						return NodeOK
+					}
+				}
 				return NodeWarn
 			}
 		}

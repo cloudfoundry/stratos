@@ -11,7 +11,6 @@ export class MonocularTabBaseComponent {
     { link: 'charts', label: 'Charts', icon: 'folder_open' },
     { link: 'repos', label: 'Repositories', icon: 'products', iconFont: 'stratos-icons' },
     { link: 'releases', label: 'Releases', icon: 'apps' },
-    { link: 'config', label: 'Config', icon: 'build' },
   ];
 
 }

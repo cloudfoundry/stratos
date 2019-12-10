@@ -49,12 +49,13 @@ export interface HelmRelease {
     notes: string;
     status: string;
   };
-  config: {
-    raw: string;
-  };
+  config: any;
   chart: {
     values: any;
-  }
+    metadata: {
+      icon?: string;
+    };
+  };
 }
 
 export interface HelmReleaseStatus {

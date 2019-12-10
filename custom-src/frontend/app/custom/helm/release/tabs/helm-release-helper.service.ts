@@ -41,7 +41,15 @@ export class HelmReleaseHelperService {
     this.isFetching$ = svc.fetchingEntities$;
 
     this.release$ = svc.entities$.pipe(
-      map((items: HelmRelease[]) => items.find(item => item.guid === this.guid))
+      map((items: HelmRelease[]) => items.find(item => item.guid === this.guid)),
+      map((item: HelmRelease) => {
+        if (!item.chart.metadata.icon) {
+          const copy = JSON.parse(JSON.stringify(item));
+          copy.chart.metadata.icon = '/core/assets/custom/app_placeholder.svg';
+          return copy;
+        }
+        return item;
+      })
     );
   }
 
@@ -61,15 +69,7 @@ export class HelmReleaseHelperService {
   public fetchReleaseGraph(): Observable<HelmReleaseGraph> {
     // Get helm release
     const action = new GetHelmReleaseGraph(this.endpointGuid, this.releaseTitle);
-
-    console.log('fetchReleaseGraph');
-    console.log(action);
-
     return this.esf.create<HelmReleaseGraph>(action.key, action).waitForEntity$.pipe(
-      tap(e => {
-        console.log('ENTITY HELM RELEASE GRAPH');
-        console.log(e);
-      }),
       map(entity => entity.entity)
     );
   }

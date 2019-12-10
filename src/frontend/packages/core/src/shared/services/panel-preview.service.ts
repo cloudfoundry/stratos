@@ -14,7 +14,7 @@ export class PanelPreviewService {
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
     private router: Router,
-    @Inject(DOCUMENT) private document: Document,    
+    @Inject(DOCUMENT) private document: Document,
   ) {
     this.openedSubject = new BehaviorSubject(false);
     this.opened$ = this.observeSubject(this.openedSubject);
@@ -30,12 +30,12 @@ export class PanelPreviewService {
     this.container = container;
   }
 
-  public show(component: object, props?: { [key: string]: any }) {
+  public show(component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
     if (!this.container) {
       throw new Error('PanelPreviewService: container must be set');
     }
 
-    this.render(component, props);
+    this.render(component, props, componentFactoryResolver);
     this.openedSubject.next(true);
 
     this.document.addEventListener('keydown', this.onKeyDown);
@@ -57,12 +57,15 @@ export class PanelPreviewService {
 
   }
 
-  render(component: object, props: { [key: string]: any }) {
+  render(component: object, props: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
     if (this.container.length) {
       this.container.remove(0);
     }
 
-    const factory: ComponentFactory<any> = this.componentFactoryResolver.resolveComponentFactory(component as any);
+    // Use the supplied component factory resolver if provided
+    const resolver = componentFactoryResolver ||  this.componentFactoryResolver;
+
+    const factory: ComponentFactory<any> = resolver.resolveComponentFactory(component as any);
     const componentRef: ComponentRef<any> = this.container.createComponent(factory);
 
     if (props) {

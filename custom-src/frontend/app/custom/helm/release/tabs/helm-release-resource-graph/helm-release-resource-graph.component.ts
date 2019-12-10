@@ -1,5 +1,5 @@
 import { Node, Edge } from '@swimlane/ngx-graph';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ComponentFactoryResolver } from '@angular/core';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 import { Subject, Subscription } from 'rxjs';
 import { PanelPreviewService } from '../../../../../shared/services/panel-preview.service';
@@ -38,11 +38,12 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   private graph: Subscription;
 
-  constructor(private helper: HelmReleaseHelperService, private previewPanel: PanelPreviewService) { }
+  constructor(
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private helper: HelmReleaseHelperService,
+    private previewPanel: PanelPreviewService) { }
 
   ngOnInit() {
-
-    console.log('GOING TO WAIT FOR RESOURCE GRAPH.....');
 
     // Listen for the graph
     this.graph = this.helper.fetchReleaseGraph().subscribe((g: any) => {
@@ -83,14 +84,15 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   // Open side panel when node is clicked
   public onNodeClick(node: any) {
-    console.log('Node was clicked')
-    console.log(node);
-
     this.previewPanel.show(
       HelmReleaseResourcePreviewComponent,
       {
-        node
-      }
+        node,
+        helper: this.helper,
+        endpoint: this.helper.endpointGuid,
+        releaseTitle: this.helper.releaseTitle
+      },
+      this.componentFactoryResolver
     );
   }
 

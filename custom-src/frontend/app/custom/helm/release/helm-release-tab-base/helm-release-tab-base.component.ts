@@ -79,7 +79,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   ) {
     this.title = this.helmReleaseHelper.releaseTitle;
 
-    console.log('RELEASE BASE - CREATE NEW');
 
     const releaseRef = this.helmReleaseHelper.guidAsUrlFragment();
     const host = window.location.host;
@@ -87,14 +86,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
     const streamUrl = (
       `${protocol}://${host}/pp/v1/helm/releases/${releaseRef}`
     );
-    console.log(streamUrl);
-
-    // const data = new Subject<string>();
-    // const connection = websocketConnect(
-    //   streamUrl,
-    //   data
-    // );
-
 
     const socket$ = makeWebSocketObservable(streamUrl).pipe(catchError(e => {
       this.logService.error(
@@ -124,14 +115,8 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
     this.sub = messages.subscribe(jsonString => {
       const messageObj = JSON.parse(jsonString);
       if (messageObj) {
-        console.log('Got message .... ' + messageObj.kind);
-        console.log(messageObj);
-
-        // this.store.dispatch(new HelmUpdateRelease(messageObj));
-
         if (messageObj.kind === 'ReleasePrefix') {
           prefix = messageObj.data;
-          console.log('Got prefix: ' + prefix);
         } else if (messageObj.kind === 'Pods') {
           const pods = messageObj.data;
           pods.forEach(pod => {
@@ -140,7 +125,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           const releasePodsAction = new GetHelmReleasePods(this.helmReleaseHelper.endpointGuid, this.helmReleaseHelper.releaseTitle);
           this.populateList(releasePodsAction, pods);
         } else if (messageObj.kind === 'Graph') {
-          console.log('GOT GRAPH');
           const graph = messageObj.data;
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
           graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
@@ -158,7 +142,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           // Store ALL resources for the release
           manifest.forEach(resource => {
             if (resource.kind === 'Service' && prefix) {
-              console.log(`Service: ${prefix}-${resource.metadata.name}`);
               this.addResource(kubernetesServicesEntityType, resource, `${prefix}-${resource.metadata.name}`);
               svcs.push(resource);
             }
@@ -245,7 +228,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log('DESTROY RELEASE TAB BASE');
     this.sub.unsubscribe();
   }
 }

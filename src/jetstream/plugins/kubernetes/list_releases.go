@@ -228,6 +228,8 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 
 	go readLoop(ws, stopchan)
 
+	var sleep = 1 * time.Second
+
 	// Now we have everything, so loop, polling to get status
 	for {
 		log.Warn("Polling for release - wait 10 seconds")
@@ -238,7 +240,7 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 			log.Error("****************************************************************************************************")
 			ws.Close()
 			return nil
-		case <-time.After(10 * time.Second):
+		case <-time.After(sleep):
 			break
 		}
 
@@ -257,6 +259,8 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 
 		graph.ParseManifest(rel)
 		sendResource(ws, "Graph", graph)
+
+		sleep = 10 * time.Second
 	}
 
 	log.Error("****************************************************************************************************")

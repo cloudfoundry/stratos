@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import * as moment from 'moment';
+
 import { AppState } from '../../../../../store/src/app-state';
 import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
@@ -68,28 +70,30 @@ export class HelmReleasePodsListConfig implements IListConfig<HelmReleasePod> {
       columnId: 'age',
       headerCell: () => 'Age',
       cellDefinition: {
-        valuePath: 'age'
+        getValue: (row: any) => {
+          return moment(row.metadata.creationTimestamp).fromNow(true);
+        }
       },
       sort: {
         type: 'sort',
         orderKey: 'age',
-        field: 'age'
+        field: 'metadata.creationTimestamp'
       },
       cellFlex: '1'
-    },
-    {
-      columnId: 'restarts',
-      headerCell: () => 'Restarts',
-      cellDefinition: {
-        valuePath: 'restarts'
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'restarts',
-        field: 'restarts'
-      },
-      cellFlex: '1'
-    },
+    }
+    // {
+    //   columnId: 'restarts',
+    //   headerCell: () => 'Restarts',
+    //   cellDefinition: {
+    //     valuePath: 'restarts'
+    //   },
+    //   sort: {
+    //     type: 'sort',
+    //     orderKey: 'restarts',
+    //     field: 'restarts'
+    //   },
+    //   cellFlex: '1'
+    // },
   ];
   initialised$: Observable<boolean>;
 

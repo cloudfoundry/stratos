@@ -38,7 +38,6 @@ import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summ
 import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
 import { HelmReleaseResourcePreviewComponent} from './release/tabs/helm-release-resource-graph/helm-release-resource-preview/helm-release-resource-preview.component';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
-import { HelmConfigurationComponent } from './tabs/configuration-tab/helm-configuration.component';
 import { HelmReleasesTabComponent } from './tabs/releases-tab/releases-tab.component';
 import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.component';
 import { KubernetesModule } from '../kubernetes/kubernetes.module';
@@ -73,7 +72,6 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
     RepositoryTabComponent,
     CatalogTabComponent,
     HelmReleasesTabComponent,
-    HelmConfigurationComponent,
     MonocularChartCardComponent,
     HelmReleaseServiceCardComponent,
     MonocularChartViewComponent,
@@ -85,7 +83,7 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
     HelmReleaseServicesTabComponent,
     HelmServicePortsComponent,
     HelmReleaseResourceGraphComponent,
-    //HelmReleaseResourcePreviewComponent,
+    HelmReleaseResourcePreviewComponent,
   ],
   providers: [
     ChartsService,
@@ -97,7 +95,7 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
     MonocularChartCardComponent,
     HelmReleaseServiceCardComponent,
     HelmServicePortsComponent,
-    //HelmReleaseResourcePreviewComponent,
+    HelmReleaseResourcePreviewComponent,
   ]
 })
 export class HelmModule { }

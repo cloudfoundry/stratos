@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap, startWith } from 'rxjs/operators';
 
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
@@ -11,43 +11,64 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
 })
 export class HelmReleaseValuesTabComponent {
 
-  public values$: Observable<string>;
+  public values$: Observable<any>;
 
-  public viewType = 'user';
+  private viewTypeSubject = new Subject<string>();
 
-  private viewTypeSubject = new Subject<boolean>('user');
-
-  // Observable boolean streams
-  public viewType$ = this.viewTypeSubject.asObservable();  
+  public viewType$: Observable<string>;
 
   constructor(public helmReleaseHelper: HelmReleaseHelperService) {
+
+    this.viewType$ = this.viewTypeSubject.asObservable().pipe(startWith('user'));
 
     this.values$ = combineLatest(
       this.viewType$,
       helmReleaseHelper.release$
     ).pipe(
       map(([vtype, release]) => {
-        console.log('HELLO');
-        console.log(vtype);
-        console.log(release);
-
-        return release.chart.values;
+        switch (vtype) {
+          case 'user':
+            return release.config || {};
+          case 'combined':
+              const chart = release.chart.values || {};
+              const user = release.config || {};
+              const target = {};
+              return this.mergeDeep(target, chart, user);
+          default:
+            return release.chart.values || {};
+        }
       })
     );
   }
 
   public viewTypeChange(viewType: string) {
-    this.viewType = viewType;
     this.viewTypeSubject.next(viewType);
-
   }
 
-  private hidePasswords(values: string): string {
-    // TODO: See #150 - It's a PITA but this should be done in the back end
-    let mask = values.replace(new RegExp('(PASSWORD: [a-zA-Z0-9_\-]*)', 'gm'), 'PASSWORD: **********');
-    mask = mask.replace(new RegExp('(password: [a-zA-Z0-9_\-]*)', 'gm'), 'password: **********');
-    mask = mask.replace(new RegExp('(SECRET: [a-zA-Z0-9_\-]*)', 'gm'), 'SECRET: **********');
-    mask = mask.replace(new RegExp('(secret: [a-zA-Z0-9_\-]*)', 'gm'), 'secret: **********');
-    return mask;
+  private isObject(item) {
+    return (item && typeof item === 'object' && !Array.isArray(item));
   }
+
+  private mergeDeep(target, ...sources) {
+    if (!sources.length) {
+      return target;
+    }
+    const source = sources.shift();
+
+    if (this.isObject(target) && this.isObject(source)) {
+      for (const key in source) {
+        if (this.isObject(source[key])) {
+          if (!target[key]) {
+            Object.assign(target, { [key]: {} });
+          }
+          this.mergeDeep(target[key], source[key]);
+        } else {
+          Object.assign(target, { [key]: source[key] });
+        }
+      }
+    }
+
+    return this.mergeDeep(target, ...sources);
+  }
+
 }

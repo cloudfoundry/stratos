@@ -17,6 +17,8 @@ export class JsonViewerComponent implements OnChanges {
 
   @Input() json: any;
 
+  @Input() root: string;
+
   // Whether to expand all initially
   @Input() expanded = true;
   /**
@@ -43,6 +45,10 @@ export class JsonViewerComponent implements OnChanges {
   ngOnChanges() {
     if (this.cleanOnChange) {
       this.segments = [];
+    }
+
+    if (!this.json) {
+      return;
     }
 
     if (typeof this.json === 'object') {
