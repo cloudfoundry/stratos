@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
@@ -8,6 +8,7 @@ import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../core/src/environments/environment';
+import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState } from '../../../store/src/app-state';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import {
@@ -63,8 +64,16 @@ import {
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
 
-function createAutoscalerRequestMessage(requestType: string, error: { status: string, _body: string }) {
-  return `Unable to ${requestType}: ${error.status} ${error._body}`;
+function extractAutoscalerError(error): string {
+  const httpResponse: HttpErrorResponse = isHttpErrorResponse(error);
+  if (httpResponse) {
+    return httpResponse.error ? httpResponse.error.error : JSON.stringify(httpResponse.error);
+  }
+  return error._body;
+}
+
+function createAutoscalerErrorMessage(requestType: string, error) {
+  return `Unable to ${requestType}: ${error.status} ${extractAutoscalerError(error) || ''}`;
 }
 
 @Injectable()
@@ -97,7 +106,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch autoscaler info', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch autoscaler info', err), action, actionType)
           ]));
     }));
 
@@ -123,7 +132,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch health info', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch health info', err), action, actionType)
           ]));
     }));
 
@@ -157,7 +166,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('update policy', err), action, actionType)
           ]));
     }));
 
@@ -189,7 +198,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('detach policy', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('detach policy', err), action, actionType)
           ]));
     }));
 
@@ -247,7 +256,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch scaling history', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch scaling history', err), action, actionType)
           ]));
     }));
 
@@ -278,7 +287,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch metrics', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch metrics', err), action, actionType)
           ]));
     }));
 
@@ -307,7 +316,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('update policy', err), action, actionType)
           ]));
   }
 
@@ -365,7 +374,7 @@ export class AutoscalerEffects {
           const response: AppAutoscalerFetchPolicyFailedResponse = { status: err.status, noPolicy };
 
           return [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), getPolicyAction, actionType, null, response)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch policy', err), getPolicyAction, actionType, null, response)
           ];
         }));
   }
