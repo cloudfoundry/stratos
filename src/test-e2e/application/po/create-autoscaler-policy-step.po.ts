@@ -1,7 +1,8 @@
-import { ElementFinder, ElementArrayFinder, by, promise } from 'protractor';
+import * as moment from 'moment-timezone';
+import { by, ElementArrayFinder, ElementFinder, promise } from 'protractor';
 
-import { StepperComponent } from '../../po/stepper.po';
 import { FormComponent } from '../../po/form.po';
+import { StepperComponent } from '../../po/stepper.po';
 
 export class CreateAutoscalerPolicyStep extends StepperComponent {
 
@@ -31,7 +32,7 @@ export class CreateAutoscalerPolicyStep extends StepperComponent {
     this.getDoneButton().click();
   }
 
-  getDoneButtonDisabledStatus(): promise.Promise<string>  {
+  getDoneButtonDisabledStatus(): promise.Promise<string> {
     return this.getDoneButton().getAttribute('disabled');
   }
 
@@ -57,6 +58,12 @@ export class CreateAutoscalerPolicyStep extends StepperComponent {
 
   getMatErrorsCount(): promise.Promise<any> {
     return this.getMatErrors().count();
+  }
+
+  getScheduleStartTime(): promise.Promise<moment.Moment> {
+    return this.getStepperForm().getText('start_date_time').then(startTime => {
+      return moment(startTime);
+    });
   }
 
 }

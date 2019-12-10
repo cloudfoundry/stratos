@@ -30,7 +30,7 @@
     "lint": "ng lint --format stylish",
     "sass-lint": "sass-lint -v",
     "e2e": "ng e2e",
-    "e2e-dev": "STRATOS_E2E_BASE_URL=https://127.0.0.1:4300 ng e2e --dev-server-target= --base-url=https://127.0.0.1:4300",
+    "e2e-dev": "STRATOS_E2E_BASE_URL=https://127.0.0.1:4200 ng e2e --dev-server-target= --base-url=https://127.0.0.1:4200",
     "e2e-local": "STRATOS_E2E_BASE_URL=https://127.0.0.1 ng e2e --dev-server-target= --base-url=https://127.0.0.1",
     "headless-e2e": "xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./protractor.conf.js",
     "climate": "codeclimate analyze $(git diff --name-only master)",

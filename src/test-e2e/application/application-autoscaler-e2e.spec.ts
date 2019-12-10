@@ -8,6 +8,7 @@ import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { LocaleHelper } from '../locale.helper';
 import { CFPage } from '../po/cf-page.po';
+import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { createApplicationDeployTests } from './application-deploy-helper';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageAutoscalerTab } from './po/application-page-autoscaler.po';
@@ -15,7 +16,6 @@ import { ApplicationBasePage } from './po/application-page.po';
 import { CreateAutoscalerPolicy } from './po/create-autoscaler-policy.po';
 import { PageAutoscalerEventBase } from './po/page-autoscaler-event-base.po';
 import { PageAutoscalerMetricBase } from './po/page-autoscaler-metric-base.po';
-import { ConfirmDialogComponent } from '../po/confirm-dialog';
 
 let applicationE2eHelper: ApplicationE2eHelper;
 
@@ -213,7 +213,8 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.canNext()).toBeFalsy();
 
       // Schedule dates should not overlap
-      const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(10, 'seconds'); // Should be set close to time it's entered
+      // scheduleStartDate1 should be set close to time it's entered, this is what triggers the scaling event tested below
+      const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(10, 'seconds');
       scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
       scheduleStartDate2 = moment().tz('UTC').add(3, 'days');
       scheduleEndDate2 = moment().tz('UTC').add(4, 'days');
@@ -313,6 +314,13 @@ describe('Autoscaler -', () => {
 
     extendE2ETestTime(60000);
 
+    let dateAndTimeFormat;
+
+    beforeAll(() => new LocaleHelper().getWindowDateTimeFormats().then(formats => {
+      const timeFormat = formats.timeFormat;
+      dateAndTimeFormat = `${formats.dateFormat},${timeFormat}`;
+    }));
+
     beforeAll(() => {
       const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
       appAutoscaler.goToAutoscalerTab();
@@ -350,6 +358,27 @@ describe('Autoscaler -', () => {
 
     it('Should pass SpecificDates Step', () => {
       createPolicy.stepper.clickDeleteButton(1);
+      expect(createPolicy.stepper.canNext()).toBeTruthy();
+
+      createPolicy.stepper.clickEditButton();
+      createPolicy.stepper.getScheduleStartTime().then((startTime: moment.Moment) => {
+
+        const now = moment();
+        const diff = moment.duration(now.diff(startTime));
+
+        console.log('Testing schedule start time. Should be at least a minute into future');
+        console.log(`Now: ${now.toString()}. StartTime: ${startTime.toString()}. Diff (ms): ${diff.asMilliseconds()}`);
+        if (diff.asMinutes() > -1) {
+          const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes');
+          const scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
+          console.log(`Updating schedule. Start: ${scheduleStartDate1.toString()}. End ${scheduleEndDate1.toString()}`);
+          createPolicy.stepper.getStepperForm().waitUntilShown();
+          createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateAndTimeFormat) });
+          return createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateAndTimeFormat) });
+        }
+      });
+      createPolicy.stepper.clickDoneButton();
+
       expect(createPolicy.stepper.canNext()).toBeTruthy();
       createPolicy.stepper.next();
     });
@@ -428,7 +457,7 @@ describe('Autoscaler -', () => {
       });
 
       // This depends on scheduleStartDate1
-      extendE2ETestTime(60000);
+      extendE2ETestTime(120000);
       function waitForRow() {
         const sub = timer(5000, 5000).pipe(
           switchMap(() => eventPageBase.list.table.getRowCount())
