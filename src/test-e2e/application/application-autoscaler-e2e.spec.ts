@@ -1,5 +1,5 @@
 import * as moment from 'moment-timezone';
-import { browser } from 'protractor';
+import { browser, promise } from 'protractor';
 import { timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
@@ -214,7 +214,7 @@ describe('Autoscaler -', () => {
 
       // Schedule dates should not overlap
       // scheduleStartDate1 should be set close to time it's entered, this is what triggers the scaling event tested below
-      const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(10, 'seconds');
+      const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(30, 'seconds');
       scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
       scheduleStartDate2 = moment().tz('UTC').add(3, 'days');
       scheduleEndDate2 = moment().tz('UTC').add(4, 'days');
@@ -225,10 +225,13 @@ describe('Autoscaler -', () => {
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10' });
-
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
+
+      // Bad form, have seen errors where the first schedule isn't shown in ux but is submitted. When submitted the start time is already
+      // in the past and the create policy request fails. Needs a better solution
+      e2e.sleep(1000);
 
       // Click [Add] button
       createPolicy.stepper.clickAddButton();
@@ -239,6 +242,7 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(4);
       // Fill in form -- fix invalid inputs
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
+      // Fill in form -- valid inputs
       createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate2.format(dateAndTimeFormat) });
       createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate2.format(dateAndTimeFormat) });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
@@ -460,8 +464,14 @@ describe('Autoscaler -', () => {
       extendE2ETestTime(120000);
       function waitForRow() {
         const sub = timer(5000, 5000).pipe(
-          switchMap(() => eventPageBase.list.table.getRowCount())
-        ).subscribe(rowCount => {
+          switchMap(() => promise.all<boolean | number>([
+            eventPageBase.list.table.getRowCount(),
+            eventPageBase.list.header.isRefreshing()
+          ]))
+        ).subscribe(([rowCount, isRefreshing]) => {
+          if (isRefreshing) {
+            return;
+          }
           if (rowCount === 0) {
             eventPageBase.list.header.refresh();
           } else {
