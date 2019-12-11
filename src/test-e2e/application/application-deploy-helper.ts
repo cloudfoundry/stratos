@@ -7,6 +7,7 @@ import { CFPage } from '../po/cf-page.po';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationBasePage } from './po/application-page.po';
+import { DeployApplication } from './po/deploy-app.po';
 
 
 
@@ -46,7 +47,7 @@ export function createApplicationDeployTests(appUrl: boolean = false): {
   describe(`Should deploy app from ${sourceText}`, () => {
 
     const loggingPrefix = `Application Deploy: Deploy from ${sourceText}:`;
-    let deployApp;
+    let deployApp: DeployApplication;
 
     beforeAll(() => {
       // Should be on deploy app modal

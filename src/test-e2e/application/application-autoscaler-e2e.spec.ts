@@ -373,7 +373,7 @@ describe('Autoscaler -', () => {
         console.log('Testing schedule start time. Should be at least a minute into future');
         console.log(`Now: ${now.toString()}. StartTime: ${startTime.toString()}. Diff (ms): ${diff.asMilliseconds()}`);
         if (diff.asMinutes() > -1) {
-          const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes');
+          const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(15, 'seconds');
           const scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
           console.log(`Updating schedule. Start: ${scheduleStartDate1.toString()}. End ${scheduleEndDate1.toString()}`);
           createPolicy.stepper.getStepperForm().waitUntilShown();
@@ -462,20 +462,47 @@ describe('Autoscaler -', () => {
 
       // This depends on scheduleStartDate1
       extendE2ETestTime(120000);
+
+      /**
+       * Find the required scaling event row via row count and row content
+       * Row count is not enough on it's own as this can sometimes contain empty content
+       */
+      function findRow(): promise.Promise<boolean> {
+        return eventPageBase.list.table.getRowCount().then(rowCount => {
+          if (rowCount < 1) {
+            return false;
+          }
+          eventPageBase.list.table.getTableDataRaw().then(e2e.debugLog);
+
+          // Sometimes the first row can be full of empty values, so also confirm content
+          return promise.all([
+            eventPageBase.list.table.getCell(0, 2).getText(),
+            eventPageBase.list.table.getCell(0, 4).getText()
+          ]).then(([type, action]) => {
+            e2e.debugLog('');
+            return type === 'schedule' && action === '+1 instance(s) because limited by min instances 2';
+          });
+        });
+      }
+
       function waitForRow() {
         const sub = timer(5000, 5000).pipe(
           switchMap(() => promise.all<boolean | number>([
-            eventPageBase.list.table.getRowCount(),
+            findRow(),
             eventPageBase.list.header.isRefreshing()
           ]))
-        ).subscribe(([rowCount, isRefreshing]) => {
+        ).subscribe(([foundRow, isRefreshing]) => {
+          e2e.debugLog('Waiting for event row: Checking');
           if (isRefreshing) {
+            e2e.debugLog('Waiting for event row: Skip actions... list is refreshing');
             return;
           }
-          if (rowCount === 0) {
-            eventPageBase.list.header.refresh();
-          } else {
+          if (foundRow) {
+            e2e.debugLog('Waiting for event row: Found row!');
             sub.unsubscribe();
+          } else {
+            e2e.debugLog('Waiting for event row: manually refreshing list');
+            eventPageBase.list.header.refresh();
           }
         });
         browser.wait(() => sub.closed);
@@ -485,10 +512,10 @@ describe('Autoscaler -', () => {
         e2e.debugLog(`${loggingPrefix} Waiting For Autoscale Event Page`);
         eventPageBase.waitForPage();
         expect(eventPageBase.header.getTitleText()).toBe('AutoScaler Scaling Events: ' + testAppName);
+
+        browser.waitForAngularEnabled().then(res => e2e.debugLog('browser.waitForAngularEnabled: ' + res));
         waitForRow();
-        expect(eventPageBase.list.table.getRowCount()).toBe(1);
-        expect(eventPageBase.list.table.getCell(0, 2).getText()).toBe('schedule');
-        expect(eventPageBase.list.table.getCell(0, 4).getText()).toBe('+1 instance(s) because limited by min instances 2');
+
         eventPageBase.header.clickIconButton('clear');
       });
 
@@ -501,7 +528,6 @@ describe('Autoscaler -', () => {
         browser.wait(ApplicationPageAutoscalerTab.detect()
           .then(appAutoscaler => {
             appAutoscaler.tableEvents.clickRefreshButton();
-            extendE2ETestTime(5000);
             expect(appAutoscaler.tableEvents.getTableRowsCount()).toBe(1);
             expect(appAutoscaler.tableEvents.getTableRowCellContent(0, 0)).toBe('Instances scaled up from 1 to 2');
             expect(appAutoscaler.tableEvents.getTableRowCellContent(0, 1))
