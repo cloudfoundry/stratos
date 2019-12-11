@@ -6,6 +6,7 @@ Stratos provides a mechanism for customization - the following customizations ar
 - Changing certain image assets (favorite icon, login background and logo)
 - Overriding styles
 - Adding new functionality
+- Changing the initial loading indicator
 
 ## Approach
 
@@ -122,3 +123,24 @@ We currently expose the following extension points in the Stratos UI:
 We use Decorators to annotate components to indicate that they are Stratos extensions.
 
 See [Extensions](extensions.md) for more detail and examples of front-end extensions.
+
+
+### Changing the Initial Loading Indicator
+
+On slower connections, it can take a few seconds to load the main Javascript resources for Stratos.
+
+In order to give the user some initial feedback that Stratos is loading, a loading indicator is included in the `index.html` file. This gets shown as early as possible, as soon as this main html file has loaded. Once the main code has been fetched, the view refreshes to show the application.
+
+A default loading indicator is provided that can be changed. To do so, create the following two files:
+
+- `custom-src/frontend/loading.css` - CSS styles to be included in a style block in the head of the index page
+- `custom-src/frontend/loading.html` - HTML markup to be included the the index page to render the loading indicator
+
+The files for the default indicator can be found in the `src/frontend/packages/core/misc/custom` folder.
+
+An example of a different loading indicator is included with the ACME sample in `examples/custom-src/frontend`.
+
+The customization task will insert the appropriate CSS and HTML files into the main index.html file when it runs.
+
+Take a look at the template for the `index.html` file in `src/frontend/packages/core/misc/custom/index.html`. The CSS file is inserted where the marker `/** @@LOADING_CSS@@ **/` is and the HTML file where `<!-- @@LOADING_HTML@@ -->` is.
+
