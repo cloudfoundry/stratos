@@ -22,7 +22,7 @@
     "start-dev": "ng serve --aot=false",
     "test-clean": "./build/clean-test-reports.sh",
     "test-reports": "./build/show-test-reports.sh",
-    "test": "NG_TEST_SUITE=all npm run test-clean && run-s test-frontend:* --continue-on-error || true && npm run test-reports",
+    "test": "npm run test-clean && run-s test-frontend:* --continue-on-error || true && npm run test-reports",
     "test-frontend:core": "NG_TEST_SUITE=core ng test core --code-coverage --watch=false",
     "test-frontend:store": "NG_TEST_SUITE=store ng test store --code-coverage --watch=false",
     "test-frontend:cloud-foundry": "NG_TEST_SUITE=cloud-foundry ng test cloud-foundry --code-coverage --watch=false",
