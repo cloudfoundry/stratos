@@ -87,7 +87,7 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	initFDBDocLayerConnection(fdbURL, fDB, debug)
+	InitFDBDocLayerConnection(fdbURL, fDB, debug)
 
 	n := setupRoutes()
 
@@ -100,7 +100,7 @@ func main() {
 	http.ListenAndServe(addr, n)
 }
 
-func initFDBDocLayerConnection(fdbURL *string, fDB *string, debug *bool) {
+func InitFDBDocLayerConnection(fdbURL *string, fDB *string, debug *bool) {
 
 	log.Debugf("Attempting to connect to FDB: %v, %v, debug: %v", *fdbURL, *fDB, *debug)
 

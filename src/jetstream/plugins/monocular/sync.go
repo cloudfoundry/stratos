@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/helm/monocular/chartrepo"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,7 +17,7 @@ type SyncMetadata struct {
 	Busy   bool   `json:"busy"`
 }
 
-// Sync Chanel
+// Sync Channel
 var syncChan = make(chan SyncJob, 100)
 
 // InitSync starts the go routine that will sync repositories in the background
@@ -26,7 +25,7 @@ func (m *Monocular) InitSync() {
 	go m.processSyncRequests()
 }
 
-// Sync shceudles a sync action for the given endpoint
+// Sync schedules a sync action for the given endpoint
 func (m *Monocular) Sync(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
 
 	job := SyncJob{
@@ -50,7 +49,9 @@ func (m *Monocular) processSyncRequests() {
 				Busy:   true,
 			}
 			m.portalProxy.UpdateEndointMetadata(job.Endpoint.GUID, marshalSyncMetadata(metadata))
-			err := chartrepo.SyncRepo(m.Store, job.Endpoint.Name, job.Endpoint.APIEndpoint.String(), "")
+			//Kate TODO hit the sync container rest endpoint to trigger a sync for given repo
+			//err := chartrepo.SyncRepo(m.Store, job.Endpoint.Name, job.Endpoint.APIEndpoint.String(), "")
+			var err error
 			metadata.Busy = false
 			if err != nil {
 				log.Warn("Failed to sync repository: %v+", err)
@@ -63,7 +64,8 @@ func (m *Monocular) processSyncRequests() {
 			log.Infof("Sync completed for repository: %s", job.Endpoint.APIEndpoint.String())
 		} else if job.Action == 1 {
 			log.Infof("Deleting Helm Repository: %s", job.Endpoint.Name)
-			m.Store.DeleteRepo(job.Endpoint.Name)
+			//Kate TODO hit the sync container rest endpoint to trigger a delete for given repo
+			//m.Store.DeleteRepo(job.Endpoint.Name)
 		}
 	}
 
