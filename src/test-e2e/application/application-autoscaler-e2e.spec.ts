@@ -569,7 +569,6 @@ describe('Autoscaler -', () => {
       });
       confirm.confirm();
       confirm.waitUntilNotShown();
-      extendE2ETestTime(5000);
       expect(appAutoscaler.bannerAutoscalerTab.getButtonsCount()).toBe(1);
       expect(appAutoscaler.bannerAutoscalerTab.getCreateButtonExistence()).toBe(true);
       expect(appAutoscaler.tableEvents.isDisplayed()).toBe(true);
