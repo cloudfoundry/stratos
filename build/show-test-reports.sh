@@ -12,6 +12,11 @@ done
 cat "${STRATOS_PATH}/coverage/stratos-unittests.txt"
 echo ""
 
+if [ ! -f " ${STRATOS_PATH}/coverage/stratos-exitcode.txt" ]; then
+  echo "ERORR: Exit code file does not exist"
+  exit 1
+fi
+
 exitCode=$(cat ${STRATOS_PATH}/coverage/stratos-exitcode.txt)
 echo "Exiting with exit code ${exitCode}"
 exit ${exitCode}

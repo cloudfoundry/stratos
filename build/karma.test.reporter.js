@@ -104,6 +104,8 @@
         console.log('\x1b[0m');
       }
 
+      try {
+
       this.writeFile(`${this.bold}${this.cyan}Test results for package ${this.bluebg} ${process.env.NG_TEST_SUITE} ${this.reset}`);
       this.writeFile(`Total    : ${this.bold}${this.cyan}${this.total}${this.reset}`)
       this.writeFile(`Passed   : ${this.bold}${this.cyan}${passed}${this.reset}`)
@@ -141,6 +143,11 @@
       // Dump the summary for this test suite
       var contents = fs.readFileSync(this.file, 'utf8');
       console.log(contents);
+
+      } catch(e) {
+        console.log('ERROR while reporting test result');
+        console.log(e);
+      }
     };
   };
 
