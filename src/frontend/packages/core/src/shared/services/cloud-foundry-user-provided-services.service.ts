@@ -32,7 +32,7 @@ import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
 import { EntityCatalogueEntityConfig, IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalogue.types';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 
 
 @Injectable()

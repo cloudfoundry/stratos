@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { CoreTestingModule } from '../../../../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../../../../core/core.module';
-import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.component';
 import { CFBaseTestModules } from '../../../../../../../../cloud-foundry/test-framework/cf-test-helper';
 

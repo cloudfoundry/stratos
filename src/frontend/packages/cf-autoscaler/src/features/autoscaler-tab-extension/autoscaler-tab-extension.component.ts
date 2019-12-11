@@ -17,7 +17,7 @@ import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/app-state';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';

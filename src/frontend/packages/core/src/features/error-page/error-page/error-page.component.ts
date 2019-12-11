@@ -12,8 +12,8 @@ import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { InternalEventState } from '../../../../../store/src/types/internal-events.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
 import { endpointEntitySchema } from '../../../base-entity-schemas';
-import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
-import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
+import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
+import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
 import { StratosStatus } from '../../../shared/shared.types';
 
 @Component({

@@ -1,8 +1,8 @@
 import { Subscription } from 'rxjs';
 
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { PaginationMonitor } from '../../monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { TableRowStateManager } from './list-table/table-row/table-row-state-manager';
 import { EntityCatalogueEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalogue.types';
 

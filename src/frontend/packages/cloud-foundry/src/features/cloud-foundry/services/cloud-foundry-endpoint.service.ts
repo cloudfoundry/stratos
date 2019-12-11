@@ -25,7 +25,7 @@ import { EndpointsService } from '../../../../../core/src/core/endpoints.service
 import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { EntityService } from '../../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';

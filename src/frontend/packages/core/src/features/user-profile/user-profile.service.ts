@@ -25,7 +25,7 @@ import {
 } from '../../../../store/src/types/user-profile.types';
 import { userProfileEntitySchema } from '../../base-entity-schemas';
 import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
-import { EntityMonitor } from '../../shared/monitors/entity-monitor';
+import { EntityMonitor } from '../../../../store/src/monitors/entity-monitor';
 
 
 @Injectable()

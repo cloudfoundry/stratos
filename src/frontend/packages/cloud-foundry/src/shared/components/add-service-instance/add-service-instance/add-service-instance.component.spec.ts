@@ -40,9 +40,9 @@ import {
 } from '../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
 import { PageHeaderModule } from '../../../../../../core/src/shared/components/page-header/page-header.module';
 import { SteppersModule } from '../../../../../../core/src/shared/components/stepper/steppers.module';
-import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../../../core/src/shared/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { TabNavService } from '../../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModulesNoShared,

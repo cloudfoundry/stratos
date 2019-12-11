@@ -17,7 +17,7 @@ import {
 } from '../../../../../../core/src/shared/components/application-state/application-state.service';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { ApplicationServiceMock } from '../../../../../../core/test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationService } from '../../../../features/applications/application.service';

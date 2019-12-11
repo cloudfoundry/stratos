@@ -16,7 +16,7 @@ import { CurrentUserPermissionsService } from '../../../../../../core/src/core/c
 import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { QParam } from '../../../../shared/q-param';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';

@@ -15,7 +15,7 @@ import { getPaginationObservables } from '../../../../../store/src/reducers/pagi
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 
 
 @Component({

@@ -16,7 +16,7 @@ import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-cat
 import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { safeStringToObj } from '../../../../core/src/core/utils.service';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { StratosStatus } from '../../../../core/src/shared/shared.types';
 import { QParam, QParamJoiners } from '../../shared/q-param';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

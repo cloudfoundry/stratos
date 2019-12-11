@@ -16,7 +16,7 @@ import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../src/shared/components/application-state/application-state.service';
-import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {

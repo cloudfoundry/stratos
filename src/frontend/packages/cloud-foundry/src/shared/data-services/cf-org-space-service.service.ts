@@ -25,7 +25,7 @@ import {
 import {
   valueOrCommonFalsy,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
 import { QParam, QParamJoiners } from '../q-param';
 import {

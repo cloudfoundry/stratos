@@ -25,7 +25,7 @@ import {
 } from '../../../../../core/src/core/cf-api.types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';

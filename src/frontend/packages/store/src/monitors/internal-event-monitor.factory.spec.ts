@@ -1,6 +1,6 @@
 import { TestBed, inject } from '@angular/core/testing';
 import { InternalEventMonitorFactory } from './internal-event-monitor.factory';
-import { SharedModule } from '../shared.module';
+import { SharedModule } from '../../../core/src/shared/shared.module';
 import { StoreModule } from '@ngrx/store';
 
 

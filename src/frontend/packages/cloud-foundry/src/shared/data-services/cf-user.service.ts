@@ -20,7 +20,7 @@ import {
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import {
   getPaginationObservables,
   PaginationObservables,

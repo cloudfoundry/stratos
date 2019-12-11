@@ -22,7 +22,7 @@ import {
   ListPaginationMultiFilterChange,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { MultiActionListEntity } from '../../../../../../../core/src/shared/monitors/pagination-monitor';
+import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { CFListDataSource } from '../../../../cf-list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';

@@ -16,7 +16,7 @@ import { entityCatalogue } from '../../../../../../store/src/entity-catalog/enti
 import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';

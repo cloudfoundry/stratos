@@ -16,7 +16,7 @@ import {
   TableRowStateManager,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { PaginationMonitor } from '../../../../../../../core/src/shared/monitors/pagination-monitor';
+import { PaginationMonitor } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { CFListDataSource } from '../../../../cf-list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';

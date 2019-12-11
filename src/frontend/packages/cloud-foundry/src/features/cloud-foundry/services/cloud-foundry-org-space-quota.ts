@@ -5,7 +5,7 @@ import { CFEntityConfig } from '../../../../../cloud-foundry/cf-types';
 import { IApp, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { truthyIncludingZero } from '../../../../../core/src/core/utils.service';
 import { determineCardStatus } from '../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import { EntityMonitorFactory } from '../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';

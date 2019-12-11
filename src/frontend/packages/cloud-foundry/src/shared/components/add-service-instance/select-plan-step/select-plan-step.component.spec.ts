@@ -4,8 +4,8 @@ import { EntityServiceFactory } from '../../../../../../store/src/entity-service
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   generateCfBaseTestModulesNoShared,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';

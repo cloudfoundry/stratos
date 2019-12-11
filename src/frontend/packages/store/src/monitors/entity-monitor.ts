@@ -14,17 +14,17 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { AppState, GeneralRequestDataState } from '../../../../store/src/app-state';
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { AppState, GeneralRequestDataState } from '../app-state';
+import { EntitySchema } from '../helpers/entity-schema';
 import {
   ActionState,
   getDefaultActionState,
   getDefaultRequestState,
   RequestInfoState,
   UpdatingSection,
-} from '../../../../store/src/reducers/api-request-reducer/types';
-import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../../../store/src/selectors/api.selectors';
-import { selectDashboardState } from '../../../../store/src/selectors/dashboard.selectors';
+} from '../reducers/api-request-reducer/types';
+import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../selectors/api.selectors';
+import { selectDashboardState } from '../selectors/dashboard.selectors';
 
 
 export class EntityMonitor<T = any> {

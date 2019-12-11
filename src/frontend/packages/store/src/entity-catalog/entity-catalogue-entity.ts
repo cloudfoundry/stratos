@@ -9,7 +9,7 @@ import { APISuccessOrFailedAction, EntityRequestAction } from '../types/request.
 import { IEndpointFavMetadata } from '../types/user-favorites.types';
 import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { getFullEndpointApiUrl } from '../../../core/src/features/endpoints/endpoint-helpers';
-import { EntityMonitor } from '../../../core/src/shared/monitors/entity-monitor';
+import { EntityMonitor } from '../monitors/entity-monitor';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { EntityActionDispatcherManager } from './action-dispatcher/action-dispatcher';
 import {

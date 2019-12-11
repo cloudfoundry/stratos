@@ -4,7 +4,7 @@ import {
   BooleanIndicatorComponent,
 } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
 import {
   generateCfBaseTestModulesNoShared,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';

@@ -7,7 +7,7 @@ import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-sta
 import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { entityCatalogue } from '../../../../../../../../store/src/entity-catalog/entity-catalogue.service';
-import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   getPaginationObservables,
   PaginationObservables,

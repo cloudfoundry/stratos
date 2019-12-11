@@ -2,8 +2,8 @@ import { HttpClient, HttpHandler } from '@angular/common/http';
 import { inject, TestBed } from '@angular/core/testing';
 
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { EntityMonitorFactory } from '../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfUserServiceProvider,

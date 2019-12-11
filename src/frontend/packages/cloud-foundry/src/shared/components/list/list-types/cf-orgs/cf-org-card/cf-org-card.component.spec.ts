@@ -3,8 +3,8 @@ import { Store } from '@ngrx/store';
 
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
 import { testSessionData } from '../../../../../../../../core/test-framework/store-test-helper';
 import { VerifiedSession } from '../../../../../../../../store/src/actions/auth.actions';

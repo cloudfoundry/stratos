@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { AppStat } from '../../../store/types/app-metadata.types';
 
 @Component({

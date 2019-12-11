@@ -8,8 +8,8 @@ import { ExtensionService } from '../../../../core/src/core/extension/extension-
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../core/src/core/github.helpers';
 import { ApplicationStateService } from '../../../../core/src/shared/components/application-state/application-state.service';
 import { GitSCMService } from '../../../../core/src/shared/data-services/scm/scm.service';
-import { EntityMonitorFactory } from '../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { generateTestApplicationServiceProvider } from '../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../core/test-framework/entity-service.helper';
 import { AppStoreModule } from '../../../../store/src/store.module';

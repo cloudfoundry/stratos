@@ -5,7 +5,7 @@ import { debounceTime, takeWhile, tap } from 'rxjs/operators';
 
 import { MetricsAction } from '../../../../store/src/actions/metrics.actions';
 import { IMetrics } from '../../../../store/src/types/base-metric.types';
-import { EntityMonitor } from '../monitors/entity-monitor';
+import { EntityMonitor } from '../../../../store/src/monitors/entity-monitor';
 import { MetricsRangeSelectorService } from './metrics-range-selector.service';
 import { ITimeRange, MetricQueryType } from './metrics-range-selector.types';
 

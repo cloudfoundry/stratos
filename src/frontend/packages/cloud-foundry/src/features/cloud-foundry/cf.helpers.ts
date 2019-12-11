@@ -28,8 +28,8 @@ import { pathGet } from '../../../../core/src/core/utils.service';
 import {
   extractActualListEntity,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
-import { MultiActionListEntity } from '../../../../core/src/shared/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { MultiActionListEntity } from '../../../../store/src/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

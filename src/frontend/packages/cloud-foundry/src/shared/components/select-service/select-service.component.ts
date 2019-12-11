@@ -6,7 +6,7 @@ import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { IService } from '../../../../../core/src/core/cf-api-svc.types';
 import { StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { SetCreateServiceInstanceServiceGuid } from '../../../actions/create-service-instance.actions';
 import { CFAppState } from '../../../cf-app-state';

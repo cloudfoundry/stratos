@@ -16,7 +16,7 @@ import {
 import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
 import { entityCatalogue } from '../../entity-catalog/entity-catalogue.service';
 import { sortStringify } from '../../../../core/src/core/utils.service';
-import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
+import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';

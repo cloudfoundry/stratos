@@ -16,7 +16,7 @@ import { ISpaceQuotaDefinition } from '../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
 import { IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalogue.types';
 import { StepOnNextResult } from '../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';

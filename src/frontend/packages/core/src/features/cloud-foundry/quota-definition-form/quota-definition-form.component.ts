@@ -16,7 +16,7 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
 import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { QuotaDefinitionActionBuilder } from '../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 

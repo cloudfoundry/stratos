@@ -17,7 +17,7 @@ import { IOrganization, IOrgQuotaDefinition } from '../../../../../../core/src/c
 import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';

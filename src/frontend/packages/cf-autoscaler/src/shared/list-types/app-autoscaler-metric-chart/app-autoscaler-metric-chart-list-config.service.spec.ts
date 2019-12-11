@@ -9,8 +9,8 @@ import { EntityServiceFactory } from '../../../../../store/src/entity-service-fa
 import {
   ApplicationStateService,
 } from '../../../../../core/src/shared/components/application-state/application-state.service';
-import { EntityMonitorFactory } from '../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { createEmptyStoreModule } from '../../../../../core/test-framework/store-test-helper';

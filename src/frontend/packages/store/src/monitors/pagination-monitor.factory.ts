@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../../store/src/entity-catalog/entity-catalogue.types';
+import { entityCatalogue } from '../entity-catalog/entity-catalogue.service';
+import { EntityCatalogueEntityConfig } from '../entity-catalog/entity-catalogue.types';
 import { PaginationMonitor } from './pagination-monitor';
+import { AppState } from '../app-state';
 
 @Injectable()
 export class PaginationMonitorFactory {
 
-  constructor(private store: Store<CFAppState>) { }
+  constructor(private store: Store<AppState>) { }
 
   private monitorCache: {
     [key: string]: PaginationMonitor

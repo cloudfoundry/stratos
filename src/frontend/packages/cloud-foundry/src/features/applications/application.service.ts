@@ -34,9 +34,9 @@ import {
   ApplicationStateService,
 } from '../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID } from '../../../../core/src/shared/entity.tokens';
-import { EntityMonitorFactory } from '../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitor } from '../../../../store/src/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
   getCurrentPageRequestInfo,

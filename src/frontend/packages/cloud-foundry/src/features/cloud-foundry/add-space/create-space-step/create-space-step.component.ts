@@ -11,7 +11,7 @@ import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/s
 import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
 import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { SpaceActionBuilders } from '../../../../entity-action-builders/space.action-builders';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { CfCellHelper } from '../../../../../../core/src/features/cloud-foundry/cf-cell.helpers';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { AppState } from '../../../../../../store/src/app-state';
 import {
   CfCellsListConfigService,
