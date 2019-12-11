@@ -59,7 +59,7 @@ func Sync(cmd *cobra.Command, args []string) {
 
 	startTime := time.Now()
 	authorizationHeader := os.Getenv("AUTHORIZATION_HEADER")
-	if err = syncRepo(client, fDB, args[0], args[1], authorizationHeader); err != nil {
+	if err = SyncRepo(client, fDB, args[0], args[1], authorizationHeader); err != nil {
 		log.Fatalf("Can't add chart repository to database: %v", err)
 		return
 	}

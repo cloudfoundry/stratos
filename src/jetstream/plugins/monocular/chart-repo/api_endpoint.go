@@ -30,8 +30,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	fdb "github.com/helm/monocular/chartsvc/foundationdb"
-	fdbDatastore "github.com/helm/monocular/chartsvc/foundationdb/datastore"
+	fdb "github.com/helm/monocular/chart-repo/foundationdb"
+	fdbDatastore "github.com/helm/monocular/chart-repo/foundationdb/datastore"
 )
 
 const pathPrefix = "/v1"
@@ -39,6 +39,12 @@ const pathPrefix = "/v1"
 var client *mongo.Client
 var fDBName string
 var authorizationHeader string
+
+// Params a key-value map of path params
+type Params map[string]string
+
+// WithParams can be used to wrap handlers to take an extra arg for path params
+type WithParams func(http.ResponseWriter, *http.Request, Params)
 
 func setupRoutes() http.Handler {
 	r := mux.NewRouter()
@@ -50,15 +56,15 @@ func setupRoutes() http.Handler {
 
 	// Routes
 	apiv1 := r.PathPrefix(pathPrefix).Subrouter()
-	apiv1.Methods("PUT").Path("/sync/{repo}").Handler(fdb.WithParams(fdb.OnDemandSync))
-	apiv1.Methods("PUT").Path("/delete/{repo}").Handler(fdb.WithParams(fdb.OnDemandDelete))
+	apiv1.Methods("PUT").Path("/sync/{repo}").Handler(WithParams(OnDemandSync))
+	apiv1.Methods("PUT").Path("/delete/{repo}").Handler(WithParams(OnDemandDelete))
 	
 	n := negroni.Classic()
 	n.UseHandler(r)
 	return n
 }
 
-func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params)
+func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 	repoURL := req.FormValue("repoURL") 
 	repoName := params["repo"]
 	//TODO kate check and handle errors
@@ -74,31 +80,17 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params)
 func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params)
 	repoName := params["repo"]
 	//TODO kate check and handle errors
-	if err = deleteRepo(cient, fDBName, repoName); err != nil {
+	if err = fdb.DeleteRepo(cient, fDBName, repoName); err != nil {
 		log.Fatalf("Can't delete chart repository %s from database: %v", args[0], err)
 	}
 }
 
-func initOnDemandEndpoint() {
+func initOnDemandEndpoint(fdbURL string, fdbName string , authHeader string, debug bool) {
 
-	debugVar, isSet := os.LookupEnv("DEBUG")
-	var debug bool
-	if !isSet {
-		debug = strconv.ParseBool(debug)
-	}
-
-	authorizationHeader = os.Getenv("AUTHORIZATION_HEADER")
-
-	//Flags for optional FoundationDB + Document Layer backend
-	fdbURL, isSet = os.LookupEnv("doclayer-url")
-	if !isSet {
-		fdbURL = "mongodb://fdb-service/27016"
-	}
-
-	fDBName, isSet = os.LookupEnv("doclayer-database")
-	if !isSet {
-		fDB = "charts"
-	}
+	authorizationHeader = authHeader
+	debug = debug
+	fdbURL = fdbURL
+	fdbName = fdbName
 
 	if debug {
 		log.SetLevel(log.DebugLevel)

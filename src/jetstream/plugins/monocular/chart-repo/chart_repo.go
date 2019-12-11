@@ -40,10 +40,8 @@ func main() {
 }
 
 func init() {
-
-	initOnDemandEndpoint()
 	
-	cmds := []*cobra.Command{SyncCmd, DeleteCmd}
+	cmds := []*cobra.Command{SyncCmd, DeleteCmd, ServeCmd}
 
 	for _, cmd := range cmds {
 		rootCmd.AddCommand(cmd)
