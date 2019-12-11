@@ -41,6 +41,8 @@ func main() {
 
 func init() {
 
+	initOnDemandEndpoint()
+	
 	cmds := []*cobra.Command{SyncCmd, DeleteCmd}
 
 	for _, cmd := range cmds {

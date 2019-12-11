@@ -67,7 +67,7 @@ func init() {
 // These steps are processed in this way to ensure relevant chart data is
 // imported into the database as fast as possible. E.g. we want all icons for
 // charts before fetching readmes for each chart and version pair.
-func syncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHeader string) error {
+func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHeader string) error {
 
 	db, closer := dbClient.Database(dbName)
 	defer closer()
@@ -190,7 +190,7 @@ func updateLastCheck(db Database, repoName string, checksum string, now time.Tim
 	return err
 }
 
-func deleteRepo(dbClient Client, dbName, repoName string) error {
+func DeleteRepo(dbClient Client, dbName, repoName string) error {
 	db, closer := dbClient.Database(dbName)
 	defer closer()
 	collection := db.Collection(chartCollection)
