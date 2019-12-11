@@ -7,6 +7,7 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { createCfFeatureFlagFetchAction } from './cf-feature-flags-data-source.helpers';
 
@@ -28,6 +29,9 @@ export const FeatureFlagDescriptions = {
   service_instance_sharing: 'Org and Space Managers can allow service instances to be shared across different spaces.'
 };
 export class CfFeatureFlagsDataSource extends ListDataSource<IFeatureFlag> {
+  static nameColumnId = 'name';
+  static descriptionColumnId = 'description';
+
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<IFeatureFlag>) {
     const action = createCfFeatureFlagFetchAction(cfGuid);
     super({
@@ -37,7 +41,32 @@ export class CfFeatureFlagsDataSource extends ListDataSource<IFeatureFlag> {
       getRowUniqueId: (ff) => ff.guid,
       paginationKey: action.paginationKey,
       isLocal: true,
-      transformEntities: [{ type: 'filter', field: 'name' }],
+      transformEntities: [
+        ((entities: IFeatureFlag[], paginationState: PaginationEntityState) => {
+          if (!paginationState.clientPagination.filter.string) {
+            return entities;
+          }
+
+          const filterString = paginationState.clientPagination.filter.string.toUpperCase();
+
+          const filterKey = paginationState.clientPagination.filter.filterKey;
+
+          switch (filterKey) {
+            case CfFeatureFlagsDataSource.nameColumnId:
+              return entities.filter(ff => ff.name.toUpperCase().includes(filterString));
+            case CfFeatureFlagsDataSource.descriptionColumnId:
+              return entities.filter(ff => {
+                const description = FeatureFlagDescriptions[ff.name];
+                if (!description) {
+                  return false;
+                }
+                return description.toUpperCase().includes(filterString);
+              });
+            default:
+              return entities;
+          }
+        })
+      ],
       listConfig
     });
   }
