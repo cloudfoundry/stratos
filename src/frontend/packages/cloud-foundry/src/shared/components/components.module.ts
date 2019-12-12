@@ -1,4 +1,3 @@
-// tslint:disable:max-line-length
 import { CommonModule } from '@angular/common';
 import { ApplicationModule, NgModule } from '@angular/core';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
@@ -109,6 +108,24 @@ import {
 } from './list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
 import { CfServiceCardComponent } from './list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import {
+  TableCellServiceActiveComponent,
+} from './list/list-types/cf-services/table-cell-service-active/table-cell-service-active.component';
+import {
+  TableCellServiceBindableComponent,
+} from './list/list-types/cf-services/table-cell-service-bindable/table-cell-service-bindable.component';
+import {
+  TableCellServiceCfBreadcrumbsComponent,
+} from './list/list-types/cf-services/table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
+import {
+  TableCellServiceProviderComponent,
+} from './list/list-types/cf-services/table-cell-service-provider/table-cell-service-provider.component';
+import {
+  TableCellServiceReferencesComponent,
+} from './list/list-types/cf-services/table-cell-service-references/table-cell-service-references.component';
+import {
+  TableCellServiceTagsComponent,
+} from './list/list-types/cf-services/table-cell-service-tags/table-cell-service-tags.component';
+import {
   TableCellServiceInstanceAppsAttachedComponent,
 } from './list/list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
 import {
@@ -159,6 +176,7 @@ import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
 
+// tslint:disable:max-line-length
 // tslint:enable:max-line-length
 
 @NgModule({
@@ -250,7 +268,13 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellUsageComponent,
     TableCellQuotaComponent,
     TableCellServiceComponent,
-    TableCellServiceLastOpComponent
+    TableCellServiceLastOpComponent,
+    TableCellServiceTagsComponent,
+    TableCellServiceCfBreadcrumbsComponent,
+    TableCellServiceProviderComponent,
+    TableCellServiceBindableComponent,
+    TableCellServiceActiveComponent,
+    TableCellServiceReferencesComponent
   ],
   exports: [
     ServiceIconComponent,
@@ -336,7 +360,13 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellUsageComponent,
     TableCellQuotaComponent,
     TableCellServiceComponent,
-    TableCellServiceLastOpComponent
+    TableCellServiceLastOpComponent,
+    TableCellServiceTagsComponent,
+    TableCellServiceCfBreadcrumbsComponent,
+    TableCellServiceProviderComponent,
+    TableCellServiceBindableComponent,
+    TableCellServiceActiveComponent,
+    TableCellServiceReferencesComponent
   ]
 })
 export class CloudFoundryComponentsModule { }
