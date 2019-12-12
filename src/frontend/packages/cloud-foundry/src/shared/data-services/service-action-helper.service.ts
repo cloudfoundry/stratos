@@ -1,20 +1,32 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { filter, map, pairwise } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
-import { DeleteUserProvidedInstance } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
+import {
+  DeleteUserProvidedInstance,
+  UpdateUserProvidedServiceInstance,
+} from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
-import { IServiceBinding } from '../../../../core/src/core/cf-api-svc.types';
+import {
+  serviceBindingEntityType,
+  serviceInstancesEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-types';
+import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../../../core/src/core/cf-api-svc.types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   EntityCatalogueEntityConfig,
   IEntityMetadata,
 } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
-import { APIResource } from '../../../../store/src/types/api.types';
+import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
+import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
+import { UpdateServiceInstance } from '../../actions/service-instances.actions';
 import { ServiceBindingActionBuilders } from '../../entity-action-builders/service-binding.action-builders';
 import { ServiceInstanceActionBuilders } from '../../entity-action-builders/service-instance.action.builders';
 import {
@@ -38,6 +50,7 @@ export class ServiceActionHelperService {
   constructor(
     private confirmDialog: ConfirmationDialogService,
     private store: Store<CFAppState>,
+    private entityServiceFactory: EntityServiceFactory
   ) { }
 
   detachServiceBinding = (
@@ -99,16 +112,59 @@ export class ServiceActionHelperService {
   }
 
 
-  editServiceBinding = (guid: string, endpointGuid: string, query: RouterQueryParams = {}, userProvided = false) =>
+  editServiceBinding = (
+    guid: string,
+    endpointGuid: string,
+    query: RouterQueryParams = {},
+    userProvided = false): Observable<ActionState> => {
     this.store.dispatch(new RouterNav(
       {
         path: [
           '/services/', this.getRouteKey(userProvided), endpointGuid, guid, 'edit'
         ], query
       }
-    ))
+    ));
+
+    const obs: Observable<EntityInfo<APIResource>> = userProvided ?
+      this.createUserProvidedServiceInstanceObs(guid, endpointGuid) :
+      this.createServiceInstanceObs(guid, endpointGuid);
+
+    const updatingKey = userProvided ?
+      UpdateUserProvidedServiceInstance.updateServiceInstance :
+      UpdateServiceInstance.updateServiceInstance;
+
+    return obs.pipe(
+      filter(res => !!res),
+      map(res => res.entityRequestInfo.updating[updatingKey]),
+      filter(res => !!res),
+      pairwise(),
+      filter(([oldV, newV]) => oldV.busy && !newV.busy),
+      map(([, newV]) => newV),
+    );
+  }
 
   private getRouteKey(userProvided: boolean) {
     return userProvided ? SERVICE_INSTANCE_TYPES.USER_SERVICE : SERVICE_INSTANCE_TYPES.SERVICE;
+  }
+
+  private createUserProvidedServiceInstanceObs(guid: string, endpointGuid: string):
+    Observable<EntityInfo<APIResource<IUserProvidedServiceInstance>>> {
+    const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+    const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('get');
+    const getUserProvidedServiceAction = actionBuilder(guid, endpointGuid);
+    return this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
+      guid,
+      getUserProvidedServiceAction
+    ).entityObs$;
+  }
+
+  private createServiceInstanceObs(guid: string, endpointGuid: string): Observable<EntityInfo<APIResource<IServiceInstance>>> {
+    const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('get');
+    const getServiceInstanceAction = actionBuilder(guid, endpointGuid);
+    return this.entityServiceFactory.create<APIResource<IServiceInstance>>(
+      guid,
+      getServiceInstanceAction
+    ).entityObs$;
   }
 }
