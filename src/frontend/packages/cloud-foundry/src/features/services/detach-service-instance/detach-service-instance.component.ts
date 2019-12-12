@@ -12,7 +12,7 @@ import {
   ServiceActionHelperService,
 } from '../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
 import { IServiceBinding, IServiceInstance } from '../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import {
   AppMonitorComponentTypes,
@@ -32,7 +32,7 @@ export class DetachServiceInstanceComponent {
   cfGuid: string;
   selectedBindings: APIResource<IServiceBinding>[];
   deleteStarted: boolean;
-  public siBindingCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+  public siBindingCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
 
   public confirmColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
     {
@@ -67,7 +67,7 @@ export class DetachServiceInstanceComponent {
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
     const serviceInstanceId = activatedRoute.snapshot.params.serviceInstanceId;
 
-    const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const serviceIntanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
     const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('get');
     const getServiceInstanceAction = actionBuilder(serviceInstanceId, this.cfGuid);
     const serviceBindingEntityService = this.entityServiceFactory.create<APIResource<IServiceInstance>>(

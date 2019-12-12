@@ -6,7 +6,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IRoute } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe } from '../../../../../../../core/src/core/utils.service';
 import {
   ListPaginationMultiFilterChange,
@@ -160,11 +160,11 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
     return paginationMonitor.currentPage$.pipe(
       map(routes => {
         return routes.map(route => {
-          const catalogueEntity = entityCatalogue.getEntity({
+          const catalogEntity = entityCatalog.getEntity({
             entityType: routeEntityType,
             endpointType: CF_ENDPOINT_TYPE
           });
-          const entityMonitor = catalogueEntity.getEntityMonitor(store, route.metadata.guid);
+          const entityMonitor = catalogEntity.getEntityMonitor(store, route.metadata.guid);
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
               const unmapping = request.updating.unmapping || { busy: false };

@@ -10,8 +10,8 @@ import { getEntityUpdateSections, getUpdateSectionById } from './selectors/api.s
 import { EntityInfo } from './types/api.types';
 import { EntityRequestAction } from './types/request.types';
 import { EntityMonitor } from './monitors/entity-monitor';
-import { entityCatalogue } from './entity-catalog/entity-catalogue.service';
-import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalogue.types';
+import { entityCatalog } from './entity-catalog/entity-catalog.service';
+import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
 
 export const ENTITY_INFO_HANDLER = '__ENTITY_INFO_HANDLER__';
 
@@ -153,7 +153,7 @@ export class EntityService<T = any> {
         entityType,
         endpointType
       } = dispatcherConfigOrAction as EntityActionBuilderEntityConfig;
-      const actionBuilder = entityCatalogue.getEntity(endpointType, entityType).actionOrchestrator.getActionBuilder('get');
+      const actionBuilder = entityCatalog.getEntity(endpointType, entityType).actionOrchestrator.getActionBuilder('get');
       return actionBuilder(entityGuid, endpointGuid, actionMetadata);
     }
   }

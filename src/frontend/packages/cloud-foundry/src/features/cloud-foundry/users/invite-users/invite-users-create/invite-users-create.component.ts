@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import {
   StackedInputActionResult,
@@ -69,7 +69,7 @@ export class InviteUsersCreateComponent implements OnInit {
 
   ngOnInit() {
     this.isSpace = !!this.activeRouteCfOrgSpace.spaceGuid;
-    const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const orgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
     const getOrgAction = getOrgActionBuilder(
       this.activeRouteCfOrgSpace.orgGuid,
@@ -82,7 +82,7 @@ export class InviteUsersCreateComponent implements OnInit {
     ).waitForEntity$.pipe(
       map(entity => entity.entity)
     );
-    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
     const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
     const getSpaceAction = actionBuilder(
       this.activeRouteCfOrgSpace.spaceGuid,

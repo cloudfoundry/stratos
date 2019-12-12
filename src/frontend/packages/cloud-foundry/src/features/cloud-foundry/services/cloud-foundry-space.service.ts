@@ -28,7 +28,7 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
-import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 
 @Injectable()
@@ -119,7 +119,7 @@ export class CloudFoundrySpaceService {
             createEntityRelationKey(spaceEntityType, SpaceUserRoleNames.AUDITOR),
           );
         }
-        const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+        const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
         const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
         const getSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid, { includeRelations: relations });
         const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(

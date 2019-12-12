@@ -1,8 +1,8 @@
 import { Action } from '@ngrx/store';
 
-import { StratosBaseCatalogueEntity } from '../../entity-catalog/entity-catalogue-entity';
-import { entityCatalogue } from '../../entity-catalog/entity-catalogue.service';
-import { IStratosEntityDefinition } from '../../entity-catalog/entity-catalogue.types';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { IStratosEntityDefinition } from '../../entity-catalog/entity-catalog.types';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../types/api.types';
 import { EntityRequestAction } from '../../types/request.types';
@@ -30,8 +30,8 @@ function getEntities(
 ): { [entityKey: string]: any[] } {
   return Object.keys(endpointResponse.normalizedEntities.entities).reduce(
     (newEntities, entityKey) => {
-      const innerCatalogueEntity = entityCatalogue.getEntityFromKey(entityKey) as StratosBaseCatalogueEntity;
-      const entitySuccessMapper = getSuccessMapper(innerCatalogueEntity);
+      const innerCatalogEntity = entityCatalog.getEntityFromKey(entityKey) as StratosBaseCatalogEntity;
+      const entitySuccessMapper = getSuccessMapper(innerCatalogEntity);
       const entities = entitySuccessMapper ? Object.keys(endpointResponse.normalizedEntities.entities[entityKey]).reduce(
         (newEntitiesOfType, guid) => {
           const entity = entitySuccessMapper(
@@ -42,7 +42,7 @@ function getEntities(
             action.endpointType,
             action
           );
-          const newGuid = entity ? innerCatalogueEntity.getGuidFromEntity(entity) || guid : guid;
+          const newGuid = entity ? innerCatalogEntity.getGuidFromEntity(entity) || guid : guid;
           return {
             ...newEntitiesOfType,
             [newGuid]: entity
@@ -58,13 +58,13 @@ function getEntities(
 
 export function mapMultiEndpointResponses(
   action: EntityRequestAction,
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes,
   multiEndpointResponses: HandledMultiEndpointResponse,
   actionDispatcher: (actionToDispatch: Action) => void
 ): PipelineResult {
   const normalizeEntityPipe = normalizeEntityPipeFactory(
-    catalogueEntity,
+    catalogEntity,
     // Can this be done outside of the pipe?
     // This pipe shouldn't have to worry about the multi entity lists.
     patchActionWithForcedConfig(action).schemaKey
@@ -72,13 +72,13 @@ export function mapMultiEndpointResponses(
   const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
   endpointErrorHandler(
     action,
-    catalogueEntity,
+    catalogEntity,
     requestType,
     multiEndpointResponses.errors
   );
 
   if (multiEndpointResponses.errors && multiEndpointResponses.errors.length) {
-    const errorMessage = createErrorMessage(catalogueEntity.definition as IStratosEntityDefinition, multiEndpointResponses.errors);
+    const errorMessage = createErrorMessage(catalogEntity.definition as IStratosEntityDefinition, multiEndpointResponses.errors);
     return {
       success: false,
       errorMessage
@@ -87,7 +87,7 @@ export function mapMultiEndpointResponses(
     const responses = multiEndpointResponses.successes.map(normalizeEntityPipe);
     const mapped = responses.map(endpointResponse => {
       const entities = getEntities(endpointResponse, action);
-      const parentEntities = entities[catalogueEntity.entityKey];
+      const parentEntities = entities[catalogEntity.entityKey];
       return {
         response: {
           entities,

@@ -22,7 +22,7 @@ import {
 import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
-import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityService } from '../../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
@@ -85,7 +85,7 @@ export class CloudFoundryEndpointService {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
       : createEntityRelationPaginationKey(endpointSchemaKey);
-    const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const organizationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getAllOrganizationsAction = actionBuilder(cfGuid, paginationKey,
       {
@@ -104,7 +104,7 @@ export class CloudFoundryEndpointService {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
       : createEntityRelationPaginationKey(endpointSchemaKey);
-    const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const organizationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getAllOrganizationsAction = actionBuilder(cfGuid, paginationKey,
       {
@@ -149,7 +149,7 @@ export class CloudFoundryEndpointService {
       new GetAllEndpoints()
     );
 
-    const cfInfoEntity = entityCatalogue.getEntity<any, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType);
+    const cfInfoEntity = entityCatalog.getEntity<any, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType);
     const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get');
     const action = actionBuilder(this.cfGuid);
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
@@ -234,7 +234,7 @@ export class CloudFoundryEndpointService {
   }
 
   public fetchDomains = () => {
-    const domainEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, domainEntityType);
+    const domainEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, domainEntityType);
     const actionBuilder = domainEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const action = actionBuilder(this.cfGuid, null);
     this.paginationSubscription = getPaginationObservables<APIResource>(

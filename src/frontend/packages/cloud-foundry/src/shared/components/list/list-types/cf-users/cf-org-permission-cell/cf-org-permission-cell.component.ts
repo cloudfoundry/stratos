@@ -15,7 +15,7 @@ import {
 import { IOrganization } from '../../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -64,7 +64,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
         perm.key,
         row.metadata.guid
       );
-      const catalogueEntity = entityCatalogue.getEntity({
+      const catalogEntity = entityCatalog.getEntity({
         entityType: organizationEntityType,
         endpointType: CF_ENDPOINT_TYPE
       });
@@ -74,7 +74,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
         guid: orgPerms.orgGuid,
         userName: row.entity.username,
         userGuid: row.metadata.guid,
-        busy: catalogueEntity.getEntityMonitor(
+        busy: catalogEntity.getEntityMonitor(
           this.store,
           orgPerms.orgGuid
         )

@@ -1,4 +1,4 @@
-import { EntityCatalogueEntityConfig } from '../../../store/src/entity-catalog/entity-catalogue.types';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import {
   EntityInlineChildAction,
   EntityInlineParentAction,
@@ -41,7 +41,7 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
     '[Fetch Relations] Failed'
   ];
   options: HttpRequest<any>;
-  parentEntityConfig: EntityCatalogueEntityConfig;
+  parentEntityConfig: EntityCatalogEntityConfig;
   static is(anything: any): FetchRelationAction {
     return (anything.isId === relationActionId) ? anything as FetchRelationAction : null;
   }

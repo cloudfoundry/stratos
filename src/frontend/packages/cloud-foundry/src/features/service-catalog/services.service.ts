@@ -19,7 +19,7 @@ import {
   IServicePlanVisibility,
 } from '../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
@@ -85,7 +85,7 @@ export class ServicesService {
 
   getServicePlanVisibilities = () => {
     const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid);
-    const servicePlanVisibilityEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, servicePlanVisibilityEntityType);
+    const servicePlanVisibilityEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, servicePlanVisibilityEntityType);
     const actionBuilder = servicePlanVisibilityEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getServicePlanVisibilitiesAction = actionBuilder(this.cfGuid, paginationKey);
     return getPaginationObservables<APIResource<IServicePlanVisibility>>(
@@ -106,7 +106,7 @@ export class ServicesService {
 
   private getServiceBrokers = () => {
     const paginationKey = createEntityRelationPaginationKey(serviceBrokerEntityType, this.cfGuid);
-    const serviceBrokerEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
+    const serviceBrokerEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
     const actionBuilder = serviceBrokerEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getServiceBrokersAction = actionBuilder(this.cfGuid, paginationKey);
     return getPaginationObservables<APIResource<IServiceBroker>>(
@@ -216,7 +216,7 @@ export class ServicesService {
             isSpaceScoped: false
           });
         } else {
-          const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+          const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
           const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
           const getSpaceAction = actionBuilder(spaceGuid, this.cfGuid);
           const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(

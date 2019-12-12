@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
-import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { environment } from '../../../core/src/environments/environment';
 import { AppState } from '../../../store/src/app-state';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
@@ -86,7 +86,7 @@ export class AutoscalerEffects {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
           mergeMap(autoscalerInfo => {
-            const entityKey = entityCatalogue.getEntityKey(action);
+            const entityKey = entityCatalog.getEntityKey(action);
             const mappedData = {
               entities: { [entityKey]: {} },
               result: []
@@ -112,7 +112,7 @@ export class AutoscalerEffects {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
           mergeMap(healthInfo => {
-            const entity = entityCatalogue.getEntity(action);
+            const entity = entityCatalog.getEntity(action);
             const mappedData = {
               entities: { [entity.entityKey]: {} },
               result: []
@@ -144,7 +144,7 @@ export class AutoscalerEffects {
         }).pipe(
           mergeMap(response => {
             const policyInfo = autoscalerTransformArrayToMap(response);
-            const entity = entityCatalogue.getEntity(action);
+            const entity = entityCatalog.getEntity(action);
             const mappedData = {
               entities: { [entity.entityKey]: {} },
               result: []
@@ -176,7 +176,7 @@ export class AutoscalerEffects {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
           mergeMap(response => {
-            const entity = entityCatalogue.getEntity(action);
+            const entity = entityCatalog.getEntity(action);
             const mappedData = {
               entities: { [entity.entityKey]: {} },
               result: []
@@ -205,7 +205,7 @@ export class AutoscalerEffects {
       const actionType = 'fetch';
       const paginatedAction = action as PaginatedAction;
       this.store.dispatch(new StartRequestAction(action, actionType));
-      const entity = entityCatalogue.getEntity(action);
+      const entity = entityCatalog.getEntity(action);
       // Set params from store
       const paginationState = selectPaginationState(
         entity.entityKey,
@@ -256,7 +256,7 @@ export class AutoscalerEffects {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType));
       const params = this.buildParams(action.initialParams, action.params);
-      const entity = entityCatalogue.getEntity(action);
+      const entity = entityCatalog.getEntity(action);
       return this.http
         .get<PaginationResponse<AppAutoscalerMetricData>>(`${commonPrefix}/${action.url}`, {
           headers: this.addHeaders(action.endpointGuid),
@@ -285,7 +285,7 @@ export class AutoscalerEffects {
     actionType: ApiRequestTypes = 'create'
   ): Observable<Action> {
     this.store.dispatch(new StartRequestAction(action, actionType));
-    const entity = entityCatalogue.getEntity(action);
+    const entity = entityCatalog.getEntity(action);
     return this.http
       .put<AppAutoscalerPolicy>(`${commonPrefix}/apps/${action.guid}/policy`, {
         headers: this.addHeaders(action.endpointGuid),
@@ -317,7 +317,7 @@ export class AutoscalerEffects {
         headers: this.addHeaders(getPolicyAction.endpointGuid)
       }).pipe(
         mergeMap(response => {
-          const actionEntity = entityCatalogue.getEntity(getPolicyAction);
+          const actionEntity = entityCatalog.getEntity(getPolicyAction);
           const policyInfo = autoscalerTransformArrayToMap(response);
           const mappedData = {
             entities: { [actionEntity.entityKey]: {} },
@@ -330,7 +330,7 @@ export class AutoscalerEffects {
           ];
 
           if (getPolicyTriggerAction) {
-            const triggerEntity = entityCatalogue.getEntity(getPolicyTriggerAction);
+            const triggerEntity = entityCatalog.getEntity(getPolicyTriggerAction);
             const mappedPolicyData = {
               entities: { [triggerEntity.entityKey]: {} },
               result: []

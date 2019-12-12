@@ -12,8 +12,8 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -114,7 +114,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
 
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    const quotaDefinitionEntity = entityCatalogue.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(
+    const quotaDefinitionEntity = entityCatalog.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(
       CF_ENDPOINT_TYPE,
       quotaDefinitionEntityType
     );

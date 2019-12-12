@@ -29,8 +29,8 @@ import { getPaginationObservables } from '../../../../store/src/reducers/paginat
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
-import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
-import { EntityCatalogueEntityConfig, IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalogue.types';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig, IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 
@@ -38,12 +38,12 @@ import { PaginationMonitorFactory } from '../../../../store/src/monitors/paginat
 @Injectable()
 export class CloudFoundryUserProvidedServicesService {
 
-  private serviceInstancesEntityConfig: EntityCatalogueEntityConfig = {
+  private serviceInstancesEntityConfig: EntityCatalogEntityConfig = {
     endpointType: CF_ENDPOINT_TYPE,
     entityType: serviceInstancesEntityType
   };
 
-  private userProvidedServiceEntity = entityCatalogue.getEntity<IEntityMetadata, any, UserProvidedServiceActionBuilder>(
+  private userProvidedServiceEntity = entityCatalog.getEntity<IEntityMetadata, any, UserProvidedServiceActionBuilder>(
     CF_ENDPOINT_TYPE,
     userProvidedServiceInstanceEntityType
   );

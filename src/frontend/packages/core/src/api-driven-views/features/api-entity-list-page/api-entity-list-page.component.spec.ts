@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ApiEntityListPageComponent } from './api-entity-list-page.component';
 import { ApiDrivenViewsModule } from '../../api-driven-views.module';
 import { RouterTestingModule } from '@angular/router/testing';
-import { EntityCatalogueModule } from '../../../../../store/src/entity-catalogue.module';
+import { EntityCatalogModule } from '../../../../../store/src/entity-catalog.module';
 import { generateStratosEntities } from '../../../base-entity-types';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
@@ -16,7 +16,7 @@ describe('ApiEntityListPageComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        EntityCatalogueModule.forFeature(generateStratosEntities),
+        EntityCatalogModule.forFeature(generateStratosEntities),
         CoreModule,
         RouterTestingModule,
         SharedModule,

@@ -19,7 +19,7 @@ import {
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { CF_GUID } from '../../../../../core/src/shared/entity.tokens';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../cf-entity-factory';
@@ -63,7 +63,7 @@ export class CreateServiceInstanceHelper {
     );
 
     const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid);
-    const servicePlanVisibilityEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, servicePlanVisibilityEntityType);
+    const servicePlanVisibilityEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, servicePlanVisibilityEntityType);
     const actionBuilder = servicePlanVisibilityEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getServicePlanVisibilitiesAction = actionBuilder(this.cfGuid, paginationKey);
     this.servicePlanVisibilities$ = getPaginationObservables<APIResource<IServicePlanVisibility>>(
@@ -185,7 +185,7 @@ export class CreateServiceInstanceHelper {
   getServiceInstancesForService = (servicePlanGuid: string = null, spaceGuid: string = null, cfGuid: string = null) => {
     let action;
     let paginationKey;
-    const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const serviceInstanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
     if (spaceGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, `${spaceGuid}-${servicePlanGuid}`);
       const q = [new QParam('service_plan_guid', servicePlanGuid, QParamJoiners.colon).toString()];

@@ -27,8 +27,8 @@ import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalogue.types';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
 
@@ -149,7 +149,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     );
     this.endpointsService.registerHealthCheck(
       new EndpointHealthCheck('cf', (endpoint) => {
-        entityCatalogue.getEntity<IEntityMetadata, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType)
+        entityCatalog.getEntity<IEntityMetadata, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType)
           .actionDispatchManager.dispatchGet(endpoint.guid);
       })
     );

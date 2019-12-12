@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
-import { InitCatalogueEntitiesAction } from '../../entity-catalogue.actions';
-import { getDefaultStateFromEntityCatalogue } from '../../entity-catalog/entity-catalogue.store-setup';
+import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
+import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import {
   RECURSIVE_ENTITY_RESET,
   RECURSIVE_ENTITY_SET_DELETED,
@@ -25,8 +25,8 @@ export function requestReducerFactory(actions: IRequestArray) {
   const [startAction, successAction, failedAction, updateAction] = actions;
   return function apiRequestReducer(state = {}, action: Action) {
     switch (action.type) {
-      case InitCatalogueEntitiesAction.ACTION_TYPE:
-        return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {}, state);
+      case InitCatalogEntitiesAction.ACTION_TYPE:
+        return getDefaultStateFromEntityCatalog((action as InitCatalogEntitiesAction).entityKeys, {}, state);
       case startAction:
         return startRequest(state, action as StartRequestAction);
       case successAction:

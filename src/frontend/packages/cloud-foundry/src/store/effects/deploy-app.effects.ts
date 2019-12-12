@@ -30,7 +30,7 @@ import { CFAppState } from '../../cf-app-state';
 import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-types';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { GitCommit } from '../types/git.types';
-import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { CF_ENDPOINT_TYPE } from './../../../cf-types';
 
 function parseHttpPipeError(res: any, logger: LoggerService): { message?: string } {
@@ -93,7 +93,7 @@ export class DeployAppEffects {
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return action.scm.getBranches(action.projectName).pipe(
         mergeMap(branches => {
-          const entityKey = entityCatalogue.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
           const mappedData = {
             entities: { [entityKey]: {} },
             result: []
@@ -133,7 +133,7 @@ export class DeployAppEffects {
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return action.scm.getCommit(action.projectName, action.commitSha).pipe(
         mergeMap(commit => {
-          const entityKey = entityCatalogue.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
           const mappedData = {
             entities: { [entityKey]: {} },
             result: []
@@ -162,7 +162,7 @@ export class DeployAppEffects {
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return action.scm.getCommits(action.projectName, action.sha).pipe(
         mergeMap((commits: GitCommit[]) => {
-          const entityKey = entityCatalogue.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
           const mappedData = {
             entities: { [entityKey]: {} },
             result: []

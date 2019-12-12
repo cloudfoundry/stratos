@@ -17,8 +17,8 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../../../../cloud-foundr
 import { AppState } from '../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../core/cf-api.types';
-import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -75,7 +75,7 @@ export class EditQuotaStepComponent implements OnDestroy {
   submit: StepOnNextFunction = () => {
     const formValues = this.form.formGroup.value;
     const entityConfig =
-      entityCatalogue.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+      entityCatalog.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
     entityConfig.actionDispatchManager.dispatchUpdate(this.quotaGuid, this.cfGuid, formValues);
     return entityConfig
       .getEntityMonitor(this.store, this.quotaGuid)

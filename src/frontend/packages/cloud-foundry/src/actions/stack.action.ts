@@ -1,4 +1,4 @@
-import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
@@ -26,7 +26,7 @@ export class GetStack extends CFStartAction implements ICFAction {
     GET_SUCCESS,
     GET_FAILED
   ];
-  entity = [entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType).getSchema()];
+  entity = [entityCatalog.getEntity(CF_ENDPOINT_TYPE, stackEntityType).getSchema()];
   entityType = stackEntityType;
   options: HttpRequest<any>;
 }
@@ -41,7 +41,7 @@ export class GetAllStacks extends CFStartAction implements PaginatedAction {
   }
   paginationKey: string;
   actions = getActions('Stack', 'Fetch all');
-  entity = [entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType).getSchema()];
+  entity = [entityCatalog.getEntity(CF_ENDPOINT_TYPE, stackEntityType).getSchema()];
   entityType = stackEntityType;
   options: HttpRequest<any>;
   initialParams = {

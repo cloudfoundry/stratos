@@ -24,7 +24,7 @@ import {
 } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { EnvVarViewComponent } from '../../../../../../../../core/src/shared/components/env-var-view/env-var-view.component';
@@ -117,7 +117,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsServiceInstance() {
-    const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const serviceIntanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
     const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('get');
     const getServiceInstanceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid);
     const serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
@@ -153,7 +153,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsUserProvidedServiceInstance() {
-    const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+    const serviceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
     const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('get');
     const getUserProvidedServiceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid);
     const userProvidedServiceInstance$ = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(

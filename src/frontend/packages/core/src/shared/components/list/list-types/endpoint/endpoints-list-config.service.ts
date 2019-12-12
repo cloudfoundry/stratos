@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
@@ -133,6 +133,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   public getMultiFiltersConfigs = () => [];
 
   private getEndpointTypeString(endpoint: EndpointModel): string {
-    return entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition.label;
+    return entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition.label;
   }
 }

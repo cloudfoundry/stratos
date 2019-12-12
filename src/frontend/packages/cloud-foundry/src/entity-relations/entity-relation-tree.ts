@@ -1,5 +1,5 @@
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
-import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 
 /**
  * A structure which represents the tree like layout of entity dependencies. For example organization --> space --> routes
@@ -29,7 +29,7 @@ export class EntityTreeRelation {
     public path = '', // entity.space
     public childRelations: EntityTreeRelation[]
   ) {
-    this.entityKey = entityCatalogue.getEntityKey(entity);
+    this.entityKey = entityCatalog.getEntityKey(entity);
     this.entityType = entity.entityType;
   }
 }

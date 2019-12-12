@@ -6,7 +6,7 @@ import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
   getPaginationAction,
 } from '../../../../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator.spec.helpers';
-import { EntityCatalogueEntityConfig } from '../../../../../../../../store/src/entity-catalog/entity-catalogue.types';
+import { EntityCatalogEntityConfig } from '../../../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
   ApplicationStateService,
@@ -50,7 +50,7 @@ describe('EventsTabComponent', () => {
       ]
     })
       .compileComponents();
-    const eventsConfig: EntityCatalogueEntityConfig = cfEntityFactory(appEventEntityType);
+    const eventsConfig: EntityCatalogEntityConfig = cfEntityFactory(appEventEntityType);
 
     const mappedData = {
       entities: {},

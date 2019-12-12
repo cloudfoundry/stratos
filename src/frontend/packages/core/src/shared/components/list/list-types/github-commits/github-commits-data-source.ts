@@ -7,7 +7,7 @@ import { CFEntitySchema } from '../../../../../../../cloud-foundry/src/cf-entity
 import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
@@ -30,7 +30,7 @@ export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
     sha: string,
     commitSha?: string,
   ) {
-    const gitCommitEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
+    const gitCommitEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
     const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const fetchCommitAction = fetchCommitActionBuilder(sha, null, {
       scm,

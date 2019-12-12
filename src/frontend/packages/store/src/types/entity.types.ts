@@ -7,7 +7,7 @@ import { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
 import { UserProfileInfo } from './user-profile.types';
 
 export interface BaseEntityValues {
-  // FIXME: Should come from catalogue and start with stratos - STRAT-151
+  // FIXME: Should come from catalog and start with stratos - STRAT-151
   stratosEndpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
   stratosUserProfile: UserProfileInfo;
@@ -22,7 +22,7 @@ export type ExtendedRequestDataState<E extends Record<keyof E, any>> = {
 };
 
 
-// FIXME: These should also come from catalogue? - STRAT-151
+// FIXME: These should also come from catalog? - STRAT-151
 export interface IRequestState extends IRequestTypeState {
   endpoint: IRequestEntityTypeState<RequestInfoState>;
   userFavorites: IRequestEntityTypeState<RequestInfoState>;

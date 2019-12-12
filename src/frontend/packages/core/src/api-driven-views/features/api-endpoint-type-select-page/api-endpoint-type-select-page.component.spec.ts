@@ -9,7 +9,7 @@ import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { TabNavService } from '../../../../tab-nav.service';
-import { EntityCatalogueModule } from '../../../../../store/src/entity-catalogue.module';
+import { EntityCatalogModule } from '../../../../../store/src/entity-catalog.module';
 import { generateStratosEntities } from '../../../base-entity-types';
 
 describe('ApiEndpointTypeSelectPageComponent', () => {
@@ -19,7 +19,7 @@ describe('ApiEndpointTypeSelectPageComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        EntityCatalogueModule.forFeature(generateStratosEntities),
+        EntityCatalogModule.forFeature(generateStratosEntities),
         CoreModule,
         RouterTestingModule,
         SharedModule,

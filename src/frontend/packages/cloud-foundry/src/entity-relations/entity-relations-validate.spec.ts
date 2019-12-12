@@ -2,11 +2,11 @@ import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 
 import {
-  EntityCatalogueTestModuleManualStore,
+  EntityCatalogTestModuleManualStore,
   TEST_CATALOGUE_ENTITIES,
-} from '../../../store/src/entity-catalogue-test.module';
-import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../store/src/entity-catalog/entity-catalogue.types';
+} from '../../../store/src/entity-catalog-test.module';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { environment } from '../../../core/src/environments/environment';
 import {
   createBasicStoreModule,
@@ -58,15 +58,15 @@ describe('Entity Relations - validate -', () => {
   let apiResponse: APIResponse;
   let newEntities: IRequestTypeState;
 
-  const orgEntityKey = entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, organizationEntityType);
-  const spaceEntityKey = entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
-  const quotaEntityKey = entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+  const orgEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, organizationEntityType);
+  const spaceEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
+  const quotaEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
 
   function setup(store) {
     TestBed.configureTestingModule({
       imports: [
         {
-          ngModule: EntityCatalogueTestModuleManualStore,
+          ngModule: EntityCatalogTestModuleManualStore,
           providers: [
             { provide: TEST_CATALOGUE_ENTITIES, useValue: generateCFEntities() }
           ]
@@ -224,7 +224,7 @@ describe('Entity Relations - validate -', () => {
   describe('validate from store - ', () => {
 
     function createBasicStore() {
-      const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity>>([
+      const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity>>([
         [
           cfEntityFactory(organizationEntityType),
           [{
@@ -501,7 +501,7 @@ describe('Entity Relations - validate -', () => {
 
     beforeEach(() => {
 
-      const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity>>([
+      const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity>>([
         [
           cfEntityFactory(organizationEntityType),
           [],

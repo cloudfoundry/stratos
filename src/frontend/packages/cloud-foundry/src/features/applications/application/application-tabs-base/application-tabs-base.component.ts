@@ -10,7 +10,7 @@ import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata
 import { IApp, IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityService } from '../../../../../../store/src/entity-service';
 import {
   getActionsFromExtensions,
@@ -72,8 +72,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private favoritesConfigMapper: FavoritesConfigMapper,
     private appPollingService: ApplicationPollingService
   ) {
-    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-    this.schema = catalogueEntity.getSchema();
+    const catalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    this.schema = catalogEntity.getSchema();
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
       withLatestFrom(
