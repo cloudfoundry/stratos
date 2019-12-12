@@ -17,7 +17,7 @@ import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/eff
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { CreateNewApplicationState } from '../../../../../../cloud-foundry/src/store/types/create-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
@@ -115,7 +115,7 @@ export class CreateApplicationStep3Component implements OnInit {
     const newRouteGuid = hostName + selectedDomainGuid;
 
     if (shouldCreate) {
-      const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+      const routeEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
       const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('create');
       const createRouteAction = actionBuilder(newRouteGuid,
         cloudFoundry,
@@ -135,7 +135,7 @@ export class CreateApplicationStep3Component implements OnInit {
   }
 
   associateRoute(appGuid: string, routeGuid: string, endpointGuid: string): Observable<RequestInfoState> {
-    const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    const appEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
     const assignRouteAction = actionBuilder(endpointGuid, routeGuid, appGuid);
     this.store.dispatch(assignRouteAction);
@@ -163,7 +163,7 @@ export class CreateApplicationStep3Component implements OnInit {
         this.hostControl().setValue(state.name.split(' ').join('-').toLowerCase());
         this.hostControl().markAsDirty();
         this.newAppData = state;
-        const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+        const orgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
         const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
         const getOrgAction = getOrgActionBuilder(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, {
           includeRelations: [

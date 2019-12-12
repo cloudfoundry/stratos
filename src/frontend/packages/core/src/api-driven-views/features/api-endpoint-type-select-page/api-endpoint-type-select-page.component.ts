@@ -3,7 +3,7 @@ import { GeneralAppState } from '../../../../../store/src/app-state';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { ApiEntityType } from '../../api-drive-views.types';
-import { entityCatalogue } from '../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { map } from 'rxjs/operators';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -25,9 +25,9 @@ export class ApiEndpointTypeSelectPageComponent implements OnInit {
     this.router.navigate([endpoint.type], { relativeTo: this.activeRoute });
   }
   ngOnInit() {
-    const endpointTypes = entityCatalogue.getAllEndpointTypes();
+    const endpointTypes = entityCatalog.getAllEndpointTypes();
     const endpointTypesWithEntities = endpointTypes
-      .filter(endpointType => entityCatalogue.getAllEntitiesForEndpointType(endpointType.type).length > 0);
+      .filter(endpointType => entityCatalog.getAllEntitiesForEndpointType(endpointType.type).length > 0);
     this.connectedEndpointTypes$ = this.store.select(endpointEntitiesSelector).pipe(
       map(endpoints => {
         const endpointTypeSet = new Set<string>();

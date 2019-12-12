@@ -7,7 +7,7 @@ import { CoreModule } from '../../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { TabNavService } from '../../../../tab-nav.service';
-import { EntityCatalogueModule } from '../../../../../store/src/entity-catalogue.module';
+import { EntityCatalogModule } from '../../../../../store/src/entity-catalog.module';
 import { generateStratosEntities } from '../../../base-entity-types';
 
 describe('ApiEndpointSelectPageComponent', () => {
@@ -17,7 +17,7 @@ describe('ApiEndpointSelectPageComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        EntityCatalogueModule.forFeature(generateStratosEntities),
+        EntityCatalogModule.forFeature(generateStratosEntities),
         CoreModule,
         RouterTestingModule,
         SharedModule,

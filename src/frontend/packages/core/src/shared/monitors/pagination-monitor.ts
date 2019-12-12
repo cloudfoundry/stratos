@@ -20,9 +20,9 @@ import { ActionState, ListActionState } from '../../../../store/src/reducers/api
 import { getAPIRequestDataState, selectEntities } from '../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
-import { StratosBaseCatalogueEntity } from '../../../../store/src/entity-catalog/entity-catalogue-entity';
-import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../../store/src/entity-catalog/entity-catalogue.types';
+import { StratosBaseCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { LocalPaginationHelpers } from '../components/list/data-sources-controllers/local-list.helpers';
 
 export class MultiActionListEntity {
@@ -64,35 +64,35 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
   public schema: EntitySchema;
 
   /**
-   * Returns a pagination monitor for a given catalogue entity and pagination key.
+   * Returns a pagination monitor for a given catalog entity and pagination key.
    */
-  static getMonitorFromCatalogueEntity(
+  static getMonitorFromCatalogEntity(
     store: Store<GeneralEntityAppState>,
-    catalogueEntity: StratosBaseCatalogueEntity,
+    catalogEntity: StratosBaseCatalogEntity,
     paginationKey: string,
     {
       isLocal = false,
       schemaKey = ''
     }: any
   ) {
-    // This is a static on the pagination monitor rather than a member of StratosBaseCatalogueEntity due to
+    // This is a static on the pagination monitor rather than a member of StratosBaseCatalogEntity due to
     // a circular dependency on entityFactory from the getPageInfo function below.
-    const schema = catalogueEntity.getSchema(schemaKey);
+    const schema = catalogEntity.getSchema(schemaKey);
     return new PaginationMonitor(store, paginationKey, schema, isLocal);
   }
 
   constructor(
     private store: Store<Y>,
     public paginationKey: string,
-    public entityConfig: EntityCatalogueEntityConfig,
+    public entityConfig: EntityCatalogEntityConfig,
     public isLocal = false
   ) {
     const { endpointType, entityType, schemaKey } = entityConfig;
-    const catalogueEntity = entityCatalogue.getEntity(endpointType, entityType);
-    if (!catalogueEntity) {
-      throw new Error(`Could not find catalogue entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
+    const catalogEntity = entityCatalog.getEntity(endpointType, entityType);
+    if (!catalogEntity) {
+      throw new Error(`Could not find catalog entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
     }
-    this.schema = entityCatalogue.getEntity(endpointType, entityType).getSchema(schemaKey);
+    this.schema = entityCatalog.getEntity(endpointType, entityType).getSchema(schemaKey);
     this.init(store, paginationKey, this.schema);
   }
 
@@ -250,7 +250,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       map(([pagination]) => {
         return Object.values(pagination.pageRequests).reduce((entityKeys, pageRequest) => {
           const { entityConfig } = pageRequest;
-          const key = entityCatalogue.getEntityKey(entityConfig);
+          const key = entityCatalog.getEntityKey(entityConfig);
           if (key && !entityKeys.includes(key)) {
             entityKeys.push(key);
           }
@@ -301,7 +301,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
   private getPageInfo(pagination: PaginationEntityState, pageId: number | string, defaultSchema: normalizrSchema.Entity) {
     const page = pagination.ids[pageId] || [];
     const pageState = pagination.pageRequests[pageId] || {} as ListActionState;
-    const pageSchema = pageState.entityConfig ? entityCatalogue.getEntity(
+    const pageSchema = pageState.entityConfig ? entityCatalog.getEntity(
       pageState.entityConfig.endpointType,
       pageState.entityConfig.entityType
     ).getSchema(pageState.entityConfig.schemaKey) : defaultSchema;

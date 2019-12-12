@@ -8,8 +8,8 @@ import { filter } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
@@ -78,7 +78,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   submit: StepOnNextFunction = () => {
     const id = `${this.orgGuid}-${this.spaceName.value}`;
-    const spaceEntity = entityCatalogue.getEntity<IEntityMetadata, any, SpaceActionBuilders>(
+    const spaceEntity = entityCatalog.getEntity<IEntityMetadata, any, SpaceActionBuilders>(
       CF_ENDPOINT_TYPE,
       spaceEntityType
     );

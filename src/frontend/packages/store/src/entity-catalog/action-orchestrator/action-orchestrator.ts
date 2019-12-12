@@ -115,7 +115,7 @@ export class BasePipelineRequestAction<M extends Array<any> = any[]> extends Sta
   }
 }
 
-// This action will be created by the entity catalogue from single request entity builder configs.
+// This action will be created by the entity catalog from single request entity builder configs.
 export class BaseEntityRequestAction extends BasePipelineRequestAction implements EntityRequestAction {
   public options: HttpRequest<any>;
   public updatingKey = null;
@@ -135,7 +135,7 @@ export class BaseEntityRequestAction extends BasePipelineRequestAction implement
   }
 }
 
-// This action will be created by the entity catalogue from multi request entity builder configs.
+// This action will be created by the entity catalog from multi request entity builder configs.
 export class BasePaginationRequestAction extends BasePipelineRequestAction implements EntityRequestAction {
   public options: HttpRequest<any>;
   constructor(

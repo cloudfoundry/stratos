@@ -4,11 +4,11 @@ import { first } from 'rxjs/operators';
 
 import { ISpace } from '../../../core/src/core/cf-api.types';
 import {
-  EntityCatalogueTestModuleManualStore,
+  EntityCatalogTestModuleManualStore,
   TEST_CATALOGUE_ENTITIES,
-} from '../../../store/src/entity-catalogue-test.module';
-import { entityCatalogue } from '../../../store/src/entity-catalog/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../store/src/entity-catalog/entity-catalogue.types';
+} from '../../../store/src/entity-catalog-test.module';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import {
   createBasicStoreModule,
   createEntityStoreState,
@@ -29,7 +29,7 @@ import { populatePaginationFromParent } from './entity-relations';
 
 
 describe('Entity Relations - populate from parent', () => {
-  const spaceEntityKey = entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
+  const spaceEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
 
   const helper = new EntityRelationSpecHelper();
 
@@ -41,7 +41,7 @@ describe('Entity Relations - populate from parent', () => {
     TestBed.configureTestingModule({
       imports: [
         {
-          ngModule: EntityCatalogueTestModuleManualStore,
+          ngModule: EntityCatalogTestModuleManualStore,
           providers: [
             { provide: TEST_CATALOGUE_ENTITIES, useValue: generateCFEntities() }
           ]
@@ -52,7 +52,7 @@ describe('Entity Relations - populate from parent', () => {
   }
 
   it('No list in parent - no op', (done) => {
-    const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity>>([
+    const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity>>([
       [
         cfEntityFactory(organizationEntityType),
         [{
@@ -86,7 +86,7 @@ describe('Entity Relations - populate from parent', () => {
     const org = helper.createEmptyOrg(orgGuid, 'org-name');
     org.entity.spaces = spaces;
 
-    const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
+    const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>([
       [
         cfEntityFactory(organizationEntityType),
         [{

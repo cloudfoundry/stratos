@@ -13,8 +13,8 @@ import {
 import { UpdateSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType, spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
@@ -111,7 +111,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   }
 
   updateSpace$() {
-    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
     const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('update');
     const updateSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid, {
       name: this.editSpaceForm.value.spaceName,
@@ -130,7 +130,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     let spaceQuotaQueryGuid;
     let action: AssociateSpaceQuota | DisassociateSpaceQuota;
 
-    const spaceQuotaEntity = entityCatalogue.getEntity<IEntityMetadata, any, SpaceQuotaDefinitionActionBuilders>(
+    const spaceQuotaEntity = entityCatalog.getEntity<IEntityMetadata, any, SpaceQuotaDefinitionActionBuilders>(
       CF_ENDPOINT_TYPE,
       spaceQuotaEntityType
     );

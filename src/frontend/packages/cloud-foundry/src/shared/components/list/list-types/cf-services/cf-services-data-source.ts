@@ -6,7 +6,7 @@ import { serviceEntityType } from '../../../../../../../cloud-foundry/src/cf-ent
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -19,13 +19,13 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 export class CfServicesDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey);
-    const serviceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
+    const serviceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceEntityType);
     const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getServicesAction = actionBuilder(endpointGuid, paginationKey);
     super({
       store,
       action: getServicesAction,
-      schema: entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType).getSchema(),
+      schema: entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceEntityType).getSchema(),
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,

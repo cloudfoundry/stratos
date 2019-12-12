@@ -26,7 +26,7 @@ import {
 } from '../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import {
@@ -95,7 +95,7 @@ export class ApplicationService {
       appGuid,
       createGetApplicationAction(appGuid, cfGuid)
     );
-    const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
+    const appSummaryEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
     const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
     const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
     this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
@@ -146,7 +146,7 @@ export class ApplicationService {
     app: IApp,
     appGuid: string,
     cfGuid: string): Observable<ApplicationStateData> {
-    const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+    const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
     const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
     const dummyAction = actionBuilder(appGuid, cfGuid) as PaginatedAction;
     const paginationMonitor = new PaginationMonitor(
@@ -170,7 +170,7 @@ export class ApplicationService {
     this.appSpace$ = moreWaiting$.pipe(
       first(),
       switchMap(app => {
-        const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+        const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
         const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
         const getSpaceAction = actionBuilder(
           app.space_guid,
@@ -221,7 +221,7 @@ export class ApplicationService {
 
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
-    const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+    const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
     const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
     const action = actionBuilder(this.appGuid, this.cfGuid) as PaginatedAction;
     const appStats = getPaginationObservables({
@@ -353,7 +353,7 @@ export class ApplicationService {
 
     // Create an Observable that can be used to determine when the update completed
     const actionState = selectUpdateInfo(
-      entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, applicationEntityType),
+      entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, applicationEntityType),
       this.appGuid,
       UpdateExistingApplication.updateKey
     );

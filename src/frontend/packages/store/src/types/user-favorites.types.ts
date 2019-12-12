@@ -1,4 +1,4 @@
-import { IEntityMetadata } from '../entity-catalog/entity-catalogue.types';
+import { IEntityMetadata } from '../entity-catalog/entity-catalog.types';
 import { LoggerService } from '../../../core/src/core/logger.service';
 
 export const userFavoritesPaginationKey = 'userFavorites';

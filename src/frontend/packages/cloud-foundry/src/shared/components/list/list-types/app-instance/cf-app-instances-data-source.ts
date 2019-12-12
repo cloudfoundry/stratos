@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import { AppStat } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
-import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -24,7 +24,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
     listConfig: IListConfig<ListAppInstance>
   ) {
     const paginationKey = createEntityRelationPaginationKey(applicationEntityType, appGuid);
-    const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+    const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
     const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
     const action = actionBuilder(appGuid, cfGuid) as PaginatedAction;
 

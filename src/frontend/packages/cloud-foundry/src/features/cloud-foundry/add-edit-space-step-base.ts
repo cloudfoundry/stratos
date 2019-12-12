@@ -13,8 +13,8 @@ import {
 } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ISpaceQuotaDefinition } from '../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalogue.types';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { StepOnNextResult } from '../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
@@ -44,7 +44,7 @@ export class AddEditSpaceStepBase {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     const paginationKey = getPaginationKey('cf-space', this.orgGuid);
-    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
     const getAllSpaceActionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
     const action = getAllSpaceActionBuilder(this.orgGuid, this.cfGuid, paginationKey) as PaginatedAction;
 
@@ -67,7 +67,7 @@ export class AddEditSpaceStepBase {
 
     const quotaPaginationKey = createEntityRelationPaginationKey(organizationEntityType, this.orgGuid);
 
-    const quotaEntity = entityCatalogue.getEntity<IEntityMetadata, any, SpaceQuotaDefinitionActionBuilders>(
+    const quotaEntity = entityCatalog.getEntity<IEntityMetadata, any, SpaceQuotaDefinitionActionBuilders>(
       CF_ENDPOINT_TYPE,
       spaceQuotaEntityType
     );

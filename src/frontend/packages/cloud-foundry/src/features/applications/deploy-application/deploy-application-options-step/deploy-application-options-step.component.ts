@@ -14,7 +14,7 @@ import { stackEntityType } from '../../../../../../cloud-foundry/src/cf-entity-t
 import { selectCfDetails } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { OverrideAppDetails } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -124,7 +124,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
 
     this.stacks$ = cfDetails$.pipe(
       switchMap(cfDetails => {
-        const stackEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
+        const stackEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
         const getAllStacksActionBuilder = stackEntity.actionOrchestrator.getActionBuilder('getMultiple');
         const action = getAllStacksActionBuilder(cfDetails.cloudFoundry, null);
         return getPaginationObservables<APIResource<IDomain>>(

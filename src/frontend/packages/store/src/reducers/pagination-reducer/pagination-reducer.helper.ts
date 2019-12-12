@@ -14,7 +14,7 @@ import {
 } from 'rxjs/operators';
 
 import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
-import { entityCatalogue } from '../../entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import { sortStringify } from '../../../../core/src/core/utils.service';
 import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
 import { SetInitialParams } from '../../actions/pagination.actions';
@@ -80,7 +80,7 @@ function getEntityConfigFromAction(action): PaginatedAction {
 export function getActionPaginationEntityKey(action): string {
   const apiAction = getAction(action);
   const entityConfig = apiAction.proxyPaginationEntityConfig || getEntityConfigFromAction(action);
-  return entityCatalogue.getEntityKey(entityConfig);
+  return entityCatalog.getEntityKey(entityConfig);
 }
 
 export function getPaginationKeyFromAction(action: PaginatedAction) {

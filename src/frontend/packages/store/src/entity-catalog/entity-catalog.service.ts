@@ -3,30 +3,30 @@ import { ExtraApiReducers } from '../reducers/api-request-reducers.generator.hel
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
 import {
-  StratosBaseCatalogueEntity,
-  StratosCatalogueEndpointEntity,
-  StratosCatalogueEntity,
-} from './entity-catalogue-entity';
-import { EntityCatalogueHelpers } from './entity-catalogue.helper';
-import { EntityCatalogueEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalogue.types';
+  StratosBaseCatalogEntity,
+  StratosCatalogEndpointEntity,
+  StratosCatalogEntity,
+} from './entity-catalog-entity';
+import { EntityCatalogHelpers } from './entity-catalog.helper';
+import { EntityCatalogEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalog.types';
 
-class EntityCatalogue {
-  protected entities: Map<string, StratosCatalogueEntity> = new Map();
-  protected endpoints: Map<string, StratosCatalogueEndpointEntity> = new Map();
+class EntityCatalog {
+  protected entities: Map<string, StratosCatalogEntity> = new Map();
+  protected endpoints: Map<string, StratosCatalogEndpointEntity> = new Map();
 
-  private registerEndpoint(endpoint: StratosCatalogueEndpointEntity) {
+  private registerEndpoint(endpoint: StratosCatalogEndpointEntity) {
     if (this.endpoints.has(endpoint.entityKey)) {
-      console.warn(`Duplicate endpoint catalogue entity found. ID: ${endpoint.entityKey} - Type: ${endpoint.definition.type}`);
+      console.warn(`Duplicate endpoint catalog entity found. ID: ${endpoint.entityKey} - Type: ${endpoint.definition.type}`);
     } else {
       this.endpoints.set(endpoint.entityKey, endpoint);
     }
   }
 
-  private registerEntity(entity: StratosCatalogueEntity) {
+  private registerEntity(entity: StratosCatalogEntity) {
     if (this.entities.has(entity.entityKey)) {
       const { type } = entity.definition;
       console.warn(
-        `Duplicate catalogue entity found. ID: ${entity.entityKey} - Type: ${type} - Endpoint: ${entity.definition.endpoint.type}`
+        `Duplicate catalog entity found. ID: ${entity.entityKey} - Type: ${type} - Endpoint: ${entity.definition.endpoint.type}`
       );
     } else {
       this.entities.set(entity.entityKey, entity);
@@ -39,13 +39,13 @@ class EntityCatalogue {
   ) {
     const id = endpointType ? this.getEntityKey(endpointType, entityType) : entityType;
     // STRATOS_ENDPOINT_TYPE is a special case for internal entities.
-    if (endpointType !== STRATOS_ENDPOINT_TYPE && entityType === EntityCatalogueHelpers.endpointType) {
+    if (endpointType !== STRATOS_ENDPOINT_TYPE && entityType === EntityCatalogHelpers.endpointType) {
       return this.endpoints.get(id);
     }
     return this.entities.get(id);
   }
 
-  private getEntitySubType(entity: StratosBaseCatalogueEntity, subtypeType: string) {
+  private getEntitySubType(entity: StratosBaseCatalogEntity, subtypeType: string) {
     const subTypes = entity.definition.subTypes as IStratosBaseEntityDefinition[];
     if (!subTypes) {
       return null;
@@ -60,7 +60,7 @@ class EntityCatalogue {
       ...parent
     } = definition;
     // Ensure the subtype inherits parent
-    return new StratosBaseCatalogueEntity({
+    return new StratosBaseCatalogEntity({
       ...parent,
       ...subtype,
       parentType: parent.type
@@ -68,11 +68,11 @@ class EntityCatalogue {
   }
 
   private getConfig(
-    endpointTypeOrConfig: string | EntityCatalogueEntityConfig,
+    endpointTypeOrConfig: string | EntityCatalogEntityConfig,
     entityType?: string,
     subType?: string
-  ): EntityCatalogueEntityConfig {
-    const config = endpointTypeOrConfig as EntityCatalogueEntityConfig;
+  ): EntityCatalogEntityConfig {
+    const config = endpointTypeOrConfig as EntityCatalogEntityConfig;
     if (!config) {
       return {
         endpointType: null,
@@ -90,12 +90,12 @@ class EntityCatalogue {
     };
   }
 
-  public register(entity: StratosBaseCatalogueEntity) {
+  public register(entity: StratosBaseCatalogEntity) {
     if (entity.isEndpoint) {
-      this.registerEndpoint(entity as StratosCatalogueEndpointEntity);
+      this.registerEndpoint(entity as StratosCatalogEndpointEntity);
     } else {
       // We could auto register endpoints found in entities
-      this.registerEntity(entity as StratosCatalogueEntity);
+      this.registerEntity(entity as StratosCatalogEntity);
     }
   }
 
@@ -105,49 +105,49 @@ class EntityCatalogue {
 
   /* tslint:disable:max-line-length */
   public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
-    entityConfig: EntityCatalogueEntityConfig
-  ): StratosBaseCatalogueEntity<T, Y, AB>;
+    entityConfig: EntityCatalogEntityConfig
+  ): StratosBaseCatalogEntity<T, Y, AB>;
   public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
     endpointType: string,
     entityType: string,
     subType?: string
-  ): StratosBaseCatalogueEntity<T, Y, AB>;
+  ): StratosBaseCatalogEntity<T, Y, AB>;
   public getEntity<T extends IEntityMetadata = IEntityMetadata, Y = any, AB extends OrchestratedActionBuilders = OrchestratedActionBuilders>(
-    endpointTypeOrConfig: string | EntityCatalogueEntityConfig,
+    endpointTypeOrConfig: string | EntityCatalogEntityConfig,
     entityType?: string,
     subType?: string
-  ): StratosBaseCatalogueEntity<T, Y, AB> {
+  ): StratosBaseCatalogEntity<T, Y, AB> {
     /* tslint:enable:max-line-length */
     const config = this.getConfig(endpointTypeOrConfig, entityType, subType);
     const entityOfType = this.getEntityOfType(config.entityType, config.endpointType);
     if (subType) {
-      return this.getEntitySubType(entityOfType, subType) as StratosBaseCatalogueEntity<T, Y, AB>;
+      return this.getEntitySubType(entityOfType, subType) as StratosBaseCatalogEntity<T, Y, AB>;
     }
     if (!entityOfType) {
       console.warn(
-        `Could not find catalogue entity for endpoint type '${config.endpointType}' and entity type '${config.entityType}'. Stack: `,
+        `Could not find catalog entity for endpoint type '${config.endpointType}' and entity type '${config.entityType}'. Stack: `,
         new Error().stack
       );
     }
-    return entityOfType as StratosBaseCatalogueEntity<T, Y, AB>;
+    return entityOfType as StratosBaseCatalogEntity<T, Y, AB>;
   }
 
   public getEntityKey(endpointType: string, entityType: string): string;
-  public getEntityKey(entityConfig: EntityCatalogueEntityConfig): string;
-  public getEntityKey(endpointTypeOrConfig: string | EntityCatalogueEntityConfig, entityType?: string) {
+  public getEntityKey(entityConfig: EntityCatalogEntityConfig): string;
+  public getEntityKey(endpointTypeOrConfig: string | EntityCatalogEntityConfig, entityType?: string) {
     const config = this.getConfig(endpointTypeOrConfig, entityType);
     if (config && config.entityType) {
-      return EntityCatalogueHelpers.buildEntityKey(config.entityType, config.endpointType);
+      return EntityCatalogHelpers.buildEntityKey(config.entityType, config.endpointType);
     }
-    return EntityCatalogueHelpers.buildEntityKey(entityType, endpointTypeOrConfig as string);
+    return EntityCatalogHelpers.buildEntityKey(entityType, endpointTypeOrConfig as string);
   }
 
   public getEndpoint(endpointType: string, subType?: string) {
     return this.getEntity(
       endpointType,
-      EntityCatalogueHelpers.endpointType,
+      EntityCatalogHelpers.endpointType,
       subType
-    ) as StratosCatalogueEndpointEntity;
+    ) as StratosCatalogEndpointEntity;
   }
 
   public getAllEntitiesForEndpointType(endpointType: string) {
@@ -173,7 +173,7 @@ class EntityCatalogue {
         });
       }
       return allEndpoints;
-    }, [] as StratosCatalogueEndpointEntity[]);
+    }, [] as StratosCatalogEndpointEntity[]);
   }
 
   public getAllEntityRequestDataReducers() {
@@ -192,7 +192,7 @@ class EntityCatalogue {
 }
 
 // Only to be used for tests
-export class TestEntityCatalogue extends EntityCatalogue {
+export class TestEntityCatalog extends EntityCatalog {
   public clear() {
     this.endpoints.clear();
     this.entities.clear();
@@ -200,7 +200,7 @@ export class TestEntityCatalogue extends EntityCatalogue {
 }
 
 // FIXME: This shouldn't make it into the production code. It's quite the anti pattern but fixes the tests for the time being.
-// https://github.com/cloudfoundry-incubator/stratos/issues/3753 - Reverting the entity catalogue to an Angular service
+// https://github.com/cloudfoundry-incubator/stratos/issues/3753 - Reverting the entity catalog to an Angular service
 // makes testing much easier and remove the need for this.
 /* tslint:disable-next-line:no-string-literal  */
-export const entityCatalogue = !!window['__karma__'] ? new TestEntityCatalogue() : new EntityCatalogue();
+export const entityCatalog = !!window['__karma__'] ? new TestEntityCatalog() : new EntityCatalog();

@@ -16,7 +16,7 @@ import { Omit } from '../../../core/src/core/utils.service';
 import { GeneralEntityAppState } from '../app-state';
 import { Store } from '@ngrx/store';
 
-export interface EntityCatalogueEntityConfig {
+export interface EntityCatalogEntityConfig {
   entityType: string;
   endpointType: string;
   subType?: string;
@@ -29,14 +29,14 @@ export interface ActionBuilderConfig<T extends Record<any, any> = Record<any, an
   endpointGuid?: string;
 }
 
-export type EntityActionBuilderEntityConfig = EntityCatalogueEntityConfig & ActionBuilderConfig;
+export type EntityActionBuilderEntityConfig = EntityCatalogEntityConfig & ActionBuilderConfig;
 
-export const extractEntityCatalogueEntityConfig = (ecec: Partial<EntityCatalogueEntityConfig>): EntityCatalogueEntityConfig => {
+export const extractEntityCatalogEntityConfig = (ecec: Partial<EntityCatalogEntityConfig>): EntityCatalogEntityConfig => {
   const { entityType, endpointType, subType, schemaKey } = ecec;
   return { entityType, endpointType, subType, schemaKey };
 };
 
-export interface EntityCatalogueSchemas {
+export interface EntityCatalogSchemas {
   default: EntitySchema;
   [schemaKey: string]: EntitySchema;
 }
@@ -55,7 +55,7 @@ export interface IEntityMetadata {
  *
  * @export
  */
-export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogueSchemas> extends IStratosEntityWithIcons {
+export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSchemas> extends IStratosEntityWithIcons {
   readonly type?: string;
   readonly schema: T;
   readonly label?: string;
@@ -78,7 +78,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
  *
  * @export
  */
-export interface IStratosEndpointDefinition<T = EntityCatalogueSchemas | EntitySchema> extends IStratosBaseEntityDefinition<T> {
+export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySchema> extends IStratosBaseEntityDefinition<T> {
   readonly logoUrl: string;
   readonly tokenSharing?: boolean;
   readonly urlValidation?: boolean;
@@ -111,7 +111,7 @@ export interface EntityTableConfig<T = any> {
  * @export
  */
 export interface IStratosEntityDefinition<
-  T = EntitySchema | EntityCatalogueSchemas,
+  T = EntitySchema | EntityCatalogSchemas,
   E = any,
   I = E
   > extends IStratosBaseEntityDefinition<T> {

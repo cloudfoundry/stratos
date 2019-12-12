@@ -10,7 +10,7 @@ import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src
 import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
-import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
@@ -267,7 +267,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   detachPolicy(): Observable<ActionState> {
     const action = new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid);
     this.store.dispatch(action);
-    const entityKey = entityCatalogue.getEntityKey(action);
+    const entityKey = entityCatalog.getEntityKey(action);
 
     return this.store.select(selectDeletionInfo(entityKey, this.applicationService.appGuid)).pipe(
       pairwise(),

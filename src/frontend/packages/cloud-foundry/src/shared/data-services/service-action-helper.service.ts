@@ -6,11 +6,11 @@ import { DeleteUserProvidedInstance } from '../../../../cloud-foundry/src/action
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { IServiceBinding } from '../../../../core/src/core/cf-api-svc.types';
-import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import {
-  EntityCatalogueEntityConfig,
+  EntityCatalogEntityConfig,
   IEntityMetadata,
-} from '../../../../store/src/entity-catalog/entity-catalogue.types';
+} from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
@@ -25,12 +25,12 @@ import {
 @Injectable()
 export class ServiceActionHelperService {
 
-  private sgEntity = entityCatalogue.getEntity<IEntityMetadata, any, ServiceBindingActionBuilders>(
+  private sgEntity = entityCatalog.getEntity<IEntityMetadata, any, ServiceBindingActionBuilders>(
     CF_ENDPOINT_TYPE,
     serviceBindingEntityType
   );
 
-  private serviceInstanceEntity = entityCatalogue.getEntity<IEntityMetadata, any, ServiceInstanceActionBuilders>(
+  private serviceInstanceEntity = entityCatalog.getEntity<IEntityMetadata, any, ServiceInstanceActionBuilders>(
     CF_ENDPOINT_TYPE,
     serviceInstancesEntityType
   );
@@ -78,7 +78,7 @@ export class ServiceActionHelperService {
     endpointGuid: string,
     userProvided = false
   ) => {
-    const serviceInstancesEntityConfig: EntityCatalogueEntityConfig = {
+    const serviceInstancesEntityConfig: EntityCatalogEntityConfig = {
       endpointType: CF_ENDPOINT_TYPE,
       entityType: serviceInstancesEntityType
     };

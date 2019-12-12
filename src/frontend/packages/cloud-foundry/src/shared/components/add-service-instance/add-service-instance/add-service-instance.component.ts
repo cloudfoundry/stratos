@@ -48,8 +48,8 @@ import {
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { IServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
 import { IApp, ISpace } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalogue.types';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -102,17 +102,17 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     map(details => details.spaceGuid)
   );
 
-  private serviceInstanceEntity = entityCatalogue.getEntity<IEntityMetadata, any, ServiceInstanceActionBuilders>(
+  private serviceInstanceEntity = entityCatalog.getEntity<IEntityMetadata, any, ServiceInstanceActionBuilders>(
     CF_ENDPOINT_TYPE,
     serviceInstancesEntityType
   );
 
-  private spaceEntity = entityCatalogue.getEntity<IEntityMetadata, any, SpaceActionBuilders>(
+  private spaceEntity = entityCatalog.getEntity<IEntityMetadata, any, SpaceActionBuilders>(
     CF_ENDPOINT_TYPE,
     spaceEntityType
   );
 
-  private appEntity = entityCatalogue.getEntity<IEntityMetadata, any, ApplicationActionBuilders>(
+  private appEntity = entityCatalog.getEntity<IEntityMetadata, any, ApplicationActionBuilders>(
     CF_ENDPOINT_TYPE,
     applicationEntityType
   );

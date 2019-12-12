@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
-import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../../../../store/src/entity-catalog/entity-catalogue.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../../../store/src/entity-catalog/entity-catalog.types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -49,7 +49,7 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
     listConfig: IListConfig<APIResource>
   ) {
     const paginationKey = `app-events:${cfGuid}${appGuid}`;
-    const appEventEntity = entityCatalogue.getEntity<IEntityMetadata, any, ApplicationEventActionBuilders>(
+    const appEventEntity = entityCatalog.getEntity<IEntityMetadata, any, ApplicationEventActionBuilders>(
       CF_ENDPOINT_TYPE,
       appEventEntityType
     );

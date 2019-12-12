@@ -9,7 +9,7 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
@@ -64,7 +64,7 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
     this.getDataSource = () => {
       // Lazy init so that any changes to the columns & data functions (like sort) are correctly applied
       if (!this.dataSource) {
-        const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+        const routeEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
         const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
         const getAppRoutesAction = actionBuilder(appService.appGuid, appService.cfGuid) as PaginatedAction;
         this.dataSource = new CfAppRoutesDataSource(

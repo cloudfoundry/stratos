@@ -1,4 +1,4 @@
-export abstract class EntityCatalogueHelpers {
+export abstract class EntityCatalogHelpers {
   static readonly endpointType = 'endpoint';
   static buildEntityKey(entityType: string, endpointType: string): string {
     if (!entityType) {

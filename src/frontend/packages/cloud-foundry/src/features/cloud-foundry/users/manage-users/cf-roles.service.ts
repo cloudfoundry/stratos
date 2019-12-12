@@ -38,7 +38,7 @@ import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../stor
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
-import { entityCatalogue } from '../../../../../../store/src/entity-catalog/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
 
@@ -232,7 +232,7 @@ export class CfRolesService {
   }
 
   fetchOrg(cfGuid: string, orgGuid: string): Observable<EntityInfo<APIResource<IOrganization>>> {
-    const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const orgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
     const getOrgAction = getOrgActionBuilder(orgGuid, cfGuid, { includeRelations: [], populateMissing: false });
     return this.entityServiceFactory.create<APIResource<IOrganization>>(
@@ -251,7 +251,7 @@ export class CfRolesService {
   fetchOrgs(cfGuid: string): Observable<APIResource<IOrganization>[]> {
     if (!this.cfOrgs[cfGuid]) {
       const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
-      const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+      const organizationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
       const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
       const getAllOrganizationsAction = actionBuilder(
         cfGuid,

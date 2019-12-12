@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { entityCatalogue } from '../../../../store/src/entity-catalog/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../../store/src/entity-catalog/entity-catalogue.types';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { PaginationMonitor } from './pagination-monitor';
 
 @Injectable()
@@ -17,14 +17,14 @@ export class PaginationMonitorFactory {
 
   public create<T = any>(
     paginationKey: string,
-    entityConfig: EntityCatalogueEntityConfig
+    entityConfig: EntityCatalogEntityConfig
   ) {
     const { endpointType, entityType } = entityConfig;
-    const catalogueEntity = entityCatalogue.getEntity(endpointType, entityType);
-    if (!catalogueEntity) {
-      throw new Error(`Could not find catalogue entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
+    const catalogEntity = entityCatalog.getEntity(endpointType, entityType);
+    if (!catalogEntity) {
+      throw new Error(`Could not find catalog entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
     }
-    const cacheKey = paginationKey + catalogueEntity.entityKey;
+    const cacheKey = paginationKey + catalogEntity.entityKey;
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey] as PaginationMonitor<T>;
     } else {

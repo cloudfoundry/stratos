@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { GeneralEntityAppState } from './app-state';
 import { EntityRequestAction } from './types/request.types';
 import { EntityMonitorFactory } from '../../core/src/shared/monitors/entity-monitor.factory.service';
-import { entityCatalogue } from './entity-catalog/entity-catalogue.service';
-import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalogue.types';
+import { entityCatalog } from './entity-catalog/entity-catalog.service';
+import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
 import { ENTITY_INFO_HANDLER, EntityInfoHandler, EntityService } from './entity-service';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class EntityServiceFactory {
   ): EntityService<T>;
   create<T>(
     // FIXME: Remove entityId and use action.guid (should be accessibly via IRequestAction-->SingleEntityAction) - STRAT-159
-    // FIXME: Also we should bump this into the catalogue https://jira.capbristol.com/browse/STRAT-141
+    // FIXME: Also we should bump this into the catalog https://jira.capbristol.com/browse/STRAT-141
     entityIdOrConfig: string | EntityActionBuilderEntityConfig,
     action?: EntityRequestAction
   ): EntityService<T> {
@@ -44,8 +44,8 @@ export class EntityServiceFactory {
       isConfig ? config : action
     );
     if (isConfig) {
-      // Get the get action from the entity catalogue.
-      const actionBuilder = entityCatalogue.getEntity(config.endpointType, config.entityType).actionOrchestrator.getActionBuilder('get');
+      // Get the get action from the entity catalog.
+      const actionBuilder = entityCatalog.getEntity(config.endpointType, config.entityType).actionOrchestrator.getActionBuilder('get');
       return new EntityService<T>(this.store, entityMonitor, actionBuilder(
         config.entityGuid,
         config.endpointGuid,
