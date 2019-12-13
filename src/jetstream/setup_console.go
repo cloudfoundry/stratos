@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	setupRequestRegex      = "^/pp/v1/setup$"
+	setupRequestRegex      = "^/pp/v1/setup/save$"
 	setupCheckRequestRegex = "^/pp/v1/setup/check$"
 	versionRequestRegex    = "^/pp/v1/version$"
 	backendRequestRegex    = "^/pp/v1/"
@@ -69,7 +69,7 @@ func parseConsoleConfigFromForm(c echo.Context) (*interfaces.ConsoleConfig, erro
 
 // Check the initial parameter set and fetch the list of available scopes
 // This does not persist the configuration to the database at this stage
-func (p *portalProxy) saveConsoleSetupDataUAA(c echo.Context) error {
+func (p *portalProxy) setupGetAvailableScopes(c echo.Context) error {
 
 	// Check if already set up
 	if p.GetConfig().ConsoleConfig.IsSetupComplete() {
@@ -122,7 +122,6 @@ func (p *portalProxy) saveConsoleSetupDataUAA(c echo.Context) error {
 }
 
 func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
-
 	if interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType] == interfaces.Local {
 		return saveLocalUserConsoleConfig(consoleRepo, consoleConfig)
 	}
@@ -191,8 +190,10 @@ func saveUAAConsoleConfig(consoleRepo console_config.Repository, consoleConfig *
 	return nil
 }
 
-// Save the console setup
-func (p *portalProxy) saveConsoleSetupData(c echo.Context) error {
+// Save the console setup data to the database
+func (p *portalProxy) setupSaveConfig(c echo.Context) error {
+
+	log.Warn("setupSaveConfig")
 
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -218,7 +219,6 @@ func (p *portalProxy) saveConsoleSetupData(c echo.Context) error {
 	}
 
 	c.NoContent(http.StatusOK)
-	log.Infof("Updated Stratos setup")
 	return nil
 }
 

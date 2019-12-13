@@ -4,11 +4,11 @@ import { Observable, BehaviorSubject, of as obsof } from 'rxjs';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { Store } from '@ngrx/store';
 import { InternalAppState } from '../../../../../store/src/app-state';
-import { SetupUAASave } from '../../../../../store/src/actions/setup.actions';
-import { filter, delay, take, map } from 'rxjs/operators';
+import { filter, delay, take, map, tap } from 'rxjs/operators';
 import { UAASetupState, LocalAdminSetupData } from '../../../../../store/src/types/uaa-setup.types';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { VerifySession } from '../../../../../store/src/actions/auth.actions';
+import { SetupSaveConfig } from '../../../../../store/src/actions/setup.actions';
 
 @Component({
   selector: 'app-local-account-wizard',
@@ -18,7 +18,7 @@ import { VerifySession } from '../../../../../store/src/actions/auth.actions';
 export class LocalAccountWizardComponent implements OnInit {
 
   passwordForm: FormGroup;
-  validateUAAForm: Observable<boolean>;
+  validateLocalAuthForm: Observable<boolean>;
   applyingSetup$ = new BehaviorSubject<boolean>(false);
 
   constructor(private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>) { }
@@ -29,31 +29,26 @@ export class LocalAccountWizardComponent implements OnInit {
       adminPasswordConfirm: new FormControl('', [Validators.required as any])
     });
 
-    let observer;
-    this.validateUAAForm = new Observable(o => {
-      observer = o;
-      observer.next(false);
-    });
-
-    this.passwordForm.valueChanges.subscribe(() => {
-      observer.next(this.passwordForm.valid);
-      this.passwordForm.controls.adminPasswordConfirm.setValidators([Validators.required, this.confirmPasswordValidator()]);
-    });
+    this.validateLocalAuthForm = this.passwordForm.valueChanges.pipe(
+      tap(() => {
+        this.passwordForm.controls.adminPasswordConfirm.setValidators([Validators.required, this.confirmPasswordValidator()]);
+      }),
+      map(() => this.passwordForm.valid)
+    );
   }
 
   next: StepOnNextFunction = () => {
-
     const data: LocalAdminSetupData = {
       local_admin_password: this.passwordForm.get('adminPassword').value,
     };
 
     this.applyingSetup$.next(true);
-    this.store.dispatch(new SetupUAASave(data));
+    this.store.dispatch(new SetupSaveConfig(data));
     return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
       filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         return !(uaa.settingUp || auth.verifying);
       }),
-      delay(3000),
+      delay(2000),
       take(10),
       filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;

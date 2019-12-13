@@ -34,12 +34,17 @@
   &__intro {
     font-size: 28px;
     font-weight: 600;
-    padding-bottom: 26px;
+    padding-bottom: 20px;
+    text-align: center;
+  }
+
+  &__welcome {
+    line-height: 1.5em;
     text-align: center;
   }
 
   &__config {
-    margin-bottom: 40px;
+    margin-bottom: 30px;
     padding: 10px;
   }
 

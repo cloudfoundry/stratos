@@ -5,12 +5,12 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 import {
-  SETUP_UAA,
-  SetupUAA,
-  SetupUAAFailed,
-  SetupUAASuccess,
-  SETUP_UAA_SAVE,
-  SetupUAASave,
+  SETUP_GET_SCOPES,
+  SETUP_SAVE_CONFIG,
+  SetupConsoleGetScopes,
+  SetupSuccess,
+  SetupFailed,
+  SetupSaveConfig,
 } from './../actions/setup.actions';
 
 
@@ -22,30 +22,30 @@ export class UAASetupEffect {
     private actions$: Actions
   ) { }
 
-  baseUrl = '/pp/v1/setup';
-  uaaSetupUrl = '/pp/v1/setup/check';
+  getSetupScopesUrl = '/pp/v1/setup.check';
+  saveSetupUrl = '/pp/v1/setup/save';
 
-  @Effect() uaaSetupRequest$ = this.actions$.pipe(
-    ofType<SetupUAA>(SETUP_UAA),
+  @Effect() setupGetScopes$ = this.actions$.pipe(
+    ofType<SetupConsoleGetScopes>(SETUP_GET_SCOPES),
     switchMap(({ setupData }) => {
       const params = this.getParams(setupData);
-      return this.http.post(this.uaaSetupUrl, params, {
+      return this.http.post(this.getSetupScopesUrl, params, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       }).pipe(
-        map(data => new SetupUAASuccess(data)),
-        catchError((err, caught) => [new SetupUAAFailed(`Failed to save UAA configuration. ${this.fetchError(err)}`)])
+        map(data => new SetupSuccess(data)),
+        catchError((err, caught) => [new SetupFailed(`Failed to save configuration. ${this.fetchError(err)}`)])
       );
     }));
 
-  @Effect() uaaSetupSetScope = this.actions$.pipe(
-    ofType<SetupUAASave>(SETUP_UAA_SAVE),
+  @Effect() setupSaveConfiguration$ = this.actions$.pipe(
+    ofType<SetupSaveConfig>(SETUP_SAVE_CONFIG),
     switchMap(({ setupData }) => {
       const params = this.getParams(setupData);
-      return this.http.post(this.baseUrl, params, {
+      return this.http.post(this.saveSetupUrl, params, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       }).pipe(
-        map(data => new SetupUAASuccess(data)),
-        catchError((err, caught) => [new SetupUAAFailed(`Failed to setup Administrator scope. ${this.fetchError(err)}`)])
+        map(data => new SetupSuccess(data)),
+        catchError((err, caught) => [new SetupFailed(`Failed to setup Administrator scope. ${this.fetchError(err)}`)])
       );
     }));
 
@@ -56,7 +56,9 @@ export class UAASetupEffect {
     } catch (err) { }
     return '';
   }
-  private getParams(setupData: any): HttpParams {
+
+
+  private getParams(setupData: any): any {
     let params = new HttpParams();
     if ((setupData as UaaSetupData).console_client) {
       const uaaSetupData = setupData as UaaSetupData;

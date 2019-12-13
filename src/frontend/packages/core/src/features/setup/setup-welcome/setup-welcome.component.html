@@ -10,7 +10,7 @@
           <app-stratos-title></app-stratos-title>
           <div class="setup__config">
             <p class="setup__intro">Welcome to Stratos</p>
-            <p>Before you can login, you need to choose how users will login to Stratos and complete the required configuration for the chosen method of authenticaion:</p>
+            <p class="setup__welcome">Before you can login, you need to choose how users will login to Stratos and complete the required configuration for the chosen method of authentication:</p>
           </div>
           <div class="setup-tiles">
             <app-tile-selector-tile *ngFor="let tile of tileSelectorConfig" (tileSelect)="selectionChange(tile)" [tile]="tile" [active]="true">

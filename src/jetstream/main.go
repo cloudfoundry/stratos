@@ -800,8 +800,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// Add middleware to block requests if unconfigured
 	if needSetupMiddleware {
 		e.Use(p.SetupMiddleware())
-		pp.POST("/v1/setup", p.saveConsoleSetupData)
-		pp.POST("/v1/setup/check", p.saveConsoleSetupDataUAA)
+		pp.POST("/v1/setup/check", p.setupGetAvailableScopes)
+		pp.POST("/v1/setup/save", p.setupSaveConfig)
 	}
 
 	loginAuthGroup := pp.Group("/v1/auth")
