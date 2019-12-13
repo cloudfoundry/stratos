@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
-import { FetchBranchesForProject } from '../../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { GitCommit, GitRepo } from '../../../../../../../../cloud-foundry/src/store/types/git.types';
 import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../../../../../core/src/core/entity-service';
@@ -112,10 +111,9 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         const branchID = `${scmType}-${projectName}-${stProject.deploySource.branch}`;
         const gitBranchesEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitBranchesEntityType);
         const fetchBranchesActionBuilder = gitBranchesEntity.actionOrchestrator.getActionBuilder('get');
-        const fetchBranchesAction = fetchBranchesActionBuilder(branchID, null, { projectName, scm });
         this.gitBranchEntityService = this.entityServiceFactory.create(
           branchID,
-          new FetchBranchesForProject(scm, projectName)
+          fetchBranchesActionBuilder(branchID, null, { projectName, scm })
         );
 
         this.gitSCMRepo$ = this.gitSCMRepoEntityService.waitForEntity$.pipe(
