@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package chartrepo
+package main
 
 import (
-	"github.com/helm/monocular/chartrepo/foundationdb"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -42,6 +42,6 @@ var ServeCmd = &cobra.Command{
 		}
 		authorizationHeader := os.Getenv("AUTHORIZATION_HEADER")
 
-		initOnDemandEndpoint(fdbURL, fDB, debug, authorizationHeader)
+		initOnDemandEndpoint(fdbURL, fDB, authorizationHeader, debug)
 	},
 }

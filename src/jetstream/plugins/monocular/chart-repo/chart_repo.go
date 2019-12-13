@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package chartrepo
+package main
 
 import (
 	"os"
@@ -40,7 +40,7 @@ func main() {
 }
 
 func init() {
-	
+
 	cmds := []*cobra.Command{SyncCmd, DeleteCmd, ServeCmd}
 
 	for _, cmd := range cmds {

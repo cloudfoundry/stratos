@@ -172,7 +172,7 @@ func Test_syncURLInvalidity(t *testing.T) {
 	dbClient := NewMockClient(&m)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := syncRepo(dbClient, "test", "test", tt.repoURL, "")
+			err := SyncRepo(dbClient, "test", "test", tt.repoURL, "")
 			assert.ExistsErr(t, err, tt.name)
 		})
 	}
@@ -322,7 +322,7 @@ func Test_DeleteRepo(t *testing.T) {
 	}, mock.Anything).Return(&mongo.DeleteResult{}, nil)
 	dbClient := NewMockClient(m)
 
-	err := deleteRepo(dbClient, "test", "test")
+	err := DeleteRepo(dbClient, "test", "test")
 	if err != nil {
 		t.Errorf("failed to delete chart repo test: %v", err)
 	}
@@ -633,7 +633,7 @@ func Test_emptyChartRepo(t *testing.T) {
 	//Expect a call to test the DB readiness
 	m.On("InsertOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
 	m.On("FindOne", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-	err := syncRepo(dbClient, "test", "testRepo", "https://my.examplerepo.com", "")
+	err := SyncRepo(dbClient, "test", "testRepo", "https://my.examplerepo.com", "")
 	assert.ExistsErr(t, err, "Failed Request")
 }
 

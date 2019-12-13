@@ -14,29 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package chartrepo
+package main
 
 import (
 	"context"
-	"flag"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/heptiolabs/healthcheck"
-	mongoDatastore "github.com/kubeapps/common/datastore"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/negroni"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	fdb "github.com/helm/monocular/chart-repo/foundationdb"
-	fdbDatastore "github.com/helm/monocular/chart-repo/foundationdb/datastore"
+	fdb "github.com/helm/monocular/chartrepo/foundationdb"
 )
 
 const pathPrefix = "/v1"
 
-var client *mongo.Client
+var fdbClient fdb.Client
 var fDBName string
 var authorizationHeader string
 
@@ -45,6 +42,11 @@ type Params map[string]string
 
 // WithParams can be used to wrap handlers to take an extra arg for path params
 type WithParams func(http.ResponseWriter, *http.Request, Params)
+
+func (h WithParams) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	h(w, req, vars)
+}
 
 func setupRoutes() http.Handler {
 	r := mux.NewRouter()
@@ -58,34 +60,34 @@ func setupRoutes() http.Handler {
 	apiv1 := r.PathPrefix(pathPrefix).Subrouter()
 	apiv1.Methods("PUT").Path("/sync/{repo}").Handler(WithParams(OnDemandSync))
 	apiv1.Methods("PUT").Path("/delete/{repo}").Handler(WithParams(OnDemandDelete))
-	
+
 	n := negroni.Classic()
 	n.UseHandler(r)
 	return n
 }
 
 func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
-	repoURL := req.FormValue("repoURL") 
+	repoURL := req.FormValue("repoURL")
 	repoName := params["repo"]
 	//TODO kate check and handle errors
 	startTime := time.Now()
-	if err = fdb.SyncRepo(client, fDBName, repoName, repoURL, authorizationHeader); err != nil {
+	if err := fdb.SyncRepo(fdbClient, fDBName, repoName, repoURL, authorizationHeader); err != nil {
 		log.Fatalf("Can't sync chart repository with database: %v", err)
 		return
 	}
 	timeTaken := time.Since(startTime).Seconds()
-	log.Infof("Successfully added the chart repository %s to database in %v seconds", args[0], timeTaken)
+	log.Infof("Successfully added the chart repository %s to database in %v seconds", repoName, timeTaken)
 }
 
-func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params)
+func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 	repoName := params["repo"]
 	//TODO kate check and handle errors
-	if err = fdb.DeleteRepo(cient, fDBName, repoName); err != nil {
-		log.Fatalf("Can't delete chart repository %s from database: %v", args[0], err)
+	if err := fdb.DeleteRepo(fdbClient, fDBName, repoName); err != nil {
+		log.Fatalf("Can't delete chart repository %s from database: %v", repoName, err)
 	}
 }
 
-func initOnDemandEndpoint(fdbURL string, fdbName string , authHeader string, debug bool) {
+func initOnDemandEndpoint(fdbURL string, fdbName string, authHeader string, debug bool) {
 
 	authorizationHeader = authHeader
 	debug = debug
@@ -96,7 +98,7 @@ func initOnDemandEndpoint(fdbURL string, fdbName string , authHeader string, deb
 		log.SetLevel(log.DebugLevel)
 	}
 
-	InitFDBDocLayerConnection(&fdbURL, &fDB, &debug)
+	InitFDBDocLayerConnection(&fdbURL, &fdbName, &debug)
 
 	n := setupRoutes()
 
@@ -116,13 +118,12 @@ func InitFDBDocLayerConnection(fdbURL *string, fDB *string, debug *bool) {
 	clientOptions := options.Client().ApplyURI(*fdbURL).SetMinPoolSize(10).SetMaxPoolSize(100)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	client, err := fdbDatastore.NewDocLayerClient(context.Background(), clientOptions)
+	client, err := fdb.NewDocLayerClient(ctx, clientOptions)
+	fdbClient = client
 	if err != nil {
 		log.Fatalf("Can't create client for FoundationDB document layer: %v", err)
 		return
 	}
 	log.Debugf("FDB Document Layer client created.")
 
-	fdb.InitDBConfig(client, *fDB)
-	fdb.SetPathPrefix(pathPrefix)
 }
