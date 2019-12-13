@@ -17,7 +17,7 @@ import { cfEventEntityType } from '../../../../../cf-entity-types';
 import { CfEventActionBuilders } from '../../../../../entity-action-builders/cf-event.action-builders';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
-export class CfAppEventsDataSource extends ListDataSource<APIResource> {
+export class CfEventsDataSource extends ListDataSource<APIResource> {
 
   public getFilterFromParams(pag: PaginationEntityState) {
     const qParams = pag.params.q as string[];
@@ -45,20 +45,15 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
   constructor(
     store: Store<CFAppState>,
     cfGuid: string,
-    appGuid: string,
     listConfig: IListConfig<APIResource>
   ) {
-    const paginationKey = `app-events:${cfGuid}${appGuid}`;
+    // const paginationKey = `app-events:${cfGuid}${appGuid}`;
     const appEventEntity = entityCatalogue.getEntity<IEntityMetadata, any, CfEventActionBuilders>(
       CF_ENDPOINT_TYPE,
       cfEventEntityType
     );
     const actionBuilder = appEventEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const action = actionBuilder(cfGuid, paginationKey);
-    action.initialParams.q = [
-      new QParam('actee', appGuid, QParamJoiners.colon).toString(),
-    ];
-
+    const action = actionBuilder(cfGuid, null);
 
     super(
       {
@@ -66,7 +61,7 @@ export class CfAppEventsDataSource extends ListDataSource<APIResource> {
         action,
         schema: cfEntityFactory(cfEventEntityType),
         getRowUniqueId: getRowMetadata,
-        paginationKey,
+        paginationKey: action.paginationKey,
         listConfig
       }
     );

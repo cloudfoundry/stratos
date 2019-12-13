@@ -143,6 +143,7 @@ import {
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
+import { CloudFoundryEventsComponent } from './tabs/cloud-foundry-events/cloud-foundry-events.component';
 
 
 @NgModule({
@@ -217,6 +218,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CfAdminAddUserWarningComponent,
     QuotaDefinitionComponent,
     SpaceQuotaDefinitionComponent,
+    CloudFoundryEventsComponent,
   ],
   providers: [
     CFEndpointsListConfigService,
