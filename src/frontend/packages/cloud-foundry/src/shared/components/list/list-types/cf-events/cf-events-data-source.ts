@@ -43,12 +43,12 @@ export class CfEventsDataSource extends ListDataSource<APIResource> {
     action.initialParams.q = [];
     if (orgGuid) {
       action.initialParams.q.push(
-        new QParam('organization_guid', appGuid, QParamJoiners.colon).toString(),
+        new QParam('organization_guid', orgGuid, QParamJoiners.colon).toString(),
       );
     }
     if (spaceGuid) {
       action.initialParams.q.push(
-        new QParam('space_guid', appGuid, QParamJoiners.colon).toString(),
+        new QParam('space_guid', spaceGuid, QParamJoiners.colon).toString(),
       );
     }
     if (appGuid) {

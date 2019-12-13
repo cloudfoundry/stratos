@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -52,6 +51,9 @@ import {
   CloudFoundryOrganizationBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component';
 import {
+  CloudFoundryOrganizationEventsComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-events/cloud-foundry-organization-events.component';
+import {
   CloudFoundryOrganizationSpacesComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-organization-spaces.component';
 import {
@@ -60,6 +62,9 @@ import {
 import {
   CloudFoundrySpaceAppsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-apps/cloud-foundry-space-apps.component';
+import {
+  CloudFoundrySpaceEventsComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-events/cloud-foundry-space-events.component';
 import {
   CloudFoundrySpaceRoutesComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-routes/cloud-foundry-space-routes.component';
@@ -94,6 +99,8 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
 import { InviteUsersComponent } from './users/invite-users/invite-users.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
+
+/* tslint:disable:max-line-length */
 
 
 /* tslint:enable:max-line-length */
@@ -338,6 +345,10 @@ const cloudFoundry: Routes = [{
                   component: CloudFoundryOrganizationSpaceQuotasComponent
                 },
                 {
+                  path: 'events',
+                  component: CloudFoundryOrganizationEventsComponent
+                },
+                {
                   path: '**',
                   component: PageNotFoundComponentComponent,
                   canActivate: [DynamicExtensionRoutes],
@@ -390,6 +401,10 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'space-quota',
                   component: SpaceQuotaDefinitionComponent
+                },
+                {
+                  path: 'events',
+                  component: CloudFoundrySpaceEventsComponent
                 },
                 {
                   path: '**',

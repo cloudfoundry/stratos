@@ -21,11 +21,13 @@ import {
 })
 export class CloudFoundryEventsComponent implements OnInit, OnDestroy {
 
-  // TODO: RC Privilideges
+  // TODO: RC Privilideges. non-admins can use/see?
   // TODO: RC Disable when list is busy
   // TODO: RC Apply existing values
-  // TODO: Add at org and space level
+  // TODO: RC Add space level and for other entities? (services, whatever an actee is?)
   // TODO: RC add org/space filter to top level
+  // TODO: RC test lists at differnet levels (stored as different sources)
+  // TODO: RC Wrap list in component that comes with type/actee selector, apply to 4 places where used
 
   filtersFormGroup: FormGroup;
   acteeValues: string[] = [
