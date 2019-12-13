@@ -28,12 +28,12 @@ export class PanelPreviewService {
     this.container = container;
   }
 
-  public show(component: object, props?: { [key: string]: any }) {
+  public show(component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
     if (!this.container) {
       throw new Error('PanelPreviewService: container must be set');
     }
 
-    this.render(component, props);
+    this.render(component, props, componentFactoryResolver);
     this.openedSubject.next(true);
   }
 
@@ -45,12 +45,16 @@ export class PanelPreviewService {
     this.openedSubject.next(false);
   }
 
-  render(component: object, props: { [key: string]: any }) {
+  render(
+    component: object,
+    props: { [key: string]: any },
+    componentFactoryResolver: ComponentFactoryResolver = this.componentFactoryResolver
+  ) {
     if (this.container.length) {
       this.container.remove(0);
     }
 
-    const factory: ComponentFactory<any> = this.componentFactoryResolver.resolveComponentFactory(component as any);
+    const factory: ComponentFactory<any> = componentFactoryResolver.resolveComponentFactory(component as any);
     const componentRef: ComponentRef<any> = this.container.createComponent(factory);
 
     if (props) {
