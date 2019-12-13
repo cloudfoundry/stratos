@@ -5,7 +5,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { ApiDrivenViewsModule } from '../../api-driven-views.module';
 import { CoreModule } from '../../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { TabNavService } from '../../../../tab-nav.service';
 import { EntityCatalogModule } from '../../../../../store/src/entity-catalog.module';
 import { generateStratosEntities } from '../../../base-entity-types';

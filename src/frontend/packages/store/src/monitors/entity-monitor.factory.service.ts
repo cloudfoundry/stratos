@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { EntityMonitor } from './entity-monitor';
+import { AppState } from '../app-state';
 
 @Injectable()
 export class EntityMonitorFactory {
 
-  constructor(private store: Store<CFAppState>) { }
+  constructor(private store: Store<AppState>) { }
 
   private monitorCache: {
     [key: string]: EntityMonitor

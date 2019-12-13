@@ -2,7 +2,7 @@ import { async, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreTestingModule } from '../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { AppComponent } from './app.component';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';

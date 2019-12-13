@@ -13,7 +13,7 @@ import {
   createBasicStoreModule,
   createEntityStoreState,
   TestStoreEntity,
-} from '../../../core/test-framework/store-test-helper';
+} from '@stratos/store/testing';
 import { RequestTypes } from '../../../store/src/actions/request.actions';
 import { AppState } from '../../../store/src/app-state';
 import { EntityRelationSpecHelper } from '../../../store/src/helpers/entity-relations/entity-relations-spec-helper';

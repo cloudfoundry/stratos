@@ -6,7 +6,7 @@ import { endpointEntitySchema } from '../../../../../core/src/base-entity-schema
 import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
 import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { TabNavService } from '../../../../../core/tab-nav.service';
-import { testSCFEndpoint, testSCFEndpointGuid } from '../../../../../core/test-framework/store-test-helper';
+import { testSCFEndpoint, testSCFEndpointGuid } from '@stratos/store/testing';
 import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
 import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import { WrapperRequestActionSuccess } from '../../../../../store/src/types/request.types';
