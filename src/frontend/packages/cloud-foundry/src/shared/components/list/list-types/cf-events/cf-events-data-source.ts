@@ -19,6 +19,72 @@ import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers
 
 export class CfEventsDataSource extends ListDataSource<APIResource> {
 
+  constructor(
+    store: Store<CFAppState>,
+    cfGuid: string,
+    listConfig: IListConfig<APIResource>,
+    orgGuid?: string,
+    spaceGuid?: string,
+    appGuid?: string,
+  ) {
+    const appEventEntity = entityCatalogue.getEntity<IEntityMetadata, any, CfEventActionBuilders>(
+      CF_ENDPOINT_TYPE,
+      cfEventEntityType
+    );
+    const actionBuilder = appEventEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const paginationKey = CfEventsDataSource.createPaginationKey(
+      cfGuid,
+      orgGuid,
+      spaceGuid,
+      appGuid
+    );
+    const action = actionBuilder(cfGuid, paginationKey);
+
+    action.initialParams.q = [];
+    if (orgGuid) {
+      action.initialParams.q.push(
+        new QParam('organization_guid', appGuid, QParamJoiners.colon).toString(),
+      );
+    }
+    if (spaceGuid) {
+      action.initialParams.q.push(
+        new QParam('space_guid', appGuid, QParamJoiners.colon).toString(),
+      );
+    }
+    if (appGuid) {
+      action.initialParams.q.push(
+        new QParam('actee', appGuid, QParamJoiners.colon).toString(),
+      );
+    }
+    super(
+      {
+        store,
+        action,
+        schema: cfEntityFactory(cfEventEntityType),
+        getRowUniqueId: getRowMetadata,
+        paginationKey: action.paginationKey,
+        listConfig
+      }
+    );
+
+  }
+
+  private static createPaginationKey(
+    cfGuid: string,
+    orgGuid?: string,
+    spaceGuid?: string,
+    appGuid?: string,
+  ): string {
+    if (appGuid) {
+      return `${cfGuid}:app:${appGuid}`;
+    } else if (spaceGuid) {
+      return `${cfGuid}:space:${spaceGuid}`;
+    } else if (orgGuid) {
+      return `${cfGuid}:app:${orgGuid}`;
+    }
+    return null;
+  }
+
   public getFilterFromParams(pag: PaginationEntityState) {
     const qParams = pag.params.q as string[];
     if (qParams) {
@@ -40,32 +106,6 @@ export class CfEventsDataSource extends ListDataSource<APIResource> {
     } else if (qParams.find((q: string) => QParam.fromString(q).key === 'type')) {
       this.store.dispatch(new RemoveParams(config, this.paginationKey, [], ['type']));
     }
-  }
-
-  constructor(
-    store: Store<CFAppState>,
-    cfGuid: string,
-    listConfig: IListConfig<APIResource>
-  ) {
-    // const paginationKey = `app-events:${cfGuid}${appGuid}`;
-    const appEventEntity = entityCatalogue.getEntity<IEntityMetadata, any, CfEventActionBuilders>(
-      CF_ENDPOINT_TYPE,
-      cfEventEntityType
-    );
-    const actionBuilder = appEventEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const action = actionBuilder(cfGuid, null);
-
-    super(
-      {
-        store,
-        action,
-        schema: cfEntityFactory(cfEventEntityType),
-        getRowUniqueId: getRowMetadata,
-        paginationKey: action.paginationKey,
-        listConfig
-      }
-    );
-
   }
 
 }

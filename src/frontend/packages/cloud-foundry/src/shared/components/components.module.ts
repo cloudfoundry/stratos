@@ -45,23 +45,6 @@ import { CliInfoComponent } from './cli-info/cli-info.component';
 import {
   CreateApplicationStep1Component,
 } from './create-application/create-application-step1/create-application-step1.component';
-import { EventTabActeeIconPipe } from './list/list-types/app-event/table-cell-event-actee/event-tab-actee-icon.pipe';
-import {
-  TableCellEventActeeComponent,
-} from './list/list-types/app-event/table-cell-event-actee/table-cell-event-actee.component';
-import { EventTabActorIconPipe } from './list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
-import {
-  TableCellEventActionComponent,
-} from './list/list-types/app-event/table-cell-event-action/table-cell-event-action.component';
-import {
-  TableCellEventDetailComponent,
-} from './list/list-types/app-event/table-cell-event-detail/table-cell-event-detail.component';
-import {
-  TableCellEventTimestampComponent,
-} from './list/list-types/app-event/table-cell-event-timestamp/table-cell-event-timestamp.component';
-import {
-  TableCellEventTypeComponent,
-} from './list/list-types/app-event/table-cell-event-type/table-cell-event-type.component';
 import { TableCellCfCellComponent } from './list/list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from './list/list-types/app-instance/table-cell-usage/table-cell-usage.component';
 import {
@@ -89,6 +72,22 @@ import {
 import {
   TableCellConfirmRoleAddRemComponent,
 } from './list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
+import {
+  TableCellEventActeeComponent,
+} from './list/list-types/cf-events/table-cell-event-actee/table-cell-event-actee.component';
+import { EventTabActorIconPipe } from './list/list-types/cf-events/table-cell-event-action/event-tab-actor-icon.pipe';
+import {
+  TableCellEventActionComponent,
+} from './list/list-types/cf-events/table-cell-event-action/table-cell-event-action.component';
+import {
+  TableCellEventDetailComponent,
+} from './list/list-types/cf-events/table-cell-event-detail/table-cell-event-detail.component';
+import {
+  TableCellEventTimestampComponent,
+} from './list/list-types/cf-events/table-cell-event-timestamp/table-cell-event-timestamp.component';
+import {
+  TableCellEventTypeComponent,
+} from './list/list-types/cf-events/table-cell-event-type/table-cell-event-type.component';
 import {
   TableCellFeatureFlagStateComponent,
 } from './list/list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
@@ -243,8 +242,7 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellEventDetailComponent,
     TableCellUsageComponent,
     TableCellQuotaComponent,
-    TableCellEventActeeComponent,
-    EventTabActeeIconPipe
+    TableCellEventActeeComponent
   ],
   exports: [
     ServiceIconComponent,

@@ -6,6 +6,9 @@ import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { CfEventsConfigService } from '../../../../shared/components/list/list-types/cf-events/cf-events-config.service';
+import {
+  CfAllEventsConfigService,
+} from '../../../../shared/components/list/list-types/cf-events/types/cf-all-events-config.service';
 
 @Component({
   selector: 'app-cloud-foundry-events',
@@ -13,7 +16,7 @@ import { CfEventsConfigService } from '../../../../shared/components/list/list-t
   styleUrls: ['./cloud-foundry-events.component.scss'],
   providers: [{
     provide: ListConfig,
-    useClass: CfEventsConfigService,
+    useClass: CfAllEventsConfigService,
   }]
 })
 export class CloudFoundryEventsComponent implements OnInit, OnDestroy {
@@ -21,8 +24,8 @@ export class CloudFoundryEventsComponent implements OnInit, OnDestroy {
   // TODO: RC Privilideges
   // TODO: RC Disable when list is busy
   // TODO: RC Apply existing values
-  // TODO: Add tooltip to actee icon, other icon too?
-  // TODO: RC use same table in app world
+  // TODO: Add at org and space level
+  // TODO: RC add org/space filter to top level
 
   filtersFormGroup: FormGroup;
   acteeValues: string[] = [

@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
@@ -9,7 +8,7 @@ import {
 } from '../../../../../../../cloud-foundry/src/shared/components/cf-role-checkbox/cf-role-checkbox.component';
 import {
   EventTabActorIconPipe,
-} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-events/table-cell-event-action/event-tab-actor-icon.pipe';
 import {
   RunningInstancesComponent,
 } from '../../../../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
@@ -36,6 +35,7 @@ import { GithubCommitAuthorComponent } from '../../../github-commit-author/githu
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { listTableCells, TableCellComponent } from './table-cell.component';
 
+/* tslint:disable:max-line-length */
 /* tslint:enable:max-line-length */
 
 describe('TableCellComponent', () => {
