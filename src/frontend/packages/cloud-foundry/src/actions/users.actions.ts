@@ -1,3 +1,5 @@
+import { HttpRequest } from '@angular/common/http';
+
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
@@ -5,11 +7,13 @@ import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../cf-entity-types';
-import { createEntityRelationPaginationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
-import { OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/user.types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+  EntityInlineParentAction,
+} from '../entity-relations/entity-relations.types';
+import { CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/user.types';
 import { CFStartAction } from './cf-action.types';
-import { createDefaultUserRelations } from './user.actions.helpers';
-import { HttpRequest } from '@angular/common/http';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -29,6 +33,18 @@ export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
 
 export const GET_CF_USERS_AS_NON_ADMIN = '[Users] Get cf users by org ';
 export const GET_CF_USERS_AS_NON_ADMIN_SUCCESS = '[Users] Get cf users by org success';
+
+export function createDefaultUserRelations() {
+  return [
+    createEntityRelationKey(cfUserEntityType, CfUserRoleParams.ORGANIZATIONS),
+    createEntityRelationKey(cfUserEntityType, CfUserRoleParams.AUDITED_ORGS),
+    createEntityRelationKey(cfUserEntityType, CfUserRoleParams.MANAGED_ORGS),
+    createEntityRelationKey(cfUserEntityType, CfUserRoleParams.BILLING_MANAGER_ORGS),
+    createEntityRelationKey(cfUserEntityType, CfUserRoleParams.SPACES),
+    createEntityRelationKey(cfUserEntityType, CfUserRoleParams.MANAGED_SPACES),
+    createEntityRelationKey(cfUserEntityType, CfUserRoleParams.AUDITED_SPACES)
+  ];
+}
 
 
 export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
