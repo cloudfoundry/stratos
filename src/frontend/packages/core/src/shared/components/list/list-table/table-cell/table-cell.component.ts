@@ -1,4 +1,5 @@
 /* tslint:disable:max-line-length */
+
 import {
   Component,
   ComponentFactoryResolver,
@@ -117,7 +118,6 @@ import { TableCellSelectComponent } from '../table-cell-select/table-cell-select
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
 import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
-
 
 
 /* tslint:enable:max-line-length */
