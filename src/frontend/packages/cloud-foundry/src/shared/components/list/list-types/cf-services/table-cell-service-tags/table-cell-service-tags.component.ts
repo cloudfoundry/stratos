@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { of } from 'rxjs';
 
 import { IService } from '../../../../../../../../core/src/core/cf-api-svc.types';
@@ -12,7 +12,7 @@ import { ServiceTag } from '../cf-service-card/cf-service-card.component';
   templateUrl: './table-cell-service-tags.component.html',
   styleUrls: ['./table-cell-service-tags.component.scss']
 })
-export class TableCellServiceTagsComponent extends TableCellCustom<APIResource<IService>> implements OnInit {
+export class TableCellServiceTagsComponent extends TableCellCustom<APIResource<IService>> {
 
   tags: AppChip<ServiceTag>[] = [];
 
@@ -31,13 +31,8 @@ export class TableCellServiceTagsComponent extends TableCellCustom<APIResource<I
   get row(): APIResource<IService> {
     return this.service;
   }
-  // @Input() entityKey: string;
 
   constructor() {
     super();
   }
-
-  ngOnInit() {
-  }
-
 }

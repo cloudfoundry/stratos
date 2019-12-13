@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import { IService, IServiceExtra } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -9,7 +9,7 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
   templateUrl: './table-cell-service-references.component.html',
   styleUrls: ['./table-cell-service-references.component.scss']
 })
-export class TableCellServiceReferencesComponent extends TableCellCustom<APIResource<IService>> implements OnInit {
+export class TableCellServiceReferencesComponent extends TableCellCustom<APIResource<IService>> {
 
   extraInfo: IServiceExtra;
 
@@ -25,9 +25,6 @@ export class TableCellServiceReferencesComponent extends TableCellCustom<APIReso
 
   constructor() {
     super();
-  }
-
-  ngOnInit() {
   }
 
   hasDocumentationUrl() {

@@ -16,6 +16,4 @@ export class TableCellServiceBindableComponent extends TableCellCustom<APIResour
   constructor() {
     super();
   }
-
-
 }

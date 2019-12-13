@@ -8,9 +8,9 @@ describe('TableCellServiceProviderComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellServiceProviderComponent ]
+      declarations: [TableCellServiceProviderComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

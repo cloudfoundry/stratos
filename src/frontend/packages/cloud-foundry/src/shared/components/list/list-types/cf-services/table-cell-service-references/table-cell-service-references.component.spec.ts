@@ -1,5 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import {
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { LongRunningCfOperationsService } from '../../../../../data-services/long-running-cf-op.service';
 import { TableCellServiceReferencesComponent } from './table-cell-service-references.component';
 
 describe('TableCellServiceReferencesComponent', () => {
@@ -8,9 +12,17 @@ describe('TableCellServiceReferencesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellServiceReferencesComponent ]
+      declarations: [
+        TableCellServiceReferencesComponent,
+      ],
+      imports: [
+        generateCfBaseTestModulesNoShared()
+      ],
+      providers: [
+        LongRunningCfOperationsService
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

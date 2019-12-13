@@ -35,8 +35,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
 
   constructor(
     private store: Store<CFAppState>,
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    // private endpointsService: EndpointsService
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     this.dataSource = new CfServicesDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
     this.cf = {
@@ -63,9 +62,10 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
       })
     );
   }
-  static cfColumnId = 'cf';
-  cf: CfOrgSpaceItem;
 
+  static cfColumnId = 'cf';
+
+  cf: CfOrgSpaceItem;
   isLocal: true;
   viewType = ListViewTypes.BOTH;
   enableTextFilter = true;
