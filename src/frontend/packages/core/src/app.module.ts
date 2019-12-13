@@ -46,6 +46,7 @@ import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
 import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
+import { PanelPreviewService } from './shared/services/panel-preview.service';
 import { SharedModule } from './shared/shared.module';
 
 // Create action for router navigation. See
@@ -110,6 +111,7 @@ export class CustomRouterStateSerializer
     LoggedInService,
     ExtensionService,
     DynamicExtensionRoutes,
+    PanelPreviewService,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy }

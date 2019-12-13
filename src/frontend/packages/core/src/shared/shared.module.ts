@@ -116,7 +116,6 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
-import { PanelPreviewService } from './services/panel-preview.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
 /* tslint:disable:max-line-length */
@@ -321,7 +320,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     ApplicationStateService,
     EndpointListHelper,
     EndpointsListConfigService,
-    PanelPreviewService,
     // CfUserService,
     ConfirmationDialogService,
     EntityMonitorFactory,
