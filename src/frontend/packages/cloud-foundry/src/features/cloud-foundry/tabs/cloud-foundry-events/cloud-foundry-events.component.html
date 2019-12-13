@@ -1,1 +1,13 @@
+<form [formGroup]="filtersFormGroup" class="">
+  <mat-form-field>
+    <mat-label>Event Type</mat-label>
+    <mat-select multiple name="type" formControlName="type">
+      <mat-option *ngFor="let pType of typeValues" [value]="pType">{{pType}}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field>
+    <input type="text" matInput name="actee" formControlName="actee" placeholder="Actee's Guid">
+  </mat-form-field>
+</form>
+
 <app-list></app-list>

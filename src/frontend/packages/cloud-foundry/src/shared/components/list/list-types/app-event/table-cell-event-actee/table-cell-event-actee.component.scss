@@ -1,0 +1,13 @@
+div {
+  display: flex;
+  flex-direction: column;
+
+  mat-icon,
+  span {
+    padding-bottom: 5px;
+  }
+
+  mat-icon  {
+    margin-right: 5px;
+  }
+}

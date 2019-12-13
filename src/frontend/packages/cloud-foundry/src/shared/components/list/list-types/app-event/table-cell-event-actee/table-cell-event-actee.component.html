@@ -1,0 +1,10 @@
+<div>
+  <mat-icon [matTooltip]="row.entity.actee_type" [fontSet]="icon[row.entity.actee_type]?.iconFont">
+    {{icon[row.entity.actee_type]?.icon}}</mat-icon>
+  <span *ngIf="row.entity.actee_name">
+    {{row.entity.actee_name}}
+  </span>
+  <span>
+    {{row.entity.actee}}
+  </span>
+</div>

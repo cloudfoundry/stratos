@@ -7,9 +7,13 @@ import {
   ListConfig,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
+import { QParam, QParamJoiners } from '../../../../../../../store/src/q-param';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { TableCellEventActeeComponent } from '../app-event/table-cell-event-actee/table-cell-event-actee.component';
 import { TableCellEventActionComponent } from '../app-event/table-cell-event-action/table-cell-event-action.component';
 import { TableCellEventDetailComponent } from '../app-event/table-cell-event-detail/table-cell-event-detail.component';
 import {
@@ -24,12 +28,14 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
   eventSource: CfEventsDataSource;
   columns: Array<ITableColumn<APIResource>> = [
     {
-      columnId: 'actor_name', headerCell: () => 'Actor Name', cellComponent: TableCellEventActionComponent, cellFlex: '3'
+      columnId: 'actor', headerCell: () => 'Actor', cellComponent: TableCellEventActionComponent, cellFlex: '2'
     },
     {
       columnId: 'type', headerCell: () => 'Type', cellComponent: TableCellEventTypeComponent, cellFlex: '2'
     },
-    // TODO: Actee
+    {
+      columnId: 'actee', headerCell: () => 'Actee', cellComponent: TableCellEventActeeComponent, cellFlex: '3'
+    },
     {
       columnId: 'detail', headerCell: () => 'Detail', cellComponent: TableCellEventDetailComponent, cellFlex: '6'
     },
@@ -47,7 +53,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     noEntries: 'There are no events'
   };
 
-  constructor(store: Store<CFAppState>, cfService: CloudFoundryEndpointService) {
+  constructor(private store: Store<CFAppState>, cfService: CloudFoundryEndpointService) {
     super();
     this.eventSource = new CfEventsDataSource(
       store,
@@ -63,4 +69,30 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
   getDataSource = () => this.eventSource;
   getMultiFiltersConfigs = () => [];
 
+  setFilters(values: { actee: string, type: string[] }) {
+    const action = this.eventSource.action as PaginatedAction;
+    // q=filter IN a,b,c
+
+    const addQs: string[] = [];
+    const removeQs: string[] = [];
+
+    if (!!values.type && !!values.type.length) {
+      addQs.push(new QParam('type', values.type, QParamJoiners.in).toString());
+    } else {
+      removeQs.push('type');
+    }
+
+    if (!!values.actee && !!values.actee.length) {
+      addQs.push(new QParam('actee', values.actee, QParamJoiners.in).toString());
+    } else {
+      removeQs.push('actee');
+    }
+
+    if (!!addQs.length) {
+      this.store.dispatch(new AddParams(action, this.eventSource.paginationKey, { q: addQs }));
+    }
+    if (!!removeQs.length) {
+      this.store.dispatch(new RemoveParams(action, action.paginationKey, [], removeQs));
+    }
+  }
 }

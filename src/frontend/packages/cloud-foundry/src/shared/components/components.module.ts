@@ -1,4 +1,3 @@
-// tslint:disable:max-line-length
 import { CommonModule } from '@angular/common';
 import { ApplicationModule, NgModule } from '@angular/core';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
@@ -46,6 +45,10 @@ import { CliInfoComponent } from './cli-info/cli-info.component';
 import {
   CreateApplicationStep1Component,
 } from './create-application/create-application-step1/create-application-step1.component';
+import { EventTabActeeIconPipe } from './list/list-types/app-event/table-cell-event-actee/event-tab-actee-icon.pipe';
+import {
+  TableCellEventActeeComponent,
+} from './list/list-types/app-event/table-cell-event-actee/table-cell-event-actee.component';
 import { EventTabActorIconPipe } from './list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import {
   TableCellEventActionComponent,
@@ -150,6 +153,7 @@ import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
 
+// tslint:disable:max-line-length
 // tslint:enable:max-line-length
 
 @NgModule({
@@ -238,7 +242,9 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellEventActionComponent,
     TableCellEventDetailComponent,
     TableCellUsageComponent,
-    TableCellQuotaComponent
+    TableCellQuotaComponent,
+    TableCellEventActeeComponent,
+    EventTabActeeIconPipe
   ],
   exports: [
     ServiceIconComponent,
@@ -322,7 +328,8 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellEventActionComponent,
     TableCellEventDetailComponent,
     TableCellUsageComponent,
-    TableCellQuotaComponent
+    TableCellQuotaComponent,
+    TableCellEventActeeComponent
   ]
 })
 export class CloudFoundryComponentsModule { }
