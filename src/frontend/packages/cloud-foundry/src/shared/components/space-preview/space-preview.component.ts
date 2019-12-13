@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
-import { delay, filter, map, startWith } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
 
 import { PreviewableComponent } from '../../../../../core/src/shared/previewable-component';
 import { CloudFoundryEndpointService } from '../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
@@ -40,7 +40,6 @@ export class SpacePreviewComponent implements PreviewableComponent {
       this.cfSpaceService.userProvidedServiceInstancesCount$
     ]).pipe(
       map(() => false),
-      delay(50000),
       startWith(true)
     );
   }
