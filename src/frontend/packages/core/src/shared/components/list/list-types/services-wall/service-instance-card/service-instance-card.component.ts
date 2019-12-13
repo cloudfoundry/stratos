@@ -1,13 +1,20 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, of as observableOf } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { filter, first, map } from 'rxjs/operators';
 
+import { GetServiceBroker } from '../../../../../../../../store/src/actions/service-broker.actions';
 import { AppState } from '../../../../../../../../store/src/app-state';
-import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import {
+  entityFactory,
+  serviceBrokerSchemaKey,
+  serviceInstancesSchemaKey,
+} from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { IServiceBroker, IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
@@ -21,15 +28,6 @@ import { CardCell } from '../../../list.types';
   styleUrls: ['./service-instance-card.component.scss'],
 })
 export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> {
-  serviceInstanceEntity: APIResource<IServiceInstance>;
-  cfGuid: string;
-  cardMenu: MetaCardMenuItem[];
-
-  serviceInstanceTags: AppChip[];
-  hasMultipleBindings = new BehaviorSubject(true);
-  entityConfig: ComponentEntityMonitorConfig;
-
-  cfOrgSpace: CfOrgSpaceLabelService;
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
@@ -80,16 +78,46 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           row.entity.space.entity.organization_guid,
           row.entity.space_guid);
       }
+
+      if (!this.serviceBroker$) {
+        const brokerGuid = this.serviceInstanceEntity.entity.service.entity.service_broker_guid;
+        this.serviceBroker$ = this.entityServiceFactory.create<APIResource<IServiceBroker>>(
+          serviceBrokerSchemaKey,
+          entityFactory(serviceBrokerSchemaKey),
+          brokerGuid,
+          new GetServiceBroker(
+            brokerGuid,
+            this.serviceInstanceEntity.entity.cfGuid
+          )
+        ).waitForEntity$.pipe(
+          map(a => a.entity),
+          filter(res => !!res),
+          first()
+        );
+      }
     }
   }
 
   constructor(
     private store: Store<AppState>,
     private serviceActionHelperService: ServiceActionHelperService,
-    private currentUserPermissionsService: CurrentUserPermissionsService
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private entityServiceFactory: EntityServiceFactory
   ) {
     super();
   }
+
+  static done = false;
+  serviceInstanceEntity: APIResource<IServiceInstance>;
+  cfGuid: string;
+  cardMenu: MetaCardMenuItem[];
+
+  serviceInstanceTags: AppChip[];
+  hasMultipleBindings = new BehaviorSubject(true);
+  entityConfig: ComponentEntityMonitorConfig;
+
+  cfOrgSpace: CfOrgSpaceLabelService;
+  serviceBroker$: Observable<APIResource<IServiceBroker>>;
 
   detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
@@ -126,5 +154,8 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   }
 
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
+
+  getServiceUrl = () =>
+    `/marketplace/${this.serviceInstanceEntity.entity.cfGuid}/${this.serviceInstanceEntity.entity.service.entity.guid}/summary`
 
 }

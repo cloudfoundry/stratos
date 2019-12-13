@@ -17,6 +17,7 @@ import { CfRoleCheckboxComponent } from '../../../cf-role-checkbox/cf-role-check
 import { AppChipsComponent } from '../../../chips/chips.component';
 import { GithubCommitAuthorComponent } from '../../../github-commit-author/github-commit-author.component';
 import { RunningInstancesComponent } from '../../../running-instances/running-instances.component';
+import { ServiceInstanceLastOpComponent } from '../../../service-instance-last-op/service-instance-last-op.component';
 import { ServicePlanPriceComponent } from '../../../service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from '../../../service-plan-public/service-plan-public.component';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
@@ -47,7 +48,8 @@ describe('TableCellComponent', () => {
         GithubCommitAuthorComponent,
         ServicePlanPriceComponent,
         ServicePlanPublicComponent,
-        CfOrgSpaceLinksComponent
+        CfOrgSpaceLinksComponent,
+        ServiceInstanceLastOpComponent
       ],
       imports: [
         CoreModule

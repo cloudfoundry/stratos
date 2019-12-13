@@ -26,11 +26,9 @@ import {
   TableCellServiceInstanceTagsComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
 import {
-  TableCellServiceNameComponent,
-} from '../cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
-import {
-  TableCellServicePlanComponent,
-} from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+  TableCellServiceLastOpComponent,
+} from '../cf-spaces-service-instances/table-cell-service-last-op/table-cell-service-last-op.component';
+import { TableCellServiceComponent } from '../cf-spaces-service-instances/table-cell-service/table-cell-service.component';
 
 interface CanCache {
   [spaceGuid: string]: Observable<boolean>;
@@ -69,14 +67,14 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     {
       columnId: 'service',
       headerCell: () => 'Service',
-      cellComponent: TableCellServiceNameComponent,
-      cellFlex: '1'
+      cellComponent: TableCellServiceComponent,
+      cellFlex: '2'
     },
     {
-      columnId: 'servicePlan',
-      headerCell: () => 'Plan',
-      cellComponent: TableCellServicePlanComponent,
-      cellFlex: '1'
+      columnId: 'lastOp',
+      headerCell: () => 'Last Operation',
+      cellComponent: TableCellServiceLastOpComponent,
+      cellFlex: '2'
     },
     {
       columnId: 'dashboard',

@@ -1,15 +1,18 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { of as observableOf } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
+import { filter, first, map } from 'rxjs/operators';
 
-import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
-
+import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { GetServiceBroker } from '../../../../../../../../store/src/actions/service-broker.actions';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { entityFactory, serviceBrokerSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IService, IServiceBroker, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
+import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { AppChip } from '../../../../chips/chips.component';
 import { CardCell } from '../../../list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { AppState } from '../../../../../../../../store/src/app-state';
-import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
 export interface ServiceTag {
   value: string;
@@ -18,13 +21,15 @@ export interface ServiceTag {
 @Component({
   selector: 'app-cf-service-card',
   templateUrl: './cf-service-card.component.html',
-  styleUrls: ['./cf-service-card.component.scss']
+  styleUrls: ['./cf-service-card.component.scss'],
+  providers: [EntityServiceFactory]
 })
 export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   serviceEntity: APIResource<IService>;
   cfOrgSpace: CfOrgSpaceLabelService;
   extraInfo: IServiceExtra;
   tags: AppChip<ServiceTag>[] = [];
+  serviceBrokerName$: Observable<string>;
 
   @Input() disableCardClick = false;
 
@@ -48,10 +53,31 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
       if (!this.cfOrgSpace) {
         this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.serviceEntity.entity.cfGuid);
       }
+
+      if (!this.serviceBrokerName$) {
+        const brokerGuid = this.serviceEntity.entity.service_broker_guid;
+        this.serviceBrokerName$ = this.entityServiceFactory.create<APIResource<IServiceBroker>>(
+          serviceBrokerSchemaKey,
+          entityFactory(serviceBrokerSchemaKey),
+          brokerGuid,
+          new GetServiceBroker(
+            brokerGuid,
+            this.serviceEntity.entity.cfGuid
+          )
+        ).waitForEntity$.pipe(
+          map(a => a.entity),
+          filter(res => !!res),
+          map(a => a.entity.name),
+          first()
+        );
+      }
     }
   }
 
-  constructor(private store: Store<AppState>) {
+  constructor(
+    private store: Store<AppState>,
+    private entityServiceFactory: EntityServiceFactory
+  ) {
     super();
   }
 
