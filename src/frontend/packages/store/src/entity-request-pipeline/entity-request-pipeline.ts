@@ -78,11 +78,11 @@ export const apiRequestPipelineFactory = (
     map(() => catalogEntity.getRequestAction('complete', action, requestType)),
     catchError(error => {
       const httpResponse = isHttpErrorResponse(error);
-      const res: PipelineResult = {
+      const response: PipelineResult = {
         success: false,
         errorMessage: httpResponse ? httpResponse.error : null
       };
-      failedEntityHandler(actionDispatcher, catalogEntity, requestType, action, res, recursivelyDelete);
+      failedEntityHandler(actionDispatcher, catalogEntity, requestType, action, response, recursivelyDelete);
       jetstreamErrorHandler(
         error,
         patchedAction,

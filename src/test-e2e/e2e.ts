@@ -42,8 +42,8 @@ export class E2E {
   /**
    * Convenience for sleep
    */
-  sleep(duration: number) {
-    browser.driver.sleep(duration);
+  sleep(duration: number): promise.Promise<any> {
+    return browser.driver.sleep(duration);
   }
 
   /**
