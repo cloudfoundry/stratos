@@ -132,7 +132,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
     );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
-      map(({ entity }) => entity ? entity.entity : null),
+      filter(({ entityRequestInfo }) => entityRequestInfo && !entityRequestInfo.fetching),
+      map(({ entity, }) => entity ? entity.entity : null),
       publishReplay(1),
       refCount()
     );

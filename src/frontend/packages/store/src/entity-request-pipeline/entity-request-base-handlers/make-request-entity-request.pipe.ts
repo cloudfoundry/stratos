@@ -8,7 +8,7 @@ export const makeRequestEntityPipe: MakeEntityRequestPipe = (
   httpClient,
   requestOrObservable,
   endpointConfig: StratosCatalogEndpointEntity,
-  endpointGuids: string[],
+  endpointGuids: string | string[],
   externalRequest: boolean = false
 ) => {
   if (requestOrObservable instanceof HttpRequest) {

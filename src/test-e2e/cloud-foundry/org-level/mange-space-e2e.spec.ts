@@ -10,7 +10,7 @@ import { SpaceFormPage } from './space-form-page.po';
 describe('Manage Space', () => {
   let e2eSetup;
   let spaceFormPage: SpaceFormPage;
-  let cfOrgLevelPage: CfOrgLevelPage;
+  let cfOrgLevelPage: CfOrgLevelPage = new CfOrgLevelPage();
   let cfHelper: CFHelpers;
   let cfGuid: string;
   let orgName: string;
@@ -27,7 +27,9 @@ describe('Manage Space', () => {
       .connectAllEndpoints(ConsoleUserType.admin)
       .loginAs(ConsoleUserType.admin)
       .getInfo(ConsoleUserType.admin);
+  });
 
+  beforeAll(() => {
     return protractor.promise.controlFlow().execute(() => {
       const defaultCf = e2e.secrets.getDefaultCFEndpoint();
       // Only available until after `info` call has completed as part of setup
@@ -49,10 +51,6 @@ describe('Manage Space', () => {
     });
   });
 
-  beforeEach(() => {
-    cfOrgLevelPage = new CfOrgLevelPage();
-  });
-
   describe('#create', () => {
     beforeEach(() => {
       spaceFormPage = new SpaceFormPage(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/add-space`);
@@ -62,6 +60,9 @@ describe('Manage Space', () => {
 
     it('- should reach create space page', () => {
       expect(spaceFormPage.isActivePage()).toBeTruthy();
+
+      spaceFormPage.stepper.cancel();
+      expect(cfOrgLevelPage.subHeader.getTitleText()).toBe('Spaces');
     });
 
     it('- should create space with default quota', () => {
@@ -69,11 +70,6 @@ describe('Manage Space', () => {
       spaceFormPage.submit();
 
       cfOrgLevelPage.clickOnCard(spaceName);
-    });
-
-    it('- should go to spaces when canceled', () => {
-      spaceFormPage.stepper.cancel();
-      expect(cfOrgLevelPage.subHeader.getTitleText()).toBe('Spaces');
     });
 
     it('- should validate space name', () => {
@@ -97,7 +93,7 @@ describe('Manage Space', () => {
   });
 
   describe('#destroy', () => {
-    beforeEach(() => {
+    it('Nav to spaces tab', () => {
       cfOrgLevelPage = CfOrgLevelPage.forEndpoint(cfGuid, orgGuid);
       cfOrgLevelPage.navigateTo();
       cfOrgLevelPage.goToSpacesTab();
@@ -113,7 +109,7 @@ describe('Manage Space', () => {
   describe('#update', () => {
     let cfSpaceLevelPage: CfSpaceLevelPage;
 
-    beforeEach(() => {
+    it('Nav to spaces tab', () => {
       cfOrgLevelPage = CfOrgLevelPage.forEndpoint(cfGuid, orgGuid);
       cfOrgLevelPage.navigateTo();
       cfOrgLevelPage.goToSpacesTab();

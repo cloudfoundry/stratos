@@ -16,15 +16,15 @@ import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../glo
   animations: [
     trigger(
       'eventEnter', [
-        transition(':enter', [
-          style({ opacity: 0 }),
-          animate('250ms ease-in', style({ opacity: 1 }))
-        ]),
-        transition(':leave', [
-          style({ opacity: 1 }),
-          animate('250ms ease-out', style({ opacity: 0 }))
-        ])
-      ]
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('250ms ease-in', style({ opacity: 1 }))
+      ]),
+      transition(':leave', [
+        style({ opacity: 1 }),
+        animate('250ms ease-out', style({ opacity: 0 }))
+      ])
+    ]
     )
   ]
 })
@@ -89,7 +89,7 @@ export class PageHeaderEventsComponent implements OnInit {
           const endpointErrorKeys = events.reduce((endpointIds, event) => {
             return endpointIds.add(this.getEndpointId(event));
           }, new Set<string>());
-          return endpointErrorKeys.size > 1 ? `We've been having trouble communicating with multiple endpoints` : events[0].message;
+          return endpointErrorKeys.size > 1 ? `There are multiple endpoints with errors` : events[0].message;
         }),
         share()
       );

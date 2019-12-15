@@ -17,8 +17,8 @@
       </div>
       <div class="error-page__header-right" *ngIf="errorDetails.errors && errorDetails.errors.length">
         <a class="error-page__download" mat-icon-button [href]="jsonDownloadHref$ | async"
-          title="Download endpoint error information" download="endpoint-errors.json"
-          matTooltip="Download endpoint error information" aria-label="Download endpoint error information">
+          download="endpoint-errors.json" matTooltip="Download endpoint error information"
+          aria-label="Download endpoint error information">
           <mat-icon>cloud_download</mat-icon>
         </a>
       </div>

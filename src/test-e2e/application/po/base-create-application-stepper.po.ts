@@ -3,6 +3,7 @@ import { CreateApplicationShellStepper } from './create-application-shell-steppe
 import { DeployApplication } from './deploy-app.po';
 export enum APPLICATION_CREATION_TYPES {
   DEPLOY = 'application-deploy',
+  DEPLOY_URL = 'application-deploy-url',
   SHELL = 'application-shell'
 }
 export class BaseCreateApplicationStepper {
@@ -14,6 +15,9 @@ export class BaseCreateApplicationStepper {
         return new CreateApplicationShellStepper();
       case APPLICATION_CREATION_TYPES.DEPLOY:
         this.tiles.select('Public GitHub');
+        return new DeployApplication();
+      case APPLICATION_CREATION_TYPES.DEPLOY_URL:
+        this.tiles.select('Public Git URL');
         return new DeployApplication();
     }
   }
