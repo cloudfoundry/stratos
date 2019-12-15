@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import * as moment from 'moment';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, takeWhile, tap } from 'rxjs/operators';
@@ -44,7 +44,10 @@ export class MetricsRangeSelectorManagerService {
 
   public pollInterval = 10000;
 
-  constructor(public metricRangeService: MetricsRangeSelectorService) { }
+  constructor(
+    public metricRangeService: MetricsRangeSelectorService,
+    private ngZone: NgZone,
+    ) { }
 
   private commitDate(date: moment.Moment, type: 'start' | 'end') {
     const index = type === 'start' ? this.startIndex : this.endIndex;
@@ -140,10 +143,12 @@ export class MetricsRangeSelectorManagerService {
 
   private startWindowPoll(timeWindow: ITimeRange) {
     this.endWindowPoll();
-    this.pollIndex = window.setInterval(
-      () => this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value)),
-      this.pollInterval
-    );
+    this.ngZone.runOutsideAngular(() => {
+      this.pollIndex = window.setInterval(
+        () => this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value)),
+        this.pollInterval
+      );
+    });
   }
 
   private endWindowPoll() {

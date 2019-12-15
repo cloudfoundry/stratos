@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -123,7 +124,8 @@ export class DeployApplicationStep2Component
     private store: Store<CFAppState>,
     route: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private scmService: GitSCMService
+    private scmService: GitSCMService,
+    private httpClient: HttpClient
   ) {
     this.selectedSourceType = getAutoSelectedDeployType(route);
     if (this.selectedSourceType) {
@@ -320,7 +322,7 @@ export class DeployApplicationStep2Component
 
     return observableTimer(500).pipe(
       take(1),
-      switchMap(() => this.scm.getMatchingRepositories(name)),
+      switchMap(() => this.scm.getMatchingRepositories(this.httpClient, name)),
       catchError(e => observableOf(null)),
       tap(suggestions => this.cachedSuggestions[cacheName] = suggestions)
     );

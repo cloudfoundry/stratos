@@ -299,7 +299,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           if (!!updatingInfo && updatingInfo.error) {
             return observableOf({
               success: false,
-              message: `Failed to update service instance.`
+              message: `Failed to update service instance: ${updatingInfo.message}`
             });
           }
         } else if (request.error) {

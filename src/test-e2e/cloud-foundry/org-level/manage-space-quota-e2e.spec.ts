@@ -10,7 +10,7 @@ import { SpaceQuotaFormPage } from './space-quota-form-page.po';
 describe('Manage Space Quota', () => {
   let e2eSetup;
   let quotaFormPage: SpaceQuotaFormPage;
-  let cfOrgLevelPage: CfOrgLevelPage;
+  let cfOrgLevelPage: CfOrgLevelPage = new CfOrgLevelPage();
   let cfHelper: CFHelpers;
   let cfGuid: string;
   let orgGuid: string;
@@ -25,7 +25,9 @@ describe('Manage Space Quota', () => {
       .connectAllEndpoints(ConsoleUserType.admin)
       .loginAs(ConsoleUserType.admin)
       .getInfo(ConsoleUserType.admin);
+  });
 
+  beforeAll(() => {
     return protractor.promise.controlFlow().execute(() => {
       const defaultCf = e2e.secrets.getDefaultCFEndpoint();
       // Only available until after `info` call has completed as part of setup
@@ -36,12 +38,8 @@ describe('Manage Space Quota', () => {
 
       cfHelper = new CFHelpers(e2eSetup);
       return cfHelper.baseAddOrg(cfGuid, orgName).then(org => orgGuid = org.metadata.guid)
-      .then(() => cfHelper.addSpaceQuota(cfGuid, orgGuid, quotaName));
+        .then(() => cfHelper.addSpaceQuota(cfGuid, orgGuid, quotaName));
     });
-  });
-
-  beforeEach(() => {
-    cfOrgLevelPage = new CfOrgLevelPage();
   });
 
   describe('#create', () => {
@@ -56,6 +54,10 @@ describe('Manage Space Quota', () => {
 
     it('- should reach create quota page', () => {
       expect(quotaFormPage.isActivePage()).toBeTruthy();
+
+      // should go to quotas when cancelled
+      quotaFormPage.stepper.cancel();
+      expect(cfOrgLevelPage.subHeader.getTitleText()).toBe('Space Quotas');
     });
 
     it('- should validate quota name', () => {
@@ -66,9 +68,7 @@ describe('Manage Space Quota', () => {
 
       quotaFormPage.stepper.setName(quotaName);
       expect(element(by.css('.add-space-quota-stepper')).getText()).toContain('A space quota with this name already exists.');
-    });
 
-    it('- should create quota', () => {
       quotaFormPage.stepper.setName(secondQuotaName);
       quotaFormPage.stepper.setTotalServices('1');
       quotaFormPage.stepper.setTotalRoutes('10');
@@ -81,10 +81,6 @@ describe('Manage Space Quota', () => {
       cfOrgLevelPage.clickOnSpaceQuota(secondQuotaName);
     });
 
-    it('- should go to quotas when canceled', () => {
-      quotaFormPage.stepper.cancel();
-      expect(cfOrgLevelPage.subHeader.getTitleText()).toBe('Space Quotas');
-    });
   });
 
   describe('#destroy', () => {
