@@ -1,3 +1,4 @@
+import { HttpClientModule } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
@@ -28,7 +29,6 @@ import { MultilineTitleComponent } from '../src/shared/components/multiline-titl
 import { SharedModule } from '../src/shared/shared.module';
 import { CoreTestingModule } from './core-test.modules';
 import { createBasicStoreModule } from './store-test-helper';
-import { HttpClientModule } from '@angular/common/http';
 
 export function generateBaseTestStoreModules() {
   return [

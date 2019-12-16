@@ -1,10 +1,13 @@
-import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { LoggerService } from '../../../core/logger.service';
+import {
+  generateCfBaseTestModules,
+  generateTestCfEndpointServiceProvider,
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ApplicationService } from '../../../features/applications/application.service';
+import {
+  ApplicationEnvVarsHelper,
+} from '../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationPreviewComponent } from './application-preview.component';
 
 describe('ApplicationPreviewComponent', () => {
@@ -14,13 +17,12 @@ describe('ApplicationPreviewComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ApplicationPreviewComponent],
-      providers: [LoggerService, HttpClient, HttpHandler],
-      imports: [
-        HttpClientModule,
-        HttpClientTestingModule,
-        CoreTestingModule,
-        createBasicStoreModule()
-      ]
+      providers: [
+        ...generateTestCfEndpointServiceProvider(),
+        ApplicationService,
+        ApplicationEnvVarsHelper,
+      ],
+      imports: generateCfBaseTestModules(),
     })
       .compileComponents();
   }));

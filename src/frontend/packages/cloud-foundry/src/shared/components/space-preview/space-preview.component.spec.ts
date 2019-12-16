@@ -1,10 +1,15 @@
-import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { LoggerService } from '../../../core/logger.service';
+import {
+  generateCfBaseTestModules,
+  generateTestCfEndpointServiceProvider,
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  CloudFoundryOrganizationService,
+} from '../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { CloudFoundrySpaceService } from '../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { CardCfRecentAppsComponent } from '../cards/card-cf-recent-apps/card-cf-recent-apps.component';
+import { CompactAppCardComponent } from '../cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { SpacePreviewComponent } from './space-preview.component';
 
 describe('SpacePreviewComponent', () => {
@@ -13,14 +18,17 @@ describe('SpacePreviewComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [SpacePreviewComponent],
-      providers: [LoggerService, HttpClient, HttpHandler],
-      imports: [
-        HttpClientModule,
-        HttpClientTestingModule,
-        CoreTestingModule,
-        createBasicStoreModule()
-      ]
+      declarations: [
+        SpacePreviewComponent,
+        CardCfRecentAppsComponent,
+        CompactAppCardComponent
+      ],
+      providers: [
+        ...generateTestCfEndpointServiceProvider(),
+        CloudFoundryOrganizationService,
+        CloudFoundrySpaceService
+      ],
+      imports: generateCfBaseTestModules(),
     })
       .compileComponents();
   }));

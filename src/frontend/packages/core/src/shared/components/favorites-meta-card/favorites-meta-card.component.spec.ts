@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../test-framework/core-test.helper';
+import { PanelPreviewService } from '../../services/panel-preview.service';
 import { FavoritesMetaCardComponent } from './favorites-meta-card.component';
 
 describe('FavoritesMetaCardComponent', () => {
@@ -10,6 +11,7 @@ describe('FavoritesMetaCardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [...BaseTestModules],
+      providers: [PanelPreviewService],
     })
       .compileComponents();
   }));

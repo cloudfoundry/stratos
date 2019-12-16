@@ -1,5 +1,6 @@
 import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
@@ -48,6 +49,19 @@ export function generateTestCfEndpointServiceProvider(guid = testSCFEndpointGuid
     {
       provide: ActiveRouteCfOrgSpace,
       useFactory: () => new BaseCfOrgSpaceRouteMock(guid)
+    },
+    {
+      provide: ActivatedRoute,
+      useValue: {
+        snapshot: {
+          params: {
+            endpointId: guid,
+            orgId: guid,
+            spaceId: guid,
+          },
+          queryParams: {},
+        },
+      },
     },
     CfUserServiceTestProvider,
     CloudFoundryEndpointService,

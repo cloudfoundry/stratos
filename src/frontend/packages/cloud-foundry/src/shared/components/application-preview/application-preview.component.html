@@ -15,24 +15,22 @@
                       <a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid]"
                         matTooltip="CF API URL: {{ getFullEndpointApiUrl(appSvc.cf) }}">{{ appSvc.cf?.name}}</a>
                     </app-metadata-item>
-                    <app-metadata-item label="Cloud Foundry">
-                      <a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid]"
-                        matTooltip="CF API URL: {{ getFullEndpointApiUrl(appSvc.cf) }}">{{ appSvc.cf?.name}}</a>
-                    </app-metadata-item>
-                  </app-tile>
-                  <app-tile class="app-metadata__two-cols">
                     <app-metadata-item label="SSH Access">
                       {{ sshStatus$ | async }}
                     </app-metadata-item>
+                  </app-tile>
+
+                  <app-tile class="app-metadata__two-cols">
                     <app-metadata-item label="Organization">
                       <a
                         [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
                     </app-metadata-item>
-                  </app-tile>
-                  <app-tile class="app-metadata__two-cols">
                     <app-metadata-item label="CLI Info" class="cli-link">
                       <a [routerLink]="['/applications/' + appSvc.cf?.guid + '/' + appSvc.app?.metadata.guid + '/cli']">View</a>
                     </app-metadata-item>
+                  </app-tile>
+
+                  <app-tile class="app-metadata__two-cols">
                     <app-metadata-item *ngIf="applicationService.appSpace$ | async as appSpace" label="Space">
                       <a
                         [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>

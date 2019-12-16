@@ -15,7 +15,7 @@ describe('CloudFoundrySpaceBaseComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundrySpaceBaseComponent],
       imports: generateCfBaseTestModules(),
-      providers: [generateTestCfEndpointServiceProvider(), TabNavService]
+      providers: [...generateTestCfEndpointServiceProvider(), TabNavService]
     })
       .compileComponents();
   }));

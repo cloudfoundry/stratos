@@ -18,7 +18,7 @@ describe('EditSpaceStepComponent', () => {
       imports: generateCfBaseTestModules(),
       providers: [
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
-        generateTestCfEndpointServiceProvider(),
+        ...generateTestCfEndpointServiceProvider(),
       ]
     })
       .compileComponents();

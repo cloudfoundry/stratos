@@ -14,9 +14,8 @@ import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   generateCfBaseTestModulesNoShared,
+  generateTestCfEndpointServiceProvider,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ActiveRouteCfOrgSpace } from '../../../../features/cloud-foundry/cf-page.types';
-import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { CfUserService } from '../../../data-services/cf-user.service';
 import { CardCfRecentAppsComponent } from './card-cf-recent-apps.component';
 import { CompactAppCardComponent } from './compact-app-card/compact-app-card.component';
@@ -36,8 +35,7 @@ describe('CardCfRecentAppsComponent', () => {
       ],
       imports: generateCfBaseTestModulesNoShared(),
       providers: [
-        CloudFoundryEndpointService,
-        ActiveRouteCfOrgSpace,
+        ...generateTestCfEndpointServiceProvider(),
         EntityMonitorFactory,
         CfUserService,
         PaginationMonitorFactory
