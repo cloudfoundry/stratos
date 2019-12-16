@@ -1,6 +1,4 @@
-<table>
-  <tr *ngFor="let metadata of (row.entity.metadata) | values">
-    <td>{{metadata.key}}</td>
-    <td>{{metadata.value | json}}</td>
-  </tr>
-</table>
+<div class="details" *ngFor="let metadata of (row.entity.metadata) | values">
+  <div class="details__key">{{metadata.key}}: </div>
+  <div>{{metadata.value | json}}</div>
+</div>
