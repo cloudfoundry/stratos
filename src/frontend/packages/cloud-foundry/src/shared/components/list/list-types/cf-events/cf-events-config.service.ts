@@ -90,12 +90,13 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     ).subscribe(currentFilters => {
       const action = this.eventSource.action as PaginatedAction;
 
-      const addQs: string[] = [];
+
+      const addQs: { [key: string]: string } = {};
       const removeQs: string[] = [];
 
       if (values.type !== currentFilters.type) {
         if (!!values.type && !!values.type.length) {
-          addQs.push(new QParam('type', values.type, QParamJoiners.in).toString());
+          addQs.type = new QParam('type', values.type, QParamJoiners.in).toString();
         } else {
           removeQs.push('type');
         }
@@ -105,14 +106,25 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
         valueOrCommonFalsy(currentFilters.actee)) {
 
         if (!!values.actee && !!values.actee.length) {
-          addQs.push(new QParam('actee', values.actee, QParamJoiners.in).toString());
+          addQs.actee = new QParam('actee', values.actee, QParamJoiners.in).toString();
         } else {
           removeQs.push('actee');
         }
       }
 
-      if (!!addQs.length) {
-        this.store.dispatch(new AddParams(action, this.eventSource.paginationKey, { q: addQs }));
+      if (!!Object.keys(addQs).length) {
+        const existingQ: { [key: string]: string } = {} = {};
+        if (currentFilters.type && currentFilters.type.length) {
+          existingQ.type = new QParam('type', currentFilters.type, QParamJoiners.in).toString();
+        }
+        if (currentFilters.actee) {
+          existingQ.actee = new QParam('actee', currentFilters.actee, QParamJoiners.in).toString();
+        }
+        const newQ = {
+          ...existingQ,
+          ...addQs
+        };
+        this.store.dispatch(new AddParams(action, this.eventSource.paginationKey, { q: Object.values(newQ) }));
       }
       if (!!removeQs.length) {
         this.store.dispatch(new RemoveParams(action, action.paginationKey, [], removeQs));
