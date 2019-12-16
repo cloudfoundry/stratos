@@ -54,6 +54,11 @@
               </mat-form-field>
             </ng-container>
           </div>
+          <!-- Injected filters -->
+          <div *ngIf="customFilters">
+            <ng-container *ngTemplateOutlet="customFilters">
+            </ng-container>
+          </div>
         </div>
         <div class="list-component__header__right">
           <div class="filter" *ngIf="entitySelectConfig">

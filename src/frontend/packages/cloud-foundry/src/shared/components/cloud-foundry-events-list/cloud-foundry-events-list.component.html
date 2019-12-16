@@ -1,0 +1,15 @@
+<ng-template #customFilters>
+  <form [formGroup]="filtersFormGroup" class="">
+    <mat-form-field [floatLabel]="'never'">
+      <!-- <mat-label>Event Type</mat-label> -->
+      <mat-select multiple name="type" formControlName="type" placeholder="Type">
+        <mat-option *ngFor="let pType of typeValues" [value]="pType">{{pType}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field *ngIf="showActee">
+      <input type="text" matInput name="actee" formControlName="actee" placeholder="Actee's Guid">
+    </mat-form-field>
+  </form>
+</ng-template>
+
+<app-list [customFilters]="customFilters"></app-list>

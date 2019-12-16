@@ -42,6 +42,7 @@ import { CfOrgSpaceLinksComponent } from './cf-org-space-links/cf-org-space-link
 import { CfRoleCheckboxComponent } from './cf-role-checkbox/cf-role-checkbox.component';
 import { CliCommandComponent } from './cli-info/cli-command/cli-command.component';
 import { CliInfoComponent } from './cli-info/cli-info.component';
+import { CloudFoundryEventsListComponent } from './cloud-foundry-events-list/cloud-foundry-events-list.component';
 import {
   CreateApplicationStep1Component,
 } from './create-application/create-application-step1/create-application-step1.component';
@@ -242,7 +243,8 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellEventDetailComponent,
     TableCellUsageComponent,
     TableCellQuotaComponent,
-    TableCellEventActeeComponent
+    TableCellEventActeeComponent,
+    CloudFoundryEventsListComponent
   ],
   exports: [
     ServiceIconComponent,
@@ -279,7 +281,8 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     RunningInstancesComponent,
     ServicePlanPublicComponent,
     ServicePlanPriceComponent,
-    CreateApplicationStep1Component
+    CreateApplicationStep1Component,
+    CloudFoundryEventsListComponent
   ],
   entryComponents: [
     CfEndpointDetailsComponent,

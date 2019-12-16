@@ -55,10 +55,10 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     cfGuid?: string,
     orgGuid?: string,
     spaceGuid?: string,
-    appGuid?: string,
+    public acteeGuid?: string,
   ) {
     super();
-    if (appGuid) {
+    if (acteeGuid) {
       this.columns = this.columns.filter(column => column.columnId !== CfEventsConfigService.acteeColumnId);
     }
 
@@ -68,7 +68,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
       this,
       orgGuid,
       spaceGuid,
-      appGuid,
+      acteeGuid,
     );
   }
 
