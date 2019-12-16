@@ -80,12 +80,12 @@
             value="{{ cfOrgService.serviceInstancesCount$ | async }}"
             limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
         </app-tile>
-        <app-tile [hidden]="!cfEndpointService.appsPagObs.hasEntities$ | async">
+        <app-tile *ngIf="!cfEndpointService.appsPagObs.hasEntities$ | async">
           <app-card-number-metric icon="memory" label="Memory Usage" units="mb"
             value="{{ cfOrgService.totalMem$ | async }}"
             limit="{{ (cfOrgService.quotaDefinition$ | async)?.memory_limit }}"></app-card-number-metric>
         </app-tile>
-        <app-tile [hidden]="!(cfOrgService.userProvidedServiceInstancesCount$ | async) > 0">
+        <app-tile *ngIf="(cfOrgService.userProvidedServiceInstancesCount$ | async) > 0">
           <app-card-number-metric iconFont="stratos-icons" icon="service" label="User Service Instances"
             value="{{ cfOrgService.userProvidedServiceInstancesCount$ | async }}"></app-card-number-metric>
         </app-tile>
