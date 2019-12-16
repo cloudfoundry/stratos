@@ -80,7 +80,7 @@ export class CfEventsDataSource extends ListDataSource<APIResource> {
     } else if (spaceGuid) {
       return `${cfGuid}:space:${spaceGuid}`;
     } else if (orgGuid) {
-      return `${cfGuid}:app:${orgGuid}`;
+      return `${cfGuid}:org:${orgGuid}`;
     }
     return null;
   }

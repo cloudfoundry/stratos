@@ -1,5 +1,10 @@
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 
+import {
+  valueOrCommonFalsy,
+} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   IListConfig,
@@ -79,30 +84,57 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
   getDataSource = () => this.eventSource;
   getMultiFiltersConfigs = () => [];
 
-  setFilters(values: { actee: string, type: string[] }) {
-    const action = this.eventSource.action as PaginatedAction;
-    // q=filter IN a,b,c
+  setEventFilters(values: { actee: string, type: string[] }) {
+    this.getEventFilters().pipe(
+      first()
+    ).subscribe(currentFilters => {
+      const action = this.eventSource.action as PaginatedAction;
 
-    const addQs: string[] = [];
-    const removeQs: string[] = [];
+      const addQs: string[] = [];
+      const removeQs: string[] = [];
 
-    if (!!values.type && !!values.type.length) {
-      addQs.push(new QParam('type', values.type, QParamJoiners.in).toString());
-    } else {
-      removeQs.push('type');
-    }
+      if (values.type !== currentFilters.type) {
+        if (!!values.type && !!values.type.length) {
+          addQs.push(new QParam('type', values.type, QParamJoiners.in).toString());
+        } else {
+          removeQs.push('type');
+        }
+      }
 
-    if (!!values.actee && !!values.actee.length) {
-      addQs.push(new QParam('actee', values.actee, QParamJoiners.in).toString());
-    } else {
-      removeQs.push('actee');
-    }
+      if (valueOrCommonFalsy(values.actee) !==
+        valueOrCommonFalsy(currentFilters.actee)) {
 
-    if (!!addQs.length) {
-      this.store.dispatch(new AddParams(action, this.eventSource.paginationKey, { q: addQs }));
-    }
-    if (!!removeQs.length) {
-      this.store.dispatch(new RemoveParams(action, action.paginationKey, [], removeQs));
-    }
+        if (!!values.actee && !!values.actee.length) {
+          addQs.push(new QParam('actee', values.actee, QParamJoiners.in).toString());
+        } else {
+          removeQs.push('actee');
+        }
+      }
+
+      if (!!addQs.length) {
+        this.store.dispatch(new AddParams(action, this.eventSource.paginationKey, { q: addQs }));
+      }
+      if (!!removeQs.length) {
+        this.store.dispatch(new RemoveParams(action, action.paginationKey, [], removeQs));
+      }
+    });
+  }
+
+  getEventFilters(): Observable<{
+    type: string[],
+    actee: string
+  }> {
+    return this.getDataSource().pagination$.pipe(
+      first(),
+      map(pag => QParam.fromStrings(pag.params.q as string[])),
+      map(qParams => {
+        const qType = qParams.find(qParam => qParam.key === 'type');
+        const qActee = qParams.find(qParam => qParam.key === 'actee');
+        return {
+          type: qType ? (qType.value as string).split(',') : [],
+          actee: qActee ? qActee.value as string : undefined
+        };
+      })
+    );
   }
 }

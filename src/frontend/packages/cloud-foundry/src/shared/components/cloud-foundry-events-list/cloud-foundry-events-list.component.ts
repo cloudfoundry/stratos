@@ -1,6 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
@@ -14,14 +15,11 @@ import { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-co
 })
 export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
 
-  // TODO: RC Privilideges. non-admins can use/see?
-  // TODO: RC Disable when list is busy
-  // TODO: RC Apply existing values
-  // TODO: RC Add space level and for other entities? (services, whatever an actee is?)
-  // TODO: RC add org/space filter to top level
-  // TODO: RC test lists at differnet levels (stored as different sources)
-  // TODO: RC Wrap list in component that comes with type/actee selector, apply to 4 places where used
+  // TODO: RC Add for other entities? (services, whatever an actee is?)
 
+  /**
+   * Values in the `event` filter mist contain this value, for instance `audit.app`
+   */
   @Input() typeMustContain: string;
 
   filtersFormGroup: FormGroup;
@@ -114,23 +112,32 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   private config: CfEventsConfigService;
 
   constructor(
-    listConfig: ListConfig<APIResource>
+    listConfig: ListConfig<APIResource>,
   ) {
     this.filtersFormGroup = new FormGroup({
       actee: new FormControl(null, []),
       type: new FormControl(null, []),
-      // host: new FormControl({ disabled: true }, [Validators.required, Validators.maxLength(63)]),
     });
     this.config = (listConfig as CfEventsConfigService);
 
+    // Set initial filter values
+    this.subs.push(
+      this.config.getEventFilters().pipe(
+        first()
+      ).subscribe(params => {
+        this.filtersFormGroup.controls.actee.setValue(params.actee);
+        this.filtersFormGroup.controls.type.setValue(params.type);
+      })
+    );
+
+    // Set new filter values
     this.subs.push(
       this.filtersFormGroup.valueChanges.subscribe(values => {
-        this.config.setFilters(values);
+        this.config.setEventFilters(values);
       })
     );
 
     this.showActee = !this.config.acteeGuid;
-
   }
 
   ngOnInit() {

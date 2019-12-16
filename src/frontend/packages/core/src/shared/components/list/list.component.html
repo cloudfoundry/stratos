@@ -36,6 +36,11 @@
             *ngIf="!(multiActions && multiActions.length) && (dataSource.isSelecting$ | async)">
             {{dataSource.selectedRows.size}} Selected
           </div>
+          <!-- Injected filters -->
+          <div *ngIf="customFilters">
+            <ng-container *ngTemplateOutlet="customFilters">
+            </ng-container>
+          </div>
           <!-- Multi filters, such as filter app wall by cf/org/space -->
           <div class="list-component__header__left--multi-filters"
             [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
@@ -52,11 +57,6 @@
                 </mat-select>
                 <mat-placeholder>{{multiFilterManager.multiFilterConfig.label}}</mat-placeholder>
               </mat-form-field>
-            </ng-container>
-          </div>
-          <!-- Injected filters -->
-          <div *ngIf="customFilters">
-            <ng-container *ngTemplateOutlet="customFilters">
             </ng-container>
           </div>
         </div>
