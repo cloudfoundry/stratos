@@ -18,7 +18,6 @@ export class CopyToClipboardComponent implements OnInit {
   @Input() showSuccessText = true;
   @Input() text: string;
 
-  // TODO: RC change to clipboard
   constructor(
     @Inject(DOCUMENT) document: Document,
     private logService: LoggerService

@@ -5,5 +5,9 @@
   &__icons {
     display: flex;
     margin-bottom: 5px;
+
+    > mat-icon {
+      margin-right: 28px;
+    }
   }
 }

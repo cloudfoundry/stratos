@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { debounceTime, first } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
@@ -14,8 +14,6 @@ import { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-co
   styleUrls: ['./cloud-foundry-events-list.component.scss']
 })
 export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
-
-  // TODO: RC Add for other entities? (services, whatever an actee is?)
 
   /**
    * Values in the `event` filter mist contain this value, for instance `audit.app`
@@ -132,11 +130,14 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
 
     // Set new filter values
     this.subs.push(
-      this.filtersFormGroup.valueChanges.subscribe(values => {
+      this.filtersFormGroup.valueChanges.pipe(
+        debounceTime(250)
+      ).subscribe(values => {
         this.config.setEventFilters(values);
       })
     );
 
+    // If we have an actee there's no need to show the actee guid selector
     this.showActee = !this.config.acteeGuid;
   }
 
