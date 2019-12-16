@@ -1,0 +1,38 @@
+.copy {
+  display: flex;
+  position: relative;
+  &__copied-div,
+  &__copy-icon {
+    // position: absolute;
+    // right: 10px;
+    // top: 6px;
+    // TODO: RC fix
+    transition: visibility 0s, opacity 250ms linear;
+  }
+  &__copied-div {
+    align-items: center;
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    span {
+      margin-right: 5px;
+    }
+  }
+  &__copy-icon {
+    cursor: pointer;
+  }
+  &__success {
+    .copy {
+      &__copied-div {
+        display: flex;
+        opacity: 1;
+        visibility: visible;
+      }
+      &__copy-icon {
+        display: none;
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+  }
+}

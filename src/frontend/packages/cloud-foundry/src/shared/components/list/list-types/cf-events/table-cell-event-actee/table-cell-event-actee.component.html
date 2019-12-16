@@ -1,10 +1,12 @@
-<div>
-  <mat-icon [matTooltip]="row.entity.actee_type" [fontSet]="icon[row.entity.actee_type]?.iconFont">
-    {{icon[row.entity.actee_type]?.icon}}</mat-icon>
-  <span *ngIf="row.entity.actee_name">
+<div class="event-actee">
+  <div class="event-actee__icons">
+    <mat-icon [matTooltip]="row.entity.actee_type" [fontSet]="icon[row.entity.actee_type]?.iconFont">
+      {{icon[row.entity.actee_type]?.icon}}</mat-icon>
+    <app-copy-to-clipboard class="app-code-block__copy" [text]="row.entity.actee" [tooltip]="'Copy GUID to clipboard'"
+      [showSuccessText]="false">
+    </app-copy-to-clipboard>
+  </div>
+  <div *ngIf="row.entity.actee_name" class="event-actee__name">
     {{row.entity.actee_name}}
-  </span>
-  <span>
-    {{row.entity.actee}}
-  </span>
+  </div>
 </div>

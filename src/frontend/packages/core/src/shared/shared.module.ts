@@ -28,6 +28,7 @@ import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
+import { CopyToClipboardComponent } from './components/copy-to-clipboard/copy-to-clipboard.component';
 import { DateTimeComponent } from './components/date-time/date-time.component';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
@@ -218,6 +219,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     UnlimitedInputComponent,
     SimpleListComponent,
     ListHostDirective,
+    CopyToClipboardComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -306,7 +308,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     SimpleListComponent,
-    ListHostDirective
+    ListHostDirective,
+    CopyToClipboardComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

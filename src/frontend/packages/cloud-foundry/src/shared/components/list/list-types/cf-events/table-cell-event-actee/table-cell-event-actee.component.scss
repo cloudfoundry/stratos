@@ -1,13 +1,9 @@
-div {
+.event-actee {
   display: flex;
   flex-direction: column;
 
-  mat-icon,
-  span {
+  &__icons {
+    display: flex;
     margin-bottom: 5px;
-  }
-
-  mat-icon  {
-    margin-right: 5px;
   }
 }
