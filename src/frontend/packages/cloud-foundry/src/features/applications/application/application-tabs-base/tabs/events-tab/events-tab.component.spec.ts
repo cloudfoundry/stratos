@@ -18,11 +18,12 @@ import { WrapperRequestActionSuccess } from '../../../../../../../../store/src/t
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { cfEventEntityType } from '../../../../../../cf-entity-types';
+import {
+  CloudFoundryEventsListComponent,
+} from '../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { EventsTabComponent } from './events-tab.component';
-
-
 
 describe('EventsTabComponent', () => {
   class ApplicationServiceMock {
@@ -35,11 +36,14 @@ describe('EventsTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [EventsTabComponent],
+      declarations: [
+        EventsTabComponent,
+        CloudFoundryEventsListComponent
+      ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
-        ApplicationEnvVarsHelper,
+        ApplicationEnvVarsHelper
       ],
       imports: [
         ...generateCfStoreModules(),

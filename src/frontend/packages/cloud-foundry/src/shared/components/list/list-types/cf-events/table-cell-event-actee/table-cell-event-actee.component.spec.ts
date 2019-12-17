@@ -1,5 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import {
+  CopyToClipboardComponent,
+} from '../../../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
+import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/core-test.helper';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { TableCellEventActeeComponent } from './table-cell-event-actee.component';
 
 describe('TableCellEventActeeComponent', () => {
@@ -8,14 +13,21 @@ describe('TableCellEventActeeComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellEventActeeComponent ]
+      declarations: [
+        TableCellEventActeeComponent,
+        CopyToClipboardComponent
+      ],
+      imports: [
+        ...BaseTestModulesNoShared
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellEventActeeComponent);
     component = fixture.componentInstance;
+    component.row = { entity: {} } as APIResource;
     fixture.detectChanges();
   });
 

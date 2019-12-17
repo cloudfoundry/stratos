@@ -16,16 +16,16 @@ export class CodeBlockComponent implements AfterViewInit, OnDestroy {
   @ViewChild('preBlock', { static: true }) code: ElementRef;
 
   ngAfterViewInit() {
+    this.text = this.code.nativeElement.innerText.trim();
+
     this.observer = new MutationObserver(() => {
       this.text = this.code.nativeElement.innerText.trim();
-
     });
     const config: MutationObserverInit = {
       characterData: true,
       childList: true,
       subtree: true,
     };
-
     this.observer.observe(this.code.nativeElement, config);
   }
 
