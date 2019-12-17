@@ -11,7 +11,10 @@ import { SaveAppOverrides } from '../../../../../../cloud-foundry/src/actions/de
 import { GetAllOrganizationDomains } from '../../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { stackEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { selectCfDetails } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
+import {
+  selectCfDetails,
+  selectDeployAppState,
+} from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { OverrideAppDetails } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
@@ -22,6 +25,7 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 @Component({
   selector: 'app-deploy-application-options-step',
@@ -74,6 +78,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       time: [null, [
         Validators.min(0)
       ]],
+      dockerImage: null,
+      dockerUsername: null
     });
     this.valid$ = this.deployOptionsForm.valueChanges.pipe(
       map(() => this.deployOptionsForm.valid),
@@ -94,6 +100,36 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   ngOnInit() {
+    this.subs.push(this.store.select(selectDeployAppState).pipe(
+      filter(deployAppState =>
+        !!deployAppState &&
+        !!deployAppState.applicationSource &&
+        !!deployAppState.applicationSource.dockerDetails &&
+        !!deployAppState.applicationSource.dockerDetails.applicationName),
+    ).subscribe(deployAppState => {
+      const sourceType = deployAppState.applicationSource.type;
+      if (sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
+        this.deployOptionsForm.controls.name.setValue(deployAppState.applicationSource.dockerDetails.applicationName);
+        this.deployOptionsForm.controls.name.disable();
+        this.deployOptionsForm.controls.dockerImage.setValue(deployAppState.applicationSource.dockerDetails.dockerImage);
+        this.deployOptionsForm.controls.dockerImage.disable();
+        this.deployOptionsForm.controls.dockerUsername.setValue(deployAppState.applicationSource.dockerDetails.dockerUsername);
+        this.deployOptionsForm.controls.dockerUsername.disable();
+
+        // // TODO: RC Here or there?
+        // this.deployOptionsForm.controls.name.setValidators([Validators.required]);
+        // this.deployOptionsForm.controls.name.markAsTouched();
+        // this.deployOptionsForm.controls.name.markAsDirty();
+        // this.deployOptionsForm.updateValueAndValidity();
+      } else {
+        this.deployOptionsForm.controls.name.enable(); // TODO: RC Test
+        this.deployOptionsForm.controls.dockerImage.enable(); // TODO: RC Test
+        this.deployOptionsForm.controls.dockerUsername.enable(); // TODO: RC Test
+        // this.deployOptionsForm.controls.name.setValidators([]);
+        // this.deployOptionsForm.controls.name.markAsPristine();// TODO: RC Test
+      }
+    }));
+
     const noRouteChanged$ = this.deployOptionsForm.controls.no_route.valueChanges.pipe(startWith(false));
     const randomRouteChanged$ = this.deployOptionsForm.controls.random_route.valueChanges.pipe(startWith(false));
 
@@ -172,7 +208,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     if (this.appGuid) {
       combineLatest(this.domains$, cfDetails$).pipe(
-        switchMap(([domains, cfDetails]) => this.appEnvVarsService.createEnvVarsObs(this.appGuid, cfDetails.cloudFoundry).entities$),
+        switchMap(([, cfDetails]) => this.appEnvVarsService.createEnvVarsObs(this.appGuid, cfDetails.cloudFoundry).entities$),
         map(applicationEnvVars => this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity)),
         first()
       ).subscribe(envVars => this.objToForm(envVars.deployOverrides));
@@ -187,6 +223,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   formToObj(controls: {
     [key: string]: AbstractControl;
   }): OverrideAppDetails {
+    // TODO: RC redeploy ?
+    // TODO: RC add docker overrides here or backend?
     return {
       name: controls.name.value,
       buildpack: controls.buildpack.value,
@@ -202,7 +240,9 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       startCmd: controls.startCmd.value,
       healthCheckType: controls.healthCheckType.value,
       stack: controls.stack.value,
-      time: controls.time.value
+      time: controls.time.value,
+      dockerImage: controls.dockerImage.value,
+      dockerUsername: controls.dockerUsername.value
     };
   }
 
@@ -225,6 +265,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     controls.healthCheckType.setValue(overrides.healthCheckType);
     controls.stack.setValue(overrides.stack);
     controls.time.setValue(overrides.time);
+    controls.dockerImage.setValue(overrides.dockerImage);
+    controls.dockerUsername.setValue(overrides.dockerUsername);
   }
 
   onEnter = (opts: any) => {

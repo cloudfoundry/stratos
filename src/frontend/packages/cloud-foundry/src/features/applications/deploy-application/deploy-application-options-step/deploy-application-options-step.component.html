@@ -20,7 +20,8 @@
         <mat-hint>Custom buildpack by name or Git URL</mat-hint>
       </mat-form-field>
       <mat-form-field>
-        <input matInput name="instanceCount" placeholder="Number of Instances" formControlName="instances" type="number">
+        <input matInput name="instanceCount" placeholder="Number of Instances" formControlName="instances"
+          type="number">
       </mat-form-field>
       <mat-form-field>
         <input matInput name="diskQuota" placeholder="Disk Quota" formControlName="disk_quota" type="number">
@@ -42,8 +43,16 @@
         </mat-select>
       </mat-form-field>
       <mat-form-field>
-        <input matInput name="healthCheckTimeout" placeholder="Health Check Timeout" formControlName="time" type="number">
+        <input matInput name="healthCheckTimeout" placeholder="Health Check Timeout" formControlName="time"
+          type="number">
         <span matSuffix>seconds</span>
+      </mat-form-field>
+      <!-- // TODO: RC new column? -->
+      <mat-form-field>
+        <input matInput placeholder="Docker Image" formControlName="dockerImage">
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput placeholder="Docker Username" formControlName="dockerUsername">
       </mat-form-field>
     </div>
     <div class="deploy-options__form-sections__form-section">

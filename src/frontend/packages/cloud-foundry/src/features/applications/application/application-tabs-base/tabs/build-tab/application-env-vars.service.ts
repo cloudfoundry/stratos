@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
-import { GetAppEnvVarsAction } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
@@ -29,6 +28,8 @@ export interface EnvVarStratosProjectSource {
   branch?: string;
   url?: string;
   commit?: string;
+  dockerImage?: string;
+  dockerUsername?: string; // TODO: RC push into flow when redeploy
 }
 
 @Injectable()
