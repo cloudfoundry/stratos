@@ -16,7 +16,7 @@ export class CopyToClipboardComponent implements OnInit {
 
   @Input() tooltip: string;
   @Input() showSuccessText = true;
-  @Input() text: string;
+  @Input() text = '';
 
   constructor(
     @Inject(DOCUMENT) document: Document,

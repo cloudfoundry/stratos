@@ -1,28 +1,29 @@
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-code-block',
   templateUrl: './code-block.component.html',
   styleUrls: ['./code-block.component.scss']
 })
-export class CodeBlockComponent implements AfterViewInit, OnDestroy {
-
+export class CodeBlockComponent implements OnInit, OnDestroy {
 
   @Input() hideCopy: boolean;
   @Input() codeBlockStyle: string;
-  text: string;
+  text = '';
   private observer: MutationObserver;
 
   @ViewChild('preBlock', { static: true }) code: ElementRef;
 
-  ngAfterViewInit() {
-    this.text = this.code.nativeElement.innerText.trim();
-
+  ngOnInit(): void {
     this.observer = new MutationObserver(() => {
       this.text = this.code.nativeElement.innerText.trim();
     });
     const config: MutationObserverInit = {
+      // attributeFilter: string[];
+      attributeOldValue: true,
+      attributes: true,
       characterData: true,
+      characterDataOldValue: true,
       childList: true,
       subtree: true,
     };
