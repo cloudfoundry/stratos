@@ -54,8 +54,6 @@ export class UserInviteConfigurationDialogComponent {
       clientSecret: ['', Validators.required],
     });
 
-    console.log('cfEndpointService dialog', this.cfEndpointService);
-    console.log('userInviteService dialog', this.userInviteService);
     this.userInviteService.initialize(this.data.guid);
   }
 
