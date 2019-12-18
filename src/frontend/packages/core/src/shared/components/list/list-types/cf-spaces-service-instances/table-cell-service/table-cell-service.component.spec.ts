@@ -1,6 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModulesNoShared } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  LongRunningCfOperationsService,
+} from '../../../../../../../../cloud-foundry/src/shared/data-services/long-running-cf-op.service';
+import {
+  generateCfBaseTestModulesNoShared,
+} from '../../../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
@@ -17,8 +22,8 @@ describe('TableCellServiceComponent', () => {
         ServiceInstanceLastOpComponent,
         BooleanIndicatorComponent
       ],
-      imports: [...BaseTestModulesNoShared],
-      providers: [EntityMonitorFactory]
+      imports: [...generateCfBaseTestModulesNoShared()],
+      providers: [EntityMonitorFactory, LongRunningCfOperationsService]
     })
       .compileComponents();
   }));

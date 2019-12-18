@@ -1,5 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { CoreModule } from '../../../../../../../../core/src/core/core.module';
+import {
+  BooleanIndicatorComponent,
+} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { TableCellServiceActiveComponent } from './table-cell-service-active.component';
 
 describe('TableCellServiceActiveComponent', () => {
@@ -8,9 +12,10 @@ describe('TableCellServiceActiveComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellServiceActiveComponent ]
+      declarations: [TableCellServiceActiveComponent, BooleanIndicatorComponent],
+      imports: [CoreModule]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
