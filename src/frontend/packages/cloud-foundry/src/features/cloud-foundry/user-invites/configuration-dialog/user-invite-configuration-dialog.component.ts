@@ -6,13 +6,14 @@ import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { UserInviteService } from '../user-invite.service';
 
 
 @Component({
   selector: 'app-user-invite-configuration-dialog',
   templateUrl: './user-invite-configuration-dialog.component.html',
-  styleUrls: ['./user-invite-configuration-dialog.component.scss']
+  styleUrls: ['./user-invite-configuration-dialog.component.scss'],
 })
 export class UserInviteConfigurationDialogComponent {
   connecting$: Observable<boolean>;
@@ -42,6 +43,7 @@ export class UserInviteConfigurationDialogComponent {
     public fb: FormBuilder,
     public dialogRef: MatDialogRef<UserInviteConfigurationDialogComponent>,
     public snackBar: MatSnackBar,
+    private cfEndpointService: CloudFoundryEndpointService,
     public userInviteService: UserInviteService,
     @Inject(MAT_DIALOG_DATA) public data: {
       guid: string
@@ -51,6 +53,10 @@ export class UserInviteConfigurationDialogComponent {
       clientID: ['', Validators.required],
       clientSecret: ['', Validators.required],
     });
+
+    console.log('cfEndpointService dialog', this.cfEndpointService);
+    console.log('userInviteService dialog', this.userInviteService);
+    this.userInviteService.initialize(this.data.guid);
   }
 
   submit() {

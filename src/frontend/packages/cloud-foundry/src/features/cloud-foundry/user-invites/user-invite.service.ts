@@ -64,12 +64,21 @@ export class UserInviteService {
     private store: Store<CFAppState>,
     private http: HttpClient,
     private snackBar: MatSnackBar,
-    cfEndpointService: CloudFoundryEndpointService,
+    private cfEndpointService: CloudFoundryEndpointService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private confirmDialog: ConfirmationDialogService,
   ) {
-    this.configured$ = cfEndpointService.endpoint$.pipe(
+    const { cfGuid } = activeRouteCfOrgSpace;
+
+    if (cfGuid) {
+      this.initialize(cfGuid);
+    }
+  }
+
+  initialize(cfGuid) {
+    this.cfEndpointService.initialize(cfGuid);
+    this.configured$ = this.cfEndpointService.endpoint$.pipe(
       filter(v => !!v && !!v.entity),
       // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing
       map(v => v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
@@ -85,11 +94,11 @@ export class UserInviteService {
     );
   }
 
-  configure(cfGUID: string, clientID: string, clientSecret: string): Observable<UserInviteBaseResponse> {
+  configure(cfGuid: string, clientID: string, clientSecret: string): Observable<UserInviteBaseResponse> {
     const formData: FormData = new FormData();
     formData.append('client_id', clientID);
     formData.append('client_secret', clientSecret);
-    const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
+    const url = `/pp/${proxyAPIVersion}/invite/${cfGuid}`;
     const obs$ = this.http.post(url, formData).pipe(
       map(v => {
         this.store.dispatch(new GetSystemInfo());
