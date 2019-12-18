@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
@@ -10,12 +10,12 @@ import {
   IListMultiFilterConfig,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { CfOrgSpaceLabelService } from '../../../../../../../core/src/shared/services/cf-org-space-label.service';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { endpointsRegisteredEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { haveMultiConnectedCfs } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfOrgSpaceItem, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CfServiceCardComponent } from './cf-service-card/cf-service-card.component';
 import { CfServicesDataSource } from './cf-services-data-source';
@@ -52,13 +52,14 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     this.multiFilterConfigs = [
       createCfOrgSpaceFilterConfig('cf', 'Cloud Foundry', this.cf),
     ];
-    const cfOrgSpace = new CfOrgSpaceLabelService(this.store, activeRouteCfOrgSpace.cfGuid);
-    this.init$ = cfOrgSpace.multipleConnectedEndpoints$.pipe(
+
+    this.init$ = haveMultiConnectedCfs(this.store).pipe(
       first(),
-      tap(multipleConnectedEndpoints => {
+      map(multipleConnectedEndpoints => {
         if (!multipleConnectedEndpoints) {
           this.columns.filter(column => column.columnId !== CfServicesListConfigService.cfColumnId);
         }
+        return true;
       })
     );
   }
@@ -154,7 +155,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     cellComponent: TableCellServiceTagsComponent,
     cellFlex: '2'
   }];
-  private init$: Observable<any>;
+  private init$: Observable<boolean>;
 
   getColumns = () => this.columns;
   getGlobalActions = () => [];
