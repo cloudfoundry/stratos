@@ -3,7 +3,7 @@ import { createEntityRelationPaginationKey } from '../../../cloud-foundry/src/en
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
-import { AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.types';
+import { AppAutoscalerPolicyLocal, AppScalingTrigger, AppAutoscalerCredential } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricEntityType,
   appAutoscalerHealthEntityType,
@@ -11,6 +11,7 @@ import {
   appAutoscalerPolicyEntityType,
   appAutoscalerPolicyTriggerEntityType,
   appAutoscalerScalingHistoryEntityType,
+  appAutoscalerCredentialEntityType,
   AUTOSCALER_ENDPOINT_TYPE,
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
@@ -45,6 +46,8 @@ export const APP_AUTOSCALER_POLICY_TRIGGER = '[New App Autoscaler] Fetch policy 
 export const CREATE_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Create policy';
 export const UPDATE_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Update policy';
 export const DETACH_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Detach policy';
+export const UPDATE_APP_AUTOSCALER_CREDENTIAL = '[New App Autoscaler] Update credential';
+export const DELETE_APP_AUTOSCALER_CREDENTIAL = '[New App Autoscaler] Delete credential';
 export const APP_AUTOSCALER_HEALTH = '[New App Autoscaler] Fetch Health';
 export const APP_AUTOSCALER_SCALING_HISTORY = '[New App Autoscaler] Fetch Scaling History';
 export const FETCH_APP_AUTOSCALER_METRIC = '[New App Autoscaler] Fetch Metric';
@@ -234,4 +237,30 @@ export class GetAppAutoscalerAppMetricAction extends GetAppAutoscalerMetricActio
     this.url = `apps/${guid}/metric/${metricName}`;
   }
   entityType = appAutoscalerAppMetricEntityType;
+}
+
+export class UpdateAppAutoscalerCredentialAction implements EntityRequestAction {
+  static updateKey = 'Updating-Application-Credential';
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+    public credential?: AppAutoscalerCredential,
+  ) { }
+  type = UPDATE_APP_AUTOSCALER_CREDENTIAL;
+  entity = autoscalerEntityFactory(appAutoscalerCredentialEntityType);
+  entityType = appAutoscalerCredentialEntityType;
+  endpointType = AUTOSCALER_ENDPOINT_TYPE;
+}
+
+export class DeleteAppAutoscalerCredentialAction implements EntityRequestAction {
+  static updateKey = 'Deleting-Application-Credential';
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+  ) { }
+  type = DELETE_APP_AUTOSCALER_CREDENTIAL;
+  entity = autoscalerEntityFactory(appAutoscalerCredentialEntityType);
+  entityType = appAutoscalerCredentialEntityType;
+  endpointType = AUTOSCALER_ENDPOINT_TYPE;
+  requestType: ApiRequestTypes = 'delete';
 }

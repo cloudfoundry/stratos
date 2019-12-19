@@ -27,3 +27,14 @@
     font-size: 85%;
   }
 }
+
+.autoscaler-edit-select {
+  input {
+    background: white;
+    left: 0em;
+    position: absolute;
+    top: .5em;
+    width: 90%;
+    z-index: 200;
+  }
+}

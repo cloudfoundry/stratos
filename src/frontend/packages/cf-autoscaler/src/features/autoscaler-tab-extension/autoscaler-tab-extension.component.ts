@@ -38,6 +38,7 @@ import {
   AppAutoscalerPolicyLocal,
   AppAutoscalerScalingHistory,
   AppScalingTrigger,
+  AppAutoscaleMetricChart,
 } from '../../store/app-autoscaler.types';
 import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
 
@@ -73,7 +74,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicyLocal>;
   appAutoscalerPolicySafe$: Observable<AppAutoscalerPolicyLocal>;
   appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
-  appAutoscalerAppMetricNames$: Observable<string[]>;
+  appAutoscalerAppMetricNames$: Observable<AppAutoscaleMetricChart[]>;
 
   public showNoPolicyMessage$: Observable<boolean>;
   public showAutoscalerHistory$: Observable<boolean>;
@@ -146,7 +147,14 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.loadLatestMetricsUponPolicy();
 
     this.appAutoscalerAppMetricNames$ = this.appAutoscalerPolicySafe$.pipe(
-      map(entity => Object.keys(entity.scaling_rules_map)),
+      map(entity => Object.keys(entity.scaling_rules_map).map((name) => {
+        const unit = entity.scaling_rules_map[name].upper[0] && entity.scaling_rules_map[name].upper[0].unit
+          || entity.scaling_rules_map[name].lower[0] && entity.scaling_rules_map[name].lower[0].unit;
+        return {
+          name,
+          unit,
+        };
+      })),
     );
 
     this.scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
@@ -319,8 +327,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.store.dispatch(this.scalingHistoryAction);
   }
 
-  getMetricUnit(metricType: string) {
-    return AutoscalerConstants.getMetricUnit(metricType);
+  getMetricUnit(metricType: string, unit?: string) {
+    return AutoscalerConstants.getMetricUnit(metricType, unit);
+  }
+
+  manageCredentialPage = () => {
+    this.store.dispatch(new RouterNav({
+      path: [
+        'autoscaler',
+        this.applicationService.cfGuid,
+        this.applicationService.appGuid,
+        'edit-autoscaler-credential'
+      ]
+    }));
   }
 
 }

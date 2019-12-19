@@ -22,6 +22,7 @@ import {
   appAutoscalerPolicyEntityType,
   appAutoscalerPolicyTriggerEntityType,
   appAutoscalerScalingHistoryEntityType,
+  appAutoscalerCredentialEntityType,
   AUTOSCALER_ENDPOINT_TYPE,
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
@@ -44,7 +45,8 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
     generateHealthEntity(endpointDefinition),
     generateScalingEntity(endpointDefinition),
     generateAppMetricEntity(endpointDefinition),
-    generateMetricEntity(endpointDefinition)
+    generateMetricEntity(endpointDefinition),
+    generateCredentialEntity(endpointDefinition),
   ];
 }
 
@@ -55,6 +57,15 @@ function generatePolicyEntity(endpointDefinition: IStratosEndpointDefinition) {
     endpoint: endpointDefinition
   };
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerPolicy>>(definition);
+}
+
+function generateCredentialEntity(endpointDefinition: IStratosEndpointDefinition) {
+  const definition = {
+    type: appAutoscalerCredentialEntityType,
+    schema: autoscalerEntityFactory(appAutoscalerCredentialEntityType),
+    endpoint: endpointDefinition
+  };
+  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<AppAutoscalerPolicy>>(definition);
 }
 
 function generateInfoEntity(endpointDefinition: IStratosEndpointDefinition) {
