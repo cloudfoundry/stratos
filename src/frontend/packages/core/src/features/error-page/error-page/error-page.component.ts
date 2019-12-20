@@ -17,7 +17,7 @@ import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-e
 import { StratosStatus } from '../../../shared/shared.types';
 
 @Component({
-  selector: 'app-events-page',
+  selector: 'app-error-page',
   templateUrl: './error-page.component.html',
   styleUrls: ['./error-page.component.scss']
 })
