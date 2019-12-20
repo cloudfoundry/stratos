@@ -29,7 +29,7 @@ export interface EnvVarStratosProjectSource {
   url?: string;
   commit?: string;
   dockerImage?: string;
-  dockerUsername?: string; // TODO: RC push into flow when redeploy
+  dockerUsername?: string;
 }
 
 @Injectable()
