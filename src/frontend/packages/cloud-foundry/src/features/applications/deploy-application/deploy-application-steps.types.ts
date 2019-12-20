@@ -96,13 +96,3 @@ export class ApplicationDeploySourceTypes {
     return of(true);
   }
 }
-
-// export const getApplicationDeploySourceTypes = (): SourceType[] => [
-
-// ];
-
-// export const getAutoSelectedDeployType = (activatedRoute: ActivatedRoute) => {
-//   const typeId = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
-//   return getApplicationDeploySourceTypes().find(source => source.id === typeId);
-// };
-

@@ -200,7 +200,7 @@ export class CurrentUserPermissionsChecker {
         return combineLatest(guids.map(
           guid => {
             // For admins we don't have the ff list which is usually fetched right at the start,
-            // so this can't be a pagination monitor on its own (which doesn't fetch if listis missing)
+            // so this can't be a pagination monitor on its own (which doesn't fetch if list is missing)
             const action = createCfFeatureFlagFetchAction(guid);
             return getPaginationObservables<IFeatureFlag>(
               {
@@ -218,10 +218,7 @@ export class CurrentUserPermissionsChecker {
           }
         ));
       }),
-      map(endpointFeatureFlags => {
-        console.log('FF: ', endpointFeatureFlags);
-        return endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission));
-      }),
+      map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
       startWith(false),
       distinctUntilChanged()
     );

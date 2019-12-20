@@ -21,7 +21,7 @@ export class DockerImageValidateDirective implements Validator {
 
   @Input() appDockerImageValidate: string;
 
-  // TODO: RC consider scrapping, can include hostname before?
+  // TODO: RC consider scrapping, can include hostname before and other logic?
   // Must be of the form USER/NAME - where NAME must be at least 2 charts in length
   private isValidDockerImageName(name: string) {
     // const parts = name.split('/');

@@ -236,9 +236,7 @@ export class DeployApplicationDeployer {
     return JSON.stringify(msg);
   }
 
-  // appSource: DeployApplicationSource
   sendDockerImageMetadata = (appSource: DeployApplicationSource) => {
-    // All info is in the overrides
     const dockerInfo = {
       applicationName: appSource.dockerDetails.applicationName,
       dockerImage: appSource.dockerDetails.dockerImage,
@@ -259,9 +257,6 @@ export class DeployApplicationDeployer {
       case SocketEventTypes.MANIFEST:
         this.streamTitle = 'Starting deployment...';
         // This info is will be used to retrieve the app Id
-        // TODO: RC FIX
-        // TODO: RC empty STRATOS_PROJECT
-        console.log('MANIFEST: ', log.message);
         this.appData = JSON.parse(log.message).Applications[0];
         break;
       case SocketEventTypes.APP_GUID_NOTIFY:

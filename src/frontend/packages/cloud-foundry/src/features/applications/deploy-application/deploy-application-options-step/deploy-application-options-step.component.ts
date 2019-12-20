@@ -100,6 +100,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   ngOnInit() {
+    // Set previously supplied docker values and disable boxes
     this.subs.push(this.store.select(selectDeployAppState).pipe(
       filter(deployAppState =>
         !!deployAppState &&
@@ -115,18 +116,11 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
         this.deployOptionsForm.controls.dockerImage.disable();
         this.deployOptionsForm.controls.dockerUsername.setValue(deployAppState.applicationSource.dockerDetails.dockerUsername);
         this.deployOptionsForm.controls.dockerUsername.disable();
-
-        // // TODO: RC Here or there?
-        // this.deployOptionsForm.controls.name.setValidators([Validators.required]);
-        // this.deployOptionsForm.controls.name.markAsTouched();
-        // this.deployOptionsForm.controls.name.markAsDirty();
-        // this.deployOptionsForm.updateValueAndValidity();
       } else {
-        this.deployOptionsForm.controls.name.enable(); // TODO: RC Test
-        this.deployOptionsForm.controls.dockerImage.enable(); // TODO: RC Test
-        this.deployOptionsForm.controls.dockerUsername.enable(); // TODO: RC Test
-        // this.deployOptionsForm.controls.name.setValidators([]);
-        // this.deployOptionsForm.controls.name.markAsPristine();// TODO: RC Test
+        // TODO: RC test going back in stepper and changing source type
+        this.deployOptionsForm.controls.name.enable();
+        this.deployOptionsForm.controls.dockerImage.enable();
+        this.deployOptionsForm.controls.dockerUsername.enable();
       }
     }));
 
@@ -223,8 +217,6 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   formToObj(controls: {
     [key: string]: AbstractControl;
   }): OverrideAppDetails {
-    // TODO: RC redeploy ?
-    // TODO: RC add docker overrides here or backend?
     return {
       name: controls.name.value,
       buildpack: controls.buildpack.value,

@@ -65,9 +65,6 @@ export interface DockerAppDetails {
 }
 
 export interface GitAppDetails {
-  // projectName: string;
-  // branch: GitBranch;
-  // url?: string;
   projectName: string;
   branch: GitBranch;
   commit?: GitCommit;
@@ -92,7 +89,7 @@ export interface OverrideAppDetails {
   stack: string;
   time: number;
   dockerImage: string;
-  dockerUsername: string; // TODO: RC hide this, doesn't make sense in this format???
+  dockerUsername: string; // TODO: RC Needs some instructions, can only be used with a docker password env var. first docker src deploy would fail
 }
 
 export interface ProjectExists {

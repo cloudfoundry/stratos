@@ -210,6 +210,7 @@ export class DeployApplicationStep2Component
       cfGuid$,
       this.sourceType$
     ]).pipe(
+      filter(([cfGuid, sourceType]) => !!cfGuid && !!sourceType),
       switchMap(([cfGuid, sourceType]) => {
         return this.appDeploySourceTypes.canDeployType(cfGuid, sourceType.id);
       })
@@ -223,11 +224,6 @@ export class DeployApplicationStep2Component
       this.setupForGit();
     }
 
-    // TODO: RC redeploy
-    if (sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
-      this.setupForDocker();
-    }
-
     this.store.dispatch(new SetAppSourceDetails(sourceType));
   }
 
@@ -235,11 +231,6 @@ export class DeployApplicationStep2Component
     this.validate = this.sourceSelectionForm.statusChanges.pipe(map(() => {
       return this.sourceSelectionForm.valid || this.isRedeploy;
     }));
-  }
-
-  /* Docker ------------------*/
-  private setupForDocker() {
-    // TODO: RC Remove
   }
 
   /* Git ------------------*/
@@ -280,14 +271,12 @@ export class DeployApplicationStep2Component
         }),
         // Find the specific branch we're interested inS
         withLatestFrom(deployBranchName$),
-        tap((a) => console.log(1, a)),
         filter(([, branchName]) => !!branchName),
         tap(([branches, branchName]) => {
           this.repositoryBranch = branches.find(
             branch => branch.name === branchName
           );
         }),
-        tap((a) => console.log(2, a)),
         map(([p, q]) => p),
         publishReplay(1),
         refCount()

@@ -441,16 +441,13 @@ func getDockerURLSource(clientWebSocket *websocket.Conn, tempDir string, msg Soc
 		return StratosProject{}, tempDir, err
 	}
 
-	log.Warnf("!!!!SUCCESS to write manifest in path %s", manifestPath)
-
-	sendEvent(clientWebSocket, EVENT_CLONED) // TODO: RC fix?
+	sendEvent(clientWebSocket, EVENT_CLONED)
 
 	// Return a string that can be added to the manifest as an application env var to trace where the source originated
 	info.Timestamp = time.Now().Unix()
 	stratosProject := StratosProject{
 		DeploySource: info,
 	}
-	log.Warnf("!!!!SUCCESSstratosProject %+v", stratosProject)
 
 	return stratosProject, tempDir, nil
 }
