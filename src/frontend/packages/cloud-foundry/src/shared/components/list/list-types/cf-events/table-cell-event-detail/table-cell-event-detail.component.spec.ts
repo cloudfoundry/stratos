@@ -1,28 +1,32 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { CfEvent } from '../../../../../../../../core/src/core/cf-api.types';
+import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { ValuesPipe } from '../../../../../../../../core/src/shared/pipes/values.pipe';
-import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { EventMetadataComponent } from '../event-metadata/event-metadata.component';
 import { TableCellEventDetailComponent } from './table-cell-event-detail.component';
 
 describe('TableCellEventDetailComponent', () => {
-  let component: TableCellEventDetailComponent<EntityInfo>;
-  let fixture: ComponentFixture<TableCellEventDetailComponent<EntityInfo>>;
+  let component: TableCellEventDetailComponent;
+  let fixture: ComponentFixture<TableCellEventDetailComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellEventDetailComponent, ValuesPipe]
+      declarations: [TableCellEventDetailComponent, ValuesPipe, EventMetadataComponent],
+      imports: [CoreModule]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent<TableCellEventDetailComponent<EntityInfo>>(TableCellEventDetailComponent);
+    fixture = TestBed.createComponent<TableCellEventDetailComponent>(TableCellEventDetailComponent);
     component = fixture.componentInstance;
     component.row = {
       entity: {
         metadata: {}
       }
-    } as EntityInfo;
+    } as APIResource<CfEvent>;
     fixture.detectChanges();
   });
 

@@ -2,6 +2,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { CfEvent } from '../../../../../../../core/src/core/cf-api.types';
 import {
   valueOrCommonFalsy,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
@@ -23,7 +24,7 @@ import { TableCellEventDetailComponent } from './table-cell-event-detail/table-c
 import { TableCellEventTimestampComponent } from './table-cell-event-timestamp/table-cell-event-timestamp.component';
 import { TableCellEventTypeComponent } from './table-cell-event-type/table-cell-event-type.component';
 
-export class CfEventsConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
+export class CfEventsConfigService extends ListConfig<APIResource> implements IListConfig<APIResource<CfEvent>> {
 
   static acteeColumnId = 'actee';
   eventSource: CfEventsDataSource;

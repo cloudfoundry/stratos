@@ -73,6 +73,7 @@ import {
 import {
   TableCellConfirmRoleAddRemComponent,
 } from './list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
+import { EventMetadataComponent } from './list/list-types/cf-events/event-metadata/event-metadata.component';
 import {
   TableCellEventActeeComponent,
 } from './list/list-types/cf-events/table-cell-event-actee/table-cell-event-actee.component';
@@ -244,7 +245,8 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellUsageComponent,
     TableCellQuotaComponent,
     TableCellEventActeeComponent,
-    CloudFoundryEventsListComponent
+    CloudFoundryEventsListComponent,
+    EventMetadataComponent
   ],
   exports: [
     ServiceIconComponent,
@@ -330,7 +332,9 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellEventDetailComponent,
     TableCellUsageComponent,
     TableCellQuotaComponent,
-    TableCellEventActeeComponent
+    TableCellEventActeeComponent,
+
+    EventMetadataComponent
   ]
 })
 export class CloudFoundryComponentsModule { }
