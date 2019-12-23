@@ -27,26 +27,29 @@ export class TableCellEventActeeComponent extends TableCellCustom<APIResource> {
         iconFont: 'stratos-icons'
       },
       service: {
-        icon: 'store',
+        icon: 'service',
+        iconFont: 'stratos-icons'
       },
       service_binding: {
         icon: 'compare_arrows'
       },
       service_broker: {
-        icon: 'horizontal_split',
+        icon: 'smt',
+        iconFont: 'stratos-icons'
       },
       service_dashboard_client: {
         icon: 'dashboard',
       },
       service_instance: {
-        icon: 'service',
+        icon: 'service-instance',
         iconFont: 'stratos-icons'
       },
       service_key: {
         icon: 'vpn_key',
       },
       service_plan: {
-        icon: 'assignment',
+        icon: 'service-plan',
+        iconFont: 'stratos-icons'
       },
       service_plan_visibility: {
         icon: 'remove_red_eye',

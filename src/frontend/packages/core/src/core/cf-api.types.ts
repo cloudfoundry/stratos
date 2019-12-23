@@ -1,5 +1,5 @@
-import { APIResource } from '../../../store/src/types/api.types';
 import { CfUser } from '../../../cloud-foundry/src/store/types/user.types';
+import { APIResource } from '../../../store/src/types/api.types';
 import { IService, IServiceBinding } from './cf-api-svc.types';
 
 export interface StratosCFEntity {
@@ -348,4 +348,19 @@ export interface IAppSummary {
   detected_start_command: string;
   enable_ssh: boolean;
   ports?: any;
+}
+
+
+export interface CfEvent {
+  type: string;
+  actor: string;
+  actor_type: string;
+  actor_name: string;
+  actee: string;
+  actee_type: string;
+  actee_name: string;
+  timestamp: string;
+  metadata: { [name: string]: any };
+  space_guid?: string;
+  organization_guid?: string;
 }

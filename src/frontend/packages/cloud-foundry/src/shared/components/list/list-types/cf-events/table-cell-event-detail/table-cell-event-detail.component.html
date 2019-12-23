@@ -1,4 +1,1 @@
-<div class="details" *ngFor="let metadata of (row.entity.metadata) | values">
-  <div class="details__key">{{metadata.key}}: </div>
-  <div>{{metadata.value | json}}</div>
-</div>
+<app-event-metadata [metadata]="row.entity.metadata"></app-event-metadata>
