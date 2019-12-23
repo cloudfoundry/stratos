@@ -50,4 +50,18 @@
       font-size: 16px;
     }
   }
+
+  &__address {
+    display: flex;
+    height: 24px;
+    &__value {
+      align-items: center;
+      display: flex;
+      margin-right: 28px;
+      overflow: hidden;
+      text-align: end;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
 }

@@ -36,7 +36,15 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Address</app-meta-card-key>
-    <app-meta-card-value>{{ address }}</app-meta-card-value>
+    <app-meta-card-value>
+      <div class="endpoint-card__address">
+        <div class="endpoint-card__address__value">{{ address }}</div>
+        <app-copy-to-clipboard class="app-code-block__copy" [text]="address" [tooltip]="'Copy to clipboard'"
+          [showSuccessText]="false">
+        </app-copy-to-clipboard>
+      </div>
+
+    </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item *ngIf="hasDetails">
     <app-meta-card-key>Details</app-meta-card-key>

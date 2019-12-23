@@ -31,7 +31,9 @@ export class CopyToClipboardComponent implements OnInit {
     } finally { }
   }
 
-  copyToClipboard() {
+  copyToClipboard(event: MouseEvent) {
+    event.stopPropagation();
+
     const textArea = this.document.createElement('textarea');
 
     textArea.style.position = 'fixed';
