@@ -89,7 +89,7 @@ export interface OverrideAppDetails {
   stack: string;
   time: number;
   dockerImage: string;
-  dockerUsername: string; // TODO: RC Needs some instructions, can only be used with a docker password env var. first docker src deploy would fail
+  dockerUsername: string;
 }
 
 export interface ProjectExists {

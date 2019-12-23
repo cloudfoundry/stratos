@@ -10,7 +10,6 @@ import { GitSCMService } from '../../../../../../core/src/shared/data-services/s
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationDeploySourceTypes } from '../deploy-application-steps.types';
-import { DockerImageValidateDirective } from '../docker-image-validate.directive';
 import { GithubProjectExistsDirective } from '../github-project-exists.directive';
 import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-application-fs.component';
 import { DeployApplicationStep2Component } from './deploy-application-step2.component';
@@ -25,7 +24,6 @@ describe('DeployApplicationStep2Component', () => {
         DeployApplicationStep2Component,
         DeployApplicationFsComponent,
         GithubProjectExistsDirective,
-        DockerImageValidateDirective
       ],
       imports: [
         ...generateCfStoreModules(),

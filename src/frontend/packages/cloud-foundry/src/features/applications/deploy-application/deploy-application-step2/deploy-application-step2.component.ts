@@ -85,7 +85,9 @@ export class DeployApplicationStep2Component
   // Observables for source types
   sourceTypeGithub$: Observable<boolean>;
   sourceTypeNeedsUpload$: Observable<boolean>;
-  canDeployType$: Observable<boolean>;
+  // tslint:disable-next-line:ban-types
+  canDeployType$: Observable<Boolean>;
+  isLoading$: Observable<boolean>;
 
   // Local FS data when file or folder upload
   // @Input('fsSourceData') fsSourceData;
@@ -211,9 +213,9 @@ export class DeployApplicationStep2Component
       this.sourceType$
     ]).pipe(
       filter(([cfGuid, sourceType]) => !!cfGuid && !!sourceType),
-      switchMap(([cfGuid, sourceType]) => {
-        return this.appDeploySourceTypes.canDeployType(cfGuid, sourceType.id);
-      })
+      switchMap(([cfGuid, sourceType]) => this.appDeploySourceTypes.canDeployType(cfGuid, sourceType.id)),
+      publishReplay(1),
+      refCount()
     );
 
     this.subscriptions.push(setInitialSourceType$.subscribe());

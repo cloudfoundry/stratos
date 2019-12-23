@@ -19,7 +19,6 @@ import {
 import { DeployApplicationStep2Component } from './deploy-application-step2/deploy-application-step2.component';
 import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
 import { DeployApplicationComponent } from './deploy-application.component';
-import { DockerImageValidateDirective } from './docker-image-validate.directive';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
 
 @NgModule({
@@ -34,7 +33,6 @@ import { GithubProjectExistsDirective } from './github-project-exists.directive'
     DeployApplicationComponent,
     DeployApplicationStep2Component,
     GithubProjectExistsDirective,
-    DockerImageValidateDirective,
     DeployApplicationStep3Component,
     DeployApplicationOptionsStepComponent,
     DeployApplicationStep21Component,

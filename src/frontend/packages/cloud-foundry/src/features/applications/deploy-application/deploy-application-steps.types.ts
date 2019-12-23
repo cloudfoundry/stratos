@@ -1,12 +1,20 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
+import { IFeatureFlag } from '../../../../../core/src/core/cf-api.types';
 import { PermissionConfig, PermissionTypes } from '../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
 import { CFFeatureFlagTypes } from '../../../../../core/src/shared/components/cf-auth/cf-auth.types';
+import { PaginationMonitor } from '../../../../../core/src/shared/monitors/pagination-monitor';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { CFAppState } from '../../../cf-app-state';
+import {
+  createCfFeatureFlagFetchAction,
+} from '../../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 
 export enum DEPLOY_TYPES_IDS {
   GITLAB = 'gitlab',
@@ -73,7 +81,10 @@ export class ApplicationDeploySourceTypes {
     },
   ];
 
-  constructor(private perms: CurrentUserPermissionsService) { }
+  constructor(
+    private perms: CurrentUserPermissionsService,
+    private store: Store<CFAppState>,
+  ) { }
 
   getTypes(): SourceType[] {
     return [
@@ -89,9 +100,40 @@ export class ApplicationDeploySourceTypes {
 
   canDeployType(cfId: string, sourceId: string): Observable<boolean> {
     if (sourceId === DEPLOY_TYPES_IDS.DOCKER_IMG) {
-      return this.perms.can(
+      // We don't want to return until we have a trusted response (there's a `startsWith(false)` in the `.can`), otherwise we return false
+      // then, if different, send the actual response (this leads to flashing misleading info in ux)
+      // So fetch the feature flags for the cf, which is the blocker, first before checking if we `.can`
+      const action = createCfFeatureFlagFetchAction(cfId);
+      const fetchedFeatureFlags$ = getPaginationObservables<IFeatureFlag>(
+        {
+          store: this.store,
+          action,
+          paginationMonitor: new PaginationMonitor<IFeatureFlag>(
+            this.store,
+            action.paginationKey,
+            action,
+            true
+          )
+        },
+        true
+      ).entities$.pipe(
+        map(entities => !!entities),
+        filter(hasEntities => hasEntities),
+        first(),
+        publishReplay(1),
+        refCount(),
+      );
+
+      const canDeployWithDocker$ = this.perms.can(
         new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.diego_docker), cfId
-      ).pipe(tap(console.log));
+      ).pipe(
+        publishReplay(1),
+        refCount(),
+      );
+
+      return fetchedFeatureFlags$.pipe(
+        switchMap(() => canDeployWithDocker$),
+      );
     }
     return of(true);
   }

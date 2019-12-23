@@ -117,7 +117,6 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
         this.deployOptionsForm.controls.dockerUsername.setValue(deployAppState.applicationSource.dockerDetails.dockerUsername);
         this.deployOptionsForm.controls.dockerUsername.disable();
       } else {
-        // TODO: RC test going back in stepper and changing source type
         this.deployOptionsForm.controls.name.enable();
         this.deployOptionsForm.controls.dockerImage.enable();
         this.deployOptionsForm.controls.dockerUsername.enable();

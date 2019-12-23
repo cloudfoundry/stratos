@@ -28,7 +28,6 @@ import { DeployApplicationStep2Component } from './deploy-application-step2/depl
 import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
 import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
 import { DeployApplicationComponent } from './deploy-application.component';
-import { DockerImageValidateDirective } from './docker-image-validate.directive';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
 
 describe('DeployApplicationComponent', () => {
@@ -47,7 +46,6 @@ describe('DeployApplicationComponent', () => {
         DeployApplicationFsComponent,
         CommitListWrapperComponent,
         GithubProjectExistsDirective,
-        DockerImageValidateDirective
       ],
       providers: [
         CfOrgSpaceDataService,

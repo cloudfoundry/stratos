@@ -1,6 +1,6 @@
 <b *ngIf="canDeployType$ | async"> {{ stepperText }}</b>
 <form novalidate #sourceSelectionForm="ngForm" class="stepper-form">
-  <div *ngIf="canDeployType$ | async; else cannotDeploy">
+  <div *ngIf="(canDeployType$ | async) === true">
     <div class="deploy-step2-form">
       <!-- This can be flipped when we add other deploy types -->
       <mat-form-field *ngIf="!selectedSourceType && sourceTypes.length > 1">
@@ -103,7 +103,7 @@
           </mat-form-field>
           <mat-form-field>
             <input matInput [disabled]="isRedeploy" [(ngModel)]="dockerImg" placeholder="Docker Image" name="dockerImg"
-              required [appDockerImageValidate]="">
+              required>
             <mat-error *ngIf="sourceSelectionForm.controls.dockerImg?.errors?.required">
               Image is required
             </mat-error>
@@ -112,16 +112,17 @@
             </mat-error>
           </mat-form-field>
           <mat-form-field>
-            <input matInput [(ngModel)]="dockerUsername"
-              placeholder="Username - Requires environment variable CF_DOCKER_PASSWORD" name="dockerUsername">
+            <input matInput [(ngModel)]="dockerUsername" placeholder="Docker Username" name="dockerUsername">
+            <mat-hint>Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</mat-hint>
           </mat-form-field>
         </div>
       </div>
     </div>
   </div>
-  <ng-template #cannotDeploy>
+  <!-- Boolean object type to avoid flashing negative message then positive -->
+  <div *ngIf="(canDeployType$ | async) === false">
     <div *ngIf="(sourceType$ | async) as sourceType">
       {{ sourceType.disabledText || 'The selected Cloud Foundry cannot deploy this type.' }}
     </div>
-  </ng-template>
+  </div>
 </form>
