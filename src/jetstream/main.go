@@ -50,6 +50,7 @@ const (
 	SessionExpiry        = 20 * 60 // Session cookies expire after 20 minutes
 	UpgradeVolume        = "UPGRADE_VOLUME"
 	UpgradeLockFileName  = "UPGRADE_LOCK_FILENAME"
+	LogToJSON            = "LOG_TO_JSON"
 	VCapApplication      = "VCAP_APPLICATION"
 	defaultSessionSecret = "wheeee!"
 )
@@ -109,6 +110,14 @@ func getEnvironmentLookup() *env.VarSet {
 
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
+
+	// Attempt to set the log output first through basic env var
+	if logToJSON, ok := os.LookupEnv(LogToJSON); ok {
+		if logToJSON == "true" {
+			log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.UnixDate})
+		}
+	}
+
 	log.SetOutput(os.Stdout)
 
 	log.Info("========================================")
@@ -122,6 +131,13 @@ func main() {
 
 	// Create common method for looking up config
 	envLookup := getEnvironmentLookup()
+
+	// Update log output given all env vars
+	if logToJSON, ok := envLookup.Lookup(LogToJSON); ok {
+		if logToJSON == "true" {
+			log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.UnixDate})
+		}
+	}
 
 	// Check to see if we are running as the database migrator
 	if migrateDatabase(envLookup) {
