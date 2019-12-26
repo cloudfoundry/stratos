@@ -53,7 +53,7 @@ export function jetstreamErrorHandler(
     );
   }
 
-  const errorActions = getFailApiRequestActions(action, error, requestType, catalogueEntity, {
+  const errorActions = getFailApiRequestActions(action, error, requestType, catalogEntity, {
     endpointIds,
     url: error.url || action.options.url,
     eventCode: error.status ? error.status + '' : '500',

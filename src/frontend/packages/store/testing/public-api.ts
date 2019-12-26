@@ -3,4 +3,4 @@
  */
 
 export * from './src/store-test-helper';
-export * from './src/store-test-module';
+export * from './src/store-test.module';
