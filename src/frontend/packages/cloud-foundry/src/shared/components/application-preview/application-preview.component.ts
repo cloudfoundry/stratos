@@ -59,14 +59,5 @@ export class ApplicationPreviewComponent implements PreviewableComponent {
       map(([app, appSummary]: [ApplicationData, EntityInfo<IAppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct());
-
-      //   // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now
-    //   this.cfEndpointService.appsPagObs.fetchingEntities$.pipe(
-    //     filter(loading => !loading)
-    //   ),
-    // ]).pipe(
-    //   map(() => false),
-    //   startWith(true)
-    // );
   }
 }

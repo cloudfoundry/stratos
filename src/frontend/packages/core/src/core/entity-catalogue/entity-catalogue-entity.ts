@@ -1,3 +1,4 @@
+import { Type } from '@angular/core';
 import { ActionReducer, Store } from '@ngrx/store';
 
 import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
@@ -9,6 +10,7 @@ import { IEndpointFavMetadata } from '../../../../store/src/types/user-favorites
 import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { getFullEndpointApiUrl } from '../../features/endpoints/endpoint-helpers';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
+import { PreviewableComponent } from '../../shared/previewable-component';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { EntityActionDispatcherManager } from './action-dispatcher/action-dispatcher';
 import {
@@ -256,7 +258,7 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
     getLink?: (metadata: IEndpointFavMetadata) => string,
     // TODO find a way to attach this to PreviewableComponent
-    getPreviewableComponent?: () => object
+    getPreviewableComponent?: () => Type<PreviewableComponent>
   ) {
     const fullEntity = {
       ...entity,

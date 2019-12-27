@@ -112,7 +112,6 @@ export class FavoritesMetaCardComponent {
     const catalogueEntity = entityCatalogue.getEntity(this.favorite.endpointType, this.favorite.entityType);
     const previewComponent = catalogueEntity.builders.entityBuilder.getPreviewableComponent();
 
-    // TODO: use 'endpoint' as constant
     if (this.favorite.entityType === ENDPOINT_TYPE) {
       const entity$ = this.store.select(endpointsEntityRequestDataSelector(this.favorite.endpointId));
       this.panelPreviewService.show(previewComponent, {
