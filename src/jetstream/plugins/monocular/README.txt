@@ -1,0 +1,1 @@
+docker run -p 8080:8080 --rm -e -ti --network=host kreinecke/suse-fdb-chart-repo:latest /chartrepo serve --doclayer-url=mongodb://192.168.57.1:27016 stable https://kubernetes-charts.storage.googleapis.com
