@@ -83,7 +83,7 @@ func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHe
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	res, err := collection.InsertOne(ctx, bson.M{"name": "pi", "value": 3.14159}, options.InsertOne())
 	if err != nil {
-		log.Fatalf("Database readiness test failed: %v", err)
+		log.Fatalf("Database readiness/connection test failed: %v", err)
 		cancel()
 		return err
 	}

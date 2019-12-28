@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"os"
 	"time"
@@ -67,9 +68,27 @@ func setupRoutes() http.Handler {
 }
 
 func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
-	repoURL := req.FormValue("repoURL")
+	type syncParams struct {
+		RepoURL string `json:"repoURL"`
+	}
+
+	dec := json.NewDecoder(req.Body)
+	var url syncParams
+	if err := dec.Decode(&url); err != nil {
+		log.Fatal(err)
+	}
+
+	repoURL := url.RepoURL
 	repoName := params["repo"]
-	//TODO kate check and handle errors
+
+	if repoURL == "" {
+		log.Fatal("No Repository URL provided in request for Sync action.")
+	}
+
+	if repoName == "" {
+		log.Fatal("No Repository name provided in request for Sync action.")
+	}
+
 	startTime := time.Now()
 	if err := fdb.SyncRepo(fdbClient, fDBName, repoName, repoURL, authorizationHeader); err != nil {
 		log.Fatalf("Can't sync chart repository with database: %v", err)
@@ -81,7 +100,11 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 
 func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 	repoName := params["repo"]
-	//TODO kate check and handle errors
+
+	if repoName != "" {
+		log.Fatal("No Repository name provided in request for Delete action.")
+	}
+
 	if err := fdb.DeleteRepo(fdbClient, fDBName, repoName); err != nil {
 		log.Fatalf("Can't delete chart repository %s from database: %v", repoName, err)
 	}
@@ -90,9 +113,7 @@ func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 func initOnDemandEndpoint(fdbURL string, fdbName string, authHeader string, debug bool) {
 
 	authorizationHeader = authHeader
-	debug = debug
-	fdbURL = fdbURL
-	fdbName = fdbName
+	fDBName = fdbName
 
 	if debug {
 		log.SetLevel(log.DebugLevel)
@@ -107,7 +128,7 @@ func initOnDemandEndpoint(fdbURL string, fdbName string, authHeader string, debu
 		port = "8080"
 	}
 	addr := ":" + port
-	log.WithFields(log.Fields{"addr": addr}).Info("On-Demand endpoint listening on: %v", port)
+	log.Infof("On-Demand endpoint listening on: %v", addr)
 	http.ListenAndServe(addr, n)
 }
 
