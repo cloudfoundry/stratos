@@ -101,7 +101,7 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 	repoName := params["repo"]
 
-	if repoName != "" {
+	if repoName == "" {
 		log.Fatal("No Repository name provided in request for Delete action.")
 	}
 

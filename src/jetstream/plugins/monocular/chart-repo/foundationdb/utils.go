@@ -193,7 +193,22 @@ func updateLastCheck(db Database, repoName string, checksum string, now time.Tim
 func DeleteRepo(dbClient Client, dbName, repoName string) error {
 	db, closer := dbClient.Database(dbName)
 	defer closer()
-	collection := db.Collection(chartCollection)
+
+	log.Debugf("Checking database connection and readiness...")
+	collection := db.Collection("numbers")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	res, err := collection.InsertOne(ctx, bson.M{"name": "pi", "value": 3.14159}, options.InsertOne())
+	if err != nil {
+		log.Fatalf("Database readiness/connection test failed: %v", err)
+		cancel()
+		return err
+	}
+	id := res.InsertedID
+	cancel()
+	log.Debugf("Database connection test successful.")
+	log.Debugf("Inserted a test document to test collection with ID: %v", id)
+
+	collection = db.Collection(chartCollection)
 	filter := bson.M{
 		"repo.name": repoName,
 	}
