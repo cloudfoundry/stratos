@@ -100,11 +100,16 @@ const coreSuite = globby.sync([
   './src/test-e2e/metrics/metrics-registration-e2e.spec.ts',
 ])
 
+const autoscalerSuite = globby.sync([
+  './src/test-e2e/application/application-autoscaler-e2e.spec.ts',
+])
+
 const fullMinusOtherSuites = globby.sync([
   ...fullSuite,
   ...longSuite.map(file => '!' + file),
   ...manageUsersSuite.map(file => '!' + file),
   ...coreSuite.map(file => '!' + file),
+  ...autoscalerSuite.map(file => '!' + file),
 ])
 
 const config = {
@@ -129,6 +134,10 @@ const config = {
     ]),
     core: globby.sync([
       ...coreSuite,
+      ...excludeTests
+    ]),
+    autoscaler: globby.sync([
+      ...autoscalerSuite,
       ...excludeTests
     ]),
     fullMinusOtherSuites: globby.sync([

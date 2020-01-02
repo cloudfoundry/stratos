@@ -82,6 +82,11 @@ jobs:
         - "./deploy/ci/travis/job-e2e-before_script.sh true"
       script:
         - "./deploy/ci/travis/job-e2e-script.sh core"
+    - name: E2E Tests - Autoscaler
+      before_script:
+        - "./deploy/ci/travis/job-e2e-before_script.sh"
+      script:
+        - "./deploy/ci/travis/job-e2e-script.sh autoscaler"
     - name: E2E Tests - All Other Suite
       before_script:
         - "./deploy/ci/travis/job-e2e-before_script.sh"
