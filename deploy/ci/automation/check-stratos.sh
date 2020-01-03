@@ -25,6 +25,11 @@ echo "Checking Stratos is up and running: ${ENDPOINT}"
 
 npm install
 
+# Ensure we have correct version of web driver
+CHROME_VERSION=$(google-chrome --version | grep -iEo "[0-9.]{10,20}")
+echo "Chrome version: ${CHROME_VERSION}"
+npm run update-webdriver -- --versions.chrome=${CHROME_VERSION}
+
 pushd "${DIRPATH}/../../.."
 SECRETS=secrets.yaml
 if [ -f "$SECRETS" ]; then
@@ -48,7 +53,7 @@ echo "headless: true" >> ${SECRETS}
 set +e
 
 # Run the e2e check test suite against the supplied endpoint
-./node_modules/.bin/ng e2e --dev-server-target= --base-url=${ENDPOINT} --suite=check
+./node_modules/.bin/ng e2e --no-webdriver-update --dev-server-target= --base-url=${ENDPOINT} --suite=check
 RET=$?
 
 if [ -f "$SECRETS.bak" ]; then
