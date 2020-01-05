@@ -119,7 +119,7 @@ func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
 
 	// Change to JSON logging if configured
-	if logToJSON, ok := envLookup.LookupEnv(LogToJSON); ok {
+	if logToJSON, ok := envLookup.Lookup(LogToJSON); ok {
 		if logToJSON == "true" {
 			log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.UnixDate})
 		}
