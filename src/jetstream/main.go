@@ -109,10 +109,17 @@ func getEnvironmentLookup() *env.VarSet {
 }
 
 func main() {
+
+	// Register time.Time in gob
+	gob.Register(time.Time{})
+
+	// Create common method for looking up config
+	envLookup := getEnvironmentLookup()
+
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
 
-	// Attempt to set the log output first through basic env var
-	if logToJSON, ok := os.LookupEnv(LogToJSON); ok {
+	// Change to JSON logging if configured
+	if logToJSON, ok := envLookup.LookupEnv(LogToJSON); ok {
 		if logToJSON == "true" {
 			log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.UnixDate})
 		}
@@ -125,19 +132,6 @@ func main() {
 	log.Info("========================================")
 	log.Info("")
 	log.Info("Initialization started.")
-
-	// Register time.Time in gob
-	gob.Register(time.Time{})
-
-	// Create common method for looking up config
-	envLookup := getEnvironmentLookup()
-
-	// Update log output given all env vars
-	if logToJSON, ok := envLookup.Lookup(LogToJSON); ok {
-		if logToJSON == "true" {
-			log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.UnixDate})
-		}
-	}
 
 	// Check to see if we are running as the database migrator
 	if migrateDatabase(envLookup) {
