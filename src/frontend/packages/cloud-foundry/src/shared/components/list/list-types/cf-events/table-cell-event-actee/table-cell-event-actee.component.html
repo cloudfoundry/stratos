@@ -7,6 +7,6 @@
     </app-copy-to-clipboard>
   </div>
   <div *ngIf="row.entity.actee_name" class="event-actee__name">
-    {{row.entity.actee_name}}
+    {{ row.entity.actee_name || row.entity.actee }}
   </div>
 </div>
