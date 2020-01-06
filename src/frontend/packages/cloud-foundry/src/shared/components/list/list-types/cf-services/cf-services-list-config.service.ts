@@ -57,7 +57,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
       first(),
       map(multipleConnectedEndpoints => {
         if (!multipleConnectedEndpoints) {
-          this.columns.filter(column => column.columnId !== CfServicesListConfigService.cfColumnId);
+          this.columns = this.columns.filter(column => column.columnId !== CfServicesListConfigService.cfColumnId);
         }
         return true;
       })
