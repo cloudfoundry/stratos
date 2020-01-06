@@ -1,5 +1,18 @@
 #!/bin/bash
 
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+CYAN="\033[96m"
+YELLOW="\033[93m"
+BOLD="\033[1m"
+RESET='\033[0m'
+
+echo ""
+echo -e "${BOLD}${CYAN}=================================${RESET}"
+echo -e "${BOLD}${CYAN}Stratos System Availability check${RESET}"
+echo -e "${BOLD}${CYAN}=================================${RESET}"
+echo ""
+
 # Check that a Stratos system is available
 set -eu
 
@@ -21,9 +34,17 @@ if [ -z "${PASSWORD}" ]; then
   exit 1
 fi
 
-echo "Checking Stratos is up and running: ${ENDPOINT}"
+echo -e "${BOLD}${CYAN}Checking Stratos is up and running: ${ENDPOINT}${RESET}"
 
+echo -e "${BOLD}${YELLOW}Performing npm install ...${RESET}"
 npm install
+
+echo -e "${BOLD}${YELLOW}Updating web driver ...${RESET}"
+
+# Ensure we have correct version of web driver
+CHROME_VERSION=$(google-chrome --version | grep -iEo "[0-9.]{10,20}")
+echo "Chrome version: ${CHROME_VERSION}"
+npm run update-webdriver -- --versions.chrome=${CHROME_VERSION}
 
 pushd "${DIRPATH}/../../.."
 SECRETS=secrets.yaml
@@ -47,8 +68,13 @@ echo "headless: true" >> ${SECRETS}
 
 set +e
 
+echo -e "${BOLD}${YELLOW}Running checks ...${RESET}"
+
+# Need to set base URL via env var
+export STRATOS_E2E_BASE_URL=${ENDPOINT}
+
 # Run the e2e check test suite against the supplied endpoint
-./node_modules/.bin/ng e2e --dev-server-target= --base-url=${ENDPOINT} --suite=check
+./node_modules/.bin/ng e2e --no-webdriver-update --dev-server-target= --base-url=${ENDPOINT} --suite=check
 RET=$?
 
 if [ -f "$SECRETS.bak" ]; then

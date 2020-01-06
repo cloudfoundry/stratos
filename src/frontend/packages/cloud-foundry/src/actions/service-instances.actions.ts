@@ -1,3 +1,5 @@
+import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
@@ -15,10 +17,8 @@ import {
 } from '../cf-entity-types';
 import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
-import { HttpRequest, HttpParams } from '@angular/common/http';
 
-export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
-export const UPDATE_SERVICE_INSTANCE_SUCCESS = getActions('Service Instances', 'Update Service Instance')[1];
+export const DELETE_SERVICE_INSTANCE_ACTIONS = getActions('Service Instances', 'Get particular instance');
 export const getServiceInstanceRelations = [
   createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
   createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
@@ -56,6 +56,7 @@ export class GetServiceInstances
   };
   flattenPagination = true;
 }
+
 export class GetServiceInstance
   extends CFStartAction implements EntityInlineParentAction {
   constructor(
@@ -70,7 +71,7 @@ export class GetServiceInstance
       `service_instances/${guid}`
     );
   }
-  actions = getActions('Service Instances', 'Get particular instance');
+  actions = DELETE_SERVICE_INSTANCE_ACTIONS;
   entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
   schemaKey = serviceInstancesWithSpaceEntityType;
   entityType = serviceInstancesEntityType;
@@ -80,10 +81,14 @@ export class GetServiceInstance
 export class DeleteServiceInstance extends CFStartAction implements ICFAction {
   constructor(public endpointGuid: string, public guid: string) {
     super();
+    const headers = new HttpHeaders({
+      'x-cap-long-running': 'true'
+    });
     this.options = new HttpRequest(
       'DELETE',
       `service_instances/${guid}`,
       {
+        headers,
         params: new HttpParams({
           fromObject: {
             accepts_incomplete: 'true',
@@ -114,6 +119,9 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
     url = 'service_instances'
   ) {
     super();
+    const headers = new HttpHeaders({
+      'x-cap-long-running': 'true'
+    });
     this.options = new HttpRequest(
       httpMethod,
       url,
@@ -125,6 +133,7 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
         tags
       },
       {
+        headers,
         params: new HttpParams(
           {
             fromObject: {
