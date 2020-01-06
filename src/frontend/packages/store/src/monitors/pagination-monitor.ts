@@ -20,9 +20,9 @@ import { ActionState, ListActionState } from '../reducers/api-request-reducer/ty
 import { getAPIRequestDataState, selectEntities } from '../selectors/api.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { PaginationEntityState } from '../types/pagination.types';
-import { StratosBaseCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { LocalPaginationHelpers } from '../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 
 export class MultiActionListEntity {
