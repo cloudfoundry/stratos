@@ -38,8 +38,7 @@ import { TableHeaderSelectComponent } from '../table-header-select/table-header-
 import { ICellDefinition } from '../table.types';
 import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
 
-/* tslint:disable:max-line-length */
-/* tslint:enable:max-line-length */
+
 export const listTableCells = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,

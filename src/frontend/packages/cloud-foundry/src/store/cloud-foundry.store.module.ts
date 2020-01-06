@@ -9,6 +9,7 @@ import { DeployAppEffects } from './effects/deploy-app.effects';
 import { GithubEffects } from './effects/github.effects';
 import { PermissionEffects, PermissionsEffects } from './effects/permissions.effect';
 import { RouteEffect } from './effects/route.effects';
+import { ServiceInstanceEffects } from './effects/service-instance.effects';
 
 @NgModule({
   imports: [
@@ -21,7 +22,8 @@ import { RouteEffect } from './effects/route.effects';
       CloudFoundryEffects,
       RouteEffect,
       PermissionsEffects,
-      PermissionEffects
+      PermissionEffects,
+      ServiceInstanceEffects
     ])
   ]
 })
