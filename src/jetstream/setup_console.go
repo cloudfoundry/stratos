@@ -131,7 +131,7 @@ func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *int
 
 func saveLocalUserConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
 
-	log.Info("saveLocalUserConsoleConfig")
+	log.Debug("saveLocalUserConsoleConfig")
 
 	if err := consoleRepo.SetValue(systemGroupName, "AUTH_ENDPOINT_TYPE", "local"); err != nil {
 		return err
@@ -193,7 +193,7 @@ func saveUAAConsoleConfig(consoleRepo console_config.Repository, consoleConfig *
 // Save the console setup data to the database
 func (p *portalProxy) setupSaveConfig(c echo.Context) error {
 
-	log.Warn("setupSaveConfig")
+	log.Debug("setupSaveConfig")
 
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(p.DatabaseConnectionPool)
 	if err != nil {
