@@ -5,18 +5,6 @@ import { combineLatest as observableCombineLatest, Observable, of as observableO
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import {
-  serviceBindingEntityType,
-  serviceInstancesEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { ApplicationService } from '../../../../../../../../cloud-foundry/src/features/applications/application.service';
-import { isUserProvidedServiceInstance } from '../../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
-import { getCfService } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
-import {
-  ServiceActionHelperService,
-} from '../../../../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
-import { AppEnvVarsState } from '../../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
-import {
   IService,
   IServiceBinding,
   IServiceInstance,
@@ -36,6 +24,23 @@ import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/s
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
+import {
+  serviceBindingEntityType,
+  serviceInstancesEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../../../../../cf-entity-types';
+import { ApplicationService } from '../../../../../../features/applications/application.service';
+import { isUserProvidedServiceInstance } from '../../../../../../features/cloud-foundry/cf.helpers';
+import {
+  getCfService,
+  getServiceBrokerName,
+  getServiceName,
+  getServicePlanName,
+  getServiceSummaryUrl,
+} from '../../../../../../features/service-catalog/services-helper';
+import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
+import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+
 
 interface EnvVarData {
   key: string;
@@ -61,6 +66,9 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   entityConfig: ComponentEntityMonitorConfig;
   private envVarServicesSection$: Observable<string>;
   private isUserProvidedServiceInstance: boolean;
+  serviceDescription$: Observable<string>;
+  serviceUrl$: Observable<string>;
+  serviceName$: Observable<string>;
 
   constructor(
     private dialog: MatDialog,
@@ -131,26 +139,48 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       filter(service => !!service)
     );
     this.listData = [{
-      label: null,
-      data$: this.service$.pipe(
-        map(service => service.entity.entity.description)
-      ),
-      customStyle: 'long-text'
-    },
-    {
-      label: 'Service Name',
-      data$: this.service$.pipe(
-        map(service => service.entity.entity.label)
-      )
-    },
-    {
       label: 'Service Plan',
-      data$: serviceInstance$.pipe(
-        map(service => service.entity.entity.service_plan.entity.name)
+      data$: this.serviceInstance$.pipe(
+        map(si => {
+          if (this.isUserProvidedServiceInstance) {
+            return null;
+          }
+          const serviceInstance: IServiceInstance = si.entity.entity as IServiceInstance;
+          return getServicePlanName(serviceInstance.service_plan.entity);
+        })
       )
-    }
+    },
+    {
+      label: 'Service Broker',
+      data$: this.serviceInstance$.pipe(
+        switchMap(si => {
+          if (this.isUserProvidedServiceInstance) {
+            return null;
+          }
+          const serviceInstance: IServiceInstance = si.entity.entity as IServiceInstance;
+          return getServiceBrokerName(
+            serviceInstance.service.entity.service_broker_guid,
+            serviceInstance.cfGuid,
+            this.entityServiceFactory
+          );
+        })
+      )
+    },
     ];
     this.envVarServicesSection$ = this.service$.pipe(map(s => s.entity.entity.label));
+
+    this.serviceDescription$ = this.service$.pipe(
+      map(service => service.entity.entity.description)
+    );
+
+    this.serviceUrl$ = this.service$.pipe(
+      map(service => getServiceSummaryUrl(service.entity.entity.cfGuid, service.entity.entity.guid))
+    );
+
+    this.serviceName$ = this.service$.pipe(
+      map(service => getServiceName(service.entity))
+    );
+
   }
 
   private setupAsUserProvidedServiceInstance() {
@@ -224,5 +254,4 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     { appId: this.appService.appGuid },
     this.isUserProvidedServiceInstance
   )
-
 }

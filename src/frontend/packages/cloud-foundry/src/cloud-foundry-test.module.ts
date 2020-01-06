@@ -10,6 +10,7 @@ import { getGitHubAPIURL, GITHUB_API_URL } from '../../core/src/core/github.help
 import { LoggerService } from '../../core/src/core/logger.service';
 import { GitSCMService } from '../../core/src/shared/data-services/scm/scm.service';
 import { generateCFEntities } from './cf-entity-generator';
+import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
 
 @NgModule({
@@ -37,7 +38,8 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
   providers: [
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     GitSCMService,
-    LoggerService
+    LoggerService,
+    LongRunningCfOperationsService
   ]
 })
 export class CloudFoundryTestingModule { }

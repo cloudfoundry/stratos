@@ -36,6 +36,7 @@ import { GithubCommitAuthorComponent } from '../../../github-commit-author/githu
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { listTableCells, TableCellComponent } from './table-cell.component';
 
+
 /* tslint:enable:max-line-length */
 
 describe('TableCellComponent', () => {
@@ -62,7 +63,7 @@ describe('TableCellComponent', () => {
         GithubCommitAuthorComponent,
         ServicePlanPriceComponent,
         ServicePlanPublicComponent,
-        CfOrgSpaceLinksComponent
+        CfOrgSpaceLinksComponent,
       ],
       imports: [
         CoreModule

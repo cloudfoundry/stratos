@@ -4,11 +4,6 @@ import { Store } from '@ngrx/store';
 import { switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
-import {
-  isServiceInstance,
-  isUserProvidedServiceInstance,
-} from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { IServiceBinding } from '../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
@@ -25,6 +20,8 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GetAppServiceBindings } from '../../../../../actions/application-service-routes.actions';
+import { ApplicationService } from '../../../../../features/applications/application.service';
+import { isServiceInstance, isUserProvidedServiceInstance } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import {
@@ -114,10 +111,10 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         columnId: 'service',
         headerCell: () => 'Service',
         cellDefinition: {
-          getValue: (row: APIResource<IServiceBinding>) => {
+          getValue: (row) => {
             const si = isServiceInstance(row.entity.service_instance.entity);
             return si ? si.service.entity.label : 'User Service';
-          }
+          },
         },
         cellFlex: '1'
       },
