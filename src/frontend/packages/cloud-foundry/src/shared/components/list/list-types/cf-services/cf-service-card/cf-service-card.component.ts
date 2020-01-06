@@ -4,7 +4,7 @@ import { Observable, of as observableOf } from 'rxjs';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { IService, IServiceExtra } from '../../../../../../../../core/src/core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/services/cf-org-space-label.service';
