@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
@@ -14,18 +14,18 @@ import (
 
 var findAuthToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, auth_type, meta_data
 									FROM tokens
-									WHERE token_type = 'uaa' AND user_guid = $1`
+									WHERE token_type = 'uaa' AND cnsi_guid = 'STRATOS' AND user_guid = $1`
 
 var countAuthTokens = `SELECT COUNT(*)
 										FROM tokens
-										WHERE token_type = 'uaa' AND user_guid = $1`
+										WHERE token_type = 'uaa' AND cnsi_guid = 'STRATOS' AND user_guid = $1 `
 
-var insertAuthToken = `INSERT INTO tokens (token_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
-									VALUES ($1, $2, $3, $4, $5, $6)`
+var insertAuthToken = `INSERT INTO tokens (cnsi_guid, token_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
+									VALUES ('STRATOS', $1, $2, $3, $4, $5, $6)`
 
 var updateAuthToken = `UPDATE tokens
 									SET auth_token = $1, refresh_token = $2, token_expiry = $3
-									WHERE user_guid = $4 AND token_type = $5`
+									WHERE cnsi_guid = 'STRATOS' AND user_guid = $4 AND token_type = $5`
 
 var getToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
 									FROM tokens

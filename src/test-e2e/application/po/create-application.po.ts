@@ -17,6 +17,10 @@ export class CreateApplication extends Page {
     return this.baseStepper.selectCreationType(APPLICATION_CREATION_TYPES.DEPLOY) as DeployApplication;
   }
 
+  public selectDeployUrl() {
+    return this.baseStepper.selectCreationType(APPLICATION_CREATION_TYPES.DEPLOY_URL) as DeployApplication;
+  }
+
   constructor(url = '/applications/new') {
     super(url);
   }

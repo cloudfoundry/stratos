@@ -14,7 +14,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
-import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { SortDirection } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
 import {
   asapScheduler,
@@ -41,7 +42,6 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   ListFilter,
   ListPagination,
@@ -49,7 +49,8 @@ import {
   ListView,
   SetListViewAction,
 } from '../../../../../store/src/actions/list.actions';
-import { SetPage } from '../../../../../store/src/actions/pagination.actions';
+import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pagination.actions';
+import { GeneralAppState } from '../../../../../store/src/app-state';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
@@ -68,13 +69,13 @@ import {
   defaultPaginationPageSizeOptionsTable,
   IGlobalListAction,
   IListConfig,
+  IListFilter,
   IMultiListAction,
   IOptionalAction,
   ListConfig,
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
-import { GeneralAppState } from '../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-list',
@@ -115,7 +116,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   pPaginator: MatPaginator;
   private filterString: string;
 
-  @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
+  @ViewChild(MatPaginator, { static: false }) set setPaginator(paginator: MatPaginator) {
     if (!paginator || this.paginationWidgetToStore) {
       return;
     }
@@ -142,7 +143,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     });
   }
 
-  @ViewChild('filter') set setFilter(filterValue: NgModel) {
+  @ViewChild('filter', { static: false }) set setFilter(filterValue: NgModel) {
     if (!filterValue || this.filterWidgetToStore) {
       return;
     }
@@ -175,6 +176,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       value: null
     };
   private sortColumns: ITableColumn<T>[];
+  private filterColumns: IListFilter[];
+  private filterSelected: IListFilter;
 
   private paginationWidgetToStore: Subscription;
   private filterWidgetToStore: Subscription;
@@ -395,8 +398,23 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.headerSort.direction = sort.direction;
     }));
 
+    this.filterColumns = this.config.getFilters ? this.config.getFilters() : [];
+
     const filterStoreToWidget = this.paginationController.filter$.pipe(tap((paginationFilter: ListFilter) => {
       this.filterString = paginationFilter.string;
+
+      const filterKey = paginationFilter.filterKey;
+      if (filterKey) {
+        this.filterSelected = this.filterColumns.find(filterConfig => {
+          return filterConfig.key === filterKey;
+        });
+      } else if (this.filterColumns) {
+        this.filterSelected = this.filterColumns.find(filterConfig => filterConfig.default);
+        if (this.filterSelected) {
+          this.updateListFilter(this.filterSelected);
+        }
+      }
+
       // Pipe store values to filter managers. This ensures any changes such as automatically selected orgs/spaces are shown in the drop
       // downs (change org to one with one space results in that space being selected)
       Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
@@ -587,6 +605,14 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       direction,
       field
     });
+  }
+
+  updateListFilter(filterSelected: IListFilter) {
+    this.store.dispatch(new SetClientFilterKey(
+      this.dataSource,
+      this.dataSource.paginationKey,
+      filterSelected.key
+    ));
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {

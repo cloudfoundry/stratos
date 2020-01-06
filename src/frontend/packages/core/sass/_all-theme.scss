@@ -32,6 +32,7 @@
 @import '../src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component.theme';
 @import '../src/shared/components/upload-progress-indicator/upload-progress-indicator.component.theme';
 @import '../src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component.theme';
+@import '../src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component.theme';
 @import '../src/shared/components/start-end-date/start-end-date.component.theme';
 @import '../src/shared/components/metrics-chart/metrics-chart.component.theme';
 @import '../src/shared/components/metrics-range-selector/metrics-range-selector.component.theme';
@@ -42,6 +43,8 @@
 @import '../src/core/stateful-icon/stateful-icon.component.theme';
 @import '../src/shared/components/markdown-preview/markdown-preview.component.theme';
 @import './components/mat-tabs.theme';
+@import './components/mat-snack-bar.theme';
+@import './components/ngx-charts-gauge.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
 @import './fonts';
@@ -58,13 +61,13 @@
 @import '../../cloud-foundry/src/features/cloud-foundry/tabs/cloud-foundry-firehose/cloud-foundry-firehose.component.theme';
 @import '../../cloud-foundry/src/features/service-catalog/service-catalog-page/service-catalog-page.component.theme';
 @import '../../cloud-foundry/src/features/applications/application-wall/application-wall.component.theme';
+@import '../../core/src/features/error-page/error-page/error-page.component.theme.scss';
 
 // Creates the app theme and applies it to the application
 // $theme = Angular Material Theme
 // $nav-theme - Colors for the Side Nav (optional)
 // $status-theme - Colors for status (optional)
 @mixin app-theme($stratos-theme, $nav-theme: null, $status-theme: null) {
-
   $theme: map-get($stratos-theme, theme);
   $app-theme: map-get($stratos-theme, app-theme);
   $app-background-color: map-get($app-theme, app-background-color);
@@ -82,6 +85,8 @@
   @include steppers-theme($theme, $app-theme);
   @include list-theme($theme, $app-theme);
   @include app-base-page-theme($theme, $app-theme);
+  @include app-mat-snack-bar-theme($theme, $app-theme);
+  @include ngx-charts-gauge($theme, $app-theme);
   @include app-page-subheader-theme($theme, $app-theme);
   @include app-mat-tabs-theme($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
@@ -125,4 +130,6 @@
   @include page-side-nav-theme($theme, $app-theme);
   @include cf-admin-add-user-warning($theme, $app-theme);
   @include entity-summary-title-theme($theme, $app-theme);
+  @include app-meta-card-item-theme($theme, $app-theme);
+  @include error-page-theme($theme, $app-theme);
 }

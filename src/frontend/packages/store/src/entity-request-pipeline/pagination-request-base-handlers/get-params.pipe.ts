@@ -30,21 +30,10 @@ function setRequestParams(
 
 export function getPaginationParamsPipe(
   action: PaginatedAction,
-  catalogueEntity: StratosBaseCatalogueEntity,
-  appState: InternalAppState,
+  paginationState: PaginationEntityState,
 ): HttpParams {
   const params = setRequestParams(new HttpParams(), action.initialParams);
-
-  // Set params from store
-  const paginationState = selectPaginationState(
-    catalogueEntity.entityKey,
-    action.paginationKey,
-  )(appState);
   const paginationParams = getPaginationParams(paginationState);
-  // TODO We shouldn't be modifying this here as it is a unexpected side effect.
-  action.pageNumber = paginationState
-    ? paginationState.currentPage
-    : 1;
   const paramsFromPagination = setRequestParams(params, paginationParams);
   if (!paramsFromPagination.has(resultPerPageParam)) {
     return paramsFromPagination.set(

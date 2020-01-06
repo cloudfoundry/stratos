@@ -1,15 +1,18 @@
-import { EntityRequestAction, IStartRequestAction } from '../../types/request.types';
+import { isNullOrUndefined } from 'util';
+
+import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { IStartRequestAction } from '../../types/request.types';
 import {
   getEntityRequestState,
   mergeUpdatingState,
   modifyRequestWithRequestType,
   setEntityRequestState,
 } from './request-helpers';
-import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 export function startRequest(state, action: IStartRequestAction) {
-  if (!action.apiAction.guid) {
+  if (isNullOrUndefined(action.apiAction.guid)) {
     return state;
+
   }
   const apiAction = action.apiAction as BaseEntityRequestAction;
   let requestState = getEntityRequestState(state, apiAction);

@@ -55,7 +55,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @Input() component: EndpointListDetailsComponent;
   private endpointDetails: ViewContainerRef;
-  @ViewChild('endpointDetails', { read: ViewContainerRef }) set content(content: ViewContainerRef) {
+  @ViewChild('endpointDetails', { read: ViewContainerRef, static: false }) set content(content: ViewContainerRef) {
     this.endpointDetails = content;
     this.updateInnerComponent();
   }
@@ -152,6 +152,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       this.component.isTable = false;
     }
     this.component.row = this.pRow;
+    this.componentRef.changeDetectorRef.detectChanges();
+
 
     this.updateCardStatus();
   }

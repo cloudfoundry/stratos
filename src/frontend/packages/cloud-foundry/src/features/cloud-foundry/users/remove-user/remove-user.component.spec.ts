@@ -1,5 +1,4 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -13,6 +12,7 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CfRolesService } from '../manage-users//cf-roles.service';
 import { UsersRolesConfirmComponent } from '../manage-users/manage-users-confirm/manage-users-confirm.component';
 import { RemoveUserComponent } from './remove-user.component';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('RemoveUserComponent', () => {
   let component: RemoveUserComponent;
@@ -26,7 +26,7 @@ describe('RemoveUserComponent', () => {
         SharedModule,
         NoopAnimationsModule,
         RouterTestingModule,
-        HttpModule
+        HttpClientModule
       ],
       providers: [
         {

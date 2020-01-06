@@ -3,7 +3,6 @@ import { normalize } from 'normalizr';
 
 import { AppState, IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../../../store/src/types/request.types';
@@ -14,10 +13,10 @@ import { EntityMonitor } from '../../shared/monitors/entity-monitor';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { EntityActionDispatcherManager } from './action-dispatcher/action-dispatcher';
 import {
+  ActionBuilderAction,
   ActionOrchestrator,
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
-  ActionBuilderAction,
 } from './action-orchestrator/action-orchestrator';
 import { EntityCatalogueHelpers } from './entity-catalogue.helper';
 import {
@@ -29,6 +28,7 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from './entity-catalogue.types';
+import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../../../store/src/entity-request-pipeline/pipeline.types';
 
 export interface EntityCatalogueBuilders<
   T extends IEntityMetadata = IEntityMetadata,
@@ -41,7 +41,7 @@ export interface EntityCatalogueBuilders<
   actionBuilders?: AB;
 }
 type DefinitionTypes = IStratosEntityDefinition<EntityCatalogueSchemas> |
-  IStratosEndpointDefinition |
+  IStratosEndpointDefinition<EntityCatalogueSchemas> |
   IStratosBaseEntityDefinition<EntityCatalogueSchemas>;
 export class StratosBaseCatalogueEntity<
   T extends IEntityMetadata = IEntityMetadata,
@@ -118,7 +118,7 @@ export class StratosBaseCatalogueEntity<
    * If no schemaKey is provided then the default schema will be returned
    */
   public getSchema(schemaKey?: string) {
-    const catalogueSchema = this.definition.schema;
+    const catalogueSchema = this.definition.schema as EntityCatalogueSchemas;
     if (!schemaKey || this.isEndpoint) {
       return catalogueSchema.default;
     }
@@ -140,7 +140,11 @@ export class StratosBaseCatalogueEntity<
     return this.builders.entityBuilder.getGuid(metadata);
   }
 
-  public getEntityMonitor<Q extends AppState>(
+  public getEndpointGuidFromEntity(entity: Y & EntityPipelineEntity) {
+    return entity[stratosEndpointGuidKey];
+  }
+
+  public getEntityMonitor<Q extends AppState, B = any>(
     store: Store<Q>,
     entityId: string,
     {
@@ -148,7 +152,7 @@ export class StratosBaseCatalogueEntity<
       startWithNull = false
     } = {}
   ) {
-    return new EntityMonitor(store, entityId, this.entityKey, this.getSchema(schemaKey), startWithNull);
+    return new EntityMonitor<B>(store, entityId, this.entityKey, this.getSchema(schemaKey), startWithNull);
   }
 
   public getTypeAndSubtype() {
@@ -249,14 +253,14 @@ export class StratosCatalogueEndpointEntity extends StratosBaseCatalogueEntity<I
     }),
     getLink: () => null,
     getGuid: metadata => metadata.guid,
-    getLines: metadata => [
-      ['Address', metadata.address],
-      ['User', metadata.user],
-      ['Admin', metadata.admin]
+    getLines: () => [
+      ['Address', (metadata) => metadata.address],
+      ['User', (metadata) => metadata.user],
+      ['Admin', (metadata) => metadata.admin]
     ]
   } as IStratosEntityBuilder<IEndpointFavMetadata, EndpointModel>;
   // This is needed here for typing
-  public definition: IStratosEndpointDefinition;
+  public definition: IStratosEndpointDefinition<EntityCatalogueSchemas>;
   constructor(
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
     getLink?: (metadata: IEndpointFavMetadata) => string

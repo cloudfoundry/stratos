@@ -48,10 +48,18 @@ function clean() {
 
   while IFS= read -r line
   do
-    NAME="${line%% *}"
+
+    if [ -z "$5" ]; then
+      NAME="${line%% *}"
+    else
+      NAME="${line}"
+    fi
+
     if [[ $NAME =~ $REGEX ]]; then
       DS="${BASH_REMATCH[3]}"
+      DS=${DS//_/}
       TS="${BASH_REMATCH[4]}"
+      TS=${TS//_/}
       TS="${TS:0:6}"
 
       if [[ "$unamestr" == 'Darwin' ]]; then
@@ -111,6 +119,11 @@ USERS=$(cf curl "/v2/users?results-per-page=100" | jq -r .resources[].entity.use
 clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travisci)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travis)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 
+# Routes
+echo "Cleaning routes"
+ROUTES=$(cf curl "v2/routes?results-per-page=100&inline-relations-depth=2&include-relations=domain" | jq -r '.resources[].entity | .domain.entity.name + " --hostname=" + .host + " --path=" + .path')
+clean "$ROUTES" "-" "delete-route" "([0-9a-z\.])*( --hostname=acceptance_e2e_travisci_)(20[0-9_]*)[Tt]([0-9_]*)[zZ].*" "true"
+clean "$ROUTES" "-" "delete-route" "([0-9a-z\.])*( --hostname=acceptance_e2e_travis_)(20[0-9_]*)[Tt]([0-9_]*)[zZ].*" "true"
 
 echo "Done"
 

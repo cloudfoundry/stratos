@@ -67,7 +67,7 @@ entityCache[gitBranchesEntityType] = GithubBranchSchema;
 const GithubRepoSchema = new CFEntitySchema(gitRepoEntityType);
 entityCache[gitRepoEntityType] = GithubRepoSchema;
 
-const GithubCommitSchema = new CFEntitySchema(gitCommitEntityType, {}, { idAttribute: commit => commit.sha });
+const GithubCommitSchema = new CFEntitySchema(gitCommitEntityType, {}, { idAttribute: commit => commit.guid });
 entityCache[gitCommitEntityType] = GithubCommitSchema;
 
 const CFInfoSchema = new CFEntitySchema(cfInfoEntityType);
@@ -328,24 +328,24 @@ const CFUserSchema = new CFUserEntitySchema({
     audited_spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.AUDITED_SPACES)],
   }
 }, {
-    idAttribute: getAPIResourceGuid,
-    processStrategy: (user: APIResource<CfUser>) => {
-      if (user.entity.username) {
-        return user;
-      }
-      const entity = {
-        ...user.entity,
-        username: user.metadata.guid
-      };
-
-      return user.metadata ? {
-        entity,
-        metadata: user.metadata
-      } : {
-          entity
-        };
+  idAttribute: getAPIResourceGuid,
+  processStrategy: (user: APIResource<CfUser>) => {
+    if (user.entity.username) {
+      return user;
     }
-  });
+    const entity = {
+      ...user.entity,
+      username: user.metadata.guid
+    };
+
+    return user.metadata ? {
+      entity,
+      metadata: user.metadata
+    } : {
+        entity
+      };
+  }
+});
 entityCache[cfUserEntityType] = CFUserSchema;
 
 

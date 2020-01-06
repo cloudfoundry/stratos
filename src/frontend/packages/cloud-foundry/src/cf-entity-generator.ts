@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import {
   IService,
   IServiceBinding,
@@ -34,6 +35,9 @@ import {
 } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
+import {
+  JetstreamError,
+} from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
@@ -76,6 +80,7 @@ import {
   stackEntityType,
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
+import { CfErrorResponse, getCfError } from './cf-error-helpers';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { applicationEventActionBuilders } from './entity-action-builders/application-event.action-builders';
@@ -124,6 +129,8 @@ import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
+import { CfApplicationState } from './store/types/application.types';
+import { EntitySchema } from '../../store/src/helpers/entity-schema';
 
 export interface CFBasePipelineRequestActionMeta {
   includeRelations?: string[];
@@ -146,6 +153,7 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
     logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     listDetailsComponent: CfEndpointDetailsComponent,
+    renderPriority: 1,
     globalPreRequest: (request, action) => {
       return addCfRelationParams(request, action);
     },
@@ -164,6 +172,20 @@ export function generateCFEntities(): StratosBaseCatalogueEntity[] {
         }
       }
       return data;
+    },
+    globalErrorMessageHandler: (errors: JetstreamError<CfErrorResponse>[]) => {
+      if (!errors || errors.length === 0) {
+        return 'No errors in response';
+      }
+
+      if (errors.length === 1) {
+        return getCfError(errors[0].jetstreamErrorResponse);
+      }
+
+      return errors.reduce((message, error) => {
+        message += `\n${getCfError(error.jetstreamErrorResponse)}`;
+        return message;
+      }, 'Multiple Cloud Foundry Errors. ');
     },
     paginationConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,
@@ -253,7 +275,6 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
         }
       };
     },
-    // TODO: we need a envvar type
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, APIResource>(definition, {
     dataReducers: [
@@ -635,7 +656,14 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
     schema: cfEntityFactory(gitCommitEntityType),
     label: 'Git Commit',
     labelPlural: 'Git Commits',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    nonJetstreamRequest: true,
+    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
+      return {
+        ...data,
+        guid: action.guid
+      };
+    },
   };
   return new StratosCatalogueEntity<IFavoriteMetadata, GitCommit, GitCommitActionBuildersConfig, GitCommitActionBuilders>(
     definition,
@@ -646,7 +674,8 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
       actionBuilders: gitCommitActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
-          name: ent.commit ? ent.commit.message || ent.sha : ent.sha
+          name: ent.commit ? ent.commit.message || ent.sha : ent.sha,
+          guid: ent.guid
         }),
         getGuid: metadata => metadata.guid,
       }
@@ -835,12 +864,18 @@ function generateCfEndpointEntity(endpointDefinition: StratosEndpointExtensionDe
 }
 
 function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const applicationDefinition: IStratosEntityDefinition = {
+  const applicationDefinition: IStratosEntityDefinition<EntitySchema, APIResource<IApp>> = {
     type: applicationEntityType,
     schema: cfEntityFactory(applicationEntityType),
     label: 'Application',
     labelPlural: 'Applications',
     endpoint: endpointDefinition,
+    tableConfig: {
+      rowBuilders: [
+        ['Name', (entity) => entity.entity.name],
+        ['Creation Date', (entity) => entity.metadata.created_at]
+      ]
+    }
   };
 
   return new StratosCatalogueEntity<IAppFavMetadata, APIResource<IApp>>(
@@ -854,10 +889,14 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getMetadata: app => ({
           guid: app.metadata.guid,
           cfGuid: app.entity.cfGuid,
+          createdAt: moment(app.metadata.created_at).format('LLL'),
           name: app.entity.name,
         }),
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
+        getLines: () => ([
+          ['Creation  Date', (meta) => meta.createdAt]
+        ])
       },
       actionBuilders: applicationActionBuilder
     },
@@ -891,6 +930,9 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           name: space.entity.name,
           cfGuid: space.entity.cfGuid,
         }),
+        getLines: () => ([
+          ['Name', (meta) => meta.name],
+        ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid
       }

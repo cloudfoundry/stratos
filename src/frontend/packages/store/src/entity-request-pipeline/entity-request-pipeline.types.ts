@@ -1,5 +1,4 @@
 import { HttpRequest } from '@angular/common/http';
-import { RequestOptions } from '@angular/http';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
@@ -13,6 +12,7 @@ import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers
 import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';
+import { JetstreamError } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { PipelineHttpClient } from './pipline-http-client.service';
 
 export type ActionDispatcher<T extends Action = Action> = (action: T) => void;
@@ -57,7 +57,7 @@ export type MakeEntityRequestPipe<
 
 export type BuildEntityRequestPipe = (
   requestType: ApiRequestTypes,
-  requestOptions: RequestOptions | HttpRequest<any>,
+  requestOptions: HttpRequest<any>,
   catalogueEntity: StratosBaseCatalogueEntity,
   store: Store<any>,
 ) => HttpRequest<any> | Observable<HttpRequest<any>>;
@@ -107,6 +107,10 @@ export type PrePaginationApiRequest = (
   catalogueEntity: StratosBaseCatalogueEntity,
   appState: InternalAppState
 ) => HttpRequest<any> | Observable<HttpRequest<any>>;
+
+export type ApiErrorMessageHandler = (
+  errors: JetstreamError[]
+) => string;
 
 export interface BasePipelineConfig<T extends AppState = InternalAppState, Y extends Action = Action> {
   requestType: ApiRequestTypes;

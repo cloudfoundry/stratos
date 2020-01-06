@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment-timezone';
 
@@ -67,7 +67,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
       start_time: [0, [Validators.required, this.validateRecurringScheduleTime('end_time'), this.validateRecurringScheduleGlobal()]],
       end_time: [0, [Validators.required, this.validateRecurringScheduleTime('start_time'), this.validateRecurringScheduleGlobal()]],
       effective_type: [0, [Validators.required, this.validateRecurringScheduleGlobal()]],
-      repeat_type: [0, [Validators.required, this.validateRecurringScheduleGlobal()]],
+      repeat_type: [0, [Validators.required, this.validateRecurringScheduleGlobal('repeat_type')]],
     });
   }
 
@@ -163,9 +163,13 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
     this.editIndex = -1;
   }
 
-  validateRecurringScheduleGlobal(): ValidatorFn {
+  validateRecurringScheduleGlobal(controlName?: string): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       if (this.editRecurringScheduleForm) {
+        if (controlName === 'repeat_type') {
+          this.editRepeatType = control.value;
+          this.setRecurringScheduleValidator();
+        }
         if (this.editRepeatType === 'week') {
           this.editRecurringScheduleForm.controls.days_of_week.updateValueAndValidity();
         } else {

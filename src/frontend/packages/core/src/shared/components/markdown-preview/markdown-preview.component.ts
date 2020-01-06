@@ -25,7 +25,7 @@ export class MarkdownPreviewComponent {
     }
   }
 
-  @ViewChild('markdown') public markdown: ElementRef;
+  @ViewChild('markdown', { static: true }) public markdown: ElementRef;
 
   constructor(private httpClient: HttpClient, private logger: LoggerService, private domSanitizer: DomSanitizer) { }
 

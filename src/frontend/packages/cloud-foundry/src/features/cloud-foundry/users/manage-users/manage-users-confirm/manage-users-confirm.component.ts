@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import { AfterContentInit, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
@@ -32,7 +33,6 @@ import { CfUserService } from '../../../../../shared/data-services/cf-user.servi
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 
-/* tslint:disable:max-line-length */
 
 
 /* tslint:enable:max-line-length */

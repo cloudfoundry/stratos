@@ -33,10 +33,10 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
@@ -50,6 +50,7 @@ const (
 	SessionExpiry        = 20 * 60 // Session cookies expire after 20 minutes
 	UpgradeVolume        = "UPGRADE_VOLUME"
 	UpgradeLockFileName  = "UPGRADE_LOCK_FILENAME"
+	LogToJSON            = "LOG_TO_JSON"
 	VCapApplication      = "VCAP_APPLICATION"
 	defaultSessionSecret = "wheeee!"
 )
@@ -108,7 +109,22 @@ func getEnvironmentLookup() *env.VarSet {
 }
 
 func main() {
+
+	// Register time.Time in gob
+	gob.Register(time.Time{})
+
+	// Create common method for looking up config
+	envLookup := getEnvironmentLookup()
+
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
+
+	// Change to JSON logging if configured
+	if logToJSON, ok := envLookup.Lookup(LogToJSON); ok {
+		if logToJSON == "true" {
+			log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.UnixDate})
+		}
+	}
+
 	log.SetOutput(os.Stdout)
 
 	log.Info("========================================")
@@ -116,12 +132,6 @@ func main() {
 	log.Info("========================================")
 	log.Info("")
 	log.Info("Initialization started.")
-
-	// Register time.Time in gob
-	gob.Register(time.Time{})
-
-	// Create common method for looking up config
-	envLookup := getEnvironmentLookup()
 
 	// Check to see if we are running as the database migrator
 	if migrateDatabase(envLookup) {
@@ -247,13 +257,11 @@ func main() {
 	}()
 
 	// Initialise configuration
-	needSetupMiddleware, err := initialiseConsoleConfiguration(portalProxy)
+	err = initialiseConsoleConfiguration(portalProxy)
 	if err != nil {
 		log.Infof("Failed to initialise console config due to: %s", err)
 		return
 	}
-
-	showSSOConfig(portalProxy)
 
 	// Initialise Plugins
 	portalProxy.loadPlugins()
@@ -274,6 +282,19 @@ func main() {
 
 	portalProxy.Plugins = initedPlugins
 	log.Info("Plugins initialized")
+
+	var needSetupMiddleware bool
+
+	// At this stage, all plugins have had a chance to modify configurtion based on hosting environment
+	// Check to see if we are setup or not
+	if !portalProxy.Config.ConsoleConfig.IsSetupComplete() {
+		needSetupMiddleware = true
+		log.Info("Console does not have a complete configuration - going to enter setup mode (adding `setup` route and middleware)")
+	} else {
+		needSetupMiddleware = false
+		showStratosConfig(portalProxy.Config.ConsoleConfig)
+		showSSOConfig(portalProxy)
+	}
 
 	// Get Diagnostics and store them once - ensure this is done after plugins are loaded
 	portalProxy.StoreDiagnostics()
@@ -297,13 +318,12 @@ func (portalProxy *portalProxy) GetPlugin(name string) interface{} {
 	return plugin
 }
 
-func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
+func initialiseConsoleConfiguration(portalProxy *portalProxy) error {
 
-	addSetupMiddleware := false
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(portalProxy.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Unable to initialize Stratos backend config due to: %+v", err)
-		return addSetupMiddleware, err
+		return err
 	}
 
 	// Do this BEFORE we load the config from the database, so env var lookup at this stage
@@ -327,18 +347,12 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (bool, error) {
 		log.Fatalf("Unable to load console config; %+v", err)
 	}
 
-	// We dynamically determine if we need to enter setup mode based on the configuration
-	// We need: UAA Endpoint and Console Admin Scope
-	if !consoleConfig.IsSetupComplete() {
-		addSetupMiddleware = true
-		log.Info("Will add `setup` route and middleware")
-	} else {
-		showStratosConfig(consoleConfig)
+	if consoleConfig.IsSetupComplete() {
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
 	}
 
-	return addSetupMiddleware, nil
+	return nil
 }
 
 func showStratosConfig(config *interfaces.ConsoleConfig) {
@@ -365,6 +379,7 @@ func showSSOConfig(portalProxy *portalProxy) {
 	log.Infof("SSO Configuration:")
 	log.Infof("... SSO Enabled             : %t", portalProxy.Config.SSOLogin)
 	log.Infof("... SSO Options             : %s", portalProxy.Config.SSOOptions)
+	log.Infof("... SSO Redirect Whitelist  : %s", portalProxy.Config.SSOWhiteList)
 }
 
 func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
@@ -499,6 +514,19 @@ func loadPortalConfig(pc interfaces.PortalConfig, env *env.VarSet) (interfaces.P
 		pc.HTTPClientTimeoutMutatingInSecs = pc.HTTPClientTimeoutInSecs
 	}
 
+	if len(pc.AuthEndpointType) == 0 {
+		//Default to "remote" if AUTH_ENDPOINT_TYPE is not set
+		pc.AuthEndpointType = string(interfaces.Remote)
+	} else {
+		val, endpointTypeSupported := interfaces.AuthEndpointTypes[pc.AuthEndpointType]
+		if endpointTypeSupported {
+			pc.AuthEndpointType = string(val)
+		} else {
+			return pc, fmt.Errorf("AUTH_ENDPOINT_TYPE: %v is not valid. Must be set to local or remote (defaults to remote)", val)
+		}
+	}
+
+	log.Debugf("Portal config auth endpoint type initialised to: %v", pc.AuthEndpointType)
 	return pc, nil
 }
 
@@ -595,6 +623,15 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		Handler:  pp.doHttpBasicFlowRequest,
 		UserInfo: pp.GetCNSIUserFromBasicToken,
 	})
+
+	err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.AuthEndpointType])
+	if err != nil {
+		log.Warnf("Defaulting to UAA authentication: %v", err)
+		err = pp.InitStratosAuthService(interfaces.Remote)
+		if err != nil {
+			log.Fatalf("Could not initialise auth service. %v", err)
+		}
+	}
 
 	// OIDC
 	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
@@ -726,9 +763,20 @@ func (p *portalProxy) GetHttpClient(skipSSLValidation bool) http.Client {
 	return p.getHttpClient(skipSSLValidation, false)
 }
 
+// GetHttpClientForRequest returns an Http Client for the giving request
 func (p *portalProxy) GetHttpClientForRequest(req *http.Request, skipSSLValidation bool) http.Client {
 	isMutating := req.Method != "GET" && req.Method != "HEAD"
-	return p.getHttpClient(skipSSLValidation, isMutating)
+	client := p.getHttpClient(skipSSLValidation, isMutating)
+
+	// Is this is a long-running request, then use a different timeout
+	if req.Header.Get(longRunningTimeoutHeader) == "true" {
+		longRunningClient := http.Client{}
+		longRunningClient.Transport = client.Transport
+		longRunningClient.Timeout = time.Duration(p.GetConfig().HTTPClientTimeoutLongRunningInSecs) * time.Second
+		return longRunningClient
+	}
+
+	return client
 }
 
 func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.Client {
@@ -775,19 +823,16 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		pp.POST("/v1/setup/check", p.setupConsoleCheck)
 	}
 
-	pp.POST("/v1/auth/login/uaa", p.stratosLoginHandler)
-	pp.POST("/v1/auth/logout", p.logout)
+	loginAuthGroup := pp.Group("/v1/auth")
+	loginAuthGroup.POST("/login/uaa", p.StratosAuthService.Login)
+	loginAuthGroup.POST("/logout", p.StratosAuthService.Logout)
 
 	// SSO Routes will only respond if SSO is enabled
-	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
-	pp.GET("/v1/auth/sso_logout", p.ssoLogoutOfUAA)
-
-	// Local User login/logout
-	// pp.POST("/v1/auth/local_login", p.localLogin)
-	// pp.POST("/v1/auth/local_logout", p.logout)
+	loginAuthGroup.GET("/sso_login", p.initSSOlogin)
+	loginAuthGroup.GET("/sso_logout", p.ssoLogoutOfUAA)
 
 	// Callback is used by both login to Stratos and login to an Endpoint
-	pp.GET("/v1/auth/sso_login_callback", p.ssoLoginToUAA)
+	loginAuthGroup.GET("/sso_login_callback", p.ssoLoginToUAA)
 
 	// Version info
 	pp.GET("/v1/version", p.getVersions)
@@ -806,17 +851,19 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		e.Use(middlewarePlugin.SessionEchoMiddleware)
 	}
 
+	sessionAuthGroup := sessionGroup.Group("/auth")
+
 	// Connect to endpoint
-	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
+	sessionAuthGroup.POST("/login/cnsi", p.loginToCNSI)
 
 	// Connect to Enpoint (SSO)
-	sessionGroup.GET("/auth/login/cnsi", p.ssoLoginToCNSI)
+	sessionAuthGroup.GET("/login/cnsi", p.ssoLoginToCNSI)
 
 	// Disconnect endpoint
-	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
+	sessionAuthGroup.POST("/logout/cnsi", p.logoutOfCNSI)
 
 	// Verify Session
-	sessionGroup.GET("/auth/session/verify", p.verifySession)
+	sessionAuthGroup.GET("/session/verify", p.verifySession)
 
 	// CNSI operations
 	sessionGroup.GET("/cnsis", p.listCNSIs)
@@ -926,6 +973,7 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 // EchoV2DefaultHTTPErrorHandler ensures we get V2 error behaviour
 // i.e. no wrapping in 'message' JSON object
 func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
+
 	code := http.StatusInternalServerError
 	msg := http.StatusText(code)
 	if he, ok := err.(*echo.HTTPError); ok {
@@ -949,7 +997,9 @@ func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
 		}
 	}
 
-	if err != nil {
+	//Only log if there is a message to log
+	he, _ := err.(*echo.HTTPError)
+	if err != nil && he.Message.(string) != "" {
 		c.Logger().Error(err)
 	}
 }

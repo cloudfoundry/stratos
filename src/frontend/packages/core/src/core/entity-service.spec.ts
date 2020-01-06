@@ -1,6 +1,6 @@
+import { HttpClientModule, HttpRequest, HttpXhrBackend } from '@angular/common/http';
+import { HttpTestingController } from '@angular/common/http/testing';
 import { inject, TestBed } from '@angular/core/testing';
-import { HttpModule, XHRBackend } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
 import { Action, Store } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
@@ -9,21 +9,22 @@ import { GeneralAppState } from '../../../store/src/app-state';
 import {
   failedEntityHandler,
 } from '../../../store/src/entity-request-pipeline/entity-request-base-handlers/fail-entity-request.handler';
+import { PipelineResult } from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { completeApiRequest, startApiRequest } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../../store/src/types/api.types';
 import { EntityRequestAction, ICFAction } from '../../../store/src/types/request.types';
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { createEntityStore, TestStoreEntity } from '../../test-framework/store-test-helper';
+import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
 import { ENTITY_SERVICE } from '../shared/entity.tokens';
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
 import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
-import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
+import { EntityCatalogueEntityConfig, IStratosEndpointDefinition } from './entity-catalogue/entity-catalogue.types';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
-import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
 
 function getActionDispatcher(store: Store<any>) {
   return (action: Action) => {
@@ -37,14 +38,13 @@ const entitySchema = new EntitySchema(entityType, endpointType);
 const createAction = (guid: string) => {
   return {
     actions: ['fa', 'k', 'e'],
-    options: {},
+    options: new HttpRequest<any>('GET', 'b'),
     entityType: entitySchema.entityType,
     endpointType: entitySchema.endpointType,
     guid,
     type: 'test-action'
   } as ICFAction;
 };
-
 
 const catalogueEndpointEntity = new StratosBaseCatalogueEntity({
   type: endpointType,
@@ -54,11 +54,13 @@ const catalogueEndpointEntity = new StratosBaseCatalogueEntity({
   ),
   label: 'Endpoint',
   labelPlural: 'Endpoints',
+  logoUrl: '',
+  authTypes: []
 });
 
 
 const catalogueEntity = new StratosBaseCatalogueEntity({
-  endpoint: catalogueEndpointEntity,
+  endpoint: catalogueEndpointEntity.definition as IStratosEndpointDefinition,
   type: entityType,
   schema: new EntitySchema(
     entityType,
@@ -66,6 +68,7 @@ const catalogueEntity = new StratosBaseCatalogueEntity({
   ),
   label: 'Entity',
   labelPlural: 'Entities',
+
 });
 
 function createTestService(
@@ -102,12 +105,18 @@ function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey:
   } as NormalizedResponse;
   const res = new APIResponse();
   res.response = data;
+
+  const pipelineRes: PipelineResult = {
+    success: true
+  };
+
   return {
     action,
     entities,
     entitySchema,
     entityService,
-    res
+    res,
+    pipelineRes
   };
 }
 
@@ -142,12 +151,12 @@ describe('EntityServiceService', () => {
           action
         ),
         {
-          provide: XHRBackend,
-          useClass: MockBackend
+          provide: HttpXhrBackend,
+          useClass: HttpTestingController
         }
       ],
       imports: [
-        HttpModule,
+        HttpClientModule,
         createEntityStore(entityMap),
         {
           ngModule: EntityCatalogueTestModule,
@@ -168,7 +177,7 @@ describe('EntityServiceService', () => {
   }));
 
   it('should poll', (done) => {
-    inject([ENTITY_SERVICE, XHRBackend], (service: EntityService, mockBackend: MockBackend) => {
+    inject([ENTITY_SERVICE, HttpXhrBackend], (service: EntityService, mockBackend: HttpTestingController) => {
       const sub = service.poll(1, '_root_').subscribe(a => {
         sub.unsubscribe();
         expect('polled once').toEqual('polled once');
@@ -208,7 +217,7 @@ describe('EntityServiceService', () => {
       const {
         action,
         entityService,
-        res
+        pipelineRes
       } = getAllTheThings(store, guid, entitySchema.key);
       startApiRequest(store, action);
       entityService.entityObs$.pipe(
@@ -219,7 +228,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, res);
+      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, pipelineRes);
     })();
   });
 
@@ -229,7 +238,8 @@ describe('EntityServiceService', () => {
       const {
         action,
         entityService,
-        res
+        res,
+        pipelineRes
       } = getAllTheThings(store, guid, entitySchema.key);
       startApiRequest(store, action);
       completeApiRequest(store, action, res);
@@ -241,7 +251,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, res);
+      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, pipelineRes);
     })();
   });
 
@@ -316,7 +326,9 @@ describe('EntityServiceService', () => {
         entityService,
         res
       } = getAllTheThings(store, guid, entitySchema.key);
-      action.options.method = 'delete';
+      action.options = action.options.clone({
+        method: 'DELETE'
+      });
       startApiRequest(store, action);
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entityRequestInfo.deleting.busy),
@@ -347,7 +359,9 @@ describe('EntityServiceService', () => {
       } = getAllTheThings(store, guid, entitySchema.key);
       startApiRequest(store, action);
       completeApiRequest(store, action, res);
-      action.options.method = 'delete';
+      action.options = action.options.clone({
+        method: 'DELETE'
+      });
       startApiRequest(store, action, 'delete');
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entityRequestInfo.deleting.busy),
@@ -374,11 +388,14 @@ describe('EntityServiceService', () => {
       const {
         action,
         entityService,
-        res
+        res,
+        pipelineRes
       } = getAllTheThings(store, guid, entitySchema.key);
       startApiRequest(store, action);
       completeApiRequest(store, action, res);
-      action.options.method = 'delete';
+      action.options = action.options.clone({
+        method: 'DELETE'
+      });
       entityService.entityObs$.pipe(
         pairwise(),
         filter(([x, y]) => x.entityRequestInfo.deleting.busy && !y.entityRequestInfo.deleting.busy),
@@ -398,7 +415,7 @@ describe('EntityServiceService', () => {
         first(),
         tap(ent => {
           expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
-          failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'delete', action, res);
+          failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'delete', action, pipelineRes);
         })
       ).subscribe();
     })();

@@ -38,8 +38,7 @@ import { TableHeaderSelectComponent } from '../table-header-select/table-header-
 import { ICellDefinition } from '../table.types';
 import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
 
-/* tslint:disable:max-line-length */
-/* tslint:enable:max-line-length */
+
 export const listTableCells = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
@@ -68,7 +67,7 @@ export const listTableCells = [
   entryComponents: [...listTableCells]
 })
 export class TableCellComponent<T> implements OnInit {
-  @ViewChild('target', { read: ViewContainerRef })
+  @ViewChild('target', { read: ViewContainerRef, static: true })
   target: ViewContainerRef;
   private rcRow: T | MultiActionListEntity;
 

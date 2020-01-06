@@ -1,10 +1,9 @@
-import { RequestOptions, URLSearchParams } from '@angular/http';
-
 import { QParam, QParamJoiners } from '../../../store/src/q-param';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { appEventEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
+import { HttpRequest, HttpParams } from '@angular/common/http';
 
 export const AppGetAllEvents = {
   GET_ALL: '[Application Event] Get all',
@@ -17,11 +16,17 @@ export class GetAllAppEvents extends CFStartAction implements PaginatedAction {
 
   constructor(public paginationKey: string, public appGuid: string, public endpointGuid) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = 'events';
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.options.params.append('', '');
+    this.options = new HttpRequest(
+      'GET',
+      'events',
+      {
+        params: new HttpParams({
+          fromObject: {
+            '': ''
+          }
+        })
+      }
+    );
   }
   actions = [
     AppGetAllEvents.GET_ALL,
@@ -31,7 +36,7 @@ export class GetAllAppEvents extends CFStartAction implements PaginatedAction {
 
   entity = [cfEntityFactory(appEventEntityType)];
   entityType = appEventEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams = {
     'order-direction': 'desc',
     'order-direction-field': GetAllAppEvents.sortField,

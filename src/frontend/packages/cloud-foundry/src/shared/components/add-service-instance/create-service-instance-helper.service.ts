@@ -16,16 +16,21 @@ import {
   IServicePlan,
   IServicePlanVisibility,
 } from '../../../../../core/src/core/cf-api-svc.types';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { CF_GUID } from '../../../../../core/src/shared/entity.tokens';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { cfEntityFactory } from '../../../cf-entity-factory';
-import { getCfService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { cfEntityFactory } from '../../../cf-entity-factory';
+import {
+  getCfService,
+  getServiceBroker,
+  getServiceName,
+  getServicePlans,
+} from '../../../features/service-catalog/services-helper';
 
 export class CreateServiceInstanceHelper {
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
@@ -97,14 +102,8 @@ export class CreateServiceInstanceHelper {
     return this.service$
       .pipe(
         filter(p => !!p),
-        map((service: APIResource<IService>) => {
-          const extraInfo = JSON.parse(service.entity.extra);
-          if (extraInfo && extraInfo.displayName) {
-            return extraInfo.displayName;
-          } else {
-            return service.entity.label;
-          }
-        }));
+        map(getServiceName)
+      );
   }
 
   // getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {

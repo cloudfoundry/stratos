@@ -103,21 +103,6 @@ export class UtilsService {
     return retBytes;
   }
 
-  getDefaultPrecision(precision: number): number {
-    if (precision === undefined || precision === null) {
-      precision = 0;
-    }
-    return precision;
-  }
-
-  getNumber(value: number): number {
-    return Math.floor(Math.log(value) / Math.log(1024));
-  }
-
-  getReducedValue(value: number, multiplier: number): number {
-    return (value / Math.pow(1024, Math.floor(multiplier)));
-  }
-
   usageBytes(usage, usedPrecision?, totalPrecision?): string {
     const used = usage[0];
     const total = usage[1];
@@ -157,7 +142,7 @@ export class UtilsService {
    * @returns formatted uptime string
    */
   formatUptime(uptime): string {
-    if (uptime === undefined || uptime === null) {
+    if (uptime === undefined || uptime === null || isNaN(uptime)) {
       return '-';
     }
 
@@ -176,8 +161,30 @@ export class UtilsService {
       this.formatPart(hours, 'h', 'h') +
       this.formatPart(minutes, 'm', 'm') +
       this.formatPart(seconds, 's', 's')
-        .trim()
-    );
+    ).trim();
+  }
+
+  percent(value: number, decimals: number = 2): string {
+    if (!value && value !== 0) {
+      return '';
+    }
+    const val = (value * 100).toFixed(decimals);
+    return val + '%';
+  }
+
+  private getReducedValue(value: number, multiplier: number): number {
+    return (value / Math.pow(1024, Math.floor(multiplier)));
+  }
+
+  private getDefaultPrecision(precision: number): number {
+    if (precision === undefined || precision === null) {
+      precision = 0;
+    }
+    return precision;
+  }
+
+  private getNumber(value: number): number {
+    return Math.floor(Math.log(value) / Math.log(1024));
   }
 
   private getFormattedTime(isPlural, value, unit): string {
@@ -195,14 +202,6 @@ export class UtilsService {
     } else {
       return this.getFormattedTime(true, count, plural) + ' ';
     }
-  }
-
-  percent(value: number, decimals: number = 2): string {
-    if (!value && value !== 0) {
-      return '';
-    }
-    const val = (value * 100).toFixed(decimals);
-    return val + '%';
   }
 }
 
@@ -234,8 +233,6 @@ export function pathSet(path: string, object: any, value: any) {
     object[params[index++]] = value;
   }
 }
-
-
 
 export function safeStringToObj<T = object>(value: string): T {
   try {

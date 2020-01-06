@@ -93,7 +93,7 @@ describe('Edit Service Instance', () => {
         menu.clickItem('Delete');
         return ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Service Instance', editedServiceInstanceName);
       })
-      .then(() => servicesHelperE2E.noServiceCardWithTitle(servicesWall.serviceInstancesList, editedServiceInstanceName))
+      .then(() => servicesHelperE2E.noServiceCardWithTitleAttempt(servicesWall.serviceInstancesList, editedServiceInstanceName, 1, 5))
       .then(totalResults => {
         if (totalResults === 0) {
           serviceNamesToDelete = serviceNamesToDelete.slice(serviceNamesToDelete.indexOf(editedServiceInstanceName), 1);

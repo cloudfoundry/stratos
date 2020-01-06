@@ -26,8 +26,9 @@ ADD_OFFICIAL_TAG="false"
 TAG_LATEST="false"
 NO_PUSH="true"
 DOCKER_REG_DEFAULTS="true"
+CHART_ONLY="false"
 
-while getopts ":ho:r:t:Tclb:On" opt; do
+while getopts ":ho:r:t:Tclb:Op" opt; do
   case $opt in
     h)
       echo
@@ -63,6 +64,9 @@ while getopts ":ho:r:t:Tclb:On" opt; do
       ;;
     p)
       NO_PUSH="false"
+      ;;      
+    c)
+      CHART_ONLY="true"
       ;;      
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -175,22 +179,24 @@ cleanup
 
 updateTagForRelease
 
-# Build all of the components that make up the Console
+if [ "${CHART_ONLY}" == "false" ]; then
+  # Build all of the components that make up the Console
 
-log "-- Build & publish the runtime container image for Jetstream (backend)"
-patchAndPushImage stratos-jetstream deploy/Dockerfile.bk "${STRATOS_PATH}" prod-build
+  log "-- Build & publish the runtime container image for Jetstream (backend)"
+  patchAndPushImage stratos-jetstream deploy/Dockerfile.bk "${STRATOS_PATH}" prod-build
 
-# Build the postflight container
-log "-- Build & publish the runtime container image for the postflight job"
-patchAndPushImage stratos-postflight-job deploy/Dockerfile.bk "${STRATOS_PATH}" postflight-job
+  # Build the postflight container
+  log "-- Build & publish the runtime container image for the postflight job"
+  patchAndPushImage stratos-postflight-job deploy/Dockerfile.bk "${STRATOS_PATH}" postflight-job
 
-# Build and push an image based on the mariab db container
-log "-- Building/publishing MariaDB"
-patchAndPushImage stratos-mariadb Dockerfile.mariadb "${STRATOS_PATH}/deploy/db"
+  # Build and push an image based on the mariab db container
+  log "-- Building/publishing MariaDB"
+  patchAndPushImage stratos-mariadb Dockerfile.mariadb "${STRATOS_PATH}/deploy/db"
 
-# Build and push an image based on the nginx container (Front-end)
-log "-- Building/publishing the runtime container image for the Console web server (frontend)"
-patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
+  # Build and push an image based on the nginx container (Front-end)
+  log "-- Building/publishing the runtime container image for the Console web server (frontend)"
+  patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
+fi
 
 log "-- Building Helm Chart"
 

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { RequestMethod } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
@@ -150,10 +149,9 @@ export class RequestEffect {
 
         if (
           !apiAction.updatingKey &&
-          (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
-            apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
+          (apiAction.options.method === 'POST' || apiAction.options.method === 'DELETE')
         ) {
-          // FIXME: Look at using entity config instead of actions in these actions ctors
+          // FIXME: Look at using entity config instead of actions in these actions ctors #3975
           if (apiAction.removeEntityOnDelete) {
             actions.unshift(new ClearPaginationOfEntity(apiAction, apiAction.guid));
           } else {

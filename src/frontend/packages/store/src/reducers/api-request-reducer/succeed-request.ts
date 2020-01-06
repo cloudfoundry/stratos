@@ -1,19 +1,21 @@
+import { isNullOrUndefined } from 'util';
+
+import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 import { BaseRequestState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
-import { EntityRequestAction, ISuccessRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
+import { ISuccessRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
 import {
   createRequestStateFromResponse,
   getEntityRequestState,
   mergeObject,
   mergeUpdatingState,
-  setEntityRequestState
+  setEntityRequestState,
 } from './request-helpers';
 import { defaultDeletingActionState } from './types';
-import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
 
 
 export function succeedRequest(state: BaseRequestState, action: ISuccessRequestAction) {
-  if (action.apiAction.guid) {
+  if (!isNullOrUndefined(action.apiAction.guid)) {
     const apiAction = action.apiAction as BaseEntityRequestAction;
     const successAction = action as WrapperRequestActionSuccess;
     const requestSuccessState = getEntityRequestState(state, apiAction);

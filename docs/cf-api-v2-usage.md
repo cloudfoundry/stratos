@@ -772,7 +772,7 @@ Endpoint | Inline Relations | Notes
 
 #### Others
 The include-relations property is populated by walking our relationship tree, so for a complete and exhaustive list of all possible
-relations please see the [`entity-factory.ts`](https://github.com/cloudfoundry-incubator/stratos/blob/v2-master/src/frontend/app/store/helpers/entity-factory.ts).
+relations please see the [`entity-factory.ts`](https://github.com/cloudfoundry/stratos/blob/master/src/frontend/app/store/helpers/entity-factory.ts).
 
 In terms of api requests we also make use of...
 

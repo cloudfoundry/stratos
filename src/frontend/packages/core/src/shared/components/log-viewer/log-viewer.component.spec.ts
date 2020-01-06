@@ -15,7 +15,7 @@ describe('LogViewerComponent', () => {
     template: `<app-log-viewer></app-log-viewer>`
   })
   class TestHostComponent {
-    @ViewChild(LogViewerComponent)
+    @ViewChild(LogViewerComponent, { static: true })
     public logViewer: LogViewerComponent;
   }
 

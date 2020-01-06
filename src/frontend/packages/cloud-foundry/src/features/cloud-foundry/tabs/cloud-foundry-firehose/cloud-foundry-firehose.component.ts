@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
-import { catchError, filter, share } from 'rxjs/operators';
+import { catchError, filter, share, map, switchMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../../../core/src/core/logger.service';
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
@@ -41,14 +41,13 @@ export class CloudFoundryFirehoseComponent implements OnInit {
   }
 
   private setupFirehoseStream(streamUrl: string) {
-    const { messages, connectionStatus } = websocketConnect(
-      streamUrl,
-      new Subject<string>()
+    this.messages = websocketConnect(
+      streamUrl
+    ).pipe(
+      switchMap((get) => get(new Subject<string>())),
+      map((message: string) => message)
     );
-
-    this.messages = messages;
-    this.connectionStatus = connectionStatus;
-    messages.pipe(
+    this.messages.pipe(
       catchError(e => {
         return [];
       }),

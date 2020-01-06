@@ -1,5 +1,3 @@
-import { RequestOptions, URLSearchParams } from '@angular/http';
-
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import {
   EntityInlineChildAction,
@@ -9,6 +7,7 @@ import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { RequestEntityLocation, RequestActionEntity } from '../../../store/src/types/request.types';
 import { CFStartAction } from './cf-action.types';
 import { EntityTreeRelation } from '../entity-relations/entity-relation-tree';
+import { HttpRequest, HttpParams } from '@angular/common/http';
 
 const relationActionId = 'FetchRelationAction';
 
@@ -24,10 +23,13 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
   ) {
     super();
     this.entityType = child.entityType;
-    this.options = new RequestOptions();
-    this.options.url = url.startsWith('/v2/') ? url.substring(4, url.length) : url;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      url.startsWith('/v2/') ? url.substring(4, url.length) : url,
+      {
+        params: new HttpParams()
+      }
+    );
     this.parentEntityConfig = parent.entity;
   }
   entity: RequestActionEntity;
@@ -38,7 +40,7 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
     '[Fetch Relations] Success',
     '[Fetch Relations] Failed'
   ];
-  options: RequestOptions;
+  options: HttpRequest<any>;
   parentEntityConfig: EntityCatalogueEntityConfig;
   static is(anything: any): FetchRelationAction {
     return (anything.isId === relationActionId) ? anything as FetchRelationAction : null;

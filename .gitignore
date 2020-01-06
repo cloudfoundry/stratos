@@ -78,6 +78,9 @@ deploy/stratos-ui-release/dev_releases/
 output/fissile
 deploy/ci/travis/temp/
 
+# Helm Chart Image List
+deploy/kubernetes/console/imagelist.txt
+
 .dist/
 deploy/uaa/tmp/
 src/backend/*/vendor/
@@ -91,6 +94,7 @@ e2e-reports/
 src/jetstream/jetstream
 src/jetstream/console-database.db
 src/jetstream/config.properties
+src/jetstream/db/dbconf.yml
 
 # Customisations
 

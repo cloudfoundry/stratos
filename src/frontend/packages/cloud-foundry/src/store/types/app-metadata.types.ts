@@ -38,4 +38,3 @@ export interface AppEnvVarsState {
   system_env_json?: any;
   name?: any;
 }
-

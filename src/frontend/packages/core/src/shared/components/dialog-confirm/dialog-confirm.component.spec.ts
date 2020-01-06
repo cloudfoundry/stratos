@@ -1,20 +1,25 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { DialogConfirmComponent } from './dialog-confirm.component';
 import { CommonModule } from '@angular/common';
-import { CoreModule } from '../../../core/core.module';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { CoreModule } from '../../../core/core.module';
+import { DialogConfirmComponent } from './dialog-confirm.component';
 
 describe('DialogConfirmComponent', () => {
   let component: DialogConfirmComponent;
   let fixture: ComponentFixture<DialogConfirmComponent>;
+  let element: HTMLElement;
 
   class MatDialogRefMock {
+    close() {
+    }
   }
 
   class MatDialogDataMock {
+    confirm = 'Confirm';
+    message = { textToMatch: 'textToMatch' };
+    title = 'Title';
     row = {
       entity: {
         metadata: {}
@@ -22,6 +27,7 @@ describe('DialogConfirmComponent', () => {
       entityRequestInfo: {} as RequestInfoState
     };
   }
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [DialogConfirmComponent],
@@ -42,9 +48,46 @@ describe('DialogConfirmComponent', () => {
     fixture = TestBed.createComponent(DialogConfirmComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    element = fixture.nativeElement;
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should close when clicked on cancel', () => {
+    const spy = spyOn(component.dialogRef, 'close');
+    element.querySelector('button').click();
+
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should enable confirm button if matches text', () => {
+    const confirm: HTMLButtonElement = element.querySelector('.confirm-dialog__confirm');
+    const input: HTMLInputElement = element.querySelector('input');
+    expect(confirm.disabled).toBeTruthy();
+
+    input.value = 'textToMatch';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(confirm.disabled).toBeFalsy();
+  });
+
+  it('should show warning icon if is critical', () => {
+    expect(element.querySelector('mat-icon')).toBeFalsy();
+
+    component.data = {
+      ...component.data,
+      critical: true,
+    };
+    fixture.detectChanges();
+
+    expect(element.querySelector('mat-icon').textContent).toEqual('warning');
+  });
+
+  it('should disable confirm button if not matching text', () => {
+    const confirm: HTMLButtonElement = element.querySelector('.confirm-dialog__confirm');
+    expect(confirm.disabled).toBeTruthy();
   });
 });

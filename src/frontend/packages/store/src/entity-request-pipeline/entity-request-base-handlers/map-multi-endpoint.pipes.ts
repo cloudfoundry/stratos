@@ -2,17 +2,24 @@ import { Action } from '@ngrx/store';
 
 import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { IStratosEntityDefinition } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../types/api.types';
 import { EntityRequestAction } from '../../types/request.types';
 import { PipelineResult } from '../entity-request-pipeline.types';
 import { getSuccessMapper } from '../pipeline-helpers';
 import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
-import { HandledMultiEndpointResponse } from './handle-multi-endpoints.pipe';
+import { patchActionWithForcedConfig } from './forced-action-type.helpers';
+import { HandledMultiEndpointResponse, JetstreamError } from './handle-multi-endpoints.pipe';
 import { multiEndpointResponseMergePipe } from './merge-multi-endpoint-data.pipe';
 import { normalizeEntityPipeFactory } from './normalize-entity-request-response.pipe';
-import { patchActionWithForcedConfig } from './forced-action-type.helpers';
-import { PaginatedAction } from '../../types/pagination.types';
+
+const baseErrorHandler = () => 'Api Request Failed';
+
+function createErrorMessage(definition: IStratosEntityDefinition, errors: JetstreamError[]) {
+  const errorMessageHandler = definition.errorMessageHandler || definition.endpoint.globalErrorMessageHandler || baseErrorHandler;
+  return errorMessageHandler(errors);
+}
 
 function getEntities(
   endpointResponse: {
@@ -69,10 +76,12 @@ export function mapMultiEndpointResponses(
     requestType,
     multiEndpointResponses.errors
   );
+
   if (multiEndpointResponses.errors && multiEndpointResponses.errors.length) {
+    const errorMessage = createErrorMessage(catalogueEntity.definition as IStratosEntityDefinition, multiEndpointResponses.errors);
     return {
       success: false,
-      errorMessage: 'Request Failed'
+      errorMessage
     };
   } else {
     const responses = multiEndpointResponses.successes.map(normalizeEntityPipe);

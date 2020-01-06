@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { RoutingIndicatorComponent } from './routing-indicator.component';
 import { CoreModule } from '../../../core/core.module';
-import { MatProgressBarModule } from '@angular/material';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterTestingModule } from '@angular/router/testing';
 
 describe('RoutingIndicatorComponent', () => {

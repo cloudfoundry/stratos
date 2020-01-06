@@ -2,7 +2,7 @@ import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-cat
 import { SendEventAction } from '../../actions/internal-events.actions';
 import { endpointSchemaKey } from '../../helpers/entity-factory';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
-import { InternalEventSeverity } from '../../types/internal-events.types';
+import { InternalEventSeverity, InternalEventStateMetadata } from '../../types/internal-events.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
 import { ActionDispatcher } from '../entity-request-pipeline.types';
 import { JetstreamError } from './handle-multi-endpoints.pipe';
@@ -17,8 +17,8 @@ export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher)
     const entityErrorAction = catalogueEntity.getRequestAction('failure', action, requestType);
     // Dispatch a error action for the specific endpoint that's failed
     const fakedAction = { ...action, endpointGuid: error.guid };
-    const errorMessage = error.errorResponse
-      ? error.errorResponse.description || error.errorCode
+    const errorMessage = error.jetstreamErrorResponse
+      ? error.jetstreamErrorResponse.error.status || error.errorCode
       : error.errorCode;
     actionDispatcher(
       new APISuccessOrFailedAction(
@@ -28,13 +28,14 @@ export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher)
       )
     );
     actionDispatcher(
-      new SendEventAction(endpointSchemaKey, error.guid, {
+      new SendEventAction<InternalEventStateMetadata>(endpointSchemaKey, error.guid, {
         eventCode: error.errorCode,
         severity: InternalEventSeverity.ERROR,
         message: 'API request error',
         metadata: {
           url: error.url,
-          errorResponse: error.errorResponse,
+          httpMethod: action.options ? action.options.method as string : '',
+          errorResponse: error.jetstreamErrorResponse,
         },
       }),
     );

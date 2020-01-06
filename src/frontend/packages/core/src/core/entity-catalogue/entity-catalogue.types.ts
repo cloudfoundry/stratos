@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 
 import {
+  ApiErrorMessageHandler,
   PreApiRequest,
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
@@ -12,6 +13,8 @@ import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointAuthTypeConfig } from '../extension/extension-types';
 import { Omit } from '../utils.service';
+import { GeneralEntityAppState } from '../../../../store/src/app-state';
+import { Store } from '@ngrx/store';
 
 export interface EntityCatalogueEntityConfig {
   entityType: string;
@@ -65,6 +68,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
   readonly parentType?: string;
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
   readonly paginationConfig?: PaginationPageIteratorConfig;
+  readonly tableConfig?: EntityTableConfig<any>;
 }
 
 
@@ -74,7 +78,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogue
  *
  * @export
  */
-export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition<EntityCatalogueSchemas> {
+export interface IStratosEndpointDefinition<T = EntityCatalogueSchemas | EntitySchema> extends IStratosBaseEntityDefinition<T> {
   readonly logoUrl: string;
   readonly tokenSharing?: boolean;
   readonly urlValidation?: boolean;
@@ -93,10 +97,14 @@ export interface IStratosEndpointDefinition extends IStratosBaseEntityDefinition
   // This will be used for all entities with this endpoint type unless the entity has it's own prerequest config.
   readonly globalPreRequest?: PreApiRequest;
   readonly globalPrePaginationRequest?: PrePaginationApiRequest;
+  readonly globalErrorMessageHandler?: ApiErrorMessageHandler;
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
-
+export interface EntityTableConfig<T = any> {
+  rowBuilders: EntityRowBuilder<T>[];
+  showHeader?: boolean;
+}
 /**
  * Static information describing a stratos entity.
  *
@@ -117,6 +125,15 @@ export interface IStratosEntityDefinition<
   // This will override any globalPreRequest found in the endpoint.
   readonly preRequest?: PreApiRequest;
   readonly prePaginationRequest?: PrePaginationApiRequest;
+  readonly errorMessageHandler?: ApiErrorMessageHandler;
+  // Should the request response object for this entity be parsed as if it's passed through the jetstream backend?
+  readonly nonJetstreamRequest?: boolean;
+  readonly nonJetstreamRequestHandler?: NonJetstreamRequestHandler;
+}
+
+export class NonJetstreamRequestHandler<T = any> {
+  isSuccess: (request: T) => boolean;
+  getErrorCode?: (request: T) => string;
 }
 
 export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> {
@@ -125,6 +142,7 @@ export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> 
   readonly actionable?: Observable<boolean>;
   readonly disabled?: Observable<boolean>;
 }
+export type EntityRowBuilder<T> = [string, (entity: T, store?: Store<GeneralEntityAppState>) => string | Observable<string>];
 
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
@@ -132,7 +150,7 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   // TODO This should be used in the entities schema.
   getGuid(entityMetadata: T): string;
   getLink?(entityMetadata: T): string;
-  getLines?(entityMetadata: T): [string, string | Observable<string>][];
+  getLines?(): EntityRowBuilder<T>[];
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,
     plural: string
@@ -161,4 +179,3 @@ export interface IStratosEntityData<T extends IEntityMetadata = IEntityMetadata>
 export interface IStratosEntityStatusData<Y extends IEntityMetadata = IEntityMetadata> extends IStratosEntityData<Y> {
   status$?: Observable<StratosStatus>;
 }
-

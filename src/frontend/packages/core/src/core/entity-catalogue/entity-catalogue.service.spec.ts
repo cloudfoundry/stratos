@@ -1,10 +1,10 @@
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { endpointEntitySchema } from '../../base-entity-schemas';
-import { TestEntityCatalogue } from './entity-catalogue.service';
 import { BaseEndpointAuth } from '../../features/endpoints/endpoint-auth';
 import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
-import { IStratosEndpointDefinition } from './entity-catalogue.types';
-import { StratosCatalogueEntity, StratosCatalogueEndpointEntity } from './entity-catalogue-entity';
+import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './entity-catalogue-entity';
+import { TestEntityCatalogue } from './entity-catalogue.service';
+import { IStratosEndpointDefinition, EntityCatalogueSchemas } from './entity-catalogue.types';
 
 describe('EntityCatalogueService', () => {
   let entityCatalogue: TestEntityCatalogue;
@@ -133,7 +133,7 @@ describe('EntityCatalogueService', () => {
       ]
     };
     entityCatalogue.register(new StratosCatalogueEndpointEntity(definition));
-    const expected = {
+    const expected: IStratosEndpointDefinition<EntityCatalogueSchemas> = {
       ...subtypeDefinition,
       icon: 'cloud_foundry',
       iconFont: 'stratos-icons',
@@ -141,6 +141,7 @@ describe('EntityCatalogueService', () => {
       schema: {
         default: endpointEntitySchema
       },
+      parentType: endpoint.type
     };
     const catalogueEntity = entityCatalogue.getEndpoint(endpoint.type, SUBTYPE_TYPE);
     expect(catalogueEntity).not.toBeUndefined();
@@ -175,7 +176,8 @@ describe('EntityCatalogueService', () => {
       endpoint,
       schema: {
         default: schema,
-      }
+      },
+      parentType: TYPE
     };
     const catalogueEntity = entityCatalogue.getEntity(endpoint.type, TYPE, SUBTYPE_TYPE);
     expect(catalogueEntity).not.toBeUndefined();

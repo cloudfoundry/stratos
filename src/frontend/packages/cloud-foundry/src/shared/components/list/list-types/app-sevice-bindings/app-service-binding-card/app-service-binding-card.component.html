@@ -5,10 +5,20 @@
       <app-service-icon [service]="service$ | async"></app-service-icon>
     </div>
   </app-meta-card-title>
+  <app-meta-card-item [customStyle]="'long-text'">
+    <app-meta-card-key></app-meta-card-key>
+    <app-meta-card-value>{{ serviceDescription$ | async }} </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Service</app-meta-card-key>
+    <app-meta-card-value><a [routerLink]="serviceUrl$ | async">{{ serviceName$ | async }}</a>
+    </app-meta-card-value>
+  </app-meta-card-item>
   <app-meta-card-item *ngFor="let data of listData" [customStyle]="data.customStyle">
     <app-meta-card-key>{{ data.label }}</app-meta-card-key>
     <app-meta-card-value>{{ data.data$ | async }} </app-meta-card-value>
   </app-meta-card-item>
+
   <app-meta-card-item *ngIf="envVarsAvailable$ | async as envVarData">
     <app-meta-card-key>Environment Variables</app-meta-card-key>
     <app-meta-card-value>

@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
-import { Component, Inject, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -25,7 +25,7 @@ import { DashboardState } from '../../../../../store/src/reducers/dashboard-redu
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { TabNavService } from '../../../../tab-nav.service';
-import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
+import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { IEntityMetadata } from '../../../core/entity-catalogue/entity-catalogue.types';
@@ -59,7 +59,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService,
     private ngZone: NgZone,
-    @Inject(Customizations) private customizations: CustomizationsMetadata
+    private cs: CustomizationService
   ) {
     this.noMargin$ = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
@@ -107,7 +107,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
 
   private mobileSub: Subscription;
 
-  @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
+  @ViewChild('sidenav', { static: false }) set sidenav(drawer: MatDrawer) {
     this.drawer = drawer;
     if (!this.closeSub) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
@@ -119,7 +119,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     }
   }
 
-  @ViewChild('content') public content;
+  @ViewChild('content', { static: true }) public content;
 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
 
@@ -204,8 +204,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
         };
         if (item.requiresEndpointType) {
           // Upstream always likes to show Cloud Foundry related endpoints - other distributions can chane this behaviour
-          const alwaysShow = this.customizations.alwaysShowNavForEndpointTypes ?
-            this.customizations.alwaysShowNavForEndpointTypes(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
+          const alwaysShow = this.cs.get().alwaysShowNavForEndpointTypes ?
+            this.cs.get().alwaysShowNavForEndpointTypes(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
           item.hidden = alwaysShow ? of(false) : this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
         } else if (item.requiresPersistence) {
           item.hidden = this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true));

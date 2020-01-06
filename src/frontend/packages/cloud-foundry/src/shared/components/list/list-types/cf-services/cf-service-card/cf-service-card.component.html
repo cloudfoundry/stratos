@@ -1,4 +1,5 @@
-<app-meta-card class="service-card" [clickAction]="!disableCardClick ? goToServiceInstances:null" *ngIf="!!serviceEntity">
+<app-meta-card class="service-card" [clickAction]="!disableCardClick ? goToServiceInstances:null"
+  *ngIf="!!serviceEntity">
   <app-meta-card-title noMargin="true">
     <div class="service-card__title">
       <app-multiline-title class="service-card__title__link">{{ getDisplayName() }}</app-multiline-title>
@@ -9,6 +10,12 @@
     <app-meta-card-key></app-meta-card-key>
     <app-meta-card-value>
       {{ serviceEntity.entity.description}}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Service Broker</app-meta-card-key>
+    <app-meta-card-value>
+      {{ serviceBrokerName$ | async }}
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>

@@ -14,7 +14,8 @@ import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { cfEntityFactory, organizationEntityType, spaceEntityType } from '../../../cf-entity-factory';
+import { cfEntityFactory } from '../../../cf-entity-factory';
+import { organizationEntityType, spaceEntityType } from '../../../cf-entity-types';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition.component';
 
 describe('SpaceQuotaDefinitionComponent', () => {

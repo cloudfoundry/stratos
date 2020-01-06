@@ -4,14 +4,13 @@ import {
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
-  Inject,
   NgZone,
   OnDestroy,
   OnInit,
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { combineLatest, Subscription } from 'rxjs';
 import { delay, first, map, tap } from 'rxjs/operators';
@@ -20,7 +19,7 @@ import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState } from '../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
+import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
   getActionsFromExtensions,
@@ -47,7 +46,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
   private healthCheckTimeout: number;
 
-  @ViewChild('customNoEndpoints', { read: ViewContainerRef }) customNoEndpointsContainer;
+  @ViewChild('customNoEndpoints', { read: ViewContainerRef, static: true }) customNoEndpointsContainer;
   customContentComponentRef: ComponentRef<any>;
 
   private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
@@ -56,14 +55,18 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     action: 'Got it'
   };
 
+  public customizations: CustomizationsMetadata;
+
   constructor(
     public endpointsService: EndpointsService,
     public store: Store<EndpointOnlyAppState>,
     private ngZone: NgZone,
     private resolver: ComponentFactoryResolver,
     private snackBar: MatSnackBar,
-    @Inject(Customizations) public customizations: CustomizationsMetadata
+    cs: CustomizationService
   ) {
+    this.customizations = cs.get();
+
     // Redirect to /applications if not enabled.
     endpointsService.disablePersistenceFeatures$.pipe(
       map(off => {

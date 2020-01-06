@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -132,7 +132,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
     );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
-      map(({ entity }) => entity ? entity.entity : null),
+      filter(({ entityRequestInfo }) => entityRequestInfo && !entityRequestInfo.fetching),
+      map(({ entity, }) => entity ? entity.entity : null),
       publishReplay(1),
       refCount()
     );

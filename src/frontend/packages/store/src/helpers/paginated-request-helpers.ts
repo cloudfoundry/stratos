@@ -1,5 +1,4 @@
-import { HttpClient } from '@angular/common/http';
-import { Http, Request, RequestOptions, Response } from '@angular/http';
+import { HttpClient, HttpRequest } from '@angular/common/http';
 import { forkJoin, Observable, of as observableOf } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
 
@@ -7,7 +6,6 @@ import { CFResponse } from '../../../cloud-foundry/src/store/types/cf-api.types'
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
 import { ActionDispatcher } from '../entity-request-pipeline/entity-request-pipeline.types';
 
-// TODO: This can be deleted once the api effect rework is done.
 export interface PaginationFlattenerConfig<T = any, C = any> extends Pick<
   PaginationFlattener<T, C>,
   'getTotalPages' | 'getTotalResults' | 'mergePages' | 'clearResults'
@@ -49,27 +47,17 @@ export class BaseHttpClientFetcher<T> {
 
 export class BaseHttpFetcher {
   constructor(
-    private http: Http,
-    private requestOptions: RequestOptions,
+    private http: HttpClient,
+    private requestOptions: HttpRequest<any>,
     private pageUrlParam: string
   ) { }
 
-  private getJsonData(response: Response) {
-    try {
-      return response.json();
-    } catch (e) {
-      return null;
-    }
-  }
-
-  public fetch(options: RequestOptions): Observable<any> {
-    return this.http.request(new Request(options)).pipe(
-      map(this.getJsonData),
-    );
+  public fetch(options: HttpRequest<any>): Observable<any> {
+    return this.http.request(options);
   }
 
   public buildFetchParams(i: number) {
-    const requestOption = { ...this.requestOptions } as RequestOptions;
+    const requestOption = { ...this.requestOptions } as HttpRequest<any>;
     requestOption.params.set(this.pageUrlParam, i.toString());
     return [requestOption];
   }
@@ -77,7 +65,7 @@ export class BaseHttpFetcher {
 
 export class CfAPIFlattener extends BaseHttpFetcher implements PaginationFlattener<CFResponse, { [cfGuid: string]: CFResponse }> {
 
-  constructor(http: Http, requestOptions: RequestOptions) {
+  constructor(http: HttpClient, requestOptions: HttpRequest<any>) {
     super(http, requestOptions, 'page');
   }
 
