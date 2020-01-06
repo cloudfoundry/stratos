@@ -366,7 +366,8 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellServiceProviderComponent,
     TableCellServiceBindableComponent,
     TableCellServiceActiveComponent,
-    TableCellServiceReferencesComponent
+    TableCellServiceReferencesComponent,
+    TableCellServiceLastOpComponent
   ]
 })
 export class CloudFoundryComponentsModule { }
