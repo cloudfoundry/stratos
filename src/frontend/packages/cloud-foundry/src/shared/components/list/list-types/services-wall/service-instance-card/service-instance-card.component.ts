@@ -1,12 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, of as observableOf } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { IServiceExtra, IServiceInstance } from '../../../../../../../../core/src/core/cf-api-svc.types';
+import { IServiceInstance } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
   MetaCardMenuItem,
@@ -16,6 +17,12 @@ import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
+import {
+  getServiceBrokerName,
+  getServiceName,
+  getServicePlanName,
+  getServiceSummaryUrl,
+} from '../../../../../../features/service-catalog/services-helper';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 
 @Component({
@@ -24,15 +31,6 @@ import { ServiceActionHelperService } from '../../../../../data-services/service
   styleUrls: ['./service-instance-card.component.scss'],
 })
 export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> {
-  serviceInstanceEntity: APIResource<IServiceInstance>;
-  cfGuid: string;
-  cardMenu: MetaCardMenuItem[];
-
-  serviceInstanceTags: AppChip[];
-  hasMultipleBindings = new BehaviorSubject(true);
-  entityConfig: ComponentEntityMonitorConfig;
-
-  cfOrgSpace: CfOrgSpaceLabelService;
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
@@ -83,16 +81,37 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           row.entity.space.entity.organization_guid,
           row.entity.space_guid);
       }
+
+      if (!this.serviceBrokerName$) {
+        this.serviceBrokerName$ = getServiceBrokerName(
+          this.serviceInstanceEntity.entity.service.entity.service_broker_guid,
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.entityServiceFactory
+        );
+      }
     }
   }
 
   constructor(
     private store: Store<CFAppState>,
     private serviceActionHelperService: ServiceActionHelperService,
-    private currentUserPermissionsService: CurrentUserPermissionsService
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private entityServiceFactory: EntityServiceFactory
   ) {
     super();
   }
+
+  static done = false;
+  serviceInstanceEntity: APIResource<IServiceInstance>;
+  cfGuid: string;
+  cardMenu: MetaCardMenuItem[];
+
+  serviceInstanceTags: AppChip[];
+  hasMultipleBindings = new BehaviorSubject(true);
+  entityConfig: ComponentEntityMonitorConfig;
+
+  cfOrgSpace: CfOrgSpaceLabelService;
+  serviceBrokerName$: Observable<string>;
 
   detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
@@ -116,18 +135,19 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   )
 
   getServiceName = () => {
-    const serviceEntity = this.serviceInstanceEntity.entity.service;
-    let extraInfo: IServiceExtra = null;
-    try {
-      extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
-    } catch (e) { }
-    let displayName = serviceEntity.entity ? serviceEntity.entity.label : '';
-    if (extraInfo && extraInfo.displayName) {
-      displayName = extraInfo.displayName;
+    return getServiceName(this.serviceInstanceEntity.entity.service);
+  }
+
+  getServicePlanName = () => {
+    if (!this.serviceInstanceEntity.entity.service_plan) {
+      return null;
     }
-    return displayName;
+    return getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity);
   }
 
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
+  getServiceUrl = () => {
+    return getServiceSummaryUrl(this.serviceInstanceEntity.entity.cfGuid, this.serviceInstanceEntity.entity.service.entity.guid);
+  }
 }

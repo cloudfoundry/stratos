@@ -4,12 +4,6 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import {
-  serviceBrokerEntityType,
-  servicePlanVisibilityEntityType,
-  spaceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-types';
 import {
   IService,
   IServiceBroker,
@@ -26,10 +20,13 @@ import { PaginationMonitorFactory } from '../../../../store/src/monitors/paginat
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { CFAppState } from '../../cf-app-state';
 import { cfEntityFactory } from '../../cf-entity-factory';
+import { serviceBrokerEntityType, servicePlanVisibilityEntityType, spaceEntityType } from '../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { getCfService, getServiceInstancesInCf, getServicePlans } from './services-helper';
+import { getCfService, getServiceInstancesInCf, getServiceName, getServicePlans } from './services-helper';
+
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -132,21 +129,16 @@ export class ServicesService {
     )
 
   getServiceName = () => {
-    return observableCombineLatest(this.serviceExtraInfo$, this.service$)
+    return this.service$
       .pipe(
-        map(([extraInfo, service]) => {
-          if (extraInfo && extraInfo.displayName) {
-            return extraInfo.displayName;
-          } else {
-            return service.entity.label;
-          }
-        }));
+        map(getServiceName)
+      );
   }
 
   getServiceProviderName = () => {
     return observableCombineLatest(this.serviceExtraInfo$, this.service$)
       .pipe(
-        map(([extraInfo, service]) => {
+        map(([extraInfo]) => {
           if (extraInfo && extraInfo.providerDisplayName) {
             return extraInfo.providerDisplayName;
           } else {

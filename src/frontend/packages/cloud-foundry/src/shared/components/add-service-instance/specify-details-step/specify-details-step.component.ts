@@ -25,24 +25,10 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import {
   SetCreateServiceInstanceOrg,
   SetServiceInstanceGuid,
 } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { UpdateServiceInstance } from '../../../../../../cloud-foundry/src/actions/service-instances.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  appEnvVarsEntityType,
-  serviceBindingEntityType,
-  serviceInstancesEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import {
-  selectCreateServiceInstance,
-  selectCreateServiceInstanceSpaceGuid,
-} from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
-import { CreateServiceInstanceState } from '../../../../../../cloud-foundry/src/store/types/create-service-instance.types';
 import { IServiceInstance, IServicePlan } from '../../../../../../core/src/core/cf-api-svc.types';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { pathGet, safeStringToObj } from '../../../../../../core/src/core/utils.service';
@@ -50,6 +36,17 @@ import { StepOnNextResult } from '../../../../../../core/src/shared/components/s
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { UpdateServiceInstance } from '../../../../actions/service-instances.actions';
+import { CFAppState } from '../../../../cf-app-state';
+import { appEnvVarsEntityType, serviceBindingEntityType, serviceInstancesEntityType } from '../../../../cf-entity-types';
+import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../store/selectors/api.selectors';
+import {
+  selectCreateServiceInstance,
+  selectCreateServiceInstanceSpaceGuid,
+} from '../../../../store/selectors/create-service-instance.selectors';
+import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
+import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
 import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
@@ -117,7 +114,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     private store: Store<CFAppState>,
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private csiGuidsService: CsiGuidsService,
-    public modeService: CsiModeService
+    public modeService: CsiModeService,
+    public longRunningOpService: LongRunningCfOperationsService
   ) {
     this.setupForms();
 
@@ -279,6 +277,61 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.setupValidate();
   }
 
+  private handleUpdateServiceResult(request: RequestInfoState, state: CreateServiceInstanceState): Observable<StepOnNextResult> {
+    const updatingInfo = request.updating[UpdateServiceInstance.updateServiceInstance];
+    if (!updatingInfo) {
+      // This isn't an update
+    } else if (this.longRunningOpService.isLongRunning(updatingInfo)) {
+      // This request has taken too long for the browser/jetstream and is on going. Treat this as a success
+      this.longRunningOpService.handleLongRunningUpdateService(state.serviceInstanceGuid, state.cfGuid);
+    } else if (updatingInfo.error) {
+      // The request has errored, report this back
+      return observableOf({ success: false, message: `Failed to update service instance: ${updatingInfo.message}` });
+    }
+  }
+
+  private handleCreateServiceResult(request: RequestInfoState, state: CreateServiceInstanceState): Observable<StepOnNextResult> {
+    const bindApp = !!state.bindAppGuid;
+
+    if (this.longRunningOpService.isLongRunning(request)) {
+      // This request has taken too long for the browser/jetstream and is on going. Treat this as a success
+      this.longRunningOpService.handleLongRunningCreateService(bindApp);
+      // Return to app page instead of falling through to service page
+      if (bindApp) {
+        return observableOf(this.routeToServices(state.cfGuid, state.bindAppGuid));
+      }
+    } else if (request.error) {
+      // The request has errored, report this back
+      return observableOf({ success: false, message: `Failed to create service instance: ${request.message}` });
+    } else if (bindApp) {
+      // The request has succeeded and we now need to bind an app to the new service instance
+      const serviceInstanceGuid = this.setServiceInstanceGuid(request);
+      this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
+      return this.modeService.createApplicationServiceBinding(
+        serviceInstanceGuid,
+        state.cfGuid,
+        state.bindAppGuid,
+        state.bindAppParams
+      ).pipe(
+        map(req => {
+          if (!req.success) {
+            return req;
+          } else {
+            // Refetch env vars for app, since they have been changed by CF
+            const appEnvVarsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+            const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
+            const getAppEnvVarsAction = actionBuilder(state.bindAppGuid, state.cfGuid);
+            this.store.dispatch(
+              getAppEnvVarsAction
+            );
+
+            return this.routeToServices(state.cfGuid, state.bindAppGuid);
+          }
+        })
+      );
+    }
+  }
+
   onNext = (): Observable<StepOnNextResult> => {
     return this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p),
@@ -294,47 +347,17 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       combineLatest(this.store.select(selectCreateServiceInstance)),
       first(),
       switchMap(([request, state]) => {
-        if (this.modeService.isEditServiceInstanceMode()) {
-          const updatingInfo = request.updating[UpdateServiceInstance.updateServiceInstance];
-          if (!!updatingInfo && updatingInfo.error) {
-            return observableOf({
-              success: false,
-              message: `Failed to update service instance: ${updatingInfo.message}`
-            });
-          }
-        } else if (request.error) {
-          return observableOf({ success: false, message: `Failed to create service instance: ${request.message}` });
-        }
-        if (!this.modeService.isEditServiceInstanceMode()) {
-          const serviceInstanceGuid = this.setServiceInstanceGuid(request);
-          this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
-          if (!!state.bindAppGuid) {
-            return this.modeService.createApplicationServiceBinding(
-              serviceInstanceGuid,
-              state.cfGuid,
-              state.bindAppGuid,
-              state.bindAppParams
-            ).pipe(
-              map(req => {
-                if (!req.success) {
-                  return req;
-                } else {
-                  // Refetch env vars for app, since they have been changed by CF
-                  const appEnvVarsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-                  const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
-                  const getAppEnvVarsAction = actionBuilder(state.bindAppGuid, state.cfGuid);
-                  this.store.dispatch(
-                    getAppEnvVarsAction
-                  );
 
-                  return this.routeToServices(state.cfGuid, state.bindAppGuid);
-                }
-              })
-            );
-          } else {
-            return observableOf(this.routeToServices());
-          }
+        const handleEditServiceResult = this.handleUpdateServiceResult(request, state);
+        if (handleEditServiceResult) {
+          return handleEditServiceResult;
         }
+
+        const handleCreateServiceResult = this.handleCreateServiceResult(request, state);
+        if (handleCreateServiceResult) {
+          return handleCreateServiceResult;
+        }
+
         return observableOf(this.routeToServices());
       }),
     );
