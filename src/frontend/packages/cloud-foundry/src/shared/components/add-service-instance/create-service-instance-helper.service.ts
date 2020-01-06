@@ -23,7 +23,7 @@ import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-ca
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../cf-entity-factory';
-import { getCfService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
+import { getCfService, getServiceBroker, getServicePlans, getServiceName } from '../../../features/service-catalog/services-helper';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { QParam, QParamJoiners } from '../../q-param';
 
@@ -97,14 +97,8 @@ export class CreateServiceInstanceHelper {
     return this.service$
       .pipe(
         filter(p => !!p),
-        map((service: APIResource<IService>) => {
-          const extraInfo = JSON.parse(service.entity.extra);
-          if (extraInfo && extraInfo.displayName) {
-            return extraInfo.displayName;
-          } else {
-            return service.entity.label;
-          }
-        }));
+        map(getServiceName)
+      );
   }
 
   // getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
