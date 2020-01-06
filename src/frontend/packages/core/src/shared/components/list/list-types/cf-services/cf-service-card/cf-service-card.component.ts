@@ -1,15 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { GetServiceBroker } from '../../../../../../../../store/src/actions/service-broker.actions';
 import { AppState } from '../../../../../../../../store/src/app-state';
-import { entityFactory, serviceBrokerSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IService, IServiceBroker, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
+import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { getServiceBrokerName, getServiceName } from '../../../../../../features/service-catalog/services-helper';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { AppChip } from '../../../../chips/chips.component';
 import { CardCell } from '../../../list.types';
@@ -55,20 +53,10 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
       }
 
       if (!this.serviceBrokerName$) {
-        const brokerGuid = this.serviceEntity.entity.service_broker_guid;
-        this.serviceBrokerName$ = this.entityServiceFactory.create<APIResource<IServiceBroker>>(
-          serviceBrokerSchemaKey,
-          entityFactory(serviceBrokerSchemaKey),
-          brokerGuid,
-          new GetServiceBroker(
-            brokerGuid,
-            this.serviceEntity.entity.cfGuid
-          )
-        ).waitForEntity$.pipe(
-          map(a => a.entity),
-          filter(res => !!res),
-          map(a => a.entity.name),
-          first()
+        this.serviceBrokerName$ = getServiceBrokerName(
+          this.serviceEntity.entity.service_broker_guid,
+          this.serviceEntity.entity.cfGuid,
+          this.entityServiceFactory
         );
       }
     }
@@ -82,10 +70,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   }
 
   getDisplayName() {
-    if (this.extraInfo && this.extraInfo.displayName) {
-      return this.extraInfo.displayName;
-    }
-    return this.serviceEntity.entity.label;
+    return getServiceName(this.serviceEntity);
   }
 
   hasDocumentationUrl() {

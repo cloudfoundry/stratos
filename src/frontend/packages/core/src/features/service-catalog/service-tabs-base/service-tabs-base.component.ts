@@ -7,6 +7,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { IPageSideNavTab } from '../../dashboard/page-side-nav/page-side-nav.component';
+import { getServiceName } from '../services-helper';
 import { ServicesService } from '../services.service';
 
 @Component({
@@ -72,7 +73,7 @@ export class ServiceTabsBaseComponent {
 
   getServiceLabel = (): Observable<string> => {
     return this.servicesService.service$.pipe(
-      map((s) => !!s.entity.extra ? JSON.parse(s.entity.extra).displayName || s.entity.label : s.entity.label),
+      map(getServiceName),
       publishReplay(1),
       refCount()
     );

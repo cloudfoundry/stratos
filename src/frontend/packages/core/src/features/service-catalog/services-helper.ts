@@ -23,6 +23,7 @@ import { QParam } from '../../../../store/src/types/pagination.types';
 import {
   IService,
   IServiceBroker,
+  IServiceExtra,
   IServiceInstance,
   IServicePlan,
   IServicePlanExtra,
@@ -106,6 +107,17 @@ export const fetchServiceInstancesCount = (
   }
   return fetchTotalResults(action, store, paginationMonitorFactory);
 };
+
+export const getServiceName = (serviceEntity: APIResource<IService>): string => {
+  let extraInfo: IServiceExtra = null;
+  try {
+    extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
+  } catch (e) { }
+  return extraInfo && extraInfo.displayName ? extraInfo.displayName : serviceEntity.entity.label;
+};
+
+export const getServiceSummaryUrl = (cfGuid: string, serviceGuid: string): string =>
+  `/marketplace/${cfGuid}/${serviceGuid}/summary`;
 
 export const getServicePlans = (
   service$: Observable<APIResource<IService>>,
@@ -206,6 +218,17 @@ export const getServiceBroker = (
     serviceBrokerGuid,
     new GetServiceBroker(serviceBrokerGuid, cfGuid),
     false
+  );
+};
+
+export const getServiceBrokerName = (
+  serviceBrokerGuid: string,
+  cfGuid: string,
+  entityServiceFactory: EntityServiceFactory): Observable<string> => {
+  return getServiceBroker(serviceBrokerGuid, cfGuid, entityServiceFactory).waitForEntity$.pipe(
+    filter(res => !!res),
+    map(a => a.entity.entity.name),
+    first()
   );
 };
 

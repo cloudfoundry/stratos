@@ -1,20 +1,20 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
 
-import { GetServiceBroker } from '../../../../../../../../store/src/actions/service-broker.actions';
 import { AppState } from '../../../../../../../../store/src/app-state';
-import {
-  entityFactory,
-  serviceBrokerSchemaKey,
-  serviceInstancesSchemaKey,
-} from '../../../../../../../../store/src/helpers/entity-factory';
+import { entityFactory, serviceInstancesSchemaKey } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceBroker, IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import {
+  getServiceBrokerName,
+  getServiceName,
+  getServicePlanName,
+  getServiceSummaryUrl,
+} from '../../../../../../features/service-catalog/services-helper';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { ComponentEntityMonitorConfig } from '../../../../../shared.types';
@@ -79,20 +79,11 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           row.entity.space_guid);
       }
 
-      if (!this.serviceBroker$) {
-        const brokerGuid = this.serviceInstanceEntity.entity.service.entity.service_broker_guid;
-        this.serviceBroker$ = this.entityServiceFactory.create<APIResource<IServiceBroker>>(
-          serviceBrokerSchemaKey,
-          entityFactory(serviceBrokerSchemaKey),
-          brokerGuid,
-          new GetServiceBroker(
-            brokerGuid,
-            this.serviceInstanceEntity.entity.cfGuid
-          )
-        ).waitForEntity$.pipe(
-          map(a => a.entity),
-          filter(res => !!res),
-          first()
+      if (!this.serviceBrokerName$) {
+        this.serviceBrokerName$ = getServiceBrokerName(
+          this.serviceInstanceEntity.entity.service.entity.service_broker_guid,
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.entityServiceFactory
         );
       }
     }
@@ -117,7 +108,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   entityConfig: ComponentEntityMonitorConfig;
 
   cfOrgSpace: CfOrgSpaceLabelService;
-  serviceBroker$: Observable<APIResource<IServiceBroker>>;
+  serviceBrokerName$: Observable<string>;
 
   detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
@@ -141,21 +132,19 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   )
 
   getServiceName = () => {
-    const serviceEntity = this.serviceInstanceEntity.entity.service;
-    let extraInfo: IServiceExtra = null;
-    try {
-      extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
-    } catch (e) { }
-    let displayName = serviceEntity.entity ? serviceEntity.entity.label : '';
-    if (extraInfo && extraInfo.displayName) {
-      displayName = extraInfo.displayName;
+    return getServiceName(this.serviceInstanceEntity.entity.service);
+  }
+
+  getServicePlanName = () => {
+    if (!this.serviceInstanceEntity.entity.service_plan) {
+      return null;
     }
-    return displayName;
+    return getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity);
   }
 
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
-  getServiceUrl = () =>
-    `/marketplace/${this.serviceInstanceEntity.entity.cfGuid}/${this.serviceInstanceEntity.entity.service.entity.guid}/summary`
-
+  getServiceUrl = () => {
+    return getServiceSummaryUrl(this.serviceInstanceEntity.entity.cfGuid, this.serviceInstanceEntity.entity.service.entity.guid);
+  }
 }

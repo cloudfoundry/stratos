@@ -9,9 +9,9 @@ import {
   userProvidedServiceInstanceSchemaKey,
 } from '../../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceBroker, IServiceExtra, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { IServiceBroker, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { getCfService } from '../../../../../../features/service-catalog/services-helper';
+import { getCfService, getServiceName } from '../../../../../../features/service-catalog/services-helper';
 import { TableCellCustom } from '../../../list.types';
 
 @Component({
@@ -42,14 +42,7 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
     );
 
     this.serviceName$ = service$.pipe(
-      map(s => {
-        let serviceLabel = s.entity.entity.label || 'User Provided';
-        try {
-          const extraInfo: IServiceExtra = s.entity.entity.extra ? JSON.parse(s.entity.entity.extra) : null;
-          serviceLabel = extraInfo && extraInfo.displayName ? extraInfo.displayName : serviceLabel;
-        } catch (e) { }
-        return serviceLabel;
-      })
+      map(s => this.isUserProvidedServiceInstance ? 'User Provided' : getServiceName(s.entity))
     );
 
     this.serviceUrl$ = service$.pipe(

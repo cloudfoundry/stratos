@@ -49,6 +49,7 @@ import { APIResource, NormalizedResponse } from '../../../../../../store/src/typ
 import { CreateServiceInstanceState } from '../../../../../../store/src/types/create-service-instance.types';
 import { IServiceInstance, IServicePlan } from '../../../../core/cf-api-svc.types';
 import { pathGet, safeStringToObj } from '../../../../core/utils.service';
+import { LongRunningCfOperationsService } from '../../../services/long-running-cf-op.service';
 import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -117,7 +118,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     private store: Store<AppState>,
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private csiGuidsService: CsiGuidsService,
-    public modeService: CsiModeService
+    public modeService: CsiModeService,
+    public longRunningOpService: LongRunningCfOperationsService
   ) {
     this.setupForms();
 
@@ -279,6 +281,58 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.setupValidate();
   }
 
+  private handleUpdateServiceResult(request: RequestInfoState, state: CreateServiceInstanceState): Observable<StepOnNextResult> {
+    const updatingInfo = request.updating[UpdateServiceInstance.updateServiceInstance];
+    if (!updatingInfo) {
+      // This isn't an update
+    } else if (this.longRunningOpService.isLongRunning(updatingInfo)) {
+      // This request has taken too long for the browser/jetstream and is on going. Treat this as a success
+      this.longRunningOpService.handleLongRunningUpdateService(state.serviceInstanceGuid, state.cfGuid);
+    } else if (updatingInfo.error) {
+      // The request has errored, report this back
+      return observableOf({ success: false, message: `Failed to update service instance: ${updatingInfo.message}` });
+    }
+  }
+
+  private handleCreateServiceResult(request: RequestInfoState, state: CreateServiceInstanceState): Observable<StepOnNextResult> {
+    const bindApp = !!state.bindAppGuid;
+
+    if (this.longRunningOpService.isLongRunning(request)) {
+      // This request has taken too long for the browser/jetstream and is on going. Treat this as a success
+      this.longRunningOpService.handleLongRunningCreateService(bindApp);
+      // Return to app page instead of falling through to service page
+      if (bindApp) {
+        return observableOf(this.routeToServices(state.cfGuid, state.bindAppGuid));
+      }
+    } else if (request.error) {
+      // The request has errored, report this back
+      return observableOf({ success: false, message: `Failed to create service instance: ${request.message}` });
+    } else if (bindApp) {
+      // The request has succeeded and we now need to bind an app to the new service instance
+      const serviceInstanceGuid = this.setServiceInstanceGuid(request);
+      this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
+      return this.modeService.createApplicationServiceBinding(
+        serviceInstanceGuid,
+        state.cfGuid,
+        state.bindAppGuid,
+        state.bindAppParams
+      ).pipe(
+        map(req => {
+          if (!req.success) {
+            return req;
+          } else {
+            // Refetch env vars for app, since they have been changed by CF
+            this.store.dispatch(
+              new GetAppEnvVarsAction(state.bindAppGuid, state.cfGuid)
+            );
+
+            return this.routeToServices(state.cfGuid, state.bindAppGuid);
+          }
+        })
+      );
+    }
+  }
+
   onNext = (): Observable<StepOnNextResult> => {
     return this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p),
@@ -294,44 +348,17 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       combineLatest(this.store.select(selectCreateServiceInstance)),
       first(),
       switchMap(([request, state]) => {
-        if (this.modeService.isEditServiceInstanceMode()) {
-          const updatingInfo = request.updating[UpdateServiceInstance.updateServiceInstance];
-          if (!!updatingInfo && updatingInfo.error) {
-            return observableOf({
-              success: false,
-              message: `Failed to update service instance.`
-            });
-          }
-        } else if (request.error) {
-          return observableOf({ success: false, message: `Failed to create service instance: ${request.message}` });
-        }
-        if (!this.modeService.isEditServiceInstanceMode()) {
-          const serviceInstanceGuid = this.setServiceInstanceGuid(request);
-          this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
-          if (!!state.bindAppGuid) {
-            return this.modeService.createApplicationServiceBinding(
-              serviceInstanceGuid,
-              state.cfGuid,
-              state.bindAppGuid,
-              state.bindAppParams
-            ).pipe(
-              map(req => {
-                if (!req.success) {
-                  return req;
-                } else {
-                  // Refetch env vars for app, since they have been changed by CF
-                  this.store.dispatch(
-                    new GetAppEnvVarsAction(state.bindAppGuid, state.cfGuid)
-                  );
 
-                  return this.routeToServices(state.cfGuid, state.bindAppGuid);
-                }
-              })
-            );
-          } else {
-            return observableOf(this.routeToServices());
-          }
+        const handleEditServiceResult = this.handleUpdateServiceResult(request, state);
+        if (handleEditServiceResult) {
+          return handleEditServiceResult;
         }
+
+        const handleCreateServiceResult = this.handleCreateServiceResult(request, state);
+        if (handleCreateServiceResult) {
+          return handleCreateServiceResult;
+        }
+
         return observableOf(this.routeToServices());
       }),
     );

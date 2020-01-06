@@ -1,10 +1,22 @@
-import { getCfService } from './services-helper';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import { GetServiceBrokers } from '../../../../store/src/actions/service-broker.actions';
+import { GetServicePlanVisibilities } from '../../../../store/src/actions/service-plan-visibility.actions';
+import { GetSpace } from '../../../../store/src/actions/space.actions';
+import { AppState } from '../../../../store/src/app-state';
+import {
+  entityFactory,
+  serviceBrokerSchemaKey,
+  servicePlanVisibilitySchemaKey,
+  spaceSchemaKey,
+} from '../../../../store/src/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../../../store/src/types/api.types';
 import {
   IService,
   IServiceBroker,
@@ -17,22 +29,8 @@ import { ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { getServiceInstancesInCf, getServicePlans } from './services-helper';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { AppState } from '../../../../store/src/app-state';
-import {
-  entityFactory,
-  servicePlanVisibilitySchemaKey,
-  serviceBrokerSchemaKey,
-  spaceSchemaKey
-} from '../../../../store/src/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../store/src/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { GetServicePlanVisibilities } from '../../../../store/src/actions/service-plan-visibility.actions';
-import { GetServiceBrokers } from '../../../../store/src/actions/service-broker.actions';
-import { GetSpace } from '../../../../store/src/actions/space.actions';
+import { getCfService, getServiceInstancesInCf, getServiceName, getServicePlans } from './services-helper';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -129,21 +127,16 @@ export class ServicesService {
     )
 
   getServiceName = () => {
-    return observableCombineLatest(this.serviceExtraInfo$, this.service$)
+    return this.service$
       .pipe(
-        map(([extraInfo, service]) => {
-          if (extraInfo && extraInfo.displayName) {
-            return extraInfo.displayName;
-          } else {
-            return service.entity.label;
-          }
-        }));
+        map(getServiceName)
+      );
   }
 
   getServiceProviderName = () => {
     return observableCombineLatest(this.serviceExtraInfo$, this.service$)
       .pipe(
-        map(([extraInfo, service]) => {
+        map(([extraInfo]) => {
           if (extraInfo && extraInfo.providerDisplayName) {
             return extraInfo.providerDisplayName;
           } else {

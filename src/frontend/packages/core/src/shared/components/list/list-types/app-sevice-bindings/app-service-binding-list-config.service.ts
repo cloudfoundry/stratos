@@ -13,6 +13,7 @@ import { CurrentUserPermissionsService } from '../../../../../core/current-user-
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { isServiceInstance } from '../../../../../features/cloud-foundry/cf.helpers';
 import { DataFunctionDefinition } from '../../data-sources-controllers/list-data-source';
+import { ITableColumn } from '../../list-table/table.types';
 import { IGlobalListAction, ListViewTypes } from '../../list.component.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import {
@@ -44,7 +45,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     )
   };
 
-  getColumns = () => {
+  getColumns = (): Array<ITableColumn<APIResource<IServiceBinding>>> => {
     return [
       {
         columnId: 'name',
@@ -58,10 +59,10 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         columnId: 'service',
         headerCell: () => 'Service',
         cellDefinition: {
-          getValue: (row: APIResource<IServiceBinding>) => {
+          getValue: (row) => {
             const si = isServiceInstance(row.entity.service_instance.entity);
             return si ? si.service.entity.label : 'User Service';
-          }
+          },
         },
         cellFlex: '1'
       },

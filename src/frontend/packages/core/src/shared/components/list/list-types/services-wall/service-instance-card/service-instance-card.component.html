@@ -18,11 +18,11 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Service Plan</app-meta-card-key>
-    <app-meta-card-value>{{ serviceInstanceEntity.entity.service_plan?.entity.name}} </app-meta-card-value>
+    <app-meta-card-value>{{ getServicePlanName() }} </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Service Broker</app-meta-card-key>
-    <app-meta-card-value>{{(serviceBroker$ | async)?.entity.name }} </app-meta-card-value>
+    <app-meta-card-value>{{ serviceBrokerName$ | async }} </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Applications Attached</app-meta-card-key>

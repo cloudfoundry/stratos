@@ -1,4 +1,5 @@
 /* tslint:disable:max-line-length */
+
 import {
   Component,
   ComponentFactoryResolver,
@@ -119,7 +120,6 @@ import { ICellDefinition } from '../table.types';
 import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
 
 
-/* tslint:disable:max-line-length */
 /* tslint:enable:max-line-length */
 export const listTableCells = [
   TableCellDefaultComponent,

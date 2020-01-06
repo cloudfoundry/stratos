@@ -37,8 +37,7 @@ describe('Create Service Instance with binding', () => {
   });
 
   describe('Long running tests - ', () => {
-    const timeout = 100000;
-    extendE2ETestTime(timeout);
+    extendE2ETestTime(100000);
 
     it('- should be able to to create a service instance with binding', () => {
       serviceInstanceName = servicesHelperE2E.createServiceInstanceName();

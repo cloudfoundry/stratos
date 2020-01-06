@@ -25,7 +25,12 @@ import {
   IServicePlanVisibility,
 } from '../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { getCfService, getServiceBroker, getServicePlans } from '../../../features/service-catalog/services-helper';
+import {
+  getCfService,
+  getServiceBroker,
+  getServiceName,
+  getServicePlans,
+} from '../../../features/service-catalog/services-helper';
 import { CF_GUID } from '../../entity.tokens';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 
@@ -96,14 +101,8 @@ export class CreateServiceInstanceHelper {
     return this.service$
       .pipe(
         filter(p => !!p),
-        map((service: APIResource<IService>) => {
-          const extraInfo = JSON.parse(service.entity.extra);
-          if (extraInfo && extraInfo.displayName) {
-            return extraInfo.displayName;
-          } else {
-            return service.entity.label;
-          }
-        }));
+        map(getServiceName)
+      );
   }
 
   // getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {

@@ -13,6 +13,7 @@ import { ApplicationStateService } from '../../shared/components/application-sta
 import { GitSCMService } from '../../shared/data-services/scm/scm.service';
 import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
+import { LongRunningCfOperationsService } from '../../shared/services/long-running-cf-op.service';
 import { ApplicationService } from './application.service';
 import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
@@ -41,7 +42,8 @@ describe('ApplicationService', () => {
         PaginationMonitorFactory,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         GitSCMService,
-        ExtensionService
+        ExtensionService,
+        LongRunningCfOperationsService
       ]
     });
   });

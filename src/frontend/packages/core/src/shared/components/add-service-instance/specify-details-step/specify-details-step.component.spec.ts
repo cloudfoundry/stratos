@@ -4,6 +4,7 @@ import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form
 import { BaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { LongRunningCfOperationsService } from '../../../services/long-running-cf-op.service';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CsiGuidsService } from '../csi-guids.service';
@@ -29,7 +30,8 @@ describe('SpecifyDetailsStepComponent', () => {
         CsiGuidsService,
         PaginationMonitorFactory,
         EntityMonitorFactory,
-        CsiModeService
+        CsiModeService,
+        LongRunningCfOperationsService
       ]
     })
       .compileComponents();

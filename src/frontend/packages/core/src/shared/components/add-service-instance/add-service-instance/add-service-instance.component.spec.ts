@@ -11,12 +11,14 @@ import { CloudFoundryService } from '../../../data-services/cloud-foundry.servic
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { LongRunningCfOperationsService } from '../../../services/long-running-cf-op.service';
 import {
   ApplicationStateIconComponent,
 } from '../../application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from '../../application-state/application-state-icon/application-state-icon.pipe';
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { CardStatusComponent } from '../../cards/card-status/card-status.component';
+import { CfOrgSpaceLinksComponent } from '../../cf-org-space-links/cf-org-space-links.component';
 import { AppChipsComponent } from '../../chips/chips.component';
 import {
   CreateApplicationStep1Component,
@@ -44,7 +46,6 @@ import {
   SpecifyUserProvidedDetailsComponent,
 } from '../specify-user-provided-details/specify-user-provided-details.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
-import { CfOrgSpaceLinksComponent } from '../../cf-org-space-links/cf-org-space-links.component';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
@@ -95,7 +96,8 @@ describe('AddServiceInstanceComponent', () => {
         CfOrgSpaceDataService,
         InternalEventMonitorFactory,
         CloudFoundryService,
-        TabNavService
+        TabNavService,
+        LongRunningCfOperationsService
       ],
 
     })

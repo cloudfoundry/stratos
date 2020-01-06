@@ -167,6 +167,8 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
+import { LongRunningCfOperationsService } from './services/long-running-cf-op.service';
+import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
@@ -442,7 +444,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     ServiceActionHelperService,
     MetricsRangeSelectorService,
     GitSCMService,
-    MetricsRangeSelectorService,
+    LongRunningOperationsService,
+    LongRunningCfOperationsService,
     CloudFoundryUserProvidedServicesService
   ]
 })
