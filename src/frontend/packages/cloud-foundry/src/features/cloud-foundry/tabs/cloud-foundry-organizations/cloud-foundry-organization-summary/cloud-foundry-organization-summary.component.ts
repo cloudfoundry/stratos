@@ -69,26 +69,26 @@ export class CloudFoundryOrganizationSummaryComponent {
           this.cfOrgService.orgGuid,
           this.cfEndpointService.cfGuid
         );
+
+        const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+        this.store.select(selectDeletionInfo(orgEntity.entityKey, this.cfOrgService.orgGuid)).pipe(
+          pairwise(),
+          filter(([oldV, newV]) => (oldV.busy && !newV.busy) || newV.error),
+          tap(([, newV]) => {
+            if (newV.deleted) {
+              this.store.dispatch(new RouterNav({
+                path: [
+                  'cloud-foundry',
+                  this.cfOrgService.cfGuid,
+                  'organizations'
+                ]
+              }));
+            } else if (newV.error) {
+              this.snackBar.open(`Failed to delete space: ${newV.message}`, 'Close');
+            }
+          })
+        ).subscribe();
       });
     });
-
-    const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
-    this.store.select(selectDeletionInfo(orgEntity.entityKey, this.cfOrgService.orgGuid)).pipe(
-      pairwise(),
-      filter(([oldV, newV]) => oldV.busy && !newV.busy),
-      tap(([, newV]) => {
-        if (newV.deleted) {
-          this.store.dispatch(new RouterNav({
-            path: [
-              'cloud-foundry',
-              this.cfOrgService.cfGuid,
-              'organizations'
-            ]
-          }));
-        } else if (newV.error) {
-          this.snackBar.open(`Failed to delete space: ${newV.message}`, 'Close');
-        }
-      })
-    ).subscribe();
   }
 }

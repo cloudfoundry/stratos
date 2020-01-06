@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map, pairwise } from 'rxjs/operators';
+import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 import {
@@ -140,6 +140,7 @@ export class ServiceActionHelperService {
       pairwise(),
       filter(([oldV, newV]) => oldV.busy && !newV.busy),
       map(([, newV]) => newV),
+      first()
     );
   }
 
