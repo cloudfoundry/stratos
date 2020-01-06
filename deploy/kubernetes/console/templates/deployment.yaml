@@ -1,5 +1,5 @@
 ---
-{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major .Capabilities.KubeVersion.Minor)}}
+{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
 apiVersion: apps/v1
 {{- else }}
 apiVersion: apps/v1beta1
@@ -123,6 +123,8 @@ spec:
           value: "30"
         - name: HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS
           value: "120"
+        - name: HTTP_CLIENT_TIMEOUT_LONGRUNNING_IN_SECS
+          value: "600"
         - name: SKIP_TLS_VERIFICATION
           value: "false"
         - name: CONSOLE_PROXY_TLS_ADDRESS
@@ -313,7 +315,7 @@ spec:
           name: {{ .Values.console.templatesConfigMapName }}
       {{- end }}
 ---
-{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major .Capabilities.KubeVersion.Minor)}}
+{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
 apiVersion: apps/v1
 {{- else }}
 apiVersion: extensions/v1beta1

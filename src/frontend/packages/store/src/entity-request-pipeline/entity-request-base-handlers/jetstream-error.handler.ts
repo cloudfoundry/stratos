@@ -19,7 +19,8 @@ export function jetstreamErrorHandler(
 ) {
   // This will never work for calls where endpoint list is automatically generated (list is applied to request object not action)
   // For those cases treat as a global error
-  const endpointString = action.options.headers ? action.options.headers.get(PipelineHttpClient.EndpointHeader) || null : null;
+  const headerEndpointString = action.options.headers ? action.options.headers.get(PipelineHttpClient.EndpointHeader) : null;
+  const endpointString = headerEndpointString || action.endpointGuid || null;
   const endpointIds: string[] = endpointString ? endpointString.split(',') : [];
 
   if (endpointString) {

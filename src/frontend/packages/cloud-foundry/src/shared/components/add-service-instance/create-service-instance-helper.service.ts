@@ -97,14 +97,8 @@ export class CreateServiceInstanceHelper {
     return this.service$
       .pipe(
         filter(p => !!p),
-        map((service: APIResource<IService>) => {
-          const extraInfo = JSON.parse(service.entity.extra);
-          if (extraInfo && extraInfo.displayName) {
-            return extraInfo.displayName;
-          } else {
-            return service.entity.label;
-          }
-        }));
+        map(getServiceName)
+      );
   }
 
   // getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
