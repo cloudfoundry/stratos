@@ -117,10 +117,6 @@ import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundr
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { SimpleListComponent } from './components/list/simple-list/simple-list.component';
-import { ListHostDirective } from './components/list/simple-list/list-host.directive';
-import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
-import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
 import { TileSelectorTileComponent } from './components/tile-selector-tile/tile-selector-tile.component';
 
 /* tslint:disable:max-line-length */
