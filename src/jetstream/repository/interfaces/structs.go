@@ -309,6 +309,7 @@ type CNSIRequest struct {
 	StatusCode  int         `json:"statusCode"`
 	Status      string      `json:"status"`
 	PassThrough bool        `json:"-"`
+	LongRunning bool        `json:"-"`
 
 	Response     []byte `json:"-"`
 	Error        error  `json:"-"`
@@ -316,39 +317,40 @@ type CNSIRequest struct {
 }
 
 type PortalConfig struct {
-	HTTPClientTimeoutInSecs         int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
-	HTTPClientTimeoutMutatingInSecs int64    `configName:"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS"`
-	HTTPConnectionTimeoutInSecs     int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
-	TLSAddress                      string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
-	TLSCert                         string   `configName:"CONSOLE_PROXY_CERT"`
-	TLSCertKey                      string   `configName:"CONSOLE_PROXY_CERT_KEY"`
-	TLSCertPath                     string   `configName:"CONSOLE_PROXY_CERT_PATH"`
-	TLSCertKeyPath                  string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
-	CFClient                        string   `configName:"CF_CLIENT"`
-	CFClientSecret                  string   `configName:"CF_CLIENT_SECRET"`
-	AllowedOrigins                  []string `configName:"ALLOWED_ORIGINS"`
-	SessionStoreSecret              string   `configName:"SESSION_STORE_SECRET"`
-	EncryptionKeyVolume             string   `configName:"ENCRYPTION_KEY_VOLUME"`
-	EncryptionKeyFilename           string   `configName:"ENCRYPTION_KEY_FILENAME"`
-	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
-	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
-	AutoRegisterCFName              string   `configName:"AUTO_REG_CF_NAME"`
-	SSOLogin                        bool     `configName:"SSO_LOGIN"`
-	SSOOptions                      string   `configName:"SSO_OPTIONS"`
-	SSOWhiteList                    string   `configName:"SSO_WHITELIST"`
-	AuthEndpointType                string   `configName:"AUTH_ENDPOINT_TYPE"`
-	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
-	LogLevel                        string   `configName:"LOG_LEVEL"`
-	CFAdminIdentifier               string
-	CloudFoundryInfo                *CFInfo
-	HTTPS                           bool
-	EncryptionKeyInBytes            []byte
-	ConsoleVersion                  string
-	IsCloudFoundry                  bool
-	LoginHooks                      []LoginHook
-	SessionStore                    SessionStorer
-	ConsoleConfig                   *ConsoleConfig
-	PluginConfig                    map[string]string
-	DatabaseProviderName            string
-	EnableTechPreview               bool `configName:"ENABLE_TECH_PREVIEW"`
+	HTTPClientTimeoutInSecs            int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
+	HTTPClientTimeoutMutatingInSecs    int64    `configName:"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS"`
+	HTTPClientTimeoutLongRunningInSecs int64    `configName:"HTTP_CLIENT_TIMEOUT_LONGRUNNING_IN_SECS"`
+	HTTPConnectionTimeoutInSecs        int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
+	TLSAddress                         string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
+	TLSCert                            string   `configName:"CONSOLE_PROXY_CERT"`
+	TLSCertKey                         string   `configName:"CONSOLE_PROXY_CERT_KEY"`
+	TLSCertPath                        string   `configName:"CONSOLE_PROXY_CERT_PATH"`
+	TLSCertKeyPath                     string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
+	CFClient                           string   `configName:"CF_CLIENT"`
+	CFClientSecret                     string   `configName:"CF_CLIENT_SECRET"`
+	AllowedOrigins                     []string `configName:"ALLOWED_ORIGINS"`
+	SessionStoreSecret                 string   `configName:"SESSION_STORE_SECRET"`
+	EncryptionKeyVolume                string   `configName:"ENCRYPTION_KEY_VOLUME"`
+	EncryptionKeyFilename              string   `configName:"ENCRYPTION_KEY_FILENAME"`
+	EncryptionKey                      string   `configName:"ENCRYPTION_KEY"`
+	AutoRegisterCFUrl                  string   `configName:"AUTO_REG_CF_URL"`
+	AutoRegisterCFName                 string   `configName:"AUTO_REG_CF_NAME"`
+	SSOLogin                           bool     `configName:"SSO_LOGIN"`
+	SSOOptions                         string   `configName:"SSO_OPTIONS"`
+	SSOWhiteList                       string   `configName:"SSO_WHITELIST"`
+	AuthEndpointType                   string   `configName:"AUTH_ENDPOINT_TYPE"`
+	CookieDomain                       string   `configName:"COOKIE_DOMAIN"`
+	LogLevel                           string   `configName:"LOG_LEVEL"`
+	CFAdminIdentifier                  string
+	CloudFoundryInfo                   *CFInfo
+	HTTPS                              bool
+	EncryptionKeyInBytes               []byte
+	ConsoleVersion                     string
+	IsCloudFoundry                     bool
+	LoginHooks                         []LoginHook
+	SessionStore                       SessionStorer
+	ConsoleConfig                      *ConsoleConfig
+	PluginConfig                       map[string]string
+	DatabaseProviderName               string
+	EnableTechPreview                  bool `configName:"ENABLE_TECH_PREVIEW"`
 }

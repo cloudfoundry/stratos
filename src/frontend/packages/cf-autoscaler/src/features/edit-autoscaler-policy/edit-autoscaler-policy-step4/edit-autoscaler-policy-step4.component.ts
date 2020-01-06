@@ -12,13 +12,14 @@ import { EntityService } from '../../../../../core/src/core/entity-service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/app-state';
+import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
   numberWithFractionOrExceedRange,
   specificDateRangeOverlapping,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { UpdateAppAutoscalerPolicyAction, CreateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
+import { CreateAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import {
   AppAutoscalerInvalidPolicyError,
   AppAutoscalerPolicyLocal,
@@ -26,7 +27,6 @@ import {
 } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step4',
@@ -49,6 +49,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     datetime: true
   };
   private action: CreateAppAutoscalerPolicyAction | UpdateAppAutoscalerPolicyAction;
+  private createUpdateTest: string;
 
   constructor(
     public applicationService: ApplicationService,
@@ -73,9 +74,10 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     this.action = this.isCreate ?
       new CreateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy) :
       new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy);
+    this.createUpdateTest = this.isCreate ? 'create policy' : 'update policy';
     this.updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
-      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy)
+      this.action
     );
   }
 
@@ -83,7 +85,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     if (this.validateGlobalSetting()) {
       return observableOf({
         success: false,
-        message: `Could not update policy: ${PolicyAlert.alertInvalidPolicyTriggerScheduleEmpty}`,
+        message: `Could not ${this.createUpdateTest}: ${PolicyAlert.alertInvalidPolicyTriggerScheduleEmpty}`,
       });
     }
     this.action.policy = this.currentPolicy;
@@ -96,7 +98,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
       map(request => ({
         success: !request.error,
         redirect: !request.error,
-        message: request.error ? `Could not update policy${request.message ? `: ${request.message}` : ''}` : null
+        message: request.error ? `Could not ${this.createUpdateTest}${request.message ? `: ${request.message}` : ''}` : null
       })),
       first(),
     );

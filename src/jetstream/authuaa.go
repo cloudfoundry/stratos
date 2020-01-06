@@ -151,11 +151,6 @@ func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpir
 		if err = a.p.setSessionValues(c, sessionValues); err != nil {
 			return err
 		}
-	} else {
-		// Still need to extend the expires_on of the Session
-		if err = a.p.setSessionValues(c, nil); err != nil {
-			return err
-		}
 	}
 
 	return nil

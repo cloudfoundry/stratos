@@ -32,6 +32,7 @@
 @import '../src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component.theme';
 @import '../src/shared/components/upload-progress-indicator/upload-progress-indicator.component.theme';
 @import '../src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component.theme';
+@import '../src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component.theme';
 @import '../src/shared/components/start-end-date/start-end-date.component.theme';
 @import '../src/shared/components/metrics-chart/metrics-chart.component.theme';
 @import '../src/shared/components/metrics-range-selector/metrics-range-selector.component.theme';
@@ -41,7 +42,8 @@
 @import '../src/features/user-profile/profile-info/profile-info.component.theme';
 @import '../src/core/stateful-icon/stateful-icon.component.theme';
 @import '../src/shared/components/markdown-preview/markdown-preview.component.theme';
-@import './components/mat-tabs.theme';
+@import './components/mat-snack-bar.theme';
+@import './components/ngx-charts-gauge.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
 @import './mat-themes';
@@ -82,12 +84,10 @@ $side-nav-light-active: #484848;
   $warn: map-get($theme, warn);
   $subdued: mat-contrast($primary, 50);
 
-  @if $is-dark==true {
+  @if $is-dark == true {
     $app-background-color: lighten(mat-color($background-colors, background), 10%);
-    $subdued: darken($subdued, 50);
-  }
-
-  @else {
+    $subdued: lighten($subdued, 90);
+  } @else {
     $app-background-color: darken(mat-color($background-colors, background), 2%);
     $subdued: lighten($subdued, 50);
   }
@@ -106,7 +106,8 @@ $side-nav-light-active: #484848;
   @include steppers-theme($theme, $app-theme);
   @include list-theme($theme, $app-theme);
   @include app-base-page-theme($theme, $app-theme);
-  @include app-mat-tabs-theme($theme, $app-theme);
+  @include app-mat-snack-bar-theme($theme, $app-theme);
+  @include ngx-charts-gauge($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
   @include app-card-status-theme($theme, $app-theme);
   @include app-usage-gauge-theme($theme, $app-theme);
@@ -149,15 +150,14 @@ $side-nav-light-active: #484848;
   @include page-side-nav-theme($theme, $app-theme);
   @include cf-admin-add-user-warning($theme, $app-theme);
   @include entity-summary-title-theme($theme, $app-theme);
+  @include app-meta-card-item-theme($theme, $app-theme);
   @include error-page-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
   @if ($nav-theme) {
     @return $nav-theme;
-  }
-
-  @else {
+  } @else {
     // Use default palette for side navigation
     @return (background: $side-nav-light-bg, background-top: $side-nav-light-bg, text: darken($side-nav-light-text, 10%), active: $side-nav-light-active, active-text: $side-nav-light-text, hover: $side-nav-light-hover, hover-text: $side-nav-light-text);
   }
@@ -166,9 +166,7 @@ $side-nav-light-active: #484848;
 @function app-generate-status-theme($theme, $status-theme: null) {
   @if ($status-theme) {
     @return $status-theme;
-  }
-
-  @else {
+  } @else {
     $warn: map-get($theme, warn);
     $primary: map-get($theme, primary);
     $white: #fff; // Use default palette for status

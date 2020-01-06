@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
 import { AuthOnlyAppState } from '../../store/src/app-state';
+import { ThemeService } from './core/theme.service';
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
 
@@ -20,7 +21,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   constructor(
     private loggedInService: LoggedInService,
-    store: Store<AuthOnlyAppState>
+    store: Store<AuthOnlyAppState>,
+    public themeService: ThemeService
   ) {
     // We use the username to key the session storage. We could replace this with the users id?
     this.userId$ = store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);

@@ -95,7 +95,7 @@ export class LoggedInService {
             this.store.select(selectDashboardState),
             this.store.select(s => s.auth)
           ),
-          tap(([i, dashboardState, authState]) => {
+          tap(([, dashboardState, authState]) => {
             this.ngZone.run(() => {
               this._checkSession(dashboardState, authState);
             });
