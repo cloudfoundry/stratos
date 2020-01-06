@@ -51,11 +51,11 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       ]],
       disk_quota: [0, [
         Validators.required,
-        Validators.min(0)
+        Validators.min(1)
       ]],
       memory: [0, [
         Validators.required,
-        Validators.min(0)
+        Validators.min(1)
       ]],
       enable_ssh: false
     });
