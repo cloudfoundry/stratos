@@ -21,7 +21,7 @@ import { getAPIRequestDataState, selectEntities } from '../selectors/api.selecto
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { PaginationEntityState } from '../types/pagination.types';
 import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '..//entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { LocalPaginationHelpers } from '../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 
