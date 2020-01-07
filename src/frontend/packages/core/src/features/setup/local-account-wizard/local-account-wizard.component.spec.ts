@@ -1,6 +1,16 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../tab-nav.service';
+import { CoreModule } from '../../../core/core.module';
+import { MDAppModule } from '../../../core/md.module';
+import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
+import { SharedModule } from '../../../shared/shared.module';
+import { SetupModule } from '../setup.module';
 import { LocalAccountWizardComponent } from './local-account-wizard.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
+import { StoreModule } from '@ngrx/store';
 
 describe('LocalAccountWizardComponent', () => {
   let component: LocalAccountWizardComponent;
@@ -8,7 +18,19 @@ describe('LocalAccountWizardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ LocalAccountWizardComponent ]
+      imports: [
+        CoreModule,
+        SharedModule,
+        SetupModule,
+        RouterTestingModule,
+        FormsModule,
+        PageHeaderModule,
+        ReactiveFormsModule,
+        MDAppModule,
+        StoreModule.forRoot({}),
+        NoopAnimationsModule,
+      ],
+      providers: [TabNavService]
     })
     .compileComponents();
   }));
