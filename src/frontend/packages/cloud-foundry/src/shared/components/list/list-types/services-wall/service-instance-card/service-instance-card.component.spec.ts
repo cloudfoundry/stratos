@@ -10,6 +10,12 @@ import { generateCfBaseTestModules } from '../../../../../../../test-framework/c
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
+import {
+  TableCellServiceBindableComponent,
+} from '../../cf-services/table-cell-service-bindable/table-cell-service-bindable.component';
+import {
+  TableCellServiceReferencesComponent,
+} from '../../cf-services/table-cell-service-references/table-cell-service-references.component';
 import { ServiceInstanceCardComponent } from './service-instance-card.component';
 
 describe('ServiceInstanceCardComponent', () => {
@@ -18,7 +24,13 @@ describe('ServiceInstanceCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ServiceInstanceCardComponent, CfOrgSpaceLinksComponent, ServiceInstanceLastOpComponent],
+      declarations: [
+        ServiceInstanceCardComponent,
+        CfOrgSpaceLinksComponent,
+        ServiceInstanceLastOpComponent,
+        TableCellServiceBindableComponent,
+        TableCellServiceReferencesComponent
+      ],
       imports: generateCfBaseTestModules(),
       providers: [
         ServicesWallService,

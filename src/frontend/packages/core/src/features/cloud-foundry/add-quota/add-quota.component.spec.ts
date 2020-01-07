@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
+  LongRunningCfOperationsService,
+} from '../../../../../cloud-foundry/src/shared/data-services/long-running-cf-op.service';
+import {
   generateCfBaseTestModules,
 } from '../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
 import { TabNavService } from '../../../../tab-nav.service';
@@ -16,7 +19,7 @@ describe('AddQuotaComponent', () => {
     TestBed.configureTestingModule({
       declarations: [AddQuotaComponent, CreateQuotaStepComponent, QuotaDefinitionFormComponent],
       imports: [...generateCfBaseTestModules()],
-      providers: [TabNavService]
+      providers: [TabNavService, LongRunningCfOperationsService]
     })
       .compileComponents();
   }));
