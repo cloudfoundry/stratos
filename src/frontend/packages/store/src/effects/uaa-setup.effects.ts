@@ -1,17 +1,18 @@
-import { UaaSetupData, LocalAdminSetupData } from './../types/uaa-setup.types';
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
+import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import {
   SETUP_GET_SCOPES,
   SETUP_SAVE_CONFIG,
   SetupConsoleGetScopes,
-  SetupSuccess,
   SetupFailed,
   SetupSaveConfig,
+  SetupSuccess,
 } from './../actions/setup.actions';
+import { LocalAdminSetupData, UaaSetupData } from './../types/uaa-setup.types';
 
 
 @Injectable()
@@ -22,7 +23,7 @@ export class UAASetupEffect {
     private actions$: Actions
   ) { }
 
-  getSetupScopesUrl = '/pp/v1/setup.check';
+  getSetupScopesUrl = '/pp/v1/setup/check';
   saveSetupUrl = '/pp/v1/setup/save';
 
   @Effect() setupGetScopes$ = this.actions$.pipe(
@@ -50,10 +51,16 @@ export class UAASetupEffect {
     }));
 
   private fetchError(err): string {
-    try {
-      const body = JSON.parse(err._body);
-      return body.error;
-    } catch (err) { }
+    const httpResponse = isHttpErrorResponse(err);
+    if (httpResponse) {
+      if (httpResponse.error.error) {
+        return httpResponse.error.error;
+      }
+      try {
+        const body = JSON.parse(httpResponse.error);
+        return body;
+      } catch (err) { }
+    }
     return '';
   }
 
@@ -63,12 +70,12 @@ export class UAASetupEffect {
     if ((setupData as UaaSetupData).console_client) {
       const uaaSetupData = setupData as UaaSetupData;
       params = params
-      .set('console_client', uaaSetupData.console_client)
-      .set('username', uaaSetupData.username)
-      .set('password', uaaSetupData.password)
-      .set('skip_ssl_validation', uaaSetupData.skip_ssl_validation.toString() || 'false')
-      .set('uaa_endpoint', uaaSetupData.uaa_endpoint)
-      .set('use_sso', uaaSetupData.use_sso.toString() || 'false');
+        .set('console_client', uaaSetupData.console_client)
+        .set('username', uaaSetupData.username)
+        .set('password', uaaSetupData.password)
+        .set('skip_ssl_validation', uaaSetupData.skip_ssl_validation.toString() || 'false')
+        .set('uaa_endpoint', uaaSetupData.uaa_endpoint)
+        .set('use_sso', uaaSetupData.use_sso.toString() || 'false');
       if (uaaSetupData.console_client_secret) {
         params = params.append('console_client_secret', uaaSetupData.console_client_secret);
       }
