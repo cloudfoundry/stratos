@@ -44,11 +44,8 @@ describe('Application Deploy Docker -', () => {
       // Expects app to be fully started
       const appSummary = new ApplicationPageSummaryTab(appDetails.cfGuid, appDetails.appGuid);
       appSummary.goToSummaryTab();
-
-      appSummary.cardStatus.getStatus().then(res => {
-        expect(res.status).toBe('Deployed');
-        expect(res.subStatus).toBe('Online');
-      });
+      appSummary.cardStatus.waitForStatus('Deployed');
+      appSummary.cardStatus.waitForSubStatus('Online');
 
       appSummary.cardInstances.waitForRunningInstancesText('1 / 1');
 
