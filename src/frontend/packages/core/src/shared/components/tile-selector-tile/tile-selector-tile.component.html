@@ -1,4 +1,4 @@
-<div class="tile-selector" [ngClass]="{'tile-selector__active': active, 'tile-selector__taller': !!tile.description}" (click)="onClick(tile)">
+<div *ngIf="tile" class="tile-selector" [ngClass]="{'tile-selector__active': active, 'tile-selector__taller': !!tile.description}" (click)="onClick(tile)">
   <div class="tile-selector__header">
     <mat-icon *ngIf="tile.graphic.matIcon; else imgIcon" class="tile-selector__icon"
       [fontSet]="tile.graphic.matIconFont"> {{ tile.graphic.matIcon }}</mat-icon>
