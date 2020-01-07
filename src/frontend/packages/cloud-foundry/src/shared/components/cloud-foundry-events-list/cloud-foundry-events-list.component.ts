@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { debounceTime, first } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
@@ -108,6 +108,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   showActee = false;
   private subs: Subscription[] = [];
   private config: CfEventsConfigService;
+  private initialSet = false;
 
   constructor(
     listConfig: ListConfig<APIResource>,
@@ -121,10 +122,16 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
     // Set initial filter values
     this.subs.push(
       this.config.getEventFilters().pipe(
-        first()
+        distinctUntilChanged()
       ).subscribe(params => {
-        this.filtersFormGroup.controls.actee.setValue(params.actee);
-        this.filtersFormGroup.controls.type.setValue(params.type);
+
+        if (!this.initialSet) {
+          this.filtersFormGroup.controls.type.setValue(params.type);
+          this.filtersFormGroup.controls.actee.setValue(params.actee);
+          this.initialSet = true;
+        } else if (this.filtersFormGroup.controls.actee.value !== params.actee) {
+          this.filtersFormGroup.controls.actee.setValue(params.actee);
+        }
       })
     );
 

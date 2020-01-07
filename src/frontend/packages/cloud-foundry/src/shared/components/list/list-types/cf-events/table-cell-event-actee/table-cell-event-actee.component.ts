@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -70,9 +70,17 @@ export class TableCellEventActeeComponent extends TableCellCustom<APIResource> {
       },
     };
 
+  @Input() config: {
+    setActeeFilter: (actee: string) => void;
+  };
+
   // constructor() { }
 
   // ngOnInit() {
   // }
+
+  setActee() {
+    this.config.setActeeFilter(this.row.entity.actee);
+  }
 
 }

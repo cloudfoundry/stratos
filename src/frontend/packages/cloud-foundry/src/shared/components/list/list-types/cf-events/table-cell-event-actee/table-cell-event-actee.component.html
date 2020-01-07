@@ -1,12 +1,6 @@
 <div class="event-actee">
-  <div class="event-actee__icons">
-    <mat-icon [matTooltip]="row.entity.actee_type" [fontSet]="icon[row.entity.actee_type]?.iconFont">
-      {{icon[row.entity.actee_type]?.icon}}</mat-icon>
-    <app-copy-to-clipboard class="app-code-block__copy" [text]="row.entity.actee" [tooltip]="'Copy GUID to clipboard'"
-      [showSuccessText]="false">
-    </app-copy-to-clipboard>
-  </div>
-  <div *ngIf="row.entity.actee_name" class="event-actee__name">
-    {{ row.entity.actee_name || row.entity.actee }}
-  </div>
+  <mat-icon [matTooltip]="row.entity.actee_type" [fontSet]="icon[row.entity.actee_type]?.iconFont">
+    {{icon[row.entity.actee_type]?.icon}}</mat-icon>
+  <a *ngIf="row.entity.actee_name || row.entity.actee || row.metadata.guid" (click)="setActee()"
+    routerLink=".">{{ row.entity.actee_name || row.entity.actee || row.metadata.guid}}</a>
 </div>
