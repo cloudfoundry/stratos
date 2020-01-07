@@ -17,7 +17,7 @@ export class DashboardEffect {
   @Effect({ dispatch: false }) hydrate$ = this.actions$.pipe(
     ofType<HydrateDashboardStateAction>(HYDRATE_DASHBOARD_STATE),
     map(() => {
-      // Ensure the previous theme is applied
+      // Ensure the previous theme is applied after dashboard is hydrated
       this.themeService.initialize();
     })
   );
