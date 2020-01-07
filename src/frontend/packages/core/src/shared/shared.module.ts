@@ -117,6 +117,7 @@ import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundr
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { TileSelectorTileComponent } from './components/tile-selector-tile/tile-selector-tile.component';
 
 /* tslint:disable:max-line-length */
 
@@ -219,6 +220,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     UnlimitedInputComponent,
     SimpleListComponent,
     ListHostDirective,
+    TileSelectorTileComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -307,7 +309,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     SimpleListComponent,
-    ListHostDirective
+    ListHostDirective,
+    TileSelectorTileComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,
