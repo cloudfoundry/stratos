@@ -52,6 +52,21 @@ import {
   CreateApplicationStep1Component,
 } from '../../create-application/create-application-step1/create-application-step1.component';
 import { CfServiceCardComponent } from '../../list/list-types/cf-services/cf-service-card/cf-service-card.component';
+import {
+  TableCellServiceActiveComponent,
+} from '../../list/list-types/cf-services/table-cell-service-active/table-cell-service-active.component';
+import {
+  TableCellServiceBindableComponent,
+} from '../../list/list-types/cf-services/table-cell-service-bindable/table-cell-service-bindable.component';
+import {
+  TableCellServiceCfBreadcrumbsComponent,
+} from '../../list/list-types/cf-services/table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
+import {
+  TableCellServiceReferencesComponent,
+} from '../../list/list-types/cf-services/table-cell-service-references/table-cell-service-references.component';
+import {
+  TableCellServiceTagsComponent,
+} from '../../list/list-types/cf-services/table-cell-service-tags/table-cell-service-tags.component';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { SelectServiceComponent } from '../../select-service/select-service.component';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
@@ -99,7 +114,12 @@ describe('AddServiceInstanceComponent', () => {
         ServicePlanPublicComponent,
         ServicePlanPriceComponent,
         FocusDirective,
-        SpecifyUserProvidedDetailsComponent
+        SpecifyUserProvidedDetailsComponent,
+        TableCellServiceActiveComponent,
+        TableCellServiceBindableComponent,
+        TableCellServiceReferencesComponent,
+        TableCellServiceCfBreadcrumbsComponent,
+        TableCellServiceTagsComponent
       ],
       imports: [
         ...generateCfBaseTestModulesNoShared(),
