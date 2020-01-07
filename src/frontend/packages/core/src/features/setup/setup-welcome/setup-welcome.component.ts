@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
 import { Store } from '@ngrx/store';
-import { GeneralEntityAppState } from '../../../../../store/src/app-state';
+
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
+import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
 
 @Component({
   selector: 'app-setup-welcome',
@@ -32,9 +33,9 @@ export class SetupWelcomeComponent {
 
   ];
 
-  constructor(public store: Store<GeneralEntityAppState>) {}
+  constructor(private store: Store<GeneralEntityAppState>) { }
 
-   public selectionChange(tile: ITileConfig<ITileData>) {
+  public selectionChange(tile: ITileConfig<ITileData>) {
     if (tile) {
       this.store.dispatch(new RouterNav({
         path: `setup/${tile.data.type}`,
