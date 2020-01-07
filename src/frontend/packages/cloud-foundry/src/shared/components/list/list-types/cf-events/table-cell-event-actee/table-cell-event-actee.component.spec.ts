@@ -27,7 +27,7 @@ describe('TableCellEventActeeComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellEventActeeComponent);
     component = fixture.componentInstance;
-    component.row = { entity: {} } as APIResource;
+    component.row = { entity: {}, metadata: {} } as APIResource;
     fixture.detectChanges();
   });
 
