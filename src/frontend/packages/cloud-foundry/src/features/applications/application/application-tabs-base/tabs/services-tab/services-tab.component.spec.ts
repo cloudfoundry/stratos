@@ -9,9 +9,8 @@ import { PaginationMonitorFactory } from '../../../../../../../../core/src/share
 import {
   generateTestApplicationServiceProvider,
 } from '../../../../../../../../core/test-framework/application-service-helper';
-import {
-  generateCfBaseTestModules,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ServiceActionHelperService } from '../../../../../../shared/data-services/service-action-helper.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { ServicesTabComponent } from './services-tab.component';
 
@@ -29,7 +28,8 @@ describe('ServicesTabComponent', () => {
         ApplicationEnvVarsHelper,
         ApplicationStateService,
         PaginationMonitorFactory,
-        DatePipe
+        DatePipe,
+        ServiceActionHelperService
       ]
     })
       .compileComponents();

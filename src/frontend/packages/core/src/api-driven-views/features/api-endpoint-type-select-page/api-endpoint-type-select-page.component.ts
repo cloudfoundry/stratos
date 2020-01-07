@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { GeneralAppState } from '../../../../../store/src/app-state';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { ApiEntityType } from '../../api-drive-views.types';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { map } from 'rxjs/operators';
-import { Router, ActivatedRoute } from '@angular/router';
+
+import { GeneralAppState } from '../../../../../store/src/app-state';
+import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { ApiEntityType } from '../../api-drive-views.types';
 
 @Component({
   selector: 'app-api-endpoint-type-select-page',
@@ -21,7 +22,6 @@ export class ApiEndpointTypeSelectPageComponent implements OnInit {
     public activeRoute: ActivatedRoute
   ) { }
   public endpointSelected(endpoint: ApiEntityType) {
-    console.log(endpoint);
     this.router.navigate([endpoint.type], { relativeTo: this.activeRoute });
   }
   ngOnInit() {
