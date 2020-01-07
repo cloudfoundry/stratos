@@ -9,7 +9,7 @@ import { MAT_DIALOG_DATA, MatDialog } from '@angular/material';
 export class EventMetadataComponent implements OnInit {
 
   static maxValuesLength = 1000;
-  static maxKeys = 10;
+  static maxKeys = 5;
 
   @Input() metadata: { [name: string]: any };
   @Input() canShowPopup = true;

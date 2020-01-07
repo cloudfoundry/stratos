@@ -1,8 +1,9 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 import { CfEvent } from '../../../../../../../core/src/core/cf-api.types';
+import { arraysEqual } from '../../../../../../../core/src/core/utils.service';
 import {
   valueOrCommonFalsy,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
@@ -37,7 +38,13 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
       columnId: 'type', headerCell: () => 'Type', cellComponent: TableCellEventTypeComponent, cellFlex: '2'
     },
     {
-      columnId: CfEventsConfigService.acteeColumnId, headerCell: () => 'Actee', cellComponent: TableCellEventActeeComponent, cellFlex: '3'
+      columnId: CfEventsConfigService.acteeColumnId,
+      headerCell: () => 'Actee',
+      cellComponent: TableCellEventActeeComponent,
+      cellFlex: '3',
+      cellConfig: {
+        setActeeFilter: (actee: string) => this.setActeeFilter(actee)
+      }
     },
     {
       columnId: 'detail', headerCell: () => 'Detail', cellComponent: TableCellEventDetailComponent, cellFlex: '6'
@@ -85,6 +92,17 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
   getDataSource = () => this.eventSource;
   getMultiFiltersConfigs = () => [];
 
+  setActeeFilter(actee: string) {
+    this.getEventFilters().pipe(
+      first()
+    ).subscribe(currentFilters => {
+      this.setEventFilters({
+        actee,
+        type: currentFilters.type
+      });
+    });
+  }
+
   setEventFilters(values: { actee: string, type: string[] }) {
     this.getEventFilters().pipe(
       first()
@@ -95,7 +113,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
       const addQs: { [key: string]: string } = {};
       const removeQs: string[] = [];
 
-      if (values.type !== currentFilters.type) {
+      if (!arraysEqual(values.type, currentFilters.type)) {
         if (!!values.type && !!values.type.length) {
           addQs.type = new QParam('type', values.type, QParamJoiners.in).toString();
         } else {
@@ -138,7 +156,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     actee: string
   }> {
     return this.getDataSource().pagination$.pipe(
-      first(),
+      distinctUntilChanged(),
       map(pag => QParam.fromStrings(pag.params.q as string[])),
       map(qParams => {
         const qType = qParams.find(qParam => qParam.key === 'type');

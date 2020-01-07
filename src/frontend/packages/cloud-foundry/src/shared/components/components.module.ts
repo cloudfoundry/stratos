@@ -183,6 +183,7 @@ import { ServicePlanPriceComponent } from './service-plan-price/service-plan-pri
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
 
 
+
 // tslint:enable:max-line-length
 
 @NgModule({
@@ -282,6 +283,7 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellServiceBindableComponent,
     TableCellServiceActiveComponent,
     TableCellServiceReferencesComponent,
+
     CloudFoundryEventsListComponent,
     EventMetadataComponent
   ],
