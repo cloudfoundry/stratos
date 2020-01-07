@@ -6,7 +6,7 @@ import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src//entity-catalog/entity-catalog.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
@@ -70,7 +70,7 @@ export class CloudFoundryOrganizationSummaryComponent {
           this.cfEndpointService.cfGuid
         );
 
-        const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+        const orgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
         this.store.select(selectDeletionInfo(orgEntity.entityKey, this.cfOrgService.orgGuid)).pipe(
           pairwise(),
           filter(([oldV, newV]) => (oldV.busy && !newV.busy) || newV.error),

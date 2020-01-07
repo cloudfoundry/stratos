@@ -27,7 +27,7 @@ export class ApiEndpointTypeSelectPageComponent implements OnInit {
   ngOnInit() {
     const endpointTypes = entityCatalog.getAllEndpointTypes();
     const endpointTypesWithEntities = endpointTypes
-      .filter(endpointType => entityCatalogue.getAllEntitiesForEndpointType(endpointType.type).length > 0);
+      .filter(endpointType => entityCatalog.getAllEntitiesForEndpointType(endpointType.type).length > 0);
     this.connectedEndpointTypes$ = this.store.select(endpointEntitiesSelector).pipe(
       map(endpoints => {
         const endpointTypeSet = new Set<string>();
