@@ -932,7 +932,7 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
         getLines: () => ([
-          ['Creation  Date', (meta) => meta.createdAt]
+          ['Creation Date', (meta) => meta.createdAt]
         ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid
