@@ -1,4 +1,5 @@
 import * as moment from 'moment';
+
 import {
   IService,
   IServiceBinding,
@@ -39,6 +40,7 @@ import {
   JetstreamError,
 } from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
@@ -129,8 +131,6 @@ import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
-import { CfApplicationState } from './store/types/application.types';
-import { EntitySchema } from '../../store/src/helpers/entity-schema';
 
 export interface CFBasePipelineRequestActionMeta {
   includeRelations?: string[];
@@ -895,7 +895,7 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
         getLines: () => ([
-          ['Creation  Date', (meta) => meta.createdAt]
+          ['Creation Date', (meta) => meta.createdAt]
         ])
       },
       actionBuilders: applicationActionBuilder
@@ -929,9 +929,10 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
           name: space.entity.name,
           cfGuid: space.entity.cfGuid,
+          createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
         getLines: () => ([
-          ['Name', (meta) => meta.name],
+          ['Creation Date', (meta) => meta.createdAt]
         ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid
@@ -964,8 +965,12 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
           status: getOrgStatus(org),
           name: org.entity.name,
           cfGuid: org.entity.cfGuid,
+          createdAt: moment(org.metadata.created_at).format('LLL'),
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
+        getLines: () => ([
+          ['Creation Date', (meta) => meta.createdAt]
+        ]),
         getGuid: metadata => metadata.guid
       }
     }
