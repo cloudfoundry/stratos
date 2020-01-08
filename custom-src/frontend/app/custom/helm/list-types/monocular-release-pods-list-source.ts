@@ -4,7 +4,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../shared/components/list/list.component.types';
 import { getHelmReleasePodId, helmEntityFactory } from '../helm-entity-factory';
-import { GetHelmReleasePods } from '../store/helm.actions';
+import { GetHelmReleasePods, GetHelmReleaseServices } from '../store/helm.actions';
 import { HelmReleasePod } from '../store/helm.types';
 
 export class HelmReleasePodsDataSource extends ListDataSource<HelmReleasePod> {
@@ -16,10 +16,11 @@ export class HelmReleasePodsDataSource extends ListDataSource<HelmReleasePod> {
     releaseTitle: string
   ) {
     const action = new GetHelmReleasePods(endpointGuid, releaseTitle);
+
     super({
       store,
       action,
-      schema: helmEntityFactory(action.entityType),
+      schema: action.entity[0],
       getRowUniqueId: getHelmReleasePodId,
       paginationKey: action.paginationKey,
       isLocal: true,

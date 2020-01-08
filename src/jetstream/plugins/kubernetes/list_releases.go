@@ -1,20 +1,67 @@
 package kubernetes
 
 import (
-	//"encoding/json"
-	//"fmt"
-	"net/url"
+	"encoding/json"
+	"fmt"
 
+	"time"
+
+	//"fmt"
+
+	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	// "k8s.io/client-go/kubernetes"
 	// "k8s.io/client-go/rest"
-	"k8s.io/helm/pkg/helm"
+	"helm.sh/helm/v3/pkg/action"
+	// "helm.sh/helm/v3/pkg/release"
+
 	// "k8s.io/helm/pkg/kube"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/helm"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
+
+// type helmReleaseInfo struct {
+// 	*release.Release
+// 	Extra     string                `json:"extra"`
+// 	Resources []helmReleaseResource `json:"resources"`
+// }
+
+// type helmReleaseResource struct {
+// 	Kind       string `json:"kind"`
+// 	APIVersion string `json:"apiVersion"`
+// 	Name       string `json:"name"`
+// }
+
+type ResourceResponse struct {
+	Kind string          `json:"kind"`
+	Data json.RawMessage `json:"data"`
+}
+
+// type KubeResource struct {
+// 	Kind       string `yaml:"kind"`
+// 	APIVersion string `yaml:"apiVersion"`
+// 	Metadata   struct {
+// 		Name string `yaml:"name"`
+// 	} `yaml:"metadata"`
+// 	Spec interface{} `yaml:"spec"`
+// }
+
+// type kubeAPIJob struct {
+// 	Kind       string
+// 	APIVersion string
+// 	Name       string
+// 	Namespace  string
+// 	Endpoint   string
+// 	User       string
+// }
+
+// type KubeAPIJobResult struct {
+// 	helm.KubeResourceJob
+// 	StatusCode int
+// 	Data       json.RawMessage
+// }
 
 type kubeReleasesData struct {
 	Endpoint  string `json:"endpoint"`
@@ -26,6 +73,17 @@ type kubeReleasesData struct {
 		Version    string `json:"version"`
 	} `json:"chart"`
 }
+
+// type helmReleasesData struct {
+// 	Manifest  string `json:"endpoint"`
+// 	Name      string `json:"releaseName"`
+// 	Namespace string `json:"releaseNamespace"`
+// 	Chart     struct {
+// 		Name       string `json:"chartName"`
+// 		Repository string `json:"repo"`
+// 		Version    string `json:"version"`
+// 	} `json:"chart"`
+// }
 
 type kubeReleasesResponse map[string]kubeReleasesData
 
@@ -53,20 +111,21 @@ func (c *KubernetesSpecification) listReleases(ep *interfaces.ConnectedEndpoint,
 	}
 
 	log.Debugf("listReleases: START: %s", ep.GUID)
-	client, _, tiller, err := c.GetHelmClient(ep.GUID, ep.Account)
+
+	config, hc, err := c.GetHelmConfiguration(ep.GUID, ep.Account, "")
 	if err != nil {
-		log.Errorf("Helm: ListReleases could not get a Helm Client: %s", err)
+		log.Errorf("Helm: ListReleases could not get a Helm Configuration: %s", err)
 		done <- response
 		return
 	}
 
-	defer tiller.Close()
+	defer hc.Cleanup()
+
+	list := action.NewList(config)
 
 	log.Debugf("listReleases: REQUEST: %s", ep.GUID)
 
-	res, err := client.ListReleases(
-		helm.ReleaseListStatuses(nil),
-	)
+	res, err := list.Run()
 	if err != nil {
 		log.Debugf("listReleases: ERROR: %s", ep.GUID)
 		log.Error(err)
@@ -77,71 +136,171 @@ func (c *KubernetesSpecification) listReleases(ep *interfaces.ConnectedEndpoint,
 
 	log.Debugf("listReleases: OK: %s", ep.GUID)
 	response.Result = res
+
 	done <- response
 }
 
 // GetRelease will get release status for the given release
+// This is a web socket request and will return info over the websocket
+// polling until disconnected
 func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 
 	// Need to get a config object for the target endpoint
 	endpointGUID := ec.Param("endpoint")
 	release := ec.Param("name")
+	namespace := ec.Param("namespace")
 	userID := ec.Get("user_id").(string)
 
-	client, _, tiller, err := c.GetHelmClient(endpointGUID, userID)
+	log.Infof("GET RELEASE: %s %s %s", endpointGUID, namespace, release)
+
+	config, hc, err := c.GetHelmConfiguration(endpointGUID, userID, namespace)
 	if err != nil {
-		log.Errorf("Helm: GetRelease could not get a Helm Client: %s", err)
+		log.Errorf("Helm: GetRelease could not get a Helm Configuration: %s", err)
 		return err
 	}
 
-	defer tiller.Close()
+	defer hc.Cleanup()
 
-	res, err := client.ReleaseStatus(release, helm.StatusReleaseVersion(0))
+	status := action.NewStatus(config)
+	res, err := status.Run(release)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	return ec.JSON(200, res)
-}
-
-// ListReleases will list the helm releases for all endpoints
-func (c *KubernetesSpecification) aListReleases(ec echo.Context) error {
-
-	// Need to get a config object for the target endpoint
-	// endpointGUID := ec.Param("endpoint")
-	userID := ec.Get("user_id").(string)
-
-	// Get the config maps directly - don't go via Tiller
-
-	requests := c.makeKubeProxyRequest(userID, "GET", "/api/v1/configmaps?labelSelector=OWNER%3DTILLER")
-	responses, _ := c.portalProxy.DoProxyRequest(requests)
-	return c.portalProxy.SendProxiedResponse(ec, responses)
-}
-
-func (c *KubernetesSpecification) makeKubeProxyRequest(userID, method, uri string) []interfaces.ProxyRequestInfo {
-
-	var p = c.portalProxy
-	eps, err := p.ListEndpointsByUser(userID)
+	// Upgrade to a web socket
+	ws, pingTicker, err := interfaces.UpgradeToWebSocket(ec)
 	if err != nil {
-		return nil
+		return err
+	}
+	defer ws.Close()
+	defer pingTicker.Stop()
+
+	// ws is the websocket ready for use
+
+	// Write the release info first - we will then go fetch the status of evertyhing in the release and send
+	// this back incrementally
+
+	// Parse the manifest
+	log.Info("Got release")
+	rel := helm.NewHelmRelease(res, endpointGUID, userID)
+	log.Info("Done")
+
+	graph := helm.NewHelmReleaseGraph(rel)
+
+	id := fmt.Sprintf("%s-%s", endpointGUID, rel.Namespace)
+
+	// Send over the namespace details of the release
+	sendResource(ws, "ReleasePrefix", id)
+
+	//graph.ParseManifest(rel)
+
+	// Send the manifest for the release
+	sendResource(ws, "Resources", rel.GetResources())
+
+	// // Send the manifest for the release
+	// sendResource(ws, "Test", rel.HelmManifest)
+
+	// Send the graph as we have it now
+	sendResource(ws, "Graph", graph)
+
+	// Loop over this until the web socket is closed
+
+	// Get the pods first and send those
+	rel.UpdatePods(c.portalProxy)
+	sendResource(ws, "Pods", rel.GetPods())
+
+	//graph.Generate(pods)
+	//graph.ParseManifest(rel)
+	sendResource(ws, "Graph", graph)
+
+	// Send the manifest for the release again (ReplicaSets will now be added)
+	sendResource(ws, "Manifest", rel.GetResources())
+
+	// Now get all of the resources in the manifest
+	rel.UpdateResources(c.portalProxy)
+	sendResource(ws, "Resources", rel.GetResources())
+
+	graph.ParseManifest(rel)
+	sendResource(ws, "Graph", graph)
+
+	stopchan := make(chan bool)
+
+	go readLoop(ws, stopchan)
+
+	var sleep = 1 * time.Second
+
+	// Now we have everything, so loop, polling to get status
+	for {
+		log.Warn("Polling for release - wait 10 seconds")
+
+		select {
+		case <-stopchan:
+			log.Error("***  RELEASE POLLER HAS FINISHED")
+			log.Error("****************************************************************************************************")
+			ws.Close()
+			return nil
+		case <-time.After(sleep):
+			break
+		}
+
+		log.Warn("Polling for release ....")
+
+		// Pods
+		rel.UpdatePods(c.portalProxy)
+		sendResource(ws, "Pods", rel.GetPods())
+
+		graph.ParseManifest(rel)
+		sendResource(ws, "Graph", graph)
+
+		// Now get all of the resources in the manifest
+		rel.UpdateResources(c.portalProxy)
+		sendResource(ws, "Resources", rel.GetResources())
+
+		graph.ParseManifest(rel)
+		sendResource(ws, "Graph", graph)
+
+		sleep = 10 * time.Second
 	}
 
-	// Construct the metadata for proxying
-	requests := make([]interfaces.ProxyRequestInfo, 0)
-	for _, endpoint := range eps {
-		if endpoint.CNSIType == "k8s" {
-			req := interfaces.ProxyRequestInfo{}
-			req.UserGUID = userID
-			req.ResultGUID = endpoint.GUID
-			req.EndpointGUID = endpoint.GUID
-			req.Method = method
+	log.Error("****************************************************************************************************")
+	log.Error("RELEASE POLLER HAS FINISHED")
+	log.Error("****************************************************************************************************")
 
-			uri, _ := url.Parse(uri)
-			req.URI = uri
-			requests = append(requests, req)
+	ws.Close()
+
+	return nil
+}
+
+func readLoop(c *websocket.Conn, stopchan chan<- bool) {
+	for {
+		if _, _, err := c.NextReader(); err != nil {
+			log.Error("WEB SOCKET HAS BEEN CLOSED")
+			c.Close()
+			close(stopchan)
+			break
+		}
+	}
+}
+
+func sendResource(ws *websocket.Conn, kind string, data interface{}) error {
+
+	var err error
+	var txt []byte
+	if txt, err = json.Marshal(data); err == nil {
+		resp := ResourceResponse{
+			Kind: kind,
+			Data: json.RawMessage(txt),
+		}
+
+		if txt, err = json.Marshal(resp); err == nil {
+			if ws.WriteMessage(websocket.TextMessage, txt); err == nil {
+				return nil
+			}
+
+			log.Info(err)
 		}
 	}
 
-	return requests
+	return err
 }

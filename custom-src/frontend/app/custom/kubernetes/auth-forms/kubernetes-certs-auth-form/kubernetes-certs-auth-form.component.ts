@@ -20,8 +20,18 @@ export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent 
     /** Body content is in the following encoding:
      * base64encoded:base64encoded
      */
-    const certBase64 = btoa(this.formGroup.value.authValues.cert);
-    const certKeyBase64 = btoa(this.formGroup.value.authValues.certKey);
+
+    let certBase64 = this.formGroup.value.authValues.cert;
+    let certKeyBase64 = this.formGroup.value.authValues.certKey;
+
+    // May already be base64 encoded
+    if (certBase64.indexOf('-----BEGIN') === 0) {
+      certBase64 = btoa(this.formGroup.value.authValues.cert);
+    }
+
+    if (certKeyBase64.indexOf('-----BEGIN') === 0) {
+      certKeyBase64 = btoa(this.formGroup.value.authValues.certKey);
+    }
     return `${certBase64}:${certKeyBase64}`;
   }
 }

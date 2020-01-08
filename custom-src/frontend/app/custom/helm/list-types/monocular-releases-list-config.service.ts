@@ -93,7 +93,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'last_Deployed',
       headerCell: () => 'Last Deployed',
       cellDefinition: {
-        getValue: (row) => `${this.datePipe.transform(row.lastDeployed, 'medium')}`
+        getValue: (row) => `${this.datePipe.transform(row.info.last_deployed, 'medium')}`
       },
       sort: {
         type: 'sort',

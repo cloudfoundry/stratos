@@ -1,13 +1,11 @@
+import { HttpParams, HttpRequest } from '@angular/common/http';
+
 import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import {
-  EntityInlineChildAction,
-  EntityInlineParentAction,
-} from '../entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { RequestEntityLocation, RequestActionEntity } from '../../../store/src/types/request.types';
-import { CFStartAction } from './cf-action.types';
+import { RequestActionEntity, RequestEntityLocation } from '../../../store/src/types/request.types';
 import { EntityTreeRelation } from '../entity-relations/entity-relation-tree';
-import { HttpRequest } from '@angular/common/http';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+import { CFStartAction } from './cf-action.types';
 
 const relationActionId = 'FetchRelationAction';
 
@@ -27,7 +25,7 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
       'GET',
       url.startsWith('/v2/') ? url.substring(4, url.length) : url,
       {
-        params: {}
+        params: new HttpParams()
       }
     );
     this.parentEntityConfig = parent.entity;

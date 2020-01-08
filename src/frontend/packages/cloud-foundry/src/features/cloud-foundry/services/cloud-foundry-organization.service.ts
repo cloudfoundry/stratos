@@ -24,19 +24,19 @@ import {
   ISpaceQuotaDefinition,
 } from '../../../../../core/src/core/cf-api.types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';
+import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 
 export const createOrgQuotaDefinition = (): IOrgQuotaDefinition => ({
   memory_limit: -1,
@@ -85,7 +85,7 @@ export class CloudFoundryOrganizationService {
   usersCount$: Observable<number | null>;
 
   constructor(
-    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
@@ -93,10 +93,12 @@ export class CloudFoundryOrganizationService {
     private cfEndpointService: CloudFoundryEndpointService,
     private cfUserProvidedServicesService: CloudFoundryUserProvidedServicesService
   ) {
-    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
-    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    const orgGuid = activeRouteCfOrgSpace.orgGuid;
+    const cfGuid = activeRouteCfOrgSpace.cfGuid;
 
-    this.initialiseObservables();
+    if (cfGuid && orgGuid) {
+      this.initialize(cfGuid, orgGuid);
+    }
   }
 
   public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
@@ -110,7 +112,10 @@ export class CloudFoundryOrganizationService {
     this.cfEndpointService.fetchApps();
   }
 
-  private initialiseObservables() {
+  public initialize(cfGuid, orgGuid) {
+    this.cfGuid = cfGuid;
+    this.orgGuid = orgGuid;
+
     this.org$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {
         const relations = [
@@ -133,7 +138,7 @@ export class CloudFoundryOrganizationService {
         }
         const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
         const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
-        const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid, relations);
+        const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid, { includeRelations: relations });
         const orgEntityService = this.entityServiceFactory.create<APIResource<IOrganization>>(
           this.orgGuid,
           getOrgAction
@@ -194,8 +199,8 @@ export class CloudFoundryOrganizationService {
     return CloudFoundryEndpointService.fetchAppCount(
       this.store,
       this.paginationMonitorFactory,
-      this.activeRouteCfOrgSpace.cfGuid,
-      this.activeRouteCfOrgSpace.orgGuid
+      this.cfGuid,
+      this.orgGuid
     );
   }
 

@@ -1,5 +1,5 @@
 <app-meta-card [favorite]="metaFavorite" [confirmFavoriteRemoval]="true" [ngClass]="{'fav-meta-card__clickable': !!(routerLink$ | async)}"
-  [actionMenu]="actions$ | async" [routerLink]="routerLink$ | async" class="fav-meta-card" *ngIf="config" [status$]="status$"
+  [actionMenu]="actions$ | async" (click)="previewPanel()" class="fav-meta-card" *ngIf="config" [status$]="status$"
   [entityConfig]="entityConfig">
   <app-meta-card-title class="fav-meta-card__header">
     <!--<div>ICON</div>-->

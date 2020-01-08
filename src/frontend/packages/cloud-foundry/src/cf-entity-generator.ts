@@ -1,4 +1,5 @@
 import * as moment from 'moment';
+
 import {
   IService,
   IServiceBinding,
@@ -38,6 +39,7 @@ import {
   JetstreamError,
 } from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
@@ -116,7 +118,11 @@ import { spaceActionBuilders } from './entity-action-builders/space.action-build
 import { stackActionBuilders } from './entity-action-builders/stack-action-builders';
 import { userProvidedServiceActionBuilder } from './entity-action-builders/user-provided-service.action-builders';
 import { userActionBuilders } from './entity-action-builders/user.action-builders';
+import { ApplicationPreviewComponent } from './shared/components/application-preview/application-preview.component';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
+import { CfEndpointPreviewComponent } from './shared/components/cf-endpoint-preview/cf-endpoint-preview.component';
+import { OrganizationPreviewComponent } from './shared/components/organization-preview/organization-preview.component';
+import { SpacePreviewComponent } from './shared/components/space-preview/space-preview.component';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
@@ -128,8 +134,6 @@ import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
-import { CfApplicationState } from './store/types/application.types';
-import { EntitySchema } from '../../store/src/helpers/entity-schema';
 
 export interface CFBasePipelineRequestActionMeta {
   includeRelations?: string[];
@@ -855,6 +859,7 @@ function generateCfEndpointEntity(endpointDefinition: StratosEndpointExtensionDe
   return new StratosCatalogueEndpointEntity(
     endpointDefinition,
     metadata => `/cloud-foundry/${metadata.guid}`,
+    () => CfEndpointPreviewComponent,
   );
 }
 
@@ -889,6 +894,7 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         }),
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
+        getPreviewableComponent: () => ApplicationPreviewComponent,
         getLines: () => ([
           ['Creation  Date', (meta) => meta.createdAt]
         ])
@@ -925,6 +931,7 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           name: space.entity.name,
           cfGuid: space.entity.cfGuid,
         }),
+        getPreviewableComponent: () => SpacePreviewComponent,
         getLines: () => ([
           ['Name', (meta) => meta.name],
         ]),
@@ -960,6 +967,7 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
           name: org.entity.name,
           cfGuid: org.entity.cfGuid,
         }),
+        getPreviewableComponent: () => OrganizationPreviewComponent,
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
         getGuid: metadata => metadata.guid
       }

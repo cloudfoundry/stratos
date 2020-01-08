@@ -22,9 +22,9 @@ import {
   routeEntityType,
   serviceBindingEntityType,
   spaceEntityType,
+  spaceWithOrgEntityType,
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-types';
-import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EntityService } from '../../../../core/src/core/entity-service';
@@ -47,6 +47,7 @@ import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors'
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { cfEntityFactory } from '../../cf-entity-factory';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
 import { AppStat } from '../../store/types/app-metadata.types';
 import {
@@ -59,13 +60,13 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
     guid,
     endpointGuid, [
-      createEntityRelationKey(applicationEntityType, routeEntityType),
-      createEntityRelationKey(applicationEntityType, spaceEntityType),
-      createEntityRelationKey(applicationEntityType, stackEntityType),
-      createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
-      createEntityRelationKey(routeEntityType, domainEntityType),
-      createEntityRelationKey(spaceEntityType, organizationEntityType),
-    ]
+    createEntityRelationKey(applicationEntityType, routeEntityType),
+    createEntityRelationKey(applicationEntityType, spaceEntityType),
+    createEntityRelationKey(applicationEntityType, stackEntityType),
+    createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
+    createEntityRelationKey(routeEntityType, domainEntityType),
+    createEntityRelationKey(spaceEntityType, organizationEntityType),
+  ]
   );
 }
 
@@ -91,21 +92,9 @@ export class ApplicationService {
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
-    this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
-      appGuid,
-      createGetApplicationAction(appGuid, cfGuid)
-    );
-    const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
-    const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
-    const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
-    this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
-      appGuid,
-      getAppSummaryAction
-    );
-
-    this.constructCoreObservables();
-    this.constructAmalgamatedObservables();
-    this.constructStatusObservables();
+    if (cfGuid && appGuid) {
+      this.initialize(cfGuid, appGuid);
+    }
   }
 
   // NJ: This needs to be cleaned up. So much going on!
@@ -161,6 +150,27 @@ export class ApplicationService {
     ).pipe(publishReplay(1), refCount());
   }
 
+  public initialize(cfGuid, appGuid) {
+    this.cfGuid = cfGuid;
+    this.appGuid = appGuid;
+
+    this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
+      appGuid,
+      createGetApplicationAction(appGuid, cfGuid)
+    );
+    const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
+    const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
+    const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
+    this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
+      appGuid,
+      getAppSummaryAction
+    );
+
+    this.constructCoreObservables();
+    this.constructAmalgamatedObservables();
+    this.constructStatusObservables();
+  }
+
   private constructCoreObservables() {
     // First set up all the base observables
     this.app$ = this.appEntityService.waitForEntity$;
@@ -177,6 +187,8 @@ export class ApplicationService {
           app.cfGuid,
           { includeRelations: [createEntityRelationKey(spaceEntityType, organizationEntityType)], populateMissing: true }
         );
+        getSpaceAction.entity = cfEntityFactory(spaceWithOrgEntityType);
+        getSpaceAction.schemaKey = spaceWithOrgEntityType;
         return this.entityServiceFactory.create<APIResource<ISpace>>(
           app.space_guid,
           getSpaceAction
@@ -189,13 +201,9 @@ export class ApplicationService {
     );
     this.appOrg$ = moreWaiting$.pipe(
       first(),
-      switchMap(app => this.appSpace$.pipe(
-        map(space => space.entity.organization_guid),
-        switchMap(orgGuid => {
-          return this.store.select(selectCfEntity(organizationEntityType, orgGuid));
-        }),
-        filter(org => !!org)
-      ))
+      switchMap(() => this.appSpace$),
+      map(space => space.entity.organization),
+      filter(org => !!org)
     );
 
     this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.pipe(publishReplay(1), refCount());

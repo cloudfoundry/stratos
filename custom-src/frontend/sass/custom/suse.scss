@@ -18,49 +18,52 @@ $suse-blue: #073155;
 $suse-side-nav: $suse-secondary;
 $suse-side-nav-active: #003358;
 
-.stratos .page-content > .page-header {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  // Ensure kube icons don't appear above sub header
-  background-color: #f5f5f5;
-}
+.stratos .default {
 
-.stratos img.stratos-title__logo {
-  width: 160px;
-}
-
-.stratos h1.stratos-title__header {
-  display: initial;
-}
-
-.stratos .page-header .mat-toolbar.mat-primary {
-  background-color: #fff;
-  color: #333;
-}
-
-.stratos app-page-subheader {
-  .page-subheader {
-    background-color: #fff;
-    color: #333;
+  .page-content > .page-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    // Ensure kube icons don't appear above sub header
+    background-color: #f5f5f5;
   }
 
-  .mat-tab-nav-bar.mat-background-primary {
-    .mat-tab-links {
+  img.stratos-title__logo {
+    width: 160px;
+  }
+
+  h1.stratos-title__header {
+    display: initial;
+  }
+
+  .page-header .mat-toolbar.mat-primary {
+      background-color: #fff;
+      color: #333;
+  }
+
+  app-page-subheader {
+    .page-subheader {
       background-color: #fff;
       color: #333;
     }
 
-    .mat-tab-link {
-      color: #333;
-    }
+    .mat-tab-nav-bar.mat-background-primary {
+      .mat-tab-links {
+        background-color: #fff;
+        color: #333;
+      }
 
-    .mat-ink-bar {
-      background-color: $suse-primary-color;
+      .mat-tab-link {
+        color: #333;
+      }
+
+      .mat-ink-bar {
+        background-color: $suse-primary-color;
+      }
     }
   }
 }
 
 // Use SUSE Blue Side Navigation
-.stratos {
+.stratos .default {
   // This is themeable, we really don't need this.
   .side-nav__inner,
   .side-nav__top,
@@ -86,16 +89,16 @@ $suse-side-nav-active: #003358;
 }
 
 // Remove background image from setup screen (e.g. upgrade screen)
-.stratos app-intro-screen > .intro {
+.stratos  .default app-intro-screen > .intro {
   background-color: $suse-blue;
   background-image: none;
 }
 
-.stratos .page-header__divider {
+.stratos  .default .page-header__divider {
   color: #333;
 }
 
-.stratos .page-header__menu-button-icon {
+.stratos  .default .page-header__menu-button-icon {
   background-color: $suse-primary-color;
   color: $suse-text;
 }

@@ -1,0 +1,101 @@
+<app-sidepanel-preview [title]="title">
+  <app-tile-grid fit="true">
+    <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
+      <app-tile-group>
+        <app-tile>
+          <div class="cf-space-usage">
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Summary</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <app-tile-group class="app-metadata">
+                  <app-tile class="app-metadata__two-cols">
+                    <app-metadata-item label="User Space Role/s">
+                      {{ (cfSpaceService.userRole$ | async) }}
+                    </app-metadata-item>
+                    <app-metadata-item label="Quota Definition">
+                      <ng-container *ngIf="(cfSpaceService.spaceQuotaDefinition$ | async) as spaceQuotaDefinition; else fallBackQuota">
+                        <a [routerLink]="cfSpaceService.quotaLink$ | async">
+                          {{ spaceQuotaDefinition.name }}
+                        </a>
+                      </ng-container>
+                      <ng-template #fallBackQuota>
+                        None assigned
+                        <span *ngIf="cfSpaceService.quotaDefinition$ | async as quotaDefinition"> - <a [routerLink]=""
+                            (click)="goToOrgQuota($event)">view organization's quota</a>
+                        </span>
+                      </ng-template>
+                    </app-metadata-item>
+                  </app-tile>
+                  <app-tile class="app-metadata__two-cols">
+                    <app-metadata-item label="SSH Access">
+                      {{ cfSpaceService.allowSshStatus$ | async }}
+                    </app-metadata-item>
+                    <app-metadata-item label="Provision Paid Services">
+                      <app-boolean-indicator [isTrue]="(cfSpaceService.quotaDefinition$ | async)?.non_basic_services_allowed" type="yes-no">
+                      </app-boolean-indicator>
+                    </app-metadata-item>
+                  </app-tile>
+                </app-tile-group>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric
+            link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/apps"
+            icon="apps" label="Applications" labelSingular="Application" value="{{ cfSpaceService.appCount$ | async }}">
+          </app-card-number-metric>
+        </app-tile>
+        <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
+          <app-card-number-metric icon="content_copy" label="App Instances"
+            value="{{ (cfSpaceService.appInstances$ | async) }}"
+            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric
+            link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/routes"
+            iconFont="stratos-icons" icon="network_route" label="Routes"
+            value="{{ (cfSpaceService.routes$ | async)?.length }}"
+            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric
+            link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/users"
+            icon="person" label="Users" labelSingular="User" value="{{ cfSpaceService.usersCount$ | async }}">
+          </app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric
+            link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/service-instances"
+            iconFont="stratos-icons" icon="service" label="Service Instances"
+            value="{{ (cfSpaceService.serviceInstancesCount$ | async)}}"
+            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile *ngIf="(cfSpaceService.userProvidedServiceInstancesCount$ | async) > 0">
+          <app-card-number-metric iconFont="stratos-icons" icon="service" label="User Service Instances"
+            value="5"></app-card-number-metric>
+        </app-tile>
+        <app-tile *ngIf="true">
+          <app-card-number-metric icon="memory" label="Memory Usage" units="mb"
+            value="5"
+            limit="10"></app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-cf-recent-apps *ngIf="!(detailsLoading$ | async)" [allApps$]="cfSpaceService.apps$"
+            [loading$]="cfSpaceService.loadingApps$" (refresh)="cfEndpointService.fetchApps()"></app-card-cf-recent-apps>
+        </app-tile>
+      </app-tile-group>
+    </app-loading-page>
+  </app-tile-grid>
+</app-sidepanel-preview>

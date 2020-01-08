@@ -1,3 +1,4 @@
+import { HelmReleaseResourceGraphComponent } from './release/tabs/helm-release-resource-graph/helm-release-resource-graph.component';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
@@ -35,10 +36,12 @@ import { HelmReleaseNotesTabComponent } from './release/tabs/helm-release-notes-
 import { HelmReleaseServicesTabComponent } from './release/tabs/helm-release-services/helm-release-services-tab.component';
 import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summary-tab/helm-release-summary-tab.component';
 import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
+import { HelmReleaseResourcePreviewComponent} from './release/tabs/helm-release-resource-graph/helm-release-resource-preview/helm-release-resource-preview.component';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
-import { HelmConfigurationComponent } from './tabs/configuration-tab/helm-configuration.component';
 import { HelmReleasesTabComponent } from './tabs/releases-tab/releases-tab.component';
 import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.component';
+import { KubernetesModule } from '../kubernetes/kubernetes.module';
+import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 @NgModule({
   imports: [
@@ -47,6 +50,8 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     SharedModule,
     HelmRoutingModule,
     CreateReleaseModule,
+    KubernetesModule,
+    NgxGraphModule,
   ],
   declarations: [
     PanelComponent,
@@ -67,7 +72,6 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     RepositoryTabComponent,
     CatalogTabComponent,
     HelmReleasesTabComponent,
-    HelmConfigurationComponent,
     MonocularChartCardComponent,
     HelmReleaseServiceCardComponent,
     MonocularChartViewComponent,
@@ -77,7 +81,9 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
     HelmReleaseValuesTabComponent,
     HelmReleasePodsTabComponent,
     HelmReleaseServicesTabComponent,
-    HelmServicePortsComponent
+    HelmServicePortsComponent,
+    HelmReleaseResourceGraphComponent,
+    HelmReleaseResourcePreviewComponent,
   ],
   providers: [
     ChartsService,
@@ -88,7 +94,8 @@ import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.com
   entryComponents: [
     MonocularChartCardComponent,
     HelmReleaseServiceCardComponent,
-    HelmServicePortsComponent
+    HelmServicePortsComponent,
+    HelmReleaseResourcePreviewComponent,
   ]
 })
 export class HelmModule { }
