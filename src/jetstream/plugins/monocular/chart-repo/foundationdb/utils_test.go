@@ -317,6 +317,10 @@ func Test_importCharts(t *testing.T) {
 
 func Test_DeleteRepo(t *testing.T) {
 	m := &mock.Mock{}
+	//Expect a few calls to test the DB readiness
+	m.On("InsertOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
+	m.On("DeleteMany", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.DeleteResult{}, nil)
+
 	m.On("DeleteMany", mock.Anything, bson.M{
 		"repo.name": "test",
 	}, mock.Anything).Return(&mongo.DeleteResult{}, nil)
@@ -632,6 +636,8 @@ func Test_emptyChartRepo(t *testing.T) {
 	dbClient := NewMockClient(&m)
 	//Expect a call to test the DB readiness
 	m.On("InsertOne", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.InsertOneResult{}, nil)
+	m.On("DeleteMany", mock.Anything, mock.Anything, mock.Anything).Return(&mongo.DeleteResult{}, nil)
+
 	m.On("FindOne", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	err := SyncRepo(dbClient, "test", "testRepo", "https://my.examplerepo.com", "")
 	assert.ExistsErr(t, err, "Failed Request")

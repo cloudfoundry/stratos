@@ -39,7 +39,7 @@ const pathPrefix = "/v1"
 var client *mongo.Client
 var dbSession mongoDatastore.Session
 
-func setupRoutes() http.Handler {
+func SetupRoutes() http.Handler {
 	r := mux.NewRouter()
 
 	// Healthcheck
@@ -89,7 +89,7 @@ func main() {
 
 	InitFDBDocLayerConnection(fdbURL, fDB, debug)
 
-	n := setupRoutes()
+	n := SetupRoutes()
 
 	port := os.Getenv("PORT")
 	if port == "" {

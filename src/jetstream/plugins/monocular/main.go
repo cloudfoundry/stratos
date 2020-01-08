@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/helm/monocular/chartsvc"
+	"github.com/helm/monocular/chartsvc/foundationdb"
 )
 
 const (
@@ -44,7 +45,7 @@ func (m *Monocular) Init() error {
 	fDB := "monocular-plugin"
 	debug := false
 	m.ConfigureChartSVC(&fdbURL, &fDB, &debug)
-	m.chartSvcRoutes = chartsvc.GetRoutes()
+	m.chartSvcRoutes = chartsvc.SetupRoutes()
 	m.InitSync()
 	m.syncOnStartup()
 	return nil
@@ -53,7 +54,7 @@ func (m *Monocular) Init() error {
 func (m *Monocular) syncOnStartup() {
 
 	// Get the repositories that we currently have
-	repos, err := m.RepoQueryStore.ListRepositories()
+	repos, err := foundationdb.ListRepositories()
 	if err != nil {
 		log.Errorf("Chart Repostiory Startup: Unable to sync repositories: %v+", err)
 		return
@@ -101,53 +102,6 @@ func arrayContainsString(a []string, x string) bool {
 		}
 	}
 	return false
-}
-
-// func (m *Monocular) ConfigureMonocular() error {
-//     log.Info("Connecting to MongoDB...")
-
-//     var host = "127.0.0.1"
-//     var db = "monocular"
-//     var user = "mongoadmin"
-//     var password = "secret"
-
-//     session, err := chartsvc.SetMongoConfig(&host, &db, &user, password)
-//     if err != nil {
-//             log.Warn("Could not connect to MongoDB")
-//             return err
-//     }
-
-//     store, err := chartsvc.NewMongoDBChartSvcDatastore(session)
-//     if err != nil {
-//             return err
-//     }
-//     chartsvc.SetStore(store)
-//     m.QueryStore = store
-
-//     syncStore, err := chartrepo.NewMongoDBChartRepoDatastore(session)
-//     if err != nil {
-//             return err
-//     }
-//     m.Store = syncStore
-//     log.Info("Connected to MongoDB")
-
-//     return nil
-// }
-
-func (m *Monocular) ConfigureSQL() error {
-
-	log.Info("Connecting to SQL Repo store")
-
-	InitRepositoryProvider(m.portalProxy.GetConfig().DatabaseProviderName)
-
-	sqldbStore, err := NewSQLDBCMonocularDatastore(m.portalProxy.GetDatabaseConnection())
-	if err != nil {
-		return err
-	}
-
-	m.RepoQueryStore = sqldbStore
-
-	return nil
 }
 
 func (m *Monocular) ConfigureChartSVC(fdbURL *string, fDB *string, debug *bool) {

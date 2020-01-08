@@ -88,6 +88,7 @@ func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHe
 		return err
 	}
 	id := res.InsertedID
+	collection.DeleteMany(ctx, bson.M{"_id": id}, options.Delete())
 	cancel()
 	log.Debugf("Database connection test successful.")
 	log.Debugf("Inserted a test document to test collection with ID: %v", id)
@@ -204,6 +205,7 @@ func DeleteRepo(dbClient Client, dbName, repoName string) error {
 		return err
 	}
 	id := res.InsertedID
+	collection.DeleteMany(ctx, bson.M{"_id": id}, options.Delete())
 	cancel()
 	log.Debugf("Database connection test successful.")
 	log.Debugf("Inserted a test document to test collection with ID: %v", id)

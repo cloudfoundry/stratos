@@ -43,7 +43,7 @@ func Test_GetLive(t *testing.T) {
 	dbClient := datastore.NewMockClient(&m)
 	fdb.InitDBConfig(dbClient, "test")
 
-	ts := httptest.NewServer(setupRoutes())
+	ts := httptest.NewServer(SetupRoutes())
 	defer ts.Close()
 
 	res, err := http.Get(ts.URL + "/live")
@@ -58,7 +58,7 @@ func Test_GetReady(t *testing.T) {
 	dbClient := datastore.NewMockClient(&m)
 	fdb.InitDBConfig(dbClient, "test")
 
-	ts := httptest.NewServer(setupRoutes())
+	ts := httptest.NewServer(SetupRoutes())
 	defer ts.Close()
 
 	res, err := http.Get(ts.URL + "/ready")
@@ -69,7 +69,7 @@ func Test_GetReady(t *testing.T) {
 
 // tests the GET /{apiVersion}/charts endpoint
 func Test_GetCharts(t *testing.T) {
-	ts := httptest.NewServer(setupRoutes())
+	ts := httptest.NewServer(SetupRoutes())
 	defer ts.Close()
 
 	tests := []struct {
@@ -112,7 +112,7 @@ func Test_GetCharts(t *testing.T) {
 
 // tests the GET /{apiVersion}/charts/{repo} endpoint
 func Test_GetChartsInRepo(t *testing.T) {
-	ts := httptest.NewServer(setupRoutes())
+	ts := httptest.NewServer(SetupRoutes())
 	defer ts.Close()
 
 	tests := []struct {
@@ -155,7 +155,7 @@ func Test_GetChartsInRepo(t *testing.T) {
 
 // tests the GET /{apiVersion}/charts/{repo}/{chartName} endpoint
 func Test_GetChartInRepo(t *testing.T) {
-	ts := httptest.NewServer(setupRoutes())
+	ts := httptest.NewServer(SetupRoutes())
 	defer ts.Close()
 
 	tests := []struct {
@@ -209,7 +209,7 @@ func Test_GetChartInRepo(t *testing.T) {
 
 // tests the GET /{apiVersion}/charts/{repo}/{chartName}/versions endpoint
 func Test_ListChartVersions(t *testing.T) {
-	ts := httptest.NewServer(setupRoutes())
+	ts := httptest.NewServer(SetupRoutes())
 	defer ts.Close()
 
 	tests := []struct {
@@ -263,7 +263,7 @@ func Test_ListChartVersions(t *testing.T) {
 
 // tests the GET /{apiVersion}/charts/{repo}/{chartName}/versions/{:version} endpoint
 func Test_GetChartVersion(t *testing.T) {
-	ts := httptest.NewServer(setupRoutes())
+	ts := httptest.NewServer(SetupRoutes())
 	defer ts.Close()
 
 	tests := []struct {
@@ -317,7 +317,7 @@ func Test_GetChartVersion(t *testing.T) {
 
 // tests the GET /{apiVersion}/assets/{repo}/{chartName}/logo-160x160-fit.png endpoint
 func Test_GetChartIcon(t *testing.T) {
-	ts := httptest.NewServer(setupRoutes())
+	ts := httptest.NewServer(SetupRoutes())
 	defer ts.Close()
 
 	tests := []struct {
@@ -371,7 +371,7 @@ func Test_GetChartIcon(t *testing.T) {
 
 // tests the GET /{apiVersion}/assets/{repo}/{chartName}/versions/{version}/README.md endpoint
 func Test_GetChartReadme(t *testing.T) {
-	ts := httptest.NewServer(setupRoutes())
+	ts := httptest.NewServer(SetupRoutes())
 	defer ts.Close()
 
 	tests := []struct {
@@ -429,7 +429,7 @@ func Test_GetChartReadme(t *testing.T) {
 
 // tests the GET /{apiVersion}/assets/{repo}/{chartName}/versions/{version}/values.yaml endpoint
 func Test_GetChartValues(t *testing.T) {
-	ts := httptest.NewServer(setupRoutes())
+	ts := httptest.NewServer(SetupRoutes())
 	defer ts.Close()
 
 	tests := []struct {
@@ -487,7 +487,7 @@ func Test_GetChartValues(t *testing.T) {
 
 // tests the GET /{apiVersion}/assets/{repo}/{chartName}/versions/{version}/values/schema.json endpoint
 func Test_GetChartSchema(t *testing.T) {
-	ts := httptest.NewServer(setupRoutes())
+	ts := httptest.NewServer(SetupRoutes())
 	defer ts.Close()
 
 	tests := []struct {

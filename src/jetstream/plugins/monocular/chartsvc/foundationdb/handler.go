@@ -184,8 +184,8 @@ func getPaginatedChartList(repo string, pageNumber, pageSize int, showDuplicates
 	return newChartListResponse(paginatedCharts), utils.Meta{TotalPages: totalPages}, nil
 }
 
-//ListRepos returns a list of names of all stored repositories
-func ListRepos() ([]string, error) {
+//ListRepositories returns a list of names of all stored repositories
+func ListRepositories() ([]string, error) {
 	var repoNames []string
 	//Find all repo names
 	collection := db.Collection(repoCollection)
