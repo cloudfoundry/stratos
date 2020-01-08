@@ -275,6 +275,8 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellUsageComponent,
     TableCellQuotaComponent,
     TableCellEventActeeComponent,
+    CloudFoundryEventsListComponent,
+    EventMetadataComponent,
     TableCellServiceComponent,
     TableCellServiceLastOpComponent,
     TableCellServiceTagsComponent,

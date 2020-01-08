@@ -109,6 +109,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
   private config: CfEventsConfigService;
   private initialSet = false;
+  public hasActeeFilter = false;
 
   constructor(
     listConfig: ListConfig<APIResource>,
@@ -141,6 +142,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
         debounceTime(250)
       ).subscribe(values => {
         this.config.setEventFilters(values);
+        this.hasActeeFilter = !!values.actee;
       })
     );
 
@@ -156,6 +158,10 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     safeUnsubscribe(...this.subs);
+  }
+
+  public clearActeeFilter() {
+    this.filtersFormGroup.patchValue({actee: ''});
   }
 
 }
