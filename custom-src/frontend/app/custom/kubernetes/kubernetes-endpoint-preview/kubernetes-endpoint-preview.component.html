@@ -1,0 +1,72 @@
+<app-sidepanel-preview [title]="title">
+  <app-tile-grid fit="true">
+    <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
+      <app-tile-group>
+        <app-tile>
+          <div class="cf-space-usage">
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Summary</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <app-tile-group class="app-metadata">
+                  <app-tile class="app-metadata__two-cols">
+                    <app-metadata-item label="Kubernetes Version">
+                      {{ kubeVersion$ | async }}
+                    </app-metadata-item>
+                  </app-tile>
+                </app-tile-group>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric [link]="podsLink" icon="apps" label="Pods" labelSingular="Pod"
+            value="{{ podCount$ | async }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric [link]="nodesLink" icon="apps" label="Nodes" labelSingular="Node"
+            value="{{ nodeCount$ | async }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric [link]="appsLink" icon="apps" label="Applications" labelSingular="Application"
+            value="{{ appCount$ | async }}"></app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Pod Usage"
+            value="{{ (podCapacity$ | async)?.used }}"
+            limit="{{ (podCapacity$ | async)?.total }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Disk Pressure"
+            value="{{ (diskPressure$ | async)?.used }}"
+            limit="{{ (diskPressure$ | async)?.total}}"></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Memory Pressure"
+            value="{{ (memoryPressure$ | async)?.used }}"
+            limit="{{ (memoryPressure$ | async)?.total}}"></app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Out of Disk"
+            value="{{ (outOfDisk$ | async)?.used }}"
+            limit="{{ (outOfDisk$ | async)?.total }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Ready"
+            value="{{ (nodesReady$ | async)?.used }}"
+            limit="{{ (nodesReady$ | async)?.total }}"></app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+    </app-loading-page>
+  </app-tile-grid>
+</app-sidepanel-preview>

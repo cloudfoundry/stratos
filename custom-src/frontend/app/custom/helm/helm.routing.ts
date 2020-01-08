@@ -11,9 +11,9 @@ import { HelmReleaseServicesTabComponent } from './release/tabs/helm-release-ser
 import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summary-tab/helm-release-summary-tab.component';
 import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
-import { HelmConfigurationComponent } from './tabs/configuration-tab/helm-configuration.component';
 import { HelmReleasesTabComponent } from './tabs/releases-tab/releases-tab.component';
 import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.component';
+import { HelmReleaseResourceGraphComponent } from './release/tabs/helm-release-resource-graph/helm-release-resource-graph.component';
 
 const monocular: Routes = [
   {
@@ -25,7 +25,6 @@ const monocular: Routes = [
       { path: 'charts/:repo', component: CatalogTabComponent },
       { path: 'repos', component: RepositoryTabComponent },
       { path: 'repos/:guid', component: RepositoryTabComponent },
-      { path: 'config', component: HelmConfigurationComponent },
       { path: 'releases', component: HelmReleasesTabComponent },
     ]
   },
@@ -33,13 +32,17 @@ const monocular: Routes = [
     // Helm Release Views
     path: 'releases/:guid',
     component: HelmReleaseTabBaseComponent,
+    data: {
+      reuseRoute: HelmReleaseTabBaseComponent,
+    },
     children: [
       { path: '', redirectTo: 'summary', pathMatch: 'full' },
       { path: 'summary', component: HelmReleaseSummaryTabComponent },
       { path: 'notes', component: HelmReleaseNotesTabComponent },
       { path: 'values', component: HelmReleaseValuesTabComponent },
       { path: 'pods', component: HelmReleasePodsTabComponent },
-      { path: 'services', component: HelmReleaseServicesTabComponent }
+      { path: 'services', component: HelmReleaseServicesTabComponent },
+      { path: 'graph', component: HelmReleaseResourceGraphComponent }
     ]
   },
   { pathMatch: 'full', path: 'charts/:repo/:chartName/:version', component: MonocularChartViewComponent },

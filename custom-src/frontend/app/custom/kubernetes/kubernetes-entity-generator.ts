@@ -17,6 +17,7 @@ import {
   KubernetesConfigAuthFormComponent,
 } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
+import { KubernetesEndpointPreviewComponent } from './kubernetes-endpoint-preview/kubernetes-endpoint-preview.component';
 import {
   KUBERNETES_ENDPOINT_TYPE,
   kubernetesAppsEntityType,
@@ -154,6 +155,7 @@ function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefi
   return new StratosCatalogueEndpointEntity(
     endpointDefinition,
     metadata => `/kubernetes/${metadata.guid}`,
+    () => KubernetesEndpointPreviewComponent,
   );
 }
 

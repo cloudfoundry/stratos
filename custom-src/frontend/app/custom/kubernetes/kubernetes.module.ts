@@ -93,8 +93,8 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
-
-
+import { KubernetesPodStatusComponent } from './list-types/kubernetes-pods/kubernetes-pod-status/kubernetes-pod-status.component';
+import { KubernetesPodReadinessComponent } from './list-types/kubernetes-pods/kubernetes-pod-readiness/kubernetes-pod-readiness.component';
 
 /* tslint:enable */
 
@@ -151,7 +151,9 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,
     NodePodCountComponent,
-    KubernetesServicePortsComponent
+    KubernetesServicePortsComponent,
+    KubernetesPodStatusComponent,
+    KubernetesPodReadinessComponent
   ],
   exports: [
     KubernetesServicePortsComponent
@@ -178,7 +180,9 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,
     NodePodCountComponent,
-    KubernetesServicePortsComponent
+    KubernetesServicePortsComponent,
+    KubernetesPodStatusComponent,
+    KubernetesPodReadinessComponent
   ]
 })
 export class KubernetesModule { }

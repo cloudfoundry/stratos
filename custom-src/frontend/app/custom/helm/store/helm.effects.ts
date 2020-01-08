@@ -17,7 +17,6 @@ import {
 import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../environments/environment';
 import { HELM_ENDPOINT_TYPE, helmReleaseEntityKey } from '../helm-entity-factory';
-import { parseHelmReleaseStatus } from '../release/tabs/helm-release-helper.service';
 import {
   GET_HELM_RELEASE_PODS,
   GET_HELM_RELEASE_SERVICES,
@@ -98,16 +97,18 @@ export class HelmEffects {
           if (!endpointData) {
             return;
           }
-          endpointData.releases.forEach((data) => {
+          endpointData.forEach((data) => {
+            console.log('Got helm release');
+            console.log(data);
             const helmRelease: HelmRelease = {
               ...data,
               endpointId: endpoint
             };
-            // Release name is unique for an endpoint
-            const id = endpoint + ':' + data.name;
+            // Release name is unique for an endpoint - for Helm 3, include the namespace
+            const id = endpoint + ':' + data.namespace + ':' + data.name;
             helmRelease.guid = id;
             // Make a note of the guid of the endpoint for the release
-            helmRelease.status = mapHelmStatus(data.info.status.code);
+            helmRelease.status = mapHelmStatus(data.info.status);
             helmRelease.lastDeployed = mapHelmModifiedDate(data.info.last_deployed);
             helmRelease.firstDeployed = mapHelmModifiedDate(data.info.first_deployed);
             // data.info =
@@ -162,17 +163,25 @@ export class HelmEffects {
             result: []
           } as NormalizedResponse;
 
-          const status = parseHelmReleaseStatus(response.info.status.resources);
+          const status = {};
 
-          this.updateReleasePods(action, status);
+          // TODO
 
-          this.updateReleaseServices(action, status);
+          // this.updateReleasePods(action, status);
+
+          // this.updateReleaseServices(action, status);
 
           // Go through each endpoint ID
           const newStatus: HelmReleaseStatus = {
             endpointId: action.endpointGuid,
             releaseTitle: action.releaseTitle,
-            ...status
+            ...status,
+            pods: [],
+            fields: [],
+            data: {
+              'v1/Pod': {},
+              'v1/Service': {}
+            }
           };
           processedData.entities[entityKey][action.key] = newStatus;
           processedData.result.push(action.key);
@@ -181,11 +190,11 @@ export class HelmEffects {
     })
   );
 
-  @Effect()
-  fetchHelmReleasePods$ = this.actions$.pipe(
-    ofType<GetHelmReleasePods>(GET_HELM_RELEASE_PODS),
-    mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
-  );
+  // @Effect()
+  // fetchHelmReleasePods$ = this.actions$.pipe(
+  //   ofType<GetHelmReleasePods>(GET_HELM_RELEASE_PODS),
+  //   mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
+  // );
 
   @Effect()
   fetchHelmReleaseServices$ = this.actions$.pipe(
@@ -311,8 +320,14 @@ export class HelmEffects {
   }
 }
 
-function mapHelmStatus(status: number) {
+function _mapHelmStatus(status: number) {
   return HelmStatus[status].replace('_', ' ');
+}
+
+function mapHelmStatus(status: string) {
+  // TODO: Capitalize first letter
+  return status;
+  //return HelmStatus[status].replace('_', ' ');
 }
 
 function mapHelmModifiedDate(date: any) {

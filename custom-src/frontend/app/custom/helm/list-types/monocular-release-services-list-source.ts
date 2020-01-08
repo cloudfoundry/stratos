@@ -50,23 +50,24 @@ export class HelmReleaseServicesDataSource extends ListDataSource<HelmReleaseSer
     super({
       store,
       action,
-      schema: helmEntityFactory(action.entityType),
+      schema: action.entity[0],
       getRowUniqueId: getHelmReleaseServiceId,
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,
-      transformEntity: map((helmServices: HelmReleaseService[]) => {
-        return helmServices.map(helmService => {
-          if (!helmService.kubeService$) {
-            helmService.kubeService$ = fetchHelmReleaseServiceFromKubernetes(store, helmService);
-          }
-          return helmService;
-        });
-      }),
-      refresh: () => {
-        store.dispatch(action);
-        store.dispatch(new ClearPaginationOfType(action));
-      }
     });
+    //   transformEntity: map((helmServices: HelmReleaseService[]) => {
+    //     return helmServices.map(helmService => {
+    //       if (!helmService.kubeService$) {
+    //         helmService.kubeService$ = fetchHelmReleaseServiceFromKubernetes(store, helmService);
+    //       }
+    //       return helmService;
+    //     });
+    //   }),
+    //   refresh: () => {
+    //     store.dispatch(action);
+    //     store.dispatch(new ClearPaginationOfType(action));
+    //   }
+    // });
   }
 }

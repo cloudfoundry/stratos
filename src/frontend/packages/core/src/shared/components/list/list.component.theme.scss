@@ -4,10 +4,19 @@
   $primary: map-get($theme, primary);
   $foreground-colors: map-get($theme, foreground);
   $background-colors: map-get($theme, background);
+  $is-dark: map-get($theme, is-dark);
+
+  $header-selected-color: #fff;
+  @if $is-dark == true {
+    $header-selected-color: lighten(mat-color($background-colors, background), 20%);
+  } @else {
+    $header-selected-color: mat-color($primary, 50);
+  }
+
   .list-component {
     &__header {
       &--selected {
-        background-color: mat-color($primary, 50);
+        background-color: $header-selected-color;
       }
       &__right,
       &__left--multi-filters {

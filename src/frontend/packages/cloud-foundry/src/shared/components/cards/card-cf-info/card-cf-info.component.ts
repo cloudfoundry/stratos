@@ -1,12 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, Subscription } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { fetchAutoscalerInfo } from '../../../../../../cf-autoscaler/src/core/autoscaler-helpers/autoscaler-available';
-import { ICfV2Info } from '../../../../../../core/src/core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
-import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
   UserInviteConfigurationDialogComponent,
@@ -19,9 +17,8 @@ import { UserInviteService } from '../../../../features/cloud-foundry/user-invit
   templateUrl: './card-cf-info.component.html',
   styleUrls: ['./card-cf-info.component.scss']
 })
-export class CardCfInfoComponent implements OnInit, OnDestroy {
+export class CardCfInfoComponent implements OnInit {
   public apiUrl: string;
-  private subs: Subscription[] = [];
   public autoscalerVersion$: Observable<string>;
 
   constructor(
@@ -34,49 +31,12 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   description$: Observable<string>;
 
   ngOnInit() {
-    const obs$ = this.cfEndpointService.endpoint$.pipe(
-      tap(endpoint => {
-        this.apiUrl = this.getApiEndpointUrl(endpoint.entity.api_endpoint);
-      })
-    );
-    this.subs.push(obs$.subscribe());
-
-    this.description$ = this.cfEndpointService.info$.pipe(
-      map(entity => this.getDescription(entity))
-    );
-
     // FIXME: CF should not depend on autoscaler. See #3916
     this.autoscalerVersion$ = fetchAutoscalerInfo(this.cfEndpointService.cfGuid, this.esf).pipe(
       map(e => e.entityRequestInfo.error ?
         null :
         e.entity ? e.entity.entity.build : ''),
     );
-  }
-
-  getApiEndpointUrl(apiEndpoint) {
-    const path = apiEndpoint.Path ? `/${apiEndpoint.Path}` : '';
-    return `${apiEndpoint.Scheme}://${apiEndpoint.Host}${path}`;
-  }
-
-  ngOnDestroy(): void {
-    this.subs.forEach(s => s.unsubscribe());
-  }
-
-  private getMetadataFromInfo(entity: EntityInfo<APIResource<ICfV2Info>>) {
-    return entity && entity.entity && entity.entity.entity ? entity.entity.entity : null;
-  }
-
-  private getDescription(entity: EntityInfo<APIResource<ICfV2Info>>): string {
-    const metadata = this.getMetadataFromInfo(entity);
-    if (metadata) {
-      if (metadata.description) {
-        return metadata.description + (metadata.build ? ` (${metadata.build})` : '');
-      }
-      if (metadata.support === 'pcfdev@pivotal.io') {
-        return 'PCF Dev';
-      }
-    }
-    return '-';
   }
 
   configureUserInvites() {

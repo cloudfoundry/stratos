@@ -19,6 +19,7 @@ import { SpecifyDetailsStepComponent } from './add-service-instance/specify-deta
 import {
   SpecifyUserProvidedDetailsComponent,
 } from './add-service-instance/specify-user-provided-details/specify-user-provided-details.component';
+import { ApplicationPreviewComponent } from './application-preview/application-preview.component';
 import { CardAppInstancesComponent } from './cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './cards/card-app-uptime/card-app-uptime.component';
@@ -38,6 +39,7 @@ import {
 } from './cards/service-recent-instances-card/service-recent-instances-card.component';
 import { ServiceSummaryCardComponent } from './cards/service-summary-card/service-summary-card.component';
 import { CfEndpointDetailsComponent } from './cf-endpoint-details/cf-endpoint-details.component';
+import { CfEndpointPreviewComponent } from './cf-endpoint-preview/cf-endpoint-preview.component';
 import { CfEndpointsMissingComponent } from './cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfOrgSpaceLinksComponent } from './cf-org-space-links/cf-org-space-links.component';
 import { CfRoleCheckboxComponent } from './cf-role-checkbox/cf-role-checkbox.component';
@@ -143,12 +145,14 @@ import {
 import {
   UserProvidedServiceInstanceCardComponent,
 } from './list/list-types/services-wall/user-provided-service-instance-card/user-provided-service-instance-card.component';
+import { OrganizationPreviewComponent } from './organization-preview/organization-preview.component';
 import { RunningInstancesComponent } from './running-instances/running-instances.component';
 import { SchemaFormComponent } from './schema-form/schema-form.component';
 import { SelectServiceComponent } from './select-service/select-service.component';
 import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
+import { SpacePreviewComponent } from './space-preview/space-preview.component';
 
 // tslint:enable:max-line-length
 
@@ -238,7 +242,12 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellEventActionComponent,
     TableCellEventDetailComponent,
     TableCellUsageComponent,
-    TableCellQuotaComponent
+    TableCellQuotaComponent,
+
+    CfEndpointPreviewComponent,
+    SpacePreviewComponent,
+    OrganizationPreviewComponent,
+    ApplicationPreviewComponent,
   ],
   exports: [
     ServiceIconComponent,
@@ -275,11 +284,21 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     RunningInstancesComponent,
     ServicePlanPublicComponent,
     ServicePlanPriceComponent,
-    CreateApplicationStep1Component
+    CreateApplicationStep1Component,
+
+    CfEndpointPreviewComponent,
+    SpacePreviewComponent,
+    OrganizationPreviewComponent,
+    ApplicationPreviewComponent,
   ],
   entryComponents: [
     CfEndpointDetailsComponent,
     NoServicePlansComponent,
+
+    CfEndpointPreviewComponent,
+    SpacePreviewComponent,
+    OrganizationPreviewComponent,
+    ApplicationPreviewComponent,
 
     AppServiceBindingCardComponent,
     CardAppComponent,

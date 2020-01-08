@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -28,9 +28,9 @@ import {
 import { HydrateDashboardStateAction } from '../actions/dashboard-actions';
 import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
 import { GetSystemInfo } from '../actions/system.actions';
+import { DispatchOnlyAppState } from '../app-state';
 import { getDashboardStateSessionId } from '../helpers/store-helpers';
 import { SessionData } from '../types/auth.types';
-import { DispatchOnlyAppState } from '../app-state';
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
@@ -50,8 +50,6 @@ export class AuthEffect {
   @Effect() loginRequest$ = this.actions$.pipe(
     ofType<Login>(LOGIN),
     switchMap(({ username, password }) => {
-      const encoder = new BrowserStandardEncoder();
-      const headers = new HttpHeaders();
       const params = new HttpParams({
         encoder: new BrowserStandardEncoder(),
         fromObject: {
@@ -59,9 +57,10 @@ export class AuthEffect {
           password
         }
       });
+      const headers = {
+        'x-cap-request-date': (Math.floor(Date.now() / 1000)).toString()
+      };
 
-      headers.set('Content-Type', 'application/x-www-form-urlencoded');
-      headers.set('x-cap-request-date', (Math.floor(Date.now() / 1000)).toString());
       return this.http.post('/pp/v1/auth/login/uaa', params, {
         headers,
       }).pipe(
@@ -72,8 +71,10 @@ export class AuthEffect {
   @Effect() verifyAuth$ = this.actions$.pipe(
     ofType<VerifySession>(VERIFY_SESSION),
     switchMap(action => {
-      const headers = new HttpHeaders();
-      headers.set('x-cap-request-date', (Math.floor(Date.now() / 1000)).toString());
+      const headers = {
+        'x-cap-request-date': (Math.floor(Date.now() / 1000)).toString()
+      };
+
       return this.http.get<SessionData>('/pp/v1/auth/session/verify', {
         headers,
         observe: 'response',

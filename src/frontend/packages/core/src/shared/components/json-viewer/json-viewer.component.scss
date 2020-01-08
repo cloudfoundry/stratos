@@ -1,0 +1,101 @@
+$type-colors: (
+  string: #0065ff,
+  number: #009688,
+  boolean: #b938a4,
+  date: #05668D,
+  //null: #787878;
+
+  array: #999,
+  object: #999,
+  function: #999,
+
+  'null': #787878,
+  undefined: #fff
+);
+
+:host {
+  display: flex;
+}
+
+.ngx-json-viewer {
+  font-family: "Source Code Pro";
+  font-size: 14px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+
+  .segment {
+    padding: 2px;
+    margin: 1px 1px 1px 12px;
+
+    .segment-main {
+      word-wrap: break-word;
+
+      .toggler {
+        position: absolute;
+        margin-left: -14px;
+        margin-top: 3px;
+        font-size: .8em;
+        line-height: 1.2em;
+        vertical-align: middle;
+        color: #787878;
+
+        &::after {
+          display: inline-block;
+          content: "►";
+          transition: transform 0.1s ease-in;
+        }
+      }
+
+      .segment-key {
+        color: #4E187C;
+      }
+
+      .segment-separator {
+        color: #999;
+      }
+
+      .segment-value {
+        color: #000;
+      }
+    }
+
+    .children {
+      margin-left: 12px;
+    }
+  }
+
+  @each $type, $color in $type-colors {
+    .segment-type-#{$type} > .segment-main > .segment-value {
+      color: $color;
+    }
+  }
+
+  // // special cases need highlightted
+  // .segment-type-null > .segment-main > .segment-value {
+  //   color: #787878;
+  // }
+
+  .segment-type-undefined > .segment-main {
+    & > .segment-key {
+      color: #999;
+    }
+    & > .segment-value {
+      background-color: #999;
+    }
+  }
+  .segment-type-object > .segment-main,
+  .segment-type-array > .segment-main {
+    white-space: nowrap;
+  }
+
+  .expanded > .toggler::after {
+    transform: rotate(90deg);
+  }
+
+  .expandable,
+  .expandable > .toggler {
+    cursor: pointer;
+  }
+}

@@ -1,12 +1,11 @@
 .entity-summary {
   margin: 10px 0;
   &__logo {
-    height: 400px;
-    opacity: .2;
-    position: absolute;
-    right: -120px;
-    top: 20px;
-    z-index: -1;
+    flex: 0 0 64px;
+    max-height: 64px;
+  }
+  &__logo-large {
+    max-height: 160px;
   }
   &__inline-logo {
     max-height: 160px;
@@ -24,6 +23,10 @@
   }
   &__header {
     margin: 0;
+  }
+  &__header-inner {
+    flex: 1;
+    margin-left: 10px;
   }
   &__header-wrapper {
     align-items: baseline;

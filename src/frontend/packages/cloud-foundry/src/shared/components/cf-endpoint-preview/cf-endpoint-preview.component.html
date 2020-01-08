@@ -1,0 +1,76 @@
+<app-sidepanel-preview [title]="title">
+  <app-tile-grid fit="true">
+    <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
+      <app-tile-group>
+        <app-tile>
+          <div class="cf-space-usage">
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Summary</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <app-tile-group class="app-metadata">
+                  <app-tile class="app-metadata__two-cols">
+                    <app-metadata-item label="Description">
+                      {{ cfEndpointService.description$ | async }}
+                    </app-metadata-item>
+                  </app-tile>
+                </app-tile-group>
+                <app-tile-group>
+                  <app-tile>
+                    <app-metadata-item label="Instance Address">
+                      {{ cfEndpointService.apiUrl$ | async }}
+                    </app-metadata-item>
+                    <app-metadata-item label="CF API Version">
+                      {{ (cfEndpointService.info$ | async)?.entity.entity.api_version }}
+                    </app-metadata-item>
+                  </app-tile>
+                  <app-tile class="app-metadata__two-cols">
+                    <app-metadata-item label="Account Username">
+                      {{ (cfEndpointService.endpoint$ | async )?.entity.user.name }}
+                      <span *ngIf="(cfEndpointService.endpoint$ | async )?.entity.user.admin"> (Administrator)</span>
+                    </app-metadata-item>
+                    <app-metadata-item label="SSH Access">
+                      {{ (cfEndpointService.hasSSHAccess$ | async) ? 'Available' : 'Not available' }}
+                    </app-metadata-item>
+                  </app-tile>
+                </app-tile-group>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric [link]="appLink" icon="apps" label="Applications" labelSingular="Application"
+            value="{{ cfEndpointService.appsPagObs.totalEntities$ | async }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations" iconFont="stratos-icons"
+            icon="organization" label="Orgs" labelSingular="Org" value="{{ (cfEndpointService.orgs$ | async)?.length }}">
+          </app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile *ngIf="cfEndpointService.usersCount$ | async">
+          <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/users" icon="person" label="Users"
+            labelSingular="User" value="{{ cfEndpointService.usersCount$ | async }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
+          <app-card-number-metric icon="memory" units="mb" label="Memory Usage"
+            value="{{ cfEndpointService.totalMem$ | async }}"></app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-cf-recent-apps *ngIf="!(detailsLoading$ | async)" [allApps$]="cfEndpointService.appsPagObs.entities$"
+            [loading$]="cfEndpointService.appsPagObs.fetchingEntities$" (refresh)="cfEndpointService.fetchApps()">
+          </app-card-cf-recent-apps>
+        </app-tile>
+      </app-tile-group>
+    </app-loading-page>
+  </app-tile-grid>
+</app-sidepanel-preview>

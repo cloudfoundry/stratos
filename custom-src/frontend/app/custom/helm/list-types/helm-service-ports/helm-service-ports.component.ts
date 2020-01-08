@@ -16,8 +16,9 @@ export class HelmServicePortsComponent extends KubernetesServicePortsComponent {
     if (!row) {
       return;
     }
+    console.log(row);
     const helmReleaseService = (row as HelmReleaseService);
-    this.kubeService$ = helmReleaseService.kubeService$;
+    // this.kubeService$ = helmReleaseService.kubeService$;
     this.endpointId = helmReleaseService.endpointId;
   }
 }
