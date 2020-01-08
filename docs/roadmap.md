@@ -1,4 +1,4 @@
-# Stratos Roadmap
+# Stratos Roadmap - Out of date
 
 Last Updated: 2 July 2018
 
