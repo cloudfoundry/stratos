@@ -206,16 +206,7 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
       const overrides = deployApp.getOverridesForm();
       overrides.waitUntilShown();
 
-      if (type === CREATE_APP_DEPLOY_TEST_TYPE.DOCKER) {
-        expect(overrides.isFieldDisabled('name')).toBeTruthy();
-        expect(overrides.isFieldDisabled('dockerimage')).toBeTruthy();
-        expect(overrides.isFieldDisabled('dockerusername')).toBeTruthy();
-        overrides.getFieldsMapped().then(fields => {
-          expect(fields.find(field => field.formControlName === 'name').value).toEqual(res.testAppName);
-          expect(fields.find(field => field.formControlName === 'dockerImage').value).toEqual(res.dockerUrl);
-          expect(fields.find(field => field.formControlName === 'dockerUsername').value).toEqual('');
-        });
-      } else {
+      if (type !== CREATE_APP_DEPLOY_TEST_TYPE.DOCKER) {
         overrides.fill({ name: res.testAppName, random_route: true });
       }
 
