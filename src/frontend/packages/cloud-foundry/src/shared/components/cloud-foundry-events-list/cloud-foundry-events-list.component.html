@@ -8,6 +8,9 @@
     </mat-form-field>
     <mat-form-field *ngIf="showActee" [floatLabel]="'never'">
       <input type="text" matInput name="actee" formControlName="actee" placeholder="Actee's GUID">
+      <button mat-button *ngIf="hasActeeFilter" matSuffix mat-icon-button aria-label="Clear" (click)="clearActeeFilter()">
+        <mat-icon>close</mat-icon>
+      </button>
     </mat-form-field>
   </form>
 </ng-template>
