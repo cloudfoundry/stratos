@@ -35,7 +35,7 @@ To send your code change, use GitHub pull requests. The workflow is as follows:
 
   1. Fork the project.
 
-  1. Create a branch based on `v2-master`.
+  1. Create a branch based on `master`.
 
   1. Implement your change, including tests and documentation.
 
