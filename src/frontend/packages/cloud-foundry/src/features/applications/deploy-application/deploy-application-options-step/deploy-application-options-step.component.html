@@ -1,10 +1,10 @@
 <form [formGroup]="deployOptionsForm" validate class="stepper-form deploy-options">
   <div class="deploy-options__description">Override the manifest using the following options</div>
-  <div class="deploy-options__form-sections">
+  <div class="deploy-options__form-sections" *ngIf="(sourceType$ | async) as sourceType">
     <div class="deploy-options__form-sections__form-section">
       <!--- Section -->
       <div class="deploy-options__title"><b>General</b></div>
-      <mat-form-field>
+      <mat-form-field [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
         <input matInput placeholder="Application Name" formControlName="name">
       </mat-form-field>
       <mat-form-field>
@@ -59,10 +59,10 @@
         <input matInput name="buildpack" placeholder="Custom buildpack" formControlName="buildpack">
         <mat-hint>Custom buildpack by name or Git URL</mat-hint>
       </mat-form-field>
-      <mat-form-field>
+      <mat-form-field [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
         <input matInput placeholder="Docker Image" formControlName="dockerImage">
       </mat-form-field>
-      <mat-form-field>
+      <mat-form-field [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
         <input matInput placeholder="Docker Username" formControlName="dockerUsername">
         <mat-hint>Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</mat-hint>
       </mat-form-field>

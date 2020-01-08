@@ -28,6 +28,10 @@
       &:not(:last-of-type) {
         margin-right: 60px;
       }
+
+      .hidden {
+        display: none;
+      }
     }
   }
 }

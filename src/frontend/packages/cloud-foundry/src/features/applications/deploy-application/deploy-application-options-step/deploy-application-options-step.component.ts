@@ -14,8 +14,9 @@ import { stackEntityType } from '../../../../../../cloud-foundry/src/cf-entity-t
 import {
   selectCfDetails,
   selectDeployAppState,
+  selectSourceType,
 } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
-import { OverrideAppDetails } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
+import { OverrideAppDetails, SourceType } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
 import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
@@ -46,6 +47,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   stepOpts: any;
 
   public healthCheckTypes = ['http', 'port', 'process'];
+  public sourceType$: Observable<SourceType>;
+  public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
 
   constructor(
     private fb: FormBuilder,
@@ -100,7 +103,9 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   ngOnInit() {
-    // Set previously supplied docker values and disable boxes
+    this.sourceType$ = this.store.select(selectSourceType);
+
+    // Set previously supplied docker values
     this.subs.push(this.store.select(selectDeployAppState).pipe(
       filter(deployAppState =>
         !!deployAppState &&
@@ -111,15 +116,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       const sourceType = deployAppState.applicationSource.type;
       if (sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
         this.deployOptionsForm.controls.name.setValue(deployAppState.applicationSource.dockerDetails.applicationName);
-        this.deployOptionsForm.controls.name.disable();
         this.deployOptionsForm.controls.dockerImage.setValue(deployAppState.applicationSource.dockerDetails.dockerImage);
-        this.deployOptionsForm.controls.dockerImage.disable();
         this.deployOptionsForm.controls.dockerUsername.setValue(deployAppState.applicationSource.dockerDetails.dockerUsername);
-        this.deployOptionsForm.controls.dockerUsername.disable();
-      } else {
-        this.deployOptionsForm.controls.name.enable();
-        this.deployOptionsForm.controls.dockerImage.enable();
-        this.deployOptionsForm.controls.dockerUsername.enable();
       }
     }));
 

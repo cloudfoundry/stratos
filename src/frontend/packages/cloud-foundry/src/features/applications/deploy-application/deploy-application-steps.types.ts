@@ -61,7 +61,7 @@ export class ApplicationDeploySourceTypes {
     {
       name: 'Docker Image',
       id: DEPLOY_TYPES_IDS.DOCKER_IMG,
-      helpText: 'Please enter the docker image to be used (e.g. user/docker-image-name).',
+      helpText: 'Please specify an application and the docker image to be used (registry/org/image-name).',
       graphic: {
         location: '/core/assets/endpoint-icons/docker.png'
       },
