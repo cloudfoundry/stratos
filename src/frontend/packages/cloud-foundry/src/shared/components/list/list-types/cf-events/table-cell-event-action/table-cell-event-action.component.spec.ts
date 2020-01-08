@@ -1,13 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EventTabActorIconPipe } from './event-tab-actor-icon.pipe';
 import { TableCellEventActionComponent } from './table-cell-event-action.component';
 
 describe('TableCellEventActionComponent', () => {
-  let component: TableCellEventActionComponent<EntityInfo>;
-  let fixture: ComponentFixture<TableCellEventActionComponent<EntityInfo>>;
+  let component: TableCellEventActionComponent;
+  let fixture: ComponentFixture<TableCellEventActionComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -18,11 +18,11 @@ describe('TableCellEventActionComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent<TableCellEventActionComponent<EntityInfo>>(TableCellEventActionComponent);
+    fixture = TestBed.createComponent<TableCellEventActionComponent>(TableCellEventActionComponent);
     component = fixture.componentInstance;
     component.row = {
       entity: {}
-    } as EntityInfo;
+    } as APIResource;
     fixture.detectChanges();
   });
 

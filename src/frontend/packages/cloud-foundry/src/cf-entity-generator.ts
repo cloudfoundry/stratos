@@ -49,11 +49,11 @@ import { cfEntityFactory } from './cf-entity-factory';
 import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
 import {
   appEnvVarsEntityType,
-  appEventEntityType,
   applicationEntityType,
   appStatsEntityType,
   appSummaryEntityType,
   buildpackEntityType,
+  cfEventEntityType,
   cfInfoEntityType,
   cfUserEntityType,
   domainEntityType,
@@ -85,11 +85,11 @@ import {
 import { CfErrorResponse, getCfError } from './cf-error-helpers';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
-import { applicationEventActionBuilders } from './entity-action-builders/application-event.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
 import { appSummaryActionBuilders } from './entity-action-builders/application-summary.action-builders';
 import { applicationActionBuilder } from './entity-action-builders/application.action-builders';
 import { buildpackActionBuilders } from './entity-action-builders/buildpack.action-builders';
+import { cfEventActionBuilders } from './entity-action-builders/cf-event.action-builders';
 import {
   CfInfoDefinitionActionBuilders,
   cfInfoDefinitionActionBuilders,
@@ -736,10 +736,10 @@ function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDef
 
 function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
-    type: appEventEntityType,
-    schema: cfEntityFactory(appEventEntityType),
-    label: 'Application Event',
-    labelPlural: 'Application Events',
+    type: cfEventEntityType,
+    schema: cfEntityFactory(cfEventEntityType),
+    label: 'Event',
+    labelPlural: 'Events',
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IBasicCFMetaData, APIResource>(
@@ -748,12 +748,14 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
       dataReducers: [
         endpointDisconnectRemoveEntitiesReducer()
       ],
-      actionBuilders: applicationEventActionBuilders,
+      actionBuilders: cfEventActionBuilders,
       entityBuilder: {
-        getMetadata: app => ({
-          guid: app.metadata.guid,
-          name: app.metadata.guid,
-        }),
+        getMetadata: event => {
+          return {
+            guid: event.metadata.guid,
+            name: event.metadata.guid,
+          };
+        },
         getGuid: metadata => metadata.guid,
       }
     }

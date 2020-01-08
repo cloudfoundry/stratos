@@ -28,6 +28,7 @@ import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
+import { CopyToClipboardComponent } from './components/copy-to-clipboard/copy-to-clipboard.component';
 import { DateTimeComponent } from './components/date-time/date-time.component';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
@@ -92,6 +93,7 @@ import { StackedInputActionsComponent } from './components/stacked-input-actions
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { SteppersModule } from './components/stepper/steppers.module';
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
+import { TileSelectorTileComponent } from './components/tile-selector-tile/tile-selector-tile.component';
 import { TileSelectorComponent } from './components/tile-selector/tile-selector.component';
 import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
@@ -117,9 +119,7 @@ import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundr
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { TileSelectorTileComponent } from './components/tile-selector-tile/tile-selector-tile.component';
 
-/* tslint:disable:max-line-length */
 
 @NgModule({
   imports: [
@@ -220,6 +220,7 @@ import { TileSelectorTileComponent } from './components/tile-selector-tile/tile-
     UnlimitedInputComponent,
     SimpleListComponent,
     ListHostDirective,
+    CopyToClipboardComponent,
     TileSelectorTileComponent,
   ],
   exports: [
@@ -310,6 +311,7 @@ import { TileSelectorTileComponent } from './components/tile-selector-tile/tile-
     UnlimitedInputComponent,
     SimpleListComponent,
     ListHostDirective,
+    CopyToClipboardComponent,
     TileSelectorTileComponent,
   ],
   entryComponents: [
