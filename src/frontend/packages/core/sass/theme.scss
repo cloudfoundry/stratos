@@ -1,23 +1,7 @@
 @import '~@angular/material/theming';
 @import './all-theme';
 
-// TODO: This was how we used to do things - probably can remove this with new approach
-// Custom theme support
-@import './custom';
-
-//@import '~@stratos/theme/theming';
-// Local theme reference
-
-// TODO: This would be generated into the file at build time - referencing the theme
-//@import '../../theme/theming';
-
 @import '~@stratos/theme';
-
-// TODO: Add support for theme modifiers that make it easy to modify an existing theme rather than create a new theme entirely
-// These would be imported here and then called to modify the theme
-
-// TODO: This would be generated into the file at build time - an entry for each module that needs theming
-//s@import '../../shared/sass/all-theme';
 
 // Get the theme(s)
 
