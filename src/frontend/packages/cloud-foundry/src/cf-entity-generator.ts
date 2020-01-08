@@ -895,7 +895,7 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
         getLines: () => ([
-          ['Creation  Date', (meta) => meta.createdAt]
+          ['Creation Date', (meta) => meta.createdAt]
         ])
       },
       actionBuilders: applicationActionBuilder
@@ -965,11 +965,11 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
           status: getOrgStatus(org),
           name: org.entity.name,
           cfGuid: org.entity.cfGuid,
-          createdAt: moment(org.metadata.created_at).format('LLL'), // TODO: RC
+          createdAt: moment(org.metadata.created_at).format('LLL'),
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
         getLines: () => ([
-          ['Creation  Date', (meta) => meta.createdAt]
+          ['Creation Date', (meta) => meta.createdAt]
         ]),
         getGuid: metadata => metadata.guid
       }
