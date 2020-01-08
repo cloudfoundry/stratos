@@ -36,10 +36,6 @@ import {
 import {
   CloudFoundryQuotasComponent,
 } from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
-import { EndpointListHelper } from '../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
-import {
-  EndpointsListConfigService,
-} from '../../../../core/src/shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { CloudFoundryComponentsModule } from '../../shared/components/components.module';
 import {

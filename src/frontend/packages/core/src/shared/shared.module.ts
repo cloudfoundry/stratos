@@ -117,6 +117,7 @@ import { LongRunningOperationsService } from './services/long-running-op.service
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 import { StratosComponentsModule } from '@stratos/shared';
+import { TileSelectorTileComponent } from './components/tile-selector-tile/tile-selector-tile.component';
 
 /* tslint:disable:max-line-length */
 
@@ -219,6 +220,7 @@ import { StratosComponentsModule } from '@stratos/shared';
     UnlimitedInputComponent,
     SimpleListComponent,
     ListHostDirective,
+    TileSelectorTileComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -306,7 +308,8 @@ import { StratosComponentsModule } from '@stratos/shared';
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     SimpleListComponent,
-    ListHostDirective
+    ListHostDirective,
+    TileSelectorTileComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,

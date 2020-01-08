@@ -39,6 +39,7 @@ import { ICellDefinition } from '../table.types';
 import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
 
 
+
 export const listTableCells = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
