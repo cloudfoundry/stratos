@@ -49,6 +49,7 @@ func (h WithParams) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 const chartCollection = "charts"
 const filesCollection = "files"
+const repoCollection = "repos"
 
 // count is used to parse the result of a $count operation in the database
 type count struct {
@@ -181,6 +182,24 @@ func getPaginatedChartList(repo string, pageNumber, pageSize int, showDuplicates
 
 	log.Debugf("Returning %v charts, Done.", len(paginatedCharts))
 	return newChartListResponse(paginatedCharts), utils.Meta{TotalPages: totalPages}, nil
+}
+
+//ListRepos returns a list of names of all stored repositories
+func ListRepos() ([]string, error) {
+	var repoNames []string
+	//Find all repo names
+	collection := db.Collection(repoCollection)
+	filter := bson.M{}
+	var lastChecks []*models.RepoCheck
+	err := collection.Find(context.Background(), filter, &lastChecks, options.Find())
+	if err != nil {
+		log.WithError(err).Error("could not fetch repositories")
+		return repoNames, err
+	}
+	for i := range lastChecks {
+		repoNames = append(repoNames, lastChecks[i].ID)
+	}
+	return repoNames, nil
 }
 
 // ListCharts returns a list of charts
