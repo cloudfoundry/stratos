@@ -4,13 +4,12 @@
   "stratos": {
     "assets": {
       "assets/core": "core/assets",
-      "assets/favicon.ico": "favico.ico"
+      "assets/favicon.ico": "favicon.ico"
     }
   },
   "peerDependencies": {
   },
   "scripts": {
-    "build": "rm -rf ../../../../dist/theme && mkdir -p ../../../../dist/theme && cp -R * ../../../../dist/theme",
-    "build2": "echo 'NEIL'"
+    "build": "rm -rf ../../../../dist/theme && mkdir -p ../../../../dist/theme && cp -R * ../../../../dist/theme"
   }
 }

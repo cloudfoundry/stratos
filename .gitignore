@@ -53,7 +53,6 @@ environment.dev.ts
 #v1
 *.iml
 docs/src
-lib
 tools/test-backend/config/mock.config.json
 tools/.coverage-karma/
 dev-certs/*
@@ -104,7 +103,7 @@ src/frontend/packages/core/assets/eula.html
 # src/frontend/packages/core/assets/logo.png
 # src/frontend/packages/core/assets/nav-logo.png
 # src/frontend/packages/core/assets/login-bg.jpg
-# src/frontend/packages/core/src/custom-import.module.ts
+src/frontend/packages/core/src/_custom-import.module.ts
 src/frontend/packages/core/src/custom
 src/frontend/packages/core/assets/custom
 src/frontend/packages/core/sass/custom

@@ -3,9 +3,13 @@
 # Theme to use (default is @stratos/theme if not specified)
 #theme: '@stratos/theme'
 
-theme: '@acme/theme'
+#theme: '@acme/theme'
 
 title: 'Stratos (V3)'
+
+extensions:
+  exclude:
+    - '@acme/extensions'
 
 # extensions:
 #   include:
@@ -22,3 +26,4 @@ resolveConfig:
     '@stratos/theme': 'src/frontend/packages/theme'
     '@stratos/shared': 'src/frontend/packages/shared'
     '@acme/theme': 'src/frontend/packages/acme_theme'
+    '@stratos/core': 'src/frontend/packages/core'

@@ -19,18 +19,38 @@
 // TODO: This would be generated into the file at build time - an entry for each module that needs theming
 //s@import '../../shared/sass/all-theme';
 
-// Get the theme
-$stratos-theme: stratos-theme();
+// Get the theme(s)
 
-// TODO: Check that we have a theme
-$theme: map-get($stratos-theme, theme);
+$stratos-dark-theme-supported: false !default;
 
-// Apply the theme
-@include mat-core();
-@include angular-material-theme($theme);
-@include app-theme($stratos-theme);
+// Themes
+$stratos-themes: stratos-theme();
 
 @import '~@stratos/theme/extensions';
 
-// TODO: This would be generated into the file at build time - an entry for each module that needs theming
-//@include apply-theme-stratos-shared($stratos-theme);
+// Default theme
+$stratos-theme: map-get($stratos-themes, default);
+$theme: map-get($stratos-theme, theme);
+
+.default {
+  // Apply the default theme
+  @include mat-core();
+  @include angular-material-theme($theme);
+  @include app-theme($stratos-theme);
+  @include apply-theme($stratos-theme);
+}
+
+// Optional dark theme
+@if map-has-key($stratos-theme, 'dark') {
+  $stratos-dark-theme-supported: true;
+  $dark-stratos-theme: map-get($stratos-themes, dark);
+  $dark-theme: map-get($dark-stratos-theme, theme);
+
+  .dark-theme {
+    // Apply the dark theme
+    @include mat-core();
+    @include angular-material-theme($dark-theme);
+    @include app-theme($dark-stratos-theme);
+    @include apply-theme($dark-stratos-theme);
+  }
+}

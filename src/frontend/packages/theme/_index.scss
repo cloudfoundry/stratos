@@ -49,15 +49,19 @@ $side-nav-light-active: #484848;
     $subdued: lighten($subdued, 50);
   }
 
+  // Only supports a light 'default' theme
+
   @return (
-    theme: $theme,
-    app-theme: (
-      app-background-color: $app-background-color,
-      app-background-text-color: rgba(mat-color($foreground-colors, base), .65),
-      side-nav: app-generate-nav-theme($theme, $nav-theme),
-      status: app-generate-status-theme($theme, $status-theme),
-      subdued-color: $subdued,
-      ansi-colors: $ansi-color-palette
+    default: (
+      theme: $theme,
+      app-theme: (
+        app-background-color: $app-background-color,
+        app-background-text-color: rgba(mat-color($foreground-colors, base), .65),
+        side-nav: app-generate-nav-theme($theme, $nav-theme),
+        status: app-generate-status-theme($theme, $status-theme),
+        subdued-color: $subdued,
+        ansi-colors: $ansi-color-palette
+      )
     )
   );
 }

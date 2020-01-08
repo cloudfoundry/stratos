@@ -12,20 +12,20 @@ class StratosBuilder {
 
     const sConfig = new StratosConfig(__dirname, this.options);
 
-    // Sass handler
+    // Sass handler for themes and themable packages
     const sass = new SassHandler();
     sass.apply(this.webpackConfig, sConfig);
 
-    // Assets
+    // Assets from extensions
     const assets = new AssetsHandler();
     assets.apply(this.webpackConfig, sConfig);
 
     // Index HTML modifier
     // this.webpackConfig.plugins.push(new IndexHtmlHandler(this.webpackConfig, sConfig));
-    const index = new IndexHtmlHandler(this.webpackConfig, sConfig);
-    index.install();
+    // const index = new IndexHtmlHandler(this.webpackConfig, sConfig);
+    // index.install();
 
-    // Extensions
+    // Extensions (code)
     const ext = new ExtensionsHandler();
     ext.apply(this.webpackConfig, sConfig, this.options);
   }

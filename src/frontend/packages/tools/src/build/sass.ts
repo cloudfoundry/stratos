@@ -24,16 +24,23 @@ export class SassHandler {
     let contents = '';
     c.themedPackages.forEach(themingConfig => {
       contents += `@import '${themingConfig.importPath}';\n`;
-      contents += `@include ${themingConfig.mixin}($stratos-theme);\n`;
     });
+
+    contents += '\n@mixin apply-theme($stratos-theme) {\n';
+
+    c.themedPackages.forEach(themingConfig => {
+      contents += `  @include ${themingConfig.mixin}($stratos-theme);\n`;
+    });
+
+    contents += '}\n';
 
     return contents;
   }
 
   private customSassImport(config: StratosConfig) {
     const that = this;
-    return (url, prev, done) => {
-      // console.log('Custom import: ' + url);
+    return (url, resourcePath) => {
+      // console.log('Custom import: ' + url + ' from ' + resourcePath);
       let result = url;
       if (url === '~@stratos/theme/extensions') {
         // Generate SCSS to appy theming to the packages that need to be themed
@@ -47,7 +54,7 @@ export class SassHandler {
         // console.log('================================================');
         return {
           file: config.resolvePackage(config.theme, '_index.scss')
-        }
+        };
       } else if (url.indexOf('~') === 0) {
         // See if we have an override
         const pkg = url.substr(1);
@@ -62,7 +69,7 @@ export class SassHandler {
         const pkgPath = pkgParts.join('/');
         // See if we can resolve the package name
         if (config.resolve[pkgName]) {
-          // console.log('GOT OVERRIDE: ' + resolve[pkgName]);
+          // console.log('GOT OVERRIDE: ' + config.resolve[pkgName]);
           // Should be a directory
           result = config.resolve[pkgName] + '/_' + pkgPath + '.scss';
           result = path.resolve(result);
@@ -70,11 +77,12 @@ export class SassHandler {
             file: result
           };
         }
-        // console.log('Leaving as is: ' + url);
       }
 
-      // Return URL - this tells SASS Loader to use its own resolution mechanism
-      return url;
+      // console.log('Leaving as is: ' + path.relative(resourcePath, url));
+
+      // We could not resolve, so leave to the default resolver
+      return null;
     };
   }
 

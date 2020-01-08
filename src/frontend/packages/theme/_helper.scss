@@ -16,7 +16,7 @@ $oss-theme-accent: mat-palette($mat-blue);
 $oss-theme-warn: mat-palette($mat-red);
 $oss-theme: mat-light-theme($oss-theme-primary, $oss-theme-accent, $oss-theme-warn);
 
-// Helper to create a Stratos theme ffrom color palettes
+// Helper to create a Stratos theme from color palettes
 @function stratos-theme-helper($theme: $oss-theme, $nav-theme: null, $status-theme: null) {
 
   $background-colors: map-get($theme, background);
@@ -40,14 +40,16 @@ $oss-theme: mat-light-theme($oss-theme-primary, $oss-theme-accent, $oss-theme-wa
   }
 
   @return (
-    theme: $theme,
-    app-theme: (
-      app-background-color: $app-background-color,
-      app-background-text-color: rgba(mat-color($foreground-colors, base), .65),
-      side-nav: app-generate-nav-theme($theme, $nav-theme),
-      status: app-generate-status-theme($theme, $status-theme),
-      subdued-color: $subdued,
-      ansi-colors: $ansi-color-palette
+    default: (
+      theme: $theme,
+      app-theme: (
+        app-background-color: $app-background-color,
+        app-background-text-color: rgba(mat-color($foreground-colors, base), .65),
+        side-nav: app-generate-nav-theme($theme, $nav-theme),
+        status: app-generate-status-theme($theme, $status-theme),
+        subdued-color: $subdued,
+        ansi-colors: $ansi-color-palette
+      )
     )
   );
 }
