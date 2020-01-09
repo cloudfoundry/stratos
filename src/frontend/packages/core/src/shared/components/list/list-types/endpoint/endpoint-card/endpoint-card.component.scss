@@ -57,11 +57,17 @@
     &__value {
       align-items: center;
       display: flex;
-      margin-right: 28px;
       overflow: hidden;
       text-align: end;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+  }
+
+  &__hidden {
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
   }
 }

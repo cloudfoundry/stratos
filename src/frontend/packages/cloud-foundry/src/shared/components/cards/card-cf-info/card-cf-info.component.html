@@ -7,12 +7,9 @@
       <div class="app-metadata">
         <div class="app-metadata__two-cols">
           <app-metadata-item icon="title" label="Description">{{ (description$ | async) }}</app-metadata-item>
-          <app-metadata-item icon="link" label="Instance Address">
+          <app-metadata-item icon="link" label="Instance Address" [clipboardValue]="apiUrl">
             <div class="app-metadata__address">
               <div class="app-metadata__address__value">{{ apiUrl }}</div>
-              <app-copy-to-clipboard class="app-code-block__copy" [text]="apiUrl" [tooltip]="'Copy to clipboard'"
-                [showSuccessText]="false">
-              </app-copy-to-clipboard>
             </div>
           </app-metadata-item>
           <app-metadata-item icon="info_outline" label="CF API Version">
