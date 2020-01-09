@@ -4,6 +4,6 @@
 
   $theme: map-get($stratos-theme, theme);
   $app-theme: map-get($stratos-theme, app-theme);
-  
+
   @include stratos-title-component-theme($theme, $app-theme);
 }

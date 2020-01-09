@@ -13,7 +13,7 @@
 $side-nav-light-text: #fff;
 $side-nav-light-bg: #333;
 $side-nav-light-hover: #555;
-$side-nav-light-active: #484848;  
+$side-nav-light-active: #484848;
 
 // Provide the theme function that will be used to create the theme when needed
 @function stratos-theme() {
@@ -32,19 +32,17 @@ $side-nav-light-active: #484848;
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
   $is-dark: map-get($theme, is-dark);
-  $app-background-color: white;
+  $app-background-color: #fff;
   $app-background-text-color: rgba(mat-color($foreground-colors, base), .65);
   $primary: map-get($theme, primary);
   $accent: map-get($theme, accent);
   $warn: map-get($theme, warn);
   $subdued: mat-contrast($primary, 50);
 
-  @if $is-dark==true {
+  @if $is-dark == true {
     $app-background-color: lighten(mat-color($background-colors, background), 10%);
     $subdued: darken($subdued, 50);
-  }
-
-  @else {
+  } @else {
     $app-background-color: darken(mat-color($background-colors, background), 2%);
     $subdued: lighten($subdued, 50);
   }
@@ -69,9 +67,7 @@ $side-nav-light-active: #484848;
 @function app-generate-nav-theme($theme, $nav-theme: null) {
   @if ($nav-theme) {
     @return $nav-theme;
-  }
-
-  @else {
+  } @else {
     // Use default palette for side navigation
     @return (background: $side-nav-light-bg, background-top: $side-nav-light-bg, text: darken($side-nav-light-text, 10%), active: $side-nav-light-active, active-text: $side-nav-light-text, hover: $side-nav-light-hover, hover-text: $side-nav-light-text);
   }
@@ -80,9 +76,7 @@ $side-nav-light-active: #484848;
 @function app-generate-status-theme($theme, $status-theme: null) {
   @if ($status-theme) {
     @return $status-theme;
-  }
-
-  @else {
+  } @else {
     $warn: map-get($theme, warn);
     $primary: map-get($theme, primary);
     $white: #fff; // Use default palette for status
