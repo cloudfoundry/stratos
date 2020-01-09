@@ -27,7 +27,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cf-types';
 import {
   FetchBranchesForProject,
   FetchCommit,

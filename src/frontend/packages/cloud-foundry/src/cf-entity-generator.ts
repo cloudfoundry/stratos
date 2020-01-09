@@ -44,7 +44,7 @@ import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
-import { CF_ENDPOINT_TYPE } from '../cf-types';
+import { CF_ENDPOINT_TYPE } from './cf-types';
 import { cfEntityFactory } from './cf-entity-factory';
 import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
 import {

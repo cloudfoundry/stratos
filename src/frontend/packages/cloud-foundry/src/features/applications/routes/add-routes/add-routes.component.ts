@@ -25,7 +25,7 @@ import {
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { ApplicationService } from '../../application.service';
 
 const hostPattern = '^([\\w\\-\\.]*)$';

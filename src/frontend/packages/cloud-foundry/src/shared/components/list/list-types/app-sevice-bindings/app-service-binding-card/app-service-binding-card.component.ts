@@ -22,7 +22,7 @@ import {
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import {
   serviceBindingEntityType,

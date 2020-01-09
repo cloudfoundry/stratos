@@ -4,7 +4,7 @@ import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { stackEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
 import { HttpRequest } from '@angular/common/http';

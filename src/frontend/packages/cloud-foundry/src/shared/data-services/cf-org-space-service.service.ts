@@ -37,7 +37,7 @@ import { selectPaginationState } from '../../../../store/src/selectors/paginatio
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {

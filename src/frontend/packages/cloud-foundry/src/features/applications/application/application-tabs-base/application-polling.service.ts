@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { appStatsEntityType, appSummaryEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IApp } from '../../../../../../core/src/core/cf-api.types';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';

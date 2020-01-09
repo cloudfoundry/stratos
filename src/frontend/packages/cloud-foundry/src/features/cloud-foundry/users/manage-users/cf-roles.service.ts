@@ -39,7 +39,7 @@ import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '..
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
 
 @Injectable()

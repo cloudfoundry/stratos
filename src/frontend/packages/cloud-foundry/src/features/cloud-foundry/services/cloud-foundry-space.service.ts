@@ -29,7 +29,7 @@ import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 
 @Injectable()
 export class CloudFoundrySpaceService {
