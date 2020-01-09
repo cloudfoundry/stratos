@@ -79,6 +79,7 @@ import {
   SpecifyUserProvidedDetailsComponent,
 } from '../specify-user-provided-details/specify-user-provided-details.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
+import { CopyToClipboardComponent } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
@@ -89,6 +90,7 @@ describe('AddServiceInstanceComponent', () => {
       declarations: [
         AppNameUniqueDirective,
         AddServiceInstanceComponent,
+        CopyToClipboardComponent,
         SelectPlanStepComponent,
         SpecifyDetailsStepComponent,
         BindAppsStepComponent,
