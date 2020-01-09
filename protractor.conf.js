@@ -177,6 +177,12 @@ const config = {
     //   download_throughput: 500 * 1024 * 1024, // Maximal aggregated download throughput.
     //   upload_throughput: 500 * 1024 * 1024 // Maximal aggregated upload throughput.
     // });
+    console.log('Preparing E2E Test Run ...');
+    console.log(browser.baseUrl);
+    if (browser.baseUrl.endsWith('/')) {
+      browser.baseUrl = browser.baseUrl.substr(0, browser.baseUrl.length - 1);
+      console.log('Removed trailing / from base URL');
+    }
 
     skipPlugin.install(jasmine);
     require('ts-node').register({
@@ -248,6 +254,10 @@ const config = {
 if (process.env['STRATOS_E2E_BASE_URL']) {
   config.baseUrl = process.env['STRATOS_E2E_BASE_URL'];
 }
+
+console.log('Base URL is: ' + config.baseUrl);
+console.log(process.env['STRATOS_E2E_BASE_URL']);
+
 exports.config = config
 // Should we run e2e tests in headless Chrome?
 const headless = secrets.headless || process.env['STRATOS_E2E_HEADLESS'];
