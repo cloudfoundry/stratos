@@ -7,11 +7,11 @@ import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { IService } from '../../../../../core/src/core/cf-api-svc.types';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 

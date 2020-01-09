@@ -18,9 +18,9 @@ import {
 } from '../../../../../core/src/core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { CF_GUID } from '../../../../../core/src/shared/entity.tokens';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { getCfService, getServiceBroker, getServicePlans, getServiceName } from '../../../features/service-catalog/services-helper';

@@ -27,7 +27,7 @@ import {
   RequestEntityLocation,
   WrapperRequestActionSuccess,
 } from '../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { GetOrganization } from '../actions/organization.actions';
 import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { CFAppState } from '../cf-app-state';

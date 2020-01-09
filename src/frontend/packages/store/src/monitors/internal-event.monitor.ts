@@ -8,7 +8,7 @@ import {
   InternalEventsState,
   InternalEventSubjectState,
   InternalEventState,
-} from '../../../../store/src/types/internal-events.types';
+} from '../types/internal-events.types';
 
 export function newNonAngularInterval(ngZone: NgZone, intervalTime: number) {
   return new Observable<number>((observer) => {

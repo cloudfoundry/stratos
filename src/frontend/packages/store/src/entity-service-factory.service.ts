@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import { GeneralEntityAppState } from './app-state';
 import { EntityRequestAction } from './types/request.types';
-import { EntityMonitorFactory } from '../../core/src/shared/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { entityCatalog } from './entity-catalog/entity-catalog.service';
 import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
 import { ENTITY_INFO_HANDLER, EntityInfoHandler, EntityService } from './entity-service';

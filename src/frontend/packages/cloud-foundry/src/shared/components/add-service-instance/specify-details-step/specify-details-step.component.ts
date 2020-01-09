@@ -36,7 +36,7 @@ import { StepOnNextResult } from '../../../../../../core/src/shared/components/s
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { UpdateServiceInstance } from '../../../../actions/service-instances.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import { appEnvVarsEntityType, serviceBindingEntityType, serviceInstancesEntityType } from '../../../../cf-entity-types';

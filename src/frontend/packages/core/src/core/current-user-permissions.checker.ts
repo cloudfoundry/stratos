@@ -23,7 +23,7 @@ import {
 } from '../../../store/src/selectors/current-user-role.selectors';
 import { endpointsRegisteredEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
-import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
+import { PaginationMonitor } from '../../../store/src/monitors/pagination-monitor';
 import { IFeatureFlag } from './cf-api.types';
 import {
   PermissionConfig,

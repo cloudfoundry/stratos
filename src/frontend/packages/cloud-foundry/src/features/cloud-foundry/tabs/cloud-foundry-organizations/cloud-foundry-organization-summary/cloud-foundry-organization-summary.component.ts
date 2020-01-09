@@ -11,7 +11,7 @@ import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/c
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { selectDeletionInfo } from '../../../../../../../store/src/selectors/api.selectors';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { organizationEntityType } from '../../../../../cf-entity-types';
 import { goToAppWall } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';

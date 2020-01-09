@@ -16,7 +16,7 @@ import {
 import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
 import { SpaceUserRoleNames } from '../../../../../store/types/user.types';

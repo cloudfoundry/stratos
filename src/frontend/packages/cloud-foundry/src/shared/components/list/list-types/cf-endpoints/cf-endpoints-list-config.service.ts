@@ -10,9 +10,9 @@ import {
   EndpointsListConfigService,
 } from '../../../../../../../core/src/shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { EntityMonitorFactory } from '../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../../../../core/src/shared/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { CFEndpointsDataSource } from './cf-endpoints-data-source';
 

@@ -1,7 +1,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 
-import { appReducers } from '../../../../store/src/reducers.module';
+import { appReducers } from '../reducers.module';
 import { PaginationMonitorFactory } from './pagination-monitor.factory';
 
 describe('PaginationMonitorFactoryService', () => {

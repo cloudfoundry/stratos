@@ -2,10 +2,10 @@ import { ActionReducer, Store } from '@ngrx/store';
 
 import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { getFullEndpointApiUrl } from '../../../core/src/features/endpoints/endpoint-helpers';
-import { EntityMonitor } from '../../../core/src/shared/monitors/entity-monitor';
 import { AppState, IRequestEntityTypeState } from '../app-state';
 import { EntityPipelineEntity, stratosEndpointGuidKey } from '../entity-request-pipeline/pipeline.types';
 import { EntitySchema } from '../helpers/entity-schema';
+import { EntityMonitor } from '../monitors/entity-monitor';
 import { EndpointModel } from '../types/endpoint.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../types/request.types';
 import { IEndpointFavMetadata } from '../types/user-favorites.types';

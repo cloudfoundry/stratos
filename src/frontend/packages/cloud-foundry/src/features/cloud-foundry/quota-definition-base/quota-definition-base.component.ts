@@ -16,7 +16,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { organizationEntityType, spaceEntityType } from '../../../cf-entity-types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 

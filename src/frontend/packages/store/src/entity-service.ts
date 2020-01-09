@@ -9,7 +9,7 @@ import { RequestInfoState, UpdatingSection } from './reducers/api-request-reduce
 import { getEntityUpdateSections, getUpdateSectionById } from './selectors/api.selectors';
 import { EntityInfo } from './types/api.types';
 import { EntityRequestAction } from './types/request.types';
-import { EntityMonitor } from '../../core/src/shared/monitors/entity-monitor';
+import { EntityMonitor } from './monitors/entity-monitor';
 import { entityCatalog } from './entity-catalog/entity-catalog.service';
 import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
 

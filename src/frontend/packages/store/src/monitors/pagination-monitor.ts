@@ -14,16 +14,16 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { AppState, GeneralEntityAppState, GeneralRequestDataState } from '../../../../store/src/app-state';
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { ActionState, ListActionState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { getAPIRequestDataState, selectEntities } from '../../../../store/src/selectors/api.selectors';
-import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
-import { StratosBaseCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { LocalPaginationHelpers } from '../components/list/data-sources-controllers/local-list.helpers';
+import { AppState, GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
+import { EntitySchema } from '../helpers/entity-schema';
+import { ActionState, ListActionState } from '../reducers/api-request-reducer/types';
+import { getAPIRequestDataState, selectEntities } from '../selectors/api.selectors';
+import { selectPaginationState } from '../selectors/pagination.selectors';
+import { PaginationEntityState } from '../types/pagination.types';
+import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import { LocalPaginationHelpers } from '../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 
 export class MultiActionListEntity {
   static getEntity(entity: MultiActionListEntity | any) {

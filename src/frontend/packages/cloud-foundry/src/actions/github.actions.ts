@@ -1,4 +1,4 @@
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { gitRepoEntityType } from '../cf-entity-types';
 import {
   EnvVarStratosProject,

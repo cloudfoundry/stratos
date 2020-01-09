@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../cf-types';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
   organizationEntityType,
@@ -16,7 +16,7 @@ import { ISpaceQuotaDefinition } from '../../../../core/src/core/cf-api.types';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { StepOnNextResult } from '../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';

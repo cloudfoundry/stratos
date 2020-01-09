@@ -1,6 +1,6 @@
 import { getActions } from '../../../store/src/actions/action.helper';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CFEntityConfig } from '../../cf-types';
+import { CFEntityConfig } from '../cf-types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,

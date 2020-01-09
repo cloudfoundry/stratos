@@ -32,7 +32,7 @@ import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-type
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { GitCommit } from '../types/git.types';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { CF_ENDPOINT_TYPE } from './../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 
 function parseHttpPipeError(res: any, logger: LoggerService): { message?: string } {
   if (!res.status) {

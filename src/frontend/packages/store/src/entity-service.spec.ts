@@ -18,8 +18,8 @@ import { generateTestEntityServiceProvider } from '../../core/test-framework/ent
 import { createEntityStore, TestStoreEntity } from '../../core/test-framework/store-test-helper';
 import { STRATOS_ENDPOINT_TYPE } from '../../core/src/base-entity-schemas';
 import { ENTITY_SERVICE } from '../../core/src/shared/entity.tokens';
-import { EntityMonitor } from '../../core/src/shared/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../core/src/shared/monitors/entity-monitor.factory.service';
+import { EntityMonitor } from './monitors/entity-monitor';
+import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalog-test.module';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity';
 import { EntityCatalogEntityConfig, IStratosEndpointDefinition } from './entity-catalog/entity-catalog.types';

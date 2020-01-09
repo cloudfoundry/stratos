@@ -32,7 +32,7 @@ import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema'
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { PaginationMonitor } from '../../../monitors/pagination-monitor';
+import { PaginationMonitor } from '../../../../../../store/src/monitors/pagination-monitor';
 import { IListDataSourceConfig, MultiActionConfig } from './list-data-source-config';
 import {
   EntitySelectConfig,
