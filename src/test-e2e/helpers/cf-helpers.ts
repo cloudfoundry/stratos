@@ -12,6 +12,7 @@ import {
   ISpaceQuotaDefinition,
 } from '../../frontend/packages/core/src/core/cf-api.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
+import { ApplicationPageSummaryTab } from '../application/po/application-page-summary.po';
 import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
 import { CfOrgLevelPage } from '../cloud-foundry/org-level/cf-org-level-page.po';
 import { CfSpaceLevelPage } from '../cloud-foundry/space-level/cf-space-level-page.po';
@@ -508,5 +509,28 @@ export class CFHelpers {
       ...options
     };
     return this.cfRequestHelper.sendCfPost<APIResource<ISpaceQuotaDefinition>>(cfGuid, 'space_quota_definitions', body);
+  }
+
+  createTestAppAndNav(appName: string, nav = true): promise.Promise<{
+    cfGuid: string,
+    app: APIResource<IApp>
+  }> {
+    // It's advised to run cfHelper.updateDefaultCfOrgSpace first
+    return this.basicCreateApp(
+      CFHelpers.cachedDefaultCfGuid,
+      CFHelpers.cachedDefaultSpaceGuid,
+      appName
+    )
+      .then((app) => {
+        if (nav) {
+          const appSummary = new ApplicationPageSummaryTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
+          appSummary.navigateTo();
+          appSummary.waitForPage();
+        }
+        return {
+          cfGuid: CFHelpers.cachedDefaultCfGuid,
+          app
+        };
+      });
   }
 }

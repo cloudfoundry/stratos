@@ -1,0 +1,10 @@
+div {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  mat-icon {
+    margin-right: 10px;
+  }
+}

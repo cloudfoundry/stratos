@@ -154,4 +154,7 @@ if [ "${SETUP_INVITE_USER}" == "true" ]; then
   addInviteUserUaaClient
 fi
 
+# Enable docker for deploy app from docker test
+cf enable-feature-flag diego_docker
+
 echo "All done"

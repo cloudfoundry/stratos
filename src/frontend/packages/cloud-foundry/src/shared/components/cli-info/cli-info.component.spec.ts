@@ -1,9 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CliInfoComponent } from './cli-info.component';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { MDAppModule } from '../../../../../core/src/core/md.module';
 import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
+import {
+  CopyToClipboardComponent,
+} from '../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
+import { CliInfoComponent } from './cli-info.component';
 
 describe('CliInfoComponent', () => {
   let component: CliInfoComponent;
@@ -11,13 +14,13 @@ describe('CliInfoComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CliInfoComponent, CodeBlockComponent ],
+      declarations: [CliInfoComponent, CodeBlockComponent, CopyToClipboardComponent],
       imports: [
         CoreModule,
         MDAppModule,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

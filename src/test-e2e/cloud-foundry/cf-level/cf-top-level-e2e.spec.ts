@@ -36,10 +36,7 @@ describe('CF - Top Level - ', () => {
     });
 
     describe('Basic Tests -', () => {
-      beforeEach(navToCfPage);
-
-      beforeEach(() => {
-      });
+      it('Nav to CF Page', navToCfPage);
 
       it('Breadcrumb', () => {
         expect(cfPage.header.getTitleText()).toBe(defaultCf.name);
@@ -76,7 +73,7 @@ describe('CF - Top Level - ', () => {
 
     describe('Basic Tests -', () => {
 
-      beforeEach(navToCfPage);
+      it('Nav to CF Page', navToCfPage);
 
       it('Breadcrumb', () => {
         expect(cfPage.header.getTitleText()).toBe(defaultCf.name);

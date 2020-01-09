@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { GetAllUsersAsAdmin } from '../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
@@ -47,6 +46,8 @@ import {
 export class CfUserService {
   private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
 
+  private userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
+
   users: { [guid: string]: Observable<APIResource<CfUser>> } = {};
 
   constructor(
@@ -83,8 +84,7 @@ export class CfUserService {
           return observableOf(users.filter(o => o.metadata.guid === userGuid)[0]);
         }
         if (!this.users[userGuid]) {
-          const userEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
-          const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('get');
+          const actionBuilder = this.userCatalogueEntity.actionOrchestrator.getActionBuilder('get');
           const getUserAction = actionBuilder(userGuid, endpointGuid);
           this.users[userGuid] = this.entityServiceFactory.create<APIResource<CfUser>>(
             userGuid,
@@ -371,34 +371,25 @@ export class CfUserService {
   }
 
   private createCfGetUsersAction = (cfGuid: string): PaginatedAction => {
-    const userEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
-    const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const action = actionBuilder(undefined, cfGuid) as GetAllUsersAsAdmin;
-    return action;
+    return this.userCatalogueEntity.actionOrchestrator.getActionBuilder('getMultiple')(cfGuid, null);
   }
 
   private createOrgGetUsersAction = (isAdmin: boolean, cfGuid: string, orgGuid: string): PaginatedAction => {
-    const userEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
-    const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
-    const action = actionBuilder(
+    return this.userCatalogueEntity.actionOrchestrator.getActionBuilder('getAllInOrganization')(
       orgGuid,
       cfGuid,
       createEntityRelationPaginationKey(organizationEntityType, orgGuid),
       isAdmin
     ) as PaginatedAction;
-    return action;
   }
 
   private createSpaceGetUsersAction = (isAdmin: boolean, cfGuid: string, spaceGuid: string, ): PaginatedAction => {
-    const userEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
-    const actionBuilder = userEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
-    const action = actionBuilder(
+    return this.userCatalogueEntity.actionOrchestrator.getActionBuilder('getAllInSpace')(
       spaceGuid,
       cfGuid,
       createEntityRelationPaginationKey(spaceEntityType, spaceGuid),
       isAdmin
     ) as PaginatedAction;
-    return action;
   }
 
   public isConnectedUserAdmin = (cfGuid: string): Observable<boolean> =>

@@ -18,6 +18,7 @@ import { ServicesModule } from './features/services/services.module';
 import { CloudFoundryComponentsModule } from './shared/components/components.module';
 import { CfUserService } from './shared/data-services/cf-user.service';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
+import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
 
@@ -83,6 +84,7 @@ function infoValidator(action: ICFAction, dispatcher) {
     CfUserService,
     CloudFoundryService,
     ServiceActionHelperService,
+    LongRunningCfOperationsService
   ]
 })
 export class CloudFoundryPackageModule { }

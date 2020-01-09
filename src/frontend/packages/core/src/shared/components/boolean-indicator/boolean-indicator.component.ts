@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 export enum BooleanIndicatorType {
   enabledDisabled = 'enabled-disabled',
@@ -7,7 +7,8 @@ export enum BooleanIndicatorType {
   yesNo = 'yes-no',
   trueFalse = 'true-false',
   healthyUnhealthy = 'healthy-unhealthy',
-  succeededFailed = 'success-failed'
+  succeededFailed = 'success-failed',
+  progressProgress = 'progress-progress'
 }
 
 interface IBooleanConfig {
@@ -66,7 +67,8 @@ export class BooleanIndicatorComponent {
     Remove: 'remove_circle',
     Locked: 'lock_outline',
     Unlocked: 'lock_open',
-    Unknown: 'help_outline'
+    Unknown: 'help_outline',
+    Progress: 'cached'
   };
 
   private getIconTextAndSeverity = (

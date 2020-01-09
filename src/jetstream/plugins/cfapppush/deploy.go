@@ -59,6 +59,7 @@ const (
 	SOURCE_FILE_ACK
 	SOURCE_GITURL
 	SOURCE_WAIT_ACK
+	SOURCE_DOCKER_IMG
 )
 
 // Application Overrides messages
@@ -125,6 +126,8 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		stratosProject, appDir, err = getFolderSource(clientWebSocket, tempDir, msg)
 	case SOURCE_GITURL:
 		stratosProject, appDir, err = getGitURLSource(clientWebSocket, tempDir, msg)
+	case SOURCE_DOCKER_IMG:
+		stratosProject, appDir, err = getDockerURLSource(clientWebSocket, tempDir, msg)
 	default:
 		err = errors.New("Unsupported source type; don't know how to get the source for the application")
 	}
@@ -408,6 +411,47 @@ func getGitURLSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 	return stratosProject, tempDir, nil
 }
 
+func getDockerURLSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (StratosProject, string, error) {
+
+	var (
+		err error
+	)
+
+	// The msg data is JSON for the docker info
+	info := DockerImageSourceInfo{}
+
+	if err = json.Unmarshal([]byte(msg.Message), &info); err != nil {
+		return StratosProject{}, tempDir, err
+	}
+
+	log.Debugf("Docker Image: '%s', Username '%s'", info.DockerImage, info.DockerUsername)
+
+	// Create a manifest using the application name. This sets up the environment as if it were a git clone
+	applicationData := RawManifestApplication{
+		Name: info.ApplicationName,
+	}
+	manifest := Applications{
+		Applications: []RawManifestApplication{applicationData},
+	}
+	marshalledYaml, err := yaml.Marshal(manifest)
+	manifestPath := fmt.Sprintf("%s/manifest.yml", tempDir)
+	err = ioutil.WriteFile(manifestPath, marshalledYaml, 0600)
+	if err != nil {
+		log.Warnf("Failed to write manifest in path %s", manifestPath)
+		return StratosProject{}, tempDir, err
+	}
+
+	sendEvent(clientWebSocket, EVENT_CLONED)
+
+	// Return a string that can be added to the manifest as an application env var to trace where the source originated
+	info.Timestamp = time.Now().Unix()
+	stratosProject := StratosProject{
+		DeploySource: info,
+	}
+
+	return stratosProject, tempDir, nil
+}
+
 func getMarshalledSocketMessage(data string, messageType MessageType) ([]byte, error) {
 
 	messageStruct := SocketMessage{
@@ -523,8 +567,8 @@ func fetchManifest(repoPath string, stratosProject StratosProject, clientWebSock
 		return manifest, err
 	}
 
-	marshalledJson, _ := json.Marshal(stratosProject)
-	envVarMetaData := string(marshalledJson)
+	marshalledJSON, _ := json.Marshal(stratosProject)
+	envVarMetaData := string(marshalledJSON)
 
 	// If we have metadata to indicate the source origin, add it to the manifest
 	if len(envVarMetaData) > 0 {

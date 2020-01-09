@@ -1,4 +1,4 @@
-import { HttpClientModule, HttpClient, HttpBackend } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -26,6 +26,7 @@ import {
 } from './deploy-application-step2/deploy-application-fs/deploy-application-fs.component';
 import { DeployApplicationStep2Component } from './deploy-application-step2/deploy-application-step2.component';
 import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
+import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
 import { DeployApplicationComponent } from './deploy-application.component';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
 
@@ -44,7 +45,7 @@ describe('DeployApplicationComponent', () => {
         DeployApplicationStepSourceUploadComponent,
         DeployApplicationFsComponent,
         CommitListWrapperComponent,
-        GithubProjectExistsDirective
+        GithubProjectExistsDirective,
       ],
       providers: [
         CfOrgSpaceDataService,
@@ -55,7 +56,8 @@ describe('DeployApplicationComponent', () => {
           provide: HttpBackend,
           useClass: HttpTestingController
         },
-        TabNavService
+        TabNavService,
+        ApplicationDeploySourceTypes
       ],
       imports: [
         ...generateCfStoreModules(),

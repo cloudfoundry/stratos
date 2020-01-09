@@ -12,11 +12,11 @@ import {
 } from './cf-entity-schema-types';
 import {
   appEnvVarsEntityType,
-  appEventEntityType,
   applicationEntityType,
   appStatsEntityType,
   appSummaryEntityType,
   buildpackEntityType,
+  cfEventEntityType,
   cfInfoEntityType,
   cfUserEntityType,
   domainEntityType,
@@ -73,8 +73,8 @@ entityCache[gitCommitEntityType] = GithubCommitSchema;
 const CFInfoSchema = new CFEntitySchema(cfInfoEntityType);
 entityCache[cfInfoEntityType] = CFInfoSchema;
 
-const EventSchema = new CFEntitySchema(appEventEntityType, {}, { idAttribute: getAPIResourceGuid });
-entityCache[appEventEntityType] = EventSchema;
+const EventSchema = new CFEntitySchema(cfEventEntityType, {}, { idAttribute: getAPIResourceGuid });
+entityCache[cfEventEntityType] = EventSchema;
 
 const StackSchema = new CFEntitySchema(stackEntityType, {}, { idAttribute: getAPIResourceGuid });
 entityCache[stackEntityType] = StackSchema;
@@ -328,24 +328,24 @@ const CFUserSchema = new CFUserEntitySchema({
     audited_spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.AUDITED_SPACES)],
   }
 }, {
-    idAttribute: getAPIResourceGuid,
-    processStrategy: (user: APIResource<CfUser>) => {
-      if (user.entity.username) {
-        return user;
-      }
-      const entity = {
-        ...user.entity,
-        username: user.metadata.guid
-      };
-
-      return user.metadata ? {
-        entity,
-        metadata: user.metadata
-      } : {
-          entity
-        };
+  idAttribute: getAPIResourceGuid,
+  processStrategy: (user: APIResource<CfUser>) => {
+    if (user.entity.username) {
+      return user;
     }
-  });
+    const entity = {
+      ...user.entity,
+      username: user.metadata.guid
+    };
+
+    return user.metadata ? {
+      entity,
+      metadata: user.metadata
+    } : {
+        entity
+      };
+  }
+});
 entityCache[cfUserEntityType] = CFUserSchema;
 
 
