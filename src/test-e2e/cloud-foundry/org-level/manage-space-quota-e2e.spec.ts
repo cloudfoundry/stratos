@@ -57,6 +57,7 @@ describe('Manage Space Quota', () => {
 
       // should go to quotas when cancelled
       quotaFormPage.stepper.cancel();
+      quotaFormPage.stepper.waitUntilNotShown();
       expect(cfOrgLevelPage.subHeader.getTitleText()).toBe('Space Quotas');
     });
 
@@ -111,6 +112,7 @@ describe('Manage Space Quota', () => {
       quotaFormPage = new SpaceQuotaFormPage();
       quotaFormPage.stepper.setName(secondQuotaName);
       quotaFormPage.submit();
+      quotaFormPage.stepper.waitUntilNotShown();
 
       expect(cfOrgLevelPage.header.getTitleText()).toBe(secondQuotaName);
     });
