@@ -1,3 +1,4 @@
+// tslint:disable:max-line-length
 import { CommonModule } from '@angular/common';
 import { ApplicationModule, NgModule } from '@angular/core';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
@@ -51,22 +52,10 @@ import { CfOrgSpaceLinksComponent } from './cf-org-space-links/cf-org-space-link
 import { CfRoleCheckboxComponent } from './cf-role-checkbox/cf-role-checkbox.component';
 import { CliCommandComponent } from './cli-info/cli-command/cli-command.component';
 import { CliInfoComponent } from './cli-info/cli-info.component';
+import { CloudFoundryEventsListComponent } from './cloud-foundry-events-list/cloud-foundry-events-list.component';
 import {
   CreateApplicationStep1Component,
 } from './create-application/create-application-step1/create-application-step1.component';
-import { EventTabActorIconPipe } from './list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
-import {
-  TableCellEventActionComponent,
-} from './list/list-types/app-event/table-cell-event-action/table-cell-event-action.component';
-import {
-  TableCellEventDetailComponent,
-} from './list/list-types/app-event/table-cell-event-detail/table-cell-event-detail.component';
-import {
-  TableCellEventTimestampComponent,
-} from './list/list-types/app-event/table-cell-event-timestamp/table-cell-event-timestamp.component';
-import {
-  TableCellEventTypeComponent,
-} from './list/list-types/app-event/table-cell-event-type/table-cell-event-type.component';
 import { TableCellCfCellComponent } from './list/list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from './list/list-types/app-instance/table-cell-usage/table-cell-usage.component';
 import {
@@ -94,6 +83,23 @@ import {
 import {
   TableCellConfirmRoleAddRemComponent,
 } from './list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
+import { EventMetadataComponent } from './list/list-types/cf-events/event-metadata/event-metadata.component';
+import {
+  TableCellEventActeeComponent,
+} from './list/list-types/cf-events/table-cell-event-actee/table-cell-event-actee.component';
+import { EventTabActorIconPipe } from './list/list-types/cf-events/table-cell-event-action/event-tab-actor-icon.pipe';
+import {
+  TableCellEventActionComponent,
+} from './list/list-types/cf-events/table-cell-event-action/table-cell-event-action.component';
+import {
+  TableCellEventDetailComponent,
+} from './list/list-types/cf-events/table-cell-event-detail/table-cell-event-detail.component';
+import {
+  TableCellEventTimestampComponent,
+} from './list/list-types/cf-events/table-cell-event-timestamp/table-cell-event-timestamp.component';
+import {
+  TableCellEventTypeComponent,
+} from './list/list-types/cf-events/table-cell-event-type/table-cell-event-type.component';
 import {
   TableCellFeatureFlagStateComponent,
 } from './list/list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
@@ -176,7 +182,8 @@ import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
 
-// tslint:disable:max-line-length
+
+
 // tslint:enable:max-line-length
 
 @NgModule({
@@ -267,6 +274,9 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellEventDetailComponent,
     TableCellUsageComponent,
     TableCellQuotaComponent,
+    TableCellEventActeeComponent,
+    CloudFoundryEventsListComponent,
+    EventMetadataComponent,
     TableCellServiceComponent,
     TableCellServiceLastOpComponent,
     TableCellServiceTagsComponent,
@@ -274,7 +284,10 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellServiceProviderComponent,
     TableCellServiceBindableComponent,
     TableCellServiceActiveComponent,
-    TableCellServiceReferencesComponent
+    TableCellServiceReferencesComponent,
+
+    CloudFoundryEventsListComponent,
+    EventMetadataComponent
   ],
   exports: [
     ServiceIconComponent,
@@ -311,7 +324,8 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     RunningInstancesComponent,
     ServicePlanPublicComponent,
     ServicePlanPriceComponent,
-    CreateApplicationStep1Component
+    CreateApplicationStep1Component,
+    CloudFoundryEventsListComponent
   ],
   entryComponents: [
     CfEndpointDetailsComponent,
@@ -359,6 +373,7 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellEventDetailComponent,
     TableCellUsageComponent,
     TableCellQuotaComponent,
+    TableCellEventActeeComponent,
     TableCellServiceComponent,
     TableCellServiceLastOpComponent,
     TableCellServiceTagsComponent,
@@ -367,7 +382,10 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellServiceBindableComponent,
     TableCellServiceActiveComponent,
     TableCellServiceReferencesComponent,
-    TableCellServiceLastOpComponent
+    TableCellServiceLastOpComponent,
+
+    EventMetadataComponent
+
   ]
 })
 export class CloudFoundryComponentsModule { }

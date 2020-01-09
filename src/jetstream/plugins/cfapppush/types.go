@@ -56,6 +56,14 @@ type GitUrlSourceInfo struct {
 	CommitHash string `json:"commit"`
 }
 
+// DockerImageSourceInfo - Structure used to provide metadata about the docker source
+type DockerImageSourceInfo struct {
+	DeploySource
+	ApplicationName string `json:"applicationName"`
+	DockerImage     string `json:"dockerImage"`
+	DockerUsername  string `json:"dockerUsername"`
+}
+
 type FolderSourceInfo struct {
 	DeploySource
 	WaitAfterUpload bool     `json:"wait"`

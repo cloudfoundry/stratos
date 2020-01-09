@@ -9,7 +9,7 @@ import {
 } from '../../../../../../../cloud-foundry/src/shared/components/cf-role-checkbox/cf-role-checkbox.component';
 import {
   EventTabActorIconPipe,
-} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-events/table-cell-event-action/event-tab-actor-icon.pipe';
 import {
   RunningInstancesComponent,
 } from '../../../../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';

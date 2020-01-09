@@ -12,6 +12,7 @@ export function createCfFeatureFlagFetchAction(cfGuid: string) {
   const featureFlagEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, featureFlagEntityType);
   const actionBuilder = featureFlagEntity.actionOrchestrator.getActionBuilder('getMultiple');
   const action = actionBuilder(cfGuid, paginationKey) as PaginatedAction;
+  action.flattenPagination = true;
   return action;
 }
 

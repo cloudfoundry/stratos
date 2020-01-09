@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MetadataItemComponent } from './metadata-item.component';
 import { CoreModule } from '../../../core/core.module';
+import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 
 describe('MetadataItemComponent', () => {
   let component: MetadataItemComponent;
@@ -10,7 +11,8 @@ describe('MetadataItemComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        MetadataItemComponent
+        MetadataItemComponent,
+        CopyToClipboardComponent
       ],
       imports: [
         CoreModule

@@ -4,6 +4,7 @@ import { EntityServiceFactory } from '../../../../../../store/src/entity-service
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
+import { CopyToClipboardComponent } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
@@ -27,6 +28,7 @@ describe('SelectPlanStepComponent', () => {
         SelectPlanStepComponent,
         CardStatusComponent,
         MetadataItemComponent,
+        CopyToClipboardComponent,
         ServicePlanPublicComponent,
         ServicePlanPriceComponent,
         FocusDirective
