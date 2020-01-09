@@ -18,6 +18,9 @@ export class CopyToClipboardComponent implements OnInit {
   @Input() showSuccessText = true;
   @Input() text = '';
 
+  // Show smaller icon
+  @Input() compact = false;
+
   constructor(
     @Inject(DOCUMENT) document: Document,
     private logService: LoggerService
@@ -31,7 +34,11 @@ export class CopyToClipboardComponent implements OnInit {
     } finally { }
   }
 
-  copyToClipboard() {
+  copyToClipboard(event: MouseEvent = null) {
+    if (event) {
+      event.stopPropagation();
+    }
+
     const textArea = this.document.createElement('textarea');
 
     textArea.style.position = 'fixed';

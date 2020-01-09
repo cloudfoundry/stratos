@@ -11,6 +11,7 @@ import {
 import { CloudFoundrySpaceServiceMock } from '../../../../../../core/test-framework/cloud-foundry-space.service.mock';
 import { CloudFoundrySpaceService } from '../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { CardCfSpaceDetailsComponent } from './card-cf-space-details.component';
+import { CopyToClipboardComponent } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 
 describe('CardCfSpaceDetailsComponent', () => {
   let component: CardCfSpaceDetailsComponent;
@@ -18,7 +19,13 @@ describe('CardCfSpaceDetailsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CardCfSpaceDetailsComponent, MetadataItemComponent, BooleanIndicatorComponent],
+      declarations: [
+        CardCfSpaceDetailsComponent,
+        MetadataItemComponent,
+        CopyToClipboardComponent,
+        CardCfSpaceDetailsComponent,
+        BooleanIndicatorComponent
+      ],
       imports: generateCfBaseTestModulesNoShared(),
       providers: [
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
