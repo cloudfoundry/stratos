@@ -1,6 +1,6 @@
 import { ListDataSource } from '../data-sources-controllers/list-data-source';
 import { Store } from '@ngrx/store';
-import { StratosBaseCatalogueEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogEntity } from '../../../../../../store/src/entity-catalog/entity-catalog-entity';
 import { ListConfig, ListViewTypes } from '../list.component.types';
 import { createTableColumnFavorite } from '../list-table/table-cell-favorite/table-cell-favorite.component';
 import { UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
@@ -11,26 +11,26 @@ export interface GetMultipleActionConfig {
   paginationKey?: string;
   extraArgs?: Record<any, any>;
 }
-export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity> extends ListDataSource<T> {
+export class CatalogEntityDrivenListDataSource<T extends EntityPipelineEntity> extends ListDataSource<T> {
   public listConfig: ListConfig<T>;
   constructor(
-    catalogueEntity: StratosBaseCatalogueEntity,
-    { endpointGuid, paginationKey = catalogueEntity.entityKey + '-list', extraArgs }: GetMultipleActionConfig,
+    catalogEntity: StratosBaseCatalogEntity,
+    { endpointGuid, paginationKey = catalogEntity.entityKey + '-list', extraArgs }: GetMultipleActionConfig,
     store: Store<any>,
   ) {
-    const tableConfig = catalogueEntity.definition.tableConfig;
-    const schema = catalogueEntity.getSchema();
-    const getAllActionBuilder = catalogueEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    const tableConfig = catalogEntity.definition.tableConfig;
+    const schema = catalogEntity.getSchema();
+    const getAllActionBuilder = catalogEntity.actionOrchestrator.getActionBuilder('getMultiple');
     if (!getAllActionBuilder) {
-      throw Error(`List Error: ${catalogueEntity.entityKey} has no action builder for the getMultiple action.`);
+      throw Error(`List Error: ${catalogEntity.entityKey} has no action builder for the getMultiple action.`);
     }
     const listConfig = new ListConfig<T>();
     listConfig.viewType = ListViewTypes.TABLE_ONLY;
     listConfig.isLocal = true;
     listConfig.enableTextFilter = true;
-    const title = !tableConfig || tableConfig && tableConfig.showHeader ? catalogueEntity.definition.labelPlural : null;
+    const title = !tableConfig || tableConfig && tableConfig.showHeader ? catalogEntity.definition.labelPlural : null;
     listConfig.text = {
-      noEntries: `There are no ${catalogueEntity.definition.labelPlural.toLowerCase()}`
+      noEntries: `There are no ${catalogEntity.definition.labelPlural.toLowerCase()}`
     };
     if (title) {
       listConfig.text.title = title;
@@ -52,10 +52,10 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
         })),
         createTableColumnFavorite(row => {
           return new UserFavorite(
-            catalogueEntity.getEndpointGuidFromEntity(row),
-            catalogueEntity.endpointType,
-            catalogueEntity.definition.type,
-            catalogueEntity.getGuidFromEntity(row),
+            catalogEntity.getEndpointGuidFromEntity(row),
+            catalogEntity.endpointType,
+            catalogEntity.definition.type,
+            catalogEntity.getGuidFromEntity(row),
           );
         })
       ];
@@ -67,7 +67,7 @@ export class CatalogueEntityDrivenListDataSource<T extends EntityPipelineEntity>
       action,
       paginationKey: action.paginationKey,
       schema,
-      getRowUniqueId: entity => catalogueEntity.getGuidFromEntity(entity),
+      getRowUniqueId: entity => catalogEntity.getGuidFromEntity(entity),
       listConfig,
       isLocal: true
     });

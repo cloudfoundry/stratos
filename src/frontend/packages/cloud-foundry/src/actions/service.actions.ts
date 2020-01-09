@@ -1,4 +1,4 @@
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
@@ -24,7 +24,7 @@ export class GetAllServices extends CFStartAction implements PaginatedAction, En
     );
   }
   actions = getActions('Service', 'Get all Services');
-  entity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType).getSchema();
+  entity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceEntityType).getSchema();
   entityType = serviceEntityType;
   options: HttpRequest<any>;
   initialParams = {

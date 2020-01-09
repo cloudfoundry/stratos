@@ -5,7 +5,7 @@ import { applicationEntityType, spaceEntityType } from '../../../../../../../clo
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -20,7 +20,7 @@ import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/
 export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfSpaceService: CloudFoundrySpaceService, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(spaceEntityType, cfSpaceService.spaceGuid) + '-tab';
-    const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    const appEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
     const action = actionBuilder(cfSpaceService.spaceGuid, cfSpaceService.cfGuid, paginationKey, [], false, false) as PaginatedAction;
     super({

@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import {
   ServiceInstanceLastOpComponent,
 } from '../../../../../../../../core/src/shared/components/service-instance-last-op/service-instance-last-op.component';

@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../core/src/core/core.module';
-import { EntityServiceFactory } from '../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../core/src/shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../core/src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../../core/src/shared/shared.module';

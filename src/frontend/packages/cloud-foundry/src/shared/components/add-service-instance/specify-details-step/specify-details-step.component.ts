@@ -30,7 +30,7 @@ import {
   SetServiceInstanceGuid,
 } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
 import { IServiceInstance, IServicePlan } from '../../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { pathGet, safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
@@ -318,7 +318,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
             return req;
           } else {
             // Refetch env vars for app, since they have been changed by CF
-            const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+            const appEnvVarsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
             const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
             const getAppEnvVarsAction = actionBuilder(state.bindAppGuid, state.cfGuid);
             this.store.dispatch(
@@ -422,7 +422,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     tagsStr: string[],
     isEditMode: boolean
   ) {
-    const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const serviceInstanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
     if (isEditMode) {
       const updateActionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('update');
       const updateServiceInstanceAction = updateActionBuilder(
@@ -447,7 +447,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         // We need to re-fetch the Service Instance
         // incase of creation because the entity returned is incomplete
         const guid = response.result[0];
-        const serviceIntanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+        const serviceIntanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
         const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('get');
         const getServiceInstanceAction = actionBuilder(guid, cfGuid);
         this.store.dispatch(getServiceInstanceAction);
@@ -502,7 +502,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: object) => {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-    const servceBindingEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+    const servceBindingEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
     const actionBuilder = servceBindingEntity.actionOrchestrator.getActionBuilder('create');
     const createServiceBindingAction = actionBuilder(
       cfGuid,

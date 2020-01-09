@@ -31,7 +31,7 @@ export class ApiEndpointSelectPageComponent implements OnInit {
       map(endpoints => endpoints.map(endpoint => new ApiEntityType(
         endpoint.guid,
         endpoint.name
-        //  TODO Get icon from entity catalogue
+        //  TODO Get icon from entity catalog
       )))
     );
   }

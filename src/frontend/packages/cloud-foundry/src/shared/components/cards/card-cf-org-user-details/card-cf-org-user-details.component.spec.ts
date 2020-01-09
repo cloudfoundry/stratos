@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import {
   BooleanIndicatorComponent,
 } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';

@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../core/entity-catalogue/entity-catalogue.types';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityMonitor } from './entity-monitor';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class EntityMonitorFactory {
 
   public create<T>(
     id: string,
-    entityConfig: EntityCatalogueEntityConfig,
+    entityConfig: EntityCatalogEntityConfig,
     startWithNull = true
   ): EntityMonitor<T> {
     const { endpointType, entityType } = entityConfig;
@@ -25,11 +25,11 @@ export class EntityMonitorFactory {
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey];
     } else {
-      const catalogueEntity = entityCatalogue.getEntity(entityConfig);
-      if (!catalogueEntity) {
-        throw new Error(`Could not find catalogue entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
+      const catalogEntity = entityCatalog.getEntity(entityConfig);
+      if (!catalogEntity) {
+        throw new Error(`Could not find catalog entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
       }
-      const monitor = catalogueEntity.getEntityMonitor(
+      const monitor = catalogEntity.getEntityMonitor(
         this.store,
         id,
         {

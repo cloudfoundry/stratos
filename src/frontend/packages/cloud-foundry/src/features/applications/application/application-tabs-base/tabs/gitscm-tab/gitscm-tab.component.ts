@@ -6,9 +6,9 @@ import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
 import { GitCommit, GitRepo } from '../../../../../../../../cloud-foundry/src/store/types/git.types';
-import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityService } from '../../../../../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../../../core/src/shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
@@ -91,7 +91,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         const repoEntityID = `${scmType}-${projectName}`;
         const commitEntityID = `${repoEntityID}-${commitId}`;
 
-        const gitRepoEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitRepoEntityType);
+        const gitRepoEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, gitRepoEntityType);
         const getRepoActionBuilder = gitRepoEntity.actionOrchestrator.getActionBuilder('getRepoInfo');
         const getRepoAction = getRepoActionBuilder(stProject) as FetchGitHubRepoInfo;
         this.gitSCMRepoEntityService = this.entityServiceFactory.create(
@@ -109,7 +109,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         );
 
         const branchID = `${scmType}-${projectName}-${stProject.deploySource.branch}`;
-        const gitBranchesEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitBranchesEntityType);
+        const gitBranchesEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, gitBranchesEntityType);
         const fetchBranchesActionBuilder = gitBranchesEntity.actionOrchestrator.getActionBuilder('get');
         this.gitBranchEntityService = this.entityServiceFactory.create(
           branchID,

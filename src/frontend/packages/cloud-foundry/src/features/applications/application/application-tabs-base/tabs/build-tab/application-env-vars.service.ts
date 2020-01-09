@@ -5,7 +5,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
   getPaginationObservables,
@@ -41,15 +41,15 @@ export class ApplicationEnvVarsHelper {
   ) { }
 
   createEnvVarsObs(appGuid: string, cfGuid: string): PaginationObservables<APIResource> {
-    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-    const actionBuilder = catalogueEntity.actionOrchestrator.getActionBuilder('get');
+    const catalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const actionBuilder = catalogEntity.actionOrchestrator.getActionBuilder('get');
     const action = actionBuilder(appGuid, cfGuid) as PaginatedAction;
     return getPaginationObservables<APIResource>({
       store: this.store,
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        catalogueEntity.getSchema()
+        catalogEntity.getSchema()
       )
     }, true);
   }

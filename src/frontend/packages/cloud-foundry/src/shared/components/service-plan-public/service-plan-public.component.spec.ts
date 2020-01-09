@@ -9,7 +9,7 @@ import { ServicesService } from '../../../features/service-catalog/services.serv
 import { ServicesServiceMock } from '../../../features/service-catalog/services.service.mock';
 import { ServicePlanPublicComponent } from './service-plan-public.component';
 import { getAction } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { EntityService } from '../../../../../core/src/core/entity-service';
+import { EntityService } from '../../../../../store/src/entity-service';
 
 const getCfService = {
   waitForEntity$: {

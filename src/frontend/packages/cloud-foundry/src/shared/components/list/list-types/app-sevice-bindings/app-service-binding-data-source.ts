@@ -15,7 +15,7 @@ import {
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { getRowMetadata } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { IServiceBinding } from '../../../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -28,7 +28,7 @@ import { cfEntityFactory } from '../../../../../cf-entity-factory';
 export class AppServiceBindingDataSource extends ListDataSource<APIResource<IServiceBinding>> {
   static createGetAllServiceBindings(appGuid: string, cfGuid: string) {
     const paginationKey = createEntityRelationPaginationKey(serviceBindingEntityType, appGuid);
-    const serviceBindingEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+    const serviceBindingEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
     const actionBuilder = serviceBindingEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
     const getAppServiceBindingsAction = actionBuilder(
       appGuid, cfGuid, paginationKey, {

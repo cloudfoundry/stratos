@@ -4,25 +4,25 @@ import { inject, TestBed } from '@angular/core/testing';
 import { Action, Store } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { APIResponse } from '../../../store/src/actions/request.actions';
-import { GeneralAppState } from '../../../store/src/app-state';
+import { APIResponse } from './actions/request.actions';
+import { GeneralAppState } from './app-state';
 import {
   failedEntityHandler,
-} from '../../../store/src/entity-request-pipeline/entity-request-base-handlers/fail-entity-request.handler';
-import { PipelineResult } from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
-import { completeApiRequest, startApiRequest } from '../../../store/src/reducers/api-request-reducer/request-helpers';
-import { NormalizedResponse } from '../../../store/src/types/api.types';
-import { EntityRequestAction, ICFAction } from '../../../store/src/types/request.types';
-import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
-import { createEntityStore, TestStoreEntity } from '../../test-framework/store-test-helper';
-import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
-import { ENTITY_SERVICE } from '../shared/entity.tokens';
-import { EntityMonitor } from '../shared/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
-import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
-import { StratosBaseCatalogueEntity } from './entity-catalogue/entity-catalogue-entity';
-import { EntityCatalogueEntityConfig, IStratosEndpointDefinition } from './entity-catalogue/entity-catalogue.types';
+} from './entity-request-pipeline/entity-request-base-handlers/fail-entity-request.handler';
+import { PipelineResult } from './entity-request-pipeline/entity-request-pipeline.types';
+import { EntitySchema } from './helpers/entity-schema';
+import { completeApiRequest, startApiRequest } from './reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from './types/api.types';
+import { EntityRequestAction, ICFAction } from './types/request.types';
+import { generateTestEntityServiceProvider } from '../../core/test-framework/entity-service.helper';
+import { createEntityStore, TestStoreEntity } from '../../core/test-framework/store-test-helper';
+import { STRATOS_ENDPOINT_TYPE } from '../../core/src/base-entity-schemas';
+import { ENTITY_SERVICE } from '../../core/src/shared/entity.tokens';
+import { EntityMonitor } from '../../core/src/shared/monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../core/src/shared/monitors/entity-monitor.factory.service';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalog-test.module';
+import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity';
+import { EntityCatalogEntityConfig, IStratosEndpointDefinition } from './entity-catalog/entity-catalog.types';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
 
@@ -46,7 +46,7 @@ const createAction = (guid: string) => {
   } as ICFAction;
 };
 
-const catalogueEndpointEntity = new StratosBaseCatalogueEntity({
+const catalogEndpointEntity = new StratosBaseCatalogEntity({
   type: endpointType,
   schema: new EntitySchema(
     endpointType,
@@ -59,8 +59,8 @@ const catalogueEndpointEntity = new StratosBaseCatalogueEntity({
 });
 
 
-const catalogueEntity = new StratosBaseCatalogueEntity({
-  endpoint: catalogueEndpointEntity.definition as IStratosEndpointDefinition,
+const catalogEntity = new StratosBaseCatalogEntity({
+  endpoint: catalogEndpointEntity.definition as IStratosEndpointDefinition,
   type: entityType,
   schema: new EntitySchema(
     entityType,
@@ -122,7 +122,7 @@ function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey:
 
 describe('EntityServiceService', () => {
   beforeEach(() => {
-    const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
+    const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>([
       [
         entitySchema,
         [
@@ -159,11 +159,11 @@ describe('EntityServiceService', () => {
         HttpClientModule,
         createEntityStore(entityMap),
         {
-          ngModule: EntityCatalogueTestModule,
+          ngModule: EntityCatalogTestModule,
           providers: [
             {
               provide: TEST_CATALOGUE_ENTITIES, useValue: [
-                catalogueEntity
+                catalogEntity
               ]
             }
           ]
@@ -228,7 +228,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, pipelineRes);
+      failedEntityHandler(getActionDispatcher(store), catalogEntity, 'fetch', action, pipelineRes);
     })();
   });
 
@@ -251,7 +251,7 @@ describe('EntityServiceService', () => {
           done();
         })
       ).subscribe();
-      failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'fetch', action, pipelineRes);
+      failedEntityHandler(getActionDispatcher(store), catalogEntity, 'fetch', action, pipelineRes);
     })();
   });
 
@@ -415,7 +415,7 @@ describe('EntityServiceService', () => {
         first(),
         tap(ent => {
           expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
-          failedEntityHandler(getActionDispatcher(store), catalogueEntity, 'delete', action, pipelineRes);
+          failedEntityHandler(getActionDispatcher(store), catalogEntity, 'delete', action, pipelineRes);
         })
       ).subscribe();
     })();

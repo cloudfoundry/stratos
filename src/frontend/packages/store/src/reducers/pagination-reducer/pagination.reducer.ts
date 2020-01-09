@@ -1,6 +1,6 @@
-import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
+import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import {
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,
@@ -103,8 +103,8 @@ function paginate(action, state = {}, updatePagination) {
     return state;
   }
 
-  if (action.type === InitCatalogueEntitiesAction.ACTION_TYPE) {
-    return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {}, state);
+  if (action.type === InitCatalogEntitiesAction.ACTION_TYPE) {
+    return getDefaultStateFromEntityCatalog((action as InitCatalogEntitiesAction).entityKeys, {}, state);
   }
 
   if (action.type === CREATE_PAGINATION) {
@@ -121,7 +121,7 @@ function paginate(action, state = {}, updatePagination) {
 
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
     const clearAction = action as ClearPaginationOfType;
-    const clearEntityType = entityCatalogue.getEntityKey(clearAction.entityConfig.endpointType, clearAction.entityConfig.entityType);
+    const clearEntityType = entityCatalog.getEntityKey(clearAction.entityConfig.endpointType, clearAction.entityConfig.entityType);
     return paginationClearAllTypes(state, [clearEntityType], getDefaultPaginationEntityState());
   }
 

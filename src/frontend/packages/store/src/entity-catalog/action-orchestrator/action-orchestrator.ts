@@ -1,10 +1,10 @@
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { Action } from '@ngrx/store';
 
-import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
-import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { EntityRequestAction, StartAction } from '../../../../../store/src/types/request.types';
-import { Omit } from '../../utils.service';
+import { EntitySchema } from '../../helpers/entity-schema';
+import { PaginatedAction } from '../../types/pagination.types';
+import { EntityRequestAction, StartAction } from '../../types/request.types';
+import { Omit } from '../../../../core/src/core/utils.service';
 import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 
 export interface ActionBuilderAction extends EntityRequestAction {
@@ -115,7 +115,7 @@ export class BasePipelineRequestAction<M extends Array<any> = any[]> extends Sta
   }
 }
 
-// This action will be created by the entity catalogue from single request entity builder configs.
+// This action will be created by the entity catalog from single request entity builder configs.
 export class BaseEntityRequestAction extends BasePipelineRequestAction implements EntityRequestAction {
   public options: HttpRequest<any>;
   public updatingKey = null;
@@ -135,7 +135,7 @@ export class BaseEntityRequestAction extends BasePipelineRequestAction implement
   }
 }
 
-// This action will be created by the entity catalogue from multi request entity builder configs.
+// This action will be created by the entity catalog from multi request entity builder configs.
 export class BasePaginationRequestAction extends BasePipelineRequestAction implements EntityRequestAction {
   public options: HttpRequest<any>;
   constructor(

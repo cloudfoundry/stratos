@@ -1,4 +1,4 @@
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { EntitySchema } from '../helpers/entity-schema';
 import {
   BaseEntityRequestAction,
   BaseEntityRequestConfig,

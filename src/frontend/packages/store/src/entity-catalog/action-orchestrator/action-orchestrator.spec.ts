@@ -1,5 +1,5 @@
-import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { EntityRequestAction } from '../../../../../store/src/types/request.types';
+import { PaginatedAction } from '../../types/pagination.types';
+import { EntityRequestAction } from '../../types/request.types';
 import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 import { ActionOrchestrator, OrchestratedActionBuilders } from './action-orchestrator';
 import { getPaginationAction, getRequestAction, hasActions } from './action-orchestrator.spec.helpers';

@@ -18,8 +18,8 @@ import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-sta
 import { SetHeaderEvent } from '../../../../../../../../store/src/actions/dashboard-actions';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
-import { StratosCatalogueEndpointEntity } from '../../../../../../core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { StratosCatalogEndpointEntity } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import {
   coreEndpointListDetailsComponents,
@@ -44,7 +44,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public favorite: UserFavoriteEndpoint;
   public address: string;
   public cardMenu: MetaCardMenuItem[];
-  public endpointCatalogueEntity: StratosCatalogueEndpointEntity;
+  public endpointCatalogEntity: StratosCatalogEndpointEntity;
   public hasDetails = true;
   public endpointLink: string = null;
   public endpointParentType: string;
@@ -72,13 +72,13 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
     this.pRow = row;
 
-    this.endpointCatalogueEntity = entityCatalogue.getEndpoint(row.cnsi_type, row.sub_type);
+    this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
-    if (this.endpointCatalogueEntity) {
-      const metadata = this.endpointCatalogueEntity.builders.entityBuilder.getMetadata(row);
-      this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogueEntity.definition.unConnectable ?
-        this.endpointCatalogueEntity.builders.entityBuilder.getLink(metadata) : null;
+    if (this.endpointCatalogEntity) {
+      const metadata = this.endpointCatalogEntity.builders.entityBuilder.getMetadata(row);
+      this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogEntity.definition.unConnectable ?
+        this.endpointCatalogEntity.builders.entityBuilder.getLink(metadata) : null;
     }
     this.updateInnerComponent();
 
@@ -129,7 +129,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (favorite) {
       this.favorite = this.favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
     }
-    const e = this.endpointCatalogueEntity.definition;
+    const e = this.endpointCatalogEntity.definition;
     this.hasDetails = !!e && !!e.listDetailsComponent;
   }
 
@@ -146,7 +146,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (!this.endpointDetails || !this.pRow) {
       return;
     }
-    const e = this.endpointCatalogueEntity.definition;
+    const e = this.endpointCatalogEntity.definition;
     if (!e || !e.listDetailsComponent) {
       return;
     }

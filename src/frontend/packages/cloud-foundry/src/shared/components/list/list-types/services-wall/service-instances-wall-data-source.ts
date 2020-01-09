@@ -6,7 +6,7 @@ import { serviceInstancesEntityType } from '../../../../../../../cloud-foundry/s
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -23,7 +23,7 @@ export class ServiceInstancesWallDataSource extends ListDataSource<APIResource> 
 
   constructor(store: Store<CFAppState>, transformEntities: any[], listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType);
-    const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const serviceInstanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
     const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const marketplaceAction = actionBuilder(null, paginationKey);
     const userProvidedAction = new GetAllUserProvidedServices();

@@ -16,7 +16,7 @@ import {
 import { IOrganization, ISpace } from '../../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -120,7 +120,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         perm.key,
         row.metadata.guid
       );
-      const catalogueEntity = entityCatalogue.getEntity({
+      const catalogEntity = entityCatalog.getEntity({
         entityType: spaceEntityType,
         endpointType: CF_ENDPOINT_TYPE
       });
@@ -130,7 +130,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         guid: spacePerms.spaceGuid,
         userName: row.entity.username,
         userGuid: row.metadata.guid,
-        busy: catalogueEntity.getEntityMonitor(
+        busy: catalogEntity.getEntityMonitor(
           this.store,
           spacePerms.spaceGuid
         )

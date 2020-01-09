@@ -1,9 +1,9 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
-import { QParam, QParamJoiners } from '../../../store/src/q-param';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { cfEventEntityType } from '../cf-entity-types';
+import { QParam, QParamJoiners } from '../shared/q-param';
 import { CFStartAction } from './cf-action.types';
 
 export const AppGetAllEvents = {

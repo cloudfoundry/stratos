@@ -11,7 +11,7 @@ import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types'
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
-import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,

@@ -13,9 +13,9 @@ import {
 } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceBroker, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { TableCellCustom } from '../../../list.types';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 
 // TODO: Move CF code to CF Module #3769
 
@@ -58,7 +58,7 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
       first(),
       switchMap(service => {
         const brokerGuid = service.entity.entity.service_broker_guid;
-        const serviceBrokerEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
+        const serviceBrokerEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
         const actionBuilder = serviceBrokerEntity.actionOrchestrator.getActionBuilder('get');
         const getServiceBrokersAction = actionBuilder(brokerGuid, service.entity.entity.cfGuid);
         return this.entityServiceFactory.create<APIResource<IServiceBroker>>(
