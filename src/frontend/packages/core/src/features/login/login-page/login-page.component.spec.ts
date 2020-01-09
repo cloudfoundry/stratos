@@ -8,6 +8,7 @@ import { appReducers } from '../../../../../store/src/reducers.module';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { LoginPageComponent } from './login-page.component';
+import { StratosComponentsModule } from '@stratos/shared';
 
 describe('LoginPageComponent', () => {
   let component: LoginPageComponent;
@@ -20,6 +21,7 @@ describe('LoginPageComponent', () => {
         CommonModule,
         CoreModule,
         SharedModule,
+        StratosComponentsModule,
         RouterTestingModule,
         NoopAnimationsModule,
         StoreModule.forRoot(

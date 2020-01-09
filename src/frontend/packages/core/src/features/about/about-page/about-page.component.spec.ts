@@ -7,6 +7,7 @@ import { createBasicStoreModule } from '../../../../test-framework/store-test-he
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { AboutPageComponent } from './about-page.component';
+import { StratosComponentsModule } from '@stratos/shared';
 
 describe('AboutPageComponent', () => {
   let component: AboutPageComponent;
@@ -17,6 +18,7 @@ describe('AboutPageComponent', () => {
       declarations: [AboutPageComponent],
       imports: [
         CoreModule,
+        StratosComponentsModule,
         RouterTestingModule,
         SharedModule,
         CoreTestingModule,

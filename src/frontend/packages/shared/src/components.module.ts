@@ -12,7 +12,6 @@ import { StratosTitleComponent } from './components/stratos-title/stratos-title.
 })
 export class StratosComponentsModule {
 
-  constructor() {
-    console.log('Stratos Components Module loaded');
-  }
- }
+  constructor() {}
+
+}

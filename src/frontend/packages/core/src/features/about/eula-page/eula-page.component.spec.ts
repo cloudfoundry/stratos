@@ -5,7 +5,9 @@ import { TabNavService } from '../../../../tab-nav.service';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { EulaPageComponent, EulaPageContentComponent } from './eula-page.component';
+import { EulaPageComponent } from './eula-page.component';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('EulaPageComponent', () => {
   let component: EulaPageComponent;
@@ -13,11 +15,13 @@ describe('EulaPageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [EulaPageComponent, EulaPageContentComponent],
+      declarations: [EulaPageComponent],
       imports: [
         CoreModule,
         RouterTestingModule,
         SharedModule,
+        HttpClientModule,
+        HttpClientTestingModule,
         createBasicStoreModule(),
       ],
       providers: [TabNavService]
