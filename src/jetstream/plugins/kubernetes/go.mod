@@ -85,7 +85,7 @@ replace (
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20190221213512-86fb29eff628
 	k8s.io/apiserver => k8s.io/apiserver v0.0.0-20190221215341-5838f549963b
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.0.0-20190221221947-d8fee89e76ca
-	k8s.io/client-go => k8s.io/client-go v2.0.0-alpha.0.0.20190202011228-6e4752048fde+incompatible
+	k8s.io/client-go => k8s.io/client-go kubernetes-1.13.9 
 	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20180509051136-39cb288412c4
 	k8s.io/kubernetes => k8s.io/kubernetes v1.13.3
 )
