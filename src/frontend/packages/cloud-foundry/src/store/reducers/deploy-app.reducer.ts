@@ -1,12 +1,12 @@
 import {
   CHECK_PROJECT_EXISTS,
   DELETE_DEPLOY_APP_SECTION,
-  FETCH_BRANCHES_FOR_PROJECT,
   PROJECT_DOESNT_EXIST,
   PROJECT_EXISTS,
   PROJECT_FETCH_FAILED,
   SAVE_APP_DETAILS,
   SAVE_APP_OVERRIDE_DETAILS,
+  SaveAppDetails,
   SET_APP_SOURCE_DETAILS,
   SET_BRANCH,
   SET_DEPLOY_BRANCH,
@@ -14,7 +14,6 @@ import {
   SET_DEPLOY_COMMIT,
 } from '../../actions/deploy-applications.actions';
 import { DeployApplicationState } from '../types/deploy-application.types';
-
 
 const defaultState: DeployApplicationState = {
   cloudFoundryDetails: null,
@@ -30,27 +29,35 @@ const defaultState: DeployApplicationState = {
   }
 };
 
-export function deployAppReducer(state: DeployApplicationState = defaultState, action) {
+export function deployAppReducer(state: DeployApplicationState = defaultState, action): DeployApplicationState {
   switch (action.type) {
     case SET_APP_SOURCE_DETAILS:
       return {
-        ...state, applicationSource: { ...state.applicationSource, type: action.sourceType }
+        ...state,
+        applicationSource: {
+          ...state.applicationSource,
+          type: action.sourceType
+        }
       };
     case SET_DEPLOY_CF_SETTINGS:
       return {
-        ...state, cloudFoundryDetails: action.cloudFoundryDetails
+        ...state,
+        cloudFoundryDetails: action.cloudFoundryDetails
       };
     case CHECK_PROJECT_EXISTS:
       return {
-        ...state, projectExists: {
+        ...state,
+        projectExists: {
           checking: true,
           exists: false,
-          name: action.projectName
+          name: action.projectName,
+          error: false
         }
       };
     case PROJECT_EXISTS:
       return {
-        ...state, projectExists: {
+        ...state,
+        projectExists: {
           checking: false,
           exists: true,
           name: action.projectName,
@@ -78,40 +85,55 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
           data: action.error
         }
       };
-    case FETCH_BRANCHES_FOR_PROJECT:
-      return {
-        ...state, applicationSource:
-        {
-          ...state.applicationSource, branches: {
-            fetching: true,
-            success: false,
-            data: null
-          }
-        }
-      };
     case SAVE_APP_DETAILS:
+      const saveAppDetails = action as SaveAppDetails;
       return {
-        ...state, applicationSource:
-          { ...state.applicationSource, ...action.appDetails }
+        ...state,
+        applicationSource: {
+          ...state.applicationSource,
+          gitDetails: saveAppDetails.git || state.applicationSource.gitDetails,
+          dockerDetails: saveAppDetails.docker || state.applicationSource.dockerDetails,
+        }
       };
     case SAVE_APP_OVERRIDE_DETAILS:
       return {
-        ...state, applicationOverrides: { ...action.appOverrideDetails }
+        ...state,
+        applicationOverrides: {
+          ...action.appOverrideDetails
+        }
       };
     case SET_BRANCH:
       return {
-        ...state, applicationSource:
-          { ...state.applicationSource, ...{ branch: action.branch } }
+        ...state,
+        applicationSource: {
+          ...state.applicationSource,
+          gitDetails: {
+            ...state.applicationSource.gitDetails,
+            branch: action.branch
+          }
+        }
       };
     case SET_DEPLOY_BRANCH:
       return {
-        ...state, applicationSource:
-          { ...state.applicationSource, ...{ branchName: action.branch } }
+        ...state,
+        applicationSource: {
+          ...state.applicationSource,
+          gitDetails: {
+            ...state.applicationSource.gitDetails,
+            branchName: action.branch
+          }
+        }
       };
     case SET_DEPLOY_COMMIT:
       return {
-        ...state, applicationSource:
-          { ...state.applicationSource, ...{ commit: action.commit } }
+        ...state,
+        applicationSource: {
+          ...state.applicationSource,
+          gitDetails: {
+            ...state.applicationSource.gitDetails,
+            commit: action.commit
+          }
+        }
       };
     case DELETE_DEPLOY_APP_SECTION:
       return defaultState;

@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 
+import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import {
   CfAppEventsConfigService,
-} from '../../../../../../shared/components/list/list-types/app-event/cf-app-events-config.service';
-import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
+} from '../../../../../../shared/components/list/list-types/cf-events/types/cf-app-events-config.service';
 
 @Component({
   selector: 'app-events-tab',
@@ -14,7 +14,4 @@ import { ListConfig } from '../../../../../../../../core/src/shared/components/l
     useClass: CfAppEventsConfigService,
   }]
 })
-
-export class EventsTabComponent {
-
-}
+export class EventsTabComponent { }

@@ -9,6 +9,7 @@ import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../core/src/core
 import { GitSCMService } from '../../../../../../core/src/shared/data-services/scm/scm.service';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ApplicationDeploySourceTypes } from '../deploy-application-steps.types';
 import { GithubProjectExistsDirective } from '../github-project-exists.directive';
 import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-application-fs.component';
 import { DeployApplicationStep2Component } from './deploy-application-step2.component';
@@ -22,7 +23,7 @@ describe('DeployApplicationStep2Component', () => {
       declarations: [
         DeployApplicationStep2Component,
         DeployApplicationFsComponent,
-        GithubProjectExistsDirective
+        GithubProjectExistsDirective,
       ],
       imports: [
         ...generateCfStoreModules(),
@@ -35,7 +36,8 @@ describe('DeployApplicationStep2Component', () => {
       ],
       providers: [
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        GitSCMService
+        GitSCMService,
+        ApplicationDeploySourceTypes
       ]
     })
       .compileComponents();

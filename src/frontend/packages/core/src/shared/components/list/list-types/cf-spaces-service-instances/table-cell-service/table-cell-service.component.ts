@@ -17,6 +17,8 @@ import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/
 import { TableCellCustom } from '../../../list.types';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 
+// TODO: Move CF code to CF Module #3769
+
 @Component({
   selector: 'app-table-cell-service',
   templateUrl: './table-cell-service.component.html',

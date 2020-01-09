@@ -2,7 +2,6 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
 import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { CustomImportModule } from '../../../../../core/src/custom-import.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';

@@ -9,12 +9,13 @@ export interface ITileImgConfig {
 
 export type ITileGraphic = ITileIconConfig | ITileImgConfig;
 
-export class ITileConfig<T extends ITileData = ITileData> {
+export class ITileConfig<T extends ITileData = ITileData, Y = ITileGraphic> {
   constructor(
     public label: string | number,
-    public graphic: ITileGraphic,
+    public graphic: Y,
     public data?: T,
-    public hidden = false
+    public hidden = false,
+    public description = ''
   ) { }
 }
 
