@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 import { AppMetadataTypes } from '../../../cloud-foundry/src/actions/app-metadata.actions';
 import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { appEnvVarsEntityType, appStatsEntityType, appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-types';

@@ -1,7 +1,7 @@
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../../cf-types';
 import { IApp, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { truthyIncludingZero } from '../../../../../core/src/core/utils.service';
 import { determineCardStatus } from '../../../../../core/src/shared/components/cards/card-status/card-status.component';

@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import {
   AssociateSpaceQuota,
   DisassociateSpaceQuota,

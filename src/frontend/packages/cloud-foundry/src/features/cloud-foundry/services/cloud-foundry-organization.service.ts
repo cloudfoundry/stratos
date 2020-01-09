@@ -35,7 +35,7 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 
 export const createOrgQuotaDefinition = (): IOrgQuotaDefinition => ({

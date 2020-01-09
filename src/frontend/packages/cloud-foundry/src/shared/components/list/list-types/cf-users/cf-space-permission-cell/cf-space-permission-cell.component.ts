@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { RemoveUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';

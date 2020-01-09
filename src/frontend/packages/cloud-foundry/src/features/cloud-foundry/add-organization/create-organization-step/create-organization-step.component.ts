@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { CreateOrganization } from '../../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';

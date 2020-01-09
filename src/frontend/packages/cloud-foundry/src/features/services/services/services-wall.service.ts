@@ -11,7 +11,7 @@ import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagi
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 

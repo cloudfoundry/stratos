@@ -7,7 +7,7 @@ import { RequestInfoState } from './api-request-reducer/types';
 import { chainApiReducers, ExtraApiReducers, requestActions } from './api-request-reducers.generator.helpers';
 import { appStatsReducer } from '../../../cloud-foundry/src/store/reducers/app-stats-request.reducer';
 import { entityCatalog } from '../entity-catalog/entity-catalog.service';
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 
 /**
  * This module uses the request data reducer and request reducer factories to create

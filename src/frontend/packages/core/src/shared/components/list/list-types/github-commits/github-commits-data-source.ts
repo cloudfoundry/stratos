@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/src/cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CFEntitySchema } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';

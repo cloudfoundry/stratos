@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { debounceTime, filter, map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/src/cf-types';
 import {
   CreateUserProvidedServiceInstance,
   getUserProvidedServiceInstanceRelations,

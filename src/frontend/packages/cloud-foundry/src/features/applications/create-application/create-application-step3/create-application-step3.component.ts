@@ -23,7 +23,7 @@ import { StepOnNextFunction } from '../../../../../../core/src/shared/components
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import { createGetApplicationAction } from '../../application.service';
 

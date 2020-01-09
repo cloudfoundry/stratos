@@ -27,7 +27,7 @@ import { CreatePagination } from '../../../../../../../store/src/actions/paginat
 import { CFListDataSource } from '../../../../cf-list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';

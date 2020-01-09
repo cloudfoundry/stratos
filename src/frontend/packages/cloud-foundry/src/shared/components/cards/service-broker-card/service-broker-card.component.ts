@@ -11,7 +11,7 @@ import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { spaceEntityType } from '../../../../cf-entity-types';
 
 @Component({

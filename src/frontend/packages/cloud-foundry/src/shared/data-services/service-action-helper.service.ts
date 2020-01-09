@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import {
   DeleteUserProvidedInstance,
   UpdateUserProvidedServiceInstance,
@@ -16,7 +16,7 @@ import {
 } from '../../../../cloud-foundry/src/cf-entity-types';
 import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../../../core/src/core/cf-api-svc.types';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata, EntityCatalogEntityConfig} from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { IEntityMetadata, EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';

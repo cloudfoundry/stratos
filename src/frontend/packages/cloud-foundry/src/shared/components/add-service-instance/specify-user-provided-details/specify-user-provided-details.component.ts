@@ -35,7 +35,7 @@ import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;

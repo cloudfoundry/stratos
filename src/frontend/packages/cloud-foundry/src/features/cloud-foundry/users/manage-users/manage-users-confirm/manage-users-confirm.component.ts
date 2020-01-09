@@ -17,7 +17,7 @@ import {
   selectUsersRolesChangedRoles,
 } from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.actions';
 import { ChangeUserRole } from '../../../../../actions/users.actions';
 import { CFAppState } from '../../../../../cf-app-state';

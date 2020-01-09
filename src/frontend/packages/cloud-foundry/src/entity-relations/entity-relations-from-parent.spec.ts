@@ -19,7 +19,7 @@ import { AppState } from '../../../store/src/app-state';
 import { EntityRelationSpecHelper } from '../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
 import { APIResource } from '../../../store/src/types/api.types';
 import { WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
 import { CFAppState } from '../cf-app-state';
 import { cfEntityFactory } from '../cf-entity-factory';

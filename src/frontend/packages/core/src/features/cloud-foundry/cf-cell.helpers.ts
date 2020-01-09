@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../../../cloud-foundry/src/cf-types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../cloud-foundry/src/actions/cf-metrics.actions';
 import {
   CellMetrics,

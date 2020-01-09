@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/src/cf-types';
 import {
   serviceBrokerEntityType,
   userProvidedServiceInstanceEntityType,

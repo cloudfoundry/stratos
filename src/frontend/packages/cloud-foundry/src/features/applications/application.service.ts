@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../cf-types';
 import { AppMetadataTypes } from '../../../../cloud-foundry/src/actions/app-metadata.actions';
 import {
   GetApplication,

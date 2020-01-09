@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
