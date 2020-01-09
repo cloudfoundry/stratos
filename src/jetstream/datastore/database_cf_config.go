@@ -102,7 +102,8 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 				return false
 			}
 
-			db.Username, db.Password, db.Host, db.Port, db.Database, err = findDatabaseConfigurationFromURI(uri)
+			db.Username, db.Password, db.Host, db.Port, db.Database, err = findDatabaseConfigurationFromURI(uri, defaultDBProviderPort(service))
+
 			if err != nil {
 				log.Warnf("Failed to find Cloud Foundry service config from `%v` (failed to parse)", DB_URI)
 				return false
@@ -164,7 +165,7 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func findDatabaseConfigurationFromURI(uri string) (string, string, string, int, string, error) {
+func findDatabaseConfigurationFromURI(uri string, defaultPort int) (string, string, string, int, string, error) {
 	re := regexp.MustCompile(`(?P<provider>.+)://(?P<username>[^:]+)(?::(?P<password>.+))?@(?P<host>[^:]+)(?::(?P<port>.+))?\/(?P<dbname>.+)`)
 	n1 := re.SubexpNames()
 	matches := re.FindAllStringSubmatch(uri, -1)
@@ -186,10 +187,19 @@ func findDatabaseConfigurationFromURI(uri string) (string, string, string, int, 
 	if portStr != "<nil>" {
 		port, _ = strconv.Atoi(portStr)
 	} else {
-		port = 0
+		port = defaultPort
 	}
 	dbname := md["dbname"]
 
 	return username, password, host, port, dbname, nil
 
+}
+
+func defaultDBProviderPort(service VCAPService) int {
+	if isPostgresService(service) {
+		return 5432
+	} else if isMySQLService(service) {
+		return 3306
+	}
+	return 0
 }
