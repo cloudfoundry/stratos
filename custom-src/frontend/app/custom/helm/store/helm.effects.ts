@@ -300,6 +300,8 @@ export class HelmEffects {
       const newService: HelmReleaseService = {
         endpointId: action.endpointGuid,
         releaseTitle: action.releaseTitle,
+        metadata: null,
+        spec: null,
         ...service
       };
       res[GetHelmReleasePods.createKey(action.endpointGuid, action.releaseTitle, service.name)] = newService;

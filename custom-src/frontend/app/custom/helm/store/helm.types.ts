@@ -96,6 +96,8 @@ export interface HelmReleaseService {
   endpointId: string;
   releaseTitle: string;
   name: string;
+  metadata: any;
+  spec: any;
   kubeService$?: Observable<KubeService>;
 }
 
