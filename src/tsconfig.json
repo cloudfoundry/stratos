@@ -9,8 +9,9 @@
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es5",
-    "module": "commonjs",
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
     "types": [
       "hammerjs",
       "jasmine",

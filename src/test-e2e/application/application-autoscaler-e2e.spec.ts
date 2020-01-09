@@ -9,7 +9,7 @@ import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { LocaleHelper } from '../locale.helper';
 import { CFPage } from '../po/cf-page.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
-import { createApplicationDeployTests } from './application-deploy-helper';
+import { CREATE_APP_DEPLOY_TEST_TYPE, createApplicationDeployTests } from './application-deploy-helper';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageAutoscalerTab } from './po/application-page-autoscaler.po';
 import { ApplicationBasePage } from './po/application-page.po';
@@ -37,7 +37,7 @@ describe('Autoscaler -', () => {
     browser.waitForAngularEnabled(true);
   });
 
-  const { testAppName, appDetails } = createApplicationDeployTests(true);
+  const { testAppName, appDetails } = createApplicationDeployTests(CREATE_APP_DEPLOY_TEST_TYPE.GIT_URL);
 
   describe('Tab Tests -', () => {
     beforeAll(() => {

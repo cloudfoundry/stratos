@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { IService, IServiceExtra } from '../../../../../../../../core/src/core/cf-api-svc.types';
@@ -41,12 +41,6 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
           this.extraInfo = JSON.parse(this.serviceEntity.entity.extra);
         } catch { }
       }
-      this.serviceEntity.entity.tags.forEach(t => {
-        this.tags.push({
-          value: t,
-          hideClearButton$: observableOf(true)
-        });
-      });
 
       if (!this.cfOrgSpace) {
         this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.serviceEntity.entity.cfGuid);
@@ -72,23 +66,6 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   getDisplayName() {
     return getServiceName(this.serviceEntity);
   }
-
-  hasDocumentationUrl() {
-    return !!(this.getDocumentationUrl());
-  }
-  getDocumentationUrl() {
-    return this.extraInfo && this.extraInfo.documentationUrl;
-  }
-
-  hasSupportUrl() {
-    return !!(this.getSupportUrl());
-  }
-
-  getSupportUrl() {
-    return this.extraInfo && this.extraInfo.supportUrl;
-  }
-
-  getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
   goToServiceInstances = () =>
     this.store.dispatch(new RouterNav({

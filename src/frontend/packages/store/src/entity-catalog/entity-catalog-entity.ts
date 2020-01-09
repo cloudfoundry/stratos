@@ -1,15 +1,14 @@
 import { ActionReducer, Store } from '@ngrx/store';
-import { normalize } from 'normalizr';
 
+import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
+import { getFullEndpointApiUrl } from '../../../core/src/features/endpoints/endpoint-helpers';
 import { AppState, IRequestEntityTypeState } from '../app-state';
+import { EntityPipelineEntity, stratosEndpointGuidKey } from '../entity-request-pipeline/pipeline.types';
 import { EntitySchema } from '../helpers/entity-schema';
-import { NormalizedResponse } from '../types/api.types';
+import { EntityMonitor } from '../monitors/entity-monitor';
 import { EndpointModel } from '../types/endpoint.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../types/request.types';
 import { IEndpointFavMetadata } from '../types/user-favorites.types';
-import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { getFullEndpointApiUrl } from '../../../core/src/features/endpoints/endpoint-helpers';
-import { EntityMonitor } from '../monitors/entity-monitor';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { EntityActionDispatcherManager } from './action-dispatcher/action-dispatcher';
 import {
@@ -28,7 +27,6 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from './entity-catalog.types';
-import { EntityPipelineEntity, stratosEndpointGuidKey } from '../entity-request-pipeline/pipeline.types';
 
 export interface EntityCatalogBuilders<
   T extends IEntityMetadata = IEntityMetadata,
@@ -89,8 +87,8 @@ export class StratosBaseCatalogEntity<
       }
       return newSchema;
     }, {
-        default: entitySchemas.default
-      });
+      default: entitySchemas.default
+    });
   }
 
   private getEndpointType(definition: IStratosBaseEntityDefinition) {
@@ -217,13 +215,6 @@ export class StratosBaseCatalogEntity<
 
   }
 
-  public getNormalizedEntityData(entities: Y | Y[], schemaKey?: string): NormalizedResponse<Y> {
-    const schema = this.getSchema(schemaKey);
-    if (Array.isArray(entities)) {
-      return normalize(entities, [schema]);
-    }
-    return normalize(entities, schema);
-  }
 }
 
 export class StratosCatalogEntity<

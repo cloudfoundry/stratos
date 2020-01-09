@@ -120,6 +120,8 @@
           this.writeFile(`${this.red}${this.bold} - ${f.fullName}${this.reset}`);
           const logs = f.log || [];
           logs.forEach(l => fs.appendFileSync(this.file, `${this.grey}    ${l}${this.reset}`));
+          // Add empty line
+          this.writeFile('');
         });
       }
 

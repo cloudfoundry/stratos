@@ -37,6 +37,21 @@ import { ServicesWallService } from '../../../features/services/services/service
 import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
 import { CfOrgSpaceLinksComponent } from '../cf-org-space-links/cf-org-space-links.component';
 import { CfServiceCardComponent } from '../list/list-types/cf-services/cf-service-card/cf-service-card.component';
+import {
+  TableCellServiceActiveComponent,
+} from '../list/list-types/cf-services/table-cell-service-active/table-cell-service-active.component';
+import {
+  TableCellServiceBindableComponent,
+} from '../list/list-types/cf-services/table-cell-service-bindable/table-cell-service-bindable.component';
+import {
+  TableCellServiceCfBreadcrumbsComponent,
+} from '../list/list-types/cf-services/table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
+import {
+  TableCellServiceReferencesComponent,
+} from '../list/list-types/cf-services/table-cell-service-references/table-cell-service-references.component';
+import {
+  TableCellServiceTagsComponent,
+} from '../list/list-types/cf-services/table-cell-service-tags/table-cell-service-tags.component';
 import { ServiceIconComponent } from '../service-icon/service-icon.component';
 import { SelectServiceComponent } from './select-service.component';
 
@@ -62,7 +77,12 @@ describe('SelectServiceComponent', () => {
         AppChipsComponent,
         ApplicationStateIconComponent,
         ApplicationStateIconPipe,
-        MultilineTitleComponent
+        MultilineTitleComponent,
+        TableCellServiceActiveComponent,
+        TableCellServiceBindableComponent,
+        TableCellServiceReferencesComponent,
+        TableCellServiceCfBreadcrumbsComponent,
+        TableCellServiceTagsComponent
       ],
       imports: generateCfBaseTestModulesNoShared(),
       providers: [

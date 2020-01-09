@@ -9,9 +9,13 @@ import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationBasePage } from './po/application-page.po';
 import { DeployApplication } from './po/deploy-app.po';
 
+export enum CREATE_APP_DEPLOY_TEST_TYPE {
+  GIT_CLONE = 'GitHub',
+  GIT_URL = 'Git URL',
+  DOCKER = 'Docker Image',
+}
 
-
-export function createApplicationDeployTests(appUrl: boolean = false): {
+export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.GIT_CLONE): {
   testApp: string,
   testAppName: string,
   deployedCommit: promise.Promise<string>,
@@ -19,6 +23,7 @@ export function createApplicationDeployTests(appUrl: boolean = false): {
     cfGuid: string,
     appGuid: string
   },
+  dockerUrl: string
 } {
   const res = {
     testApp: e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app',
@@ -26,15 +31,18 @@ export function createApplicationDeployTests(appUrl: boolean = false): {
     deployedCommit: null,
     appDetails: {
       cfGuid: '',
-      appGuid: ''
+      appGuid
+        : ''
     },
+    dockerUrl: 'nginxdemos/hello'
   };
   const testAppUrl = 'https://github.com/' + res.testApp;
-  const sourceText = appUrl ? 'Git URL' : 'GitHub';
+  const sourceText = type.toString(); // appUrl ? 'Git URL' : 'GitHub';
 
   const cfName = e2e.secrets.getDefaultCFEndpoint().name;
   const orgName = e2e.secrets.getDefaultCFEndpoint().testOrg;
   const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
+
 
   const nav = new SideNavigation();
   const appWall = new ApplicationsPage();
@@ -50,32 +58,65 @@ export function createApplicationDeployTests(appUrl: boolean = false): {
     let deployApp: DeployApplication;
 
     beforeAll(() => {
-      // Should be on deploy app modal
+      // Should move to deploy app modal
       expect(appWall.isActivePage()).toBeTruthy();
       appWall.waitForPage();
       const baseCreateAppStep = appWall.clickCreateApp();
       baseCreateAppStep.waitForPage();
-      deployApp = appUrl ? baseCreateAppStep.selectDeployUrl() : baseCreateAppStep.selectDeploy();
+      switch (type) {
+        case CREATE_APP_DEPLOY_TEST_TYPE.GIT_CLONE:
+          deployApp = baseCreateAppStep.selectDeploy();
+          break;
+        case CREATE_APP_DEPLOY_TEST_TYPE.GIT_URL:
+          deployApp = baseCreateAppStep.selectDeployUrl();
+          break;
+        case CREATE_APP_DEPLOY_TEST_TYPE.DOCKER:
+          deployApp = baseCreateAppStep.selectDeployDocker();
+          break;
+      }
+
     });
 
     it('Check deploy steps', () => {
-      expect(deployApp.header.getTitleText()).toBe(`Deploy from Public ${sourceText}`);
+      switch (type) {
+        case CREATE_APP_DEPLOY_TEST_TYPE.GIT_CLONE:
+          expect(deployApp.header.getTitleText()).toBe(`Deploy from Public ${sourceText}`);
+          break;
+        case CREATE_APP_DEPLOY_TEST_TYPE.GIT_URL:
+          expect(deployApp.header.getTitleText()).toBe(`Deploy from Public ${sourceText}`);
+          break;
+        case CREATE_APP_DEPLOY_TEST_TYPE.DOCKER:
+          expect(deployApp.header.getTitleText()).toBe(`Deploy from Docker Image`);
+
+          break;
+      }
+
       // Check the steps
       e2e.debugLog(`${loggingPrefix} Checking Steps`);
       deployApp.stepper.getStepNames().then(steps => {
-        if (appUrl) {
-          expect(steps.length).toBe(4);
-          expect(steps[0]).toBe('Cloud Foundry');
-          expect(steps[1]).toBe('Source');
-          expect(steps[2]).toBe('Overrides (Optional)');
-          expect(steps[3]).toBe('Deploy');
-        } else {
-          expect(steps.length).toBe(5);
-          expect(steps[0]).toBe('Cloud Foundry');
-          expect(steps[1]).toBe('Source');
-          expect(steps[2]).toBe('Source Config');
-          expect(steps[3]).toBe('Overrides (Optional)');
-          expect(steps[4]).toBe('Deploy');
+        switch (type) {
+          case CREATE_APP_DEPLOY_TEST_TYPE.GIT_CLONE:
+            expect(steps.length).toBe(5);
+            expect(steps[0]).toBe('Cloud Foundry');
+            expect(steps[1]).toBe('Source');
+            expect(steps[2]).toBe('Source Config');
+            expect(steps[3]).toBe('Overrides (Optional)');
+            expect(steps[4]).toBe('Deploy');
+            break;
+          case CREATE_APP_DEPLOY_TEST_TYPE.GIT_URL:
+            expect(steps.length).toBe(4);
+            expect(steps[0]).toBe('Cloud Foundry');
+            expect(steps[1]).toBe('Source');
+            expect(steps[2]).toBe('Overrides (Optional)');
+            expect(steps[3]).toBe('Deploy');
+            break;
+          case CREATE_APP_DEPLOY_TEST_TYPE.DOCKER:
+            expect(steps.length).toBe(4);
+            expect(steps[0]).toBe('Cloud Foundry');
+            expect(steps[1]).toBe('Source');
+            expect(steps[2]).toBe('Overrides (Optional)');
+            expect(steps[3]).toBe('Deploy');
+            break;
         }
       });
     });
@@ -110,12 +151,20 @@ export function createApplicationDeployTests(appUrl: boolean = false): {
       expect(deployApp.stepper.getActiveStepName()).toBe('Source');
       expect(deployApp.stepper.canNext()).toBeFalsy();
 
-      if (appUrl) {
-        deployApp.stepper.getStepperForm().fill({ giturl: testAppUrl });
-        deployApp.stepper.getStepperForm().fill({ urlbranchname: 'master' });
-      } else {
-        deployApp.stepper.getStepperForm().fill({ projectname: res.testApp });
+      switch (type) {
+        case CREATE_APP_DEPLOY_TEST_TYPE.GIT_CLONE:
+          deployApp.stepper.getStepperForm().fill({ projectname: res.testApp });
+          break;
+        case CREATE_APP_DEPLOY_TEST_TYPE.GIT_URL:
+          deployApp.stepper.getStepperForm().fill({ giturl: testAppUrl });
+          deployApp.stepper.getStepperForm().fill({ urlbranchname: 'master' });
+          break;
+        case CREATE_APP_DEPLOY_TEST_TYPE.DOCKER:
+          deployApp.stepper.getStepperForm().fill({ dockerappname: res.testAppName });
+          deployApp.stepper.getStepperForm().fill({ dockerimg: res.dockerUrl });
+          break;
       }
+
 
       // Press next to get to source config step
       deployApp.stepper.waitUntilCanNext('Next');
@@ -123,7 +172,7 @@ export function createApplicationDeployTests(appUrl: boolean = false): {
     });
 
     it('Should pass Source Config step', () => {
-      if (appUrl) {
+      if (type !== CREATE_APP_DEPLOY_TEST_TYPE.GIT_CLONE) {
         // Skip
         return;
       }
@@ -156,7 +205,10 @@ export function createApplicationDeployTests(appUrl: boolean = false): {
 
       const overrides = deployApp.getOverridesForm();
       overrides.waitUntilShown();
-      overrides.fill({ name: res.testAppName, random_route: true });
+
+      if (type !== CREATE_APP_DEPLOY_TEST_TYPE.DOCKER) {
+        overrides.fill({ name: res.testAppName, random_route: true });
+      }
 
       e2e.debugLog(`${loggingPrefix} Overrides Step - overrides set`);
     });
