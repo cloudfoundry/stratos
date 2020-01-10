@@ -1,7 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
-import { ApiEndpointTypeSelectPageComponent } from './api-endpoint-type-select-page.component';
+import { TabNavService } from '../../../../tab-nav.service';
+import { generateBaseTestStoreModules } from '../../../../test-framework/core-test.helper';
+import { CoreModule } from '../../../core/core.module';
+import { SharedModule } from '../../../shared/shared.module';
 import { ApiDrivenViewsModule } from '../../api-driven-views.module';
+import { ApiEndpointTypeSelectPageComponent } from './api-endpoint-type-select-page.component';
 
 describe('ApiEndpointTypeSelectPageComponent', () => {
   let component: ApiEndpointTypeSelectPageComponent;
@@ -9,7 +14,14 @@ describe('ApiEndpointTypeSelectPageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [ApiDrivenViewsModule]
+      imports: [
+        ...generateBaseTestStoreModules(),
+        CoreModule,
+        RouterTestingModule,
+        SharedModule,
+        ApiDrivenViewsModule,
+      ],
+      providers: [TabNavService]
     })
       .compileComponents();
   }));

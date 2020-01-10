@@ -16,7 +16,6 @@ import {
 import { getFavoriteFromCfEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
 import { environment } from '../../../../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
   FavoritesConfigMapper,
@@ -77,6 +76,11 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
       link: 'users',
       label: 'Users',
       icon: 'people'
+    },
+    {
+      link: 'events',
+      label: 'Events',
+      icon: 'watch_later'
     }
   ];
 

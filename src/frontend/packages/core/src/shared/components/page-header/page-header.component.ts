@@ -165,7 +165,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
     this.username$ = store.select(s => s.auth).pipe(
-      map((auth: AuthState) => auth && auth.sessionData ? auth.sessionData.user.name : 'Unknown')
+      map((auth: AuthState) => auth && auth.sessionData && auth.sessionData.user ? auth.sessionData.user.name : 'Unknown')
     );
     this.userNameFirstLetter$ = this.username$.pipe(
       map(name => name[0].toLocaleUpperCase())

@@ -742,6 +742,10 @@ func TestVerifySession(t *testing.T) {
 		res, _, ctx, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
 
+		if e := pp.InitStratosAuthService(interfaces.Remote); e != nil {
+			log.Fatalf("Could not initialise auth service: %v", e)
+		}
+
 		// Set a dummy userid in session - normally the login to UAA would do this.
 		sessionValues := make(map[string]interface{})
 		sessionValues["user_id"] = mockUserGUID
@@ -849,6 +853,10 @@ func TestVerifySessionExpired(t *testing.T) {
 		})
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
+
+		if e := pp.InitStratosAuthService(interfaces.Remote); e != nil {
+			log.Fatalf("Could not initialise auth service: %v", e)
+		}
 
 		// Set a dummy userid in session - normally the login to UAA would do this.
 		sessionValues := make(map[string]interface{})

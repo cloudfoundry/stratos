@@ -36,7 +36,7 @@ if [ "${ACTION}" == "build" ]; then
   echo "Build complete ..."
 else
   echo "Running backend tests ..."
-  GO111MODULE=on go test ./... -v
+  GO111MODULE=on go test ./... -v -count=1
 fi
 
 popd > /dev/null

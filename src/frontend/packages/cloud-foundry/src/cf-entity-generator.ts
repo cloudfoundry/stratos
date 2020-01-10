@@ -1,4 +1,5 @@
 import * as moment from 'moment';
+
 import {
   IService,
   IServiceBinding,
@@ -38,6 +39,7 @@ import {
   JetstreamError,
 } from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
@@ -46,11 +48,11 @@ import { cfEntityFactory } from './cf-entity-factory';
 import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
 import {
   appEnvVarsEntityType,
-  appEventEntityType,
   applicationEntityType,
   appStatsEntityType,
   appSummaryEntityType,
   buildpackEntityType,
+  cfEventEntityType,
   cfInfoEntityType,
   cfUserEntityType,
   domainEntityType,
@@ -82,11 +84,11 @@ import {
 import { CfErrorResponse, getCfError } from './cf-error-helpers';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
-import { applicationEventActionBuilders } from './entity-action-builders/application-event.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
 import { appSummaryActionBuilders } from './entity-action-builders/application-summary.action-builders';
 import { applicationActionBuilder } from './entity-action-builders/application.action-builders';
 import { buildpackActionBuilders } from './entity-action-builders/buildpack.action-builders';
+import { cfEventActionBuilders } from './entity-action-builders/cf-event.action-builders';
 import {
   CfInfoDefinitionActionBuilders,
   cfInfoDefinitionActionBuilders,
@@ -128,8 +130,6 @@ import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
-import { CfApplicationState } from './store/types/application.types';
-import { EntitySchema } from '../../store/src/helpers/entity-schema';
 
 export interface CFBasePipelineRequestActionMeta {
   includeRelations?: string[];
@@ -731,10 +731,10 @@ function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDef
 
 function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
-    type: appEventEntityType,
-    schema: cfEntityFactory(appEventEntityType),
-    label: 'Application Event',
-    labelPlural: 'Application Events',
+    type: cfEventEntityType,
+    schema: cfEntityFactory(cfEventEntityType),
+    label: 'Event',
+    labelPlural: 'Events',
     endpoint: endpointDefinition
   };
   return new StratosCatalogueEntity<IBasicCFMetaData, APIResource>(
@@ -743,12 +743,14 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
       dataReducers: [
         endpointDisconnectRemoveEntitiesReducer()
       ],
-      actionBuilders: applicationEventActionBuilders,
+      actionBuilders: cfEventActionBuilders,
       entityBuilder: {
-        getMetadata: app => ({
-          guid: app.metadata.guid,
-          name: app.metadata.guid,
-        }),
+        getMetadata: event => {
+          return {
+            guid: event.metadata.guid,
+            name: event.metadata.guid,
+          };
+        },
         getGuid: metadata => metadata.guid,
       }
     }
@@ -890,7 +892,7 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
         getLines: () => ([
-          ['Creation  Date', (meta) => meta.createdAt]
+          ['Creation Date', (meta) => meta.createdAt]
         ])
       },
       actionBuilders: applicationActionBuilder
@@ -924,9 +926,10 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
           name: space.entity.name,
           cfGuid: space.entity.cfGuid,
+          createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
         getLines: () => ([
-          ['Name', (meta) => meta.name],
+          ['Creation Date', (meta) => meta.createdAt]
         ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid
@@ -959,8 +962,12 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
           status: getOrgStatus(org),
           name: org.entity.name,
           cfGuid: org.entity.cfGuid,
+          createdAt: moment(org.metadata.created_at).format('LLL'),
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
+        getLines: () => ([
+          ['Creation Date', (meta) => meta.createdAt]
+        ]),
         getGuid: metadata => metadata.guid
       }
     }

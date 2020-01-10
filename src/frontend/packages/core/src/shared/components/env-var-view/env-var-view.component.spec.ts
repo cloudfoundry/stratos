@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
 import { CodeBlockComponent } from '../code-block/code-block.component';
+import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 import { EnvVarViewComponent } from './env-var-view.component';
 
 describe('EnvVarViewComponent', () => {
@@ -11,7 +12,11 @@ describe('EnvVarViewComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [EnvVarViewComponent, CodeBlockComponent],
+      declarations: [
+        EnvVarViewComponent,
+        CodeBlockComponent,
+        CopyToClipboardComponent
+      ],
       imports: [...BaseTestModulesNoShared],
       providers: [
         { provide: MatDialogRef, useValue: {} }, { provide: MAT_DIALOG_DATA, useValue: { key: '', value: '' } }

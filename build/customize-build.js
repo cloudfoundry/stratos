@@ -19,6 +19,10 @@
   const CUSTOM_METADATA = path.resolve(__dirname, '../custom-src/stratos.yaml');
   const GIT_FOLDER = path.resolve(__dirname, '../.git');
   const GIT_METADATA = path.resolve(__dirname, '../.stratos-git-metadata.json');
+  const INDEX_LOADING_HTML_CUSTOM = path.resolve(__dirname, '../custom-src/frontend/loading.html');
+  const INDEX_LOADING_HTML_DEFAULT = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom/loading.html');
+  const INDEX_LOADING_CSS_CUSTOM = path.resolve(__dirname, '../custom-src/frontend/loading.css');
+  const INDEX_LOADING_CSS_DEFAULT = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom/loading.css');
 
   // Apply any customizations
   // Symlink customizations of the default resources for Stratos
@@ -264,6 +268,22 @@
 
     // Date and Time that the build was made (approximately => it is when this script is run)
     replace.sync({ files: INDEX_HTML, from: '@@stratos_build_date@@', to: new Date() });
+
+    // Replace loading indicator - HTML
+    let loadingHtmlFile = INDEX_LOADING_HTML_DEFAULT;
+    if (fs.existsSync(INDEX_LOADING_HTML_CUSTOM)) {
+      loadingHtmlFile = INDEX_LOADING_HTML_CUSTOM
+    }
+    const loadingHtml = fs.readFileSync(loadingHtmlFile, 'utf8');
+    replace.sync({ files: INDEX_HTML, from: '<!-- @@LOADING_HTML@@ -->', to: loadingHtml });
+
+    // Replace loading indicator - CSS
+    let loadingCssFile = INDEX_LOADING_CSS_DEFAULT;
+    if (fs.existsSync(INDEX_LOADING_CSS_CUSTOM)) {
+      loadingCssFile = INDEX_LOADING_CSS_CUSTOM
+    }
+    const loadingCss = fs.readFileSync(loadingCssFile, 'utf8');
+    replace.sync({ files: INDEX_HTML, from: '/** @@LOADING_CSS@@ **/', to: loadingCss });
   }
 
   // We can only do this if we have a git repository checkout

@@ -56,16 +56,18 @@ export class CfTopLevelPage extends CFPage {
   }
 
   clickOnQuota(quotaName: string) {
-    const { table } = new ListComponent();
+    const { table, header } = new ListComponent();
     table.waitUntilShown();
+    header.setSearchText(quotaName);
 
     const row = table.findRowByCellContent(quotaName);
     row.element(by.css('a')).click();
   }
 
   deleteQuota(quotaName: string, waitUntilNotShown = true) {
-    const { table } = new ListComponent();
+    const { table, header } = new ListComponent();
     table.waitUntilShown();
+    header.setSearchText(quotaName);
 
     const row = table.findRowByCellContent(quotaName);
     const menu = table.openRowActionMenuByRow(row);

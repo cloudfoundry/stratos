@@ -4,9 +4,8 @@ import { Store } from '@ngrx/store';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { IFeatureFlag } from '../../../../../../../core/src/core/cf-api.types';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { IListFilter, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfFeatureFlagsDataSource, FeatureFlagDescriptions } from './cf-feature-flags-data-source';
@@ -14,6 +13,12 @@ import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-st
 
 @Injectable()
 export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFlag> {
+
+  constructor(private store: Store<CFAppState>, activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+    super();
+    this.dataSource = new CfFeatureFlagsDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
+  }
+
   dataSource: CfFeatureFlagsDataSource;
   defaultView = 'table' as ListView;
   pageSizeOptions = [25, 50, 100];
@@ -27,7 +32,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFl
 
   columns: Array<ITableColumn<IFeatureFlag>> = [
     {
-      columnId: 'name',
+      columnId: CfFeatureFlagsDataSource.nameColumnId,
       headerCell: () => 'Name',
       cellDefinition: {
         getValue: (row) => `${row.name}`
@@ -41,7 +46,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFl
       }
     },
     {
-      columnId: 'description',
+      columnId: CfFeatureFlagsDataSource.descriptionColumnId,
       headerCell: () => 'Description',
       cellDefinition: {
         getValue: (row) => FeatureFlagDescriptions[row.name]
@@ -61,10 +66,22 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFl
       cellFlex: '1'
     }
   ];
-  constructor(private store: Store<CFAppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
-    super();
-    this.dataSource = new CfFeatureFlagsDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
-  }
+
+  filters: IListFilter[] = [
+    {
+      default: true,
+      key: CfFeatureFlagsDataSource.nameColumnId,
+      label: 'Name',
+      placeholder: 'Filter by Name'
+    },
+    {
+      key: CfFeatureFlagsDataSource.descriptionColumnId,
+      label: 'Description',
+      placeholder: 'Filter by Description'
+    }
+  ];
+
+  getFilters = () => this.filters;
   getColumns = () => this.columns;
   getDataSource = () => this.dataSource;
 }
