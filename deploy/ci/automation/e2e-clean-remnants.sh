@@ -37,18 +37,17 @@ function clean() {
   local ITEMS=$1
   local PREFIX=$2
   local CMD=$3
-  local REGEX="^($PREFIX)(.*)\.([0-9]*)[Tt]([0-9]*)[zZ].*"
+  local REGEX=""
   local NOW=$(date "+%s")
 
   if [ -z "$4" ]; then
-    local REGEX="^($PREFIX)(.*)\.([0-9]*)[Tt]([0-9]*)[zZ].*"
+    local REGEX="^($PREFIX)(.*)\.([0-9\-]*)[Tt]([0-9:]*)([zZ]|\.[0-9]*z).*"
   else
     local REGEX="$4"
   fi
 
   while IFS= read -r line
   do
-
     if [ -z "$5" ]; then
       NAME="${line%% *}"
     else
@@ -58,8 +57,10 @@ function clean() {
     if [[ $NAME =~ $REGEX ]]; then
       DS="${BASH_REMATCH[3]}"
       DS=${DS//_/}
+      DS=${DS//-/}
       TS="${BASH_REMATCH[4]}"
       TS=${TS//_/}
+      TS=${TS//:/}
       TS="${TS:0:6}"
 
       if [[ "$unamestr" == 'Darwin' ]]; then
