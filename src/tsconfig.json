@@ -27,7 +27,6 @@
     ],
     "preserveSymlinks": true,
     "paths": {
-      "@stratos/store": ["frontend/packages/store/src/public-api.ts"],
       "@stratos/store/testing": ["frontend/packages/store/testing/public-api.ts"]
     }    
   }
