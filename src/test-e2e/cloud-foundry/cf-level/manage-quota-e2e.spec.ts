@@ -11,7 +11,7 @@ import { QuotaFormPage } from './quota-form-page.po';
 describe('Manage Quota', () => {
   let e2eSetup;
   let quotaFormPage: QuotaFormPage;
-  let cfTopLevelPage: CfTopLevelPage;
+  let cfTopLevelPage: CfTopLevelPage = new CfTopLevelPage();
   let cfHelper: CFHelpers;
   let cfGuid: string;
   let orgName: string;
@@ -25,7 +25,9 @@ describe('Manage Quota', () => {
       .connectAllEndpoints(ConsoleUserType.admin)
       .loginAs(ConsoleUserType.admin)
       .getInfo(ConsoleUserType.admin);
+  });
 
+  beforeAll(() => {
     return protractor.promise.controlFlow().execute(() => {
       const defaultCf = e2e.secrets.getDefaultCFEndpoint();
       // Only available until after `info` call has completed as part of setup
@@ -41,10 +43,6 @@ describe('Manage Quota', () => {
     });
   });
 
-  beforeEach(() => {
-    cfTopLevelPage = new CfTopLevelPage();
-  });
-
   describe('#create', () => {
     const timeout = 100000;
     extendE2ETestTime(timeout);
@@ -55,11 +53,9 @@ describe('Manage Quota', () => {
       quotaFormPage.waitForPage();
     });
 
-    it('- should reach create quota page', () => {
-      expect(quotaFormPage.isActivePage()).toBeTruthy();
-    });
-
     it('- should validate quota name', () => {
+      expect(quotaFormPage.isActivePage()).toBeTruthy();
+
       expect(quotaFormPage.stepper.canNext()).toBeFalsy();
 
       quotaFormPage.stepper.setName(secondQuotaName);
@@ -67,6 +63,10 @@ describe('Manage Quota', () => {
 
       quotaFormPage.stepper.setName(quotaName);
       expect(element(by.css('.add-quota-stepper')).getText()).toContain('A quota with this name already exists.');
+
+      // should go to quotas when cancelled
+      quotaFormPage.stepper.cancel();
+      expect(cfTopLevelPage.subHeader.getTitleText()).toBe('Organization Quotas');
     });
 
     it('- should create quota', () => {
@@ -81,11 +81,6 @@ describe('Manage Quota', () => {
       quotaFormPage.stepper.waitUntilNotShown();
       cfTopLevelPage.clickOnQuota(secondQuotaName);
     });
-
-    it('- should go to quotas when canceled', () => {
-      quotaFormPage.stepper.cancel();
-      expect(cfTopLevelPage.subHeader.getTitleText()).toBe('Organization Quotas');
-    });
   });
 
   describe('#destroy', () => {
@@ -96,13 +91,10 @@ describe('Manage Quota', () => {
     });
 
     it('- should delete quota', () => {
-      expect(element(by.tagName('app-table')).getText()).toContain(secondQuotaName);
       cfTopLevelPage.deleteQuota(secondQuotaName);
-      expect(element(by.tagName('app-table')).getText()).not.toContain(secondQuotaName);
     });
 
     it('- should not delete quota if attached to org', () => {
-      expect(element(by.tagName('app-table')).getText()).toContain(quotaName);
       cfTopLevelPage.deleteQuota(quotaName, false);
       // Wait until the delete operation has finished
       const table = new TableComponent();
@@ -112,7 +104,7 @@ describe('Manage Quota', () => {
   });
 
   describe('#update', () => {
-    beforeEach(() => {
+    it('Go To Quota', () => {
       cfTopLevelPage = CfTopLevelPage.forEndpoint(cfGuid);
       cfTopLevelPage.navigateTo();
       cfTopLevelPage.goToQuotasTab();

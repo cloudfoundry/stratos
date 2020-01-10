@@ -4,6 +4,11 @@
     matTooltip="Edit Organization">
     <mat-icon>mode_edit</mat-icon>
   </button>
+  <button mat-icon-button name="delete"
+    *appUserPermission="permsOrgDelete;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;"
+    (click)="deleteOrgWarn()" matTooltip="Delete Organization">
+    <mat-icon>delete</mat-icon>
+  </button>
   <button mat-icon-button name="cli"
     routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/cli"
     matTooltip="CLI Info">

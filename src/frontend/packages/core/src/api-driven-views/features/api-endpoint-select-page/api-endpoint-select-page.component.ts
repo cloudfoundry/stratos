@@ -5,7 +5,7 @@ import { ApiEntityType } from '../../api-drive-views.types';
 import { Store } from '@ngrx/store';
 import { connectedEndpointsOfTypesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-api-endpoint-select-page',
@@ -26,7 +26,9 @@ export class ApiEndpointSelectPageComponent implements OnInit {
     const endpointType = this.route.snapshot.params.endpointType;
 
     this.connectedEndpointsOfType$ = this.store.select(connectedEndpointsOfTypesSelector(endpointType)).pipe(
-      map(endpoints => Object.values(endpoints).map(endpoint => new ApiEntityType(
+      map(endpointsMap => Object.values(endpointsMap)),
+      filter(endpoints => !!endpoints || !endpoints.length),
+      map(endpoints => endpoints.map(endpoint => new ApiEntityType(
         endpoint.guid,
         endpoint.name
         //  TODO Get icon from entity catalogue

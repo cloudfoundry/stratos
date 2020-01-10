@@ -11,10 +11,11 @@ import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-
 import { IStratosEntityDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { AppState, InternalAppState } from '../app-state';
 import { PaginationFlattenerConfig } from '../helpers/paginated-request-helpers';
+import { selectPaginationState } from '../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import {
   handleJetstreamResponsePipeFactory,
-  handleNonJetstreamResponsePipeFactory
+  handleNonJetstreamResponsePipeFactory,
 } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
 import { mapMultiEndpointResponses } from './entity-request-base-handlers/map-multi-endpoint.pipes';
@@ -26,9 +27,8 @@ import {
 } from './entity-request-pipeline.types';
 import { getPaginationParamsPipe } from './pagination-request-base-handlers/get-params.pipe';
 import { PaginationPageIterator } from './pagination-request-base-handlers/pagination-iterator.pipe';
-import { singleRequestToPaged, isJetstreamRequest } from './pipeline-helpers';
+import { isJetstreamRequest, singleRequestToPaged } from './pipeline-helpers';
 import { PipelineHttpClient } from './pipline-http-client.service';
-import { selectPaginationState } from '../selectors/pagination.selectors';
 
 function getRequestObjectObservable(request: HttpRequest<any> | Observable<HttpRequest<any>>): Observable<HttpRequest<any>> {
   return isObservable(request) ? request : of(request);
@@ -126,7 +126,7 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
       ).pipe(
         // Convert { [endpointGuid]: <raw response> } to { { errors: [], successes: [] } }
         map(handleMultiEndpointsPipe),
-        // Convert { { errors: [], successes: [] } } to { response: NoramlisedResponse, success: boolean }
+        // Convert { { errors: [], successes: [] } } to { response: NormalisedResponse, success: boolean }
         map(multiEndpointResponses => mapMultiEndpointResponses(
           completePaginationAction,
           catalogueEntity,

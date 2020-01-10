@@ -277,3 +277,27 @@ export const sortStringify = (obj: { [key: string]: string | string[] | number }
     return res += `${key}-${obj[key]},`;
   }, '');
 };
+
+/**
+ * Real basic, shallow check
+ */
+export const arraysEqual = (a: any[], b: any[]): boolean => {
+  // Both falsy
+  if (!a && !b) {
+    return true;
+  }
+  // Both truthy
+  if (a && b) {
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (const vA of a) {
+      if (!b.includes(vA)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  // Falsy/Truthy
+  return false;
+};

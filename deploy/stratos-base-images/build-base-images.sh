@@ -7,11 +7,13 @@ YELLOW="\033[93m"
 RESET="\033[0m"
 BOLD="\033[1m"
 
-BASE_IMAGE=opensuse:42.3
+BASE_IMAGE=opensuse/leap:15.1
 REGISTRY=docker.io
 ORGANIZATION=splatform
-TAG=opensuse
+TAG=leap15_1
 PROG=$(basename ${BASH_SOURCE[0]})
+SQUASH_ARGS="--squash"
+NO_SQUASH="stratos-base"
 
 function usage {
     echo "usage: $PROG [-b BASE] [-r REGISTRY] [-o ORGANIZATION] [-t TAG] [-p] [h]"
@@ -115,8 +117,15 @@ build_and_push_image() {
     printf "${CYAN}Building image ${YELLOW}${image_name}${CYAN} with docker file ${YELLOW}${docker_file}${RESET}\n"
     printf "${CYAN}========= >>>>${RESET}\n"
     echo ""
+
+    # We can't squash base image as its the same as the base (just re-tagged)
+    ARG=""
+    if [ "${image_name}" != "$NO_SQUASH" ]; then
+        ARG="${SQUASH_ARGS}"
+    fi
     set -x
-    docker build . -f $docker_file  -t ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
+    # Always remove intermediate containers
+    docker build --force-rm ${ARG} . -f $docker_file  -t ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
     if [ ! -z ${PUSH_IMAGES} ]; then
         docker push ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
     fi

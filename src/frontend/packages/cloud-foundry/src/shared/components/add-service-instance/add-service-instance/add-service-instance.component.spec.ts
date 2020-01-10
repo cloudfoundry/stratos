@@ -15,9 +15,6 @@ import {
 } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
-import {
-  CreateApplicationStep1Component,
-} from '../../create-application/create-application-step1/create-application-step1.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import {
   MetaCardComponent,
@@ -44,15 +41,32 @@ import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors
 import { InternalEventMonitorFactory } from '../../../../../../core/src/shared/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { TabNavService } from '../../../../../../core/tab-nav.service';
-import {
-  generateCfBaseTestModulesNoShared,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
+import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
 import { CfOrgSpaceLinksComponent } from '../../cf-org-space-links/cf-org-space-links.component';
+import {
+  CreateApplicationStep1Component,
+} from '../../create-application/create-application-step1/create-application-step1.component';
 import { CfServiceCardComponent } from '../../list/list-types/cf-services/cf-service-card/cf-service-card.component';
+import {
+  TableCellServiceActiveComponent,
+} from '../../list/list-types/cf-services/table-cell-service-active/table-cell-service-active.component';
+import {
+  TableCellServiceBindableComponent,
+} from '../../list/list-types/cf-services/table-cell-service-bindable/table-cell-service-bindable.component';
+import {
+  TableCellServiceCfBreadcrumbsComponent,
+} from '../../list/list-types/cf-services/table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
+import {
+  TableCellServiceReferencesComponent,
+} from '../../list/list-types/cf-services/table-cell-service-references/table-cell-service-references.component';
+import {
+  TableCellServiceTagsComponent,
+} from '../../list/list-types/cf-services/table-cell-service-tags/table-cell-service-tags.component';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { SelectServiceComponent } from '../../select-service/select-service.component';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
@@ -100,7 +114,12 @@ describe('AddServiceInstanceComponent', () => {
         ServicePlanPublicComponent,
         ServicePlanPriceComponent,
         FocusDirective,
-        SpecifyUserProvidedDetailsComponent
+        SpecifyUserProvidedDetailsComponent,
+        TableCellServiceActiveComponent,
+        TableCellServiceBindableComponent,
+        TableCellServiceReferencesComponent,
+        TableCellServiceCfBreadcrumbsComponent,
+        TableCellServiceTagsComponent
       ],
       imports: [
         ...generateCfBaseTestModulesNoShared(),
@@ -115,7 +134,8 @@ describe('AddServiceInstanceComponent', () => {
         CfOrgSpaceDataService,
         InternalEventMonitorFactory,
         CloudFoundryService,
-        TabNavService
+        TabNavService,
+        LongRunningCfOperationsService
       ],
 
     })
