@@ -1,4 +1,3 @@
-import { APP_TITLE, appTitleFactory } from './core.types';
 import { PortalModule } from '@angular/cdk/portal';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -31,7 +30,6 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
-import { Title } from '@angular/platform-browser';
 
 @NgModule({
   imports: [
@@ -75,11 +73,6 @@ import { Title } from '@angular/platform-browser';
     UserService,
     EntityServiceFactory,
     CurrentUserPermissionsService,
-    {
-      provide: APP_TITLE,
-      useFactory: appTitleFactory,
-      deps: [Title]
-    }
   ],
   declarations: [
     StatefulIconComponent,
