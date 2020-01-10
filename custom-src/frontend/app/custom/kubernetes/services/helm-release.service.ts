@@ -5,9 +5,9 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, share } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { getIdFromRoute } from '../../../core/utils.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { KubernetesApp, KubernetesDeployment, KubernetesPod, KubernetesStatefulSet, KubeService } from '../store/kube.types';
 import { GetKubernetesApps, GetKubernetesServices } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';

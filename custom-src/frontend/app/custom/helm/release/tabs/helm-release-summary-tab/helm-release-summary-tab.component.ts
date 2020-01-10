@@ -8,7 +8,7 @@ import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pa
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { HideSnackBar, ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { LoggerService } from '../../../../../core/logger.service';
 import { ConfirmationDialogConfig } from '../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../shared/components/confirmation-dialog.service';
@@ -123,7 +123,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
           this.logService.error('Failed to delete release: ', err);
         },
         complete: () => {
-          const releaseEntityConfig = entityCatalogue.getEntity(HELM_ENDPOINT_TYPE, helmReleaseEntityKey);
+          const releaseEntityConfig = entityCatalog.getEntity(HELM_ENDPOINT_TYPE, helmReleaseEntityKey);
           this.store.dispatch(new ClearPaginationOfType(releaseEntityConfig));
           this.completeDelete();
           this.store.dispatch(new RouterNav({ path: ['monocular/releases'] }));

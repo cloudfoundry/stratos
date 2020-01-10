@@ -1,15 +1,15 @@
 // import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClient } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { TabNavService } from '../../../../tab-nav.service';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
-import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { KubernetesBaseTestModules } from '../../kubernetes/kubernetes.testing.module';
 import { CreateReleaseComponent } from './create-release.component';
-import { HttpClient } from '@angular/common/http';
-import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('CreateReleaseComponent', () => {
   let component: CreateReleaseComponent;

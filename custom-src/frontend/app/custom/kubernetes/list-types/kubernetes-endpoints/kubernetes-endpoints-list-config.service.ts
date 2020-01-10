@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../../../store/src/app-state';
+import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { BaseEndpointsDataSource } from '../../../../shared/components/list/list-types/endpoint/base-endpoints-data-source';
@@ -12,9 +15,6 @@ import {
   EndpointsListConfigService,
 } from '../../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
-import { EntityMonitorFactory } from '../../../../shared/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../shared/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { KubernetesEndpointsDataSource } from './kubernetes-endpoints-data-source';
 
 @Injectable()
