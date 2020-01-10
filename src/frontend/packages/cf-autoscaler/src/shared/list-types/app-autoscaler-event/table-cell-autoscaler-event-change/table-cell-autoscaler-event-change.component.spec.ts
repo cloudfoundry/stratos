@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatIcon } from '@angular/material';
+import { MatIcon } from '@angular/material/icon';
 
 import { EntityInfo } from '../../../../../../store/src/types/api.types';
 import { TableCellAutoscalerEventChangeIconPipe } from './table-cell-autoscaler-event-change-icon.pipe';

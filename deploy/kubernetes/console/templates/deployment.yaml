@@ -1,5 +1,9 @@
 ---
+{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
+apiVersion: apps/v1
+{{- else }}
 apiVersion: apps/v1beta1
+{{- end }}
 kind: StatefulSet
 metadata:
   name: stratos

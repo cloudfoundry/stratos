@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
@@ -51,11 +51,11 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       ]],
       disk_quota: [0, [
         Validators.required,
-        Validators.min(0)
+        Validators.min(1)
       ]],
       memory: [0, [
         Validators.required,
-        Validators.min(0)
+        Validators.min(1)
       ]],
       enable_ssh: false
     });

@@ -36,10 +36,6 @@ import {
 import {
   CloudFoundryQuotasComponent,
 } from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
-import { EndpointListHelper } from '../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
-import {
-  EndpointsListConfigService,
-} from '../../../../core/src/shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { CloudFoundryComponentsModule } from '../../shared/components/components.module';
 import {
@@ -143,6 +139,9 @@ import {
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
+import { CloudFoundryEventsComponent } from './tabs/cloud-foundry-events/cloud-foundry-events.component';
+import { CloudFoundryOrganizationEventsComponent } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-events/cloud-foundry-organization-events.component';
+import { CloudFoundrySpaceEventsComponent } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-events/cloud-foundry-space-events.component';
 
 
 @NgModule({
@@ -217,6 +216,9 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CfAdminAddUserWarningComponent,
     QuotaDefinitionComponent,
     SpaceQuotaDefinitionComponent,
+    CloudFoundryEventsComponent,
+    CloudFoundryOrganizationEventsComponent,
+    CloudFoundrySpaceEventsComponent,
   ],
   providers: [
     CFEndpointsListConfigService,

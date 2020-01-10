@@ -1,13 +1,12 @@
-import { RequestOptions, URLSearchParams } from '@angular/http';
-
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { serviceEntityType, servicePlanEntityType } from '../cf-entity-types';
 import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
+import { HttpRequest } from '@angular/common/http';
 
 export class GetAllServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
@@ -19,15 +18,15 @@ export class GetAllServices extends CFStartAction implements PaginatedAction, En
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `services`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `services`
+    );
   }
   actions = getActions('Service', 'Get all Services');
-  entity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceEntityType).getSchema();
+  entity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceEntityType).getSchema();
   entityType = serviceEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -46,15 +45,15 @@ export class GetService extends CFStartAction implements EntityInlineParentActio
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `services/${guid}`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `services/${guid}`
+    );
   }
   actions = getActions('Service', 'Get Service');
   entity = cfEntityFactory(serviceEntityType);
   entityType = serviceEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class GetServicePlansForService extends CFStartAction implements PaginatedAction {
@@ -68,15 +67,15 @@ export class GetServicePlansForService extends CFStartAction implements Paginate
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `services/${serviceGuid}/service_plans`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `services/${serviceGuid}/service_plans`
+    );
   }
   actions = getActions('Service', 'Get Service plans');
   entity = [cfEntityFactory(servicePlanEntityType)];
   entityType = servicePlanEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams = {
     page: 1,
     'results-per-page': 100,

@@ -10,7 +10,7 @@ import { CoreTestingModule } from '../../../../../../../test-framework/core-test
 import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
 import * as favoriteHelpers from '../../../../../../core/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
-import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { SharedModule } from '../../../../../shared.module';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
@@ -23,7 +23,7 @@ import { MetaCardComponent } from './meta-card.component';
     </app-meta-card>`
 })
 class WrapperComponent {
-  @ViewChild(MetaCardComponent)
+  @ViewChild(MetaCardComponent, { static: true })
   metaCard: MetaCardComponent;
 }
 

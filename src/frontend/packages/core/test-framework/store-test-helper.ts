@@ -15,8 +15,8 @@ import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { BaseEntityValues } from '../../store/src/types/entity.types';
 import { WrapperRequestActionSuccess } from '../../store/src/types/request.types';
 import { endpointEntitySchema } from '../src/base-entity-schemas';
-import { entityCatalogue } from '../src/core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../src/core/entity-catalogue/entity-catalogue.types';
+import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../store/src/entity-catalog/entity-catalog.types';
 
 export const testSCFEndpointGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 const testSCFSessionEndpoint: SessionDataEndpoint = {
@@ -158,14 +158,14 @@ function getDefaultInitialTestStratosStoreState() {
     },
     dashboard: {
       sidenavOpen: true,
-      headerEventMinimized: false,
       timeoutSession: true,
       sideHelpOpen: false,
       sideHelpDocument: '',
       isMobile: false,
       isMobileNavOpen: false,
       sideNavPinned: false,
-      pollingEnabled: true
+      pollingEnabled: true,
+      themeKey: null
     },
     actionHistory: [],
     lists: {},
@@ -192,7 +192,10 @@ function getDefaultInitialTestStratosStoreState() {
       }
     },
     internalEvents: {
-      types: {}
+      types: {
+        global: {},
+        endpoint: {}
+      }
     },
     currentUserRoles: {
       internal: {
@@ -337,14 +340,14 @@ export function createBasicStoreModule(
   return StoreModule.forRoot(
     appReducers,
     {
-      initialState
+      initialState, runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
     }
   );
 }
 
 export function createEmptyStoreModule(): ModuleWithProviders {
   return StoreModule.forRoot(
-    appReducers
+    appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
   );
 }
 
@@ -368,10 +371,10 @@ export interface TestStoreEntity {
 /**
  * Should not be used by StoreModule.forRoot's initialState (lack of specific reducers in same object cause parts of state to be ignored)
  */
-export function createEntityStoreState(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>) {
+export function createEntityStoreState(entityMap: Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>) {
   return Array.from(entityMap.keys()).reduce((state, entityConfig) => {
     const entities = entityMap.get(entityConfig);
-    const entityKey = entityCatalogue.getEntityKey(entityConfig);
+    const entityKey = entityCatalog.getEntityKey(entityConfig);
     return {
       request: {
         ...state.request,
@@ -389,14 +392,14 @@ export function createEntityStoreState(entityMap: Map<EntityCatalogueEntityConfi
   }, getDefaultInitialTestStoreState());
 }
 
-export function createEntityStore(entityMap: Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
+export function createEntityStore(entityMap: Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
   const initialState = createEntityStoreState(entityMap);
   return createBasicStoreModule(initialState);
 }
 
 export function populateStoreWithTestEndpoint(): EndpointModel {
-  const stratosEndpointEntityConfig: EntityCatalogueEntityConfig = endpointEntitySchema;
-  const stratosEndpointEntityKey = entityCatalogue.getEntityKey(stratosEndpointEntityConfig);
+  const stratosEndpointEntityConfig: EntityCatalogEntityConfig = endpointEntitySchema;
+  const stratosEndpointEntityKey = entityCatalog.getEntityKey(stratosEndpointEntityConfig);
   const mappedData = {
     entities: {
       [stratosEndpointEntityKey]: {

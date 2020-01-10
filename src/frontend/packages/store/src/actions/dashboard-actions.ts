@@ -1,11 +1,11 @@
 import { Action } from '@ngrx/store';
 
+import { StratosTheme } from '../../../core/src/core/theme.service';
 import { DashboardState } from '../reducers/dashboard-reducer';
 
 export const OPEN_SIDE_NAV = '[Dashboard] Open side nav';
 export const CLOSE_SIDE_NAV = '[Dashboard] Close side nav';
 export const TOGGLE_SIDE_NAV = '[Dashboard] Toggle side nav';
-export const TOGGLE_HEADER_EVENT = '[Dashboard] Toggle header event';
 export const SET_HEADER_EVENT = '[Dashboard] Set header event';
 
 export const ENABLE_SIDE_NAV_MOBILE_MODE = '[Dashboard] Enable mobile nav';
@@ -17,6 +17,7 @@ export const CLOSE_SIDE_HELP = '[Dashboard] Close side help';
 
 export const TIMEOUT_SESSION = '[Dashboard] Timeout Session';
 export const ENABLE_POLLING = '[Dashboard] Enable Polling';
+export const SET_STRATOS_THEME = '[Dashboard] Set Theme';
 
 export const HYDRATE_DASHBOARD_STATE = '[Dashboard] Hydrate dashboard state';
 
@@ -35,10 +36,6 @@ export class CloseSideNav implements Action {
 export class ToggleSideNav implements Action {
   constructor() { }
   type = TOGGLE_SIDE_NAV;
-}
-
-export class ToggleHeaderEvent implements Action {
-  type = TOGGLE_HEADER_EVENT;
 }
 
 export class ShowSideHelp implements Action {
@@ -78,3 +75,7 @@ export class HydrateDashboardStateAction implements Action {
   type = HYDRATE_DASHBOARD_STATE;
 }
 
+export class SetThemeAction implements Action {
+  constructor(public theme: StratosTheme) { }
+  type = SET_STRATOS_THEME;
+}

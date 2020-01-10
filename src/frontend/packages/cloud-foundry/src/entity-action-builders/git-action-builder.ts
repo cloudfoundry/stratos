@@ -3,7 +3,7 @@ import {
   KnownEntityActionBuilder,
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
-} from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+} from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import { FetchBranchesForProject, FetchCommits } from '../actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../actions/github.actions';

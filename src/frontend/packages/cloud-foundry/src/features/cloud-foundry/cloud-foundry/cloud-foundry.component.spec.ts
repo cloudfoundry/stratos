@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModules,

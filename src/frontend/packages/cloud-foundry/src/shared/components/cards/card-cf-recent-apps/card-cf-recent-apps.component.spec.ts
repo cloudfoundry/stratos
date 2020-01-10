@@ -10,8 +10,8 @@ import {
 import {
   PollingIndicatorComponent,
 } from '../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
-import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   generateCfBaseTestModulesNoShared,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';

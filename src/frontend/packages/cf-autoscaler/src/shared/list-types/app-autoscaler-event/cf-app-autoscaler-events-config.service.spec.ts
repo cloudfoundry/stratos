@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
+import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpTestingController } from '@angular/common/http/testing';
 import { inject, TestBed } from '@angular/core/testing';
-import { ConnectionBackend, Http } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
@@ -9,7 +9,7 @@ import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-fact
 import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { ApplicationsModule } from '../../../../../cloud-foundry/src/features/applications/applications.module';
 import { CoreModule } from '../../../../../core/src/core/core.module';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
@@ -25,6 +25,7 @@ describe('CfAppAutoscalerEventsConfigService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        { provide: HttpBackend, useClass: HttpTestingController },
         CfAppAutoscalerEventsConfigService,
         EntityServiceFactory,
         generateTestEntityServiceProvider(
@@ -33,10 +34,10 @@ describe('CfAppAutoscalerEventsConfigService', () => {
           new GetApplication(appGuid, cfGuid)
         ),
         generateTestApplicationServiceProvider(appGuid, cfGuid),
-        Http,
-        { provide: ConnectionBackend, useClass: MockBackend },
+        HttpClient,
       ],
       imports: [
+        HttpClientModule,
         CfAutoscalerTestingModule,
         CommonModule,
         CoreModule,

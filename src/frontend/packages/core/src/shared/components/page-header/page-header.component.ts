@@ -3,7 +3,7 @@ import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { Logout } from '../../../../../store/src/actions/auth.actions';
@@ -14,12 +14,13 @@ import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.sel
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { TabNavService } from '../../../../tab-nav.service';
-import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
+import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { StratosStatus } from '../../shared.types';
 import { FavoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
-import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { TabNavItem } from '../../../../tab-nav.types';
+import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 
 @Component({
   selector: 'app-page-header',
@@ -31,13 +32,15 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
   public pFavorite: UserFavorite<IFavoriteMetadata>;
-  private pTabs: ISubHeaderTabs[];
+  private pTabs: IPageSideNavTab[];
 
   public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
 
-  @ViewChild('pageHeaderTmpl') pageHeaderTmpl: TemplateRef<any>;
+  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl: TemplateRef<any>;
 
   @Input() hideSideNavButton = false;
+
+  @Input() hideEndpointErrors = false;
 
   @Input() hideMenu = false;
 
@@ -45,7 +48,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   endpointIds$: Observable<string[]>;
 
   @Input()
-  set tabs(tabs: ISubHeaderTabs[]) {
+  set tabs(tabs: IPageSideNavTab[]) {
     if (tabs) {
       this.pTabs = tabs.map(tab => ({
         ...tab,
@@ -77,7 +80,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   public events$: Observable<IGlobalEvent[]>;
-  public eventCount$: Observable<number>;
+  public unreadEventCount$: Observable<number>;
   public eventPriorityStatus$: Observable<StratosStatus>;
 
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
@@ -87,7 +90,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       const prettyType = this.favoritesConfigMapper.getPrettyTypeName(favorite);
       const prettyEndpointType = this.favoritesConfigMapper.getPrettyTypeName({
         endpointType: favorite.endpointType,
-        entityType: EntityCatalogueHelpers.endpointType
+        entityType: EntityCatalogHelpers.endpointType
       });
       if (mapperFunction) {
         const { name, routerLink } = mapperFunction(favorite.metadata);
@@ -150,7 +153,11 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     eventService: GlobalEventService,
     private favoritesConfigMapper: FavoritesConfigMapper
   ) {
-    this.eventCount$ = eventService.events$.pipe(
+    this.events$ = eventService.events$.pipe(
+      startWith([])
+    );
+    this.unreadEventCount$ = eventService.events$.pipe(
+      map(events => events.filter(event => !event.read)),
       map(events => events.length)
     );
     this.eventPriorityStatus$ = eventService.priorityStratosStatus$;
@@ -158,7 +165,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
     this.username$ = store.select(s => s.auth).pipe(
-      map((auth: AuthState) => auth && auth.sessionData ? auth.sessionData.user.name : 'Unknown')
+      map((auth: AuthState) => auth && auth.sessionData && auth.sessionData.user ? auth.sessionData.user.name : 'Unknown')
     );
     this.userNameFirstLetter$ = this.username$.pipe(
       map(name => name[0].toLocaleUpperCase())

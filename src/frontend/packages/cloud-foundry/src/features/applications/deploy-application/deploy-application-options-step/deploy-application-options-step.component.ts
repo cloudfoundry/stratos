@@ -1,27 +1,32 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { SaveAppOverrides } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { GetAllOrganizationDomains } from '../../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { stackEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { selectCfDetails } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
-import { OverrideAppDetails } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
+import {
+  selectCfDetails,
+  selectDeployAppState,
+  selectSourceType,
+} from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
+import { OverrideAppDetails, SourceType } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 @Component({
   selector: 'app-deploy-application-options-step',
@@ -42,6 +47,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   stepOpts: any;
 
   public healthCheckTypes = ['http', 'port', 'process'];
+  public sourceType$: Observable<SourceType>;
+  public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
 
   constructor(
     private fb: FormBuilder,
@@ -74,6 +81,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       time: [null, [
         Validators.min(0)
       ]],
+      dockerImage: null,
+      dockerUsername: null
     });
     this.valid$ = this.deployOptionsForm.valueChanges.pipe(
       map(() => this.deployOptionsForm.valid),
@@ -94,6 +103,24 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   ngOnInit() {
+    this.sourceType$ = this.store.select(selectSourceType);
+
+    // Set previously supplied docker values
+    this.subs.push(this.store.select(selectDeployAppState).pipe(
+      filter(deployAppState =>
+        !!deployAppState &&
+        !!deployAppState.applicationSource &&
+        !!deployAppState.applicationSource.dockerDetails &&
+        !!deployAppState.applicationSource.dockerDetails.applicationName),
+    ).subscribe(deployAppState => {
+      const sourceType = deployAppState.applicationSource.type;
+      if (sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
+        this.deployOptionsForm.controls.name.setValue(deployAppState.applicationSource.dockerDetails.applicationName);
+        this.deployOptionsForm.controls.dockerImage.setValue(deployAppState.applicationSource.dockerDetails.dockerImage);
+        this.deployOptionsForm.controls.dockerUsername.setValue(deployAppState.applicationSource.dockerDetails.dockerUsername);
+      }
+    }));
+
     const noRouteChanged$ = this.deployOptionsForm.controls.no_route.valueChanges.pipe(startWith(false));
     const randomRouteChanged$ = this.deployOptionsForm.controls.random_route.valueChanges.pipe(startWith(false));
 
@@ -124,7 +151,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
 
     this.stacks$ = cfDetails$.pipe(
       switchMap(cfDetails => {
-        const stackEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
+        const stackEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
         const getAllStacksActionBuilder = stackEntity.actionOrchestrator.getActionBuilder('getMultiple');
         const action = getAllStacksActionBuilder(cfDetails.cloudFoundry, null);
         return getPaginationObservables<APIResource<IDomain>>(
@@ -172,7 +199,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     if (this.appGuid) {
       combineLatest(this.domains$, cfDetails$).pipe(
-        switchMap(([domains, cfDetails]) => this.appEnvVarsService.createEnvVarsObs(this.appGuid, cfDetails.cloudFoundry).entities$),
+        switchMap(([, cfDetails]) => this.appEnvVarsService.createEnvVarsObs(this.appGuid, cfDetails.cloudFoundry).entities$),
         map(applicationEnvVars => this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity)),
         first()
       ).subscribe(envVars => this.objToForm(envVars.deployOverrides));
@@ -202,7 +229,9 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       startCmd: controls.startCmd.value,
       healthCheckType: controls.healthCheckType.value,
       stack: controls.stack.value,
-      time: controls.time.value
+      time: controls.time.value,
+      dockerImage: controls.dockerImage.value,
+      dockerUsername: controls.dockerUsername.value
     };
   }
 
@@ -225,6 +254,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     controls.healthCheckType.setValue(overrides.healthCheckType);
     controls.stack.setValue(overrides.stack);
     controls.time.setValue(overrides.time);
+    controls.dockerImage.setValue(overrides.dockerImage);
+    controls.dockerUsername.setValue(overrides.dockerUsername);
   }
 
   onEnter = (opts: any) => {

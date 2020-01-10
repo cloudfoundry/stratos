@@ -1,6 +1,6 @@
-import { InitCatalogueEntitiesAction } from '../../../../core/src/core/entity-catalogue.actions';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { getDefaultStateFromEntityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.store-setup';
+import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import {
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,
@@ -16,6 +16,7 @@ import {
   REMOVE_PARAMS,
   RESET_PAGINATION,
   SET_CLIENT_FILTER,
+  SET_CLIENT_FILTER_KEY,
   SET_CLIENT_PAGE,
   SET_CLIENT_PAGE_SIZE,
   SET_INITIAL_PARAMS,
@@ -38,6 +39,7 @@ import { paginationMaxReached } from './pagination-reducer-max-reached';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { getDefaultPaginationEntityState, paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
+import { paginationSetClientFilterKey } from './pagination-reducer-set-client-filter-key';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
 import { paginationSetClientPageSize } from './pagination-reducer-set-client-page-size';
 import { paginationSetPage } from './pagination-reducer-set-page';
@@ -76,6 +78,8 @@ const getPaginationUpdater = (types: [string, string, string]) => {
         return paginationSetClientPage(state, action);
       case SET_CLIENT_FILTER:
         return paginationSetClientFilter(state, action);
+      case SET_CLIENT_FILTER_KEY:
+        return paginationSetClientFilterKey(state, action);
       case SET_PAGE_BUSY:
         return paginationPageBusy(state, action);
       default:
@@ -99,8 +103,8 @@ function paginate(action, state = {}, updatePagination) {
     return state;
   }
 
-  if (action.type === InitCatalogueEntitiesAction.ACTION_TYPE) {
-    return getDefaultStateFromEntityCatalogue((action as InitCatalogueEntitiesAction).entityKeys, {}, state);
+  if (action.type === InitCatalogEntitiesAction.ACTION_TYPE) {
+    return getDefaultStateFromEntityCatalog((action as InitCatalogEntitiesAction).entityKeys, {}, state);
   }
 
   if (action.type === CREATE_PAGINATION) {
@@ -117,7 +121,7 @@ function paginate(action, state = {}, updatePagination) {
 
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
     const clearAction = action as ClearPaginationOfType;
-    const clearEntityType = entityCatalogue.getEntityKey(clearAction.entityConfig.endpointType, clearAction.entityConfig.entityType);
+    const clearEntityType = entityCatalog.getEntityKey(clearAction.entityConfig.endpointType, clearAction.entityConfig.entityType);
     return paginationClearAllTypes(state, [clearEntityType], getDefaultPaginationEntityState());
   }
 

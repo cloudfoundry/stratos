@@ -1,6 +1,6 @@
 import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChild, ViewContainerRef } from '@angular/core';
 
-import { MultiActionListEntity } from '../../../../monitors/pagination-monitor';
+import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
 import { CardCell } from '../../list.types';
@@ -47,7 +47,7 @@ export class CardComponent<T> {
     this.componentCreator({ item });
   }
 
-  @ViewChild('target', { read: ViewContainerRef }) target: ViewContainerRef;
+  @ViewChild('target', { read: ViewContainerRef, static: true }) target: ViewContainerRef;
 
   cardComponent: CardCell<T>;
 

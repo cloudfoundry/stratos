@@ -7,6 +7,7 @@ import { generateTestApplicationServiceProvider } from '../../../../../../core/t
 import { generateTestEntityServiceProvider } from '../../../../../../core/test-framework/entity-service.helper';
 import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { applicationEntityType } from '../../../../cf-entity-types';
+import { ServiceActionHelperService } from '../../../../shared/data-services/service-action-helper.service';
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -29,7 +30,8 @@ describe('DeleteAppInstancesComponent', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationEnvVarsHelper,
-        DatePipe
+        DatePipe,
+        ServiceActionHelperService
       ]
     })
       .compileComponents();

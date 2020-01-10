@@ -11,12 +11,12 @@ import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types'
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
-import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../src/shared/components/application-state/application-state.service';
-import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {

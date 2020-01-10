@@ -6,6 +6,7 @@ import {
   generateTestCfEndpointService,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CardCfUserInfoComponent } from './card-cf-user-info.component';
+import { CopyToClipboardComponent } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 
 describe('CardCfUserInfoComponent', () => {
   let component: CardCfUserInfoComponent;
@@ -13,7 +14,7 @@ describe('CardCfUserInfoComponent', () => {
   beforeEach(
     async(() => {
       TestBed.configureTestingModule({
-        declarations: [CardCfUserInfoComponent, MetadataItemComponent],
+        declarations: [CardCfUserInfoComponent, MetadataItemComponent, CopyToClipboardComponent, CardCfUserInfoComponent],
         imports: generateCfBaseTestModulesNoShared(),
         providers: [generateTestCfEndpointService()]
       }).compileComponents();

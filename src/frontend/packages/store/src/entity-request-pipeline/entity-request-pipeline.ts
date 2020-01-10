@@ -2,8 +2,8 @@ import { Action, Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { StratosBaseCatalogueEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, InternalAppState } from '../app-state';
 import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
@@ -32,7 +32,7 @@ export interface PipelineFactoryConfig<T extends AppState = InternalAppState> {
 
 export interface PipelineConfig<T extends AppState = InternalAppState> {
   requestType: ApiRequestTypes;
-  catalogueEntity: StratosBaseCatalogueEntity;
+  catalogEntity: StratosBaseCatalogEntity;
   action: EntityRequestAction;
   appState: T;
   postSuccessDataMapper?: SuccessfulApiResponseDataMapper;
@@ -52,41 +52,41 @@ export const apiRequestPipelineFactory = (
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const requestType = getRequestTypeFromMethod(patchedAction);
 
-  const catalogueEntity = entityCatalogue.getEntity(patchedAction);
+  const catalogEntity = entityCatalog.getEntity(patchedAction);
   const recursivelyDelete = shouldRecursivelyDelete(requestType, patchedAction);
 
   if (recursivelyDelete) {
     store.dispatch(
-      new RecursiveDelete(action.guid, catalogueEntity.getSchema(patchedAction.schemaKey)),
+      new RecursiveDelete(action.guid, catalogEntity.getSchema(patchedAction.schemaKey)),
     );
   }
 
-  startEntityHandler(actionDispatcher, catalogueEntity, requestType, action);
+  startEntityHandler(actionDispatcher, catalogEntity, requestType, action);
   return pipeline(store, httpClient, {
     action,
     requestType,
-    catalogueEntity,
+    catalogEntity,
     appState
   }).pipe(
     tap((response) => {
       if (response.success) {
-        successEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response, recursivelyDelete);
+        successEntityHandler(actionDispatcher, catalogEntity, requestType, action, response, recursivelyDelete);
       } else {
-        failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, response, recursivelyDelete);
+        failedEntityHandler(actionDispatcher, catalogEntity, requestType, action, response, recursivelyDelete);
       }
     }),
-    map(() => catalogueEntity.getRequestAction('complete', action, requestType)),
+    map(() => catalogEntity.getRequestAction('complete', action, requestType)),
     catchError(error => {
       const httpResponse = isHttpErrorResponse(error);
-      const res: PipelineResult = {
+      const response: PipelineResult = {
         success: false,
         errorMessage: httpResponse ? httpResponse.error : null
       };
-      failedEntityHandler(actionDispatcher, catalogueEntity, requestType, action, res, recursivelyDelete);
+      failedEntityHandler(actionDispatcher, catalogEntity, requestType, action, response, recursivelyDelete);
       jetstreamErrorHandler(
         error,
         patchedAction,
-        catalogueEntity,
+        catalogEntity,
         requestType,
         actionDispatcher,
         recursivelyDelete

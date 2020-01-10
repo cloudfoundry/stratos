@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
@@ -10,8 +10,8 @@ import {
   StoreCFSettings,
 } from '../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { getCFEntityKey } from '../../../../../cloud-foundry/src/cf-entity-helpers';
+import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import {
   selectApplicationSource,
   selectCfDetails,
@@ -22,7 +22,7 @@ import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { selectPaginationState } from '../../../../../store/src/selectors/pagination.selectors';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { getApplicationDeploySourceTypes, getAutoSelectedDeployType } from './deploy-application-steps.types';
+import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
 
 @Component({
   selector: 'app-deploy-application',
@@ -40,19 +40,19 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   deployButtonText = 'Deploy';
   skipConfig$: Observable<boolean> = observableOf(false);
   isRedeploy: boolean;
-  sourceTypes: SourceType[] = getApplicationDeploySourceTypes();
   selectedSourceType: SourceType;
   entityKey: string;
   constructor(
     private store: Store<CFAppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    appDeploySourceTypes: ApplicationDeploySourceTypes
   ) {
     this.entityKey = getCFEntityKey(applicationEntityType);
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     this.isRedeploy = !!this.appGuid;
 
-    this.selectedSourceType = getAutoSelectedDeployType(activatedRoute);
+    this.selectedSourceType = appDeploySourceTypes.getAutoSelectedType(activatedRoute);
 
     this.skipConfig$ = this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
       map((appSource: DeployApplicationSource) => {

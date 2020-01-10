@@ -51,6 +51,7 @@ const (
 	SessionExpiry        = 20 * 60 // Session cookies expire after 20 minutes
 	UpgradeVolume        = "UPGRADE_VOLUME"
 	UpgradeLockFileName  = "UPGRADE_LOCK_FILENAME"
+	LogToJSON            = "LOG_TO_JSON"
 	VCapApplication      = "VCAP_APPLICATION"
 	defaultSessionSecret = "wheeee!"
 )
@@ -109,7 +110,22 @@ func getEnvironmentLookup() *env.VarSet {
 }
 
 func main() {
+
+	// Register time.Time in gob
+	gob.Register(time.Time{})
+
+	// Create common method for looking up config
+	envLookup := getEnvironmentLookup()
+
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
+
+	// Change to JSON logging if configured
+	if logToJSON, ok := envLookup.Lookup(LogToJSON); ok {
+		if logToJSON == "true" {
+			log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.UnixDate})
+		}
+	}
+
 	log.SetOutput(os.Stdout)
 
 	log.Info("========================================")
@@ -117,12 +133,6 @@ func main() {
 	log.Info("========================================")
 	log.Info("")
 	log.Info("Initialization started.")
-
-	// Register time.Time in gob
-	gob.Register(time.Time{})
-
-	// Create common method for looking up config
-	envLookup := getEnvironmentLookup()
 
 	// Load the portal configuration from env vars
 	var portalConfig interfaces.PortalConfig
@@ -259,6 +269,16 @@ func main() {
 		return
 	}
 
+	// Init auth service
+	err = portalProxy.InitStratosAuthService(interfaces.AuthEndpointTypes[portalProxy.Config.AuthEndpointType])
+	if err != nil {
+		log.Warnf("Defaulting to UAA authentication: %v", err)
+		err = portalProxy.InitStratosAuthService(interfaces.Remote)
+		if err != nil {
+			log.Fatalf("Could not initialise auth service. %v", err)
+		}
+	}
+
 	// Initialise Plugins
 	portalProxy.loadPlugins()
 
@@ -348,6 +368,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) error {
 	if consoleConfig.IsSetupComplete() {
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
+		portalProxy.Config.AuthEndpointType = consoleConfig.AuthEndpointType
 	}
 
 	return nil
@@ -622,15 +643,6 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		UserInfo: pp.GetCNSIUserFromBasicToken,
 	})
 
-	err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.AuthEndpointType])
-	if err != nil {
-		log.Warnf("Defaulting to UAA authentication: %v", err)
-		err = pp.InitStratosAuthService(interfaces.Remote)
-		if err != nil {
-			log.Fatalf("Could not initialise auth service. %v", err)
-		}
-	}
-
 	// OIDC
 	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
 		Handler: pp.doOidcFlowRequest,
@@ -761,9 +773,20 @@ func (p *portalProxy) GetHttpClient(skipSSLValidation bool) http.Client {
 	return p.getHttpClient(skipSSLValidation, false)
 }
 
+// GetHttpClientForRequest returns an Http Client for the giving request
 func (p *portalProxy) GetHttpClientForRequest(req *http.Request, skipSSLValidation bool) http.Client {
 	isMutating := req.Method != "GET" && req.Method != "HEAD"
-	return p.getHttpClient(skipSSLValidation, isMutating)
+	client := p.getHttpClient(skipSSLValidation, isMutating)
+
+	// Is this is a long-running request, then use a different timeout
+	if req.Header.Get(longRunningTimeoutHeader) == "true" {
+		longRunningClient := http.Client{}
+		longRunningClient.Transport = client.Transport
+		longRunningClient.Timeout = time.Duration(p.GetConfig().HTTPClientTimeoutLongRunningInSecs) * time.Second
+		return longRunningClient
+	}
+
+	return client
 }
 
 func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.Client {
@@ -806,13 +829,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// Add middleware to block requests if unconfigured
 	if needSetupMiddleware {
 		e.Use(p.SetupMiddleware())
-		pp.POST("/v1/setup", p.setupConsole)
-		pp.POST("/v1/setup/check", p.setupConsoleCheck)
+		pp.POST("/v1/setup/check", p.setupGetAvailableScopes)
+		pp.POST("/v1/setup/save", p.setupSaveConfig)
 	}
 
 	loginAuthGroup := pp.Group("/v1/auth")
-	loginAuthGroup.POST("/login/uaa", p.StratosAuthService.Login)
-	loginAuthGroup.POST("/logout", p.StratosAuthService.Logout)
+	loginAuthGroup.POST("/login/uaa", p.consoleLogin)
+	loginAuthGroup.POST("/logout", p.consoleLogout)
 
 	// SSO Routes will only respond if SSO is enabled
 	loginAuthGroup.GET("/sso_login", p.initSSOlogin)

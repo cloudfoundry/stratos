@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { of as observableOf, Subject } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
@@ -16,7 +16,7 @@ import {
   IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { UpdateExistingApplication } from '../../../../../actions/application.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { appEnvVarsEntityType, applicationEntityType } from '../../../../../cf-entity-types';
@@ -88,7 +88,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   private dispatchDeleteAction(newValues: ListAppEnvVar[]) {
     const confirmation = this.getConfirmationModal(newValues);
 
-    const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const appEnvVarsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
     const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('removeFromApplication');
     const action = actionBuilder(
       this.envVarsDataSource.appGuid,
@@ -113,11 +113,11 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   }
 
   private getEntityMonitor() {
-    const catalogueEntity = entityCatalogue.getEntity({
+    const catalogEntity = entityCatalog.getEntity({
       entityType: applicationEntityType,
       endpointType: CF_ENDPOINT_TYPE
     });
-    return catalogueEntity
+    return catalogEntity
       .getEntityMonitor(
         this.store,
         this.envVarsDataSource.appGuid

@@ -1,6 +1,7 @@
 FROM {{BASE_IMAGE}}
 
 {{#IS_SLE}}
+RUN rm -f /usr/lib/zypp/plugins/services/container-suseconnect-zypp
 RUN zypper addrepo  -G -c '{{SMT_INTERNAL}}' smt_internal
 RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_UPDATE}}' smt_internal_update
 RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SDK}}' smt_internal_sdk
@@ -9,10 +10,14 @@ RUN zypper ref
 {{/IS_SLE}}
 
 RUN zypper -n ref && \
-zypper -n up && \
-zypper in -y which tar git gcc curl wget
-RUN wget https://storage.googleapis.com/golang/go1.12.4.linux-amd64.tar.gz && \
-    tar -xzf go1.12.4.linux-amd64.tar.gz -C /usr/local/ && \
+    zypper -n up && \
+    zypper in -y which tar git gcc curl wget gzip xz && \
+    zypper clean -a && \
+    rm -f /var/log/zypper.log /var/log/zypp/history
+
+RUN wget https://storage.googleapis.com/golang/go1.13.4.linux-amd64.tar.gz && \
+    tar -xzf go1.13.4.linux-amd64.tar.gz -C /usr/local/ && \
+    rm go1.13.4.linux-amd64.tar.gz && \
     mkdir -p /home/stratos/go/bin && \
     mkdir -p /home/stratos/go/src
     

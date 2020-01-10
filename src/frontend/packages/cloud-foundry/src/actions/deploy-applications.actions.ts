@@ -3,13 +3,13 @@ import { Action } from '@ngrx/store';
 import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { gitBranchesEntityType, gitCommitEntityType } from '../cf-entity-types';
-import { GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/deploy-application.types';
+import { DockerAppDetails, GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/deploy-application.types';
 import { GitBranch, GitCommit } from '../store/types/git.types';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
-export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
+export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Project exists';
 export const PROJECT_DOESNT_EXIST = '[Deploy App] Project Doesn\'t exist';
 export const PROJECT_FETCH_FAILED = '[Deploy App] Project Fetch Failed';
 export const PROJECT_EXISTS = '[Deploy App] Project exists';
@@ -72,7 +72,7 @@ export class FetchBranchesForProject implements PaginatedAction {
 }
 
 export class SaveAppDetails implements Action {
-  constructor(public appDetails: GitAppDetails) { }
+  constructor(public git: GitAppDetails, public docker: DockerAppDetails) { }
   type = SAVE_APP_DETAILS;
 }
 

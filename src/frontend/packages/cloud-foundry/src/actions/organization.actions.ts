@@ -1,10 +1,10 @@
-import { RequestMethod, RequestOptions, URLSearchParams } from '@angular/http';
+import { HttpHeaders, HttpRequest } from '@angular/common/http';
 
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CFEntityConfig } from '../../cf-types';
+import { CFEntityConfig } from '../cf-types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   cfUserEntityType,
@@ -19,7 +19,7 @@ import {
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
-import { createDefaultUserRelations } from './user.actions.helpers';
+import { createDefaultUserRelations } from './users.actions';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
 export const GET_ORGANIZATION_SUCCESS = '[Organization] Get one success';
@@ -52,10 +52,10 @@ export class GetOrganization extends CFStartAction implements ICFAction, EntityI
     public includeRelations: string[] = [],
     public populateMissing = true) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `organizations/${guid}`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `organizations/${guid}`
+    );
   }
   actions = [
     GET_ORGANIZATION,
@@ -64,7 +64,7 @@ export class GetOrganization extends CFStartAction implements ICFAction, EntityI
   ];
   entity = [cfEntityFactory(organizationEntityType)];
   entityType = organizationEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class GetAllOrganizationSpaces extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
@@ -77,15 +77,16 @@ export class GetAllOrganizationSpaces extends CFStartAction implements Paginated
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `organizations/${orgGuid}/spaces`;
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      `organizations/${orgGuid}/spaces`
+    );
     this.parentGuid = orgGuid;
   }
   actions = [GET_ORGANIZATION_SPACES, GET_ORGANIZATION_SPACES_SUCCESS, GET_ORGANIZATION_SPACES_FAILED];
   entity = cfEntityFactory(spaceEntityType);
   entityType = spaceEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   flattenPagination = true;
   initialParams = {
     'results-per-page': 100,
@@ -114,15 +115,16 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
     if (!this.paginationKey) {
       this.paginationKey = createEntityRelationPaginationKey(organizationEntityType, orgGuid);
     }
-    this.options = new RequestOptions();
-    this.options.url = `organizations/${orgGuid}/domains`;
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      `organizations/${orgGuid}/domains`
+    );
     this.parentGuid = orgGuid;
   }
   actions = [GET_ORGANIZATION_DOMAINS, GET_ORGANIZATION_DOMAINS_SUCCESS, GET_ORGANIZATION_DOMAINS_FAILED];
   entity = cfEntityFactory(domainEntityType);
   entityType = domainEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   flattenPagination = true;
   initialParams = {
     'results-per-page': 100,
@@ -141,9 +143,10 @@ export class GetAllOrganizations extends CFStartAction implements PaginatedActio
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = 'organizations';
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      'organizations'
+    );
   }
   actions = [
     GET_ORGANIZATIONS,
@@ -152,7 +155,7 @@ export class GetAllOrganizations extends CFStartAction implements PaginatedActio
   ];
   entity = [cfEntityFactory(organizationEntityType)];
   entityType = organizationEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -166,33 +169,38 @@ export class GetAllOrganizations extends CFStartAction implements PaginatedActio
 export class DeleteOrganization extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `organizations/${guid}`;
-    this.options.method = 'delete';
-    this.options.params = new URLSearchParams();
-    this.options.params.append('recursive', 'true');
-    this.options.params.append('async', 'false');
+    this.options = new HttpRequest(
+      'DELETE',
+      `organizations/${guid}`,
+      {
+        params: new HttpHeaders({
+          recursive: 'true',
+          async: 'false'
+        })
+      }
+    );
   }
   actions = [DELETE_ORGANIZATION, DELETE_ORGANIZATION_SUCCESS, DELETE_ORGANIZATION_FAILED];
   entity = [cfEntityFactory(organizationEntityType)];
   entityType = organizationEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   removeEntityOnDelete = true;
 }
 
 export class CreateOrganization extends CFStartAction implements ICFAction {
   constructor(public endpointGuid: string, public createOrg: IUpdateOrganization) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `organizations`;
-    this.options.method = RequestMethod.Post;
-    this.options.body = createOrg;
+    this.options = new HttpRequest(
+      'POST',
+      'organizations',
+      createOrg
+    );
     this.guid = createOrg.name;
   }
   actions = getActions('Organizations', 'Create Org');
   entity = [cfEntityFactory(organizationEntityType)];
   entityType = organizationEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   guid: string;
 }
 
@@ -201,15 +209,16 @@ export class UpdateOrganization extends CFStartAction implements ICFAction {
   public static UpdateExistingOrg = 'Updating-Existing-Org';
   constructor(public guid: string, public endpointGuid: string, updateOrg: IUpdateOrganization) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `organizations/${guid}`;
-    this.options.method = 'put';
-    this.options.body = updateOrg;
+    this.options = new HttpRequest(
+      'PUT',
+      `organizations/${guid}`,
+      updateOrg
+    );
   }
   actions = getActions('Organizations', 'Update Org');
   entity = [cfEntityFactory(organizationEntityType)];
   entityType = organizationEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   updatingKey = UpdateOrganization.UpdateExistingOrg;
 }
 
@@ -222,9 +231,10 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     public isAdmin: boolean,
     public includeRelations: string[] = createDefaultUserRelations()) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `organizations/${guid}/users`;
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      `organizations/${guid}/users`
+    );
     // Only admin's can use the url supplied by cf to fetch missing params. These are used by validation and fail for non-admins
     this.skipValidation = !isAdmin;
     this.populateMissing = !isAdmin;
@@ -236,7 +246,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
   ];
   entity = [cfEntityFactory(cfUserEntityType)];
   entityType = cfUserEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams = {
     page: 1,
     'results-per-page': 100,

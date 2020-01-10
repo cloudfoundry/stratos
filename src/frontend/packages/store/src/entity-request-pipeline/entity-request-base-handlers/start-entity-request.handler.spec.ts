@@ -1,11 +1,11 @@
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { EntityRequestAction } from '../../types/request.types';
 import { startEntityHandler } from './start-entity-request.handler';
 
 describe('startEntityHandler', () => {
   it('Should dispatch actions', () => {
-    const catalogueEntity = new StratosBaseCatalogueEntity({
+    const catalogEntity = new StratosBaseCatalogEntity({
       type: 'test',
       schema: new EntitySchema(
         'test',
@@ -17,7 +17,7 @@ describe('startEntityHandler', () => {
     const spyDispatcher = jasmine.createSpy();
     startEntityHandler(
       spyDispatcher,
-      catalogueEntity,
+      catalogEntity,
       'fetch',
       {
         endpointType: 'end',
