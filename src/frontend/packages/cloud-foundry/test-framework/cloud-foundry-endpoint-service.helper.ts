@@ -8,7 +8,7 @@ import { EntityServiceFactory } from '../../store/src/entity-service-factory.ser
 import { EntityMonitorFactory } from '../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 import { SharedModule } from '../../core/src/shared/shared.module';
-import { testSCFEndpointGuid } from '../../core/test-framework/store-test-helper';
+import { testSCFEndpointGuid } from '@stratos/store/testing';
 import { CfUserServiceTestProvider } from '../../core/test-framework/user-service-helper';
 import { appReducers } from '../../store/src/reducers.module';
 import { CFAppState } from '../src/cf-app-state';

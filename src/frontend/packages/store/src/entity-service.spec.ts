@@ -15,7 +15,7 @@ import { completeApiRequest, startApiRequest } from './reducers/api-request-redu
 import { NormalizedResponse } from './types/api.types';
 import { EntityRequestAction, ICFAction } from './types/request.types';
 import { generateTestEntityServiceProvider } from '../../core/test-framework/entity-service.helper';
-import { createEntityStore, TestStoreEntity } from '../../core/test-framework/store-test-helper';
+import { createEntityStore, TestStoreEntity } from '../testing/src/store-test-helper';
 import { STRATOS_ENDPOINT_TYPE } from '../../core/src/base-entity-schemas';
 import { ENTITY_SERVICE } from '../../core/src/shared/entity.tokens';
 import { EntityMonitor } from './monitors/entity-monitor';

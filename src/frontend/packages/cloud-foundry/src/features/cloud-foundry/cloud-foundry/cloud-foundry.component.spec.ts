@@ -6,7 +6,7 @@ import {
   generateCfBaseTestModules,
   generateTestCfServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { populateStoreWithTestEndpoint } from '../../../../../core/test-framework/store-test-helper';
+import { populateStoreWithTestEndpoint } from '@stratos/store/testing';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CloudFoundryComponent } from './cloud-foundry.component';
 
