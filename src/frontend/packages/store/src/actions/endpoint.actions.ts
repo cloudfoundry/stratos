@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { endpointSchemaKey } from '../helpers/entity-factory';

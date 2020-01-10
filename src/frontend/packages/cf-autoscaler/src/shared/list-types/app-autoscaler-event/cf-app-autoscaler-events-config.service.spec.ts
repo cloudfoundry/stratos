@@ -9,7 +9,7 @@ import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-fact
 import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { ApplicationsModule } from '../../../../../cloud-foundry/src/features/applications/applications.module';
 import { CoreModule } from '../../../../../core/src/core/core.module';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';

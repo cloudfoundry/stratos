@@ -6,7 +6,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { SaveAppOverrides } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { GetAllOrganizationDomains } from '../../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
@@ -18,9 +18,9 @@ import {
 } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { OverrideAppDetails, SourceType } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import {
@@ -151,7 +151,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
 
     this.stacks$ = cfDetails$.pipe(
       switchMap(cfDetails => {
-        const stackEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
+        const stackEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, stackEntityType);
         const getAllStacksActionBuilder = stackEntity.actionOrchestrator.getActionBuilder('getMultiple');
         const action = getAllStacksActionBuilder(cfDetails.cloudFoundry, null);
         return getPaginationObservables<APIResource<IDomain>>(

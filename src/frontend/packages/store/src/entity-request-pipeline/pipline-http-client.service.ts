@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap } from 'rxjs/operators';
 
-import { StratosCatalogueEndpointEntity } from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { IStratosEndpointDefinition } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { StratosCatalogEndpointEntity } from '../entity-catalog/entity-catalog-entity';
+import { IStratosEndpointDefinition } from '../entity-catalog/entity-catalog.types';
 import { environment } from '../../../core/src/environments/environment';
 import { InternalAppState } from '../app-state';
 import { connectedEndpointsOfTypesSelector, registeredEndpointsOfTypesSelector } from '../selectors/endpoint.selectors';
@@ -63,7 +63,7 @@ export class PipelineHttpClient {
 
   public pipelineRequest<R>(
     hr: HttpRequest<any>,
-    endpointConfig: StratosCatalogueEndpointEntity,
+    endpointConfig: StratosCatalogEndpointEntity,
     endpointGuids: string | string[] = null,
     externalRequest = false
   ): Observable<R> {

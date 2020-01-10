@@ -66,7 +66,7 @@ export type DispatchOnlyAppState = unknown;
 
 // One stop shop for all of your app state needs
 
-// Care about the catalogue entities? Use this one.
+// Care about the catalog entities? Use this one.
 export abstract class GeneralEntityAppState extends AppState<GeneralRequestDataState> { }
 
 // Only care about internal entities? Use this one.
@@ -77,6 +77,6 @@ export abstract class InternalAppState extends AppState<BaseRequestDataState> { 
 // This should only be used by internal stratos code
 export type PickedInternalAppState<T extends keyof InternalAppState> = Pick<InternalAppState, T>;
 
-// Care about internal entities and catalogue entities? Use this one.
+// Care about internal entities and catalog entities? Use this one.
 // This should only be used by internal stratos code
 export abstract class GeneralAppState extends AppState<GeneralAppRequestDataState> { }

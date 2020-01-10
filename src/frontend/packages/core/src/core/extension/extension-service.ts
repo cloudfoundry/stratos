@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 
 import { AppState, GeneralEntityAppState } from '../../../../store/src/app-state';
 import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
-import { EntityServiceFactory } from '../entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 

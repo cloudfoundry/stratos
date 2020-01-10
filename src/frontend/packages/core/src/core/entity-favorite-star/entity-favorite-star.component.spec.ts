@@ -7,7 +7,7 @@ import { BaseTestModulesNoShared } from '../../../test-framework/core-test.helpe
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { DialogConfirmComponent } from '../../shared/components/dialog-confirm/dialog-confirm.component';
 import { FavoritesConfigMapper } from '../../shared/components/favorites-meta-card/favorite-config-mapper';
-import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { UserFavoriteManager } from '../user-favorite-manager';
 import { EntityFavoriteStarComponent } from './entity-favorite-star.component';
 

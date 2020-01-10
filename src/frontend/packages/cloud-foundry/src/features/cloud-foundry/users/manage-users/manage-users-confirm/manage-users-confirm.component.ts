@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -17,7 +17,7 @@ import {
   selectUsersRolesChangedRoles,
 } from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.actions';
 import { ChangeUserRole } from '../../../../../actions/users.actions';
 import { CFAppState } from '../../../../../cf-app-state';
@@ -75,7 +75,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     }
   ];
   changes$: Observable<CfRoleChangeWithNames[]>;
-  public userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
+  public userCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
 
   monitorState = AppMonitorComponentTypes.UPDATE;
   private cfGuid$: Observable<string>;
@@ -95,7 +95,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     const schema = isSpace ? cfEntityFactory(spaceEntityType) : cfEntityFactory(organizationEntityType);
     const guid = isSpace ? row.spaceGuid : row.orgGuid;
     return {
-      entityKey: entityCatalogue.getEntityKey(schema),
+      entityKey: entityCatalog.getEntityKey(schema),
       schema,
       monitorState: AppMonitorComponentTypes.UPDATE,
       updateKey: ChangeUserRole.generateUpdatingKey(row.role, row.userGuid),

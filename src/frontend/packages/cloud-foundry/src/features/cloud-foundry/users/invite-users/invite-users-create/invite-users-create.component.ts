@@ -4,8 +4,8 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import {
   StackedInputActionResult,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
@@ -16,7 +16,7 @@ import {
 import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
 import { SpaceUserRoleNames } from '../../../../../store/types/user.types';
@@ -69,7 +69,7 @@ export class InviteUsersCreateComponent implements OnInit {
 
   ngOnInit() {
     this.isSpace = !!this.activeRouteCfOrgSpace.spaceGuid;
-    const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const orgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
     const getOrgAction = getOrgActionBuilder(
       this.activeRouteCfOrgSpace.orgGuid,
@@ -82,7 +82,7 @@ export class InviteUsersCreateComponent implements OnInit {
     ).waitForEntity$.pipe(
       map(entity => entity.entity)
     );
-    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
     const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
     const getSpaceAction = actionBuilder(
       this.activeRouteCfOrgSpace.spaceGuid,

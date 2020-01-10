@@ -11,7 +11,7 @@
       <div class="detach-service-instance__monitor">
         <p>Please confirm that you would like to delete the following service bindings:</p>
         <app-action-monitor [columns]="confirmColumns" [data$]="selectedBindings$"
-          [entityKey]="siBindingCatalogueEntity.entityKey" [schema]="siBindingCatalogueEntity.getSchema()"
+          [entityKey]="siBindingCatalogEntity.entityKey" [schema]="siBindingCatalogEntity.getSchema()"
           [monitorState]="deletingState" [getId]="getId">
         </app-action-monitor>
       </div>

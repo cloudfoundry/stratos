@@ -5,7 +5,7 @@ import { first, map, tap } from 'rxjs/operators';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromCfEntity } from '../../../../../../core/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
-import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';

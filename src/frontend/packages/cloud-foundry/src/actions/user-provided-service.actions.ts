@@ -1,7 +1,7 @@
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
-import { QParam, QParamJoiners } from '../../../store/src/q-param';
+import { QParam, QParamJoiners } from '../shared/q-param';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
@@ -97,7 +97,7 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
     public endpointGuid: string,
     public guid: string,
     data: IUserProvidedServiceInstanceData,
-    public proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
+    public proxyPaginationEntityConfig?: EntityCatalogEntityConfig
   ) {
     super();
     const {
@@ -134,7 +134,7 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
     public endpointGuid: string,
     public guid: string,
     data: Partial<IUserProvidedServiceInstanceData>,
-    public proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
+    public proxyPaginationEntityConfig?: EntityCatalogEntityConfig
   ) {
     super();
     const {
@@ -167,7 +167,7 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
 }
 
 export class DeleteUserProvidedInstance extends CFStartAction implements ICFAction {
-  constructor(public endpointGuid: string, public guid: string, public proxyPaginationEntityConfig?: EntityCatalogueEntityConfig) {
+  constructor(public endpointGuid: string, public guid: string, public proxyPaginationEntityConfig?: EntityCatalogEntityConfig) {
     super();
     this.options = new HttpRequest(
       'DELETE',

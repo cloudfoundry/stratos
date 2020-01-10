@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { EntityCatalogueModule } from '../../core/src/core/entity-catalogue.module';
-import { ENTITY_INFO_HANDLER } from '../../core/src/core/entity-service';
+import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
+import { ENTITY_INFO_HANDLER } from '../../store/src/entity-service';
 import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
 import { ValidateEntitiesStart } from '../../store/src/actions/request.actions';
@@ -62,7 +62,7 @@ function infoValidator(action: ICFAction, dispatcher) {
 }
 @NgModule({
   imports: [
-    EntityCatalogueModule.forFeature(generateCFEntities),
+    EntityCatalogModule.forFeature(generateCFEntities),
     CommonModule,
     SharedModule,
     MDAppModule,

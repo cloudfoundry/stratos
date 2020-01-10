@@ -5,7 +5,7 @@ import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import { GET_CF_INFO, GetCFInfo } from '../../actions/cloud-foundry.actions';
 import { CFAppState } from '../../cf-app-state';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { environment } from '../../../../core/src/environments/environment.prod';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
@@ -25,8 +25,8 @@ export class CloudFoundryEffects {
     ofType<GetCFInfo>(GET_CF_INFO),
     flatMap(action => {
       const actionType = 'fetch';
-      const catalogueEntity = entityCatalogue.getEntity(action.endpointType, action.entityType);
-      const cfInfoKey = catalogueEntity.entityKey;
+      const catalogEntity = entityCatalog.getEntity(action.endpointType, action.entityType);
+      const cfInfoKey = catalogEntity.entityKey;
       this.store.dispatch(new StartRequestAction(action, actionType));
       const requestArgs = {
         headers: { 'x-cap-cnsi-list': action.cfGuid }

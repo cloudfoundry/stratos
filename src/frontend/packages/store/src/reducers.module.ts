@@ -36,7 +36,7 @@ export const appReducers = {
   endpoints: endpointsReducer,
   pagination: requestPaginationReducer,
   request: requestReducer,
-  // This is added as part of the entity catalogue module.
+  // This is added as part of the entity catalog module.
   // requestData,
   dashboard: dashboardReducer,
   actionHistory: actionHistoryReducer,

@@ -1,7 +1,7 @@
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { getPaginationKey } from '../../../store/src/actions/pagination.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { GeneralEntityAppState, GeneralRequestDataState, IRequestTypeState } from '../../../store/src/app-state';
@@ -78,7 +78,7 @@ export interface EntityInlineChildAction {
   entityType: string;
   endpointType: string;
   parentGuid: string;
-  parentEntityConfig: EntityCatalogueEntityConfig;
+  parentEntityConfig: EntityCatalogEntityConfig;
   child?: EntityTreeRelation; // Not required on base actions
   endpointGuid: string;
 }

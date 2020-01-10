@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
 import { userProfileEntitySchema } from '../../../core/src/base-entity-schemas';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { environment } from '../../../core/src/environments/environment';
 import {
   FetchUserProfileAction,
@@ -35,7 +35,7 @@ export class UserProfileEffect {
 
   public static guid = 'userProfile';
 
-  stratosUserConfig = entityCatalogue.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
+  stratosUserConfig = entityCatalog.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
   private stratosUserEntityType = userProfileEntitySchema.entityType;
   private stratosUserEndpointType = userProfileEntitySchema.endpointType;
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { EndpointModel } from '../store/src/types/endpoint.types';
-import { entityCatalogue } from './src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../store/src/entity-catalog/entity-catalog.service';
 
 
 export class EndpointHealthCheck {
@@ -27,7 +27,7 @@ export class EndpointHealthChecks {
   }
 
   public checkEndpoint(endpoint: EndpointModel) {
-    const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
+    const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
     if (endpoint.connectionStatus === 'connected' || epType.unConnectable) {
       const healthCheck = this.healthChecks.find(check => {
         return check.endpointType === endpoint.cnsi_type;

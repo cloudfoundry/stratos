@@ -1,4 +1,4 @@
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
 import { SendEventAction } from '../../actions/internal-events.actions';
 import { endpointSchemaKey } from '../../helpers/entity-factory';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
@@ -9,12 +9,12 @@ import { JetstreamError } from './handle-multi-endpoints.pipe';
 
 export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher) => (
   action: EntityRequestAction,
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes,
   errors: JetstreamError[]
 ) => {
   errors.forEach(error => {
-    const entityErrorAction = catalogueEntity.getRequestAction('failure', action, requestType);
+    const entityErrorAction = catalogEntity.getRequestAction('failure', action, requestType);
     // Dispatch a error action for the specific endpoint that's failed
     const fakedAction = { ...action, endpointGuid: error.guid };
     const errorMessage = error.jetstreamErrorResponse

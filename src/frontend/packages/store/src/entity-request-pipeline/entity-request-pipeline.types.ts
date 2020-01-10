@@ -3,9 +3,9 @@ import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import {
-  StratosBaseCatalogueEntity,
-  StratosCatalogueEndpointEntity,
-} from '../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+  StratosBaseCatalogEntity,
+  StratosCatalogEndpointEntity,
+} from '../entity-catalog/entity-catalog-entity';
 import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, InternalAppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
@@ -22,14 +22,14 @@ export interface JetstreamResponse<T = any> {
 
 export type StartEntityRequestHandler = (
   actionDispatcher: ActionDispatcher,
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes,
   action: EntityRequestAction | PaginatedAction
 ) => void;
 
 export type SucceedOrFailEntityRequestHandler = (
   actionDispatcher: ActionDispatcher,
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes,
   action: EntityRequestAction,
   response: PipelineResult,
@@ -50,7 +50,7 @@ export type MakeEntityRequestPipe<
   > = (
     httpClient: PipelineHttpClient,
     request: HttpRequest<any> | Observable<HttpRequest<any>>,
-    endpointConfig: StratosCatalogueEndpointEntity,
+    endpointConfig: StratosCatalogEndpointEntity,
     endpointGuids: string | string[],
     externalRequest?: boolean
   ) => Observable<JetstreamResponse<T>>;
@@ -58,14 +58,14 @@ export type MakeEntityRequestPipe<
 export type BuildEntityRequestPipe = (
   requestType: ApiRequestTypes,
   requestOptions: HttpRequest<any>,
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   store: Store<any>,
 ) => HttpRequest<any> | Observable<HttpRequest<any>>;
 
 export type NormalizeEntityRequestResponsePipe<
   T = any,
   > = (
-    catalogueEntity: StratosBaseCatalogueEntity,
+    catalogEntity: StratosBaseCatalogEntity,
   ) => NormalizedResponse<T>;
 
 export type EntityRequestHandler = (...args: any[]) => void;
@@ -98,13 +98,13 @@ export type SuccessfulApiResponseDataMapper<O = any, I = O> = (
 export type PreApiRequest = (
   request: HttpRequest<any>,
   action: EntityRequestAction,
-  catalogueEntity: StratosBaseCatalogueEntity
+  catalogEntity: StratosBaseCatalogEntity
 ) => HttpRequest<any> | Observable<HttpRequest<any>>;
 
 export type PrePaginationApiRequest = (
   request: HttpRequest<any>,
   action: PaginatedAction,
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   appState: InternalAppState
 ) => HttpRequest<any> | Observable<HttpRequest<any>>;
 
@@ -114,7 +114,7 @@ export type ApiErrorMessageHandler = (
 
 export interface BasePipelineConfig<T extends AppState = InternalAppState, Y extends Action = Action> {
   requestType: ApiRequestTypes;
-  catalogueEntity: StratosBaseCatalogueEntity;
+  catalogEntity: StratosBaseCatalogEntity;
   action: Y;
   appState: T;
 }

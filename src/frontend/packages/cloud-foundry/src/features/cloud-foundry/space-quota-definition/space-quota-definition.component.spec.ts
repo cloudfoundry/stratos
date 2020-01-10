@@ -3,8 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { endpointEntitySchema } from '../../../../../core/src/base-entity-schemas';
-import { EntityCatalogueHelpers } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.helper';
-import { EntityCatalogueEntityConfig } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
+import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { testSCFEndpoint, testSCFEndpointGuid } from '../../../../../core/test-framework/store-test-helper';
 import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
@@ -51,18 +51,18 @@ describe('SpaceQuotaDefinitionComponent', () => {
       .compileComponents();
 
 
-    const stratosEndpointEntityConfig: EntityCatalogueEntityConfig = endpointEntitySchema;
-    const stratosEndpointEntityKey = EntityCatalogueHelpers.buildEntityKey(
+    const stratosEndpointEntityConfig: EntityCatalogEntityConfig = endpointEntitySchema;
+    const stratosEndpointEntityKey = EntityCatalogHelpers.buildEntityKey(
       stratosEndpointEntityConfig.entityType,
       stratosEndpointEntityConfig.endpointType
     );
 
-    const orgEndpointEntityConfig: EntityCatalogueEntityConfig = cfEntityFactory(organizationEntityType);
-    const orgEntityKey = EntityCatalogueHelpers.buildEntityKey(orgEndpointEntityConfig.entityType, orgEndpointEntityConfig.endpointType);
+    const orgEndpointEntityConfig: EntityCatalogEntityConfig = cfEntityFactory(organizationEntityType);
+    const orgEntityKey = EntityCatalogHelpers.buildEntityKey(orgEndpointEntityConfig.entityType, orgEndpointEntityConfig.endpointType);
     const org = helper.createEmptyOrg(orgGuid, 'org');
 
-    const spaceEndpointEntityConfig: EntityCatalogueEntityConfig = cfEntityFactory(spaceEntityType);
-    const spaceEntityKey = EntityCatalogueHelpers.buildEntityKey(
+    const spaceEndpointEntityConfig: EntityCatalogEntityConfig = cfEntityFactory(spaceEntityType);
+    const spaceEntityKey = EntityCatalogHelpers.buildEntityKey(
       spaceEndpointEntityConfig.entityType,
       spaceEndpointEntityConfig.endpointType
     );

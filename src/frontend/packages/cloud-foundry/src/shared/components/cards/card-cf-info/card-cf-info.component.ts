@@ -5,7 +5,7 @@ import { map, tap } from 'rxjs/operators';
 
 import { fetchAutoscalerInfo } from '../../../../../../cf-autoscaler/src/core/autoscaler-helpers/autoscaler-available';
 import { ICfV2Info } from '../../../../../../core/src/core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {

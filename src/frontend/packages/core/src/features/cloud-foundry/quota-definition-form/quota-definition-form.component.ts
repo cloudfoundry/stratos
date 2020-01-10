@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/src/cf-types';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { quotaDefinitionEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
@@ -14,10 +14,10 @@ import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-facto
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { IEntityMetadata } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { QuotaDefinitionActionBuilder } from '../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 
 export interface QuotaFormValues {
@@ -82,7 +82,7 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   fetchQuotasDefinitions() {
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
     const quotaDefinitionEntity =
-      entityCatalogue.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+      entityCatalog.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
     const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getQuotaDefinitionsAction = actionBuilder(quotaPaginationKey, this.cfGuid, {});
     this.quotaDefinitions$ = getPaginationObservables<APIResource>(
