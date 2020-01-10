@@ -7,7 +7,7 @@ The following instructions cover how to:
 - Deploy Stratos Metrics
 - Connect Stratos Metrics to Stratos to enable Metrics views in Stratos
 
-These instructions assume that you are deploying the SUSE Cloud Application Platform and that you have deployed UAA/SCF using a `scf-config-values` configuration file.
+These instructions assume that you are deploying the SUSE Stratos Console and that you have deployed UAA/SCF using a `scf-config-values` configuration file.
 
 ## Install Stratos with Helm
 

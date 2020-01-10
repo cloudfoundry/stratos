@@ -72,7 +72,7 @@ import { WindowRef } from './window-ref/window-ref.service';
     EndpointsService,
     UserService,
     EntityServiceFactory,
-    CurrentUserPermissionsService
+    CurrentUserPermissionsService,
   ],
   declarations: [
     StatefulIconComponent,
