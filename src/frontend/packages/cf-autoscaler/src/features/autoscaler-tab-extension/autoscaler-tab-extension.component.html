@@ -59,7 +59,7 @@
     </app-tile-group>
     <div *ngIf="appAutoscalerPolicy$ | async as policy" class="autoscaler-tab-policy">
       <app-tile-group *ngIf="policy.enabled">
-        <app-tile>
+        <app-tile class="autoscaler-tab-policy-trigger">
           <mat-card>
             <mat-card-header>
               <mat-card-title>Scaling Rules </mat-card-title>
@@ -91,7 +91,7 @@
             </mat-card-content>
           </mat-card>
         </app-tile>
-        <app-tile>
+        <app-tile class="autoscaler-tab-policy-schedule">
           <mat-card>
             <mat-card-header>
               <mat-card-title>
@@ -102,7 +102,7 @@
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <div class="app-metadata app-metadata-table">
+              <div class="app-metadata app-metadata-table autoscaler-table-policy-specific">
                 <table mat-table [dataSource]="policy && policy.schedules && policy.schedules.specific_date">
                   <ng-container matColumnDef="from">
                     <th mat-header-cell *matHeaderCellDef> From </th>
@@ -133,7 +133,7 @@
                   No specific date schedule.</div>
               </div>
               <br />
-              <div class="app-metadata app-metadata-table">
+              <div class="app-metadata app-metadata-table autoscaler-table-policy-recurring">
                 <table mat-table [dataSource]="policy && policy.schedules && policy.schedules.recurring_schedule">
                   <ng-container matColumnDef="effect">
                     <th mat-header-cell *matHeaderCellDef> Effective Duration </th>

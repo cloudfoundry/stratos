@@ -46,6 +46,11 @@ export class PageTabsPo extends Component {
     return this.getItem(name).click();
   }
 
+  waitForItem(name: string): promise.Promise<void> {
+    const item = new Component(this.getItem(name));
+    return item.waitUntilShown();
+  }
+
   goToItemAndWait(name: string, baseUrl: string, suffix: string): promise.Promise<any> {
     this.clickItem(name);
     if (!suffix.startsWith('/')) {

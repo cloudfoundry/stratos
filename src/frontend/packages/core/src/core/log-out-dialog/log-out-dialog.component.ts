@@ -19,21 +19,22 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
     private store: Store<GeneralEntityAppState>) { }
 
   private autoLogout: Subscription;
-  public countDown: number;
-  public countdownTotal: number;
+  private countDown: number;
+  private countdownTotal: number;
   public percentage = 0;
 
   ngOnInit() {
     const updateInterval = 500;
-    this.countdownTotal = this.countDown = this.data.expiryDate - Date.now();
+    this.countdownTotal = this.calcCountdown();
     this.autoLogout = interval(updateInterval)
       .pipe(
         tap(() => {
+          // Recalculate this every time, as `interval` slows down when tab not focused
+          this.countDown = this.calcCountdown();
           if (this.countDown <= 0) {
             this.autoLogout.unsubscribe();
             this.store.dispatch(new Logout());
           } else {
-            this.countDown -= updateInterval;
             this.percentage = ((this.countdownTotal - this.countDown) / this.countdownTotal) * 100;
           }
         })
@@ -43,5 +44,9 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.percentage = 0;
     this.autoLogout.unsubscribe();
+  }
+
+  private calcCountdown(): number {
+    return this.data.expiryDate - Date.now();
   }
 }

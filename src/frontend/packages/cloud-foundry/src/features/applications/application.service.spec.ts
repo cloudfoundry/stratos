@@ -15,6 +15,7 @@ import { generateTestEntityServiceProvider } from '../../../../core/test-framewo
 import { AppStoreModule } from '../../../../store/src/store.module';
 import { generateCfStoreModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { applicationEntityType } from '../../cf-entity-types';
+import { LongRunningCfOperationsService } from '../../shared/data-services/long-running-cf-op.service';
 import { ApplicationService } from './application.service';
 import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
@@ -44,7 +45,8 @@ describe('ApplicationService', () => {
         PaginationMonitorFactory,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         GitSCMService,
-        ExtensionService
+        ExtensionService,
+        LongRunningCfOperationsService
       ]
     });
   });

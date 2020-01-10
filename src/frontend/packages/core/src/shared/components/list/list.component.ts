@@ -104,6 +104,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   @Input() addForm: NgForm;
 
+  @Input() customFilters: TemplateRef<any>;
+
   @Input() noEntries: TemplateRef<any>;
 
   @Input() noEntriesForCurrentFilter: TemplateRef<any>;

@@ -1,0 +1,6 @@
+<div class="event-actee">
+  <mat-icon [matTooltip]="row.entity.actee_type" [fontSet]="icon[row.entity.actee_type]?.iconFont">
+    {{icon[row.entity.actee_type]?.icon}}</mat-icon>
+  <a *ngIf="row.entity.actee_name || row.entity.actee || row.metadata.guid" (click)="setActee()"
+    routerLink=".">{{ row.entity.actee_name || row.entity.actee || row.metadata.guid}}</a>
+</div>

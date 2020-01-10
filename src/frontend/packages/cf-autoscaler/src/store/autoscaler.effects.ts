@@ -1,3 +1,4 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
@@ -7,6 +8,7 @@ import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { environment } from '../../../core/src/environments/environment';
+import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState } from '../../../store/src/app-state';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import {
@@ -36,6 +38,7 @@ import {
   AutoscalerPaginationParams,
   AutoscalerQuery,
   CREATE_APP_AUTOSCALER_POLICY,
+  CreateAppAutoscalerPolicyAction,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
@@ -47,24 +50,30 @@ import {
   GetAppAutoscalerScalingHistoryAction,
   UPDATE_APP_AUTOSCALER_POLICY,
   UpdateAppAutoscalerPolicyAction,
-  CreateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
 import {
   AppAutoscalerEvent,
   AppAutoscalerFetchPolicyFailedResponse,
   AppAutoscalerMetricData,
   AppAutoscalerMetricDataLocal,
+  AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppScalingTrigger,
-  AppAutoscalerPolicy,
 } from './app-autoscaler.types';
-import { HttpClient } from '@angular/common/http';
 
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
 
-function createAutoscalerRequestMessage(requestType: string, error: { status: string, _body: string }) {
-  return `Unable to ${requestType}: ${error.status} ${error._body}`;
+function extractAutoscalerError(error): string {
+  const httpResponse: HttpErrorResponse = isHttpErrorResponse(error);
+  if (httpResponse) {
+    return httpResponse.error ? httpResponse.error.error : JSON.stringify(httpResponse.error);
+  }
+  return error._body;
+}
+
+function createAutoscalerErrorMessage(requestType: string, error) {
+  return `Unable to ${requestType}: ${error.status} ${extractAutoscalerError(error) || ''}`;
 }
 
 @Injectable()
@@ -97,7 +106,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch autoscaler info', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch autoscaler info', err), action, actionType)
           ]));
     }));
 
@@ -123,7 +132,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch health info', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch health info', err), action, actionType)
           ]));
     }));
 
@@ -138,8 +147,10 @@ export class AutoscalerEffects {
     mergeMap(action => {
       const actionType = 'update';
       this.store.dispatch(new StartRequestAction(action, actionType));
-      return this.http
-        .put<AppAutoscalerPolicy>(`${commonPrefix}/apps/${action.guid}/policy`, {
+      return this.http.put<AppAutoscalerPolicy>(
+        `${commonPrefix}/apps/${action.guid}/policy`,
+        autoscalerTransformMapToArray(action.policy),
+        {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
           mergeMap(response => {
@@ -155,7 +166,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('update policy', err), action, actionType)
           ]));
     }));
 
@@ -172,7 +183,7 @@ export class AutoscalerEffects {
       const actionType = 'delete';
       this.store.dispatch(new StartRequestAction(action, actionType));
       return this.http
-        .get(`${commonPrefix}/apps/${action.guid}/policy`, {
+        .delete(`${commonPrefix}/apps/${action.guid}/policy`, {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
           mergeMap(response => {
@@ -187,7 +198,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('detach policy', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('detach policy', err), action, actionType)
           ]));
     }));
 
@@ -245,7 +256,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch scaling history', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch scaling history', err), action, actionType)
           ]));
     }));
 
@@ -276,7 +287,7 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch metrics', err), action, actionType)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch metrics', err), action, actionType)
           ]));
     }));
 
@@ -287,24 +298,26 @@ export class AutoscalerEffects {
     this.store.dispatch(new StartRequestAction(action, actionType));
     const entity = entityCatalogue.getEntity(action);
     return this.http
-      .put<AppAutoscalerPolicy>(`${commonPrefix}/apps/${action.guid}/policy`, {
-        headers: this.addHeaders(action.endpointGuid),
-        body: autoscalerTransformMapToArray(action.policy)
-      }).pipe(
-        mergeMap(response => {
-          const policyInfo = autoscalerTransformArrayToMap(response);
-          const mappedData = {
-            entities: { [entity.entityKey]: {} },
-            result: []
-          } as NormalizedResponse;
-          this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
-          return [
-            new WrapperRequestActionSuccess(mappedData, action, actionType)
-          ];
-        }),
-        catchError(err => [
-          new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), action, actionType)
-        ]));
+      .put<AppAutoscalerPolicy>(
+        `${commonPrefix}/apps/${action.guid}/policy`,
+        autoscalerTransformMapToArray(action.policy),
+        {
+          headers: this.addHeaders(action.endpointGuid),
+        }).pipe(
+          mergeMap(response => {
+            const policyInfo = autoscalerTransformArrayToMap(response);
+            const mappedData = {
+              entities: { [entity.entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
+            return [
+              new WrapperRequestActionSuccess(mappedData, action, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('create policy', err), action, actionType)
+          ]));
   }
 
   private fetchPolicy(
@@ -354,14 +367,14 @@ export class AutoscalerEffects {
           return res;
         }),
         catchError(err => {
-          const noPolicy = err.status === 404 && err._body === '{}';
+          const noPolicy = err.status === 404;
           if (noPolicy) {
             err._body = 'No policy is defined for this application.';
           }
           const response: AppAutoscalerFetchPolicyFailedResponse = { status: err.status, noPolicy };
 
           return [
-            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), getPolicyAction, actionType, null, response)
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch policy', err), getPolicyAction, actionType, null, response)
           ];
         }));
   }
