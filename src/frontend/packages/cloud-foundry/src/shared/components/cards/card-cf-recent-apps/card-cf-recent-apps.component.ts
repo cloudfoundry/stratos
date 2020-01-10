@@ -11,7 +11,7 @@ import {
 import { IApp } from '../../../../../../core/src/core/cf-api.types';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { appStatsEntityType } from '../../../../cf-entity-types';
 
 const RECENT_ITEMS_COUNT = 10;

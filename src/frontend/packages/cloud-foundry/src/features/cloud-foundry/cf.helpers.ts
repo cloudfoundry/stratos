@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../cf-types';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
 import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';

@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { GetOrganization } from '../../actions/organization.actions';
 import { GetSpace } from '../../actions/space.actions';
 import {

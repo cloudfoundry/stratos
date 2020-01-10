@@ -14,7 +14,7 @@ import {
 } from '../../../../../../../../core/src/shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shared/data-services/scm/scm.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { FetchGitHubRepoInfo } from '../../../../../../actions/github.actions';
 import { CFAppState } from '../../../../../../cf-app-state';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from '../../../../../../cf-entity-types';

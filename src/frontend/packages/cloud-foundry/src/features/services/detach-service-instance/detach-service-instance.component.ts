@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, ReplaySubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import {

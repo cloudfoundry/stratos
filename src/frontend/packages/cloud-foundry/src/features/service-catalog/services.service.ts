@@ -19,7 +19,7 @@ import { EntityServiceFactory } from '../../../../store/src/entity-service-facto
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { serviceBrokerEntityType, servicePlanVisibilityEntityType, spaceEntityType } from '../../cf-entity-types';

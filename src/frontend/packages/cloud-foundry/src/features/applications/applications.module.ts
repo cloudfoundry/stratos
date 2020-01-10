@@ -30,6 +30,7 @@ import { ServicesTabComponent } from './application/application-tabs-base/tabs/s
 import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
 import { CliInfoApplicationComponent } from './cli-info-application/cli-info-application.component';
+import { ApplicationDeploySourceTypes } from './deploy-application/deploy-application-steps.types';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { NewApplicationBaseStepComponent } from './new-application-base-step/new-application-base-step.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
@@ -74,7 +75,8 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
     ApplicationService,
     ApplicationEnvVarsHelper,
     ApplicationMonitorService,
-    DatePipe
+    DatePipe,
+    ApplicationDeploySourceTypes
   ]
 })
 export class ApplicationsModule { }

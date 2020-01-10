@@ -8,7 +8,7 @@ import {
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { stackEntityType } from '../../../../../cf-entity-types';
 import { StackActionBuilders } from '../../../../../entity-action-builders/stack-action-builders';

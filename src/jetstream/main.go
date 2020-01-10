@@ -263,6 +263,16 @@ func main() {
 		return
 	}
 
+	// Init auth service
+	err = portalProxy.InitStratosAuthService(interfaces.AuthEndpointTypes[portalProxy.Config.AuthEndpointType])
+	if err != nil {
+		log.Warnf("Defaulting to UAA authentication: %v", err)
+		err = portalProxy.InitStratosAuthService(interfaces.Remote)
+		if err != nil {
+			log.Fatalf("Could not initialise auth service. %v", err)
+		}
+	}
+
 	// Initialise Plugins
 	portalProxy.loadPlugins()
 
@@ -350,6 +360,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) error {
 	if consoleConfig.IsSetupComplete() {
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
+		portalProxy.Config.AuthEndpointType = consoleConfig.AuthEndpointType
 	}
 
 	return nil
@@ -624,15 +635,6 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		UserInfo: pp.GetCNSIUserFromBasicToken,
 	})
 
-	err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.AuthEndpointType])
-	if err != nil {
-		log.Warnf("Defaulting to UAA authentication: %v", err)
-		err = pp.InitStratosAuthService(interfaces.Remote)
-		if err != nil {
-			log.Fatalf("Could not initialise auth service. %v", err)
-		}
-	}
-
 	// OIDC
 	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
 		Handler: pp.doOidcFlowRequest,
@@ -819,13 +821,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// Add middleware to block requests if unconfigured
 	if needSetupMiddleware {
 		e.Use(p.SetupMiddleware())
-		pp.POST("/v1/setup", p.setupConsole)
-		pp.POST("/v1/setup/check", p.setupConsoleCheck)
+		pp.POST("/v1/setup/check", p.setupGetAvailableScopes)
+		pp.POST("/v1/setup/save", p.setupSaveConfig)
 	}
 
 	loginAuthGroup := pp.Group("/v1/auth")
-	loginAuthGroup.POST("/login/uaa", p.StratosAuthService.Login)
-	loginAuthGroup.POST("/logout", p.StratosAuthService.Logout)
+	loginAuthGroup.POST("/login/uaa", p.consoleLogin)
+	loginAuthGroup.POST("/logout", p.consoleLogout)
 
 	// SSO Routes will only respond if SSO is enabled
 	loginAuthGroup.GET("/sso_login", p.initSSOlogin)

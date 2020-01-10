@@ -16,7 +16,7 @@ import {
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-config';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class ServiceInstancesWallDataSource extends ListDataSource<APIResource> {

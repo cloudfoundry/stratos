@@ -1,3 +1,4 @@
+import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 import {
   Component,
   ComponentFactoryResolver,
@@ -7,9 +8,10 @@ import {
   OnInit,
   ViewChild,
   ViewContainerRef,
+  ElementRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, ReplaySubject, Subscription } from 'rxjs';
+import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
@@ -60,6 +62,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.updateInnerComponent();
   }
 
+  @ViewChild('copyToClipboard', { static: false }) copyToClipboard: CopyToClipboardComponent;
+
   private pRow: EndpointModel;
   @Input('row')
   set row(row: EndpointModel) {
@@ -94,6 +98,13 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         action: () => endpointAction.action(this.pRow),
         can: endpointAction.createVisible(this.rowObs)
       }));
+
+      // Add a copy address to clipboard
+      this.cardMenu.push({
+        label: 'Copy address to Clipboard',
+        action: () => this.copyToClipboard.copyToClipboard(),
+        can: of(true)
+      });
     }
 
     this.updateCardStatus();

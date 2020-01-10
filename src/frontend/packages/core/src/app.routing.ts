@@ -15,13 +15,28 @@ import { ConsoleUaaWizardComponent } from './features/setup/uaa-wizard/console-u
 import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page.component';
 import { SharedModule } from './shared/shared.module';
 import { NotSetupGuardService } from './core/not-setup-guard.service';
+import { SetupWelcomeComponent } from './features/setup/setup-welcome/setup-welcome.component';
+import { LocalAccountWizardComponent } from './features/setup/local-account-wizard/local-account-wizard.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   {
-    path: 'uaa',
-    component: ConsoleUaaWizardComponent,
-    canActivate: [NotSetupGuardService]
+    path: 'setup',
+    canActivate: [NotSetupGuardService],
+    children: [
+      {
+        path: '',
+        component: SetupWelcomeComponent
+      },
+      {
+        path: 'uaa',
+        component: ConsoleUaaWizardComponent
+      },
+      {
+        path: 'local',
+        component: LocalAccountWizardComponent
+      },
+    ]
   },
   { path: 'upgrade', component: UpgradePageComponent },
   { path: 'domainMismatch', component: DomainMismatchComponent },

@@ -21,3 +21,7 @@ export interface UaaSetupData {
   use_sso: boolean;
   console_admin_scope?: string;
 }
+
+export interface LocalAdminSetupData {
+  local_admin_password: string;
+}

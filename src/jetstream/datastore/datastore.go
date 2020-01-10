@@ -96,7 +96,6 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 	}
 
 	// Database Config validation - check required values and the SSL Mode
-
 	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
 	if err != nil {
 		return dc, err
@@ -122,8 +121,8 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 	err = vala.BeginValidation().Validate(
 		vala.IsNotNil(username, "username"),
 		vala.IsNotNil(password, "password"),
-		vala.IsNotNil(database, "database"),
-		vala.IsNotNil(host, "host"),
+		vala.IsNotNil(database, "database name"),
+		vala.IsNotNil(host, "host/hostname"),
 		vala.GreaterThan(port, 0, "port"),
 		vala.Not(vala.GreaterThan(port, 65535, "port")),
 	).Check()

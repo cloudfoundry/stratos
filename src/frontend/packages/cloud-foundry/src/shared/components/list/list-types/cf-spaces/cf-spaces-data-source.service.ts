@@ -18,7 +18,7 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 
 export class CfSpacesDataSourceService extends ListDataSource<APIResource> {

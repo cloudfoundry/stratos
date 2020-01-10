@@ -2,7 +2,11 @@
   <mat-icon *ngIf="icon && !tooltip" class="metadata-item__icon" [fontSet]="iconFont" [ngClass]="{'metadata-item__icon_spacer': (icon === '-')}">{{ icon }}</mat-icon>
   <mat-icon *ngIf="icon && tooltip" matTooltip="{{ tooltip }}" [fontSet]="iconFont" class="metadata-item__icon" [ngClass]="{'metadata-item__icon_spacer': (icon === '-')}">{{ icon }}</mat-icon>
   <div class="metadata-item__content" [ngClass]="{'metadata-item__content-label-only': metadataValue.childNodes.length === 0}">
-    <div *ngIf="label" [ngClass]="{'metadata-item__label-only': metadataValue.childNodes.length === 0}" class="metadata-item__label">{{ label }}</div>
+    <div *ngIf="label" [ngClass]="{'metadata-item__label-only': metadataValue.childNodes.length === 0}" class="metadata-item__label">
+      <div [ngClass]="{'metadata-item__label-copy': clipboardValue}">{{ label }}</div>
+      <app-copy-to-clipboard *ngIf="clipboardValue" [compact]="true" [text]="clipboardValue" tooltip="Copy to clipboard" [showSuccessText]="false">
+      </app-copy-to-clipboard>
+    </div>
     <div class="metadata-item__value">
       <div #metadataValue>
         <ng-content></ng-content>

@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { FetchAllServiceBindings } from '../../../../../../cloud-foundry/src/actions/service-bindings.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { serviceBindingEntityType, serviceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
@@ -23,6 +23,7 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import {
   AppServiceBindingListConfigService,
 } from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
+import { ServiceActionHelperService } from '../../../../shared/data-services/service-action-helper.service';
 import { ApplicationService } from '../../application.service';
 
 @Injectable()
@@ -49,9 +50,10 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
     appService: ApplicationService,
     datePipe: DatePipe,
     currentUserPermissionService: CurrentUserPermissionsService,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    serviceActionHelperService: ServiceActionHelperService
   ) {
-    super(store, appService, datePipe, currentUserPermissionService);
+    super(store, appService, datePipe, currentUserPermissionService, serviceActionHelperService);
 
     this.getGlobalActions = () => null;
     this.getMultiActions = () => null;

@@ -1,3 +1,5 @@
+import { stratosEndpointGuidKey } from '../entity-request-pipeline/pipeline.types';
+
 export const mergeState = (state, newState) => {
   const baseState = { ...state };
 
@@ -39,7 +41,7 @@ export const deepMergeState = (state, newState) => {
 
 export function mergeEntity(baseEntity, newEntity) {
   if (baseEntity && baseEntity.entity) {
-    return {
+    const merged = {
       entity: merge(baseEntity.entity, newEntity.entity),
       // Always apply the metadata regardless of whether it exists in the baseEntity or not
       // (for cases where we fetch missing inline data of an entity before the entity exists, for example fetch orgs and their spaces..
@@ -47,6 +49,10 @@ export function mergeEntity(baseEntity, newEntity) {
       // main org and mark it as fetched)
       metadata: baseEntity.metadata ? merge(baseEntity.metadata, newEntity.metadata) : newEntity.metadata
     };
+    if (baseEntity[stratosEndpointGuidKey]) {
+      merged[stratosEndpointGuidKey] = baseEntity[stratosEndpointGuidKey];
+    }
+    return merged;
   } else {
     return merge(baseEntity, newEntity);
   }

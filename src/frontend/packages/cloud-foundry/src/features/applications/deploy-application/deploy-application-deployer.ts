@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
-import { catchError, combineLatest, filter, first, map, mergeMap, share, tap, switchMap } from 'rxjs/operators';
+import { catchError, combineLatest, filter, first, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
@@ -17,6 +17,7 @@ import {
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
+import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
 
 
 export interface DeployApplicationDeployerStatus {
@@ -109,8 +110,14 @@ export class DeployApplicationDeployer {
 
     const readyFilter = this.fsFileInfo ?
       () => true :
-      (appDetail: DeployApplicationState) =>
-        !!appDetail.applicationSource && !!appDetail.applicationSource.projectName && !!appDetail.applicationOverrides;
+      (appDetail: DeployApplicationState) => {
+        if (!appDetail.applicationSource || !appDetail.applicationOverrides) {
+          return;
+        }
+        return (!!appDetail.applicationSource.gitDetails && !!appDetail.applicationSource.gitDetails.projectName) ||
+          (!!appDetail.applicationSource.dockerDetails && !!appDetail.applicationSource.dockerDetails.dockerImage);
+
+      };
     this.isOpen = true;
     this.connectSub = this.store.select(selectDeployAppState).pipe(
       filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
@@ -155,7 +162,7 @@ export class DeployApplicationDeployer {
       })
     ).subscribe();
 
-    // Watch for updates to the app overrides - use case is app overrides beinbg set after source file/folder upload
+    // Watch for updates to the app overrides - use case is app overrides being set after source file/folder upload
     this.updateSub = this.store.select(selectDeployAppState).pipe(
       filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       tap((appDetail) => {
@@ -186,21 +193,23 @@ export class DeployApplicationDeployer {
   sendProjectInfo = (appSource: DeployApplicationSource) => {
     if (appSource.type.group === 'gitscm') {
       return this.sendGitSCMSourceMetadata(appSource);
-    } else if (appSource.type.id === 'giturl') {
+    } else if (appSource.type.id === DEPLOY_TYPES_IDS.GIT_URL) {
       return this.sendGitUrlSourceMetadata(appSource);
-    } else if (appSource.type.id === 'file' || appSource.type.id === 'folder') {
+    } else if (appSource.type.id === DEPLOY_TYPES_IDS.FILE || appSource.type.id === DEPLOY_TYPES_IDS.FOLDER) {
       return this.sendLocalSourceMetadata();
+    } else if (appSource.type.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
+      return this.sendDockerImageMetadata(appSource);
     }
     return '';
   }
 
   sendGitSCMSourceMetadata = (appSource: DeployApplicationSource) => {
     const gitscm = {
-      project: appSource.projectName,
-      branch: appSource.branch.name,
+      project: appSource.gitDetails.projectName,
+      branch: appSource.gitDetails.branch.name,
       type: appSource.type.group,
-      commit: appSource.commit,
-      url: appSource.url,
+      commit: appSource.gitDetails.commit,
+      url: appSource.gitDetails.url,
       scm: appSource.type.id
     };
 
@@ -214,8 +223,8 @@ export class DeployApplicationDeployer {
 
   sendGitUrlSourceMetadata = (appSource: DeployApplicationSource) => {
     const gitUrl = {
-      url: appSource.projectName,
-      branch: appSource.branch.name,
+      url: appSource.gitDetails.projectName,
+      branch: appSource.gitDetails.branch.name,
       type: appSource.type.id
     };
 
@@ -223,6 +232,22 @@ export class DeployApplicationDeployer {
       message: JSON.stringify(gitUrl),
       timestamp: Math.round((new Date()).getTime() / 1000),
       type: SocketEventTypes.SOURCE_GITURL
+    };
+    return JSON.stringify(msg);
+  }
+
+  sendDockerImageMetadata = (appSource: DeployApplicationSource) => {
+    const dockerInfo = {
+      applicationName: appSource.dockerDetails.applicationName,
+      dockerImage: appSource.dockerDetails.dockerImage,
+      dockerUsername: appSource.dockerDetails.dockerUsername,
+      type: appSource.type.id
+    };
+
+    const msg = {
+      message: JSON.stringify(dockerInfo),
+      timestamp: Math.round((new Date()).getTime() / 1000),
+      type: SocketEventTypes.SOURCE_DOCKER_IMG
     };
     return JSON.stringify(msg);
   }
@@ -400,4 +425,5 @@ export class DeployApplicationDeployer {
       });
     }
   }
+
 }

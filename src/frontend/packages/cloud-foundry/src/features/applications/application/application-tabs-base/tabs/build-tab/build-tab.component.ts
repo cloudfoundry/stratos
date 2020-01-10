@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { AppMetadataTypes, GetAppStatsAction } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { UpdateExistingApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
@@ -23,6 +23,7 @@ import { ActionState } from '../../../../../../../../store/src/reducers/api-requ
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
 
@@ -128,6 +129,14 @@ export class BuildTabComponent implements OnInit {
             deploySource.label = scm.getLabel();
             deploySource.commitURL = scm.getCommitURL(deploySource.project, deploySource.commit);
             deploySource.icon = scm.getIcon();
+          }
+
+          if (deploySource.type === DEPLOY_TYPES_IDS.DOCKER_IMG) {
+            return {
+              type: 'docker',
+              dockerImage: app.app.entity.docker_image,
+              dockerUrl: this.createDockerImageUrl(deploySource.dockerImage || app.app.entity.docker_image)
+            };
           }
 
           return deploySource;

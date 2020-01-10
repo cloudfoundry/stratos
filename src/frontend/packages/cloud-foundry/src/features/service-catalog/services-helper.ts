@@ -24,7 +24,7 @@ import { getPaginationObservables } from '../../../../store/src/reducers/paginat
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import {

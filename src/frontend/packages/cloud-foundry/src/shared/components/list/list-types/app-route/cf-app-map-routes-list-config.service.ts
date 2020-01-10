@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { GetSpaceRoutes } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType, spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';

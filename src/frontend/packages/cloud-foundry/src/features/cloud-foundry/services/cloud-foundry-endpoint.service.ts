@@ -39,7 +39,7 @@ import { APIResource, EntityInfo } from '../../../../../store/src/types/api.type
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { CfInfoDefinitionActionBuilders } from '../../../entity-action-builders/cf-info.action-builders';

@@ -22,7 +22,7 @@ import {
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import {
   serviceBindingEntityType,
@@ -101,7 +101,8 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
           )))
       }];
   }
-  ngOnInit(): void {
+
+  ngOnInit() {
     this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, cfEntityFactory(serviceBindingEntityType));
 
     this.isUserProvidedServiceInstance = !!isUserProvidedServiceInstance(this.row.entity.service_instance.entity);
@@ -125,8 +126,8 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsServiceInstance() {
-    const serviceIntanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
-    const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('get');
+    const serviceInstanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('get');
     const getServiceInstanceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid);
     const serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
       this.row.entity.service_instance_guid,
@@ -237,7 +238,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     });
   }
 
-  detach = () => {
+  private detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
       [this.row],
       this.row.entity.service_instance_guid,
@@ -247,7 +248,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     );
   }
 
-  edit = () => this.serviceActionHelperService.editServiceBinding(
+  private edit = () => this.serviceActionHelperService.editServiceBinding(
     this.row.entity.service_instance_guid,
     this.appService.cfGuid,
     { appId: this.appService.appGuid },

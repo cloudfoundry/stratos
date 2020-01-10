@@ -1,7 +1,7 @@
 import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
 import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../store/src/actions/metrics.actions';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 
 class CfMetricsAction extends MetricsAction {
   constructor(

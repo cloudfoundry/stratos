@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, withLatestFrom } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 import {
   UsersRolesActions,
   UsersRolesClearUpdateState,
