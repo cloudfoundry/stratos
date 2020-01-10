@@ -1,20 +1,11 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
-
-// Import Xterm and Xterm Fit Addon
+import { ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 
-import { Observable, Subject, Subscription } from 'rxjs';
 import { EventWatcherService } from '../../../core/event-watcher/event-watcher.service';
 
+// Import Xterm and Xterm Fit Addon
 @Component({
   selector: 'app-ssh-viewer',
   templateUrl: './ssh-viewer.component.html',
@@ -56,7 +47,6 @@ export class SshViewerComponent implements OnInit, OnDestroy {
 
     this.resizeSubscription = this.resizer.resizeEvent$.subscribe(r => {
       if (this.xtermFitAddon) {
-        console.log('Window was resized');
         this.resize();
       }
     });
@@ -76,7 +66,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     this.xterm = new Terminal();
     this.xterm.loadAddon(this.xtermFitAddon);
     this.xterm.open(this.container.nativeElement);
-//    this.xtermFitAddon.fit();
+    //    this.xtermFitAddon.fit();
     this.resize();
 
     this.xterm.onKey(e => {

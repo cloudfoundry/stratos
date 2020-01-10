@@ -4,6 +4,7 @@ import { e2e } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
 import { CFHelpers } from '../helpers/cf-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFUsersListComponent } from '../po/cf-users-list.po';
 import { InviteUserStepperPo } from '../po/invite-users-stepper.po';
 import { StackedInputActionsPo } from '../po/stacked-input-actions.po';
@@ -184,7 +185,7 @@ export function setupInviteUserTests(
         usersTable.getPermissions(0, false).getChips().then(chips => {
           expect(chips.length).toBe(1);
           chips[0].getText().then(text => {
-            expect(text.startsWith('Manager')).toBeTruthy();
+            expect(text.startsWith(spaceRole)).toBeTruthy();
           });
         });
       } else {
@@ -192,28 +193,34 @@ export function setupInviteUserTests(
       }
     }
 
-    it('Invite two users', () => {
-      localLog('Invite two users: Started');
-      stackedActions.addInput();
-      expect(stackedActions.getInputCount()).toBe(2);
+    describe('', () => {
+      extendE2ETestTime(60000);
 
-      const user1 = InviteUserStepperPo.createUserEmail(null, 'Invite1');
-      const user2 = InviteUserStepperPo.createUserEmail(null, 'Invite2');
-      stackedActions.setInput({ [fieldOne]: user1, [fieldTwo]: user2 });
+      it('Invite two users', () => {
+        localLog('Invite two users: Started');
+        stackedActions.addInput();
+        expect(stackedActions.getInputCount()).toBe(2);
 
-      const spaceRole = 'Manager';
-      if (isSpace) {
-        inviteUserStepper.setSpaceRole(2);
-      }
-      inviteUserStepper.next();
-      usersToDelete.push(user1, user2);
+        const user1 = InviteUserStepperPo.createUserEmail(null, 'Invite1');
+        const user2 = InviteUserStepperPo.createUserEmail(null, 'Invite2');
+        stackedActions.setInput({ [fieldOne]: user1, [fieldTwo]: user2 });
 
-      usersTable.waitUntilShown(null, 15000);
-      usersTable.waitForNoLoadingIndicator();
+        const spaceRole = 'Manager';
+        if (isSpace) {
+          inviteUserStepper.setSpaceRole(2);
+        }
+        inviteUserStepper.next();
+        usersToDelete.push(user1, user2);
 
-      testUser(user1, spaceRole);
-      testUser(user2, spaceRole);
+        usersTable.waitUntilShown(null, 15000);
+        usersTable.waitForNoLoadingIndicator();
+
+        testUser(user1, spaceRole);
+        testUser(user2, spaceRole);
+      });
     });
+
+
 
     afterAll(() => {
       localLog('afterAll: Started');

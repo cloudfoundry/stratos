@@ -1,13 +1,17 @@
-import { cfUserEntityType } from '../../cf-entity-types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
-import { GET_ORGANIZATION_USERS_SUCCESS, GetAllOrgUsers } from '../../actions/organization.actions';
-import { createDefaultUserRelations } from '../../actions/user.actions.helpers';
-import { ADD_ROLE_SUCCESS, ChangeUserRole, REMOVE_ROLE_SUCCESS } from '../../actions/users.actions';
 import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { deepMergeState } from '../../../../store/src/helpers/reducer.helper';
 import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { GET_ORGANIZATION_USERS_SUCCESS, GetAllOrgUsers } from '../../actions/organization.actions';
+import {
+  ADD_ROLE_SUCCESS,
+  ChangeUserRole,
+  createDefaultUserRelations,
+  REMOVE_ROLE_SUCCESS,
+} from '../../actions/users.actions';
+import { cfUserEntityType } from '../../cf-entity-types';
 import {
   CfUser,
   CfUserMissingOrgRoles,

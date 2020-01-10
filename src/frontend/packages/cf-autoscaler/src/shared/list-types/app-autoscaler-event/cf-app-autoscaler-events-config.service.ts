@@ -84,7 +84,7 @@ export class CfAppAutoscalerEventsConfigService
   isLocal = false;
 
   showCustomTime = true;
-  customTimePollingInterval = 120000;
+  customTimePollingInterval = 30000;
   customTimeInitialValue = '1:month';
   customTimeWindows: ITimeRange[] = [
     {

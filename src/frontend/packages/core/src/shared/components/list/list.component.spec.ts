@@ -6,6 +6,7 @@ import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';
+import { GeneralAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
@@ -20,7 +21,6 @@ import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers'
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
-import { InternalAppState, GeneralAppState } from '../../../../../store/src/app-state';
 
 class MockedNgZone {
   run = fn => fn();

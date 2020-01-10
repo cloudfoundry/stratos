@@ -1,11 +1,12 @@
+import { ITileGraphic } from '../../../../core/src/shared/components/tile/tile-selector.types';
 import { NewAppCFDetails } from './create-application.types';
 import { GitBranch, GitCommit } from './git.types';
-import { ITileGraphic } from '../../../../core/src/shared/components/tile/tile-selector.types';
 
 export interface SourceType {
   name: string;
   id: string;
   helpText?: string;
+  disabledText?: string;
   group?: string;
   graphic?: ITileGraphic;
 }
@@ -46,22 +47,28 @@ export enum SocketEventTypes {
   SOURCE_FILE_ACK = 30005,
   SOURCE_GITURL = 30006,
   SOURCE_WAIT_ACK = 30007,
+  SOURCE_DOCKER_IMG = 30008,
   OVERRIDES_REQUIRED = 50000,
   OVERRIDES_SUPPLIED = 50001
 }
 
 export interface DeployApplicationSource {
   type: SourceType;
-  projectName?: string;
-  branch?: GitBranch;
-  commit?: GitCommit;
-  branchName?: string;
-  url?: string;
+  gitDetails?: GitAppDetails;
+  dockerDetails?: DockerAppDetails;
+}
+
+export interface DockerAppDetails {
+  applicationName: string;
+  dockerImage: string;
+  dockerUsername?: string;
 }
 
 export interface GitAppDetails {
   projectName: string;
   branch: GitBranch;
+  commit?: GitCommit;
+  branchName?: string;
   url?: string;
 }
 
@@ -81,6 +88,8 @@ export interface OverrideAppDetails {
   healthCheckType: string;
   stack: string;
   time: number;
+  dockerImage: string;
+  dockerUsername: string;
 }
 
 export interface ProjectExists {

@@ -1,5 +1,5 @@
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 
 /**
  * A structure which represents the tree like layout of entity dependencies. For example organization --> space --> routes
@@ -18,7 +18,7 @@ export class EntityTreeRelation {
 
   /**
    * Creates an instance of EntityTreeRelation.
-   * @param [isArray=false] is this a collection of entities (should be paginationed) or not
+   * @param [isArray=false] is this a collection of entities (should be paginated) or not
    * @param paramName parameter name of the entity within the schema. For example `space` may be `spaces` (entity.spaces)
    * @param [path=''] location of the entity within the parent. For example `space` entity maybe be `entity.spaces`
    */
