@@ -11,4 +11,6 @@ $suse-theme-primary: mat-palette($suse-primary);
 $suse-theme-warn: mat-palette($mat-red);
 $stratos-theme: mat-light-theme($suse-theme-primary, $suse-theme-primary, $suse-theme-warn);
 
+$stratos-dark-theme-supported: false;
+
 @import "custom/suse"
