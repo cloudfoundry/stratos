@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { IEntityMetadata } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
@@ -17,18 +18,17 @@ import {
   UserRoleInSpace,
 } from '../../../../cloud-foundry/src/store/types/user.types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import {
   getPaginationObservables,
   PaginationObservables,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { cfEntityFactory } from '../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { UserActionBuilder } from '../../entity-action-builders/user.action-builders';
 import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
 import {
@@ -48,9 +48,9 @@ import {
 export class CfUserService {
   private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
 
-  users: { [guid: string]: Observable<APIResource<CfUser>> } = {};
+  private userCatalogEntity = entityCatalog.getEntity<IEntityMetadata, any, UserActionBuilder>(CF_ENDPOINT_TYPE, cfUserEntityType);
 
-  userEntity = entityCatalogue.getEntity<IEntityMetadata, any, UserActionBuilder>(CF_ENDPOINT_TYPE, cfUserEntityType);
+  users: { [guid: string]: Observable<APIResource<CfUser>> } = {};
 
   constructor(
     private store: Store<CFAppState>,
@@ -86,7 +86,7 @@ export class CfUserService {
           return observableOf(users.filter(o => o.metadata.guid === userGuid)[0]);
         }
         if (!this.users[userGuid]) {
-          const actionBuilder = this.userEntity.actionOrchestrator.getActionBuilder('get');
+          const actionBuilder = this.userCatalogEntity.actionOrchestrator.getActionBuilder('get');
           const getUserAction = actionBuilder(userGuid, endpointGuid);
           this.users[userGuid] = this.entityServiceFactory.create<APIResource<CfUser>>(
             userGuid,
@@ -373,13 +373,11 @@ export class CfUserService {
   }
 
   private createCfGetUsersAction = (cfGuid: string): PaginatedAction => {
-    const actionBuilder = this.userEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    return actionBuilder(cfGuid, null);
+    return this.userCatalogEntity.actionOrchestrator.getActionBuilder('getMultiple')(cfGuid, null);
   }
 
   private createOrgGetUsersAction = (isAdmin: boolean, cfGuid: string, orgGuid: string): PaginatedAction => {
-    const actionBuilder = this.userEntity.actionOrchestrator.getActionBuilder('getAllInOrganization');
-    return actionBuilder(
+    return this.userCatalogEntity.actionOrchestrator.getActionBuilder('getAllInOrganization')(
       orgGuid,
       cfGuid,
       createEntityRelationPaginationKey(organizationEntityType, orgGuid),
@@ -388,8 +386,7 @@ export class CfUserService {
   }
 
   private createSpaceGetUsersAction = (isAdmin: boolean, cfGuid: string, spaceGuid: string, ): PaginatedAction => {
-    const actionBuilder = this.userEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
-    return actionBuilder(
+    return this.userCatalogEntity.actionOrchestrator.getActionBuilder('getAllInSpace')(
       spaceGuid,
       cfGuid,
       createEntityRelationPaginationKey(spaceEntityType, spaceGuid),

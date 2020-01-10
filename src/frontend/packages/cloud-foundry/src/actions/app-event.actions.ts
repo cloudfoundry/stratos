@@ -1,9 +1,10 @@
-import { QParam, QParamJoiners } from '../../../store/src/q-param';
+import { HttpParams, HttpRequest } from '@angular/common/http';
+
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
-import { appEventEntityType } from '../cf-entity-types';
+import { cfEventEntityType } from '../cf-entity-types';
+import { QParam, QParamJoiners } from '../shared/q-param';
 import { CFStartAction } from './cf-action.types';
-import { HttpRequest, HttpParams } from '@angular/common/http';
 
 export const AppGetAllEvents = {
   GET_ALL: '[Application Event] Get all',
@@ -34,8 +35,8 @@ export class GetAllAppEvents extends CFStartAction implements PaginatedAction {
     AppGetAllEvents.GET_ALL_FAILED
   ];
 
-  entity = [cfEntityFactory(appEventEntityType)];
-  entityType = appEventEntityType;
+  entity = [cfEntityFactory(cfEventEntityType)];
+  entityType = cfEventEntityType;
   options: HttpRequest<any>;
   initialParams = {
     'order-direction': 'desc',

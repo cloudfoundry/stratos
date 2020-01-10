@@ -4,15 +4,15 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/src/cf-types';
 import {
   SpaceQuotaDefinitionActionBuilders,
 } from '../../../../../../cloud-foundry/src/entity-action-builders/space-quota.action-builders';
 import { AppState } from '../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../core/cf-api.types';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../core/entity-catalogue/entity-catalogue.types';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
 import { spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
@@ -47,7 +47,7 @@ export class CreateSpaceQuotaStepComponent {
     const formValues = this.form.formGroup.value;
 
     const entityConfig =
-      entityCatalogue.getEntity<IEntityMetadata, any, SpaceQuotaDefinitionActionBuilders>(CF_ENDPOINT_TYPE, spaceQuotaEntityType);
+      entityCatalog.getEntity<IEntityMetadata, any, SpaceQuotaDefinitionActionBuilders>(CF_ENDPOINT_TYPE, spaceQuotaEntityType);
     entityConfig.actionDispatchManager.dispatchCreate(formValues.name, this.cfGuid, {
       orgGuid: this.orgGuid,
       createQuota: formValues

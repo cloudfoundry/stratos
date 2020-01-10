@@ -4,6 +4,9 @@ import {
   BooleanIndicatorComponent,
 } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
+import {
+  CopyToClipboardComponent,
+} from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import {
   generateCfBaseTestModulesNoShared,
@@ -21,7 +24,8 @@ describe('CardCfInfoComponent', () => {
         declarations: [
           CardCfInfoComponent,
           MetadataItemComponent,
-          BooleanIndicatorComponent
+          BooleanIndicatorComponent,
+          CopyToClipboardComponent
         ],
         imports: generateCfBaseTestModulesNoShared(),
         providers: [

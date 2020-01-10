@@ -24,6 +24,7 @@ import { ApplicationMonitorService } from '../../../../features/applications/app
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { CardAppStatusComponent } from '../card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './card-app-uptime.component';
+import { CopyToClipboardComponent } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 
 describe('CardAppUptimeComponent', () => {
   let component: CardAppUptimeComponent;
@@ -40,6 +41,7 @@ describe('CardAppUptimeComponent', () => {
         ApplicationStateIconPipe,
         UptimePipe,
         MetadataItemComponent,
+        CopyToClipboardComponent,
       ],
       imports: [
         ...generateCfStoreModules(),

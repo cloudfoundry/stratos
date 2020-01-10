@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -7,6 +6,20 @@ import { StratosActionType } from '../../../../core/src/core/extension/extension
 import {
   PageNotFoundComponentComponent,
 } from '../../../../core/src/core/page-not-found-component/page-not-found-component.component';
+import { AddQuotaComponent } from '../../../../core/src/features/cloud-foundry/add-quota/add-quota.component';
+import {
+  AddSpaceQuotaComponent,
+} from '../../../../core/src/features/cloud-foundry/add-space-quota/add-space-quota.component';
+import { EditQuotaComponent } from '../../../../core/src/features/cloud-foundry/edit-quota/edit-quota.component';
+import {
+  EditSpaceQuotaComponent,
+} from '../../../../core/src/features/cloud-foundry/edit-space-quota/edit-space-quota.component';
+import {
+  CloudFoundryOrganizationSpaceQuotasComponent,
+} from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-space-quotas/cloud-foundry-organization-space-quotas.component';
+import {
+  CloudFoundryQuotasComponent,
+} from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
 import { AddOrganizationComponent } from './add-organization/add-organization.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
@@ -31,11 +44,15 @@ import {
   CloudFoundryCellSummaryComponent,
 } from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-summary/cloud-foundry-cell-summary.component';
 import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-cells/cloud-foundry-cells.component';
+import { CloudFoundryEventsComponent } from './tabs/cloud-foundry-events/cloud-foundry-events.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
 import {
   CloudFoundryOrganizationBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component';
+import {
+  CloudFoundryOrganizationEventsComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-events/cloud-foundry-organization-events.component';
 import {
   CloudFoundryOrganizationSpacesComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-organization-spaces.component';
@@ -45,6 +62,9 @@ import {
 import {
   CloudFoundrySpaceAppsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-apps/cloud-foundry-space-apps.component';
+import {
+  CloudFoundrySpaceEventsComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-events/cloud-foundry-space-events.component';
 import {
   CloudFoundrySpaceRoutesComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-routes/cloud-foundry-space-routes.component';
@@ -79,12 +99,9 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
 import { InviteUsersComponent } from './users/invite-users/invite-users.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
-import { AddQuotaComponent } from '../../../../core/src/features/cloud-foundry/add-quota/add-quota.component';
-import { AddSpaceQuotaComponent } from '../../../../core/src/features/cloud-foundry/add-space-quota/add-space-quota.component';
-import { EditQuotaComponent } from '../../../../core/src/features/cloud-foundry/edit-quota/edit-quota.component';
-import { EditSpaceQuotaComponent } from '../../../../core/src/features/cloud-foundry/edit-space-quota/edit-space-quota.component';
-import { CloudFoundryQuotasComponent } from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
-import { CloudFoundryOrganizationSpaceQuotasComponent } from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-space-quotas/cloud-foundry-organization-space-quotas.component';
+
+/* tslint:disable:max-line-length */
+
 
 /* tslint:enable:max-line-length */
 
@@ -255,6 +272,10 @@ const cloudFoundry: Routes = [{
               component: CloudFoundryQuotasComponent
             },
             {
+              path: 'events',
+              component: CloudFoundryEventsComponent
+            },
+            {
               path: '**',
               component: PageNotFoundComponentComponent,
               canActivate: [DynamicExtensionRoutes],
@@ -324,6 +345,10 @@ const cloudFoundry: Routes = [{
                   component: CloudFoundryOrganizationSpaceQuotasComponent
                 },
                 {
+                  path: 'events',
+                  component: CloudFoundryOrganizationEventsComponent
+                },
+                {
                   path: '**',
                   component: PageNotFoundComponentComponent,
                   canActivate: [DynamicExtensionRoutes],
@@ -376,6 +401,10 @@ const cloudFoundry: Routes = [{
                 {
                   path: 'space-quota',
                   component: SpaceQuotaDefinitionComponent
+                },
+                {
+                  path: 'events',
+                  component: CloudFoundrySpaceEventsComponent
                 },
                 {
                   path: '**',

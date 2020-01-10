@@ -1,4 +1,4 @@
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/src/cf-types';
 import { cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
 import { CFEntitySchema } from '../../../../cloud-foundry/src/cf-entity-schema-types';

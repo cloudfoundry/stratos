@@ -53,8 +53,8 @@ import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pa
 import { GeneralAppState } from '../../../../../store/src/app-state';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
   EntitySelectConfig,
@@ -103,6 +103,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   public entitySelectConfig: EntitySelectConfig;
 
   @Input() addForm: NgForm;
+
+  @Input() customFilters: TemplateRef<any>;
 
   @Input() noEntries: TemplateRef<any>;
 
@@ -684,13 +686,13 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     return actions;
   }
 
-  private getRowStateGeneratorFromEntityMonitor(entityConfig: EntityCatalogueEntityConfig, dataSource: IListDataSource<T>) {
+  private getRowStateGeneratorFromEntityMonitor(entityConfig: EntityCatalogEntityConfig, dataSource: IListDataSource<T>) {
     return (row) => {
       if (!entityConfig || !row) {
         return observableOf(getDefaultRowState());
       }
-      const catalogueEntity = entityCatalogue.getEntity(entityConfig);
-      const entityMonitor = catalogueEntity.getEntityMonitor(
+      const catalogEntity = entityCatalog.getEntity(entityConfig);
+      const entityMonitor = catalogEntity.getEntityMonitor(
         this.store,
         dataSource.getRowUniqueId(row),
         {

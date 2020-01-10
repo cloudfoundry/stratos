@@ -11,7 +11,6 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list-types/github-commits/github-commits-list-config-deploy.service';
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { GitSCMService } from '../../../../../../../core/src/shared/data-services/scm/scm.service';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
 
 @Component({
   selector: 'app-commit-list-wrapper',

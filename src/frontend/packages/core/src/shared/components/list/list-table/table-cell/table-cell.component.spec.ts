@@ -9,7 +9,7 @@ import {
 } from '../../../../../../../cloud-foundry/src/shared/components/cf-role-checkbox/cf-role-checkbox.component';
 import {
   EventTabActorIconPipe,
-} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-events/table-cell-event-action/event-tab-actor-icon.pipe';
 import {
   RunningInstancesComponent,
 } from '../../../../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
@@ -35,6 +35,7 @@ import { AppChipsComponent } from '../../../chips/chips.component';
 import { GithubCommitAuthorComponent } from '../../../github-commit-author/github-commit-author.component';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { listTableCells, TableCellComponent } from './table-cell.component';
+
 
 /* tslint:enable:max-line-length */
 
@@ -62,7 +63,7 @@ describe('TableCellComponent', () => {
         GithubCommitAuthorComponent,
         ServicePlanPriceComponent,
         ServicePlanPublicComponent,
-        CfOrgSpaceLinksComponent
+        CfOrgSpaceLinksComponent,
       ],
       imports: [
         CoreModule

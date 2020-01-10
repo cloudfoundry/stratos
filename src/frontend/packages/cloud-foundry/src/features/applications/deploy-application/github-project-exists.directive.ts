@@ -23,7 +23,6 @@ const GITHUB_PROJECT_EXISTS = {
 @Directive({
   selector: '[appGithubProjectExists][ngModel]',
   providers: [GITHUB_PROJECT_EXISTS]
-
 })
 export class GithubProjectExistsDirective implements Validator {
 

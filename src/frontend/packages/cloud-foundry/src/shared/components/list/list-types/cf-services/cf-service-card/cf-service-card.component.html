@@ -1,4 +1,5 @@
-<app-meta-card class="service-card" [clickAction]="!disableCardClick ? goToServiceInstances:null" *ngIf="!!serviceEntity">
+<app-meta-card class="service-card" [clickAction]="!disableCardClick ? goToServiceInstances:null"
+  *ngIf="!!serviceEntity">
   <app-meta-card-title noMargin="true">
     <div class="service-card__title">
       <app-multiline-title class="service-card__title__link">{{ getDisplayName() }}</app-multiline-title>
@@ -12,6 +13,12 @@
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
+    <app-meta-card-key>Service Broker</app-meta-card-key>
+    <app-meta-card-value>
+      {{ serviceBrokerName$ | async }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
     <app-meta-card-key>Service Plans</app-meta-card-key>
     <app-meta-card-value>
       {{ serviceEntity.entity.service_plans.length }}
@@ -20,35 +27,20 @@
   <app-meta-card-item>
     <app-meta-card-key>Active</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="serviceEntity.entity.active" type="yes-no">
-      </app-boolean-indicator>
+      <app-table-cell-service-active [row]="serviceEntity"></app-table-cell-service-active>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Bindable</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="serviceEntity.entity.bindable" type="yes-no">
-      </app-boolean-indicator>
+      <app-table-cell-service-bindable [row]="serviceEntity"></app-table-cell-service-bindable>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>References</app-meta-card-key>
     <app-meta-card-value>
-      <div class="service-card__links">
-        <div class="service-card__link" *ngIf="hasDocumentationUrl()">
-          <a class="service-card__icon-link" [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>
-            <mat-icon>launch</mat-icon>
-          </a>
-          <a [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>Docs</a>
-        </div>
-        <div class="service-card__link" *ngIf="hasSupportUrl()">
-          <a class="service-card__icon-link" [href]="getSupportUrl()" target="_blank" appClickStopPropagation>
-            <mat-icon>launch</mat-icon>
-          </a>
-          <a [href]="getSupportUrl()" target="_blank" appClickStopPropagation>Support</a>
-        </div>
-      </div>
-      <div *ngIf="!hasDocumentationUrl() && !hasSupportUrl()">-</div>
+      <app-table-cell-service-references [row]="serviceEntity">
+      </app-table-cell-service-references>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item *ngIf="extraInfo?.providerDisplayName">
@@ -58,14 +50,13 @@
   <app-meta-card-item *ngIf="cfOrgSpace.multipleConnectedEndpoints$ | async">
     <app-meta-card-key>CF Endpoint</app-meta-card-key>
     <app-meta-card-value>
-      <app-cf-org-space-links [service]="cfOrgSpace" [spaceBreadCrumbs]="getSpaceBreadcrumbs()">
-      </app-cf-org-space-links>
+      <app-table-cell-service-cf-breadcrumbs [row]="serviceEntity"></app-table-cell-service-cf-breadcrumbs>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item customStyle="column">
     <app-meta-card-key>Tags</app-meta-card-key>
     <app-meta-card-value>
-      <app-chips [chips]="tags"></app-chips>
+      <app-table-cell-service-tags [row]="serviceEntity"></app-table-cell-service-tags>
     </app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>

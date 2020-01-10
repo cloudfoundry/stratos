@@ -5,7 +5,7 @@ import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/src/cf-types';
 import {
   CheckProjectExists,
   SetAppSourceDetails,
@@ -19,8 +19,8 @@ import { ApplicationService } from '../../../../../../../cloud-foundry/src/featu
 import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { GitBranch, GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
-import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
 import { IListAction } from '../../list.component.types';
@@ -132,7 +132,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.scm = this.scmService.getSCM(scmType as GitSCMType);
 
       const branchKey = `${scmType}-${this.projectName}-${stratosProject.deploySource.branch}`;
-      const gitBranchesEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitBranchesEntityType);
+      const gitBranchesEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, gitBranchesEntityType);
       const fetchBranchesActionBuilder = gitBranchesEntity.actionOrchestrator.getActionBuilder('get');
       const fetchBranchesAction = fetchBranchesActionBuilder(this.projectName, this.cfGuid, {
         scm: this.scm,

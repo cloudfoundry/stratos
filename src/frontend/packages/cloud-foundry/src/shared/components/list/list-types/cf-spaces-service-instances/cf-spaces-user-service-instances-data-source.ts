@@ -24,14 +24,14 @@ import {
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { UserProvidedServiceActionBuilder } from '../../../../../entity-action-builders/user-provided-service.action-builders';
 
 export class CfSpacesUserServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(spaceEntityType, spaceGuid);
-    const userProvidedServiceEntity = entityCatalogue.getEntity<any, any, UserProvidedServiceActionBuilder>(
+    const userProvidedServiceEntity = entityCatalog.getEntity<any, any, UserProvidedServiceActionBuilder>(
       CF_ENDPOINT_TYPE,
       userProvidedServiceInstanceEntityType
     );

@@ -67,8 +67,12 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     if (!this.cellDefinition.getLink) {
       return;
     }
+    const linkValue = this.cellDefinition.getLink(this.row);
+    if (!linkValue) {
+      return;
+    }
     this.isLink = true;
-    this.linkValue = this.cellDefinition.getLink(this.row);
+    this.linkValue = linkValue;
     this.setupLinkDeps();
   }
 

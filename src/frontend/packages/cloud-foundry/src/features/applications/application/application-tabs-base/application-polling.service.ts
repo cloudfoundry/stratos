@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { appStatsEntityType, appSummaryEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IApp } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityService } from '../../../../../../core/src/core/entity-service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../../../store/src/entity-service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { ENTITY_SERVICE } from '../../../../../../core/src/shared/entity.tokens';
 import { AppState } from '../../../../../../store/src/app-state';
@@ -80,11 +80,11 @@ export class ApplicationPollingService {
     this.entityService.entityObs$.pipe(
       first(),
     ).subscribe(resource => {
-      const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
+      const appSummaryEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
       const appSummaryActionDispatcher = appSummaryEntity.actionOrchestrator.getEntityActionDispatcher(actionDispatcher);
       appSummaryActionDispatcher.dispatchGet(appGuid, cfGuid);
       if (resource && resource.entity && resource.entity.entity && resource.entity.entity.state === 'STARTED') {
-        const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+        const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
         const appStatsActionDispatcher = appStatsEntity.actionOrchestrator.getEntityActionDispatcher(actionDispatcher);
         appStatsActionDispatcher.dispatchGet(appGuid, cfGuid);
       }
