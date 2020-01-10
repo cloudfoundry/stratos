@@ -52,11 +52,6 @@ function generateCert {
     fi
   fi
 
-  # Not going to support this going forward
-  if [ -n "${CONSOLE_CERT}" ] && [ -n "${CONSOLE_CERT_KEY}" ]; then
-    echo "Got a certificate in the vars CONSOLE_CERT and CONSOLE_CERT_KEY - going to use it"
-  fi
-
   echo "Using cert generator to generate a self-signed certificate ..."
   export CERTS_PATH=./certs
   export DEV_CERTS_DOMAIN=tls
