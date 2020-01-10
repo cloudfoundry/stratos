@@ -56,15 +56,13 @@ spec:
         livenessProbe:
           exec:
             command:
-            - mysqladmin
-            - ping
-          initialDelaySeconds: 30
+            - /dbping.sh
+          initialDelaySeconds: 10
           timeoutSeconds: 5
         readinessProbe:
           exec:
             command:
-            - mysqladmin
-            - ping
+            - /dbping.sh
           initialDelaySeconds: 5
           timeoutSeconds: 1
         resources:

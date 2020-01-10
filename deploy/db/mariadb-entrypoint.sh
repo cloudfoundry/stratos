@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# TODO - Need to add back in code to update the password after init
+
+
+
 ###########################################################################################################
 #
 # This is the entrypoint script taken from here: https://github.com/docker-library/mariadb/tree/master/10.2
