@@ -1,6 +1,5 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
@@ -11,6 +10,7 @@ import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { SetupConsoleGetScopes, SetupSaveConfig } from '../../../../../store/src/actions/setup.actions';
+import { APP_TITLE } from '../../../core/core.types';
 
 @Component({
   selector: 'app-console-uaa-wizard',
@@ -22,7 +22,8 @@ export class ConsoleUaaWizardComponent implements OnInit {
 
   private clientRedirectURI: string;
 
-  constructor(private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>, private router: Router) {
+  constructor(
+    private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>, @Inject(APP_TITLE) public title: string) {
     // Client Redirect URI for SSO
     this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
       (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
