@@ -82,12 +82,6 @@ describe('Manage Space Quota', () => {
       obj[quotaFormPage.stepper.appInstanceLimit] = '1';
 
       quotaFormPage.stepper.getStepperForm().fill(obj);
-      // quotaFormPage.stepper.setTotalServices('1');
-      // quotaFormPage.stepper.setTotalRoutes('10');
-      // quotaFormPage.stepper.setMemoryLimit('1024');
-      // quotaFormPage.stepper.setInstanceMemoryLimit('1');
-      // quotaFormPage.stepper.setTotalReservedRoutePorts('0');
-      // quotaFormPage.stepper.setAppInstanceLimit('1');
       expect(quotaFormPage.stepper.canNext()).toBeTruthy();
       quotaFormPage.submit();
       quotaFormPage.stepper.waitUntilNotShown();
