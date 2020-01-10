@@ -18,7 +18,7 @@ import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
-import { createEmptyStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { createEmptyStoreModule } from '@stratos/store/testing';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-default/card-autoscaler-default.component';
 import { AutoscalerTabExtensionComponent } from './autoscaler-tab-extension.component';
