@@ -60,11 +60,11 @@ function getEntities(
 function getNormalizedEntityData(
   entities: any[],
   action: EntityRequestAction,
-  catalogueEntity: StratosBaseCatalogEntity) {
+  catalogEntity: StratosBaseCatalogEntity) {
   // Can patchActionWithForcedConfig be done outside of the pipe?
   // This pipe shouldn't have to worry about the multi entity lists.
   const patchedAction = patchActionWithForcedConfig(action);
-  const schema = patchedAction.entity || catalogueEntity.getSchema(patchedAction.schemaKey);
+  const schema = patchedAction.entity || catalogEntity.getSchema(patchedAction.schemaKey);
   const arraySafeSchema = Array.isArray(schema) ? schema[0] : schema;
   return normalize(entities, Array.isArray(entities) ? [arraySafeSchema] : arraySafeSchema);
 }

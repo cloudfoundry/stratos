@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
 import { IListConfig } from '../../list.component.types';
 import { ListActionOrConfig, ListActionOrConfigHelpers } from '../helpers/action-or-config-helpers';
-import { CatalogueEntityDrivenListConfig } from '../helpers/entity-catalogue-list-config';
+import { CatalogEntityDrivenListConfig } from '../helpers/entity-catalogue-list-config';
 import { ListConfigProvider, ListConfigUpdate, ListDataSourceConfigUpdate } from '../list-config-provider.types';
 
 
@@ -40,9 +40,9 @@ export class ActionOrConfigListConfigProvider<T, A = T> implements ListConfigPro
       }
     }
 
-    const { catalogueEntity } = ListActionOrConfigHelpers.createListAction(this.actionOrConfig);
+    const { catalogEntity } = ListActionOrConfigHelpers.createListAction(this.actionOrConfig);
     this.listConfig = {
-      ...new CatalogueEntityDrivenListConfig<T>(catalogueEntity, this.store),
+      ...new CatalogEntityDrivenListConfig<T>(catalogEntity, this.store),
       ...(this.overrideListConfig || {})
     };
     const dsConfig = ListActionOrConfigHelpers.createDataSourceConfig<A, T>(
