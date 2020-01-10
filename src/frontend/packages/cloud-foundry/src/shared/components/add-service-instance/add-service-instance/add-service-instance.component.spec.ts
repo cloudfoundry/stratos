@@ -37,9 +37,9 @@ import {
 } from '../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
 import { PageHeaderModule } from '../../../../../../core/src/shared/components/page-header/page-header.module';
 import { SteppersModule } from '../../../../../../core/src/shared/components/stepper/steppers.module';
-import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../../../core/src/shared/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { TabNavService } from '../../../../../../core/tab-nav.service';
 import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
@@ -79,6 +79,7 @@ import {
   SpecifyUserProvidedDetailsComponent,
 } from '../specify-user-provided-details/specify-user-provided-details.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
+import { CopyToClipboardComponent } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
@@ -89,6 +90,7 @@ describe('AddServiceInstanceComponent', () => {
       declarations: [
         AppNameUniqueDirective,
         AddServiceInstanceComponent,
+        CopyToClipboardComponent,
         SelectPlanStepComponent,
         SpecifyDetailsStepComponent,
         BindAppsStepComponent,

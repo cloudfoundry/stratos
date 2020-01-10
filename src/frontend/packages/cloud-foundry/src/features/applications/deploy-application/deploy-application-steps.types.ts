@@ -9,7 +9,7 @@ import { IFeatureFlag } from '../../../../../core/src/core/cf-api.types';
 import { PermissionConfig, PermissionTypes } from '../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
 import { CFFeatureFlagTypes } from '../../../../../core/src/shared/components/cf-auth/cf-auth.types';
-import { PaginationMonitor } from '../../../../../core/src/shared/monitors/pagination-monitor';
+import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { CFAppState } from '../../../cf-app-state';
 import {

@@ -13,17 +13,17 @@ import {
   IServicePlanVisibility,
 } from '../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityService } from '../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { serviceBrokerEntityType, servicePlanVisibilityEntityType, spaceEntityType } from '../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
 import { getCfService, getServiceInstancesInCf, getServiceName, getServicePlans } from './services-helper';
 
@@ -82,7 +82,7 @@ export class ServicesService {
 
   getServicePlanVisibilities = () => {
     const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid);
-    const servicePlanVisibilityEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, servicePlanVisibilityEntityType);
+    const servicePlanVisibilityEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, servicePlanVisibilityEntityType);
     const actionBuilder = servicePlanVisibilityEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getServicePlanVisibilitiesAction = actionBuilder(this.cfGuid, paginationKey);
     return getPaginationObservables<APIResource<IServicePlanVisibility>>(
@@ -103,7 +103,7 @@ export class ServicesService {
 
   private getServiceBrokers = () => {
     const paginationKey = createEntityRelationPaginationKey(serviceBrokerEntityType, this.cfGuid);
-    const serviceBrokerEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
+    const serviceBrokerEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceBrokerEntityType);
     const actionBuilder = serviceBrokerEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getServiceBrokersAction = actionBuilder(this.cfGuid, paginationKey);
     return getPaginationObservables<APIResource<IServiceBroker>>(
@@ -208,7 +208,7 @@ export class ServicesService {
             isSpaceScoped: false
           });
         } else {
-          const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+          const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
           const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
           const getSpaceAction = actionBuilder(spaceGuid, this.cfGuid);
           const spaceEntityService = this.entityServiceFactory.create<APIResource<ISpace>>(

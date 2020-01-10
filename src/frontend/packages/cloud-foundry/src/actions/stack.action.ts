@@ -1,10 +1,10 @@
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { stackEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
 import { HttpRequest } from '@angular/common/http';
@@ -26,7 +26,7 @@ export class GetStack extends CFStartAction implements ICFAction {
     GET_SUCCESS,
     GET_FAILED
   ];
-  entity = [entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType).getSchema()];
+  entity = [entityCatalog.getEntity(CF_ENDPOINT_TYPE, stackEntityType).getSchema()];
   entityType = stackEntityType;
   options: HttpRequest<any>;
 }
@@ -41,7 +41,7 @@ export class GetAllStacks extends CFStartAction implements PaginatedAction {
   }
   paginationKey: string;
   actions = getActions('Stack', 'Fetch all');
-  entity = [entityCatalogue.getEntity(CF_ENDPOINT_TYPE, stackEntityType).getSchema()];
+  entity = [entityCatalog.getEntity(CF_ENDPOINT_TYPE, stackEntityType).getSchema()];
   entityType = stackEntityType;
   options: HttpRequest<any>;
   initialParams = {

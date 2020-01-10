@@ -4,22 +4,22 @@ import { first } from 'rxjs/operators';
 
 import { ISpace } from '../../../core/src/core/cf-api.types';
 import {
-  EntityCatalogueTestModuleManualStore,
+  EntityCatalogTestModuleManualStore,
   TEST_CATALOGUE_ENTITIES,
-} from '../../../core/src/core/entity-catalogue-test.module';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+} from '../../../store/src/entity-catalog-test.module';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import {
   createBasicStoreModule,
   createEntityStoreState,
   TestStoreEntity,
-} from '../../../core/test-framework/store-test-helper';
+} from '@stratos/store/testing';
 import { RequestTypes } from '../../../store/src/actions/request.actions';
 import { AppState } from '../../../store/src/app-state';
 import { EntityRelationSpecHelper } from '../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
 import { APIResource } from '../../../store/src/types/api.types';
 import { WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
 import { CFAppState } from '../cf-app-state';
 import { cfEntityFactory } from '../cf-entity-factory';
@@ -29,7 +29,7 @@ import { populatePaginationFromParent } from './entity-relations';
 
 
 describe('Entity Relations - populate from parent', () => {
-  const spaceEntityKey = entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
+  const spaceEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
 
   const helper = new EntityRelationSpecHelper();
 
@@ -41,7 +41,7 @@ describe('Entity Relations - populate from parent', () => {
     TestBed.configureTestingModule({
       imports: [
         {
-          ngModule: EntityCatalogueTestModuleManualStore,
+          ngModule: EntityCatalogTestModuleManualStore,
           providers: [
             { provide: TEST_CATALOGUE_ENTITIES, useValue: generateCFEntities() }
           ]
@@ -52,7 +52,7 @@ describe('Entity Relations - populate from parent', () => {
   }
 
   it('No list in parent - no op', (done) => {
-    const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity>>([
+    const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity>>([
       [
         cfEntityFactory(organizationEntityType),
         [{
@@ -86,7 +86,7 @@ describe('Entity Relations - populate from parent', () => {
     const org = helper.createEmptyOrg(orgGuid, 'org-name');
     org.entity.spaces = spaces;
 
-    const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
+    const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>([
       [
         cfEntityFactory(organizationEntityType),
         [{

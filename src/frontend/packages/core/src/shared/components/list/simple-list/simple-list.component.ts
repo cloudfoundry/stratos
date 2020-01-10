@@ -1,9 +1,9 @@
 import { Component, OnInit, Input, ChangeDetectorRef, NgZone, ComponentFactoryResolver, ViewChild, Injector } from '@angular/core';
-import { StratosCatalogueEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
+import { StratosCatalogEntity } from '../../../../../../store/src/entity-catalog/entity-catalog-entity';
 import { ListComponent } from '../list.component';
 import { ListConfig, ListViewTypes } from '../list.component.types';
 import { ListHostDirective } from './list-host.directive';
-import { CatalogueEntityDrivenListDataSource } from './entity-catalogue-datasource';
+import { CatalogEntityDrivenListDataSource } from './entity-catalog-datasource';
 import { Store } from '@ngrx/store';
 import { ActivatedRoute } from '@angular/router';
 
@@ -18,7 +18,7 @@ import { ActivatedRoute } from '@angular/router';
 export class SimpleListComponent implements OnInit {
 
   @Input()
-  public catalogueEntity: StratosCatalogueEntity;
+  public catalogEntity: StratosCatalogEntity;
 
   @ViewChild(ListHostDirective, { static: true })
   public listHost: ListHostDirective;
@@ -40,8 +40,8 @@ export class SimpleListComponent implements OnInit {
     const endpointGuid = urlParams.endpointId || urlParams.endpointGuid;
     const viewContainerRef = this.listHost.viewContainerRef;
     viewContainerRef.clear();
-    const dataSource = new CatalogueEntityDrivenListDataSource<any>(
-      this.catalogueEntity,
+    const dataSource = new CatalogEntityDrivenListDataSource<any>(
+      this.catalogEntity,
       endpointGuid ? { endpointGuid } : {},
       this.store,
     );

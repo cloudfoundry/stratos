@@ -1,5 +1,5 @@
+import { QParam } from '../../../../cloud-foundry/src/shared/q-param';
 import { RemoveParams } from '../../actions/pagination.actions';
-import { QParam } from '../../q-param';
 import { PaginationEntityState } from '../../types/pagination.types';
 
 export function paginationRemoveParams(state: PaginationEntityState, action: RemoveParams) {

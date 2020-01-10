@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { IApp, ISpace } from '../../../../../../../core/src/core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';

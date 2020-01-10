@@ -7,11 +7,11 @@ import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { IServiceBroker } from '../../../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { spaceEntityType } from '../../../../cf-entity-types';
 
 @Component({
@@ -39,7 +39,7 @@ export class ServiceBrokerCardComponent implements OnDestroy {
       filter(o => !!o),
       // Broker is space scoped
       switchMap(spaceGuid => {
-        const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+        const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
         const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
         const getSpaceAction = actionBuilder(spaceGuid, this.servicesService.cfGuid);
         const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(

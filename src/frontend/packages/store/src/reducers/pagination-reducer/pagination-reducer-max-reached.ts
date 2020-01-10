@@ -1,4 +1,4 @@
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import {
   LocalPaginationHelpers,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
@@ -6,7 +6,7 @@ import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 
 export function paginationMaxReached(state: PaginationState, action: UpdatePaginationMaxedState): PaginationState {
-  const entityKey = entityCatalogue.getEntityKey(action);
+  const entityKey = entityCatalog.getEntityKey(action);
   if (!state[entityKey] || !state[entityKey][action.paginationKey]) {
     return state;
   }

@@ -3,15 +3,15 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import {
-  getPaginationAction,
-} from '../../../../../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator.spec.helpers';
-import { EntityCatalogueEntityConfig } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
   ApplicationStateService,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
+import {
+  getPaginationAction,
+} from '../../../../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator.spec.helpers';
+import { EntityCatalogEntityConfig } from '../../../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { NormalizedResponse } from '../../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
 import { WrapperRequestActionSuccess } from '../../../../../../../../store/src/types/request.types';
@@ -54,7 +54,7 @@ describe('EventsTabComponent', () => {
       ]
     })
       .compileComponents();
-    const eventsConfig: EntityCatalogueEntityConfig = cfEntityFactory(cfEventEntityType);
+    const eventsConfig: EntityCatalogEntityConfig = cfEntityFactory(cfEventEntityType);
 
     const mappedData = {
       entities: {},

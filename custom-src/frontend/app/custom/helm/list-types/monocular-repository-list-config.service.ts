@@ -3,6 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../../store/src/app-state';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { getFullEndpointApiUrl } from '../../../features/endpoints/endpoint-helpers';
 import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
@@ -13,9 +16,6 @@ import {
   TableCellEndpointStatusComponent,
 } from '../../../shared/components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
-import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { defaultHelmKubeListPageSize } from '../../kubernetes/list-types/kube-helm-list-types';
 import { MonocularRepositoryDataSource } from './monocular-repository-list-source';
 

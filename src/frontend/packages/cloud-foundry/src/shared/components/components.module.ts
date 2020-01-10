@@ -284,7 +284,10 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     TableCellServiceProviderComponent,
     TableCellServiceBindableComponent,
     TableCellServiceActiveComponent,
-    TableCellServiceReferencesComponent
+    TableCellServiceReferencesComponent,
+
+    CloudFoundryEventsListComponent,
+    EventMetadataComponent
   ],
   exports: [
     ServiceIconComponent,

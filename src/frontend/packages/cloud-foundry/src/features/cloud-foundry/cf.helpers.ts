@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../cf-types';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
 import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
@@ -28,8 +28,8 @@ import { getIdFromRoute, pathGet } from '../../../../core/src/core/utils.service
 import {
   extractActualListEntity,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
-import { MultiActionListEntity } from '../../../../core/src/shared/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { MultiActionListEntity } from '../../../../store/src/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

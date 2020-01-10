@@ -9,7 +9,7 @@ import { APIResource } from '../../../store/src/types/api.types';
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
 import { BaseEntityValues } from '../../../store/src/types/entity.types';
 import { PaginationState } from '../../../store/src/types/pagination.types';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '../../test-framework/store-test-helper';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratos/store/testing';
 import { endpointEntitySchema } from '../base-entity-schemas';
 import { generateStratosEntities } from '../base-entity-types';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
@@ -22,8 +22,8 @@ import {
   ScopeStrings,
 } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
-import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalogue-test.module';
-import { EntityCatalogueEntityConfig } from './entity-catalogue/entity-catalogue.types';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../store/src/entity-catalog-test.module';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 
 const ffSchema = cfEntityFactory(featureFlagEntityType);
 
@@ -584,7 +584,7 @@ describe('CurrentUserPermissionsService', () => {
 
 
     // Create request and requestData sections
-    const entityMap = new Map<EntityCatalogueEntityConfig, Array<TestStoreEntity | string>>([
+    const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>([
       [
         endpointEntitySchema,
         endpoints.map(endpoint => ({
@@ -916,7 +916,7 @@ describe('CurrentUserPermissionsService', () => {
       ],
       imports: [
         {
-          ngModule: EntityCatalogueTestModule,
+          ngModule: EntityCatalogTestModule,
           providers: [
             {
               provide: TEST_CATALOGUE_ENTITIES, useValue: [

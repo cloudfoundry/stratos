@@ -1,15 +1,15 @@
 import 'hammerjs';
 
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
 import {
   EntitySummaryTitleComponent,
 } from '../../../../shared/components/entity-summary-title/entity-summary-title.component';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ListItemComponent } from '../list-item/list-item.component';
 import { LoaderComponent } from '../loader/loader.component';

@@ -24,8 +24,8 @@ import {
   ISpaceQuotaDefinition,
 } from '../../../../../core/src/core/cf-api.types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
@@ -35,8 +35,8 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 
 export const createOrgQuotaDefinition = (): IOrgQuotaDefinition => ({
   memory_limit: -1,
@@ -100,7 +100,7 @@ export class CloudFoundryOrganizationService {
   }
 
   public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
-    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
     const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('remove');
     const deleteSpaceAction = actionBuilder(spaceGuid, endpointGuid, { orgGuid });
     this.store.dispatch(deleteSpaceAction);
@@ -131,7 +131,7 @@ export class CloudFoundryOrganizationService {
             createEntityRelationKey(organizationEntityType, OrgUserRoleNames.AUDITOR),
           );
         }
-        const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+        const orgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
         const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
         const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid, relations);
         const orgEntityService = this.entityServiceFactory.create<APIResource<IOrganization>>(

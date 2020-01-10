@@ -9,9 +9,9 @@ import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity
 import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { endpointEntitySchema } from '../../../../../base-entity-schemas';
-import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { RowsState } from '../../data-sources-controllers/list-data-source-types';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';

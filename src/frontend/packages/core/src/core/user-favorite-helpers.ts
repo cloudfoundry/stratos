@@ -2,7 +2,7 @@ import { CfAPIResource } from '../../../cloud-foundry/src/store/types/cf-api.typ
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import { FavoritesConfigMapper } from '../shared/components/favorites-meta-card/favorite-config-mapper';
-import { IEntityMetadata } from './entity-catalogue/entity-catalogue.types';
+import { IEntityMetadata } from '../../../store/src/entity-catalog/entity-catalog.types';
 
 export function isEndpointTypeFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
   return !favorite.entityId;

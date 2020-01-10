@@ -11,7 +11,7 @@ import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthCheck, EndpointHealthChecks } from '../../endpoints-health-checks';
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
-import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { UserService } from './user.service';
 
 
@@ -28,10 +28,10 @@ export class EndpointsService implements CanActivate {
     if (!endpoint) {
       return '';
     }
-    const catalogueEntity = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-    const metadata = catalogueEntity.builders.entityBuilder.getMetadata(endpoint);
-    if (catalogueEntity) {
-      return catalogueEntity.builders.entityBuilder.getLink(metadata);
+    const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+    const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint);
+    if (catalogEntity) {
+      return catalogEntity.builders.entityBuilder.getLink(metadata);
     }
     return '';
   }
@@ -45,7 +45,7 @@ export class EndpointsService implements CanActivate {
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => {
-        const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+        const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
         if (!epType.definition) {
           return false;
         }
@@ -138,7 +138,7 @@ export class EndpointsService implements CanActivate {
       map(ep => {
         return Object.values(ep)
           .filter(endpoint => {
-            const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
+            const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
             return endpoint.cnsi_type === type && (epType.unConnectable || endpoint.connectionStatus === 'connected');
           });
       })

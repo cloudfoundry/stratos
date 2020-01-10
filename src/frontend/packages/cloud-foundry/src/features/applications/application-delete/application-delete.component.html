@@ -27,13 +27,13 @@
               and related entities</span>:</p>
           <h3>Application</h3>
           <app-action-monitor [columns]="appDeleteColumns" [data$]="selectedApplication$"
-            [entityKey]="appCatalogueEntity.entityKey" [schema]="appCatalogueEntity.getSchema()"
+            [entityKey]="appCatalogEntity.entityKey" [schema]="appCatalogEntity.getSchema()"
             [monitorState]="deletingState" [getId]="getId">
           </app-action-monitor>
           <ng-container *ngIf="selectedRoutes && selectedRoutes.length">
             <h3>Routes</h3>
             <app-action-monitor [columns]="routeDeleteColumns" [data$]="selectedRoutes$"
-              [entityKey]="routeCatalogueEntity.entityKey" [schema]="routeCatalogueEntity.getSchema()"
+              [entityKey]="routeCatalogEntity.entityKey" [schema]="routeCatalogEntity.getSchema()"
               [monitorState]="deletingState" [getId]="getId">
             </app-action-monitor>
           </ng-container>
@@ -41,14 +41,14 @@
             <ng-container *ngIf="(selectedServiceInstances$ | async).length">
               <h3>Services</h3>
               <app-action-monitor [columns]="instanceDeleteColumns" [data$]="selectedServiceInstances$"
-                [entityKey]="siCatalogueEntity.entityKey" [schema]="siCatalogueEntity.getSchema()"
+                [entityKey]="siCatalogEntity.entityKey" [schema]="siCatalogEntity.getSchema()"
                 [monitorState]="deletingState" [getId]="getInstanceId">
               </app-action-monitor>
             </ng-container>
             <ng-container *ngIf="(selectedUserServiceInstances$ | async).length">
               <h3>User Provided Services</h3>
               <app-action-monitor [columns]="instanceDeleteColumns" [data$]="selectedUserServiceInstances$"
-                [entityKey]="upsiCatalogueEntity.entityKey" [schema]="upsiCatalogueEntity.getSchema()"
+                [entityKey]="upsiCatalogEntity.entityKey" [schema]="upsiCatalogEntity.getSchema()"
                 [monitorState]="deletingState" [getId]="getInstanceId"></app-action-monitor>
             </ng-container>
           </ng-container>

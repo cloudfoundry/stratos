@@ -14,14 +14,14 @@ import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 
 export class CfBuildpacksDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
-    const buildpackEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, buildpackEntityType);
+    const buildpackEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, buildpackEntityType);
     const actionBuilder = buildpackEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const action = actionBuilder(cfGuid, paginationKey) as PaginatedAction;
     super({

@@ -1,4 +1,4 @@
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 
 /**
@@ -29,7 +29,7 @@ export class EntityTreeRelation {
     public path = '', // entity.space
     public childRelations: EntityTreeRelation[]
   ) {
-    this.entityKey = entityCatalogue.getEntityKey(entity);
+    this.entityKey = entityCatalog.getEntityKey(entity);
     this.entityType = entity.entityType;
   }
 }

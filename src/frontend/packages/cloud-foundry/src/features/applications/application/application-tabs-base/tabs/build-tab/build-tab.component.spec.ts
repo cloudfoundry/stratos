@@ -5,7 +5,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { GITHUB_API_URL } from '../../../../../../../../core/src/core/github.helpers';
 import {
   ApplicationStateService,

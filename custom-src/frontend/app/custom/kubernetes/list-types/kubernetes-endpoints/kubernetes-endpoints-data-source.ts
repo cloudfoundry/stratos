@@ -2,15 +2,15 @@ import { Store } from '@ngrx/store';
 
 import { GetAllEndpoints } from '../../../../../../store/src/actions/endpoint.actions';
 import { AppState } from '../../../../../../store/src/app-state';
+import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import {
   BaseEndpointsDataSource,
   syncPaginationSection,
 } from '../../../../shared/components/list/list-types/endpoint/base-endpoints-data-source';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
-import { EntityMonitorFactory } from '../../../../shared/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../shared/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 
 export class KubernetesEndpointsDataSource extends BaseEndpointsDataSource {
 

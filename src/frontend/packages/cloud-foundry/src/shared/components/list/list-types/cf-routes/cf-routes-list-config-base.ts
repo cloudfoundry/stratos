@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
@@ -82,7 +82,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   };
   enableTextFilter = true;
 
-  private routeCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+  private routeCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
 
   private multiListActionDelete: IMultiListAction<APIResource> = {
     action: (items: APIResource[]) => {
@@ -130,7 +130,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   private dispatchDeleteAction(route: APIResource<ListCfRoute>) {
     const appGuids = (route.entity.apps || []).map(app => app.metadata.guid);
     const singleApp = appGuids.length === 1;
-    this.routeCatalogueEntity.actionDispatchManager.dispatchDelete(
+    this.routeCatalogEntity.actionDispatchManager.dispatchDelete(
       route.metadata.guid,
       this.cfGuid,
       // FIXME: The appGuid/appGuids params need merging
@@ -141,7 +141,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
 
   private dispatchUnmapAction(routeGuid: string, appGuids: string[]) {
     appGuids.forEach(appGuid => {
-      this.routeCatalogueEntity.actionDispatchManager.dispatchAction('unmap',
+      this.routeCatalogEntity.actionDispatchManager.dispatchAction('unmap',
         routeGuid,
         appGuid,
         this.cfGuid,

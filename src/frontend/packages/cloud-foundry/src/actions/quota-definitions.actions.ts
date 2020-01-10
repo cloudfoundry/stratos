@@ -4,7 +4,7 @@ import {
 } from '../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CFEntityConfig } from '../../cf-types';
+import { CFEntityConfig } from '../cf-types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { organizationEntityType, quotaDefinitionEntityType, spaceQuotaEntityType } from '../cf-entity-types';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';

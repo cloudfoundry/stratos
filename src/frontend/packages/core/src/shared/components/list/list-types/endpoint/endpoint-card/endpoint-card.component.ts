@@ -9,15 +9,15 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, ReplaySubject, Subscription } from 'rxjs';
+import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { SetHeaderEvent } from '../../../../../../../../store/src/actions/dashboard-actions';
+import { StratosCatalogEndpointEntity } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
-import { StratosCatalogueEndpointEntity } from '../../../../../../core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import {
   coreEndpointListDetailsComponents,
@@ -29,6 +29,7 @@ import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/m
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
+import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -42,7 +43,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public favorite: UserFavoriteEndpoint;
   public address: string;
   public cardMenu: MetaCardMenuItem[];
-  public endpointCatalogueEntity: StratosCatalogueEndpointEntity;
+  public endpointCatalogEntity: StratosCatalogEndpointEntity;
   public hasDetails = true;
   public endpointLink: string = null;
   public endpointParentType: string;
@@ -61,6 +62,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.updateInnerComponent();
   }
 
+  @ViewChild('copyToClipboard', { static: false }) copyToClipboard: CopyToClipboardComponent;
+
   private pRow: EndpointModel;
   @Input('row')
   set row(row: EndpointModel) {
@@ -69,14 +72,14 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
     this.pRow = row;
 
-    this.endpointCatalogueEntity = entityCatalogue.getEndpoint(row.cnsi_type, row.sub_type);
+    this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
-    if (this.endpointCatalogueEntity) {
-      const metadata = this.endpointCatalogueEntity.builders.entityBuilder.getMetadata(row);
-      this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogueEntity.definition.unConnectable ?
-        this.endpointCatalogueEntity.builders.entityBuilder.getLink(metadata) : null;
-      this.connectionStatus = this.endpointCatalogueEntity.definition.unConnectable ? 'connected' : row.connectionStatus;
+    if (this.endpointCatalogEntity) {
+      const metadata = this.endpointCatalogEntity.builders.entityBuilder.getMetadata(row);
+      this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogEntity.definition.unConnectable ?
+        this.endpointCatalogEntity.builders.entityBuilder.getLink(metadata) : null;
+      this.connectionStatus = this.endpointCatalogEntity.definition.unConnectable ? 'connected' : row.connectionStatus;
     }
     this.updateInnerComponent();
 
@@ -96,6 +99,13 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         action: () => endpointAction.action(this.pRow),
         can: endpointAction.createVisible(this.rowObs)
       }));
+
+      // Add a copy address to clipboard
+      this.cardMenu.push({
+        label: 'Copy address to Clipboard',
+        action: () => this.copyToClipboard.copyToClipboard(),
+        can: of(true)
+      });
     }
 
     this.updateCardStatus();
@@ -120,7 +130,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (favorite) {
       this.favorite = this.favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
     }
-    const e = this.endpointCatalogueEntity.definition;
+    const e = this.endpointCatalogEntity.definition;
     this.hasDetails = !!e && !!e.listDetailsComponent;
   }
 
@@ -137,7 +147,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (!this.endpointDetails || !this.pRow) {
       return;
     }
-    const e = this.endpointCatalogueEntity.definition;
+    const e = this.endpointCatalogEntity.definition;
     if (!e || !e.listDetailsComponent) {
       return;
     }

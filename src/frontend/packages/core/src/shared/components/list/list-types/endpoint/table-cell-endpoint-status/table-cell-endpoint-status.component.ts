@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { TableCellCustom } from '../../../list.types';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 
 @Component({
   selector: 'app-table-cell-endpoint-status',
@@ -23,7 +23,7 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
   }
 
   ngOnInit() {
-    const ep = entityCatalogue.getEndpoint(this.row.cnsi_type, this.row.sub_type);
+    const ep = entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type);
     if (!!ep) {
       this.connectable = !ep.definition.unConnectable;
     }
