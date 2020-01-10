@@ -70,8 +70,6 @@ describe('Manage Space Quota', () => {
       quotaFormPage.stepper.setName(quotaName);
       expect(element(by.css('.add-space-quota-stepper')).getText()).toContain('A space quota with this name already exists.');
 
-      // quotaFormPage.stepper.setName(secondQuotaName);
-
       const obj = {};
       obj[quotaFormPage.stepper.name] = secondQuotaName;
       obj[quotaFormPage.stepper.totalServices] = '1';
