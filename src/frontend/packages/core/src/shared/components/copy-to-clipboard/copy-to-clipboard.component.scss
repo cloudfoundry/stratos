@@ -1,0 +1,40 @@
+.copy {
+  display: flex;
+  position: relative;
+  &__copied-div,
+  &__copy-icon {
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: opacity 250ms linear;
+  }
+  &__copied-div {
+    align-items: center;
+    display: flex;
+    opacity: 0;
+    span {
+      margin-right: 5px;
+    }
+  }
+  &__copied-msg {
+    white-space: nowrap;
+  }
+  &__copy-icon {
+    cursor: pointer;
+  }
+  &__copy-icon-small {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+  }
+  &__success {
+    .copy {
+      &__copied-div {
+        opacity: 1;
+      }
+      &__copy-icon {
+        opacity: 0;
+      }
+    }
+  }
+}

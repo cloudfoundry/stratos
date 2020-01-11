@@ -1,7 +1,7 @@
 import { compose } from '@ngrx/store';
 
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogHelpers } from '../entity-catalog/entity-catalog.helper';
+import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { GeneralEntityAppState, IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState } from '../app-state';
 import { ActionState, RequestInfoState, UpdatingSection } from '../reducers/api-request-reducer/types';
 import { APIResource } from '../types/api.types';
@@ -54,11 +54,11 @@ export function selectDeletionInfo(entityKey: string, entityGuid: string) {
   );
 }
 
-export function selectRequestInfo(entityKeyOrConfig: string | EntityCatalogueEntityConfig, entityGuid: string) {
-  // Note - Replacing `buildEntityKey` with `entityCatalogue.getEntityKey` will cause circular dependency
+export function selectRequestInfo(entityKeyOrConfig: string | EntityCatalogEntityConfig, entityGuid: string) {
+  // Note - Replacing `buildEntityKey` with `entityCatalog.getEntityKey` will cause circular dependency
   const entityKey = typeof (entityKeyOrConfig) === 'string' ?
     entityKeyOrConfig :
-    EntityCatalogueHelpers.buildEntityKey(entityKeyOrConfig.entityType, entityKeyOrConfig.endpointType);
+    EntityCatalogHelpers.buildEntityKey(entityKeyOrConfig.entityType, entityKeyOrConfig.endpointType);
   return compose(
     getEntityById<RequestInfoState>(entityGuid),
     getRequestEntityKey<RequestInfoState>(entityKey),

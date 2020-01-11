@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { APP_TITLE } from './../../../core/core.types';
+import { Component, Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
@@ -33,7 +34,7 @@ export class SetupWelcomeComponent {
 
   ];
 
-  constructor(private store: Store<GeneralEntityAppState>) { }
+  constructor(private store: Store<GeneralEntityAppState>, @Inject(APP_TITLE) public title: string) { }
 
   public selectionChange(tile: ITileConfig<ITileData>) {
     if (tile) {

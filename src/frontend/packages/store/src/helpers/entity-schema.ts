@@ -1,7 +1,7 @@
 import { Schema, schema } from 'normalizr';
 
-import { EntityCatalogueHelpers } from '../../../core/src/core/entity-catalogue/entity-catalogue.helper';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogHelpers } from '../entity-catalog/entity-catalog.helper';
+import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 
 function wrapSchema(definition: Schema) {
   return {
@@ -25,7 +25,7 @@ export class StratosEntitySchema extends schema.Entity {
  * @export
  * @extends {schema.Entity}
  */
-export class EntitySchema extends schema.Entity implements EntityCatalogueEntityConfig {
+export class EntitySchema extends schema.Entity implements EntityCatalogEntityConfig {
   schema: Schema;
   schemaKey: string;
   public getId: (input, parent?, key?) => string;
@@ -46,8 +46,8 @@ export class EntitySchema extends schema.Entity implements EntityCatalogueEntity
     public excludeFromRecursiveDelete: string[] = []
   ) {
     // Note - The core schema.Entity needs to be an entityKey or denormalize will fail
-    // Note - Replacing `buildEntityKey` with `entityCatalogue.getEntityKey` will cause circular dependency
-    super(endpointType ? EntityCatalogueHelpers.buildEntityKey(entityType, endpointType) : entityType, definition, options);
+    // Note - Replacing `buildEntityKey` with `entityCatalog.getEntityKey` will cause circular dependency
+    super(endpointType ? EntityCatalogHelpers.buildEntityKey(entityType, endpointType) : entityType, definition, options);
     this.schema = definition || {};
     // Normally the entityType === schemaKey. Sometimes we can override that (space entity and space entity with spaceWithOrg schema)
     this.schemaKey = schemaKey;

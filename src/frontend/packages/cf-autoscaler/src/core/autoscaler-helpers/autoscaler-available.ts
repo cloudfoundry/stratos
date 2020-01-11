@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { GetAppAutoscalerInfoAction } from '../../store/app-autoscaler.actions';
 import { AutoscalerInfo } from '../../store/app-autoscaler.types';

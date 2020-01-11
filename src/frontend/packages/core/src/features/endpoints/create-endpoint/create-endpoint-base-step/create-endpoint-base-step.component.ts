@@ -5,12 +5,12 @@ import { first, map } from 'rxjs/operators';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { selectSessionData } from '../../../../../../store/src/reducers/auth.reducer';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 import { Observable } from 'rxjs';
-import { IStratosEndpointDefinition } from '../../../../core/entity-catalogue/entity-catalogue.types';
+import { IStratosEndpointDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 
 interface ICreateEndpointTilesData extends ITileData {
   type: string;
@@ -89,10 +89,10 @@ export class CreateEndpointBaseStepComponent {
       first(),
       map(sessionData => {
         const techPreviewIsEnabled = sessionData.config.enableTechPreview || false;
-        return entityCatalogue.getAllEndpointTypes(techPreviewIsEnabled)
+        return entityCatalog.getAllEndpointTypes(techPreviewIsEnabled)
           .sort((endpointA, endpointB) => this.sortEndpointTiles(endpointA.definition, endpointB.definition))
-          .map(catalogueEndpoint => {
-            const endpoint = catalogueEndpoint.definition;
+          .map(catalogEndpoint => {
+            const endpoint = catalogEndpoint.definition;
             return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
               endpoint.label,
               endpoint.logoUrl ? {

@@ -1,5 +1,5 @@
 @import '~@angular/material/theming';
-@mixin display-value-theme($theme, $app-theme) {
+@mixin code-block-theme($theme, $app-theme) {
   $is-dark: map-get($theme, is-dark);
   $primary: map-get($theme, primary);
   $background-colors: map-get($theme, background);
@@ -15,8 +15,5 @@
 
     background-color: $background-color;
     color: $color;
-    &__copied-icon {
-      color: mat-color($primary);
-    }
   }
 }

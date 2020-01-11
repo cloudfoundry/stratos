@@ -93,6 +93,10 @@ export class CfTopLevelPage extends CFPage {
     return this.waitForMetaDataItemComponent('Instance Address');
   }
 
+  waitForInstanceAddressValue(): promise.Promise<string> {
+    return this.waitForInstanceAddress().getValue().then(val => val.replace('content_copy', '').trim());
+  }
+
   waitForApiVersion(): MetaDataItemComponent {
     return this.waitForMetaDataItemComponent('CF API Version');
   }

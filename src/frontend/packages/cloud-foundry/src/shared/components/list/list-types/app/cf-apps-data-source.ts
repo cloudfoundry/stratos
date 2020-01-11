@@ -14,7 +14,7 @@ import {
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../../../core/src/core/dispatch-sequencer';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   distinctPageUntilChanged,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -22,12 +22,12 @@ import {
   ListPaginationMultiFilterChange,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { MultiActionListEntity } from '../../../../../../../core/src/shared/monitors/pagination-monitor';
+import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
+import { CFListDataSource } from '../../../../cf-list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
@@ -114,7 +114,7 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
           const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;
           if (appState === 'STARTED') {
-            const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+            const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
             const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
             const getAction = actionBuilder(appGuid, cfGuid);
             actions.push({

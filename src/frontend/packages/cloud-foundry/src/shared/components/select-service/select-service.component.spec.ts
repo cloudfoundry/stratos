@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import {
   ApplicationStateIconComponent,
 } from '../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -30,8 +30,8 @@ import {
 import {
   MultilineTitleComponent,
 } from '../../../../../core/src/shared/components/multiline-title/multiline-title.component';
-import { EntityMonitorFactory } from '../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
 import { CsiGuidsService } from '../add-service-instance/csi-guids.service';

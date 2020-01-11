@@ -7,10 +7,10 @@ import {
   UserFavorite,
   UserFavoriteEndpoint,
 } from '../../../../../store/src/types/user-favorites.types';
-import { StratosBaseCatalogueEntity } from '../../../core/entity-catalogue/entity-catalogue-entity';
-import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata, IStratosEntityDefinition } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { StratosBaseCatalogEntity } from '../../../../../store/src/entity-catalog/entity-catalog-entity';
+import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata, IStratosEntityDefinition } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
@@ -78,7 +78,7 @@ export class FavoritesConfigMapper {
    * For a given favorite, return the corresponding favorite meta card mapper
    */
   public getMapperFunction<T extends IEntityMetadata = IEntityMetadata>(favorite: IFavoriteTypeInfo) {
-    const catalogueEntity = entityCatalogue.getEntity(favorite.endpointType, favorite.entityType);
+    const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
     return (entity: T) => {
       if (!entity) {
         return {
@@ -89,13 +89,13 @@ export class FavoritesConfigMapper {
           menuItems: null
         };
       }
-      const linesBuilders = catalogueEntity.builders.entityBuilder.getLines ? catalogueEntity.builders.entityBuilder.getLines() : [];
+      const linesBuilders = catalogEntity.builders.entityBuilder.getLines ? catalogEntity.builders.entityBuilder.getLines() : [];
       return {
         lines: linesBuilders.map(builder => ([builder[0], builder[1](entity)])) as [string, string | Observable<string>][],
-        type: catalogueEntity.definition.type,
-        routerLink: catalogueEntity.builders.entityBuilder.getLink(entity),
+        type: catalogEntity.definition.type,
+        routerLink: catalogEntity.builders.entityBuilder.getLink(entity),
         name: entity.name,
-        menuItems: catalogueEntity.builders.entityBuilder.getActions ? catalogueEntity.builders.entityBuilder.getActions(entity) : null
+        menuItems: catalogEntity.builders.entityBuilder.getActions ? catalogEntity.builders.entityBuilder.getActions(entity) : null
       };
     };
   }
@@ -111,39 +111,39 @@ export class FavoritesConfigMapper {
    * For a given favorite, return the corresponding human readable type name
    */
   public getPrettyTypeName(favorite: IFavoriteTypeInfo) {
-    const catalogueEntity = entityCatalogue.getEntity(favorite.endpointType, favorite.entityType);
-    return catalogueEntity ? catalogueEntity.definition.label : null;
+    const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
+    return catalogEntity ? catalogEntity.definition.label : null;
   }
 
   /**
    * For a given favorite, return the corresponding hydration action
    */
   public getEntityMetadata(favorite: IFavoriteTypeInfo, entity: any) {
-    const catalogueEntity = entityCatalogue.getEntity(favorite.endpointType, favorite.entityType);
-    return catalogueEntity ? catalogueEntity.builders.entityBuilder.getMetadata(entity) : null;
+    const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
+    return catalogEntity ? catalogEntity.builders.entityBuilder.getMetadata(entity) : null;
   }
 
   /**
    * For a given endpoint type, return the list of possible favorite types
    */
   public getAllTypesForEndpoint(endpointType: string): IFavoriteTypes[] {
-    return entityCatalogue.getAllEntitiesForEndpointType(endpointType).map(catalogueEntity => ({
-      type: catalogueEntity.definition.type,
-      prettyName: catalogueEntity.definition.label
+    return entityCatalog.getAllEntitiesForEndpointType(endpointType).map(catalogEntity => ({
+      type: catalogEntity.definition.type,
+      prettyName: catalogEntity.definition.label
     }));
   }
 
-  private buildFavoriteFromCatalogueEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
-    catalogueEntity: StratosBaseCatalogueEntity<T, Y>,
+  private buildFavoriteFromCatalogEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    catalogEntity: StratosBaseCatalogEntity<T, Y>,
     entity: any,
     endpointId: string
   ) {
-    const isEndpoint = catalogueEntity.isEndpoint;
-    const entityDefinition = catalogueEntity.definition as IStratosEntityDefinition;
-    const endpointType = isEndpoint ? catalogueEntity.getTypeAndSubtype().type : entityDefinition.endpoint.type;
-    const entityType = isEndpoint ? EntityCatalogueHelpers.endpointType : entityDefinition.type;
-    const metadata = catalogueEntity.builders.entityBuilder.getMetadata(entity);
-    const guid = isEndpoint ? null : catalogueEntity.builders.entityBuilder.getGuid(metadata);
+    const isEndpoint = catalogEntity.isEndpoint;
+    const entityDefinition = catalogEntity.definition as IStratosEntityDefinition;
+    const endpointType = isEndpoint ? catalogEntity.getTypeAndSubtype().type : entityDefinition.endpoint.type;
+    const entityType = isEndpoint ? EntityCatalogHelpers.endpointType : entityDefinition.type;
+    const metadata = catalogEntity.builders.entityBuilder.getMetadata(entity);
+    const guid = isEndpoint ? null : catalogEntity.builders.entityBuilder.getGuid(metadata);
     return new UserFavorite<T>(
       endpointId,
       endpointType,
@@ -159,15 +159,15 @@ export class FavoritesConfigMapper {
     endpointId: string,
     entity: Y
   ) {
-    const catalogueEntity = entityCatalogue.getEntity<T, Y>(endpointType, entityType) as StratosBaseCatalogueEntity<T, Y>;
-    return this.buildFavoriteFromCatalogueEntity<T, Y>(catalogueEntity, entity, endpointId);
+    const catalogEntity = entityCatalog.getEntity<T, Y>(endpointType, entityType) as StratosBaseCatalogEntity<T, Y>;
+    return this.buildFavoriteFromCatalogEntity<T, Y>(catalogEntity, entity, endpointId);
   }
 
   public getFavoriteEndpointFromEntity(
     endpoint: EndpointModel
   ) {
     return this.getFavoriteFromEntity(
-      EntityCatalogueHelpers.endpointType,
+      EntityCatalogHelpers.endpointType,
       endpoint.cnsi_type,
       endpoint.guid,
       endpoint

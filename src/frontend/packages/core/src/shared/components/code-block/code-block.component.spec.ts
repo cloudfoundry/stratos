@@ -1,8 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../core/core.module';
+import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 import { CodeBlockComponent } from './code-block.component';
 
 describe('CodeBlockComponent', () => {
@@ -13,6 +14,7 @@ describe('CodeBlockComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         CodeBlockComponent,
+        CopyToClipboardComponent
       ],
       imports: [
         CoreModule,

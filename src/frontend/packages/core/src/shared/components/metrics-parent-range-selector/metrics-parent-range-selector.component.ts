@@ -2,7 +2,7 @@ import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } fr
 import { Subscription } from 'rxjs';
 
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { MetricQueryType } from '../../services/metrics-range-selector.types';
 import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';

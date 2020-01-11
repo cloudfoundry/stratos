@@ -31,8 +31,8 @@ import { CFAppState } from '../../cf-app-state';
 import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-types';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { GitCommit } from '../types/git.types';
-import { entityCatalogue } from './../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from './../../../cf-types';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 
 function parseHttpPipeError(res: any, logger: LoggerService): { message?: string } {
   if (!res.status) {
@@ -95,7 +95,7 @@ export class DeployAppEffects {
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return action.scm.getBranches(this.httpClient, action.projectName).pipe(
         mergeMap(branches => {
-          const entityKey = entityCatalogue.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
           const mappedData = {
             entities: { [entityKey]: {} },
             result: []
@@ -135,7 +135,7 @@ export class DeployAppEffects {
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return action.scm.getCommit(this.httpClient, action.projectName, action.commitSha).pipe(
         mergeMap(commit => {
-          const entityKey = entityCatalogue.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
           const mappedData = {
             entities: { [entityKey]: {} },
             result: []
@@ -164,7 +164,7 @@ export class DeployAppEffects {
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return action.scm.getCommits(this.httpClient, action.projectName, action.sha).pipe(
         mergeMap((commits: GitCommit[]) => {
-          const entityKey = entityCatalogue.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
           const mappedData = {
             entities: { [entityKey]: {} },
             result: []

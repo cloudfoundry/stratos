@@ -1,14 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { ApiEntityTypeSelectPageComponent } from './api-entity-type-select-page.component';
-import { ApiDrivenViewsModule } from '../../api-driven-views.module';
 import { RouterTestingModule } from '@angular/router/testing';
-import { EntityCatalogueModule } from '../../../core/entity-catalogue.module';
-import { generateStratosEntities } from '../../../base-entity-types';
+import { TabNavService } from 'frontend/packages/core/tab-nav.service';
+
+import { generateBaseTestStoreModules } from '../../../../test-framework/core-test.helper';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { TabNavService } from '../../../../tab-nav.service';
+import { ApiDrivenViewsModule } from '../../api-driven-views.module';
+import { ApiEntityTypeSelectPageComponent } from './api-entity-type-select-page.component';
 
 describe('ApiEntityTypeSelectPageComponent', () => {
   let component: ApiEntityTypeSelectPageComponent;
@@ -17,11 +15,10 @@ describe('ApiEntityTypeSelectPageComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        EntityCatalogueModule.forFeature(generateStratosEntities),
+        ...generateBaseTestStoreModules(),
         CoreModule,
         RouterTestingModule,
         SharedModule,
-        createBasicStoreModule(),
         ApiDrivenViewsModule,
       ],
       providers: [TabNavService]
