@@ -297,11 +297,11 @@ export class HelmEffects {
   private updateReleaseServices(action: GetHelmReleaseStatus, status: HelmReleaseStatus) {
     const releaseServiceAction = new GetHelmReleaseServices(action.endpointGuid, action.releaseTitle);
     const services = Object.values(status.data['v1/Service']).reduce((res, service) => {
-      const newService: HelmReleaseService = {
+      const newService = {
         endpointId: action.endpointGuid,
         releaseTitle: action.releaseTitle,
         ...service
-      };
+      } as HelmReleaseService;
       res[GetHelmReleasePods.createKey(action.endpointGuid, action.releaseTitle, service.name)] = newService;
       return res;
     }, {});

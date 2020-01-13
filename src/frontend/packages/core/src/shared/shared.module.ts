@@ -1,3 +1,4 @@
+import { SidepanelPreviewComponent } from './components/sidepanel-preview/sidepanel-preview.component';
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -224,6 +225,7 @@ import { JsonViewerComponent } from './components/json-viewer/json-viewer.compon
     ListHostDirective,
     CopyToClipboardComponent,
     TileSelectorTileComponent,
+    SidepanelPreviewComponent
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -316,6 +318,7 @@ import { JsonViewerComponent } from './components/json-viewer/json-viewer.compon
     ListHostDirective,
     CopyToClipboardComponent,
     TileSelectorTileComponent,
+    SidepanelPreviewComponent
   ],
   entryComponents: [
     DialogConfirmComponent,
