@@ -1,4 +1,3 @@
-import { SidepanelPreviewComponent } from './components/sidepanel-preview/sidepanel-preview.component';
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -9,6 +8,9 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import {
   ApplicationInstanceChartComponent,
 } from '../../../cloud-foundry/src/features/applications/application/application-instance-chart/application-instance-chart.component';
+import { EntityMonitorFactory } from '../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
 import { CoreModule } from '../core/core.module';
 import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -47,6 +49,7 @@ import { FileInputComponent } from './components/file-input/file-input.component
 import { FocusDirective } from './components/focus.directive';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
+import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
@@ -84,6 +87,7 @@ import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.comp
 import { PollingIndicatorComponent } from './components/polling-indicator/polling-indicator.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
+import { SidepanelPreviewComponent } from './components/sidepanel-preview/sidepanel-preview.component';
 import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
 import { SnackBarReturnComponent } from './components/snackbar-return/snackbar-return.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
@@ -107,9 +111,6 @@ import {
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { GitSCMService } from './data-services/scm/scm.service';
-import { EntityMonitorFactory } from '../../../store/src/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { PercentagePipe } from './pipes/percentage.pipe';
@@ -120,7 +121,6 @@ import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundr
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
 
 
 @NgModule({

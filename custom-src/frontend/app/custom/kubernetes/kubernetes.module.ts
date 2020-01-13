@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -80,6 +79,12 @@ import {
   KubernetesNodeTagsCardComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-tags-card/kubernetes-node-tags-card.component';
 import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-count/node-pod-count.component';
+import {
+  KubernetesPodReadinessComponent,
+} from './list-types/kubernetes-pods/kubernetes-pod-readiness/kubernetes-pod-readiness.component';
+import {
+  KubernetesPodStatusComponent,
+} from './list-types/kubernetes-pods/kubernetes-pod-status/kubernetes-pod-status.component';
 import { KubernetesPodTagsComponent } from './list-types/kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';
 import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
 import { KubernetesServicePortsComponent } from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
@@ -93,8 +98,9 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
-import { KubernetesPodStatusComponent } from './list-types/kubernetes-pods/kubernetes-pod-status/kubernetes-pod-status.component';
-import { KubernetesPodReadinessComponent } from './list-types/kubernetes-pods/kubernetes-pod-readiness/kubernetes-pod-readiness.component';
+import { WorkloadsModule } from './workloads/workloads.module';
+
+/* tslint:disable:max-line-length */
 
 /* tslint:enable */
 
@@ -105,6 +111,7 @@ import { KubernetesPodReadinessComponent } from './list-types/kubernetes-pods/ku
     SharedModule,
     NgxChartsModule,
     KubernetesRoutingModule,
+    WorkloadsModule
   ],
   declarations: [
     KubernetesComponent,
@@ -155,9 +162,9 @@ import { KubernetesPodReadinessComponent } from './list-types/kubernetes-pods/ku
     KubernetesPodStatusComponent,
     KubernetesPodReadinessComponent
   ],
-  exports: [
-    KubernetesServicePortsComponent
-  ],
+  // exports: [
+  //   KubernetesServicePortsComponent
+  // ],
   providers: [
     KubernetesService,
     BaseKubeGuid,

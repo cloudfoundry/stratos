@@ -1,11 +1,10 @@
-import { DashboardBaseComponent } from './../features/dashboard/dashboard-base/dashboard-base.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { HELM_ENDPOINT_TYPE } from './helm/helm-entity-factory';
 import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes/kubernetes-entity-factory';
 
-const kubernetes: Routes = [
+const customRoutes: Routes = [
   {
     path: 'kubernetes',
     loadChildren: './kubernetes/kubernetes.module#KubernetesModule',
@@ -16,6 +15,21 @@ const kubernetes: Routes = [
         matIconFont: 'stratos-icons', // TODO: get these from entity config?
         position: 60,
         requiresEndpointType: KUBERNETES_ENDPOINT_TYPE
+      }
+    }
+  },
+  {
+    path: 'workloads',
+    // loadChildren: './helm/helm.module#HelmModule',
+    loadChildren: () => import('./kubernetes/workloads/workloads.module').then(m => m.WorkloadsModule),
+    data: {
+      reuseRoute: true,
+      stratosNavigation: {
+        text: 'Workloads',
+        matIcon: 'apps',
+        // matIconFont: 'stratos-icons',
+        position: 64,
+        requiresEndpointType: KUBERNETES_ENDPOINT_TYPE // TODO: RC CHECK
       }
     }
   },
@@ -32,12 +46,12 @@ const kubernetes: Routes = [
         requiresEndpointType: HELM_ENDPOINT_TYPE
       }
     }
-  }
+  },
 ];
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(kubernetes),
+    RouterModule.forRoot(customRoutes),
   ],
   declarations: []
 })

@@ -9,8 +9,7 @@ export class MonocularTabBaseComponent {
 
   tabLinks = [
     { link: 'charts', label: 'Charts', icon: 'folder_open' },
-    { link: 'repos', label: 'Repositories', icon: 'products', iconFont: 'stratos-icons' },
-    { link: 'releases', label: 'Releases', icon: 'apps' },
+    { link: 'repos', label: 'Repositories', icon: 'products', iconFont: 'stratos-icons' }
   ];
 
 }

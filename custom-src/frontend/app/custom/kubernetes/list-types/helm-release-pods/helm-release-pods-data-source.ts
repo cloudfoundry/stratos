@@ -25,7 +25,6 @@ export class KubernetesReleasePodsDataSource extends ListDataSource<KubernetesPo
       action,
       schema: kubernetesEntityFactory(kubernetesPodsEntityType),
       getRowUniqueId: a => a.name,
-      // getRowUniqueId: getHelmReleaseServiceId,  //TODO: RC
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,
