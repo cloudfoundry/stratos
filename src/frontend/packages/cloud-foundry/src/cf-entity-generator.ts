@@ -901,7 +901,6 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         }),
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
-        getPreviewableComponent: () => ApplicationPreviewComponent,
         getLines: () => ([
           ['Creation Date', (meta) => meta.createdAt]
         ])
@@ -939,7 +938,6 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           cfGuid: space.entity.cfGuid,
           createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
-        getPreviewableComponent: () => SpacePreviewComponent,
         getLines: () => ([
           ['Creation Date', (meta) => meta.createdAt]
         ]),
@@ -976,7 +974,6 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
           cfGuid: org.entity.cfGuid,
           createdAt: moment(org.metadata.created_at).format('LLL'),
         }),
-        getPreviewableComponent: () => OrganizationPreviewComponent,
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
         getLines: () => ([
           ['Creation Date', (meta) => meta.createdAt]
