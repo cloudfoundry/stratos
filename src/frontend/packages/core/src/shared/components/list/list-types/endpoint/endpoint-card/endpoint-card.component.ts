@@ -1,4 +1,3 @@
-import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 import {
   Component,
   ComponentFactoryResolver,
@@ -8,18 +7,16 @@ import {
   OnInit,
   ViewChild,
   ViewContainerRef,
-  ElementRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
-import { filter, first, map, pairwise, startWith } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { SetHeaderEvent } from '../../../../../../../../store/src/actions/dashboard-actions';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { StratosCatalogEndpointEntity } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import {
   coreEndpointListDetailsComponents,
@@ -31,6 +28,7 @@ import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/m
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
+import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -114,7 +112,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     private endpointListHelper: EndpointListHelper,
     private componentFactoryResolver: ComponentFactoryResolver,
     private favoritesConfigMapper: FavoritesConfigMapper,
@@ -175,12 +173,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         map(rowState => rowState.error ? StratosStatus.ERROR : null),
         startWith(null)
       );
-
-      this.subs.push(this.cardStatus$.pipe(
-        pairwise(),
-        filter(([oldV, newV]) => !oldV && !!newV),
-        first()
-      ).subscribe(() => this.store.dispatch(new SetHeaderEvent(true))));
     }
   }
 
