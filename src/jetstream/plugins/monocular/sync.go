@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/helm/monocular/chartrepo"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -50,8 +51,7 @@ func (m *Monocular) processSyncRequests() {
 			}
 			m.portalProxy.UpdateEndointMetadata(job.Endpoint.GUID, marshalSyncMetadata(metadata))
 			//Kate TODO hit the sync container rest endpoint to trigger a sync for given repo
-			//err := chartrepo.SyncRepo(m.Store, job.Endpoint.Name, job.Endpoint.APIEndpoint.String(), "")
-			var err error
+			err := chartrepo.SyncRepo(dbClient, dbName, job.Endpoint.Name, job.Endpoint.APIEndpoint.String(), "")
 			metadata.Busy = false
 			if err != nil {
 				log.Warn("Failed to sync repository: %v+", err)

@@ -41,7 +41,7 @@ func (m *Monocular) Init() error {
 	if !m.portalProxy.GetConfig().EnableTechPreview {
 		return errors.New("Feature is in Tech Preview")
 	}
-	fdbURL := "fdb service name"
+	fdbURL := "mongodb://127.0.0.1:27016"
 	fDB := "monocular-plugin"
 	debug := false
 	m.ConfigureChartSVC(&fdbURL, &fDB, &debug)

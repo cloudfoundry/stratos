@@ -51,7 +51,7 @@ func Sync(cmd *cobra.Command, args []string) {
 	defer cancel()
 	client, err := NewDocLayerClient(ctx, clientOptions)
 	if err != nil {
-		log.Fatalf("Can't create client for FoundationDB document layer: %v", err)
+		log.Fatalf("Can't create client for FoundationDB document layer: %v. URL provided was: %v", err, fdbURL)
 		return
 	}
 

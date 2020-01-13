@@ -107,7 +107,7 @@ func InitFDBDocLayerConnection(fdbURL *string, fDB *string, debug *bool) {
 	clientOptions := options.Client().ApplyURI(*fdbURL)
 	client, err := fdbDatastore.NewDocLayerClient(context.Background(), clientOptions)
 	if err != nil {
-		log.Fatalf("Can't create client for FoundationDB document layer: %v", err)
+		log.Fatalf("Can't create client for FoundationDB document layer: %v. URL provided was: %v.", err, *fdbURL)
 		return
 	}
 	log.Debugf("FDB Document Layer client created.")
