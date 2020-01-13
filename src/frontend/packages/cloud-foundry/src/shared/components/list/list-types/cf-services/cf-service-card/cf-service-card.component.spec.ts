@@ -4,13 +4,22 @@ import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
 import {
   generateCfBaseTestModulesNoShared,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
+import { TableCellServiceActiveComponent } from '../table-cell-service-active/table-cell-service-active.component';
+import { TableCellServiceBindableComponent } from '../table-cell-service-bindable/table-cell-service-bindable.component';
+import {
+  TableCellServiceCfBreadcrumbsComponent,
+} from '../table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
+import {
+  TableCellServiceReferencesComponent,
+} from '../table-cell-service-references/table-cell-service-references.component';
+import { TableCellServiceTagsComponent } from '../table-cell-service-tags/table-cell-service-tags.component';
 import { CfServiceCardComponent } from './cf-service-card.component';
 
 describe('CfServiceCardComponent', () => {
@@ -25,7 +34,12 @@ describe('CfServiceCardComponent', () => {
         MetadataCardTestComponents,
         BooleanIndicatorComponent,
         AppChipsComponent,
-        ServiceIconComponent
+        ServiceIconComponent,
+        TableCellServiceActiveComponent,
+        TableCellServiceBindableComponent,
+        TableCellServiceReferencesComponent,
+        TableCellServiceCfBreadcrumbsComponent,
+        TableCellServiceTagsComponent
       ],
       imports: generateCfBaseTestModulesNoShared(),
       providers: [

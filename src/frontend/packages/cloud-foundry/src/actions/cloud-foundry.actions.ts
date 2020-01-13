@@ -1,4 +1,4 @@
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { cfInfoEntityType } from '../cf-entity-types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
 

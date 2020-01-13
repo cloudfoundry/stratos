@@ -4,7 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import {
   METRIC_API_FAILED,
   METRIC_API_START,
@@ -35,7 +35,7 @@ export class MetricsEffect {
         headers: { 'x-cap-cnsi-list': action.endpointGuid }
       }).pipe(
         map(metrics => {
-          const catalogueEntity = entityCatalogue.getEntity(action);
+          const catalogEntity = entityCatalog.getEntity(action);
           const metric = metrics[action.endpointGuid];
           const metricObject = metric ? {
             [guid]: {
@@ -47,7 +47,7 @@ export class MetricsEffect {
           return new WrapperRequestActionSuccess(
             {
               entities: {
-                [catalogueEntity.entityKey]: metricObject
+                [catalogEntity.entityKey]: metricObject
               },
               result: [guid]
             },

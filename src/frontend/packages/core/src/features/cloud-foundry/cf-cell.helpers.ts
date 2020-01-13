@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CFEntityConfig } from '../../../../cloud-foundry/src/cf-types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../cloud-foundry/src/actions/cf-metrics.actions';
 import {
   CellMetrics,
@@ -11,9 +11,10 @@ import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions
 import { AppState } from '../../../../store/src/app-state';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { IMetrics } from '../../../../store/src/types/base-metric.types';
-import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { MetricQueryType } from '../../shared/services/metrics-range-selector.types';
 import { endpointHasMetricsByAvailable } from '../endpoints/endpoint-helpers';
+
 
 export class CfCellHelper {
 

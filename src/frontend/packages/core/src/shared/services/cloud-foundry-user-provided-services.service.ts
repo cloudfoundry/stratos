@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { debounceTime, filter, map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/src/cf-types';
 import {
   CreateUserProvidedServiceInstance,
   getUserProvidedServiceInstanceRelations,
@@ -23,27 +23,27 @@ import {
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { fetchTotalResults } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { QParam, QParamJoiners } from '../../../../store/src/q-param';
+import { QParam, QParamJoiners } from '../../../../cloud-foundry/src/shared/q-param';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
-import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig, IEntityMetadata } from '../../core/entity-catalogue/entity-catalogue.types';
-import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig, IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 
 
 @Injectable()
 export class CloudFoundryUserProvidedServicesService {
 
-  private serviceInstancesEntityConfig: EntityCatalogueEntityConfig = {
+  private serviceInstancesEntityConfig: EntityCatalogEntityConfig = {
     endpointType: CF_ENDPOINT_TYPE,
     entityType: serviceInstancesEntityType
   };
 
-  private userProvidedServiceEntity = entityCatalogue.getEntity<IEntityMetadata, any, UserProvidedServiceActionBuilder>(
+  private userProvidedServiceEntity = entityCatalog.getEntity<IEntityMetadata, any, UserProvidedServiceActionBuilder>(
     CF_ENDPOINT_TYPE,
     userProvidedServiceInstanceEntityType
   );

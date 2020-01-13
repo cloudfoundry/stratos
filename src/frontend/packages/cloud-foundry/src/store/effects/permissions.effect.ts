@@ -16,7 +16,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { LoggerService } from '../../../../core/src/core/logger.service';
 import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../../../../store/src/actions/endpoint.actions';
 import {
@@ -113,7 +113,7 @@ function fetchCfUserRole(store: Store<CFAppState>, action: GetUserRelations, htt
 }
 
 const fetchPaginationStateFromAction = (store: Store<CFAppState>, action: BasePaginatedAction) => {
-  const entityKey = entityCatalogue.getEntityKey(action);
+  const entityKey = entityCatalog.getEntityKey(action);
   return store.select(selectPaginationState(entityKey, action.paginationKey));
 };
 

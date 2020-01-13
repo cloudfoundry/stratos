@@ -8,8 +8,8 @@ import { of as observableOf } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
-import { EntityService } from '../../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
+import { EntityService } from '../../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/app-state';
 import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';

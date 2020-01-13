@@ -1,25 +1,10 @@
 <div class="page-container">
   <app-page-header hideMenu="true" [showHistory]="false">
-    <h1>Stratos Setup</h1>
+    <h1>{{title}} Setup with Cloud Foundry UAA</h1>
   </app-page-header>
   <app-show-page-header></app-show-page-header>
   <div class="uaa-wizard">
     <app-steppers>
-      <app-step title="Introduction">
-        <div>
-          <app-stratos-title></app-stratos-title>
-          <p class="uaa-wizard__intro">Welcome to Stratos</p>
-          <p>
-            Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and
-            administrators to both manage applications running in the Cloud Foundry cluster and perform cluster
-            management
-            tasks.
-          </p>
-          <p>Before accessing Stratos for the first time some configuration information is required.</p>
-
-          <p>Press <b>NEXT</b> to get started.</p>
-        </div>
-      </app-step>
       <app-step title="UAA Endpoint" [valid]="validateUAAForm | async" [onNext]="uaaFormNext">
         <div class="uaa-wizard__form">
           <p class="uaa-wizard__form-section">Please enter the following information to allow Stratos to authenticate

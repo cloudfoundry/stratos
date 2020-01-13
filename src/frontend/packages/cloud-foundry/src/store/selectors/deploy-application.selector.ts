@@ -9,11 +9,11 @@ export const selectDeployAppState = (state: CFAppState) => {
 
 export const getApplicationSource = (state: DeployApplicationState) => state.applicationSource;
 export const getSourceType = (state: DeployApplicationSource) => state && state.type;
-export const getApplicationProjectName = (state: DeployApplicationSource) => state && state.projectName;
-export const getProjectExists = (state: DeployApplicationState) => state && state.projectExists;
-export const getCommit = (state: DeployApplicationSource) => state && state.commit;
-export const getBranch = (state: DeployApplicationSource) => state && state.branch;
-export const getDeployBranchName = (state: DeployApplicationSource) => state && state.branchName;
+export const getGitProjectName = (state: DeployApplicationSource) => state && state.gitDetails && state.gitDetails.projectName;
+export const getGitProjectExists = (state: DeployApplicationState) => state && state.projectExists;
+export const getGitCommit = (state: DeployApplicationSource) => state && state.gitDetails && state.gitDetails.commit;
+export const getGitBranch = (state: DeployApplicationSource) => state && state.gitDetails && state.gitDetails.branch;
+export const getGitDeployBranchName = (state: DeployApplicationSource) => state && state.gitDetails && state.gitDetails.branchName;
 export const getCFDetails = (state: DeployApplicationState) => state && state.cloudFoundryDetails;
 export const getProjectName = (state: ProjectExists) => state && state.name;
 
@@ -28,24 +28,24 @@ export const selectApplicationSource = compose(
 );
 
 export const selectProjectName = compose(
-  getApplicationProjectName,
+  getGitProjectName,
   getApplicationSource,
   selectDeployAppState
 );
 
 export const selectProjectExists = compose(
-  getProjectExists,
+  getGitProjectExists,
   selectDeployAppState
 );
 
 export const selectNewProjectCommit = compose(
-  getCommit,
+  getGitCommit,
   getApplicationSource,
   selectDeployAppState
 );
 
 export const selectNewProjectBranch = compose(
-  getBranch,
+  getGitBranch,
   getApplicationSource,
   selectDeployAppState
 );
@@ -56,13 +56,13 @@ export const selectCfDetails = compose(
 );
 
 export const selectDeployBranchName = compose(
-  getDeployBranchName,
+  getGitDeployBranchName,
   getApplicationSource,
   selectDeployAppState
 );
 
 export const selectPEProjectName = compose(
   getProjectName,
-  getProjectExists,
+  getGitProjectExists,
   selectDeployAppState
 );

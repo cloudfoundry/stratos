@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ListEntityConfig } from '../../../shared/components/list/list-generics/helpers/action-or-config-helpers';
 
 @Component({
@@ -18,7 +18,7 @@ export class ApiEntityListPageComponent implements OnInit {
   ngOnInit() {
     const endpointType = this.route.parent ? this.route.parent.snapshot.params.endpointType : null;
     const entityType = this.route.snapshot.params.entityType;
-    const entityConfig = entityCatalogue.getEntity(endpointType, entityType);
+    const entityConfig = entityCatalog.getEntity(endpointType, entityType);
     if (entityConfig) {
       // All these missing properties will need wiring in for CF case, maybe only endpointGuid for k8s?
       this.config = {

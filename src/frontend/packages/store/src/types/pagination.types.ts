@@ -1,8 +1,8 @@
 import { HttpRequest } from '@angular/common/http';
 import { Action } from '@ngrx/store';
 
-import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
+import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { ListActionState } from '../reducers/api-request-reducer/types';
 import { EntityRequestAction } from './request.types';
 
@@ -75,7 +75,7 @@ export interface PaginatedAction extends BasePaginatedAction, EntityRequestActio
   skipValidation?: boolean;
   // Internal, used for local multi action lists
   __forcedPageNumber__?: number;
-  __forcedPageEntityConfig__?: EntityCatalogueEntityConfig;
+  __forcedPageEntityConfig__?: EntityCatalogEntityConfig;
 }
 
 export interface PaginationEntityTypeState {

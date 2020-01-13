@@ -23,7 +23,7 @@ import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../../s
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { EndpointsService } from '../../core/endpoints.service';
-import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { EndpointType } from '../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../core/utils.service';
 
@@ -59,7 +59,7 @@ export class ConnectEndpointService {
   private hasAttemptedConnect: boolean;
   private pData: ConnectEndpointData;
 
-  private endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+  private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
 
   // We need a delay to ensure the BE has finished registering the endpoint.
   // If we don't do this and if we're quick enough, we can navigate to the application page

@@ -8,7 +8,7 @@ import { MarketplaceSummaryPage } from './marketplace-summary.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
 
-describe('Marketplace', () => {
+describe('Service Instance from Marketplace', () => {
   let setup: E2ESetup;
   const servicesWall = new ServicesWallPage();
   const timeout = 60000;

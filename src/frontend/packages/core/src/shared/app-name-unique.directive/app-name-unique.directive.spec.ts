@@ -8,7 +8,7 @@ import { Store } from '@ngrx/store';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { AppStoreModule } from '../../../../store/src/store.module';
 import { CoreTestingModule } from '../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../core/core.module';
 import { ExtensionService } from '../../core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../core/github.helpers';

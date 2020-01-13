@@ -77,6 +77,8 @@ type CFPushAppOverrides struct {
 	Host            string `json:"host"`
 	Domain          string `json:"domain"`
 	Path            string `json:"path"`
+	DockerImage     string `json:"dockerImage"`
+	DockerUsername  string `json:"dockerUsername"`
 }
 
 // ErrorType default error returned
@@ -268,9 +270,11 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 	flags = append(flags, "--random-route", strconv.FormatBool(overrides.RandomRoute))
 	flags = appendFlag(flags, "--route-path", overrides.Path)
 	flags = appendFlag(flags, "-s", overrides.Stack)
-	if overrides.Instances != nil {
+	if overrides.Time != nil {
 		flags = append(flags, "-t", strconv.Itoa(*overrides.Time))
 	}
+	flags = appendFlag(flags, "--docker-image", overrides.DockerImage)
+	flags = appendFlag(flags, "--docker-username", overrides.DockerUsername)
 
 	log.Debugf("Cf Push Overrides: %v", flags)
 

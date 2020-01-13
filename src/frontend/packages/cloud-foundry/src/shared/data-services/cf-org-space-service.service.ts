@@ -17,7 +17,7 @@ import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import {
   ListPaginationMultiFilterChange,
@@ -25,9 +25,9 @@ import {
 import {
   valueOrCommonFalsy,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { QParam, QParamJoiners } from '../../../../store/src/q-param';
+import { QParam, QParamJoiners } from '../q-param';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
@@ -37,7 +37,7 @@ import { selectPaginationState } from '../../../../store/src/selectors/paginatio
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {
@@ -298,7 +298,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createPaginationAction() {
-    const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const organizationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getAllOrganizationsAction = actionBuilder(null, CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, {
       includeRelations: [

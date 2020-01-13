@@ -1,9 +1,9 @@
 import { Store } from '@ngrx/store';
+import { StratosBaseCatalogEntity } from 'frontend/packages/store/src/entity-catalog/entity-catalog-entity';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
 
 import { isPaginatedAction, PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { StratosBaseCatalogueEntity } from '../../../../../core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../../../core/entity-catalogue/entity-catalogue.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
 import { IListConfig } from '../../list.component.types';
@@ -17,14 +17,14 @@ interface GetMultipleActionConfig {
 }
 
 export interface ListEntityConfig extends GetMultipleActionConfig {
-  entityConfig: EntityCatalogueEntityConfig;
+  entityConfig: EntityCatalogEntityConfig;
 }
 
 function actionFromConfig(config: ListEntityConfig): PaginatedAction {
-  const catalogueEntity = entityCatalogue.getEntity(config.entityConfig);
-  const getAllActionBuilder = catalogueEntity.actionOrchestrator.getActionBuilder('getMultiple');
+  const catalogEntity = entityCatalog.getEntity(config.entityConfig);
+  const getAllActionBuilder = catalogEntity.actionOrchestrator.getActionBuilder('getMultiple');
   if (!getAllActionBuilder) {
-    throw Error(`List Error: ${catalogueEntity.entityKey} has no action builder for the getMultiple action.`);
+    throw Error(`List Error: ${catalogEntity.entityKey} has no action builder for the getMultiple action.`);
   }
   return getAllActionBuilder(config.endpointGuid, config.paginationKey, config.extraArgs);
 }
@@ -32,16 +32,16 @@ function actionFromConfig(config: ListEntityConfig): PaginatedAction {
 /* tslint:disable:no-use-before-declare  */
 export class ListDataSourceFromActionOrConfig<A, T> extends ListDataSource<T, A> {
   constructor(actionOrConfig: ListActionOrConfig,
-              listConfig: IListConfig<T>,
-              store: Store<any>,
-              dataSourceConfig?: Partial<IListDataSourceConfig<A, T>>, ) {
-    const { action, catalogueEntity } = ListActionOrConfigHelpers.createListAction(actionOrConfig);
+    listConfig: IListConfig<T>,
+    store: Store<any>,
+    dataSourceConfig?: Partial<IListDataSourceConfig<A, T>>, ) {
+    const { action, catalogEntity } = ListActionOrConfigHelpers.createListAction(actionOrConfig);
     super({
       store,
       action,
       paginationKey: action.paginationKey,
-      schema: catalogueEntity.getSchema(action.schemaKey),
-      getRowUniqueId: entity => catalogueEntity.getGuidFromEntity(entity),
+      schema: catalogEntity.getSchema(action.schemaKey),
+      getRowUniqueId: entity => catalogEntity.getGuidFromEntity(entity),
       listConfig,
       isLocal: true, // assume true unless overwritten
       ...dataSourceConfig
@@ -53,14 +53,14 @@ export class ListDataSourceFromActionOrConfig<A, T> extends ListDataSource<T, A>
 export class ListActionOrConfigHelpers {
   static createListAction(actionOrConfig: ListActionOrConfig): {
     action: PaginatedAction,
-    catalogueEntity: StratosBaseCatalogueEntity
+    catalogEntity: StratosBaseCatalogEntity
   } {
     const action = isPaginatedAction(actionOrConfig) || actionFromConfig(actionOrConfig as ListEntityConfig);
-    const catalogueEntity = entityCatalogue.getEntity(action);
-    action.paginationKey = action.paginationKey || catalogueEntity.entityKey + '-list';
+    const catalogEntity = entityCatalog.getEntity(action);
+    action.paginationKey = action.paginationKey || catalogEntity.entityKey + '-list';
     return {
       action,
-      catalogueEntity
+      catalogEntity
     };
   }
 
@@ -70,13 +70,13 @@ export class ListActionOrConfigHelpers {
     listConfig: IListConfig<T>,
     dsOverrides?: Partial<IListDataSourceConfig<A, T>>
   ): IListDataSourceConfig<A, T> {
-    const { action, catalogueEntity } = ListActionOrConfigHelpers.createListAction(actionOrConfig);
+    const { action, catalogEntity } = ListActionOrConfigHelpers.createListAction(actionOrConfig);
     return {
       store,
       action,
       paginationKey: action.paginationKey,
-      schema: catalogueEntity.getSchema(action.schemaKey),
-      getRowUniqueId: entity => catalogueEntity.getGuidFromEntity(entity),
+      schema: catalogEntity.getSchema(action.schemaKey),
+      getRowUniqueId: entity => catalogEntity.getGuidFromEntity(entity),
       listConfig,
       isLocal: true, // assume true unless overwritten
       ...dsOverrides

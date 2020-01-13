@@ -1,25 +1,25 @@
 import { Store } from '@ngrx/store';
+import { StratosBaseCatalogEntity } from 'frontend/packages/store/src/entity-catalog/entity-catalog-entity';
 
 import { EntityPipelineEntity } from '../../../../../../../store/src/entity-request-pipeline/pipeline.types';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
-import { StratosBaseCatalogueEntity } from '../../../../../core/entity-catalogue/entity-catalogue-entity';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ListConfig, ListViewTypes } from '../../list.component.types';
 
-export class CatalogueEntityDrivenListConfig<T extends EntityPipelineEntity> extends ListConfig<T> {
+export class CatalogEntityDrivenListConfig<T extends EntityPipelineEntity> extends ListConfig<T> {
   constructor(
-    catalogueEntity: StratosBaseCatalogueEntity,
+    catalogEntity: StratosBaseCatalogEntity,
     store: Store<any>
   ) {
     super();
 
-    const tableConfig = catalogueEntity.definition.tableConfig;
+    const tableConfig = catalogEntity.definition.tableConfig;
     this.viewType = ListViewTypes.TABLE_ONLY;
     this.isLocal = true;
     this.enableTextFilter = true;
-    const title = !tableConfig || tableConfig && tableConfig.showHeader ? catalogueEntity.definition.labelPlural : null;
+    const title = !tableConfig || tableConfig && tableConfig.showHeader ? catalogEntity.definition.labelPlural : null;
     this.text = {
-      noEntries: `There are no ${catalogueEntity.definition.labelPlural.toLowerCase()}`
+      noEntries: `There are no ${catalogEntity.definition.labelPlural.toLowerCase()}`
     };
     if (title) {
       this.text.title = title;
@@ -41,10 +41,10 @@ export class CatalogueEntityDrivenListConfig<T extends EntityPipelineEntity> ext
         })),
         createTableColumnFavorite(row => {
           return new UserFavorite(
-            catalogueEntity.getEndpointGuidFromEntity(row),
-            catalogueEntity.endpointType,
-            catalogueEntity.definition.type,
-            catalogueEntity.getGuidFromEntity(row),
+            catalogEntity.getEndpointGuidFromEntity(row),
+            catalogEntity.endpointType,
+            catalogEntity.definition.type,
+            catalogEntity.getGuidFromEntity(row),
           );
         })
       ];

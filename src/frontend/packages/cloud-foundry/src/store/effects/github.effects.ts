@@ -12,7 +12,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../../actions/github.actions';
 import { CFAppState } from '../../cf-app-state';
 import { gitRepoEntityType } from '../../cf-entity-types';

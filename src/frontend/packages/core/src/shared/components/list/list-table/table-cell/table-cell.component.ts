@@ -36,10 +36,10 @@ import {
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
-import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
+import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 
-/* tslint:disable:max-line-length */
-/* tslint:enable:max-line-length */
+
+
 export const listTableCells = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,

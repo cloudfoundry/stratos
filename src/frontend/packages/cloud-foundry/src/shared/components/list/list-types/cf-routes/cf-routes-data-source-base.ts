@@ -2,11 +2,11 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IRoute } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe } from '../../../../../../../core/src/core/utils.service';
 import {
   ListPaginationMultiFilterChange,
@@ -16,8 +16,8 @@ import {
   TableRowStateManager,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { PaginationMonitor } from '../../../../../../../core/src/shared/monitors/pagination-monitor';
-import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
+import { PaginationMonitor } from '../../../../../../../store/src/monitors/pagination-monitor';
+import { CFListDataSource } from '../../../../cf-list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
@@ -160,11 +160,11 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
     return paginationMonitor.currentPage$.pipe(
       map(routes => {
         return routes.map(route => {
-          const catalogueEntity = entityCatalogue.getEntity({
+          const catalogEntity = entityCatalog.getEntity({
             entityType: routeEntityType,
             endpointType: CF_ENDPOINT_TYPE
           });
-          const entityMonitor = catalogueEntity.getEntityMonitor(store, route.metadata.guid);
+          const entityMonitor = catalogEntity.getEntityMonitor(store, route.metadata.guid);
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
               const unmapping = request.updating.unmapping || { busy: false };

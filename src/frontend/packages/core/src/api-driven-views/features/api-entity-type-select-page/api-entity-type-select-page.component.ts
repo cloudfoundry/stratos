@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ApiEntityType } from '../../api-drive-views.types';
 import { TabNavService } from '../../../../tab-nav.service';
 import { Store } from '@ngrx/store';
@@ -29,8 +29,8 @@ export class ApiEntityTypeSelectPageComponent implements OnInit {
   ngOnInit() {
     const endpointGuid = this.route.snapshot.params.endpointId;
     const endpointType = this.route.snapshot.params.endpointType;
-    const endpointEntity = entityCatalogue.getEndpoint(endpointType);
-    const endpointEntities = entityCatalogue.getAllEntitiesForEndpointType(endpointType);
+    const endpointEntity = entityCatalog.getEndpoint(endpointType);
+    const endpointEntities = entityCatalog.getAllEntitiesForEndpointType(endpointType);
     const entitiesWithGetMultiple = endpointEntities.filter(
       entity => entity && entity.definition.tableConfig && entity.actionOrchestrator.hasActionBuilder('getMultiple')
     );

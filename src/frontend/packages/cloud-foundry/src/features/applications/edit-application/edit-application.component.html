@@ -21,10 +21,10 @@
         <input matInput placeholder="Number of Instances" formControlName="instances" type="number">
       </mat-form-field>
       <mat-form-field>
-        <input matInput placeholder="Disk Quota (MB)" formControlName="disk_quota" type="number">
+        <input matInput placeholder="Disk Quota (MB)" formControlName="disk_quota" type="number" min="1">
       </mat-form-field>
       <mat-form-field>
-        <input matInput placeholder="Memory Quota (MB)" formControlName="memory" type="number">
+        <input matInput placeholder="Memory Quota (MB)" formControlName="memory" type="number" min="1">
       </mat-form-field>
       <mat-slide-toggle class="edit-app__toggler" formControlName="enable_ssh">Enable SSH to Application Instances</mat-slide-toggle>
     </form>

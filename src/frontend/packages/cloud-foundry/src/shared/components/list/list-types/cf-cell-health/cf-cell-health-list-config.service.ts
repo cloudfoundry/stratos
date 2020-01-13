@@ -15,7 +15,7 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { PaginationMonitorFactory } from '../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
 import { CFAppState } from '../../../../../cf-app-state';
@@ -24,6 +24,7 @@ import {
 } from '../../../../../features/cloud-foundry/tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
+
 
 // TODO: Move file to CF package (#3769)
 // tslint:enable:max-line-length
