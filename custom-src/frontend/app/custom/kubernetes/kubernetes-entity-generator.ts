@@ -154,8 +154,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   return new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/kubernetes/${metadata.guid}`,
-    () => KubernetesEndpointPreviewComponent,
+    metadata => `/kubernetes/${metadata.guid}`
   );
 }
 

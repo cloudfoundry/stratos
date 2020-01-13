@@ -123,7 +123,7 @@ function generateReleaseGraphEntity(endpointDefinition: StratosEndpointExtension
     schema: helmEntityFactory(helmReleaseGraphEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogueEntity<IFavoriteMetadata, HelmReleaseGraph>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseGraph>(definition);
 }
 
 function generateReleaseResourceEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -132,6 +132,6 @@ function generateReleaseResourceEntity(endpointDefinition: StratosEndpointExtens
     schema: helmEntityFactory(helmReleaseResourceEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogueEntity<IFavoriteMetadata, HelmReleaseResource>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseResource>(definition);
 }
 

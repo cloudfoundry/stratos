@@ -119,11 +119,7 @@ import { spaceActionBuilders } from './entity-action-builders/space.action-build
 import { stackActionBuilders } from './entity-action-builders/stack-action-builders';
 import { userProvidedServiceActionBuilder } from './entity-action-builders/user-provided-service.action-builders';
 import { userActionBuilders } from './entity-action-builders/user.action-builders';
-import { ApplicationPreviewComponent } from './shared/components/application-preview/application-preview.component';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
-import { CfEndpointPreviewComponent } from './shared/components/cf-endpoint-preview/cf-endpoint-preview.component';
-import { OrganizationPreviewComponent } from './shared/components/organization-preview/organization-preview.component';
-import { SpacePreviewComponent } from './shared/components/space-preview/space-preview.component';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
@@ -865,8 +861,7 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
 function generateCfEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   return new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/cloud-foundry/${metadata.guid}`,
-    () => CfEndpointPreviewComponent,
+    metadata => `/cloud-foundry/${metadata.guid}`
   );
 }
 

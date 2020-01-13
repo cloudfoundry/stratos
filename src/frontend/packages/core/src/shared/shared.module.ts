@@ -119,6 +119,7 @@ import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundr
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
 
 
 @NgModule({

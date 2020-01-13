@@ -1,15 +1,15 @@
 import { HELM_ENDPOINT_TYPE, helmReleaseResourceEntityType } from './../../helm-entity-factory';
 import { GetHelmReleaseServices } from './../../store/helm.actions';
-import { entityCatalogue } from './../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject, Subscription } from 'rxjs';
 
 import { HelmReleaseGuid, HelmReleasePod } from '../../store/helm.types';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
-import { catchError, switchMap, share, map, first, debounceTime, startWith } from 'rxjs/operators';
+import { catchError, switchMap, share, map } from 'rxjs/operators';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
-import { Store, Action } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/src/app-state';
 import {
   successEntityHandler
@@ -21,9 +21,9 @@ import {
 } from '../../../kubernetes/kubernetes-entity-factory';
 import { PipelineResult } from '../../../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { GetHelmReleasePods } from '../../store/helm.actions';
-import { EntityCatalogueEntityConfig } from '../../../../core/entity-catalogue/entity-catalogue.types';
 import { helmReleaseGraphEntityType } from '../../helm-entity-factory';
 import { LoggerService } from '../../../../core/logger.service';
+import { EntityCatalogEntityConfig } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 
 type IDGetterFunction = (data: any) => string;
 
@@ -162,7 +162,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
 
   private addResource(entityType: string, data: any, id: string, endpointType = KUBERNETES_ENDPOINT_TYPE) {
     const actionDispatcher = (action) => this.store.dispatch(action);
-    const catalogEntity = entityCatalogue.getEntity(endpointType, entityType);
+    const catalogEntity = entityCatalog.getEntity(endpointType, entityType);
     const pr = {
       success: true,
       response: {
@@ -189,7 +189,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
     );
   }
 
-  private populateList(action: EntityCatalogueEntityConfig, resources: any, idGetter?: IDGetterFunction) {
+  private populateList(action: EntityCatalogEntityConfig, resources: any, idGetter?: IDGetterFunction) {
     const entityType = kubernetesPodsEntityType;
     const releaseTitle = this.helmReleaseHelper.releaseTitle;
     const endpointId = this.helmReleaseHelper.endpointGuid;
@@ -199,7 +199,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
     }
 
     const actionDispatcher = (a) => this.store.dispatch(a);
-    const catalogEntity = entityCatalogue.getEntity(KUBERNETES_ENDPOINT_TYPE, entityType);
+    const catalogEntity = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, entityType);
     const newResources = {};
     resources.forEach(resource => {
       const newResource: HelmReleasePod = {
@@ -213,7 +213,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
     const releasePods = {
       success: true,
       response: {
-        entities: { [entityCatalogue.getEntityKey(action)]: Object.values(newResources) },
+        entities: { [entityCatalog.getEntityKey(action)]: Object.values(newResources) },
         result: Object.keys(newResources)
       }
     };
