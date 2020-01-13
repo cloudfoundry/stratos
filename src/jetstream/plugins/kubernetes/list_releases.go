@@ -232,19 +232,17 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 
 	// Now we have everything, so loop, polling to get status
 	for {
-		log.Warn("Polling for release - wait 10 seconds")
+		log.Debug("Polling for release - wait 10 seconds")
 
 		select {
 		case <-stopchan:
-			log.Error("***  RELEASE POLLER HAS FINISHED")
-			log.Error("****************************************************************************************************")
 			ws.Close()
 			return nil
 		case <-time.After(sleep):
 			break
 		}
 
-		log.Warn("Polling for release ....")
+		log.Debug("Polling for release ....")
 
 		// Pods
 		rel.UpdatePods(c.portalProxy)
@@ -263,10 +261,6 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 		sleep = 10 * time.Second
 	}
 
-	log.Error("****************************************************************************************************")
-	log.Error("RELEASE POLLER HAS FINISHED")
-	log.Error("****************************************************************************************************")
-
 	ws.Close()
 
 	return nil
@@ -275,7 +269,6 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 func readLoop(c *websocket.Conn, stopchan chan<- bool) {
 	for {
 		if _, _, err := c.NextReader(); err != nil {
-			log.Error("WEB SOCKET HAS BEEN CLOSED")
 			c.Close()
 			close(stopchan)
 			break

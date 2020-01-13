@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -37,7 +38,10 @@ func (f *HelmConfiguration) Cleanup() {
 	}
 }
 
+var lock sync.Mutex
+
 // GetHelmConfiguration - gets a Helm V3 client for using it as a client library
+// The Helm API we use is not thead safe, so use a lock to make sure only one call at a time
 func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, namespace string) (*action.Configuration, *HelmConfiguration, error) {
 	// Need to get a config object for the target endpoint
 	var p = c.portalProxy
@@ -53,6 +57,9 @@ func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, nam
 	if !ok {
 		return nil, hc, errors.New("Helm: Can not get user token for endpoint")
 	}
+
+	lock.Lock()
+	defer lock.Unlock()
 
 	kubeconfigcontents, err := c.GetKubeConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRecord, namespace)
 	if err != nil {
