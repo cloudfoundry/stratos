@@ -1,17 +1,17 @@
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../../actions/pagination.actions';
 import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
 import { WrapperRequestActionSuccess } from '../../types/request.types';
 
 export function successEntityHandler(
   actionDispatcher,
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   requestType,
   action,
   result,
   recursivelyDeleting = false
 ) {
-  const entityAction = catalogueEntity.getRequestAction('success', action, requestType, result.response);
+  const entityAction = catalogEntity.getRequestAction('success', action, requestType, result.response);
   if (
     !action.updatingKey &&
     (requestType === 'create' || requestType === 'delete')
@@ -39,7 +39,7 @@ export function successEntityHandler(
       new RecursiveDeleteComplete(
         action.guid,
         action.endpointGuid,
-        catalogueEntity.getSchema(action.schemaKey)
+        catalogEntity.getSchema(action.schemaKey)
       ),
     );
   }

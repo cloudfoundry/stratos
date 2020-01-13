@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { endpointEntitySchema } from '../../../../core/src/base-entity-schemas';
-import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
+import { PaginationMonitor } from '../../../../store/src/monitors/pagination-monitor';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { endpointListKey, EndpointModel } from '../../../../store/src/types/endpoint.types';
 

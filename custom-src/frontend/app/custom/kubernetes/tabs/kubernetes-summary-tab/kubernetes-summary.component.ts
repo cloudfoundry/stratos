@@ -6,15 +6,15 @@ import { combineLatest, interval, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import {
   IChartThresholds,
   ISimpleUsageChartData,
 } from '../../../../shared/components/simple-usage-chart/simple-usage-chart.types';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { GetKubernetesNodes, GetKubernetesPods } from '../../store/kubernetes.actions';
 import { GetKubernetesApps } from './../../store/kubernetes.actions';
@@ -47,9 +47,9 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   };
   public endpointDetails$: Observable<IEndpointDetails> = this.kubeEndpointService.endpoint$.pipe(
     map(endpoint => {
-      const endpointConfig = entityCatalogue.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
+      const endpointConfig = entityCatalog.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
       const { logoUrl, label } = endpointConfig.definition;
-      // const { imagePath, label } = entityCatalogue.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
+      // const { imagePath, label } = entityCatalog.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
 
       // const { imagePath, label } = getEndpointType(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
       return {

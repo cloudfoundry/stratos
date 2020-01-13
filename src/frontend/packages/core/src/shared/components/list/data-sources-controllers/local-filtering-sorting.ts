@@ -1,5 +1,5 @@
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
-import { MultiActionListEntity } from '../../../monitors/pagination-monitor';
+import { MultiActionListEntity } from '../../../../../../store/src/monitors/pagination-monitor';
 
 export function getDataFunctionList(entityFunctions: (DataFunction<any> | DataFunctionDefinition)[]): DataFunction<any>[] {
   return entityFunctions.map(functionOrDef => {

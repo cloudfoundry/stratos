@@ -2,7 +2,7 @@
   "compilerOptions": {
     "downlevelIteration": true,
     "module": "esnext",
-    "rootDir": "."
-  ,    "target": "es2015"
-}
+    "rootDir": ".",
+    "target": "es2015"
+  }
 }

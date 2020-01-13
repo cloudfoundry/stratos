@@ -1,14 +1,21 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import {
-  generateCfBaseTestModules,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+  ServiceInstanceLastOpComponent,
+} from '../../../../../../../../core/src/shared/components/service-instance-last-op/service-instance-last-op.component';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
+import {
+  TableCellServiceBindableComponent,
+} from '../../cf-services/table-cell-service-bindable/table-cell-service-bindable.component';
+import {
+  TableCellServiceReferencesComponent,
+} from '../../cf-services/table-cell-service-references/table-cell-service-references.component';
 import { ServiceInstanceCardComponent } from './service-instance-card.component';
 
 describe('ServiceInstanceCardComponent', () => {
@@ -17,7 +24,13 @@ describe('ServiceInstanceCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ServiceInstanceCardComponent, CfOrgSpaceLinksComponent],
+      declarations: [
+        ServiceInstanceCardComponent,
+        CfOrgSpaceLinksComponent,
+        ServiceInstanceLastOpComponent,
+        TableCellServiceBindableComponent,
+        TableCellServiceReferencesComponent
+      ],
       imports: generateCfBaseTestModules(),
       providers: [
         ServicesWallService,

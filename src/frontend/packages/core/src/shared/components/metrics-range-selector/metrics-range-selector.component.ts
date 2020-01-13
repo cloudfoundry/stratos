@@ -5,8 +5,8 @@ import { Subscription } from 'rxjs';
 import { metricEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
-import { EntityMonitor } from '../../monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
+import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { ITimeRange, MetricQueryType } from '../../services/metrics-range-selector.types';
 

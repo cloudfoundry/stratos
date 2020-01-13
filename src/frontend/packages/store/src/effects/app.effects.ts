@@ -3,14 +3,14 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 import { ASSIGN_ROUTE_SUCCESS } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import {
   createAppInstancesMetricAction,
 } from '../../../cloud-foundry/src/shared/components/list/list-types/app-instance/cf-app-instances-config.service';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { endpointHasMetrics } from '../../../core/src/features/endpoints/endpoint-helpers';
 import { EndpointOnlyAppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';
@@ -27,7 +27,7 @@ export class AppEffects {
   @Effect({ dispatch: false }) updateSummary$ = this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS),
     map(action => {
-      const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
+      const appSummaryEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
       const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
       const getAppSummaryAction = actionBuilder(action.apiAction.guid, action.apiAction.endpointGuid);
       this.store.dispatch(getAppSummaryAction);

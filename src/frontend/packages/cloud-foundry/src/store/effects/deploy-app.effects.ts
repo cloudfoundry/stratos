@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -30,8 +31,8 @@ import { CFAppState } from '../../cf-app-state';
 import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-types';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { GitCommit } from '../types/git.types';
-import { entityCatalogue } from './../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { CF_ENDPOINT_TYPE } from './../../../cf-types';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 
 function parseHttpPipeError(res: any, logger: LoggerService): { message?: string } {
   if (!res.status) {
@@ -59,17 +60,18 @@ export class DeployAppEffects {
     private actions$: Actions,
     private store: Store<CFAppState>,
     private logger: LoggerService,
+    private httpClient: HttpClient
   ) { }
 
   @Effect()
   checkAppExists$ = this.actions$.pipe(
     ofType<CheckProjectExists>(CHECK_PROJECT_EXISTS),
     withLatestFrom(this.store.select(selectDeployAppState)),
-    filter(([action, state]) => {
+    filter(([, state]) => {
       return state.projectExists && state.projectExists.checking;
     }),
-    switchMap(([action, state]: any) => {
-      return action.scm.getRepository(action.projectName).pipe(
+    switchMap(([action, state]: [CheckProjectExists, any]) => {
+      return action.scm.getRepository(this.httpClient, action.projectName).pipe(
         map(res => new ProjectExists(action.projectName, res)),
         catchError(err => observableOf(err.status === 404 ?
           new ProjectDoesntExist(action.projectName) :
@@ -91,9 +93,9 @@ export class DeployAppEffects {
         paginationKey: action.paginationKey
       } as PaginatedAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
-      return action.scm.getBranches(action.projectName).pipe(
+      return action.scm.getBranches(this.httpClient, action.projectName).pipe(
         mergeMap(branches => {
-          const entityKey = entityCatalogue.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
           const mappedData = {
             entities: { [entityKey]: {} },
             result: []
@@ -131,9 +133,9 @@ export class DeployAppEffects {
         type: action.type,
       } as ICFAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
-      return action.scm.getCommit(action.projectName, action.commitSha).pipe(
+      return action.scm.getCommit(this.httpClient, action.projectName, action.commitSha).pipe(
         mergeMap(commit => {
-          const entityKey = entityCatalogue.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
           const mappedData = {
             entities: { [entityKey]: {} },
             result: []
@@ -160,9 +162,9 @@ export class DeployAppEffects {
         paginationKey: action.paginationKey
       } as PaginatedAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
-      return action.scm.getCommits(action.projectName, action.sha).pipe(
+      return action.scm.getCommits(this.httpClient, action.projectName, action.sha).pipe(
         mergeMap((commits: GitCommit[]) => {
-          const entityKey = entityCatalogue.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
           const mappedData = {
             entities: { [entityKey]: {} },
             result: []

@@ -1,8 +1,8 @@
 import { HttpRequest } from '@angular/common/http';
 import { Action } from '@ngrx/store';
 
-import { BasePipelineRequestAction } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
+import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
 import { EntitySchema } from '../helpers/entity-schema';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
@@ -29,7 +29,7 @@ export enum RequestEntityLocation {
 }
 
 export type RequestActionEntity = EntitySchema | EntitySchema[];
-export interface EntityRequestAction extends EntityCatalogueEntityConfig, RequestAction {
+export interface EntityRequestAction extends EntityCatalogEntityConfig, RequestAction {
   /**
    * This is just to maintain backwards compatibility while transitioning
    * to entity pipeline proper usage
@@ -40,7 +40,7 @@ export interface EntityRequestAction extends EntityCatalogueEntityConfig, Reques
    * This is used for multiaction lists where the deleted entity
    * is going to be part of another entities pagination section
    */
-  proxyPaginationEntityConfig?: EntityCatalogueEntityConfig;
+  proxyPaginationEntityConfig?: EntityCatalogEntityConfig;
 
   /**
    * For a delete action, clear the pagination section for the given keys.

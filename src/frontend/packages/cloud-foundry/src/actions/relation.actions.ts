@@ -1,11 +1,13 @@
-import { HttpParams, HttpRequest } from '@angular/common/http';
-
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
+import {
+  EntityInlineChildAction,
+  EntityInlineParentAction,
+} from '../entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { RequestActionEntity, RequestEntityLocation } from '../../../store/src/types/request.types';
-import { EntityTreeRelation } from '../entity-relations/entity-relation-tree';
-import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+import { RequestEntityLocation, RequestActionEntity } from '../../../store/src/types/request.types';
 import { CFStartAction } from './cf-action.types';
+import { EntityTreeRelation } from '../entity-relations/entity-relation-tree';
+import { HttpRequest, HttpParams } from '@angular/common/http';
 
 const relationActionId = 'FetchRelationAction';
 
@@ -39,7 +41,7 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
     '[Fetch Relations] Failed'
   ];
   options: HttpRequest<any>;
-  parentEntityConfig: EntityCatalogueEntityConfig;
+  parentEntityConfig: EntityCatalogEntityConfig;
   static is(anything: any): FetchRelationAction {
     return (anything.isId === relationActionId) ? anything as FetchRelationAction : null;
   }

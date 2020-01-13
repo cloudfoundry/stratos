@@ -1,8 +1,10 @@
+import { HttpClient } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
 import { LoggerService } from '../../../../core/logger.service';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ChartListComponent } from '../chart-list/chart-list.component';
@@ -14,8 +16,6 @@ import { ConfigService } from '../shared/services/config.service';
 import { MenuService } from '../shared/services/menu.service';
 import { ReposService } from '../shared/services/repos.service';
 import { ChartsComponent } from './charts.component';
-import { HttpClient } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 // import { HeaderBarComponent } from '../header-bar/header-bar.component';
 // import { SeoService } from '../shared/services/seo.service';

@@ -10,7 +10,7 @@ import {
   userFavoritesEntitySchema,
   userProfileEntitySchema,
 } from './base-entity-schemas';
-import { StratosCatalogueEndpointEntity, StratosCatalogueEntity } from './core/entity-catalogue/entity-catalogue-entity';
+import { StratosCatalogEndpointEntity, StratosCatalogEntity } from '../../store/src/entity-catalog/entity-catalog-entity';
 import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
 
 //
@@ -31,7 +31,7 @@ const stratosType = {
  * DefaultEndpointEntityType is used to represent a general endpoint
  * This should not be used to actually attempt to render an endpoint and is instead used as a way to fill the
  */
-class DefaultEndpointCatalogueEntity extends StratosCatalogueEntity {
+class DefaultEndpointCatalogEntity extends StratosCatalogEntity {
   constructor() {
     super({
       schema: endpointEntitySchema,
@@ -45,7 +45,7 @@ class DefaultEndpointCatalogueEntity extends StratosCatalogueEntity {
   }
 }
 
-class UserFavoriteCatalogueEntity extends StratosCatalogueEntity {
+class UserFavoriteCatalogEntity extends StratosCatalogEntity {
   constructor() {
     super({
       schema: userFavoritesEntitySchema,
@@ -60,7 +60,7 @@ class UserFavoriteCatalogueEntity extends StratosCatalogueEntity {
   }
 }
 
-class UserProfileCatalogueEntity extends StratosCatalogueEntity {
+class UserProfileCatalogEntity extends StratosCatalogEntity {
   constructor() {
     super({
       schema: userProfileEntitySchema,
@@ -70,7 +70,7 @@ class UserProfileCatalogueEntity extends StratosCatalogueEntity {
   }
 }
 
-class SystemInfoCatalogueEntity extends StratosCatalogueEntity {
+class SystemInfoCatalogEntity extends StratosCatalogEntity {
   constructor() {
     super({
       schema: systemInfoEntitySchema,
@@ -82,12 +82,12 @@ class SystemInfoCatalogueEntity extends StratosCatalogueEntity {
 
 export function generateStratosEntities() {
   return [
-    new DefaultEndpointCatalogueEntity(),
-    new SystemInfoCatalogueEntity(),
-    new UserFavoriteCatalogueEntity(),
-    new UserProfileCatalogueEntity(),
+    new DefaultEndpointCatalogEntity(),
+    new SystemInfoCatalogEntity(),
+    new UserFavoriteCatalogEntity(),
+    new UserProfileCatalogEntity(),
     // TODO: metrics location to be sorted - STRAT-152
-    new StratosCatalogueEndpointEntity({
+    new StratosCatalogEndpointEntity({
       type: 'metrics',
       label: 'Metrics',
       labelPlural: 'Metrics',

@@ -21,15 +21,16 @@ import { AppStoreModule } from '../../store/src/store.module';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
+import { XSRFModule } from '../xsrf.module';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
 import { generateStratosEntities } from './base-entity-types';
 import { CoreModule } from './core/core.module';
 import { CustomizationService } from './core/customizations.types';
-import { EntityCatalogueModule } from './core/entity-catalogue.module';
-import { EntityActionDispatcher } from './core/entity-catalogue/action-dispatcher/action-dispatcher';
-import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
+import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
+import { EntityActionDispatcher } from '../../store/src/entity-catalog/action-dispatcher/action-dispatcher';
+import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog.service';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
@@ -46,7 +47,6 @@ import { CustomReuseStrategy } from './route-reuse-stragegy';
 import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SharedModule } from './shared/shared.module';
-import { XSRFModule } from '../xsrf.module';
 import { PanelPreviewService } from './shared/services/panel-preview.service';
 
 // Create action for router navigation. See
@@ -87,7 +87,7 @@ export class CustomRouterStateSerializer
     NoEndpointsNonAdminComponent,
   ],
   imports: [
-    EntityCatalogueModule.forFeature(generateStratosEntities),
+    EntityCatalogModule.forFeature(generateStratosEntities),
     RouteModule,
     CloudFoundryPackageModule,
     AppStoreModule,
@@ -146,11 +146,14 @@ export class AppModule {
       eventTriggered: (state: GeneralEntityAppState) => {
         const eventState = internalEventStateSelector(state);
         return Object.entries(eventState.types.endpoint).reduce((res, [eventId, value]) => {
-          const backendErrors = value.filter(error => error.eventCode === '500');
+          const backendErrors = value.filter(error => {
+            const eventCode = parseInt(error.eventCode, 10);
+            return eventCode >= 500;
+          });
           if (!backendErrors.length) {
             return res;
           }
-          const entityConfig = entityCatalogue.getEntity(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+          const entityConfig = entityCatalog.getEntity(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
           res.push(new GlobalEventData(true, {
             endpoint: selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state),
             count: backendErrors.length
@@ -159,7 +162,9 @@ export class AppModule {
         }, []);
       },
       message: data => {
-        return `We've been having trouble communicating with the endpoint ${data.endpoint.name}`;
+        const part1 = data.count > 1 ? `There are ${data.count} errors` : `There is an error`;
+        const part2 = data.endpoint ? ` associated with the endpoint '${data.endpoint.name}'` : ` associated with multiple endpoints`;
+        return part1 + part2;
       },
       key: data => `${endpointEventKey}-${data.endpoint.guid}`,
       link: data => `/errors/${data.endpoint.guid}`,
@@ -218,7 +223,7 @@ export class AppModule {
       ([entities, recents]) => {
         Object.values(recents.entities).forEach(recentEntity => {
           const mapper = this.favoritesConfigMapper.getMapperFunction(recentEntity);
-          const entityKey = entityCatalogue.getEntityKey(recentEntity);
+          const entityKey = entityCatalog.getEntityKey(recentEntity);
           if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
             const entity = entities[entityKey][recentEntity.entityId];
             const entityToMetadata = this.favoritesConfigMapper.getEntityMetadata(recentEntity, entity);
@@ -239,10 +244,10 @@ export class AppModule {
     if (favorite) {
       const isEndpoint = (favorite.entityType === endpointSchemaKey);
       // If the favorite is an endpoint ensure we look in the stratosEndpoint part of the store instead of, for example, cfEndpoint
-      const entityKey = isEndpoint ? entityCatalogue.getEntityKey({
+      const entityKey = isEndpoint ? entityCatalog.getEntityKey({
         ...favorite,
         endpointType: STRATOS_ENDPOINT_TYPE
-      }) : entityCatalogue.getEntityKey(favorite);
+      }) : entityCatalog.getEntityKey(favorite);
       const entity = entities[entityKey][favorite.entityId || favorite.endpointId];
       if (entity) {
         const newMetadata = this.favoritesConfigMapper.getEntityMetadata(favorite, entity);

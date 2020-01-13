@@ -24,8 +24,8 @@ import {
   UserProfileInfoUpdates,
 } from '../../../../store/src/types/user-profile.types';
 import { userProfileEntitySchema } from '../../base-entity-schemas';
-import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
-import { EntityMonitor } from '../../shared/monitors/entity-monitor';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityMonitor } from '../../../../store/src/monitors/entity-monitor';
 
 
 @Injectable()
@@ -39,7 +39,7 @@ export class UserProfileService {
 
   userProfile$: Observable<UserProfileInfo>;
 
-  private stratosUserConfig = entityCatalogue.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
+  private stratosUserConfig = entityCatalog.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
 
   constructor(private store: Store<AppState>) {
 

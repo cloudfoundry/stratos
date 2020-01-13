@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 
+import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { endpointListKey, EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { endpointEntitySchema } from '../../../base-entity-schemas';
-import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
 @Injectable()
 export class KubernetesService {

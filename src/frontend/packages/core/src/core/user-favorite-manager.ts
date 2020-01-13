@@ -19,7 +19,7 @@ import {
   FavoritesConfigMapper,
   TFavoriteMapperFunction,
 } from '../shared/components/favorites-meta-card/favorite-config-mapper';
-import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { LoggerService } from './logger.service';
 
 export interface IFavoriteEntity {
@@ -141,12 +141,12 @@ export class UserFavoriteManager {
   }
 
   private mapToHydrated = <T extends IFavoriteMetadata>(favorite: UserFavorite<T>): IHydrationResults<T> => {
-    const catalogueEntity = entityCatalogue.getEntity(favorite.endpointType, favorite.entityType);
+    const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
 
     return {
-      type: catalogueEntity.definition.type,
+      type: catalogEntity.definition.type,
       cardMapper: this.favoritesConfigMapper.getMapperFunction(favorite),
-      prettyName: catalogueEntity.definition.label,
+      prettyName: catalogEntity.definition.label,
       favorite
     };
   }

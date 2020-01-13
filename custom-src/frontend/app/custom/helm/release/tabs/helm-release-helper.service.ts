@@ -3,8 +3,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { PaginationMonitor } from '../../../../shared/monitors/pagination-monitor';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
+import { PaginationMonitor } from '../../../../../../store/src/monitors/pagination-monitor';
 import { helmEntityFactory, helmReleaseEntityKey } from '../../helm-entity-factory';
 import { GetHelmReleases, GetHelmReleaseStatus, GetHelmReleaseGraph, GetHelmReleaseResource } from '../../store/helm.actions';
 import { HelmRelease, HelmReleaseGuid, HelmReleaseStatus, HelmReleaseGraph, HelmReleaseResource } from '../../store/helm.types';

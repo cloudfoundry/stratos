@@ -6,7 +6,7 @@ import { EMPTY, of as observableOf } from 'rxjs';
 
 import { ListSort } from '../../../../../../store/src/actions/list.actions';
 import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../../core/core.module';
 import { UtilsService } from '../../../../core/utils.service';
 import { SharedModule } from '../../../shared.module';

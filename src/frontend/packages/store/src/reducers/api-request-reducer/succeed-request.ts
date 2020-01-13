@@ -1,6 +1,6 @@
 import { isNullOrUndefined } from 'util';
 
-import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
 import { BaseRequestState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
 import { ISuccessRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';

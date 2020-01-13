@@ -47,16 +47,16 @@ import {
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { IServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
 import { IApp, ISpace } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
 import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { cfEntityFactory } from '../../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { ApplicationActionBuilders } from '../../../../entity-action-builders/application.action-builders';
 import { ServiceInstanceActionBuilders } from '../../../../entity-action-builders/service-instance.action.builders';
 import { SpaceActionBuilders } from '../../../../entity-action-builders/space.action-builders';
@@ -102,17 +102,17 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     map(details => details.spaceGuid)
   );
 
-  private serviceInstanceEntity = entityCatalogue.getEntity<IEntityMetadata, any, ServiceInstanceActionBuilders>(
+  private serviceInstanceEntity = entityCatalog.getEntity<IEntityMetadata, any, ServiceInstanceActionBuilders>(
     CF_ENDPOINT_TYPE,
     serviceInstancesEntityType
   );
 
-  private spaceEntity = entityCatalogue.getEntity<IEntityMetadata, any, SpaceActionBuilders>(
+  private spaceEntity = entityCatalog.getEntity<IEntityMetadata, any, SpaceActionBuilders>(
     CF_ENDPOINT_TYPE,
     spaceEntityType
   );
 
-  private appEntity = entityCatalogue.getEntity<IEntityMetadata, any, ApplicationActionBuilders>(
+  private appEntity = entityCatalog.getEntity<IEntityMetadata, any, ApplicationActionBuilders>(
     CF_ENDPOINT_TYPE,
     applicationEntityType
   );

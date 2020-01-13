@@ -4,11 +4,11 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../core/src/core/core.module';
-import { EntityServiceFactory } from '../../core/src/core/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
+import { EntityMonitorFactory } from '../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 import { SharedModule } from '../../core/src/shared/shared.module';
-import { testSCFEndpointGuid } from '../../core/test-framework/store-test-helper';
+import { testSCFEndpointGuid } from '@stratos/store/testing';
 import { CfUserServiceTestProvider } from '../../core/test-framework/user-service-helper';
 import { appReducers } from '../../store/src/reducers.module';
 import { CFAppState } from '../src/cf-app-state';

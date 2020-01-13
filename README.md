@@ -35,12 +35,8 @@ Stratos can be deployed in the following environments:
 3. Docker, single container deploying all components. See [guide](deploy/all-in-one)
 
 ## Troubleshooting
-Please see our [Troubleshooting](docs/troubleshooting) page.
 
-## Project Planning
-We use [ZenHub](https://zenhub.com) for project planning. Feel free to head over to the [Boards](https://github.com/SUSE/stratos#boards)
-tab and have a look through our pipelines and milestones. Please note in order to view the Github ZenHub Boards tab you will need the [ZenHub
-browser extension](https://www.zenhub.com/extension). Alternatively, to view the planning board without the extension visit our [ZenHub Project Page](https://app.zenhub.com/workspace/o/cloudfoundry/stratos/boards)
+Please see our [Troubleshooting](docs/troubleshooting) page.
 
 ## Further Reading
  
@@ -75,3 +71,4 @@ Tested with Browserstack
 ## License
 
 The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE).
+

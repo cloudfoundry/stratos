@@ -1,10 +1,18 @@
 import { Component } from '@angular/core';
+import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, map, startWith } from 'rxjs/operators';
+import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
+import { entityCatalog } from '../../../../../../../store/src//entity-catalog/entity-catalog.service';
+import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
+import { selectDeletionInfo } from '../../../../../../../store/src/selectors/api.selectors';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { organizationEntityType } from '../../../../../cf-entity-types';
 import { goToAppWall } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
@@ -19,11 +27,14 @@ export class CloudFoundryOrganizationSummaryComponent {
   appLink: () => void;
   detailsLoading$: Observable<boolean>;
   public permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
+  public permsOrgDelete = CurrentUserPermissions.ORGANIZATION_DELETE;
 
   constructor(
-    store: Store<CFAppState>,
+    private store: Store<CFAppState>,
     public cfEndpointService: CloudFoundryEndpointService,
-    public cfOrgService: CloudFoundryOrganizationService
+    public cfOrgService: CloudFoundryOrganizationService,
+    private confirmDialog: ConfirmationDialogService,
+    private snackBar: MatSnackBar
   ) {
     this.appLink = () => {
       goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);
@@ -38,6 +49,46 @@ export class CloudFoundryOrganizationSummaryComponent {
       map(() => false),
       startWith(true)
     );
+  }
 
+  deleteOrgWarn() {
+    this.cfOrgService.org$.pipe(
+      map(org => org.entity.entity.name),
+      first()
+    ).subscribe(name => {
+      const confirmation = new ConfirmationDialogConfig(
+        'Delete Organization',
+        {
+          textToMatch: name
+        },
+        'Delete',
+        true,
+      );
+      this.confirmDialog.open(confirmation, () => {
+        this.cfEndpointService.deleteOrg(
+          this.cfOrgService.orgGuid,
+          this.cfEndpointService.cfGuid
+        );
+
+        const orgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+        this.store.select(selectDeletionInfo(orgEntity.entityKey, this.cfOrgService.orgGuid)).pipe(
+          pairwise(),
+          filter(([oldV, newV]) => (oldV.busy && !newV.busy) || newV.error),
+          tap(([, newV]) => {
+            if (newV.deleted) {
+              this.store.dispatch(new RouterNav({
+                path: [
+                  'cloud-foundry',
+                  this.cfOrgService.cfGuid,
+                  'organizations'
+                ]
+              }));
+            } else if (newV.error) {
+              this.snackBar.open(`Failed to delete space: ${newV.message}`, 'Close');
+            }
+          })
+        ).subscribe();
+      });
+    });
   }
 }

@@ -6,10 +6,10 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../store/src/types/metric.types';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { getIdFromRoute } from '../../../core/utils.service';
 import { MetricsConfig } from '../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../shared/components/metrics-chart/metrics-chart.types';

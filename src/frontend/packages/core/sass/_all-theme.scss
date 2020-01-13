@@ -8,7 +8,8 @@
 @import '../src/shared/components/display-value/display-value.component.theme';
 @import '../src/shared/components/stepper/steppers/steppers.component.theme';
 @import '../src/shared/components/list/list.component.theme';
-@import '../src//shared/components/code-block/code-block.component.theme';
+@import '../src/shared/components/code-block/code-block.component.theme';
+@import '../src/shared/components/copy-to-clipboard/copy-to-clipboard.component.theme';
 @import '../src/shared/components/list/list-cards/cards.components.theme';
 @import '../src/shared/components/dialog-error/dialog-error.component.theme';
 @import '../src/shared/components/cards/card-status/card-status.component.theme';
@@ -36,7 +37,7 @@
 @import '../src/shared/components/start-end-date/start-end-date.component.theme';
 @import '../src/shared/components/metrics-chart/metrics-chart.component.theme';
 @import '../src/shared/components/metrics-range-selector/metrics-range-selector.component.theme';
-@import '../src/shared/components/tile-selector/tile-selector.component.theme';
+@import '../src/shared/components/tile-selector-tile/tile-selector-tile.component.theme';
 @import '../src/shared/components/entity-summary-title/entity-summary-title.component.theme';
 @import '../src/shared/components/multiline-title/multiline-title.component.theme';
 @import '../src/features/user-profile/profile-info/profile-info.component.theme';
@@ -151,6 +152,8 @@ $side-nav-light-active: #484848;
   @include entity-summary-title-theme($theme, $app-theme);
   @include app-meta-card-item-theme($theme, $app-theme);
   @include error-page-theme($theme, $app-theme);
+  @include code-block-theme($theme, $app-theme);
+  @include copy-to-clipboard-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

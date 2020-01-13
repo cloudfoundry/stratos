@@ -124,7 +124,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     // Setup mode
     if (auth.sessionData && auth.sessionData.uaaError) {
       this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
-      this.store.dispatch(new RouterNav({ path: ['/uaa'] }));
+      this.store.dispatch(new RouterNav({ path: ['/setup'] }));
       return false;
     }
 

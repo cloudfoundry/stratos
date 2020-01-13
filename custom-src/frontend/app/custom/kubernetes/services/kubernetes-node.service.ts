@@ -6,11 +6,11 @@ import { filter, first, map, shareReplay } from 'rxjs/operators';
 
 import { MetricQueryConfig, MetricsAction } from '../../../../../store/src/actions/metrics.actions';
 import { AppState } from '../../../../../store/src/app-state';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { getIdFromRoute } from '../../../core/utils.service';
-import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { MetricQueryType } from '../../../shared/services/metrics-range-selector.types';
 import { KubernetesNode, MetricStatistic } from '../store/kube.types';
 import { FetchKubernetesMetricsAction, GetKubernetesNode } from '../store/kubernetes.actions';

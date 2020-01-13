@@ -24,19 +24,19 @@ import {
   ISpaceQuotaDefinition,
 } from '../../../../../core/src/core/cf-api.types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 
 export const createOrgQuotaDefinition = (): IOrgQuotaDefinition => ({
   memory_limit: -1,
@@ -85,7 +85,7 @@ export class CloudFoundryOrganizationService {
   usersCount$: Observable<number | null>;
 
   constructor(
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<CFAppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
@@ -93,16 +93,14 @@ export class CloudFoundryOrganizationService {
     private cfEndpointService: CloudFoundryEndpointService,
     private cfUserProvidedServicesService: CloudFoundryUserProvidedServicesService
   ) {
-    const orgGuid = activeRouteCfOrgSpace.orgGuid;
-    const cfGuid = activeRouteCfOrgSpace.cfGuid;
+    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
 
-    if (cfGuid && orgGuid) {
-      this.initialize(cfGuid, orgGuid);
-    }
+    this.initialiseObservables();
   }
 
   public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
-    const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+    const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
     const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('remove');
     const deleteSpaceAction = actionBuilder(spaceGuid, endpointGuid, { orgGuid });
     this.store.dispatch(deleteSpaceAction);
@@ -112,10 +110,7 @@ export class CloudFoundryOrganizationService {
     this.cfEndpointService.fetchApps();
   }
 
-  public initialize(cfGuid, orgGuid) {
-    this.cfGuid = cfGuid;
-    this.orgGuid = orgGuid;
-
+  private initialiseObservables() {
     this.org$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
       switchMap(isAdmin => {
         const relations = [
@@ -136,9 +131,9 @@ export class CloudFoundryOrganizationService {
             createEntityRelationKey(organizationEntityType, OrgUserRoleNames.AUDITOR),
           );
         }
-        const orgEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+        const orgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
         const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
-        const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid, { includeRelations: relations });
+        const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid, relations);
         const orgEntityService = this.entityServiceFactory.create<APIResource<IOrganization>>(
           this.orgGuid,
           getOrgAction
@@ -199,8 +194,8 @@ export class CloudFoundryOrganizationService {
     return CloudFoundryEndpointService.fetchAppCount(
       this.store,
       this.paginationMonitorFactory,
-      this.cfGuid,
-      this.orgGuid
+      this.activeRouteCfOrgSpace.cfGuid,
+      this.activeRouteCfOrgSpace.orgGuid
     );
   }
 

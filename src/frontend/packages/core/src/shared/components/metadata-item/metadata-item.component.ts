@@ -20,4 +20,7 @@ export class MetadataItemComponent {
   // Are we editing?
   @Input() public edit: boolean;
 
+  // Does the item have a value to copy to the clipboard? = show the copy button
+  @Input() public clipboardValue: string;
+
 }

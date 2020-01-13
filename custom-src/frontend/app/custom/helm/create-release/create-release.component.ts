@@ -8,8 +8,8 @@ import { Observable, of, Subscription } from 'rxjs';
 import { delay, filter, first, map, pairwise, switchMap, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
@@ -133,7 +133,7 @@ export class CreateReleaseComponent implements OnInit {
     const action = new HelmInstall(values);
     this.store.dispatch(action);
 
-    const releaseEntityConfig = entityCatalogue.getEntity(HELM_ENDPOINT_TYPE, helmReleaseEntityKey);
+    const releaseEntityConfig = entityCatalog.getEntity(HELM_ENDPOINT_TYPE, helmReleaseEntityKey);
 
     // Wait for result of request
     return of(true).pipe(

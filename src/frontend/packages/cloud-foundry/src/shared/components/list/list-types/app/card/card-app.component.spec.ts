@@ -6,7 +6,7 @@ import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
   ApplicationStateService,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
-import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { APIResourceMetadata } from '../../../../../../../../store/src/types/api.types';

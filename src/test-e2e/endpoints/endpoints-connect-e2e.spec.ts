@@ -8,6 +8,7 @@ import { MenuComponent } from '../po/menu.po';
 import { SnackBarPo } from '../po/snackbar.po';
 import { ConnectDialogComponent } from './connect-dialog.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
+import { SideNavMenuItem } from '../po/side-nav.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
@@ -92,6 +93,7 @@ describe('Endpoints', () => {
 
       // NOTE: We connected as the User not the Admin, so logging in as admin will NOT have the endpoint connected
       it('should go directly to endpoints view on logout and login (as admin)', () => {
+        endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
         endpointsPage.header.logout();
         const loginPage = new LoginPage();
         loginPage.waitForLogin();

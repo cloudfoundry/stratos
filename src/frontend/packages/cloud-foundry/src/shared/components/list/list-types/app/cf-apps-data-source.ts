@@ -4,7 +4,6 @@ import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllApplications } from '../../../../../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   appStatsEntityType,
@@ -14,7 +13,6 @@ import {
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../../../core/src/core/dispatch-sequencer';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   distinctPageUntilChanged,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -22,14 +20,16 @@ import {
   ListPaginationMultiFilterChange,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { MultiActionListEntity } from '../../../../../../../core/src/shared/monitors/pagination-monitor';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { CFListDataSource } from '../../../../../../../store/src/cf-list-data-source';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CFListDataSource } from '../../../../cf-list-data-source';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
 
 // export function createGetAllAppAction(paginationKey): GetAllApplications {
@@ -53,7 +53,7 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
 
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<AppState>,
     listConfig?: IListConfig<APIResource>,
     transformEntities?: any[],
     paginationKey = CfAppsDataSource.paginationKey,
@@ -114,7 +114,7 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
           const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;
           if (appState === 'STARTED') {
-            const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+            const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
             const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
             const getAction = actionBuilder(appGuid, cfGuid);
             actions.push({

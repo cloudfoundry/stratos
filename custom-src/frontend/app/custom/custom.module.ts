@@ -13,7 +13,7 @@ import { SuseLoginComponent } from './suse-login/suse-login.component';
 import { SuseWelcomeComponent } from './suse-welcome/suse-welcome.component';
 
 const SuseCustomizations: CustomizationsMetadata = {
-  copyright: '&copy; 2019 SUSE',
+  copyright: '&copy; 2020 SUSE',
   hasEula: true,
   aboutInfoComponent: SuseAboutInfoComponent,
   noEndpointsComponent: SuseWelcomeComponent,

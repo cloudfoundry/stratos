@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { fetchAutoscalerInfo } from '../../../../../../cf-autoscaler/src/core/autoscaler-helpers/autoscaler-available';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
   UserInviteConfigurationDialogComponent,

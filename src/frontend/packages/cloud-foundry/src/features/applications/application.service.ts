@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../cf-types';
 import { AppMetadataTypes } from '../../../../cloud-foundry/src/actions/app-metadata.actions';
 import {
   GetApplication,
@@ -26,17 +26,17 @@ import {
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-types';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityService } from '../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID } from '../../../../core/src/shared/entity.tokens';
-import { EntityMonitorFactory } from '../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitor } from '../../../../store/src/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
   getCurrentPageRequestInfo,
@@ -92,9 +92,21 @@ export class ApplicationService {
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
-    if (cfGuid && appGuid) {
-      this.initialize(cfGuid, appGuid);
-    }
+    this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
+      appGuid,
+      createGetApplicationAction(appGuid, cfGuid)
+    );
+    const appSummaryEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
+    const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
+    const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
+    this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
+      appGuid,
+      getAppSummaryAction
+    );
+
+    this.constructCoreObservables();
+    this.constructAmalgamatedObservables();
+    this.constructStatusObservables();
   }
 
   // NJ: This needs to be cleaned up. So much going on!
@@ -135,7 +147,7 @@ export class ApplicationService {
     app: IApp,
     appGuid: string,
     cfGuid: string): Observable<ApplicationStateData> {
-    const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+    const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
     const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
     const dummyAction = actionBuilder(appGuid, cfGuid) as PaginatedAction;
     const paginationMonitor = new PaginationMonitor(
@@ -150,27 +162,6 @@ export class ApplicationService {
     ).pipe(publishReplay(1), refCount());
   }
 
-  public initialize(cfGuid, appGuid) {
-    this.cfGuid = cfGuid;
-    this.appGuid = appGuid;
-
-    this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
-      appGuid,
-      createGetApplicationAction(appGuid, cfGuid)
-    );
-    const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
-    const actionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
-    const getAppSummaryAction = actionBuilder(appGuid, cfGuid);
-    this.appSummaryEntityService = this.entityServiceFactory.create<IAppSummary>(
-      appGuid,
-      getAppSummaryAction
-    );
-
-    this.constructCoreObservables();
-    this.constructAmalgamatedObservables();
-    this.constructStatusObservables();
-  }
-
   private constructCoreObservables() {
     // First set up all the base observables
     this.app$ = this.appEntityService.waitForEntity$;
@@ -180,7 +171,7 @@ export class ApplicationService {
     this.appSpace$ = moreWaiting$.pipe(
       first(),
       switchMap(app => {
-        const spaceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
+        const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
         const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
         const getSpaceAction = actionBuilder(
           app.space_guid,
@@ -229,7 +220,7 @@ export class ApplicationService {
 
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
-    const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+    const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
     const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
     const action = actionBuilder(this.appGuid, this.cfGuid) as PaginatedAction;
     const appStats = getPaginationObservables({
@@ -361,7 +352,7 @@ export class ApplicationService {
 
     // Create an Observable that can be used to determine when the update completed
     const actionState = selectUpdateInfo(
-      entityCatalogue.getEntityKey(CF_ENDPOINT_TYPE, applicationEntityType),
+      entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, applicationEntityType),
       this.appGuid,
       UpdateExistingApplication.updateKey
     );

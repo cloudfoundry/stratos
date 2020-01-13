@@ -4,10 +4,10 @@ import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators'
 
 import { ClearPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/app-state';
+import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../shared/components/list/list.component.types';
-import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { kubernetesEntityFactory } from '../../kubernetes/kubernetes-entity-factory';
 import { KubeService } from '../../kubernetes/store/kube.types';
 import { GetKubernetesServicesInNamespace } from '../../kubernetes/store/kubernetes.actions';

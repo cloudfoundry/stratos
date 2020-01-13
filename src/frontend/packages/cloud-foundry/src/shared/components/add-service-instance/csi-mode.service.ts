@@ -7,9 +7,9 @@ import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { selectCfRequestInfo } from '../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
@@ -63,8 +63,12 @@ export class CsiModeService {
     const orgGuid = activatedRoute.snapshot.queryParams[CANCEL_ORG_ID_PARAM];
     const isUserProvided = activatedRoute.snapshot.queryParams[CANCEL_USER_PROVIDED];
     const cfId = getIdFromRoute(activatedRoute, 'endpointId');
+    // App id when in create instance from app page mode
     const id = getIdFromRoute(activatedRoute, 'id');
 
+    // Needs tidying up, see #4051
+
+    // Started stepper from the marketplace-->service page
     if (!!serviceId && !!cfId) {
       this.mode = CreateServiceInstanceMode.MARKETPLACE_MODE;
       this.cancelUrl = `/marketplace/${cfId}/${serviceId}/instances`;
@@ -79,6 +83,7 @@ export class CsiModeService {
       };
     }
 
+    // Started stepper with a service instance... so in edit mode
     if (!!serviceInstanceId && !!cfId) {
       this.mode = CreateServiceInstanceMode.EDIT_SERVICE_INSTANCE_MODE;
       this.viewDetail = {
@@ -87,6 +92,7 @@ export class CsiModeService {
         showSelectService: false,
         showBindApp: false
       };
+      // App id when in edit service instance mode
       const appId = this.activatedRoute.snapshot.queryParams.appId;
       if (appId) {
         this.cancelUrl = `/applications/${cfId}/${appId}/services`;
@@ -94,6 +100,7 @@ export class CsiModeService {
 
     }
 
+    // Started stepper in stepper tile selector in app mode
     if (!!id && !!cfId) {
       this.mode = CreateServiceInstanceMode.APP_SERVICES_MODE;
       this.viewDetail = {
@@ -103,11 +110,13 @@ export class CsiModeService {
       this.cancelUrl = `/applications/${cfId}/${id}/services`;
     }
 
+    // Started stepper from the root service instance list
     if (!cfId) {
       this.mode = CreateServiceInstanceMode.SERVICES_WALL_MODE;
       this.viewDetail = defaultViewDetail;
     }
 
+    // Started stepper from a space's service instance list
     if (spaceGuid && orgGuid) {
       this.cancelUrl =
         // tslint:disable-next-line:max-line-length
@@ -127,7 +136,7 @@ export class CsiModeService {
   public createApplicationServiceBinding(serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: object) {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-    const servceBindingEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+    const servceBindingEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
     const actionBuilder = servceBindingEntity.actionOrchestrator.getActionBuilder('create');
     const createServiceBindingAction = actionBuilder(
       guid,

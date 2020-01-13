@@ -23,6 +23,7 @@
     }
   }
   &__label {
+    display: flex;
     flex: 1;
     opacity: .7;
     padding-bottom: 3px;
@@ -33,5 +34,10 @@
   }
   &__value {
     flex: 1;
+  }
+
+  &__label-copy {
+    flex: none;
+    margin-right: 24px;
   }
 }

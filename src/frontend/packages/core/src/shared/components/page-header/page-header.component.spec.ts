@@ -7,7 +7,7 @@ import { appReducers } from '../../../../../store/src/reducers.module';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
-import { InternalEventMonitorFactory } from '../../monitors/internal-event-monitor.factory';
+import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
 import { SharedModule } from '../../shared.module';
 import { PageHeaderComponent } from './page-header.component';
 import { PageHeaderModule } from './page-header.module';

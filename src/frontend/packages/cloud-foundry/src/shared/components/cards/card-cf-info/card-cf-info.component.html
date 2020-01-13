@@ -6,8 +6,12 @@
     <mat-card-content>
       <div class="app-metadata">
         <div class="app-metadata__two-cols">
-          <app-metadata-item icon="title" label="Description">{{ cfEndpointService.description$ | async }}</app-metadata-item>
-          <app-metadata-item icon="link" label="Instance Address">{{ cfEndpointService.apiUrl$ | async }}</app-metadata-item>
+          <app-metadata-item icon="title" label="Description">{{ (description$ | async) }}</app-metadata-item>
+          <app-metadata-item icon="link" label="Instance Address" [clipboardValue]="apiUrl">
+            <div class="app-metadata__address">
+              <div class="app-metadata__address__value">{{ apiUrl }}</div>
+            </div>
+          </app-metadata-item>
           <app-metadata-item icon="info_outline" label="CF API Version">
             {{ (cfEndpointService.info$ | async)?.entity.entity.api_version }}</app-metadata-item>
           <app-metadata-item *ngIf="autoscalerVersion$ | async as autoscalerVersion" icon="meter"
