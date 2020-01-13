@@ -33,13 +33,13 @@
       </div>
     </mat-drawer-content>
   </mat-drawer-container>
-  <mat-drawer class="dashboard__side-help-outer" #sideHelp *ngIf="rightNavState$ | async as rightNavState"
-    [autoFocus]="false" mode="over" position="end" [opened]="rightNavState.opened" (closedStart)="sideHelpClosed()">
+  <mat-drawer class="dashboard__side-help-outer" #sideHelp
+    [autoFocus]="false" mode="over" position="end" [opened]="panelPreviewService.opened$ | async" (closedStart)="sideHelpClosed()">
     <div class="dashboard__side-help">
-      <button class="dashboard__side-help-button" mat-icon-button (click)="rightNavState.opened = false">
+      <button class="dashboard__side-help-button" mat-icon-button (click)="panelPreviewService.hide()">
         <mat-icon>close</mat-icon>
       </button>
-      <app-markdown-preview [documentUrl]="rightNavState.documentUrl"></app-markdown-preview>
+      <template #previewPanelContainer></template>
     </div>
   </mat-drawer>
 </div>

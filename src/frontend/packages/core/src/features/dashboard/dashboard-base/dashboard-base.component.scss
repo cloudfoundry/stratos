@@ -15,6 +15,10 @@ $app-sub-header-height: 48px;
   }
   &__side-help-outer {
     z-index: 9999;
+
+    @include breakpoint(mobileonly) {
+      left: 0;
+    }
   }
   &__side-help-button {
     position: absolute;
@@ -51,6 +55,11 @@ $app-sub-header-height: 48px;
   }
   &__side-help {
     max-width: 600px;
+    min-width: 600px;
+
+    @include breakpoint(mobileonly) {
+      min-width: auto;
+    }
   }
 }
 
