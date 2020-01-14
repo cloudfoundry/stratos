@@ -33,8 +33,6 @@ export class ToggleSideNav implements Action {
   type = TOGGLE_SIDE_NAV;
 }
 
-}
-
 export class EnableMobileNav implements Action {
   type = ENABLE_SIDE_NAV_MOBILE_MODE;
 }
