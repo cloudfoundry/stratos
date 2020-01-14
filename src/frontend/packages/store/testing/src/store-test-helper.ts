@@ -2,21 +2,19 @@ import { ModuleWithProviders } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
+import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
 import { AppState } from '../../src/app-state';
+import { entityCatalog } from '../../src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../src/entity-catalog/entity-catalog.types';
 import { appReducers } from '../../src/reducers.module';
 import { getDefaultRequestState } from '../../src/reducers/api-request-reducer/types';
-import {
-  getDefaultPaginationEntityState,
-} from '../../src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
+import { getDefaultPaginationEntityState } from '../../src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
 import { NormalizedResponse } from '../../src/types/api.types';
 import { SessionData, SessionDataEndpoint } from '../../src/types/auth.types';
 import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../src/types/current-user-roles.types';
 import { EndpointModel } from '../../src/types/endpoint.types';
 import { BaseEntityValues } from '../../src/types/entity.types';
 import { WrapperRequestActionSuccess } from '../../src/types/request.types';
-import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
-import { entityCatalog } from '../../src/entity-catalog/entity-catalog.service';
-import { EntityCatalogEntityConfig } from '../../src/entity-catalog/entity-catalog.types';
 
 export const testSCFEndpointGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 const testSCFSessionEndpoint: SessionDataEndpoint = {
@@ -298,7 +296,6 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
             admin: true
           },
           connectionStatus: 'connected',
-          registered: true,
           system_shared_token: false,
           metricsAvailable: false
         },
