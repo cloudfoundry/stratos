@@ -38,10 +38,10 @@ func (f *HelmConfiguration) Cleanup() {
 	}
 }
 
+// The Helm API we use is not thead safe, so use a lock to make sure only one call at a time
 var lock sync.Mutex
 
 // GetHelmConfiguration - gets a Helm V3 client for using it as a client library
-// The Helm API we use is not thead safe, so use a lock to make sure only one call at a time
 func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, namespace string) (*action.Configuration, *HelmConfiguration, error) {
 	// Need to get a config object for the target endpoint
 	var p = c.portalProxy

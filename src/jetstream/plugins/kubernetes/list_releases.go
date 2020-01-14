@@ -6,62 +6,20 @@ import (
 
 	"time"
 
-	//"fmt"
-
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	// "k8s.io/client-go/rest"
 	"helm.sh/helm/v3/pkg/action"
-	// "helm.sh/helm/v3/pkg/release"
-
-	// "k8s.io/helm/pkg/kube"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/helm"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
-// type helmReleaseInfo struct {
-// 	*release.Release
-// 	Extra     string                `json:"extra"`
-// 	Resources []helmReleaseResource `json:"resources"`
-// }
-
-// type helmReleaseResource struct {
-// 	Kind       string `json:"kind"`
-// 	APIVersion string `json:"apiVersion"`
-// 	Name       string `json:"name"`
-// }
-
 type ResourceResponse struct {
 	Kind string          `json:"kind"`
 	Data json.RawMessage `json:"data"`
 }
-
-// type KubeResource struct {
-// 	Kind       string `yaml:"kind"`
-// 	APIVersion string `yaml:"apiVersion"`
-// 	Metadata   struct {
-// 		Name string `yaml:"name"`
-// 	} `yaml:"metadata"`
-// 	Spec interface{} `yaml:"spec"`
-// }
-
-// type kubeAPIJob struct {
-// 	Kind       string
-// 	APIVersion string
-// 	Name       string
-// 	Namespace  string
-// 	Endpoint   string
-// 	User       string
-// }
-
-// type KubeAPIJobResult struct {
-// 	helm.KubeResourceJob
-// 	StatusCode int
-// 	Data       json.RawMessage
-// }
 
 type kubeReleasesData struct {
 	Endpoint  string `json:"endpoint"`
@@ -73,17 +31,6 @@ type kubeReleasesData struct {
 		Version    string `json:"version"`
 	} `json:"chart"`
 }
-
-// type helmReleasesData struct {
-// 	Manifest  string `json:"endpoint"`
-// 	Name      string `json:"releaseName"`
-// 	Namespace string `json:"releaseNamespace"`
-// 	Chart     struct {
-// 		Name       string `json:"chartName"`
-// 		Repository string `json:"repo"`
-// 		Version    string `json:"version"`
-// 	} `json:"chart"`
-// }
 
 type kubeReleasesResponse map[string]kubeReleasesData
 
