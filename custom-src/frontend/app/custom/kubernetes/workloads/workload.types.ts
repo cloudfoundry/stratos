@@ -83,7 +83,6 @@ export function isHelmReleaseService(obj: any): HelmReleaseService {
   }
 }
 
-
 @Injectable()
 export class HelmReleaseGuid {
   guid: string;

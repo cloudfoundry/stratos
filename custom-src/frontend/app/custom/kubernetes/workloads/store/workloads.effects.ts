@@ -15,13 +15,8 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../../../../../../store/src/types/request.types';
-import { HelmRelease, HelmReleaseStatus } from '../workload.types';
-import {
-  GET_HELM_RELEASE,
-  GET_HELM_RELEASES,
-  GetHelmReleases,
-  GetHelmRelease
-} from './workloads.actions';
+import { HelmRelease } from '../workload.types';
+import { GET_HELM_RELEASE, GET_HELM_RELEASES, GetHelmRelease, GetHelmReleases } from './workloads.actions';
 
 @Injectable()
 export class WorkloadsEffects {
@@ -30,10 +25,7 @@ export class WorkloadsEffects {
     private httpClient: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>
-  ) {
-
-
-  }
+  ) { }
 
   proxyAPIVersion = environment.proxyAPIVersion;
 
@@ -50,28 +42,15 @@ export class WorkloadsEffects {
         } as NormalizedResponse;
 
         // Go through each endpoint ID
-        Object.keys(response).forEach(endpoint => {
-          const endpointData = response[endpoint];
+        Object.keys(response).forEach(endpointId => {
+          const endpointData = response[endpointId];
           if (!endpointData) {
             return;
           }
           endpointData.forEach((data) => {
-            console.log('Got helm release');
-            console.log(data);
-            const helmRelease: HelmRelease = {
-              ...data,
-              endpointId: endpoint
-            };
-            // Release name is unique for an endpoint - for Helm 3, include the namespace
-            const id = endpoint + ':' + data.namespace + ':' + data.name;
-            helmRelease.guid = id;
-            // Make a note of the guid of the endpoint for the release
-            helmRelease.status = this.mapHelmStatus(data.info.status);
-            helmRelease.lastDeployed = this.mapHelmModifiedDate(data.info.last_deployed);
-            helmRelease.firstDeployed = this.mapHelmModifiedDate(data.info.first_deployed);
-            // data.info =
-            processedData.entities[entityKey][id] = helmRelease;
-            processedData.result.push(id);
+            const helmRelease = this.mapHelmRelease(data, endpointId);
+            processedData.entities[entityKey][helmRelease.guid] = helmRelease;
+            processedData.result.push(helmRelease.guid);
           });
         });
         return processedData;
@@ -93,28 +72,29 @@ export class WorkloadsEffects {
             result: []
           } as NormalizedResponse;
 
-          const status = {};
-
-          console.log(response);
-
           // Go through each endpoint ID
-          const newStatus: HelmReleaseStatus = {
-            endpointId: action.endpointGuid,
-            releaseTitle: action.releaseTitle,
-            ...status,
-            pods: [],
-            fields: [],
-            data: {
-              'v1/Pod': {},
-              'v1/Service': {}
-            }
-          };
-          processedData.entities[entityKey][action.key] = newStatus;
-          processedData.result.push(action.key);
+          processedData.entities[entityKey][action.guid] = this.mapHelmRelease(response, action.endpointGuid);
+          processedData.result.push(action.guid);
           return processedData;
         }, [action.endpointGuid]);
     })
   );
+
+  private mapHelmRelease(data, endpointId) {
+    // console.log('Got helm release');
+    // console.log(data);
+    const helmRelease: HelmRelease = {
+      ...data,
+      endpointId
+    };
+    // Release name is unique for an endpoint - for Helm 3, include the namespace
+    helmRelease.guid = endpointId + ':' + data.namespace + ':' + data.name;
+    // Make a note of the guid of the endpoint for the release
+    helmRelease.status = this.mapHelmStatus(data.info.status);
+    helmRelease.lastDeployed = this.mapHelmModifiedDate(data.info.last_deployed);
+    helmRelease.firstDeployed = this.mapHelmModifiedDate(data.info.first_deployed);
+    return helmRelease;
+  }
 
 
   // TODO: NWM This uses GetHelmReleaseStatus. I added `namespace` to GetHelmReleaseStatus

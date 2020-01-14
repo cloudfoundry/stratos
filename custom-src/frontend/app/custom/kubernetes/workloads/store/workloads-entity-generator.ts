@@ -6,28 +6,20 @@ import { StratosEndpointExtensionDefinition } from 'frontend/packages/store/src/
 import { IFavoriteMetadata } from 'frontend/packages/store/src/types/user-favorites.types';
 
 import { kubernetesEntityFactory } from '../../kubernetes-entity-factory';
-import {
-  HelmRelease,
-  HelmReleaseGraph,
-  HelmReleasePod,
-  HelmReleaseResource,
-  HelmReleaseService,
-  HelmReleaseStatus,
-} from '../workload.types';
+import { HelmRelease, HelmReleaseGraph, HelmReleasePod, HelmReleaseResource, HelmReleaseService } from '../workload.types';
 import {
   helmReleaseEntityKey,
   helmReleaseGraphEntityType,
   helmReleasePodEntityType,
   helmReleaseResourceEntityType,
   helmReleaseServiceEntityType,
-  helmReleaseStatusEntityType,
 } from './workloads-entity-factory';
 
 
 export function generateWorkloadsEntities(endpointDefinition: StratosEndpointExtensionDefinition): StratosBaseCatalogEntity[] {
   return [
     generateReleaseEntity(endpointDefinition),
-    generateReleaseStatusEntity(endpointDefinition),
+    // generateReleaseStatusEntity(endpointDefinition),
     generateReleasePodEntity(endpointDefinition),
     generateReleaseServiceEntity(endpointDefinition),
     generateReleaseGraphEntity(endpointDefinition),
@@ -45,14 +37,14 @@ function generateReleaseEntity(endpointDefinition: StratosEndpointExtensionDefin
   return new StratosCatalogEntity<IFavoriteMetadata, HelmRelease>(definition);
 }
 
-function generateReleaseStatusEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: helmReleaseStatusEntityType,
-    schema: kubernetesEntityFactory(helmReleaseStatusEntityType),
-    endpoint: endpointDefinition
-  };
-  return new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseStatus>(definition);
-}
+// function generateReleaseStatusEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+//   const definition = {
+//     type: helmReleaseStatusEntityType,
+//     schema: kubernetesEntityFactory(helmReleaseStatusEntityType),
+//     endpoint: endpointDefinition
+//   };
+//   return new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseStatus>(definition);
+// }
 
 function generateReleasePodEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {

@@ -4,22 +4,20 @@ import { Store } from '@ngrx/store';
 import { LoggerService } from 'frontend/packages/core/src/core/logger.service';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
-import { EntityCatalogEntityConfig } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
-import {
-  successEntityHandler,
-} from 'frontend/packages/store/src/entity-request-pipeline/entity-request-base-handlers/success-entity-request.handler';
-import { PipelineResult } from 'frontend/packages/store/src/entity-request-pipeline/entity-request-pipeline.types';
+import { PaginatedAction } from 'frontend/packages/store/src/types/pagination.types';
+import { EntityRequestAction, WrapperRequestActionSuccess } from 'frontend/packages/store/src/types/request.types';
 import { Observable, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, map, share, switchMap } from 'rxjs/operators';
 
+import { getKubeAPIResourceGuid } from '../../../store/kube.selectors';
+import { getHelmReleaseServiceId } from '../../store/workloads-entity-factory';
 import {
-  KUBERNETES_ENDPOINT_TYPE,
-  kubernetesPodsEntityType,
-  kubernetesServicesEntityType,
-} from '../../../kubernetes-entity-factory';
-import { helmReleaseGraphEntityType, helmReleaseResourceEntityType } from '../../store/workloads-entity-factory';
-import { GetHelmReleasePods, GetHelmReleaseServices } from '../../store/workloads.actions';
+  GetHelmReleaseGraph,
+  GetHelmReleasePods,
+  GetHelmReleaseResource,
+  GetHelmReleaseServices,
+} from '../../store/workloads.actions';
 import { HelmReleaseGuid, HelmReleasePod } from '../../workload.types';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 
@@ -99,6 +97,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
       }),
       map((message: string) => message),
       catchError(e => {
+        // TODO: RC/NWM Remove comments/handle error. Raise wrapper failed action to push error to store & notification bar?
         console.log('WS Error');
         console.log(e);
         if (e.type === 'error') {
@@ -116,112 +115,76 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           prefix = messageObj.data;
         } else if (messageObj.kind === 'Pods') {
           const pods = messageObj.data;
-          pods.forEach(pod => {
-            this.addResource(kubernetesPodsEntityType, pod, pod.metadata.uid);
-          });
           const releasePodsAction = new GetHelmReleasePods(this.helmReleaseHelper.endpointGuid, this.helmReleaseHelper.releaseTitle);
-          this.populateList(releasePodsAction, pods);
+          this.populateList(releasePodsAction, pods, getKubeAPIResourceGuid);
         } else if (messageObj.kind === 'Graph') {
           const graph = messageObj.data;
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
           graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
-          this.addResource(helmReleaseGraphEntityType, graph, `${graph.endpointId}-${graph.releaseTitle}`, KUBERNETES_ENDPOINT_TYPE);
+          const releaseGraphAction = new GetHelmReleaseGraph(graph.endpointId, graph.releaseTitle);
+
+          this.addResource(releaseGraphAction, graph);
         } else if (messageObj.kind === 'Manifest' || messageObj.kind === 'Resources') {
           // Store all of the services
           const manifest = messageObj.data;
-          const ep = this.helmReleaseHelper.endpointGuid;
-          const releaseServicesAction = new GetHelmReleaseServices(
-            this.helmReleaseHelper.endpointGuid,
-            this.helmReleaseHelper.releaseTitle
-          );
           const svcs = [];
-
           // Store ALL resources for the release
           manifest.forEach(resource => {
             if (resource.kind === 'Service' && prefix) {
-              this.addResource(kubernetesServicesEntityType, resource, `${prefix}-${resource.metadata.name}`);
               svcs.push(resource);
             }
           });
           if (svcs.length > 0) {
-            this.populateList(releaseServicesAction, svcs, (svc) => `${prefix}-${svc.metadata.name}`);
+            const releaseServicesAction = new GetHelmReleaseServices(
+              this.helmReleaseHelper.endpointGuid,
+              this.helmReleaseHelper.releaseTitle
+            );
+            this.populateList(releaseServicesAction, svcs, getHelmReleaseServiceId);
           }
 
           const resources = { ...manifest };
           resources.endpointId = this.helmReleaseHelper.endpointGuid;
           resources.releaseTitle = this.helmReleaseHelper.releaseTitle;
-          this.addResource(helmReleaseResourceEntityType,
-            resources, `${resources.endpointId}-${resources.releaseTitle}`, KUBERNETES_ENDPOINT_TYPE);
+          const releaseResourceAction = new GetHelmReleaseResource(resources.endpointId, resources.releaseTitle);
+          this.addResource(releaseResourceAction, resources);
         }
       }
     });
   }
 
-  private addResource(entityType: string, data: any, id: string, endpointType = KUBERNETES_ENDPOINT_TYPE) {
-    const actionDispatcher = (action) => this.store.dispatch(action);
-    const catalogEntity = entityCatalog.getEntity(endpointType, entityType);
-    const pr = {
-      success: true,
-      response: {
-        entities: {
-          [catalogEntity.entityKey]: {
-            [id]: data
-          }
-        },
-        result: [
-          id
-        ]
-      }
-    } as PipelineResult;
-    successEntityHandler(
-      actionDispatcher,
-      catalogEntity,
-      'get',
-      {
-        endpointType,
-        entityType,
-        guid: id
+  private addResource(action: EntityRequestAction, data: any) {
+    const catalogEntity = entityCatalog.getEntity(action);
+    const response = {
+      entities: {
+        [catalogEntity.entityKey]: {
+          [action.guid]: data
+        }
       },
-      pr
-    );
+      result: [
+        action.guid
+      ]
+    };
+    const successWrapper = new WrapperRequestActionSuccess(response, action);
+    this.store.dispatch(successWrapper);
   }
 
-  private populateList(action: EntityCatalogEntityConfig, resources: any, idGetter?: IDGetterFunction) {
-    const entityType = kubernetesPodsEntityType;
-    const releaseTitle = this.helmReleaseHelper.releaseTitle;
-    const endpointId = this.helmReleaseHelper.endpointGuid;
-
-    if (!idGetter) {
-      idGetter = (data) => data.metadata.uid;
-    }
-
-    const actionDispatcher = (a) => this.store.dispatch(a);
-    const catalogEntity = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, entityType);
+  private populateList(action: PaginatedAction, resources: any, idGetter: IDGetterFunction) {
     const newResources = {};
     resources.forEach(resource => {
       const newResource: HelmReleasePod = {
-        endpointId,
-        releaseTitle,
+        endpointId: action.endpointGuid,
+        releaseTitle: this.helmReleaseHelper.releaseTitle,
         ...resource
       };
-      newResources[idGetter(resource)] = newResource;
+      newResources[idGetter(newResource)] = newResource;
     });
 
     const releasePods = {
-      success: true,
-      response: {
-        entities: { [entityCatalog.getEntityKey(action)]: Object.values(newResources) },
-        result: Object.keys(newResources)
-      }
+      entities: { [entityCatalog.getEntityKey(action)]: newResources },
+      result: Object.keys(newResources)
     };
-
-    successEntityHandler(
-      actionDispatcher,
-      catalogEntity,
-      'get',
-      action,
-      releasePods,
-    );
+    const successWrapper = new WrapperRequestActionSuccess(releasePods, action, 'fetch', releasePods.result.length, 1);
+    this.store.dispatch(successWrapper);
   }
 
   ngOnDestroy() {

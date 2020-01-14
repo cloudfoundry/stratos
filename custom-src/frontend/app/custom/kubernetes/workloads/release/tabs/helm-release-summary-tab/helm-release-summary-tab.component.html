@@ -27,6 +27,7 @@
             {{ release.info.last_deployed | date:'medium' }}
           </app-metadata-item>
         </div>
+        <!-- // TODO: RC -- NWM Is this needed anymore? -->
         <!-- <app-tile-grid>
           <app-tile-group *ngIf="chartData$ | async as chartData">
             <app-tile>
@@ -46,13 +47,12 @@
       </div>
       <app-metadata-item class="chart-details__item" label="Resources"></app-metadata-item>
 
-
-        <div *ngIf="resources$ | async as resources" class="grid">
-          <app-card-number-metric *ngFor="let res of resources" label="{{ res.label }}"
-          icon="{{ res.icon.name }}" iconFont="{{ res.icon.font }}"
-              value="{{ res.count }}">
-          </app-card-number-metric>
-        </div>
+      <!-- // TODO: RC -- NWM Is this needed anymore? -->
+      <div *ngIf="resources$ | async as resources" class="grid">
+        <app-card-number-metric *ngFor="let res of resources" label="{{ res.label }}" icon="{{ res.icon.name }}"
+          iconFont="{{ res.icon.font }}" value="{{ res.count }}">
+        </app-card-number-metric>
+      </div>
     </app-entity-summary-title>
 
 

@@ -1,32 +1,23 @@
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { addKubernetesEntitySchema, KubernetesEntitySchema } from '../../kubernetes-entity-factory';
-import {
-  HelmRelease,
-  HelmReleaseGraph,
-  HelmReleasePod,
-  HelmReleaseResource,
-  HelmReleaseService,
-  HelmReleaseStatus,
-} from '../workload.types';
+import { getKubeAPIResourceGuid } from '../../store/kube.selectors';
+import { HelmRelease, HelmReleaseGraph, HelmReleaseResource, HelmReleaseService } from '../workload.types';
 
-export const helmReleaseEntityKey = 'helmReleases';
-export const helmReleaseStatusEntityType = 'helmReleaseStatus';
+export const helmReleaseEntityKey = 'helmRelease';
 export const helmReleasePodEntityType = 'helmReleasePod';
 export const helmReleaseServiceEntityType = 'helmReleaseService';
 export const helmReleaseGraphEntityType = 'helmReleaseGraph';
 export const helmReleaseResourceEntityType = 'helmReleaseResource';
 
-export const getHelmReleaseId = (entity: HelmRelease) => entity.endpointId;
-export const getHelmReleaseStatusId = (entity: HelmReleaseStatus) => entity.endpointId;
-export const getHelmReleasePodId = (entity: HelmReleasePod) => entity.name;
-export const getHelmReleaseServiceId = (entity: HelmReleaseService) => entity.name;
-export const getHelmReleaseGraphId = (entity: HelmReleaseGraph) => entity.endpointId;
-export const getHelmReleaseReleaseId = (entity: HelmReleaseResource) => entity.endpointId;
+export const getHelmReleaseId = (entity: HelmRelease) => `${entity.endpointId}-${entity.namespace}-${entity.name}`;
+export const getHelmReleaseServiceId =
+  (entity: HelmReleaseService) => `${entity.endpointId}-${entity.releaseTitle}-${entity.metadata.name}`;
+export const getHelmReleaseGraphId = (entity: HelmReleaseGraph) => `${entity.endpointId}-${entity.releaseTitle}`;
+export const getHelmReleaseResourceId = (entity: HelmReleaseResource) => `${entity.endpointId}-${entity.releaseTitle}`;
 
 const entityCache: {
   [key: string]: EntitySchema
 } = {};
-
 
 entityCache[helmReleaseEntityKey] = new KubernetesEntitySchema(
   helmReleaseEntityKey,
@@ -34,16 +25,10 @@ entityCache[helmReleaseEntityKey] = new KubernetesEntitySchema(
   { idAttribute: getHelmReleaseId }
 );
 
-entityCache[helmReleaseStatusEntityType] = new KubernetesEntitySchema(
-  helmReleaseStatusEntityType,
-  {},
-  { idAttribute: getHelmReleaseStatusId }
-);
-
 entityCache[helmReleasePodEntityType] = new KubernetesEntitySchema(
   helmReleasePodEntityType,
   {},
-  { idAttribute: getHelmReleasePodId }
+  { idAttribute: getKubeAPIResourceGuid }
 );
 
 entityCache[helmReleaseServiceEntityType] = new KubernetesEntitySchema(
@@ -61,7 +46,7 @@ entityCache[helmReleaseGraphEntityType] = new KubernetesEntitySchema(
 entityCache[helmReleaseResourceEntityType] = new KubernetesEntitySchema(
   helmReleaseResourceEntityType,
   {},
-  { idAttribute: getHelmReleaseReleaseId }
+  { idAttribute: getHelmReleaseResourceId }
 );
 
 Object.entries(entityCache).forEach(([key, workloadSchema]) => addKubernetesEntitySchema(key, workloadSchema));

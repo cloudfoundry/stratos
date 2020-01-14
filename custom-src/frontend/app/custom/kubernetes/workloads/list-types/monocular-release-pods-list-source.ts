@@ -3,7 +3,7 @@ import { ListDataSource } from 'frontend/packages/core/src/shared/components/lis
 import { IListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
 import { AppState } from 'frontend/packages/store/src/app-state';
 
-import { getHelmReleasePodId } from '../store/workloads-entity-factory';
+import { getKubeAPIResourceGuid } from '../../store/kube.selectors';
 import { GetHelmReleasePods } from '../store/workloads.actions';
 import { HelmReleasePod } from '../workload.types';
 
@@ -22,7 +22,7 @@ export class HelmReleasePodsDataSource extends ListDataSource<HelmReleasePod> {
       store,
       action,
       schema: action.entity[0],
-      getRowUniqueId: getHelmReleasePodId,
+      getRowUniqueId: getKubeAPIResourceGuid,
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,

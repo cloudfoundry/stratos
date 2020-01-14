@@ -8,7 +8,7 @@ import {
   kubernetesPodsEntityType,
   kubernetesServicesEntityType,
 } from '../../kubernetes-entity-factory';
-import { helmReleaseEntityKey, helmReleaseGraphEntityType, helmReleaseStatusEntityType } from './workloads-entity-factory';
+import { helmReleaseEntityKey, helmReleaseGraphEntityType, helmReleaseResourceEntityType } from './workloads-entity-factory';
 
 export const GET_HELM_RELEASES = '[Helm] Get Releases';
 export const GET_HELM_RELEASES_SUCCESS = '[Helm] Get Releases Success';
@@ -61,8 +61,8 @@ export class GetHelmRelease implements EntityRequestAction {
   }
   type = GET_HELM_RELEASE;
   endpointType = KUBERNETES_ENDPOINT_TYPE;
-  entity = kubernetesEntityFactory(helmReleaseStatusEntityType);
-  entityType = helmReleaseStatusEntityType;
+  entity = kubernetesEntityFactory(helmReleaseEntityKey);
+  entityType = helmReleaseEntityKey;
   actions = [
     GET_HELM_RELEASE,
     GET_HELM_RELEASE_SUCCESS,
@@ -70,15 +70,13 @@ export class GetHelmRelease implements EntityRequestAction {
   ];
 }
 
-// Never dispateched - just used for look-up
-// Don't know why I need an action for this rather than an entity type?
 export class GetHelmReleaseGraph implements EntityRequestAction {
-  key: string;
+  guid: string;
   constructor(
     public endpointGuid: string,
     public releaseTitle: string
   ) {
-    this.key = `${endpointGuid}-${releaseTitle}`;
+    this.guid = `${endpointGuid}-${releaseTitle}`;
   }
   type = this.constructor.name;
   endpointType = KUBERNETES_ENDPOINT_TYPE;
@@ -87,24 +85,23 @@ export class GetHelmReleaseGraph implements EntityRequestAction {
   actions = [this.type];
 }
 
-// Never dispateched - just used for look-up
-// Don't know why I need an action for this rather than an entity type?
 export class GetHelmReleaseResource implements EntityRequestAction {
-  key: string;
+  guid: string;
   constructor(
     public endpointGuid: string,
     public releaseTitle: string
   ) {
-    this.key = `${endpointGuid}-${releaseTitle}`;
+    this.guid = `${endpointGuid}-${releaseTitle}`;
   }
   type = this.constructor.name;
   endpointType = KUBERNETES_ENDPOINT_TYPE;
-  entity = kubernetesEntityFactory(kubernetesPodsEntityType);
-  entityType = kubernetesPodsEntityType;
+  entity = kubernetesEntityFactory(helmReleaseResourceEntityType);
+  entityType = helmReleaseResourceEntityType;
   actions = [this.type];
 }
 
 
+// TODO: RC candidate for removal, look after pods work finished
 export class GetHelmReleasePods implements MonocularPaginationAction {
   constructor(
     public endpointGuid: string,
@@ -131,6 +128,7 @@ export class GetHelmReleasePods implements MonocularPaginationAction {
   }
 }
 
+// TODO: RC candidate for removal, look after pods work finished
 export class GetHelmReleaseServices implements MonocularPaginationAction {
   constructor(
     public endpointGuid: string,

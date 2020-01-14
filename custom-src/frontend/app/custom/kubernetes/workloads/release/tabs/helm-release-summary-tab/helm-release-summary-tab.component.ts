@@ -62,7 +62,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     private logService: LoggerService
   ) {
 
-    const releaseStatus$ = this.helmReleaseHelper.fetchReleaseStatus();
+    // const releaseStatus$ = this.helmReleaseHelper.fetchReleaseStatus();
 
     this.isBusy$ = combineLatest([
       this.helmReleaseHelper.isFetching$,
@@ -76,25 +76,26 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       startWith(true)
     );
 
+    // TODO: RC --> NWM Is this needed anymore?
     // Async fetch release status
-    this.chartData$ = releaseStatus$.pipe(
-      map(data => ({
-        podsChartData: Object.keys(data.pods.status).map(status => ({
-          name: status,
-          value: data.pods.status[status]
-        })),
-        containersChartData: [
-          {
-            name: 'Ready',
-            value: data.pods.ready
-          },
-          {
-            name: 'Not Ready',
-            value: data.pods.containers - data.pods.ready
-          }
-        ]
-      }))
-    );
+    // this.chartData$ = releaseStatus$.pipe(
+    //   map(data => ({
+    //     podsChartData: Object.keys(data.pods.status).map(status => ({
+    //       name: status,
+    //       value: data.pods.status[status]
+    //     })),
+    //     containersChartData: [
+    //       {
+    //         name: 'Ready',
+    //         value: data.pods.ready
+    //       },
+    //       {
+    //         name: 'Not Ready',
+    //         value: data.pods.containers - data.pods.ready
+    //       }
+    //     ]
+    //   }))
+    // );
   }
 
   private startDelete() {
