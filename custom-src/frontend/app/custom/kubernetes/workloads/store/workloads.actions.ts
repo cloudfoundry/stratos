@@ -14,9 +14,9 @@ export const GET_HELM_RELEASES = '[Helm] Get Releases';
 export const GET_HELM_RELEASES_SUCCESS = '[Helm] Get Releases Success';
 export const GET_HELM_RELEASES_FAILURE = '[Helm] Get Releases Failure';
 
-export const GET_HELM_RELEASE_STATUS = '[Helm] Get Release Status';
-export const GET_HELM_RELEASE_STATUS_SUCCESS = '[Helm] Get Release Status Success';
-export const GET_HELM_RELEASE_STATUS_FAILURE = '[Helm] Get Release Status Failure';
+export const GET_HELM_RELEASE = '[Helm] Get Release Status';
+export const GET_HELM_RELEASE_SUCCESS = '[Helm] Get Release Status Success';
+export const GET_HELM_RELEASE_FAILURE = '[Helm] Get Release Status Failure';
 
 export const GET_HELM_RELEASE_PODS = '[Helm] Get Release Pods';
 export const GET_HELM_RELEASE_PODS_SUCCESS = '[Helm] Get Release Pods Success';
@@ -26,9 +26,9 @@ export const GET_HELM_RELEASE_SERVICES = '[Helm] Get Release Services';
 export const GET_HELM_RELEASE_SERVICES_SUCCESS = '[Helm] Get Release Services Success';
 export const GET_HELM_RELEASE_SERVICES_FAILURE = '[Helm] Get Release Services Failure';
 
-export const UPDATE_HELM_RELEASE_STATUS = '[Helm] Update Release Status [WS]';
-export const UPDATE_HELM_RELEASE_STATUS_SUCCESS = '[Helm] Update Release Status [WS] Success';
-export const UPDATE_HELM_RELEASE_STATUS_FAILURE = '[Helm] Update Release Status [WS] Failure';
+export const UPDATE_HELM_RELEASE = '[Helm] Update Release';
+export const UPDATE_HELM_RELEASE_SUCCESS = '[Helm] Update Release Success';
+export const UPDATE_HELM_RELEASE_FAILURE = '[Helm] Update Release Failure';
 
 export class GetHelmReleases implements MonocularPaginationAction {
   constructor() {
@@ -50,23 +50,23 @@ export class GetHelmReleases implements MonocularPaginationAction {
   };
 }
 
-export class GetHelmReleaseStatus implements EntityRequestAction {
-  key: string;
+export class GetHelmRelease implements EntityRequestAction {
+  guid: string;
   constructor(
     public endpointGuid: string,
+    public namespace: string,
     public releaseTitle: string
   ) {
-    // TODO: This should have `namespace` in if used in future?
-    this.key = `${endpointGuid}/${releaseTitle}`;
+    this.guid = `${endpointGuid}:${namespace}:${releaseTitle}`;
   }
-  type = GET_HELM_RELEASE_STATUS;
+  type = GET_HELM_RELEASE;
   endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = kubernetesEntityFactory(helmReleaseStatusEntityType);
   entityType = helmReleaseStatusEntityType;
   actions = [
-    GET_HELM_RELEASE_STATUS,
-    GET_HELM_RELEASE_STATUS_SUCCESS,
-    GET_HELM_RELEASE_STATUS_FAILURE
+    GET_HELM_RELEASE,
+    GET_HELM_RELEASE_SUCCESS,
+    GET_HELM_RELEASE_FAILURE
   ];
 }
 
@@ -159,6 +159,6 @@ export class GetHelmReleaseServices implements MonocularPaginationAction {
 
 export class HelmUpdateRelease implements Action {
   constructor(public values: any) { }
-  type = UPDATE_HELM_RELEASE_STATUS;
+  type = UPDATE_HELM_RELEASE;
   // public guid = () => '<New Release>' + this.values.releaseName;
 }

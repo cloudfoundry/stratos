@@ -81,7 +81,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
     const host = window.location.host;
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const streamUrl = (
-      `${protocol}://${host}/pp/v1/helm/releases/${releaseRef}`
+      `${protocol}://${host}/pp/v1/helm/releases/${releaseRef}/status`
     );
 
     const socket$ = makeWebSocketObservable(streamUrl).pipe(catchError(e => {

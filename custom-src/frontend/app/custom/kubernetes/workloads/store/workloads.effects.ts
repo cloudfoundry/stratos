@@ -17,12 +17,10 @@ import {
 } from '../../../../../../store/src/types/request.types';
 import { HelmRelease, HelmReleaseStatus } from '../workload.types';
 import {
-  GET_HELM_RELEASE_SERVICES,
-  GET_HELM_RELEASE_STATUS,
+  GET_HELM_RELEASE,
   GET_HELM_RELEASES,
   GetHelmReleases,
-  GetHelmReleaseServices,
-  GetHelmReleaseStatus,
+  GetHelmRelease
 } from './workloads.actions';
 
 @Injectable()
@@ -82,13 +80,13 @@ export class WorkloadsEffects {
   );
 
   @Effect()
-  fetchHelmReleaseStatus$ = this.actions$.pipe(
-    ofType<GetHelmReleaseStatus>(GET_HELM_RELEASE_STATUS),
+  fetchHelmRelease$ = this.actions$.pipe(
+    ofType<GetHelmRelease>(GET_HELM_RELEASE),
     flatMap(action => {
       const entityKey = entityCatalog.getEntityKey(action);
       return this.makeRequest(
         action,
-        `/pp/${this.proxyAPIVersion}/helm/releases/${action.endpointGuid}/${action.releaseTitle}`,
+        `/pp/${this.proxyAPIVersion}/helm/releases/${action.endpointGuid}/${action.namespace}/${action.releaseTitle}`,
         (response) => {
           const processedData = {
             entities: { [entityKey]: {} },
@@ -97,11 +95,7 @@ export class WorkloadsEffects {
 
           const status = {};
 
-          // TODO
-
-          // this.updateReleasePods(action, status);
-
-          // this.updateReleaseServices(action, status);
+          console.log(response);
 
           // Go through each endpoint ID
           const newStatus: HelmReleaseStatus = {
@@ -124,11 +118,12 @@ export class WorkloadsEffects {
 
 
   // TODO: NWM This uses GetHelmReleaseStatus. I added `namespace` to GetHelmReleaseStatus
-  @Effect()
-  fetchHelmReleaseServices$ = this.actions$.pipe(
-    ofType<GetHelmReleaseServices>(GET_HELM_RELEASE_SERVICES),
-    mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
-  );
+  // RC: Don't need this anymore - services come back over the web socket
+  // @Effect()
+  // fetchHelmReleaseServices$ = this.actions$.pipe(
+  //   ofType<GetHelmReleaseServices>(GET_HELM_RELEASE_SERVICES),
+  //   mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
+  // );
 
   // private updateReleasePods(action: GetHelmReleaseStatus, status: HelmReleaseStatus) {
   //   const releasePodsAction = new GetHelmReleasePods(action.endpointGuid, action.releaseTitle);
