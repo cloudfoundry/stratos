@@ -7,12 +7,11 @@ import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   RemoveUserFavoriteAction,
 } from '../../../../../store/src/actions/user-favourites-actions/remove-user-favorite-action';
-import {
-  endpointEntitiesSelector,
-} from '../../../../../store/src/selectors/endpoint.selectors';
+import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { userFavoritesEntitySchema } from '../../../base-entity-schemas';
 import { IFavoriteEntity } from '../../../core/user-favorite-manager';
+import { isEndpointConnected } from '../../../features/endpoints/connect.service';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
@@ -85,13 +84,14 @@ export class FavoritesMetaCardComponent {
       this.setConfirmation(this.prettyName, favorite);
 
       const config = cardMapper && favorite && favorite.metadata ? cardMapper(favorite.metadata) : null;
+
       if (config) {
         if (this.endpoint) {
-          this.name$ = endpoint$.pipe(map(endpoint => config.name + (endpoint.user ? '' : ' (Disconnected)')));
-          this.routerLink$ = endpoint$.pipe(map(endpoint => endpoint.user ? config.routerLink : '/endpoints'));
+          this.name$ = endpoint$.pipe(map(endpoint => config.name + (isEndpointConnected(endpoint) ? '' : ' (Disconnected)')));
+          this.routerLink$ = endpoint$.pipe(map(endpoint => isEndpointConnected(endpoint) ? config.routerLink : '/endpoints'));
         } else {
           this.name$ = observableOf(config.name);
-          this.routerLink$ = endpoint$.pipe(map(endpoint => endpoint.user ? config.routerLink : null));
+          this.routerLink$ = endpoint$.pipe(map(endpoint => isEndpointConnected(endpoint) ? config.routerLink : null));
         }
         config.lines = this.mapLinesToObservables(config.lines);
         this.config = config;
