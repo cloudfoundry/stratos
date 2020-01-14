@@ -16,14 +16,14 @@ import {
   ISpacesRoleState,
 } from '../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
+import { PaginationMonitor } from '../../../store/src/monitors/pagination-monitor';
 import { getPaginationObservables } from '../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
 } from '../../../store/src/selectors/current-user-role.selectors';
-import { endpointsRegisteredEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
+import { connectedEndpointsSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
-import { PaginationMonitor } from '../../../store/src/monitors/pagination-monitor';
 import { IFeatureFlag } from './cf-api.types';
 import {
   PermissionConfig,
@@ -320,7 +320,7 @@ export class CurrentUserPermissionsChecker {
   }
 
   private getAllEndpointGuids() {
-    return this.store.select(endpointsRegisteredEntitiesSelector).pipe(
+    return this.store.select(connectedEndpointsSelector).pipe(
       map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf').map(endpoint => endpoint.guid))
     );
   }

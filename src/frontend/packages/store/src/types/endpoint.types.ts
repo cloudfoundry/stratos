@@ -55,7 +55,6 @@ export interface EndpointModel {
   system_shared_token: boolean;
   sso_allowed: boolean;
   // These are generated client side when we login
-  registered?: boolean;
   connectionStatus?: endpointConnectionStatus;
   metricsAvailable: boolean;
 }
