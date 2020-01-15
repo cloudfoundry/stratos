@@ -38,11 +38,11 @@ function fetchRelease(store: Store<AppState>, endpointGuid: string, releaseTitle
   );
 }
 
-export class HelmReleaseServicesDataSource extends ListDataSource<HelmReleaseService> {
+export class HelmReleaseServicesDataSource extends ListDataSource<KubeService> {
 
   constructor(
     store: Store<AppState>,
-    listConfig: IListConfig<HelmReleaseService>,
+    listConfig: IListConfig<KubeService>,
     endpointGuid: string,
     releaseTitle: string
   ) {
