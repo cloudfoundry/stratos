@@ -98,7 +98,6 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
-import { WorkloadsModule } from './workloads/workloads.module';
 
 /* tslint:disable:max-line-length */
 
@@ -111,7 +110,6 @@ import { WorkloadsModule } from './workloads/workloads.module';
     SharedModule,
     NgxChartsModule,
     KubernetesRoutingModule,
-    WorkloadsModule
   ],
   declarations: [
     KubernetesComponent,

@@ -4,15 +4,15 @@ import { IListConfig } from 'frontend/packages/core/src/shared/components/list/l
 import { AppState } from 'frontend/packages/store/src/app-state';
 
 import { getKubeAPIResourceGuid } from '../../store/kube.selectors';
+import { KubernetesPod } from '../../store/kube.types';
 import { GetHelmReleasePods } from '../store/workloads.actions';
-import { HelmReleasePod } from '../workload.types';
 
 
-export class HelmReleasePodsDataSource extends ListDataSource<HelmReleasePod> {
+export class HelmReleasePodsDataSource extends ListDataSource<KubernetesPod> {
 
   constructor(
     store: Store<AppState>,
-    listConfig: IListConfig<HelmReleasePod>,
+    listConfig: IListConfig<KubernetesPod>,
     endpointGuid: string,
     releaseTitle: string
   ) {

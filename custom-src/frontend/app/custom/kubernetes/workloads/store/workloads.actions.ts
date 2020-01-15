@@ -100,8 +100,9 @@ export class GetHelmReleaseResource implements EntityRequestAction {
   actions = [this.type];
 }
 
-
-// TODO: RC candidate for removal, look after pods work finished
+/**
+ * Won't fetch pods, used to push/retrieve data from store
+ */
 export class GetHelmReleasePods implements MonocularPaginationAction {
   constructor(
     public endpointGuid: string,
@@ -123,12 +124,11 @@ export class GetHelmReleasePods implements MonocularPaginationAction {
     'order-direction': 'asc',
     'order-direction-field': 'name',
   };
-  static createKey = (endpointGuid: string, releaseTitle: string, name: string): string => {
-    return `${endpointGuid}/${releaseTitle}/${name}`;
-  }
 }
 
-// TODO: RC candidate for removal, look after pods work finished
+/**
+ * Won't fetch pods, used to push/retrieve data from store
+ */
 export class GetHelmReleaseServices implements MonocularPaginationAction {
   constructor(
     public endpointGuid: string,
@@ -150,13 +150,9 @@ export class GetHelmReleaseServices implements MonocularPaginationAction {
     'order-direction': 'asc',
     'order-direction-field': 'name',
   };
-  static createKey = (endpointGuid: string, releaseTitle: string, name: string): string => {
-    return `${endpointGuid}/${releaseTitle}/${name}`;
-  }
 }
 
 export class HelmUpdateRelease implements Action {
   constructor(public values: any) { }
   type = UPDATE_HELM_RELEASE;
-  // public guid = () => '<New Release>' + this.values.releaseName;
 }

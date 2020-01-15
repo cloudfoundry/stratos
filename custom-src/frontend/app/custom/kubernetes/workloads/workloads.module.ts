@@ -4,6 +4,7 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { KubernetesModule } from '../kubernetes.module';
 import { HelmReleaseServiceCardComponent } from './list-types/helm-release-service-card/helm-release-service-card.component';
 import { HelmServicePortsComponent } from './list-types/helm-service-ports/helm-service-ports.component';
 import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/helm-release-tab-base.component';
@@ -30,6 +31,7 @@ import { WorkloadsRouting } from './workloads.routing';
     WorkloadsStoreModule,
     WorkloadsRouting,
     NgxGraphModule,
+    KubernetesModule
   ],
   declarations: [
     HelmReleasesTabComponent,

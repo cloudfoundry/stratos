@@ -9,7 +9,7 @@ import { RouterNav } from 'frontend/packages/store/src/actions/router.actions';
 import { HideSnackBar, ShowSnackBar } from 'frontend/packages/store/src/actions/snackBar.actions';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
-import { combineLatest, Observable, of, ReplaySubject } from 'rxjs';
+import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { KUBERNETES_ENDPOINT_TYPE } from '../../../../kubernetes-entity-factory';
@@ -62,17 +62,13 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     private logService: LoggerService
   ) {
 
-    // const releaseStatus$ = this.helmReleaseHelper.fetchReleaseStatus();
-
     this.isBusy$ = combineLatest([
       this.helmReleaseHelper.isFetching$,
-      // releaseStatus$, // TODO: NWM
-      of(true),
       this.busyDeletingSubject.asObservable().pipe(
         startWith(false)
       )
     ]).pipe(
-      map(([isFetching, releaseStatus, isDeleting]) => isFetching || !releaseStatus || isDeleting),
+      map(([isFetching, isDeleting]) => isFetching || isDeleting),
       startWith(true)
     );
 
