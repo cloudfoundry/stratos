@@ -12,6 +12,7 @@ import { KubernetesApp, KubernetesDeployment, KubernetesPod, KubernetesStatefulS
 import { GetKubernetesApps, GetKubernetesServices } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
+//TODO: RC Move to workloads?
 @Injectable()
 export class HelmReleaseService {
   kubeGuid: string;

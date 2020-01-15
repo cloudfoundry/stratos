@@ -1,6 +1,5 @@
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { addKubernetesEntitySchema, KubernetesEntitySchema } from '../../kubernetes-entity-factory';
-import { getKubeAPIResourceGuid } from '../../store/kube.selectors';
 import { HelmRelease, HelmReleaseGraph, HelmReleaseResource, HelmReleaseService } from '../workload.types';
 
 export const helmReleaseEntityKey = 'helmRelease';
@@ -23,18 +22,6 @@ entityCache[helmReleaseEntityKey] = new KubernetesEntitySchema(
   helmReleaseEntityKey,
   {},
   { idAttribute: getHelmReleaseId }
-);
-
-entityCache[helmReleasePodEntityType] = new KubernetesEntitySchema(
-  helmReleasePodEntityType,
-  {},
-  { idAttribute: getKubeAPIResourceGuid }
-);
-
-entityCache[helmReleaseServiceEntityType] = new KubernetesEntitySchema(
-  helmReleaseServiceEntityType,
-  {},
-  { idAttribute: getHelmReleaseServiceId }
 );
 
 entityCache[helmReleaseGraphEntityType] = new KubernetesEntitySchema(

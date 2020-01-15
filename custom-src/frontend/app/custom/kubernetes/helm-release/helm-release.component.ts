@@ -1,13 +1,16 @@
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { Component, OnInit } from '@angular/core';
-import { BaseKubeGuid } from '../kubernetes-page.types';
 import { ActivatedRoute } from '@angular/router';
-import { KubernetesService } from '../services/kubernetes.service';
-import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { Observable, of as ObservableOf } from 'rxjs';
-import { HelmReleaseService } from '../services/helm-release.service';
 import { map } from 'rxjs/operators';
 
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { BaseKubeGuid } from '../kubernetes-page.types';
+import { HelmReleaseService } from '../services/helm-release.service';
+import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
+import { KubernetesService } from '../services/kubernetes.service';
+
+// TODO: RC Remove this whole folder? (kube/apps/release summary tab)
+// Also include any lists, components, etc
 @Component({
   selector: 'app-helm-release',
   templateUrl: './helm-release.component.html',
