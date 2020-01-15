@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"errors"
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
@@ -17,6 +18,26 @@ func (c *KubernetesSpecification) GetConfigForEndpoint(masterURL string, token i
 	return clientcmd.BuildConfigFromKubeconfigGetter(masterURL, func() (*clientcmdapi.Config, error) {
 		return c.getKubeConfigForEndpoint(masterURL, token, "")
 	})
+}
+
+// GetConfigForEndpointUser gets a kube config for the endpoint ID and user ID
+func (c *KubernetesSpecification) GetConfigForEndpointUser(endpointID, userID string) (*restclient.Config, error) {
+
+	var p = c.portalProxy
+
+	cnsiRecord, err := p.GetCNSIRecord(endpointID)
+	if err != nil {
+		//return sendSSHError("Could not get endpoint information")
+		return nil, errors.New("Could not get endpoint information")
+	}
+
+	// Get token for this users
+	tokenRec, ok := p.GetCNSITokenRecord(endpointID, userID)
+	if !ok {
+		return nil, errors.New("Could not get token")
+	}
+
+	return c.GetConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRec)
 }
 
 func (c *KubernetesSpecification) getKubeConfigForEndpoint(masterURL string, token interfaces.TokenRecord, namespace string) (*clientcmdapi.Config, error) {
