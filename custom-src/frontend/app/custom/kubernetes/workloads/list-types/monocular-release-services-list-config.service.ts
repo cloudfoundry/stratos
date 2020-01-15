@@ -11,9 +11,6 @@ import { HelmReleaseServicesDataSource } from './monocular-release-services-list
 
 @Injectable()
 export class HelmReleaseServicesListConfig extends BaseKubernetesServicesListConfig {
-  dataSource: HelmReleaseServicesDataSource;
-
-  public getDataSource = () => this.dataSource;
 
   constructor(
     private store: Store<AppState>,
@@ -23,4 +20,9 @@ export class HelmReleaseServicesListConfig extends BaseKubernetesServicesListCon
     super();
     this.dataSource = new HelmReleaseServicesDataSource(this.store, this, helmReleaseHelper.endpointGuid, helmReleaseHelper.releaseTitle);
   }
+  dataSource: HelmReleaseServicesDataSource;
+
+  hideRefresh = true;
+
+  public getDataSource = () => this.dataSource;
 }
