@@ -1,10 +1,10 @@
-import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
-import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
-import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
-import { KubeService } from '../store/kube.types';
-import { defaultHelmKubeListPageSize } from './kube-helm-list-types';
-import { KubernetesServicePortsComponent } from './kubernetes-service-ports/kubernetes-service-ports.component';
-
+import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
+import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
+import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
+import { KubeService } from '../../store/kube.types';
+import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
+import { KubernetesServicePortsComponent } from '../kubernetes-service-ports/kubernetes-service-ports.component';
+import { KubeServiceCardComponent } from './kubernetes-service-card/kubernetes-service-card.component';
 
 export abstract class BaseKubernetesServicesListConfig implements IListConfig<KubeService> {
   columns: Array<ITableColumn<KubeService>> = [
@@ -45,7 +45,9 @@ export abstract class BaseKubernetesServicesListConfig implements IListConfig<Ku
   ];
 
   pageSizeOptions = defaultHelmKubeListPageSize;
-  viewType = ListViewTypes.TABLE_ONLY;
+  // TODO: RC --> NWM Do we just want this in helm world?
+  cardComponent = KubeServiceCardComponent;
+  viewType = ListViewTypes.BOTH;
   enableTextFilter = true;
   text = {
     filter: 'Filter by Name',

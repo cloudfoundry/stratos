@@ -88,6 +88,9 @@ import {
 import { KubernetesPodTagsComponent } from './list-types/kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';
 import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
 import { KubernetesServicePortsComponent } from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
+import {
+  KubeServiceCardComponent,
+} from './list-types/kubernetes-services/kubernetes-service-card/kubernetes-service-card.component';
 import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import { HelmReleaseService } from './services/helm-release.service';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
@@ -158,11 +161,9 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     NodePodCountComponent,
     KubernetesServicePortsComponent,
     KubernetesPodStatusComponent,
-    KubernetesPodReadinessComponent
+    KubernetesPodReadinessComponent,
+    KubeServiceCardComponent
   ],
-  // exports: [
-  //   KubernetesServicePortsComponent
-  // ],
   providers: [
     KubernetesService,
     BaseKubeGuid,
@@ -187,7 +188,8 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     NodePodCountComponent,
     KubernetesServicePortsComponent,
     KubernetesPodStatusComponent,
-    KubernetesPodReadinessComponent
+    KubernetesPodReadinessComponent,
+    KubeServiceCardComponent
   ]
 })
 export class KubernetesModule { }

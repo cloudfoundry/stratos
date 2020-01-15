@@ -16,11 +16,6 @@ import { GetHelmReleases } from '../store/workloads.actions';
 import { HelmRelease } from '../workload.types';
 
 const kubeEndpointFilter = (entities: HelmRelease[], paginationState: PaginationEntityState) => {
-  // Filtering is done remotely when maxedResults are hit (see `setMultiFilter`)
-  if (!!paginationState.maxedMode) {
-    return entities;
-  }
-
   // Filter by Kube Endpoint and Namespace
   const kubeId = paginationState.clientPagination.filter.items.kubeId;
   const namespace = paginationState.clientPagination.filter.items.namespace;
