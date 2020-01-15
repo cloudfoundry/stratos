@@ -1,9 +1,21 @@
+
+@import '~@angular/material/theming';
+
 @mixin app-sidepanel-preview-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
+  $background-color:  map-get($app-theme, app-background-color);
+  $darker-background-color:  darken($background-color, 4%);
 
   .sidepanel-preview__header {
     background-color: mat-color($primary);
     color: mat-contrast($primary, 500);
+  }
+
+  .sidepanel-preview__preview {
+    .sidepanel-preview__header {
+      background: $darker-background-color;
+      color: map-get($app-theme, subdued-color);
+    }
   }
 
   .sidepanel-preview__content {
@@ -24,3 +36,4 @@
     }
   }
 }
+

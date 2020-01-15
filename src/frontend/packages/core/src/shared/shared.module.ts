@@ -320,7 +320,8 @@ import { UserPermissionDirective } from './user-permission.directive';
   entryComponents: [
     DialogConfirmComponent,
     EnvVarViewComponent,
-    SnackBarReturnComponent
+    SnackBarReturnComponent,
+    MarkdownPreviewComponent,
   ],
   providers: [
     ListConfig,

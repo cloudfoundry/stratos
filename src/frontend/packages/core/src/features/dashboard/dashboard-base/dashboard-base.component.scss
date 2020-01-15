@@ -2,6 +2,8 @@
 @import '../../../../sass/mixins';
 
 $app-sub-header-height: 48px;
+$app-header-height: 56px;
+
 .dashboard {
   display: flex;
   flex-direction: column;
@@ -20,11 +22,12 @@ $app-sub-header-height: 48px;
       left: 0;
     }
   }
-  &__side-help-button {
-    position: absolute;
-    right: 5px;
-    top: 7px;
+
+  &__side_preview {
+    top: $app-header-height;
+    height: calc(100vw - #{$app-header-height});
   }
+
   &__page-tabs {
     background-color: rgba(146, 146, 146, .1);
   }
