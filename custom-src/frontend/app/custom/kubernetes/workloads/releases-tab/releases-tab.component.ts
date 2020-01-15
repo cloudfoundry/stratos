@@ -7,16 +7,20 @@ import { map } from 'rxjs/operators';
 
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { HELM_ENDPOINT_TYPE } from '../../../helm/helm-entity-factory';
+import { KubernetesNamespacesFilterService } from '../list-types/kube-namespaces-filter-config.service';
 import { HelmReleasesListConfig } from '../list-types/monocular-releases-list-config.service';
 
 @Component({
   selector: 'app-releases-tab',
   templateUrl: './releases-tab.component.html',
   styleUrls: ['./releases-tab.component.scss'],
-  providers: [{
-    provide: ListConfig,
-    useClass: HelmReleasesListConfig,
-  }]
+  providers: [
+    {
+      provide: ListConfig,
+      useClass: HelmReleasesListConfig,
+    },
+    KubernetesNamespacesFilterService,
+  ]
 })
 // TODO: RC Rename all 'HelmRelease' files/names to 'Workload`
 export class HelmReleasesTabComponent implements OnInit {

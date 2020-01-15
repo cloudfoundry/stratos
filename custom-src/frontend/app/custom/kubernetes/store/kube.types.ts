@@ -450,9 +450,9 @@ export interface Volume {
 }
 
 
-export interface ConfigMap {
+export interface ConfigMap<T = Item> {
   name: string;
-  items: Item[];
+  items: T[];
   defaultMode: number;
 }
 

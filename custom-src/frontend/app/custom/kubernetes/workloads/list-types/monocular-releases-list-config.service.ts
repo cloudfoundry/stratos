@@ -6,22 +6,28 @@ import { ITableColumn } from 'frontend/packages/core/src/shared/components/list/
 import {
   TableCellEndpointNameComponent,
 } from 'frontend/packages/core/src/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
-import { IListConfig, ListViewTypes } from 'frontend/packages/core/src/shared/components/list/list.component.types';
+import {
+  IListConfig,
+  IListMultiFilterConfig,
+  ListViewTypes,
+} from 'frontend/packages/core/src/shared/components/list/list.component.types';
 import { AppState } from 'frontend/packages/store/src/app-state';
+import { filter, map } from 'rxjs/operators';
 
 import { defaultHelmKubeListPageSize } from '../../list-types/kube-helm-list-types';
 import { HelmRelease } from '../workload.types';
+import { KubernetesNamespacesFilterItem, KubernetesNamespacesFilterService } from './kube-namespaces-filter-config.service';
 import { HelmReleasesDataSource } from './monocular-releases-list-source';
 
 @Injectable()
 export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
+
   isLocal = true;
   dataSource: HelmReleasesDataSource;
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: '',
-    filter: 'Filter Releases',
-    noEntries: 'There are no releases'
+    filter: 'Filter by Name',
   };
   pageSizeOptions = defaultHelmKubeListPageSize;
   enableTextFilter = true;
@@ -42,7 +48,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
         orderKey: 'name',
         field: 'name'
       },
-      cellFlex: '2'
+      cellFlex: '2',
     },
     {
       columnId: 'cluster',
@@ -104,18 +110,41 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
     },
   ];
 
+  private multiFilterConfigs: IListMultiFilterConfig[];
+
   constructor(
     private store: Store<AppState>,
     public activatedRoute: ActivatedRoute,
     private datePipe: DatePipe,
+    kubeNamespaceService: KubernetesNamespacesFilterService
   ) {
     this.dataSource = new HelmReleasesDataSource(this.store, this);
+
+    this.multiFilterConfigs = [
+      createKubeNamespaceFilterConfig('kubeId', 'Kubernetes', kubeNamespaceService.kube),
+      createKubeNamespaceFilterConfig('namespace', 'Namespace', kubeNamespaceService.namespace),
+    ];
   }
 
   public getColumns = () => this.columns;
   public getGlobalActions = () => [];
   public getMultiActions = () => [];
   public getSingleActions = () => [];
-  public getMultiFiltersConfigs = () => [];
+  getMultiFiltersConfigs = () => this.multiFilterConfigs;
   public getDataSource = () => this.dataSource;
+}
+
+function createKubeNamespaceFilterConfig(key: string, label: string, cfOrgSpaceItem: KubernetesNamespacesFilterItem) {
+  return {
+    key,
+    label,
+    ...cfOrgSpaceItem,
+    list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
+      return entities.map(entity => ({
+        label: entity.name || entity.metadata.name,
+        item: entity,
+        value: entity.guid || entity.metadata.name // Endpoint search via guid, namespace by name (easier filtering)
+      }));
+    })),
+  };
 }
