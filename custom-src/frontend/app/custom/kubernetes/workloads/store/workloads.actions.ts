@@ -121,7 +121,7 @@ export class GetHelmReleasePods implements MonocularPaginationAction {
   ];
   paginationKey: string;
   initialParams = {
-    'order-direction': 'asc',
+    'order-direction': 'desc',
     'order-direction-field': 'name',
   };
 }
@@ -147,7 +147,7 @@ export class GetHelmReleaseServices implements MonocularPaginationAction {
   ];
   paginationKey: string;
   initialParams = {
-    'order-direction': 'asc',
+    'order-direction': 'desc',
     'order-direction-field': 'name',
   };
 }
