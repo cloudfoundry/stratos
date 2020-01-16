@@ -27,8 +27,7 @@
             {{ release.info.last_deployed | date:'medium' }}
           </app-metadata-item>
         </div>
-        <!-- // TODO: RC -- NWM Is this needed anymore? -->
-        <!-- <app-tile-grid>
+        <app-tile-grid>
           <app-tile-group *ngIf="chartData$ | async as chartData">
             <app-tile>
               <mat-card class="full-card">
@@ -42,7 +41,7 @@
               </mat-card>
             </app-tile>
           </app-tile-group>
-        </app-tile-grid> -->
+        </app-tile-grid>
 
       </div>
       <app-metadata-item class="chart-details__item" label="Resources"></app-metadata-item>

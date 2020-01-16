@@ -27,29 +27,30 @@ export interface HelmRelease {
   };
 }
 
-export interface HelmReleaseStatus {
-  endpointId?: string;
-  releaseTitle?: string;
-  data: {
-    'v1/Pod': {
-      [key: string]: {
-        age: string;
-        name: string;
-        ready: string;
-        restarts: string;
-        status: string;
-      }
-    }
-    'v1/Service': {
-      [key: string]: {
-        name: string;
-      }
-    },
-    [dataKey: string]: any
-  };
-  fields: string[];
-  pods: any;
-}
+// TODO: RC Remove
+// export interface HelmReleaseStatus {
+//   endpointId?: string;
+//   releaseTitle?: string;
+//   data: {
+//     'v1/Pod': {
+//       [key: string]: {
+//         age: string;
+//         name: string;
+//         ready: string;
+//         restarts: string;
+//         status: string;
+//       }
+//     }
+//     'v1/Service': {
+//       [key: string]: {
+//         name: string;
+//       }
+//     },
+//     [dataKey: string]: any
+//   };
+//   fields: string[];
+//   pods: any;
+// }
 
 export interface HelmReleasePod {
   endpointId: string;
@@ -86,4 +87,9 @@ export function isHelmReleaseService(obj: any): HelmReleaseService {
 @Injectable()
 export class HelmReleaseGuid {
   guid: string;
+}
+
+export interface HelmReleaseChartData {
+  podsChartData: { name: string; value: any; }[];
+  containersChartData: { name: string; value: any; }[];
 }

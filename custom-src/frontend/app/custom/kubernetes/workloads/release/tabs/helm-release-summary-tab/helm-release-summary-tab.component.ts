@@ -14,6 +14,7 @@ import { map, startWith } from 'rxjs/operators';
 
 import { KUBERNETES_ENDPOINT_TYPE } from '../../../../kubernetes-entity-factory';
 import { helmReleaseEntityKey } from '../../../store/workloads-entity-factory';
+import { HelmReleaseChartData, HelmReleaseResource } from '../../../workload.types';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
 @Component({
@@ -48,11 +49,34 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     }
   ];
 
+  public iconMappings = {
+    Pod: {
+      name: 'adjust'
+    },
+    Role: {
+      name: 'lock'
+    },
+    RoleBinding: {
+      name: 'lock'
+    },
+    ServiceAccount: {
+      name: 'lock'
+    },
+    ReplicaSet: {
+      name: 'filter_none'
+    },
+    default: {
+      name: 'collocation',
+      font: 'stratos-icons'
+    }
+  };
+
   // Blue: #00B2E2
   // Yellow: #FFC107
 
   private deleted = false;
-  public chartData$: Observable<{ podsChartData: { name: string; value: any; }[]; containersChartData: { name: string; value: any; }[]; }>;
+  public chartData$: Observable<HelmReleaseChartData>;
+  public resources$: Observable<HelmReleaseResource[]>;
 
   constructor(
     public helmReleaseHelper: HelmReleaseHelperService,
@@ -72,26 +96,37 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       startWith(true)
     );
 
-    // TODO: RC --> NWM Is this needed anymore?
-    // Async fetch release status
-    // this.chartData$ = releaseStatus$.pipe(
-    //   map(data => ({
-    //     podsChartData: Object.keys(data.pods.status).map(status => ({
-    //       name: status,
-    //       value: data.pods.status[status]
-    //     })),
-    //     containersChartData: [
-    //       {
-    //         name: 'Ready',
-    //         value: data.pods.ready
-    //       },
-    //       {
-    //         name: 'Not Ready',
-    //         value: data.pods.containers - data.pods.ready
-    //       }
-    //     ]
-    //   }))
-    // );
+    this.chartData$ = this.helmReleaseHelper.fetchReleaseChartStats();
+
+    this.resources$ = this.helmReleaseHelper.fetchReleaseGraph().pipe(
+      map((graph: any) => {
+        const resources = {};
+        // Collect the resources
+        Object.values(graph.nodes).forEach((node: any) => {
+          if (!resources[node.data.kind]) {
+            resources[node.data.kind] = {
+              kind: node.data.kind,
+              label: `${node.data.kind}s`,
+              count: 0,
+              statuses: [],
+              icon: this.getIcon(node.data.kind)
+            };
+          }
+          resources[node.data.kind].count++;
+          resources[node.data.kind].statuses.push(node.data.status);
+        });
+        return Object.values(resources).sort((a: any, b: any) => a.kind.localeCompare(b.kind));
+      })
+    );
+  }
+
+  private getIcon(kind: string) {
+    const rkind = kind || 'Pod';
+    if (this.iconMappings[rkind]) {
+      return this.iconMappings[rkind];
+    } else {
+      return this.iconMappings.default;
+    }
   }
 
   private startDelete() {
