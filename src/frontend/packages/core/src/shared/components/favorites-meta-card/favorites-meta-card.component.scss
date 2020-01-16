@@ -37,11 +37,16 @@
     display: flex;
     white-space: nowrap;
   }
-  &__icon {
-    margin-right: 8px;
-    width: 32px;
+  &__icon-panel {
+    display: flex;
+    justify-content: center;
+    width: 56px;
   }
-
+  &__icon {
+    height: 48px;
+    margin-right: 8px;
+    width: auto;
+  }
   &__panel {
     display: flex;
     :first-child {

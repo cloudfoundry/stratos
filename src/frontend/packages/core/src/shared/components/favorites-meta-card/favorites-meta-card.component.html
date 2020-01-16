@@ -3,7 +3,7 @@
   [entityConfig]="entityConfig">
   <app-meta-card-title class="fav-meta-card__header">
     <div class="fav-meta-card__header">
-      <div *ngIf="!compact">
+      <div *ngIf="!compact" class="fav-meta-card__icon-panel">
         <img class="fav-meta-card__icon" *ngIf="iconUrl$ | async as imageUrl" [src]="imageUrl" />
       </div>
       <div class="fav-meta-card__header-text-panel">
