@@ -10,17 +10,19 @@ import { KubernetesNamespacePodsDataSource } from './kubernetes-namespace-pods-d
 @Injectable()
 export class KubernetesNamespacePodsListConfigService extends BaseKubernetesPodsListConfigService {
 
-  private podsDataSource: KubernetesNamespacePodsDataSource;
-
-  getDataSource = () => this.podsDataSource;
+  showNamespaceLink = false;
 
   constructor(
     store: Store<AppState>,
     kubeId: BaseKubeGuid,
     public kubeNamespaceService: KubernetesNamespaceService,
   ) {
-    super();
+    super(kubeId.guid);
     this.podsDataSource = new KubernetesNamespacePodsDataSource(store, kubeId, this, kubeNamespaceService);
   }
+
+  private podsDataSource: KubernetesNamespacePodsDataSource;
+
+  getDataSource = () => this.podsDataSource;
 
 }
