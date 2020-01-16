@@ -7,7 +7,7 @@ import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions'
 import { EndpointOnlyAppState } from '../../../../../store/src/app-state';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { MarkdownPreviewComponent } from '../../../shared/components/markdown-preview/markdown-preview.component';
-import { PanelPreviewService } from '../../../shared/services/panel-preview.service';
+import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.service';
 
 
@@ -29,7 +29,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: ConnectEndpointConfig,
     private store: Store<EndpointOnlyAppState>,
     endpointsService: EndpointsService,
-    private panelPreviewService: PanelPreviewService,
+    private sidePanelService: SidePanelService,
   ) {
     this.connectService = new ConnectEndpointService(store, endpointsService, data);
 
@@ -40,7 +40,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   }
 
   showHelp() {
-    this.panelPreviewService.show(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
+    this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
   }
 
   ngOnDestroy(): void {

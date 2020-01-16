@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { PanelPreviewService } from '../../services/panel-preview.service';
-import { first } from 'rxjs/operators';
+import { SidePanelService } from '../../services/side-panel.service';
 
 @Component({
   selector: 'app-sidepanel-preview',
@@ -12,5 +11,5 @@ export class SidepanelPreviewComponent {
   @Input()
   title: string;
 
-  constructor(public previewService: PanelPreviewService) { }
+  constructor(public sidePanelService: SidePanelService) { }
 }

@@ -11,6 +11,7 @@ import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { EndpointsPageComponent } from './endpoints-page.component';
+import { SidePanelService } from './../../../shared/services/side-panel.service';
 
 describe('EndpointsPageComponent', () => {
   let component: EndpointsPageComponent;
@@ -32,7 +33,7 @@ describe('EndpointsPageComponent', () => {
         ),
         NoopAnimationsModule
       ],
-      providers: [TabNavService]
+      providers: [TabNavService, SidePanelService]
     })
       .compileComponents();
   }));

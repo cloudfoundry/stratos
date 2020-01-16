@@ -4,8 +4,15 @@ import { asapScheduler, BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, observeOn, publishReplay, refCount, tap } from 'rxjs/operators';
 import { DOCUMENT } from '@angular/common';
 
+/**
+ * Service to allow the overlay side panel to be shown or hidden.
+ *
+ * Supports two modes:
+ *  - with show(...) - Brings in side panel below the top nav
+ *  - with showModal(...) - Brings in side panel overlaying the top nav
+ */
 @Injectable()
-export class PanelPreviewService {
+export class SidePanelService {
   private openedSubject: BehaviorSubject<boolean>;
   public opened$: Observable<boolean>;
 
@@ -30,7 +37,7 @@ export class PanelPreviewService {
 
   public setContainer(container: ViewContainerRef) {
     if (this.container) {
-      throw new Error('PanelPreviewService: container already set');
+      throw new Error('SidePanelService: container already set');
     }
 
     this.container = container;
@@ -41,7 +48,7 @@ export class PanelPreviewService {
    */
   public show(component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
     if (!this.container) {
-      throw new Error('PanelPreviewService: container must be set');
+      throw new Error('SidePanelService: container must be set');
     }
 
     this.render(component, props, componentFactoryResolver);
@@ -54,7 +61,7 @@ export class PanelPreviewService {
    */
   public showModal(component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
     if (!this.container) {
-      throw new Error('PanelPreviewService: container must be set');
+      throw new Error('SidePanelService: container must be set');
     }
 
     this.render(component, props, componentFactoryResolver);
@@ -69,7 +76,7 @@ export class PanelPreviewService {
 
   public hide() {
     if (!this.container) {
-      throw new Error('PanelPreviewService: container must be set');
+      throw new Error('SidePanelService: container must be set');
     }
 
     this.openedSubject.next(false);

@@ -24,7 +24,7 @@ import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { PanelPreviewService } from '../../../shared/services/panel-preview.service';
+import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
 
@@ -67,7 +67,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService,
     private ngZone: NgZone,
-    public panelPreviewService: PanelPreviewService,
+    public sidePanelService: SidePanelService,
     private cs: CustomizationService
   ) {
     this.noMargin$ = this.router.events.pipe(
@@ -128,11 +128,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   sideHelpClosed() {
-    this.panelPreviewService.hide();
+    this.sidePanelService.hide();
   }
 
   ngAfterViewInit() {
-    this.panelPreviewService.setContainer(this.previewPanelContainer);
+    this.sidePanelService.setContainer(this.previewPanelContainer);
   }
 
   ngOnInit() {

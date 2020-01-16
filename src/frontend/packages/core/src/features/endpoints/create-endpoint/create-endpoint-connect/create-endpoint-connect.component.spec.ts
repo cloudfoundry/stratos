@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
 import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../../core/core.module';
-import { PanelPreviewService } from '../../../../shared/services/panel-preview.service';
+import { SidePanelService } from '../../../../shared/services/side-panel.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { ConnectEndpointComponent } from '../../connect-endpoint/connect-endpoint.component';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect.component';
@@ -26,7 +26,7 @@ describe('CreateEndpointConnectComponent', () => {
         RouterTestingModule,
         createBasicStoreModule(),
       ],
-      providers: [PanelPreviewService],
+      providers: [SidePanelService],
     })
       .compileComponents();
   }));
