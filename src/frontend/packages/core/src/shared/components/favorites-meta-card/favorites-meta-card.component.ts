@@ -2,7 +2,7 @@ import { entityCatalog } from './../../../../../store/src/entity-catalog/entity-
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { isObservable, Observable, of as observableOf } from 'rxjs';
-import { map, first } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
