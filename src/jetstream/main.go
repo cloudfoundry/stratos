@@ -999,9 +999,8 @@ func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
 		}
 	}
 
-	//Only log if there is a message to log
-	he, _ := err.(*echo.HTTPError)
-	if err != nil && he.Message.(string) != "" {
+	// Always log error
+	if err != nil {
 		c.Logger().Error(err)
 	}
 }
