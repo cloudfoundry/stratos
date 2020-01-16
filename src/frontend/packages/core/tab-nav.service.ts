@@ -1,13 +1,17 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, asapScheduler, Observable, Subject, combineLatest } from 'rxjs';
-import { observeOn, map, startWith, publishReplay, refCount, tap, filter } from 'rxjs/operators';
 import { Portal } from '@angular/cdk/portal';
-import { Router, NavigationEnd } from '@angular/router';
-import { TabNavItem } from './tab-nav.types';
+import { Injectable } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { asapScheduler, BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { filter, map, observeOn, publishReplay, refCount, startWith } from 'rxjs/operators';
+
 import { IPageSideNavTab } from './src/features/dashboard/page-side-nav/page-side-nav.component';
+
 
 @Injectable()
 export class TabNavService {
+
+  static TabsNoLinkValue = null;
+
   private tabNavsSubject: BehaviorSubject<IPageSideNavTab[]>;
   public tabNavs$: Observable<IPageSideNavTab[]>;
 
@@ -63,7 +67,10 @@ export class TabNavService {
     if (!tabs) {
       return null;
     }
-    const activeTab = tabs.find(tab => this.router.isActive(tab.link, false));
+    const activeTab = tabs
+      .filter(tab => tab.link !== TabNavService.TabsNoLinkValue)
+      .find(tab => this.router.isActive(tab.link, false));
+
     if (!activeTab) {
       return null;
     }
