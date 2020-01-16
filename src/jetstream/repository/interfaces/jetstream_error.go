@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/labstack/echo"
 )
@@ -23,9 +24,9 @@ func (e JetstreamError) HTTPError() *echo.HTTPError {
 }
 
 // NewJetstreamError creates a new JetStream error
-func NewJetstreamError(status int, userFacingError string) error {
+func NewJetstreamError(userFacingError string) error {
 	shadowError := JetstreamError{
-		Status:          status,
+		Status:          http.StatusInternalServerError,
 		UserFacingError: userFacingError,
 	}
 	return shadowError

@@ -1,9 +1,8 @@
 package kubernetes
 
 import (
-	"encoding/base64"
+	"errors"
 	"fmt"
-	"regexp"
 
 	log "github.com/sirupsen/logrus"
 
@@ -17,52 +16,49 @@ import (
 // GetConfigForEndpoint gets a config for the Kubernetes go-client for the specified endpoint
 func (c *KubernetesSpecification) GetConfigForEndpoint(masterURL string, token interfaces.TokenRecord) (*restclient.Config, error) {
 	return clientcmd.BuildConfigFromKubeconfigGetter(masterURL, func() (*clientcmdapi.Config, error) {
-
-		name := "cluster-0"
-
-		// Create a config
-
-		// Initialize a new config
-		context := clientcmdapi.NewContext()
-		context.Cluster = name
-		context.AuthInfo = name
-
-		// Configure the cluster
-		cluster := clientcmdapi.NewCluster()
-		cluster.Server = masterURL
-		cluster.InsecureSkipTLSVerify = true
-
-		// Configure auth information
-		authInfo := clientcmdapi.NewAuthInfo()
-		err := c.addAuthInfoForEndpoint(authInfo, token)
-
-		config := clientcmdapi.NewConfig()
-		config.Clusters[name] = cluster
-		config.Contexts[name] = context
-		config.AuthInfos[name] = authInfo
-		config.CurrentContext = context.Cluster
-
-		return config, err
+		return c.getKubeConfigForEndpoint(masterURL, token, "")
 	})
-
 }
 
-func (c *KubernetesSpecification) GetKubeConfigForEndpoint(masterURL string, token interfaces.TokenRecord, namespace string) (string, error) {
+// GetConfigForEndpointUser gets a kube config for the endpoint ID and user ID
+func (c *KubernetesSpecification) GetConfigForEndpointUser(endpointID, userID string) (*restclient.Config, error) {
 
-	name := "config-0"
-	clusterName := "cluster-0"
-	userName := "user-0"
+	var p = c.portalProxy
+
+	cnsiRecord, err := p.GetCNSIRecord(endpointID)
+	if err != nil {
+		//return sendSSHError("Could not get endpoint information")
+		return nil, errors.New("Could not get endpoint information")
+	}
+
+	// Get token for this users
+	tokenRec, ok := p.GetCNSITokenRecord(endpointID, userID)
+	if !ok {
+		return nil, errors.New("Could not get token")
+	}
+
+	return c.GetConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRec)
+}
+
+func (c *KubernetesSpecification) getKubeConfigForEndpoint(masterURL string, token interfaces.TokenRecord, namespace string) (*clientcmdapi.Config, error) {
+
+	name := "cluster-0"
 
 	// Create a config
 
 	// Initialize a new config
 	context := clientcmdapi.NewContext()
-	context.Cluster = clusterName
-	context.AuthInfo = userName
+	context.Cluster = name
+	context.AuthInfo = name
+	if len(namespace) > 0 {
+		context.Namespace = namespace
+	}
 
 	// Configure the cluster
 	cluster := clientcmdapi.NewCluster()
 	cluster.Server = masterURL
+
+	// TODO
 	cluster.InsecureSkipTLSVerify = true
 
 	// Configure auth information
@@ -70,52 +66,28 @@ func (c *KubernetesSpecification) GetKubeConfigForEndpoint(masterURL string, tok
 	err := c.addAuthInfoForEndpoint(authInfo, token)
 
 	config := clientcmdapi.NewConfig()
-	config.Clusters[clusterName] = cluster
-	config.Kind = "Config"
+	config.Clusters[name] = cluster
 	config.Contexts[name] = context
-	config.AuthInfos[userName] = authInfo
+	config.AuthInfos[name] = authInfo
 	config.CurrentContext = context.Cluster
 
-	// Convert to string
-	str := `apiVersion: v1
-kind: Config
-contexts:
-- context:
-		cluster: kube
-		user: kube
-		%s
-	name: kube
-clusters:
-- cluster:
-		insecure-skip-tls-verify: true
-		server: %s
-	name: kube
-current-context: kube
-preferences: {}
-users:
-- name: kube
-	user:
-`
+	return config, err
+}
 
-	nsReplace := ""
-	if len(namespace) > 0 {
-		nsReplace = fmt.Sprintf("namespace: %s", namespace)
+// GetKubeConfigForEndpoint gets a Kube Config file contents for the specified endpoint
+func (c *KubernetesSpecification) GetKubeConfigForEndpoint(masterURL string, token interfaces.TokenRecord, namespace string) (string, error) {
+
+	config, err := c.getKubeConfigForEndpoint(masterURL, token, namespace)
+	if err != nil {
+		return "", err
 	}
 
-	space := regexp.MustCompile(`\t`)
-	s := space.ReplaceAllString(str, "  ")
-
-	// Now append the auth details
-	//log.Infof("%+v", authInfo)
-
-	if authInfo.ClientCertificateData != nil {
-		s = fmt.Sprintf("%s    client-certificate-data: %s\n", s, base64.StdEncoding.EncodeToString(authInfo.ClientCertificateData))
-	}
-	if authInfo.ClientKeyData != nil {
-		s = fmt.Sprintf("%s    client-key-data: %s\n", s, base64.StdEncoding.EncodeToString(authInfo.ClientKeyData))
+	kconfig, err := clientcmd.Write(*config)
+	if err != nil {
+		return "", err
 	}
 
-	return fmt.Sprintf(s, nsReplace, masterURL), err
+	return string(kconfig), nil
 }
 
 func (c *KubernetesSpecification) addAuthInfoForEndpoint(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {

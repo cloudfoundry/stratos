@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	//	"k8s.io/client-go/rest"
-
 	// Import the OIDC auth plugin
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 
@@ -30,7 +28,6 @@ type KubeProxyResponse struct {
 // KubeProxyResponses represents response from multiple proxy requests to the Kube API
 type KubeProxyResponses map[string]interface{}
 
-
 // ProxyKubernetesAPI proxies an API request to all of the user's connected Kubernetes endpoints
 func (c *KubernetesSpecification) ProxyKubernetesAPI(userID string, f KubeProxyFunc) (KubeProxyResponses, error) {
 
@@ -41,8 +38,7 @@ func (c *KubernetesSpecification) ProxyKubernetesAPI(userID string, f KubeProxyF
 		return nil, fmt.Errorf("Could not get endpints Client for endpoint: %v+", err)
 	}
 
-
-	// TODO: Endpoint must be connected
+	// Get all connected k8s endpoints for the user
 	for _, endpoint := range eps {
 		if endpoint.CNSIType == "k8s" {
 			k8sList = append(k8sList, endpoint)
