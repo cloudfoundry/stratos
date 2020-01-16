@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import {
+  IListDataSource,
+} from 'frontend/packages/core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import * as moment from 'moment';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
@@ -8,12 +12,11 @@ import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesPod } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { getContainerLengthSort } from '../kube-sort.helper';
+import { KubernetesPodReadinessComponent } from './kubernetes-pod-readiness/kubernetes-pod-readiness.component';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 import { PodNameLinkComponent } from './pod-name-link/pod-name-link.component';
 
-@Injectable()
-export class KubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
-  podsDataSource: KubernetesPodsDataSource;
+export abstract class BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
 
   columns: Array<ITableColumn<KubernetesPod>> = [
     {
@@ -90,6 +93,37 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
       },
       cellFlex: '5',
     },
+    // TODO: RC --> NWM From releases table. Diff between this and above?
+    {
+      columnId: 'ready',
+      headerCell: () => 'Ready',
+      cellComponent: KubernetesPodReadinessComponent,
+      // cellDefinition: {
+      //   valuePath: 'ready'
+      // },
+      sort: {
+        type: 'sort',
+        orderKey: 'ready',
+        field: 'ready'
+      },
+      cellFlex: '1'
+    },
+    // TODO: RC --> NWM From releases table, keep in all pod tables?
+    {
+      columnId: 'age',
+      headerCell: () => 'Age',
+      cellDefinition: {
+        getValue: (row: any) => {
+          return moment(row.metadata.creationTimestamp).fromNow(true);
+        }
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'age',
+        field: 'metadata.creationTimestamp'
+      },
+      cellFlex: '1'
+    }
   ];
 
   pageSizeOptions = defaultHelmKubeListPageSize;
@@ -99,19 +133,28 @@ export class KubernetesPodsListConfigService implements IListConfig<KubernetesPo
     filter: 'Filter by Name',
     noEntries: 'There are no pods'
   };
-
+  abstract getDataSource: () => IListDataSource<KubernetesPod>;
   getGlobalActions = () => null;
   getMultiActions = () => [];
   getSingleActions = () => [];
   getColumns = () => this.columns;
-  getDataSource = () => this.podsDataSource;
   getMultiFiltersConfigs = () => [];
+
+}
+
+@Injectable()
+export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfigService {
+  private podsDataSource: KubernetesPodsDataSource;
+
+  getDataSource = () => this.podsDataSource;
 
   constructor(
     store: Store<AppState>,
     kubeId: BaseKubeGuid,
   ) {
+    super();
     this.podsDataSource = new KubernetesPodsDataSource(store, kubeId, this);
   }
 
 }
+

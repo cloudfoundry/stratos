@@ -2,7 +2,9 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, combineLatest, flatMap, mergeMap } from 'rxjs/operators';
+import { connectedEndpointsOfTypesSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
+import { of } from 'rxjs';
+import { catchError, combineLatest, first, flatMap, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -281,6 +283,7 @@ export class KubernetesEffects {
     ofType<GetKubernetesApps>(GET_KUBERNETES_APP_INFO),
     flatMap(action => {
       this.store.dispatch(new StartRequestAction(action));
+
       const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
       const requestArgs = {
         headers
@@ -365,32 +368,53 @@ export class KubernetesEffects {
   }
 
 
-  private processListAction<T>(
+  private processListAction<T = any>(
     action: KubePaginationAction | KubeAction,
     url: string,
     entityKey: string,
     getId: GetID<T>,
     filterResults?: Filter<T>) {
     this.store.dispatch(new StartRequestAction(action));
-    const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
-    const requestArgs = {
-      headers,
-      params: null
-    };
-    const paginationAction = action as KubePaginationAction;
-    if (paginationAction.initialParams) {
-      requestArgs.params = Object.keys(paginationAction.initialParams).reduce((httpParams, initialKey: string) => {
-        return httpParams.set(initialKey, paginationAction.initialParams[initialKey].toString());
-      }, new HttpParams());
-    }
-    return this.http
-      .get(url, requestArgs)
-      .pipe(mergeMap(response => {
+
+    const getKubeIds = action.kubeGuid ?
+      of([action.kubeGuid]) :
+      this.store.select(connectedEndpointsOfTypesSelector(KUBERNETES_ENDPOINT_TYPE)).pipe(
+        first(),
+        map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
+      );
+    let pKubeIds;
+
+    return getKubeIds.pipe(
+      switchMap(kubeIds => {
+        pKubeIds = kubeIds;
+        const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeIds });
+        // const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, endpointGuids);
+        const requestArgs = {
+          headers,
+          params: null
+        };
+        const paginationAction = action as KubePaginationAction;
+        if (paginationAction.initialParams) {
+          requestArgs.params = Object.keys(paginationAction.initialParams).reduce((httpParams, initialKey: string) => {
+            return httpParams.set(initialKey, paginationAction.initialParams[initialKey].toString());
+          }, new HttpParams());
+        }
+        return this.http.get(url, requestArgs);
+      }),
+      mergeMap(allRes => {
         const base = {
           entities: { [entityKey]: {} },
           result: []
         } as NormalizedResponse;
-        const items = response[action.kubeGuid].items as Array<any>;
+
+        const items: Array<T> = Object.entries(allRes).reduce((combinedRes, [kubeId, res]) => {
+          res.items.forEach(item => {
+            item.metadata.kubeId = kubeId;
+            combinedRes.push(item);
+          });
+          return combinedRes;
+        }, []);
+        // const items = response[action.kubeGuid].items as Array<any>;
         const processesData = items.filter((res) => !!filterResults ? filterResults(res) : true)
           .reduce((res, data) => {
             const id = getId(data);
@@ -401,15 +425,17 @@ export class KubernetesEffects {
         return [
           new WrapperRequestActionSuccess(processesData, action)
         ];
-      }), catchError(error => [
+      }),
+      catchError(error => [
         new WrapperRequestActionFailed(error.message, action, 'fetch', {
-          endpointIds: [action.kubeGuid],
+          endpointIds: pKubeIds,
           url: error.url || url,
           eventCode: error.status ? error.status + '' : '500',
           message: 'Kubernetes API request error',
-          error
+          error,
         })
-      ]));
+      ])
+    );
   }
 
   private processSingleItemAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T>) {

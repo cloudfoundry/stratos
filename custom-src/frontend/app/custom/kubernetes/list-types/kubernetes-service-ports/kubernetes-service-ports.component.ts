@@ -21,6 +21,8 @@ export class KubernetesServicePortsComponent extends CardCell<KubeService> {
     }
     this.pRow = row;
     this.kubeService$ = of(row as KubeService);
+    /* tslint:disable-next-line:no-string-literal  */
+    this.endpointId = row['endpointId'];
   }
   get row(): KubeService {
     return this.pRow;

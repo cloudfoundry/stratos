@@ -1,35 +1,13 @@
 import { Schema, schema } from 'normalizr';
 
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import {
-  HelmRelease,
-  HelmReleasePod,
-  HelmReleaseService,
-  HelmReleaseStatus,
-  HelmVersion,
-  MonocularChart,
-  HelmReleaseGraph,
-  HelmReleaseResource,
-} from './store/helm.types';
+import { HelmVersion, MonocularChart } from './store/helm.types';
 
+export const helmVersionsEntityType = 'helmVersions';
 export const monocularChartsEntityType = 'monocularCharts';
 
-export const helmReleaseEntityKey = 'helmReleases';
-export const helmVersionsEntityType = 'helmVersions';
-export const helmReleaseStatusEntityType = 'helmReleaseStatus';
-export const helmReleasePodEntityType = 'helmReleasePod';
-export const helmReleaseServiceEntityType = 'helmReleaseService';
-export const helmReleaseGraphEntityType = 'helmReleaseGraph';
-export const helmReleaseResourceEntityType = 'helmReleaseResource';
-
 export const getMonocularChartId = (entity: MonocularChart) => entity.id;
-export const getHelmReleaseId = (entity: HelmRelease) => entity.endpointId;
 export const getHelmVersionId = (entity: HelmVersion) => entity.endpointId;
-export const getHelmReleaseStatusId = (entity: HelmReleaseStatus) => entity.endpointId;
-export const getHelmReleasePodId = (entity: HelmReleasePod) => entity.name;
-export const getHelmReleaseServiceId = (entity: HelmReleaseService) => entity.name;
-export const getHelmReleaseGraphId = (entity: HelmReleaseGraph) => entity.endpointId;
-export const getHelmReleaseReleaseId = (entity: HelmReleaseResource) => entity.endpointId;
 
 export const HELM_ENDPOINT_TYPE = 'helm';
 
@@ -61,46 +39,10 @@ entityCache[monocularChartsEntityType] = new HelmEntitySchema(
   { idAttribute: getMonocularChartId }
 );
 
-entityCache[helmReleaseEntityKey] = new HelmEntitySchema(
-  helmReleaseEntityKey,
-  {},
-  { idAttribute: getHelmReleaseId }
-);
-
 entityCache[helmVersionsEntityType] = new HelmEntitySchema(
   helmVersionsEntityType,
   {},
   { idAttribute: getHelmVersionId }
-);
-
-entityCache[helmReleaseStatusEntityType] = new HelmEntitySchema(
-  helmReleaseStatusEntityType,
-  {},
-  { idAttribute: getHelmReleaseStatusId }
-);
-
-entityCache[helmReleasePodEntityType] = new HelmEntitySchema(
-  helmReleasePodEntityType,
-  {},
-  { idAttribute: getHelmReleasePodId }
-);
-
-entityCache[helmReleaseServiceEntityType] = new HelmEntitySchema(
-  helmReleaseServiceEntityType,
-  {},
-  { idAttribute: getHelmReleaseServiceId }
-);
-
-entityCache[helmReleaseGraphEntityType] = new HelmEntitySchema(
-  helmReleaseGraphEntityType,
-  {},
-  { idAttribute: getHelmReleaseGraphId }
-);
-
-entityCache[helmReleaseResourceEntityType] = new HelmEntitySchema(
-  helmReleaseResourceEntityType,
-  {},
-  { idAttribute: getHelmReleaseReleaseId }
 );
 
 export function helmEntityFactory(key: string): EntitySchema {

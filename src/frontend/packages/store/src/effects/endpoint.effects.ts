@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
@@ -35,6 +34,7 @@ import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 import { DispatchOnlyAppState } from '../app-state';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
@@ -87,7 +87,6 @@ export class EndpointsEffect {
           mappedData.entities[endpointEntityKey][endpointInfo.guid] = {
             ...endpointInfo,
             connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
-            registered: !!endpointInfo.user,
           };
           mappedData.result.push(endpointInfo.guid);
         });

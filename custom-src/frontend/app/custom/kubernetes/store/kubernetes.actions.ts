@@ -260,7 +260,7 @@ export class GetKubernetesPodsInNamespace implements PaginatedAction, KubeAction
 
 export class GetKubernetesNamespaces implements KubePaginationAction {
   constructor(public kubeGuid) {
-    this.paginationKey = getPaginationKey(kubernetesNamespacesEntityType, kubeGuid);
+    this.paginationKey = getPaginationKey(kubernetesNamespacesEntityType, kubeGuid || 'all');
   }
   type = GET_NAMESPACES_INFO;
   entityType = kubernetesNamespacesEntityType;

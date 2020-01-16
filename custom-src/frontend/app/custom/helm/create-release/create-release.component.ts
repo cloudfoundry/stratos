@@ -4,8 +4,9 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTextareaAutosize } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { EntityServiceFactory } from 'frontend/packages/store/src/entity-service-factory.service';
 import { Observable, of, Subscription } from 'rxjs';
-import { delay, filter, first, map, pairwise, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, delay, filter, first, map, pairwise, switchMap, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -14,7 +15,7 @@ import { ConfirmationDialogConfig } from '../../../shared/components/confirmatio
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
-import { HELM_ENDPOINT_TYPE, helmReleaseEntityKey } from '../helm-entity-factory';
+import { helmReleaseEntityKey } from '../../kubernetes/workloads/store/workloads-entity-factory';
 import { HelmInstall } from '../store/helm.actions';
 import { HELM_INSTALLING_KEY, HelmInstallValues } from '../store/helm.types';
 
@@ -54,6 +55,7 @@ export class CreateReleaseComponent implements OnInit {
     private store: Store<AppState>,
     private httpClient: HttpClient,
     private confirmDialog: ConfirmationDialogService,
+    private esf: EntityServiceFactory
   ) {
     const chart = this.route.snapshot.params;
     this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
@@ -133,7 +135,10 @@ export class CreateReleaseComponent implements OnInit {
     const action = new HelmInstall(values);
     this.store.dispatch(action);
 
-    const releaseEntityConfig = entityCatalog.getEntity(HELM_ENDPOINT_TYPE, helmReleaseEntityKey);
+    const releaseEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, helmReleaseEntityKey);
+
+    // TODO: RC Once we have a GetRelease action use to access new entity for info to redirect to the release page using redirectPayload
+    // this.esf.create(action.guid(), )
 
     // Wait for result of request
     return of(true).pipe(
@@ -143,15 +148,17 @@ export class CreateReleaseComponent implements OnInit {
       filter(update => !!update),
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
-      map(([oldVal, newVal]) => newVal),
+      map(([, newVal]) => newVal),
       map(result => ({
         success: !result.error,
         redirect: !result.error,
         redirectPayload: {
-          path: 'monocular/releases'
+          path: `workloads`
         },
         message: !result.error ? '' : result.message
-      })));
+      })),
+      combineLatest()
+    );
 
   }
 

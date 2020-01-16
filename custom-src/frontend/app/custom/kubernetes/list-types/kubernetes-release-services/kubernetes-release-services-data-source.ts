@@ -7,7 +7,7 @@ import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { HelmReleaseService } from '../../services/helm-release.service';
 import { KubeService } from '../../store/kube.types';
 import { GetKubernetesServices } from '../../store/kubernetes.actions';
-import { BaseKubernetesServicesDataSource } from '../kubernetes-services-data-source';
+import { BaseKubernetesServicesDataSource } from '../kubernetes-services/kubernetes-services-data-source';
 
 
 export class KubernetesHelmReleaseServicesDataSource extends BaseKubernetesServicesDataSource {

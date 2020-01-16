@@ -58,7 +58,7 @@ export class CfAuthService {
     ).subscribe(([endpoints, session]: [IRequestEntityTypeState<EndpointModel>, SessionData]) => {
       this.session = session;
       Object.values(endpoints).forEach(endpoint => {
-        if (endpoint.registered) {
+        if (endpoint.connectionStatus !== 'connected') {
           // User hasn't connected to this endpoint
           return;
         } else if (this.isInitialized(endpoint.guid)) {

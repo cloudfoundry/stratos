@@ -17,7 +17,6 @@ import {
   KubernetesConfigAuthFormComponent,
 } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
-import { KubernetesEndpointPreviewComponent } from './kubernetes-endpoint-preview/kubernetes-endpoint-preview.component';
 import {
   KUBERNETES_ENDPOINT_TYPE,
   kubernetesAppsEntityType,
@@ -39,6 +38,7 @@ import {
   KubernetesStatefulSet,
   KubeService,
 } from './store/kube.types';
+import { generateWorkloadsEntities } from './workloads/store/workloads-entity-generator';
 
 const enum KubeEndpointAuthTypes {
   CERT_AUTH = 'kube-cert-auth',
@@ -147,7 +147,8 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     generateNamespacesEntity(endpointDefinition),
     generateServicesEntity(endpointDefinition),
     generateDashboardEntity(endpointDefinition),
-    generateMetricEntity(endpointDefinition)
+    generateMetricEntity(endpointDefinition),
+    ...generateWorkloadsEntities(endpointDefinition)
   ];
 }
 

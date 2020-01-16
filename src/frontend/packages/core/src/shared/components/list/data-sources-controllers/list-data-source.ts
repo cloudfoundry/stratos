@@ -28,11 +28,11 @@ import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.a
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
 import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
+import { PaginationMonitor } from '../../../../../../store/src/monitors/pagination-monitor';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { PaginationMonitor } from '../../../../../../store/src/monitors/pagination-monitor';
 import { IListDataSourceConfig, MultiActionConfig } from './list-data-source-config';
 import {
   EntitySelectConfig,
@@ -47,8 +47,10 @@ import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
 import { LocalPaginationHelpers } from './local-list.helpers';
 
+export type DataFunctionDefinitionType = 'sort' | 'filter';
+
 export class DataFunctionDefinition {
-  type: 'sort' | 'filter';
+  type: DataFunctionDefinitionType;
   orderKey?: string;
   field: string;
   static is(obj) {

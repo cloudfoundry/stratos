@@ -1,4 +1,3 @@
-import { HelmReleaseResourceGraphComponent } from './release/tabs/helm-release-resource-graph/helm-release-resource-graph.component';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
@@ -7,8 +6,6 @@ import { SharedModule } from '../../shared/shared.module';
 import { MonocularChartViewComponent } from './chart-view/monocular.component';
 import { CreateReleaseModule } from './create-release/create-release.module';
 import { HelmRoutingModule } from './helm.routing';
-import { HelmReleaseServiceCardComponent } from './list-types/helm-release-service-card/helm-release-service-card.component';
-import { HelmServicePortsComponent } from './list-types/helm-service-ports/helm-service-ports.component';
 import { MonocularChartCardComponent } from './list-types/monocular-chart-card/monocular-chart-card.component';
 import { MonocularTabBaseComponent } from './monocular-tab-base/monocular-tab-base.component';
 import { ChartDetailsInfoComponent } from './monocular/chart-details/chart-details-info/chart-details-info.component';
@@ -30,18 +27,8 @@ import { ChartsService } from './monocular/shared/services/charts.service';
 import { ConfigService } from './monocular/shared/services/config.service';
 import { MenuService } from './monocular/shared/services/menu.service';
 import { ReposService } from './monocular/shared/services/repos.service';
-import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/helm-release-tab-base.component';
-import { HelmReleasePodsTabComponent } from './release/tabs//helm-release-pods/helm-release-pods-tab.component';
-import { HelmReleaseNotesTabComponent } from './release/tabs/helm-release-notes-tab/helm-release-notes-tab.component';
-import { HelmReleaseServicesTabComponent } from './release/tabs/helm-release-services/helm-release-services-tab.component';
-import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summary-tab/helm-release-summary-tab.component';
-import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
-import { HelmReleaseResourcePreviewComponent} from './release/tabs/helm-release-resource-graph/helm-release-resource-preview/helm-release-resource-preview.component';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
-import { HelmReleasesTabComponent } from './tabs/releases-tab/releases-tab.component';
 import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.component';
-import { KubernetesModule } from '../kubernetes/kubernetes.module';
-import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 @NgModule({
   imports: [
@@ -50,8 +37,6 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
     SharedModule,
     HelmRoutingModule,
     CreateReleaseModule,
-    KubernetesModule,
-    NgxGraphModule,
   ],
   declarations: [
     PanelComponent,
@@ -71,19 +56,8 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
     MonocularTabBaseComponent,
     RepositoryTabComponent,
     CatalogTabComponent,
-    HelmReleasesTabComponent,
     MonocularChartCardComponent,
-    HelmReleaseServiceCardComponent,
     MonocularChartViewComponent,
-    HelmReleaseTabBaseComponent,
-    HelmReleaseSummaryTabComponent,
-    HelmReleaseNotesTabComponent,
-    HelmReleaseValuesTabComponent,
-    HelmReleasePodsTabComponent,
-    HelmReleaseServicesTabComponent,
-    HelmServicePortsComponent,
-    HelmReleaseResourceGraphComponent,
-    HelmReleaseResourcePreviewComponent,
   ],
   providers: [
     ChartsService,
@@ -93,9 +67,6 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
   ],
   entryComponents: [
     MonocularChartCardComponent,
-    HelmReleaseServiceCardComponent,
-    HelmServicePortsComponent,
-    HelmReleaseResourcePreviewComponent,
   ]
 })
 export class HelmModule { }

@@ -17,13 +17,13 @@ import { GetSystemInfo } from '../../../../store/src/actions/system.actions';
 import { EndpointOnlyAppState } from '../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../store/src/effects/endpoint.effects';
 import { SystemEffects } from '../../../../store/src/effects/system.effects';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { EndpointsService } from '../../core/endpoints.service';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { EndpointType } from '../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../core/utils.service';
 
@@ -41,6 +41,12 @@ export interface ConnectEndpointData {
   systemShared: boolean;
   bodyContent: string;
 }
+
+// Why is this here instead of somewhere more common? Answer - Because it'd create circulate dependencies due to reliance on entityCatalog
+export const isEndpointConnected = (endpoint: EndpointModel): boolean => {
+  const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
+  return endpoint.connectionStatus === 'connected' || epType.unConnectable;
+};
 
 export class ConnectEndpointService {
 
