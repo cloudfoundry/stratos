@@ -74,7 +74,7 @@ $app-sub-header-height: 48px;
   height: $app-sub-header-height;
   margin-left: 200px;
   padding: 0;
-  width: 100%;
+  // width: 100%;
   @include breakpoint(tablet) {
     margin: 0;
     padding: 0 20px;
