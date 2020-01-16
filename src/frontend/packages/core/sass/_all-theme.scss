@@ -51,6 +51,7 @@
 @import './fonts';
 @import './ansi-colors';
 @import '../src/shared/components/favorites-global-list/favorites-global-list.component.theme';
+@import '../src/shared/components/favorites-meta-card/favorites-meta-card.component.theme';
 
 @import '../../cloud-foundry/src/shared/components/schema-form/schema-form.component.theme';
 @import '../../cloud-foundry/src/features/services/services-wall/services-wall.component.theme';
@@ -148,6 +149,7 @@ $side-nav-light-active: #484848;
   @include app-simple-usage-chart($theme, $app-theme);
   @include home-page-theme($theme, $app-theme);
   @include favorites-global-list-theme($theme, $app-theme);
+  @include favorites-meta-card-theme($theme, $app-theme);
   @include page-side-nav-theme($theme, $app-theme);
   @include cf-admin-add-user-warning($theme, $app-theme);
   @include entity-summary-title-theme($theme, $app-theme);
