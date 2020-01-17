@@ -4,9 +4,8 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTextareaAutosize } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { EntityServiceFactory } from 'frontend/packages/store/src/entity-service-factory.service';
 import { Observable, of, Subscription } from 'rxjs';
-import { combineLatest, delay, filter, first, map, pairwise, switchMap, tap } from 'rxjs/operators';
+import { delay, filter, first, map, pairwise, switchMap, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -17,7 +16,7 @@ import { StepOnNextFunction } from '../../../shared/components/stepper/step/step
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
 import { helmReleaseEntityKey } from '../../kubernetes/workloads/store/workloads-entity-factory';
 import { HelmInstall } from '../store/helm.actions';
-import { HELM_INSTALLING_KEY, HelmInstallValues } from '../store/helm.types';
+import { HelmInstallValues } from '../store/helm.types';
 
 @Component({
   selector: 'app-create-release',
@@ -55,7 +54,7 @@ export class CreateReleaseComponent implements OnInit {
     private store: Store<AppState>,
     private httpClient: HttpClient,
     private confirmDialog: ConfirmationDialogService,
-    private esf: EntityServiceFactory
+    // private esf: EntityServiceFactory
   ) {
     const chart = this.route.snapshot.params;
     this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
@@ -137,14 +136,11 @@ export class CreateReleaseComponent implements OnInit {
 
     const releaseEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, helmReleaseEntityKey);
 
-    // TODO: RC Once we have a GetRelease action use to access new entity for info to redirect to the release page using redirectPayload
-    // this.esf.create(action.guid(), )
-
     // Wait for result of request
     return of(true).pipe(
       delay(1),
-      switchMap(() => releaseEntityConfig.getEntityMonitor(this.store, action.guid()).updatingSection$),
-      map(updatingSection => updatingSection[HELM_INSTALLING_KEY]),
+      switchMap(() => releaseEntityConfig.getEntityMonitor(this.store, action.guid).updatingSection$),
+      map(updatingSection => updatingSection[action.updatingKey]),
       filter(update => !!update),
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -153,11 +149,10 @@ export class CreateReleaseComponent implements OnInit {
         success: !result.error,
         redirect: !result.error,
         redirectPayload: {
-          path: `workloads`
+          path: !result.error ? `workloads/${values.endpoint}:${values.releaseNamespace}:${values.releaseName}/summary` : ''
         },
         message: !result.error ? '' : result.message
       })),
-      combineLatest()
     );
 
   }

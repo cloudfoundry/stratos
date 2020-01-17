@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from 'frontend/packages/store/src/app-state';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from 'frontend/packages/store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from 'frontend/packages/store/src/monitors/pagination-monitor.factory';
+import { selectEntity } from 'frontend/packages/store/src/selectors/api.selectors';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -67,20 +69,21 @@ export class HelmReleaseHelperService {
     return this.guid.replace(':', '/').replace(':', '/');
   }
 
-  // TODO: RC convert both of these to just selects fetchReleaseGraph fetchReleaseResources
   public fetchReleaseGraph(): Observable<HelmReleaseGraph> {
     // Get helm release
     const action = new GetHelmReleaseGraph(this.endpointGuid, this.releaseTitle);
-    return this.esf.create<HelmReleaseGraph>(action.guid, action).waitForEntity$.pipe(
-      map(entity => entity.entity)
+    const entityKey = entityCatalog.getEntityKey(action);
+    return this.store.select(selectEntity<HelmReleaseGraph>(entityKey, action.guid)).pipe(
+      filter(graph => !!graph)
     );
   }
 
   public fetchReleaseResources(): Observable<HelmReleaseResource> {
     // Get helm release
     const action = new GetHelmReleaseResource(this.endpointGuid, this.releaseTitle);
-    return this.esf.create<HelmReleaseResource>(action.guid, action).waitForEntity$.pipe(
-      map(entity => entity.entity)
+    const entityKey = entityCatalog.getEntityKey(action);
+    return this.store.select(selectEntity<HelmReleaseResource>(entityKey, action.guid)).pipe(
+      filter(resources => !!resources)
     );
   }
 
@@ -115,14 +118,15 @@ export class HelmReleaseHelperService {
       } else {
         podPhases[status]++;
       }
-
-      pod.status.containerStatuses.forEach(containerStatus => {
-        if (containerStatus.state.running) {
-          containers.ready.value++;
-        } else {
-          containers.notReady.value++;
-        }
-      });
+      if (pod.status.containerStatuses) {
+        pod.status.containerStatuses.forEach(containerStatus => {
+          if (containerStatus.state.running) {
+            containers.ready.value++;
+          } else {
+            containers.notReady.value++;
+          }
+        });
+      }
     });
 
     return {

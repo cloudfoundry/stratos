@@ -20,7 +20,6 @@ const customRoutes: Routes = [
   },
   {
     path: 'workloads',
-    // loadChildren: './helm/helm.module#HelmModule',
     loadChildren: () => import('./kubernetes/workloads/workloads.module').then(m => m.WorkloadsModule),
     data: {
       reuseRoute: true,
@@ -29,7 +28,7 @@ const customRoutes: Routes = [
         matIcon: 'apps',
         // matIconFont: 'stratos-icons',
         position: 64,
-        requiresEndpointType: KUBERNETES_ENDPOINT_TYPE // TODO: RC CHECK
+        requiresEndpointType: KUBERNETES_ENDPOINT_TYPE
       }
     }
   },

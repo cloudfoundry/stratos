@@ -45,7 +45,6 @@ export abstract class BaseKubernetesServicesListConfig implements IListConfig<Ku
   ];
 
   pageSizeOptions = defaultHelmKubeListPageSize;
-  // TODO: RC --> NWM Do we just want this in helm world?
   cardComponent = KubeServiceCardComponent;
   viewType = ListViewTypes.BOTH;
   enableTextFilter = true;
