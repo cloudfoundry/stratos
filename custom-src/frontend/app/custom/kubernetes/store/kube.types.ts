@@ -43,6 +43,7 @@ export interface DeploymentSpec {
   revisionHistoryLimit: number;
   progressDeadlineSeconds: number;
   type?: string;
+  clusterIP?: string;
 }
 
 export interface KubernetesDeployment extends BasicKubeAPIResource {
