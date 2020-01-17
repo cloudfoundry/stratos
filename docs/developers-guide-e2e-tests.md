@@ -11,6 +11,10 @@ Developers' should be aware that:
 
 ## Pre-requisites
 
+### NPM
+The test run via NPM, which should be installed the normal way.
+
+### Cloud Foundry
 The tests require an instance of Cloud Foundry with the following:
 
 - A user with cloud-controller.admin scope (i.e. an Cloud Foundry admin)
@@ -105,6 +109,12 @@ Given the output of the script, the following template can be used to update the
 If tests are stopped before completing or fail to clean old test artifacts will exist in the CF. To clean some of these please see the script
 at [deploy/ci/automation/e2e-clean-remnants.sh](../deploy/ci/automation/e2e-clean-remnants.sh)
 
+## Running the tests
+
+To run the tests against an instance of Stratos execute
+```
+npm run e2e -- --dev-server-target= --base-url=<URL of stratos
+```
 
 
 ## Running tests on Browserstack
