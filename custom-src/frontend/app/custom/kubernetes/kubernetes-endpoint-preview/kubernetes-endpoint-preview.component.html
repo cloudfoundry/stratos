@@ -31,40 +31,36 @@
           <app-card-number-metric [link]="nodesLink" icon="apps" label="Nodes" labelSingular="Node"
             value="{{ nodeCount$ | async }}"></app-card-number-metric>
         </app-tile>
-        <app-tile>
-          <app-card-number-metric [link]="appsLink" icon="apps" label="Applications" labelSingular="Application"
-            value="{{ appCount$ | async }}"></app-card-number-metric>
-        </app-tile>
+        <!-- // TODO: RC Namespaces/Order -->
       </app-tile-group>
 
       <app-tile-group>
         <app-tile>
           <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Pod Usage"
-            value="{{ (podCapacity$ | async)?.used }}"
-            limit="{{ (podCapacity$ | async)?.total }}"></app-card-number-metric>
+            value="{{ (podCapacity$ | async)?.used }}" limit="{{ (podCapacity$ | async)?.total }}">
+          </app-card-number-metric>
         </app-tile>
         <app-tile>
           <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Disk Pressure"
-            value="{{ (diskPressure$ | async)?.used }}"
-            limit="{{ (diskPressure$ | async)?.total}}"></app-card-number-metric>
+            value="{{ (diskPressure$ | async)?.used }}" limit="{{ (diskPressure$ | async)?.total}}">
+          </app-card-number-metric>
         </app-tile>
         <app-tile>
           <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Memory Pressure"
-            value="{{ (memoryPressure$ | async)?.used }}"
-            limit="{{ (memoryPressure$ | async)?.total}}"></app-card-number-metric>
+            value="{{ (memoryPressure$ | async)?.used }}" limit="{{ (memoryPressure$ | async)?.total}}">
+          </app-card-number-metric>
         </app-tile>
       </app-tile-group>
 
       <app-tile-group>
         <app-tile>
           <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Out of Disk"
-            value="{{ (outOfDisk$ | async)?.used }}"
-            limit="{{ (outOfDisk$ | async)?.total }}"></app-card-number-metric>
+            value="{{ (outOfDisk$ | async)?.used }}" limit="{{ (outOfDisk$ | async)?.total }}"></app-card-number-metric>
         </app-tile>
         <app-tile>
           <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Ready"
-            value="{{ (nodesReady$ | async)?.used }}"
-            limit="{{ (nodesReady$ | async)?.total }}"></app-card-number-metric>
+            value="{{ (nodesReady$ | async)?.used }}" limit="{{ (nodesReady$ | async)?.total }}">
+          </app-card-number-metric>
         </app-tile>
       </app-tile-group>
     </app-loading-page>

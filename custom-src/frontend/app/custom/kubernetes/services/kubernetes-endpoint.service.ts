@@ -12,7 +12,6 @@ import { getPaginationObservables } from '../../../../../store/src/reducers/pagi
 import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import {
-  kubernetesAppsEntityType,
   kubernetesDeploymentsEntityType,
   kubernetesNodesEntityType,
   kubernetesPodsEntityType,
@@ -21,7 +20,6 @@ import {
 } from '../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import {
-  KubernetesApp,
   KubernetesDeployment,
   KubernetesNode,
   KubernetesPod,
@@ -30,7 +28,6 @@ import {
 } from '../store/kube.types';
 import {
   GeKubernetesDeployments,
-  GetKubernetesApps,
   GetKubernetesDashboard,
   GetKubernetesNodes,
   GetKubernetesPods,
@@ -53,7 +50,6 @@ export class KubernetesEndpointService {
   statefulSets$: Observable<KubernetesStatefulSet[]>;
   services$: Observable<KubeService[]>;
   pods$: Observable<KubernetesPod[]>;
-  apps$: Observable<KubernetesApp[]>;
   nodes$: Observable<KubernetesNode[]>;
   kubeDashboardEnabled$: Observable<boolean>;
 
@@ -173,11 +169,6 @@ export class KubernetesEndpointService {
     this.nodes$ = this.getObservable<KubernetesNode>(
       new GetKubernetesNodes(this.kubeGuid),
       kubernetesNodesEntityType
-    );
-
-    this.apps$ = this.getObservable<KubernetesApp>(
-      new GetKubernetesApps(this.kubeGuid),
-      kubernetesAppsEntityType
     );
 
     this.statefulSets$ = this.getObservable<KubernetesStatefulSet>(

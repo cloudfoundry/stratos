@@ -6,7 +6,6 @@ import { PaginatedAction, PaginationParam } from '../../../../../store/src/types
 import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import {
   KUBERNETES_ENDPOINT_TYPE,
-  kubernetesAppsEntityType,
   kubernetesDashboardEntityType,
   kubernetesDeploymentsEntityType,
   kubernetesEntityFactory,
@@ -247,26 +246,6 @@ export class GetKubernetesNamespaces implements KubePaginationAction {
     GET_NAMESPACES_INFO,
     GET_NAMESPACES_INFO_SUCCESS,
     GET_NAMESPACES_INFO_FAILURE
-  ];
-  paginationKey: string;
-  initialParams = {
-    'order-direction': 'desc' as SortDirection,
-    'order-direction-field': 'name'
-  };
-}
-
-export class GetKubernetesApps implements KubePaginationAction {
-  constructor(public kubeGuid) {
-    this.paginationKey = getPaginationKey(kubernetesAppsEntityType, kubeGuid);
-  }
-  type = GET_KUBERNETES_APP_INFO;
-  entityType = kubernetesAppsEntityType;
-  endpointType = KUBERNETES_ENDPOINT_TYPE;
-  entity = [kubernetesEntityFactory(kubernetesAppsEntityType)];
-  actions = [
-    GET_KUBERNETES_APP_INFO,
-    GET_KUBERNETES_APP_INFO_SUCCESS,
-    GET_KUBERNETES_APP_INFO_FAILURE
   ];
   paginationKey: string;
   initialParams = {

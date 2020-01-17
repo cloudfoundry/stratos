@@ -20,7 +20,6 @@ export class KubernetesEndpointPreviewComponent implements PreviewableComponent 
   kubeVersion$: Observable<string>;
   podCount$: Observable<number>;
   nodeCount$: Observable<number>;
-  appCount$: Observable<number>;
   podCapacity$: Observable<ISimpleUsageChartData>;
   diskPressure$: Observable<ISimpleUsageChartData>;
   memoryPressure$: Observable<ISimpleUsageChartData>;
@@ -45,7 +44,6 @@ export class KubernetesEndpointPreviewComponent implements PreviewableComponent 
     this.kubeVersion$ = this.kubeEndpointService.getNodeKubeVersions();
     this.podCount$ = this.kubeEndpointService.getCountObservable(this.kubeEndpointService.pods$);
     this.nodeCount$ = this.kubeEndpointService.getCountObservable(nodes$);
-    this.appCount$ = this.kubeEndpointService.getCountObservable(this.kubeEndpointService.apps$);
     this.podCapacity$ = this.kubeEndpointService.getPodCapacity();
     this.diskPressure$ = this.kubeEndpointService.getNodeStatusCount(this.kubeEndpointService.nodes$, 'DiskPressure');
     this.memoryPressure$ = this.kubeEndpointService.getNodeStatusCount(this.kubeEndpointService.nodes$, 'MemoryPressure');
@@ -59,7 +57,6 @@ export class KubernetesEndpointPreviewComponent implements PreviewableComponent 
     this.detailsLoading$ = combineLatest([
       this.podCount$,
       this.nodeCount$,
-      this.appCount$,
       this.podCapacity$,
       this.diskPressure$,
       this.memoryPressure$,

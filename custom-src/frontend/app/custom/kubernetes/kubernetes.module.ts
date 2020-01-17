@@ -28,10 +28,6 @@ import { BaseKubeGuid } from './kubernetes-page.types';
 import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab-base.component';
 import { KubernetesRoutingModule } from './kubernetes.routing';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
-import { AppLinkComponent } from './list-types/kubernetes-apps/app-link/app-link.component';
-import {
-  KubeAppcreatedDateComponent,
-} from './list-types/kubernetes-apps/kube-appcreated-date/kube-appcreated-date.component';
 import { KubernetesLabelsCellComponent } from './list-types/kubernetes-labels-cell/kubernetes-labels-cell.component';
 import {
   KubeNamespacePodCountComponent,
@@ -85,16 +81,15 @@ import {
   KubeServiceCardComponent,
 } from './list-types/kubernetes-services/kubernetes-service-card/kubernetes-service-card.component';
 import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
-import { HelmReleaseService } from './services/helm-release.service';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from './services/kubernetes-node.service';
 import { KubernetesService } from './services/kubernetes.service';
-import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernetes-apps-tab.component';
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 
+// import { HelmReleaseService } from './services/helm-release.service';
 /* tslint:disable:max-line-length */
 
 /* tslint:enable */
@@ -117,8 +112,6 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesNamespacesTabComponent,
     KubernetesDashboardTabComponent,
     KubernetesSummaryTabComponent,
-    KubernetesAppsTabComponent,
-    AppLinkComponent,
     PodMetricsComponent,
     KubernetesNodeLinkComponent,
     KubernetesNodeIpsComponent,
@@ -143,7 +136,6 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesNamespaceComponent,
     KubernetesNamespacePodsComponent,
     KubernetesNamespaceServicesComponent,
-    KubeAppcreatedDateComponent,
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,
     NodePodCountComponent,
@@ -156,13 +148,12 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesService,
     BaseKubeGuid,
     KubernetesEndpointService,
-    HelmReleaseService,
+    // HelmReleaseService,
     KubernetesNodeService
   ],
   entryComponents: [
     KubernetesNodeCapacityComponent,
     KubernetesPodTagsComponent,
-    AppLinkComponent,
     KubernetesNodeLinkComponent,
     KubernetesNodeIpsComponent,
     KubernetesNodeLabelsComponent,
@@ -170,7 +161,6 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesLabelsCellComponent,
     ConditionCellComponent,
     KubernetesNamespaceLinkComponent,
-    KubeAppcreatedDateComponent,
     KubeNamespacePodCountComponent,
     PodNameLinkComponent,
     NodePodCountComponent,
