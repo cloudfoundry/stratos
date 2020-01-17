@@ -88,29 +88,6 @@ export interface KubeAction extends EntityRequestAction {
 }
 export interface KubePaginationAction extends PaginatedAction, KubeAction { }
 
-export class GetKubernetesReleasePods implements KubePaginationAction {
-
-  constructor(public kubeGuid: string, releaseName: string) {
-    this.paginationKey = getPaginationKey(kubernetesPodsEntityType, `release-${releaseName}`, kubeGuid);
-    this.initialParams = {
-      labelSelector: `app.kubernetes.io/instance=${releaseName}`,
-      ...sortPodsByName
-    };
-  }
-  initialParams: PaginationParam;
-  type = GET_RELEASE_POD_INFO;
-  entityType = kubernetesPodsEntityType;
-  endpointType = KUBERNETES_ENDPOINT_TYPE;
-  entity = [kubernetesEntityFactory(kubernetesPodsEntityType)];
-  params: { labelSelector: string; };
-  actions = [
-    GET_RELEASE_POD_INFO,
-    GET_RELEASE_POD_INFO_SUCCESS,
-    GET_RELEASE_POD_INFO_FAILURE
-  ];
-  paginationKey: string;
-}
-
 export class KubeHealthCheck implements KubePaginationAction {
   constructor(public kubeGuid) {
     this.paginationKey = kubeGuid + '-health-check';

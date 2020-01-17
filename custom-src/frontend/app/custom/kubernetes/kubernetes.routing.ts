@@ -1,9 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { KubernetesReleasePodsTabComponent } from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
-import { HelmReleaseServicesComponent } from './helm-release/helm-release-services/helm-release-services.component';
-import { HelmReleaseComponent } from './helm-release/helm-release.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
 import {
   KubernetesNamespacePodsComponent,
@@ -88,25 +85,6 @@ const kubernetes: Routes = [{
       component: KubernetesNamespaceServicesComponent
     },
 
-  ]
-},
-{
-  path: ':endpointId/apps/:releaseName',
-  component: HelmReleaseComponent,
-  children: [
-    {
-      path: '',
-      redirectTo: 'pods',
-      pathMatch: 'full'
-    },
-    {
-      path: 'pods',
-      component: KubernetesReleasePodsTabComponent
-    },
-    {
-      path: 'services',
-      component: HelmReleaseServicesComponent
-    }
   ]
 },
 {

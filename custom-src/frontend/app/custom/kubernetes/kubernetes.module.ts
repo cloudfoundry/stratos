@@ -4,13 +4,6 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
-import { KubernetesReleasePodsTabComponent } from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
-import { HelmReleaseServicesComponent } from './helm-release/helm-release-services/helm-release-services.component';
-import {
-  HelmReleaseSummaryCardComponent,
-} from './helm-release/helm-release-summary/helm-release-summary-card/helm-release-summary-card.component';
-import { HelmReleaseSummaryComponent } from './helm-release/helm-release-summary/helm-release-summary.component';
-import { HelmReleaseComponent } from './helm-release/helm-release.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
 import {
   KubernetesNamespacePodsComponent,
@@ -125,12 +118,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesDashboardTabComponent,
     KubernetesSummaryTabComponent,
     KubernetesAppsTabComponent,
-    HelmReleaseComponent,
     AppLinkComponent,
-    KubernetesReleasePodsTabComponent,
-    HelmReleaseSummaryComponent,
-    HelmReleaseServicesComponent,
-    HelmReleaseSummaryCardComponent,
     PodMetricsComponent,
     KubernetesNodeLinkComponent,
     KubernetesNodeIpsComponent,

@@ -22,11 +22,7 @@
               icon="apps" label="Nodes" labelSingular="Node" value="{{ nodeCount$ | async }}">
             </app-card-number-metric>
           </app-tile>
-          <app-tile>
-            <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/apps"
-              icon="apps" label="Applications" labelSingular="Application" value="{{ appCount$ | async }}">
-            </app-card-number-metric>
-          </app-tile>
+          <!-- // TODO: RC add namespace, sort order matching nav -->
         </app-tile-group>
       </app-tile-grid>
       <div class="kube-details__graphs">

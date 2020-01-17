@@ -17,7 +17,6 @@ import {
 } from '../../../../shared/components/simple-usage-chart/simple-usage-chart.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { GetKubernetesNodes, GetKubernetesPods } from '../../store/kubernetes.actions';
-import { GetKubernetesApps } from './../../store/kubernetes.actions';
 
 interface IValueLabels {
   usedLabel?: string;
@@ -38,7 +37,6 @@ interface IEndpointDetails {
 export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   public podCount$: Observable<number>;
   public nodeCount$: Observable<number>;
-  public appCount$: Observable<number>;
   public highUsageColors = {
     domain: ['#00000026', '#00af00']
   };
@@ -107,14 +105,11 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
     const podCountAction = new GetKubernetesPods(guid);
     const nodeCountAction = new GetKubernetesNodes(guid);
-    const appCountAction = new GetKubernetesApps(guid);
-    const applications$ = this.getPaginationObservable(appCountAction);
     const pods$ = this.getPaginationObservable(podCountAction);
     const nodes$ = this.getPaginationObservable(nodeCountAction);
 
     this.podCount$ = this.kubeEndpointService.getCountObservable(pods$);
     this.nodeCount$ = this.kubeEndpointService.getCountObservable(nodes$);
-    this.appCount$ = this.kubeEndpointService.getCountObservable(applications$);
 
     this.podCapacity$ = this.kubeEndpointService.getPodCapacity(nodes$, pods$);
     this.diskPressure$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'DiskPressure', {
@@ -155,7 +150,6 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
       this.endpointDetails$,
       this.podCount$,
       this.nodeCount$,
-      this.appCount$,
       this.podCapacity$,
       this.diskPressure$,
       this.memoryPressure$,

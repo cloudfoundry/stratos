@@ -4,7 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { connectedEndpointsOfTypesSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { of } from 'rxjs';
-import { catchError, combineLatest, first, flatMap, map, mergeMap, switchMap } from 'rxjs/operators';
+import { catchError, first, flatMap, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -17,7 +17,6 @@ import {
 import { environment } from '../../../environments/environment';
 import {
   KUBERNETES_ENDPOINT_TYPE,
-  kubernetesAppsEntityType,
   kubernetesDashboardEntityType,
   kubernetesDeploymentsEntityType,
   kubernetesNamespacesEntityType,
@@ -28,8 +27,6 @@ import {
 } from '../kubernetes-entity-factory';
 import { getKubeAPIResourceGuid } from './kube.selectors';
 import {
-  ConfigMap,
-  KubernetesConfigMap,
   KubernetesDeployment,
   KubernetesNamespace,
   KubernetesNode,
@@ -43,7 +40,6 @@ import {
   GET_KUBE_DEPLOYMENT,
   GET_KUBE_POD,
   GET_KUBE_STATEFULSETS,
-  GET_KUBERNETES_APP_INFO,
   GET_NAMESPACE_INFO,
   GET_NAMESPACES_INFO,
   GET_NODE_INFO,
@@ -51,10 +47,8 @@ import {
   GET_POD_INFO,
   GET_PODS_IN_NAMESPACE_INFO,
   GET_PODS_ON_NODE_INFO,
-  GET_RELEASE_POD_INFO,
   GET_SERVICE_INFO,
   GET_SERVICES_IN_NAMESPACE_INFO,
-  GetKubernetesApps,
   GetKubernetesDashboard,
   GetKubernetesNamespace,
   GetKubernetesNamespaces,
@@ -64,7 +58,6 @@ import {
   GetKubernetesPods,
   GetKubernetesPodsInNamespace,
   GetKubernetesPodsOnNode,
-  GetKubernetesReleasePods,
   GetKubernetesServices,
   GetKubernetesServicesInNamespace,
   GetKubernetesStatefulSets,
@@ -120,20 +113,6 @@ export class KubernetesEffects {
             error
           })
         ]));
-    })
-  );
-
-  @Effect()
-  fetchReleasePodsInfo$ = this.actions$.pipe(
-    ofType<GetKubernetesReleasePods>(GET_RELEASE_POD_INFO),
-    flatMap(action => {
-      const nodeEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNodesEntityType);
-      return this.processListAction<KubernetesPod>(
-        action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
-        nodeEntityConfig.entityKey,
-        getKubeAPIResourceGuid
-      );
     })
   );
 
@@ -278,95 +257,13 @@ export class KubernetesEffects {
     })
   );
 
-  @Effect()
-  fetchKubernetesAppsInfo$ = this.actions$.pipe(
-    ofType<GetKubernetesApps>(GET_KUBERNETES_APP_INFO),
-    flatMap(action => {
-      this.store.dispatch(new StartRequestAction(action));
-
-      const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
-      const requestArgs = {
-        headers
-      };
-      const appsEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesAppsEntityType);
-      return this.http
-        .get<ConfigMap>(`/pp/${this.proxyAPIVersion}/proxy/api/v1/configmaps`, requestArgs)
-        .pipe(
-          combineLatest(
-            this.http.get<ConfigMap>(`/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`, requestArgs),
-            this.http.get<ConfigMap>(`/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/statefulsets`, requestArgs)),
-          mergeMap(([configMapsResponse, deploymentsResponse, statefulesetResponse]) => {
-            const { kubeGuid: kubeId } = action;
-            const items = configMapsResponse[kubeId].items as Array<any>;
-            const deployments = deploymentsResponse[kubeId].items as Array<KubernetesDeployment>;
-            const statefulSets = statefulesetResponse[kubeId].items as Array<any>;
-
-            const getChartName = (name: string, labelName: string): string => {
-              // Might not have a label (e.g. Dex)
-              const releaseDeployment = deployments.filter(d =>
-                d.metadata.labels && d.metadata.labels['app.kubernetes.io/instance'] === name);
-              const releaseStatefulSets = statefulSets.filter(d =>
-                d.metadata.labels && d.metadata.labels['app.kubernetes.io/instance'] === name);
-
-              if (releaseDeployment.length !== 0) {
-                return releaseDeployment[0].metadata.labels[labelName];
-              }
-              if (releaseStatefulSets.length !== 0) {
-                return releaseStatefulSets[0].metadata.labels[labelName];
-              }
-            };
-            const releases = items
-              .filter((configMap) => !!configMap.metadata.labels &&
-                !!configMap.metadata.labels.NAME &&
-                configMap.metadata.labels.OWNER === 'TILLER'
-              )
-              .map((configMap: KubernetesConfigMap) => ({
-                name: configMap.metadata.labels.NAME,
-                kubeId,
-                createdAt: configMap.metadata.creationTimestamp,
-                status: configMap.metadata.labels.STATUS,
-                version: configMap.metadata.labels.VERSION,
-                chartName: getChartName(configMap.metadata.labels.NAME, 'helm.sh/chart'),
-                appVersion: getChartName(configMap.metadata.labels.NAME, 'app.kubernetes.io/version')
-              })
-              ).reduce((res, app) => {
-                const id = `${app.kubeId}-${app.name}`;
-                res.entities[appsEntityConfig.entityKey][id] = app;
-                if (res.result.indexOf(id) === -1) {
-                  res.result.push(id);
-                }
-                return res;
-              }, {
-                entities: { [appsEntityConfig.entityKey]: {} },
-                result: []
-              } as NormalizedResponse);
-
-            return [
-              new WrapperRequestActionSuccess(releases, action)
-            ];
-          }),
-          catchError(error => [
-            new WrapperRequestActionFailed(error.message, action, 'fetch', {
-              endpointIds: [action.kubeGuid],
-              url: error.url || `/pp/${this.proxyAPIVersion}/proxy/api/v1/configmaps`,
-              eventCode: error.status ? error.status + '' : '500',
-              message: 'Kubernetes API request error',
-              error
-            })
-          ])
-        );
-    })
-  );
-
-
-  private processNodeAction(action: GetKubernetesReleasePods | GetKubernetesNodes) {
+  private processNodeAction(action: GetKubernetesNodes) {
     const nodeEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNodesEntityType);
     return this.processListAction<KubernetesNode>(action,
       `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes`,
       nodeEntityConfig.entityKey,
       getKubeAPIResourceGuid);
   }
-
 
   private processListAction<T = any>(
     action: KubePaginationAction | KubeAction,
