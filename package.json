@@ -91,7 +91,7 @@
     "xterm": "^4.0.2",
     "xterm-addon-fit": "^0.3.0",
     "zone.js": "~0.10.2",
-    "@nrwl/angular": "8.5.2"
+    "@nrwl/angular": "8.11.2"
   },
   "engines": {
     "node": "12.13.0"
