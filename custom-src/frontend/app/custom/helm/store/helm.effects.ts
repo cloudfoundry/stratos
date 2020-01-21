@@ -5,6 +5,7 @@ import { Action, Store } from '@ngrx/store';
 import { ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from 'frontend/packages/store/src/types/api.types';
 import {
   EntityRequestAction,
@@ -16,6 +17,7 @@ import { Observable } from 'rxjs';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
+import { isJetstreamError } from '../../../jetstream.helpers';
 import {
   GET_HELM_VERSIONS,
   GET_MONOCULAR_CHARTS,
@@ -76,6 +78,9 @@ export class HelmEffects {
         // Go through each endpoint ID
         Object.keys(response).forEach(endpoint => {
           const endpointData = response[endpoint] || {};
+          if (isJetstreamError(endpointData)) {
+            throw endpointData;
+          }
           // Maintain typing
           const version: HelmVersion = {
             endpointId: endpoint,
@@ -93,8 +98,9 @@ export class HelmEffects {
   helmInstall$ = this.actions$.pipe(
     ofType<HelmInstall>(HELM_INSTALL),
     flatMap(action => {
+      const requestType: ApiRequestTypes = 'create';
       const url = '/pp/v1/helm/install';
-      this.store.dispatch(new StartRequestAction(action));
+      this.store.dispatch(new StartRequestAction(action, requestType));
       return this.httpClient.post(url, action.values).pipe(
         mergeMap(() => {
           return [
@@ -103,12 +109,13 @@ export class HelmEffects {
           ];
         }),
         catchError(error => {
-          const errorMessage = `Failed to install helm chart: ${error.message}`;
+          const { status, message } = this.createHelmError(error);
+          const errorMessage = `Failed to install helm chart: ${message}`;
           return [
-            new WrapperRequestActionFailed(errorMessage, action, 'create', {
+            new WrapperRequestActionFailed(errorMessage, action, requestType, {
               endpointIds: [action.values.endpoint],
               url: error.url || url,
-              eventCode: error.status ? error.status + '' : '500',
+              eventCode: status,
               message: errorMessage,
               error
             })
@@ -131,16 +138,47 @@ export class HelmEffects {
     };
     return this.httpClient.get(url, requestArgs).pipe(
       mergeMap((response: any) => [new WrapperRequestActionSuccess(mapResult(response), action)]),
-      catchError(error => [
-        new WrapperRequestActionFailed(error.message, action, 'fetch', {
-          endpointIds,
-          url: error.url || url,
-          eventCode: error.status ? error.status + '' : '500',
-          message: 'Monocular API request error',
-          error
-        })
-      ])
+      catchError(error => {
+        const { status, message } = this.createHelmError(error);
+        return [
+          new WrapperRequestActionFailed(message, action, 'fetch', {
+            endpointIds,
+            url: error.url || url,
+            eventCode: status,
+            message,
+            error
+          })
+        ];
+      })
     );
+  }
+
+  private createHelmErrorMessage(err: any): string {
+    if (err) {
+      if (err.error && err.error.message) {
+        // Kube error
+        return err.error.message;
+      } else if (err.message) {
+        // Http error
+        return err.message;
+      }
+    }
+    return 'Monocular API request error';
+  }
+
+  private createHelmError(err: any): { status: string, message: string } {
+    const jetstreamError = isJetstreamError(err);
+    if (jetstreamError) {
+      // Wrapped error
+      return {
+        status: jetstreamError.error.statusCode.toString(),
+        message: this.createHelmErrorMessage(jetstreamError.errorResponse)
+      };
+    }
+    return {
+      status: err && err.status ? err.status + '' : '500',
+      message: this.createHelmErrorMessage(err)
+    };
   }
 
 }
