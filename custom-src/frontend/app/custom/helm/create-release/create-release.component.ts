@@ -85,6 +85,14 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   }
 
   private setupDetailsStep() {
+    this.details = new FormGroup({
+      endpoint: new FormControl('', Validators.required),
+      releaseName: new FormControl('', Validators.required),
+      releaseNamespace: new FormControl(''),
+      createNamespace: new FormControl(false),
+    });
+    this.details.controls.createNamespace.disable();
+
     this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
 
     const action = new GetKubernetesNamespaces(null);
@@ -98,19 +106,22 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     );
     this.namespaces$ = combineLatest([
       allNamespaces$,
-      this.endpointChanged.asObservable()
+      this.endpointChanged.asObservable(),
+      this.details.controls.releaseNamespace.valueChanges.pipe(startWith(''), distinctUntilChanged())
     ]).pipe(
-      map(([namespaces, namespace]: [KubernetesNamespace[], string]) => namespaces.filter(ns => ns.metadata.kubeId === namespace)),
-      map((namespaces: KubernetesNamespace[]) => namespaces.map(namespace => namespace.metadata.name)),
+      // Filter out namespaces from other kubes
+      map(([namespaces, kubeId, namespace]: [KubernetesNamespace[], string, string]) => ([
+        namespaces.filter(ns => ns.metadata.kubeId === kubeId),
+        namespace
+      ])),
+      // Map to endpoint names
+      map(([namespaces, namespace]: [KubernetesNamespace[], string]) => [
+        namespaces.map(ns => ns.metadata.name),
+        namespace
+      ]),
+      // Filter out namespaces not matching existing text
+      map(([namespaces, namespace]: [string[], string]) => this.filterTyped(namespaces, namespace)),
     );
-
-    this.details = new FormGroup({
-      endpoint: new FormControl('', Validators.required),
-      releaseName: new FormControl('', Validators.required),
-      releaseNamespace: new FormControl(''),
-      createNamespace: new FormControl(false),
-    });
-    this.details.controls.createNamespace.disable();
 
     const namespaceChanged$ = this.details.controls.releaseNamespace.valueChanges.pipe(
       distinctUntilChanged()
@@ -158,6 +169,11 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     this.validate$ = this.details.statusChanges.pipe(
       map(() => this.details.valid)
     );
+  }
+
+  private filterTyped(namespaces: string[], namespace: string): string[] {
+    const lowerCase = namespace.toLowerCase();
+    return lowerCase.length ? namespaces.filter(ns => ns.toLowerCase().indexOf(lowerCase) >= 0) : namespaces;
   }
 
   public useValuesYaml() {

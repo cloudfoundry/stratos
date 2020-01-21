@@ -21,7 +21,7 @@
 
       <mat-form-field>
         <input type="text" placeholder="Namespace" matInput formControlName="releaseNamespace" [matAutocomplete]="auto">
-        <mat-autocomplete #auto="matAutocomplete">
+        <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
           <mat-option *ngFor="let namespace of namespaces$ | async" [value]="namespace">
             {{namespace}}
           </mat-option>
