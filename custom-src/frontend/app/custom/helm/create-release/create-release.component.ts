@@ -30,7 +30,6 @@ import { StepOnNextFunction, StepOnNextResult } from '../../../shared/components
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
 import { KubernetesNamespace } from '../../kubernetes/store/kube.types';
 import { CreateKubernetesNamespace, GetKubernetesNamespaces } from '../../kubernetes/store/kubernetes.actions';
-import { helmReleaseEntityKey } from '../../kubernetes/workloads/store/workloads-entity-factory';
 import { HelmInstall } from '../store/helm.actions';
 import { HelmInstallValues } from '../store/helm.types';
 
@@ -68,6 +67,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   public valuesYaml = '';
 
   private subs: Subscription[] = [];
+  private createdNamespace = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -98,7 +98,9 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   private setupDetailsStep() {
     this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
 
+    // TODO: RC ALL upfront or mess with loading indicators on change
     this.namespaces$ = this.endpointChanged.asObservable().pipe(
+      // filter(endpoint => !!endpoint),
       switchMap(endpoint => {
         const action = new GetKubernetesNamespaces(endpoint);
         return getPaginationObservables<KubernetesNamespace>({
@@ -205,25 +207,42 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   }
 
   submit: StepOnNextFunction = () => {
-
-    const createNamespace$ = this.details.controls.createNamespace.value ? this.createNamespace() : of({ success: true });
-
-    return createNamespace$.pipe(
-      switchMap(createRes => {
-        if (!createRes.success) {
-          return createRes;
-        }
-        return this.installChart();
-      })
+    return this.createNamespace().pipe(
+      switchMap(createRes => createRes.success ? this.installChart() : of(createRes))
     );
   }
 
   createNamespace(): Observable<StepOnNextResult> {
-    // TODO: RC namespace exists from previous run??
-    const action = new CreateKubernetesNamespace();
-    return of({
-      success: false
-    });
+    if (!this.details.controls.createNamespace.value || this.createdNamespace) {
+      return of({
+        success: true
+      });
+    }
+
+    const action = new CreateKubernetesNamespace(
+      this.details.controls.releaseNamespace.value,
+      this.details.controls.endpoint.value);
+    this.store.dispatch(action);
+
+    const namespaceEntityConfig = entityCatalog.getEntity(action);
+    const monitor = namespaceEntityConfig.getEntityMonitor(this.store, action.guid);
+    return monitor.entityRequest$.pipe(
+      pairwise(),
+      filter(([oldVal, newVal]) => oldVal.creating && !newVal.creating),
+      map(([, newVal]) => newVal),
+      map(state => {
+        if (state.error) {
+          return {
+            success: false,
+            message: `Failed to create namespace '${this.details.controls.releaseNamespace.value}': ` + state.message
+          };
+        }
+        this.createdNamespace = true;
+        return {
+          success: true
+        };
+      })
+    );
   }
 
   installChart(): Observable<StepOnNextResult> {
@@ -238,7 +257,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     const action = new HelmInstall(values);
     this.store.dispatch(action);
 
-    const releaseEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, helmReleaseEntityKey);
+    const releaseEntityConfig = entityCatalog.getEntity(action);
 
     // Wait for result of request
     return of(true).pipe(

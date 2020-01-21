@@ -68,7 +68,6 @@ export class HelmEffects {
     flatMap(action => {
       const entityKey = entityCatalog.getEntityKey(action);
       return this.makeRequest(action, `/pp/${this.proxyAPIVersion}/helm/versions`, (response) => {
-        // const a: HelmVersion = {};
         const processedData = {
           entities: { [entityKey]: {} },
           result: []
@@ -116,7 +115,6 @@ export class HelmEffects {
           ];
         })
       );
-
     })
   );
 

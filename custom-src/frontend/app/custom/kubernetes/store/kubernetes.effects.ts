@@ -1,7 +1,9 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
+import { ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
+import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
 import { connectedEndpointsOfTypesSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { of } from 'rxjs';
 import { catchError, first, flatMap, map, mergeMap, switchMap } from 'rxjs/operators';
@@ -15,6 +17,7 @@ import {
   WrapperRequestActionSuccess,
 } from '../../../../../store/src/types/request.types';
 import { environment } from '../../../environments/environment';
+import { isJetstreamError } from '../../../jetstream.helpers';
 import {
   KUBERNETES_ENDPOINT_TYPE,
   kubernetesDashboardEntityType,
@@ -35,6 +38,8 @@ import {
   KubeService,
 } from './kube.types';
 import {
+  CREATE_NAMESPACE,
+  CreateKubernetesNamespace,
   GeKubernetesDeployments,
   GET_KUBE_DASHBOARD,
   GET_KUBE_DEPLOYMENT,
@@ -233,6 +238,26 @@ export class KubernetesEffects {
     })
   );
 
+
+  @Effect()
+  createNamespace$ = this.actions$.pipe(
+    ofType<CreateKubernetesNamespace>(CREATE_NAMESPACE),
+    flatMap(action => {
+      const namespaceEntityConfig = entityCatalog.getEntity(action);
+      return this.processSingleItemAction<KubernetesNamespace>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`,
+        namespaceEntityConfig.entityKey,
+        getKubeAPIResourceGuid,
+        {
+          kind: 'Namespace',
+          apiVersion: 'v1',
+          metadata: {
+            name: action.namespaceName,
+          },
+        });
+    })
+  );
+
   @Effect()
   fetchStatefulSets$ = this.actions$.pipe(
     ofType<GetKubernetesStatefulSets>(GET_KUBE_STATEFULSETS),
@@ -284,7 +309,7 @@ export class KubernetesEffects {
     return getKubeIds.pipe(
       switchMap(kubeIds => {
         pKubeIds = kubeIds;
-        const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeIds });
+        const headers = new HttpHeaders({ 'x-cap-cnsi-list': pKubeIds });
         // const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, endpointGuids);
         const requestArgs = {
           headers,
@@ -305,13 +330,17 @@ export class KubernetesEffects {
         } as NormalizedResponse;
 
         const items: Array<T> = Object.entries(allRes).reduce((combinedRes, [kubeId, res]) => {
+          if (!res.items) {
+            // The request to this endpoint has failed. Note - throwing this hides any other failures,
+            // however we follow the same approach elsewhere
+            throw res;
+          }
           res.items.forEach(item => {
             item.metadata.kubeId = kubeId;
             combinedRes.push(item);
           });
           return combinedRes;
         }, []);
-        // const items = response[action.kubeGuid].items as Array<any>;
         const processesData = items.filter((res) => !!filterResults ? filterResults(res) : true)
           .reduce((res, data) => {
             const id = getId(data);
@@ -323,50 +352,92 @@ export class KubernetesEffects {
           new WrapperRequestActionSuccess(processesData, action)
         ];
       }),
-      catchError(error => [
-        new WrapperRequestActionFailed(error.message, action, 'fetch', {
-          endpointIds: pKubeIds,
-          url: error.url || url,
-          eventCode: error.status ? error.status + '' : '500',
-          message: 'Kubernetes API request error',
-          error,
-        })
-      ])
+      catchError(error => {
+        const { status, message } = this.createKubeError(error);
+        return [
+          new WrapperRequestActionFailed(message, action, 'fetch', {
+            endpointIds: pKubeIds,
+            url: error.url || url,
+            eventCode: status,
+            message,
+            error,
+          })
+        ];
+      })
     );
   }
 
-  private processSingleItemAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T>) {
-    this.store.dispatch(new StartRequestAction(action));
-    const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
+  private processSingleItemAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T>, body?: any) {
+    const requestType: ApiRequestTypes = body ? 'create' : 'fetch';
+    this.store.dispatch(new StartRequestAction(action, requestType));
+    const headers = new HttpHeaders({
+      'x-cap-cnsi-list': action.kubeGuid,
+      'x-cap-passthrough': 'true'
+    },
+    );
     const requestArgs = {
       headers
     };
-    return this.http
-      .get(url, requestArgs)
-      .pipe(mergeMap(response => {
-        const base = {
-          entities: { [schemaKey]: {} },
-          result: []
-        } as NormalizedResponse;
-        const items = [response[action.kubeGuid]];
-        const processesData = items.reduce((res, data) => {
-          const id = getId(data);
-          res.entities[schemaKey][id] = data;
+    const request = body ? this.http.post(url, body, requestArgs) : this.http.get(url, requestArgs);
+
+    return request
+      .pipe(
+        mergeMap((response: T) => {
+          const res = {
+            entities: { [schemaKey]: {} },
+            result: []
+          } as NormalizedResponse;
+          const id = getId(response);
+          res.entities[schemaKey][id] = response;
           res.result.push(id);
-          return res;
-        }, base);
-        return [
-          new WrapperRequestActionSuccess(processesData, action)
-        ];
-      }), catchError(error => [
-        new WrapperRequestActionFailed(error.message, action, 'fetch', {
-          endpointIds: [action.kubeGuid],
-          url: error.url || url,
-          eventCode: error.status ? error.status + '' : '500',
-          message: 'Kubernetes API request error',
-          error
+          const actions: Action[] = [
+            new WrapperRequestActionSuccess(res, action)
+          ];
+          if (requestType === 'create') {
+            actions.push(new ClearPaginationOfType(action));
+          }
+          return actions;
+        }),
+        catchError(error => {
+          const { status, message } = this.createKubeError(error);
+          return [
+            new WrapperRequestActionFailed(message, action, requestType, {
+              endpointIds: [action.kubeGuid],
+              url: error.url || url,
+              eventCode: status,
+              message,
+              error
+            })
+          ];
         })
-      ]));
+      );
   }
 
+  private createKubeErrorMessage(err: any): string {
+    if (err) {
+      if (err.error && err.error.message) {
+        // Kube error
+        return err.error.message;
+      } else if (err.message) {
+        // Http error
+        return err.message;
+      }
+    }
+    return 'Kubernetes API request error';
+  }
+
+  private createKubeError(err: any): { status: string, message: string } {
+    const jetstreamError = isJetstreamError(err);
+    if (jetstreamError) {
+      // Wrapped error
+      return {
+        status: jetstreamError.error.statusCode.toString(),
+        message: this.createKubeErrorMessage(jetstreamError.errorResponse)
+      };
+    }
+    return {
+      status: err && err.status ? err.status + '' : '500',
+      message: this.createKubeErrorMessage(err)
+    };
+  }
 }

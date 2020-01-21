@@ -1,5 +1,6 @@
 import { SortDirection } from '@angular/material';
 import { getActions } from 'frontend/packages/store/src/actions/action.helper';
+import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
 
 import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../../../store/src/actions/metrics.actions';
 import { getPaginationKey } from '../../../../../store/src/actions/pagination.actions';
@@ -170,6 +171,7 @@ export class CreateKubernetesNamespace implements KubeAction {
   endpointType = KUBERNETES_ENDPOINT_TYPE;
   entity = [kubernetesEntityFactory(kubernetesNamespacesEntityType)];
   actions = getActions('Namespace', 'Create');
+  requestType: ApiRequestTypes = 'create';
 }
 
 export class GetKubernetesPods implements KubePaginationAction {
