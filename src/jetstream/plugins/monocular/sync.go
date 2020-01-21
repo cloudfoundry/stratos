@@ -2,9 +2,12 @@ package monocular
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/helm/monocular/chartrepo"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -17,6 +20,8 @@ type SyncMetadata struct {
 	Status string `json:"status"`
 	Busy   bool   `json:"busy"`
 }
+
+const chartRepoPathPrefix = "/v1"
 
 // Sync Channel
 var syncChan = make(chan SyncJob, 100)
@@ -41,7 +46,7 @@ func (m *Monocular) processSyncRequests() {
 	log.Info("Helm Repository Sync init")
 	for job := range syncChan {
 		log.Debugf("Processing Helm Repository Sync Job: %s", job.Endpoint.Name)
-
+		var repoSyncRequestParams string = fmt.Sprintf("{\"repoURL\":%q}", job.Endpoint.APIEndpoint.String())
 		// Could be delete or sync
 		if job.Action == 0 {
 			log.Debug("Syncing new repository")
@@ -50,22 +55,25 @@ func (m *Monocular) processSyncRequests() {
 				Busy:   true,
 			}
 			m.portalProxy.UpdateEndointMetadata(job.Endpoint.GUID, marshalSyncMetadata(metadata))
-			//Kate TODO hit the sync container rest endpoint to trigger a sync for given repo
-			err := chartrepo.SyncRepo(dbClient, dbName, job.Endpoint.Name, job.Endpoint.APIEndpoint.String(), "")
+			//Hit the sync server container endpoint to trigger a sync for given repo
+			err := putRequest("reposync:8080" + chartRepoPathPrefix + "/sync/" + job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
 			metadata.Busy = false
 			if err != nil {
-				log.Warn("Failed to sync repository: %v+", err)
+				log.Warn("Request to sync repository failed: %v+", err)
 				metadata.Status = "Sync Failed"
 				m.updateMetadata(job.Endpoint.GUID, metadata)
 			} else {
-				metadata.Status = "Synchronized"
+				metadata.Status = "Synchronizing"
 				m.updateMetadata(job.Endpoint.GUID, metadata)
 			}
-			log.Infof("Sync completed for repository: %s", job.Endpoint.APIEndpoint.String())
+			log.Infof("Sync in progress for repository: %s", job.Endpoint.APIEndpoint.String())
 		} else if job.Action == 1 {
 			log.Infof("Deleting Helm Repository: %s", job.Endpoint.Name)
-			//Kate TODO hit the sync container rest endpoint to trigger a delete for given repo
-			//m.Store.DeleteRepo(job.Endpoint.Name)
+			//Hit the sync server container endpoint to trigger a delete for given repo
+			err := putRequest("reposync:8080" + chartRepoPathPrefix + "/delete/" + job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
+			if err != nil {
+				log.Warn("Request to delete repository failed: %v+", err)
+			}
 		}
 	}
 
@@ -85,4 +93,14 @@ func (m *Monocular) updateMetadata(endpoint string, metadata SyncMetadata) {
 	if err != nil {
 		log.Errorf("Failed to update endpoint metadata: %v+", err)
 	}
+}
+
+//https://gist.github.com/maniankara/a10d19960293b34b608ac7ef068a3d63
+func putRequest(url string, data io.Reader) error {
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPut, url, data)
+	if err == nil {
+		_, err = client.Do(req)
+	}
+	return err
 }
