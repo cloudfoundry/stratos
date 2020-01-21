@@ -7,18 +7,7 @@ import { Store } from '@ngrx/store';
 import { PaginationMonitorFactory } from 'frontend/packages/store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from 'frontend/packages/store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import {
-  delay,
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  pairwise,
-  publishReplay,
-  refCount,
-  startWith,
-  switchMap,
-} from 'rxjs/operators';
+import { delay, distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -98,20 +87,21 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   private setupDetailsStep() {
     this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
 
-    // TODO: RC ALL upfront or mess with loading indicators on change
-    this.namespaces$ = this.endpointChanged.asObservable().pipe(
-      // filter(endpoint => !!endpoint),
-      switchMap(endpoint => {
-        const action = new GetKubernetesNamespaces(endpoint);
-        return getPaginationObservables<KubernetesNamespace>({
-          store: this.store,
-          action,
-          paginationMonitor: this.pmf.create(action.paginationKey, action)
-        }).entities$;
-      }),
+    const action = new GetKubernetesNamespaces(null);
+    const allNamespaces$ = getPaginationObservables<KubernetesNamespace>({
+      store: this.store,
+      action,
+      paginationMonitor: this.pmf.create(action.paginationKey, action)
+    }).entities$.pipe(
+      filter(namespaces => !!namespaces),
+      first()
+    );
+    this.namespaces$ = combineLatest([
+      allNamespaces$,
+      this.endpointChanged.asObservable()
+    ]).pipe(
+      map(([namespaces, namespace]: [KubernetesNamespace[], string]) => namespaces.filter(ns => ns.metadata.kubeId === namespace)),
       map((namespaces: KubernetesNamespace[]) => namespaces.map(namespace => namespace.metadata.name)),
-      publishReplay(1),
-      refCount(),
     );
 
     this.details = new FormGroup({
@@ -135,29 +125,28 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
         this.namespaces$,
         namespaceChanged$,
         createNamespaceChanged$
-      ])
-        .pipe().subscribe(([namespaces, namespace, create]) => {
-          const namespaceExists = !!namespaces.find(val => val === namespace);
-          if (namespaceExists) {
-            // All is fine
-            this.details.controls.releaseNamespace.validator = () => null;
-            this.details.controls.createNamespace.setValue(false);
-            this.details.controls.createNamespace.disable();
-          } else if (!namespace) {
-            // Invalid - missing namespace
-            this.details.controls.releaseNamespace.validator = () => ({ required: true });
-            this.details.controls.createNamespace.disable();
-          } else if (!create) {
-            // Invalid - namespace doesn't exist and not creating
-            this.details.controls.releaseNamespace.validator = () => ({ namespaceDoesNotExist: true });
-            this.details.controls.createNamespace.enable();
-          } else {
-            // Valid - namespace doesn't exist but creating
-            this.details.controls.releaseNamespace.validator = () => null;
-            // this.details.controls.createNamespace.disable();
-          }
-          this.details.controls.releaseNamespace.updateValueAndValidity();
-        })
+      ]).pipe().subscribe(([namespaces, namespace, create]) => {
+        const namespaceExists = !!namespaces.find(val => val === namespace);
+        if (namespaceExists) {
+          // All is fine
+          this.details.controls.releaseNamespace.validator = () => null;
+          this.details.controls.createNamespace.setValue(false);
+          this.details.controls.createNamespace.disable();
+        } else if (!namespace) {
+          // Invalid - missing namespace
+          this.details.controls.releaseNamespace.validator = () => ({ required: true });
+          this.details.controls.createNamespace.disable();
+        } else if (!create) {
+          // Invalid - namespace doesn't exist and not creating
+          this.details.controls.releaseNamespace.validator = () => ({ namespaceDoesNotExist: true });
+          this.details.controls.createNamespace.enable();
+        } else {
+          // Valid - namespace doesn't exist but creating
+          this.details.controls.releaseNamespace.validator = () => null;
+          // this.details.controls.createNamespace.disable();
+        }
+        this.details.controls.releaseNamespace.updateValueAndValidity();
+      })
     );
 
     this.subs.push(
