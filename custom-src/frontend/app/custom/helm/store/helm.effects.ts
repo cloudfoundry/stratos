@@ -16,8 +16,6 @@ import { Observable } from 'rxjs';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
-import { helmReleaseEntityKey } from '../../kubernetes/workloads/store/workloads-entity-factory';
-import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 import {
   GET_HELM_VERSIONS,
   GET_MONOCULAR_CHARTS,
@@ -26,7 +24,7 @@ import {
   HELM_INSTALL,
   HelmInstall,
 } from './helm.actions';
-import { HELM_INSTALLING_KEY, HelmVersion } from './helm.types';
+import { HelmVersion } from './helm.types';
 
 @Injectable()
 export class HelmEffects {
@@ -92,30 +90,23 @@ export class HelmEffects {
     })
   );
 
-  // @Effect()
-  // fetchHelmReleasePods$ = this.actions$.pipe(
-  //   ofType<GetHelmReleasePods>(GET_HELM_RELEASE_PODS),
-  //   mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
-  // );
-
   @Effect()
   helmInstall$ = this.actions$.pipe(
     ofType<HelmInstall>(HELM_INSTALL),
     flatMap(action => {
-      const apiAction = this.getHelmUpdateAction(action.guid(), action.type, HELM_INSTALLING_KEY);
       const url = '/pp/v1/helm/install';
-      this.store.dispatch(new StartRequestAction(apiAction));
+      this.store.dispatch(new StartRequestAction(action));
       return this.httpClient.post(url, action.values).pipe(
         mergeMap(() => {
           return [
-            new ClearPaginationOfType(apiAction),
-            new WrapperRequestActionSuccess(null, apiAction)
+            new ClearPaginationOfType(action),
+            new WrapperRequestActionSuccess(null, action)
           ];
         }),
         catchError(error => {
           const errorMessage = `Failed to install helm chart: ${error.message}`;
           return [
-            new WrapperRequestActionFailed(errorMessage, apiAction, 'create', {
+            new WrapperRequestActionFailed(errorMessage, action, 'create', {
               endpointIds: [action.values.endpoint],
               url: error.url || url,
               eventCode: error.status ? error.status + '' : '500',
@@ -128,16 +119,6 @@ export class HelmEffects {
 
     })
   );
-
-  private getHelmUpdateAction(guid: string, type: string, updatingKey: string) {
-    return {
-      endpointType: HELM_ENDPOINT_TYPE,
-      entityType: helmReleaseEntityKey,
-      guid,
-      type,
-      updatingKey,
-    } as EntityRequestAction;
-  }
 
   private makeRequest(
     action: EntityRequestAction,

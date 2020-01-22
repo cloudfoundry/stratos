@@ -1,6 +1,6 @@
-import { Action } from '@ngrx/store';
-
 import { EntityRequestAction } from '../../../../../store/src/types/request.types';
+import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
+import { helmReleaseEntityKey } from '../../kubernetes/workloads/store/workloads-entity-factory';
 import {
   HELM_ENDPOINT_TYPE,
   helmEntityFactory,
@@ -65,9 +65,15 @@ export class GetHelmVersions implements MonocularPaginationAction {
   };
 }
 
-export class HelmInstall implements Action {
-  constructor(public values: HelmInstallValues) { }
+export class HelmInstall implements EntityRequestAction {
+  static HELM_INSTALLING_KEY = 'installing';
   type = HELM_INSTALL;
-  public guid = () => '<New Release>' + this.values.releaseName;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
+  entityType = helmReleaseEntityKey;
+  updatingKey = HelmInstall.HELM_INSTALLING_KEY;
+  guid: string;
+  constructor(public values: HelmInstallValues) {
+    this.guid = '<New Release>' + this.values.releaseName;
+  }
 }
 

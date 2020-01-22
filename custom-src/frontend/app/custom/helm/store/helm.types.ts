@@ -59,6 +59,3 @@ export interface HelmInstallValues {
   values: string;
   chart: string;
 }
-
-export const HELM_INSTALLING_KEY = 'installing';
-

@@ -8,12 +8,10 @@ import { ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagin
 import { RouterNav } from 'frontend/packages/store/src/actions/router.actions';
 import { HideSnackBar, ShowSnackBar } from 'frontend/packages/store/src/actions/snackBar.actions';
 import { AppState } from 'frontend/packages/store/src/app-state';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { KUBERNETES_ENDPOINT_TYPE } from '../../../../kubernetes-entity-factory';
-import { helmReleaseEntityKey } from '../../../store/workloads-entity-factory';
+import { GetHelmReleases } from '../../../store/workloads.actions';
 import { HelmReleaseChartData, HelmReleaseResource } from '../../../workload.types';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
@@ -24,11 +22,7 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
 })
 export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // Confirmation dialogs
-  deleteReleaseConfirmation = new ConfirmationDialogConfig(
-    'Delete Release',
-    'Are you sure you want to delete this Release?',
-    'Delete'
-  );
+  deleteReleaseConfirmation: ConfirmationDialogConfig;
 
   private busyDeletingSubject = new ReplaySubject<boolean>();
   public isBusy$: Observable<boolean>;
@@ -118,6 +112,14 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
         return Object.values(resources).sort((a: any, b: any) => a.kind.localeCompare(b.kind));
       })
     );
+
+    this.deleteReleaseConfirmation = new ConfirmationDialogConfig(
+      `Delete Workload`,
+      {
+        textToMatch: helmReleaseHelper.releaseTitle
+      },
+      'Delete'
+    );
   }
 
   private getIcon(kind: string) {
@@ -148,7 +150,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   public deleteRelease() {
     this.confirmDialog.open(this.deleteReleaseConfirmation, () => {
       // Make the http request to delete the release
-      const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/');
+      const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/').replace(':', '/');
       this.startDelete();
       this.httpClient.delete(`/pp/v1/helm/releases/${endpointAndName}`).subscribe({
         error: (err: any) => {
@@ -157,10 +159,10 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
           this.logService.error('Failed to delete release: ', err);
         },
         complete: () => {
-          const releaseEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, helmReleaseEntityKey);
-          this.store.dispatch(new ClearPaginationOfType(releaseEntityConfig));
+          const action = new GetHelmReleases();
+          this.store.dispatch(new ClearPaginationOfType(action));
           this.completeDelete();
-          this.store.dispatch(new RouterNav({ path: ['monocular/releases'] }));
+          this.store.dispatch(new RouterNav({ path: ['workloads'] }));
         }
       });
     });
