@@ -132,8 +132,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   ngAfterViewInit() {
-    console.log('*************');
-    console.log('SETTING PREVIEW PANEL');
     this.panelPreviewService.setContainer(this.previewPanelContainer);
   }
 

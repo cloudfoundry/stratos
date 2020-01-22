@@ -81,8 +81,6 @@ export class WorkloadsEffects {
   );
 
   private mapHelmRelease(data, endpointId) {
-    // console.log('Got helm release');
-    // console.log(data);
     const helmRelease: HelmRelease = {
       ...data,
       endpointId
@@ -95,65 +93,6 @@ export class WorkloadsEffects {
     helmRelease.firstDeployed = this.mapHelmModifiedDate(data.info.first_deployed);
     return helmRelease;
   }
-
-
-  // TODO: NWM This uses GetHelmReleaseStatus. I added `namespace` to GetHelmReleaseStatus
-  // RC: Don't need this anymore - services come back over the web socket
-  // @Effect()
-  // fetchHelmReleaseServices$ = this.actions$.pipe(
-  //   ofType<GetHelmReleaseServices>(GET_HELM_RELEASE_SERVICES),
-  //   mergeMap(action => [new GetHelmReleaseStatus(action.endpointGuid, action.releaseTitle)])
-  // );
-
-  // private updateReleasePods(action: GetHelmReleaseStatus, status: HelmReleaseStatus) {
-  //   const releasePodsAction = new GetHelmReleasePods(action.endpointGuid, action.releaseTitle);
-  //   const pods = Object.values(status.data['v1/Pod']).reduce((res, pod) => {
-  //     const newPod: HelmReleasePod = {
-  //       endpointId: action.endpointGuid,
-  //       releaseTitle: action.releaseTitle,
-  //       ...pod
-  //     };
-  //     res[GetHelmReleasePods.createKey(action.endpointGuid, action.releaseTitle, pod.name)] = newPod;
-  //     return res;
-  //   }, {});
-  //   const keys = Object.keys(pods);
-  //   const releasePods = {
-  //     entities: { [entityCatalog.getEntityKey(releasePodsAction)]: pods },
-  //     result: keys
-  //   } as NormalizedResponse;
-  //   this.store.dispatch(new WrapperRequestActionSuccess(
-  //     releasePods,
-  //     releasePodsAction,
-  //     'fetch',
-  //     keys.length,
-  //     1)
-  //   );
-  // }
-
-  // private updateReleaseServices(action: GetHelmReleaseStatus, status: HelmReleaseStatus) {
-  //   const releaseServiceAction = new GetHelmReleaseServices(action.endpointGuid, action.releaseTitle);
-  //   const services = Object.values(status.data['v1/Service']).reduce((res, service) => {
-  //     const newService: HelmReleaseService = {
-  //       endpointId: action.endpointGuid,
-  //       releaseTitle: action.releaseTitle,
-  //       ...service
-  //     };
-  //     res[GetHelmReleasePods.createKey(action.endpointGuid, action.releaseTitle, service.name)] = newService;
-  //     return res;
-  //   }, {});
-  //   const keys = Object.keys(services);
-  //   const releaseServices = {
-  //     entities: { [entityCatalog.getEntityKey(releaseServiceAction)]: services },
-  //     result: keys
-  //   } as NormalizedResponse;
-  //   this.store.dispatch(new WrapperRequestActionSuccess(
-  //     releaseServices,
-  //     releaseServiceAction,
-  //     'fetch',
-  //     keys.length,
-  //     1)
-  //   );
-  // }
 
   private makeRequest(
     action: EntityRequestAction,

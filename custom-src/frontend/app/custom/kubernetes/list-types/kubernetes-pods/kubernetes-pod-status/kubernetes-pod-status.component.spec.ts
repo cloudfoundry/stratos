@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { KubernetesPod, KubernetesStatus } from '../../../store/kube.types';
 import { KubernetesPodStatusComponent } from './kubernetes-pod-status.component';
 
 describe('KubernetesPodStatusComponent', () => {
@@ -8,14 +9,22 @@ describe('KubernetesPodStatusComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesPodStatusComponent ]
+      declarations: [KubernetesPodStatusComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesPodStatusComponent);
     component = fixture.componentInstance;
+    component.row = {
+      status: {
+        phase: KubernetesStatus.FAILED,
+      },
+      spec: {
+        containers: []
+      }
+    } as KubernetesPod;
     fixture.detectChanges();
   });
 

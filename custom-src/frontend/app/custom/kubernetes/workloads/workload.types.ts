@@ -46,9 +46,13 @@ export interface HelmReleaseService {
   spec: any;
 }
 
+// TODO: RC/NWM - Remove WS release logging in backend
+
 export interface HelmReleaseGraph {
   endpointId: string;
   releaseTitle: string;
+  nodes: {};
+  links: {};
 }
 
 export type HelmReleaseResource = any;

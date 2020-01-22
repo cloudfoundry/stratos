@@ -10,7 +10,6 @@ import { createBasicStoreModule } from '../../../../store/testing/public-api';
 import { generateStratosEntities } from '../../base-entity-types';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
-import { HelmReleaseHelperService } from '../kubernetes/workloads/release/tabs/helm-release-helper.service';
 import { HelmReleaseGuid } from '../kubernetes/workloads/workload.types';
 import { generateHelmEntities } from './helm-entity-generator';
 
@@ -64,9 +63,6 @@ export const HelmBaseTestModules = [
 ];
 
 export const HelmBaseTestProviders = [
-  HelmReleaseHelperService,
-  HelmReleaseActivatedRouteMock,
-  HelmReleaseGuidMock,
   HttpClient,
   HttpHandler
 ];
