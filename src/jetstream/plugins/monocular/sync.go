@@ -56,7 +56,7 @@ func (m *Monocular) processSyncRequests() {
 			}
 			m.portalProxy.UpdateEndointMetadata(job.Endpoint.GUID, marshalSyncMetadata(metadata))
 			//Hit the sync server container endpoint to trigger a sync for given repo
-			err := putRequest("reposync:8080" + chartRepoPathPrefix + "/sync/" + job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
+			err := putRequest("http://127.0.0.1:8080" + chartRepoPathPrefix + "/sync/" + job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
 			metadata.Busy = false
 			if err != nil {
 				log.Warn("Request to sync repository failed: %v+", err)
@@ -70,7 +70,7 @@ func (m *Monocular) processSyncRequests() {
 		} else if job.Action == 1 {
 			log.Infof("Deleting Helm Repository: %s", job.Endpoint.Name)
 			//Hit the sync server container endpoint to trigger a delete for given repo
-			err := putRequest("reposync:8080" + chartRepoPathPrefix + "/delete/" + job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
+			err := putRequest("http://127.0.0.1:8080" + chartRepoPathPrefix + "/delete/" + job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
 			if err != nil {
 				log.Warn("Request to delete repository failed: %v+", err)
 			}
