@@ -16,7 +16,6 @@ import {
   KubernetesConfigAuthFormComponent,
 } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
-import { KubernetesEndpointPreviewComponent } from './kubernetes-endpoint-preview/kubernetes-endpoint-preview.component';
 import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes-entity-factory';
 import { generateKubernetesEntities } from './kubernetes-entity-generator';
 import { BaseKubeGuid } from './kubernetes-page.types';
@@ -38,7 +37,6 @@ import { KubeHealthCheck } from './store/kubernetes.actions';
     KubernetesAWSAuthFormComponent,
     KubernetesConfigAuthFormComponent,
     KubernetesGKEAuthFormComponent,
-    KubernetesEndpointPreviewComponent,
   ],
   providers: [
     BaseKubeGuid,
@@ -49,7 +47,6 @@ import { KubeHealthCheck } from './store/kubernetes.actions';
     KubernetesAWSAuthFormComponent,
     KubernetesConfigAuthFormComponent,
     KubernetesGKEAuthFormComponent,
-    KubernetesEndpointPreviewComponent,
   ]
 })
 export class KubernetesSetupModule {

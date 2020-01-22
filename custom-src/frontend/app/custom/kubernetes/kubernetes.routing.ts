@@ -1,9 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { KubernetesReleasePodsTabComponent } from './helm-release/helm-release-pods-tab/helm-release-pods-tab.component';
-import { HelmReleaseServicesComponent } from './helm-release/helm-release-services/helm-release-services.component';
-import { HelmReleaseComponent } from './helm-release/helm-release.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
 import {
   KubernetesNamespacePodsComponent,
@@ -21,7 +18,6 @@ import {
   KubernetesNodeSummaryComponent,
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-summary.component';
 import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
-import { KubernetesAppsTabComponent } from './tabs/kubernetes-apps-tab/kubernetes-apps-tab.component';
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
@@ -30,10 +26,6 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
 const kubernetes: Routes = [{
   path: '',
   component: KubernetesComponent
-},
-{
-  path: ':endpointId/apps/:releaseName/pods/:namespace/:podName',
-  component: PodMetricsComponent,
 },
 {
   path: ':endpointId/nodes/:nodeName/pods/:namespace/:podName',
@@ -91,25 +83,6 @@ const kubernetes: Routes = [{
   ]
 },
 {
-  path: ':endpointId/apps/:releaseName',
-  component: HelmReleaseComponent,
-  children: [
-    {
-      path: '',
-      redirectTo: 'pods',
-      pathMatch: 'full'
-    },
-    {
-      path: 'pods',
-      component: KubernetesReleasePodsTabComponent
-    },
-    {
-      path: 'services',
-      component: HelmReleaseServicesComponent
-    }
-  ]
-},
-{
   path: ':endpointId',
   component: KubernetesTabBaseComponent,
   children: [
@@ -133,10 +106,6 @@ const kubernetes: Routes = [{
     {
       path: 'pods',
       component: KubernetesPodsTabComponent
-    },
-    {
-      path: 'apps',
-      component: KubernetesAppsTabComponent,
     },
   ]
 },

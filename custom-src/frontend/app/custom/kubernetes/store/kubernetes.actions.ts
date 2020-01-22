@@ -6,7 +6,6 @@ import { PaginatedAction, PaginationParam } from '../../../../../store/src/types
 import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import {
   KUBERNETES_ENDPOINT_TYPE,
-  kubernetesAppsEntityType,
   kubernetesDashboardEntityType,
   kubernetesDeploymentsEntityType,
   kubernetesEntityFactory,
@@ -87,29 +86,6 @@ export interface KubeAction extends EntityRequestAction {
   kubeGuid: string;
 }
 export interface KubePaginationAction extends PaginatedAction, KubeAction { }
-
-export class GetKubernetesReleasePods implements KubePaginationAction {
-
-  constructor(public kubeGuid: string, releaseName: string) {
-    this.paginationKey = getPaginationKey(kubernetesPodsEntityType, `release-${releaseName}`, kubeGuid);
-    this.initialParams = {
-      labelSelector: `app.kubernetes.io/instance=${releaseName}`,
-      ...sortPodsByName
-    };
-  }
-  initialParams: PaginationParam;
-  type = GET_RELEASE_POD_INFO;
-  entityType = kubernetesPodsEntityType;
-  endpointType = KUBERNETES_ENDPOINT_TYPE;
-  entity = [kubernetesEntityFactory(kubernetesPodsEntityType)];
-  params: { labelSelector: string; };
-  actions = [
-    GET_RELEASE_POD_INFO,
-    GET_RELEASE_POD_INFO_SUCCESS,
-    GET_RELEASE_POD_INFO_FAILURE
-  ];
-  paginationKey: string;
-}
 
 export class KubeHealthCheck implements KubePaginationAction {
   constructor(public kubeGuid) {
@@ -270,26 +246,6 @@ export class GetKubernetesNamespaces implements KubePaginationAction {
     GET_NAMESPACES_INFO,
     GET_NAMESPACES_INFO_SUCCESS,
     GET_NAMESPACES_INFO_FAILURE
-  ];
-  paginationKey: string;
-  initialParams = {
-    'order-direction': 'desc' as SortDirection,
-    'order-direction-field': 'name'
-  };
-}
-
-export class GetKubernetesApps implements KubePaginationAction {
-  constructor(public kubeGuid) {
-    this.paginationKey = getPaginationKey(kubernetesAppsEntityType, kubeGuid);
-  }
-  type = GET_KUBERNETES_APP_INFO;
-  entityType = kubernetesAppsEntityType;
-  endpointType = KUBERNETES_ENDPOINT_TYPE;
-  entity = [kubernetesEntityFactory(kubernetesAppsEntityType)];
-  actions = [
-    GET_KUBERNETES_APP_INFO,
-    GET_KUBERNETES_APP_INFO_SUCCESS,
-    GET_KUBERNETES_APP_INFO_FAILURE
   ];
   paginationKey: string;
   initialParams = {
