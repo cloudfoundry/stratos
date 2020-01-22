@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+
 import { TableCellCustom } from '../../../../../shared/components/list/list.types';
-import { KubernetesPod, ContainerStatus } from '../../../store/kube.types';
+import { ContainerStatus, KubernetesPod } from '../../../store/kube.types';
 
 @Component({
   selector: 'app-kubernetes-pod-readiness',
@@ -13,6 +14,10 @@ export class KubernetesPodReadinessComponent extends TableCellCustom<KubernetesP
   public ready = 0;
 
   ngOnInit() {
+    if (this.row.status.phase === 'Failed') {
+      return `0 / ${this.row.spec.containers.length}`;
+    }
+
     const containers = this.row.status.containerStatuses || [];
     this.total = containers.length;
     this.ready = containers.reduce((r: number, cstatus: ContainerStatus) => cstatus.ready ? r + 1 : r, 0);

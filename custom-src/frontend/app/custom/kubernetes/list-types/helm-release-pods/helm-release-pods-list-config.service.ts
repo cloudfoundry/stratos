@@ -20,7 +20,7 @@ export class KubernetesReleasePodsListConfigService extends BaseKubernetesPodsLi
     kubeId: BaseKubeGuid,
     public helmReleaseService: HelmReleaseService,
   ) {
-    super();
+    super(kubeId.guid);
     this.podsDataSource = new KubernetesReleasePodsDataSource(store, kubeId, this, helmReleaseService);
   }
 

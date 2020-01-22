@@ -2,6 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { LoggerService } from 'frontend/packages/core/src/core/logger.service';
+import { IPageSideNavTab } from 'frontend/packages/core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
 import { PaginatedAction } from 'frontend/packages/store/src/types/pagination.types';
@@ -58,7 +59,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
 
   public title = '';
 
-  tabLinks = [
+  tabLinks: IPageSideNavTab[] = [
     { link: 'summary', label: 'Summary', icon: 'helm', iconFont: 'stratos-icons' },
     { link: 'notes', label: 'Notes', icon: 'subject' },
     { link: 'values', label: 'Values', icon: 'list' },
