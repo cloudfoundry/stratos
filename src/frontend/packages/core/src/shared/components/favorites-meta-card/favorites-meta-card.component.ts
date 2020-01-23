@@ -1,3 +1,4 @@
+import { entityCatalog } from './../../../../../store/src/entity-catalog/entity-catalog.service';
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { isObservable, Observable, of as observableOf } from 'rxjs';
@@ -64,6 +65,9 @@ export class FavoritesMetaCardComponent {
   public routerLink$: Observable<string>;
   public actions$: Observable<MetaCardMenuItem[]>;
 
+  // Optional icon for the favorite
+  public iconUrl$: Observable<string>;
+
   @Input()
   set favoriteEntity(favoriteEntity: IFavoriteEntity) {
     if (!this.placeholder && favoriteEntity) {
@@ -80,12 +84,23 @@ export class FavoritesMetaCardComponent {
       this.prettyName = prettyName || 'Unknown';
       this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, userFavoritesEntitySchema);
 
+      // If this favorite is an endpoint, lookup the image for it from the entitiy catalog
+      if (this.favorite.entityType === 'endpoint') {
+        this.iconUrl$ = endpoint$.pipe(map(a => {
+          const entityDef = entityCatalog.getEndpoint(a.cnsi_type, a.sub_type);
+          return entityDef.definition.logoUrl;
+        }));
+      } else {
+        this.iconUrl$ = observableOf('');
+      }
+
       this.setConfirmation(this.prettyName, favorite);
 
       const config = cardMapper && favorite && favorite.metadata ? cardMapper(favorite.metadata) : null;
       if (config) {
         if (this.endpoint) {
-          this.name$ = endpoint$.pipe(map(endpoint => config.name + (endpoint.user ? '' : ' (Disconnected)')));
+          // this.name$ = endpoint$.pipe(map(endpoint => config.name + (endpoint.user ? '' : ' (Disconnected)')));
+          this.name$ = observableOf(config.name);
           this.routerLink$ = endpoint$.pipe(map(endpoint => endpoint.user ? config.routerLink : '/endpoints'));
         } else {
           this.name$ = observableOf(config.name);
