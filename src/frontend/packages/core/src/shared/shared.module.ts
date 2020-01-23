@@ -86,7 +86,6 @@ import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.comp
 import { PollingIndicatorComponent } from './components/polling-indicator/polling-indicator.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
-import { ServiceInstanceLastOpComponent } from './components/service-instance-last-op/service-instance-last-op.component';
 import { SidepanelPreviewComponent } from './components/sidepanel-preview/sidepanel-preview.component';
 import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
 import { SnackBarReturnComponent } from './components/snackbar-return/snackbar-return.component';
@@ -118,7 +117,6 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
-import { LongRunningCfOperationsService } from './services/long-running-cf-op.service';
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
@@ -226,7 +224,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
-    ServiceInstanceLastOpComponent
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -341,7 +338,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetricsRangeSelectorService,
     GitSCMService,
     LongRunningOperationsService,
-    LongRunningCfOperationsService,
     CloudFoundryUserProvidedServicesService
   ]
 })

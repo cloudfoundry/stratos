@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import {
   Component,
   ComponentFactoryResolver,
@@ -10,36 +9,9 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
-import {
-  TableCellConfirmOrgSpaceComponent,
-} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
-import {
-  TableCellFeatureFlagStateComponent,
-} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
-import {
-  TableCellRouteAppsAttachedComponent,
-} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
-import {
-  TableCellServiceInstanceAppsAttachedComponent,
-} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
-import {
-  TableCellServiceInstanceTagsComponent,
-} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
-import {
-  CfOrgPermissionCellComponent,
-} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-users/cf-org-permission-cell/cf-org-permission-cell.component';
-import {
-  CfSpacePermissionCellComponent,
-} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import {
-  TableCellServiceLastOpComponent,
-} from '../../list-types/cf-spaces-service-instances/table-cell-service-last-op/table-cell-service-last-op.component';
-import {
-  TableCellServiceComponent,
-} from '../../list-types/cf-spaces-service-instances/table-cell-service/table-cell-service.component';
 import {
   TableCellEndpointDetailsComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-details/table-cell-endpoint-details.component';
@@ -67,9 +39,7 @@ import { TableHeaderSelectComponent } from '../table-header-select/table-header-
 import { ICellDefinition } from '../table.types';
 
 
-
-/* tslint:enable:max-line-length */
-export const listTableCells = [
+export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
   TableCellSelectComponent,
@@ -79,16 +49,6 @@ export const listTableCells = [
   TableCellEndpointNameComponent,
   TableCellBooleanIndicatorComponent,
   TableCellRadioComponent,
-  TableCellServiceInstanceAppsAttachedComponent,
-  TableCellServiceInstanceTagsComponent,
-  TableCellServiceComponent,
-  TableCellServiceLastOpComponent,
-  TableCellRouteAppsAttachedComponent,
-  CfOrgPermissionCellComponent,
-  CfSpacePermissionCellComponent,
-  TableCellFeatureFlagStateComponent,
-  TableCellConfirmOrgSpaceComponent,
-  TableCellRequestMonitorIconComponent,
   TableCellCommitAuthorComponent,
   TableCellRequestMonitorIconComponent,
   TableCellFavoriteComponent,
