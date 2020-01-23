@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -41,7 +40,6 @@ import { CloudFoundryComponentsModule } from '../../shared/components/components
 import {
   CFEndpointsListConfigService,
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
-import { ApplicationService } from '../applications/application.service';
 import { AddOrganizationComponent } from './add-organization/add-organization.component';
 import {
   CreateOrganizationStepComponent,
@@ -61,7 +59,6 @@ import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { QuotaDefinitionComponent } from './quota-definition/quota-definition.component';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
-import { CloudFoundrySpaceService } from './services/cloud-foundry-space.service';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition/space-quota-definition.component';
 import { CfAdminAddUserWarningComponent } from './tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
@@ -79,6 +76,7 @@ import {
 } from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell-summary/cloud-foundry-cell-summary.component';
 import { CloudFoundryCellService } from './tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';
 import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-cells/cloud-foundry-cells.component';
+import { CloudFoundryEventsComponent } from './tabs/cloud-foundry-events/cloud-foundry-events.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
 import {
@@ -88,6 +86,9 @@ import {
   CloudFoundryOrganizationBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component';
 import {
+  CloudFoundryOrganizationEventsComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-events/cloud-foundry-organization-events.component';
+import {
   CloudFoundryOrganizationSpacesComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-organization-spaces.component';
 import {
@@ -96,6 +97,9 @@ import {
 import {
   CloudFoundrySpaceAppsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-apps/cloud-foundry-space-apps.component';
+import {
+  CloudFoundrySpaceEventsComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-events/cloud-foundry-space-events.component';
 import {
   CloudFoundrySpaceRoutesComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-routes/cloud-foundry-space-routes.component';
@@ -141,10 +145,8 @@ import {
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
-import { CloudFoundryEventsComponent } from './tabs/cloud-foundry-events/cloud-foundry-events.component';
-import { CloudFoundryOrganizationEventsComponent } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-events/cloud-foundry-organization-events.component';
-import { CloudFoundrySpaceEventsComponent } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-events/cloud-foundry-space-events.component';
 
+/* tslint:disable:max-line-length */
 
 @NgModule({
   imports: [
@@ -232,8 +234,8 @@ import { CloudFoundrySpaceEventsComponent } from './tabs/cloud-foundry-organizat
       provide: ActiveRouteCfCell,
       useValue: {}
     },
-    ApplicationService,
-    CloudFoundrySpaceService,
+    // ApplicationService,
+    // CloudFoundrySpaceService,
     CloudFoundryOrganizationService,
     CloudFoundryEndpointService,
     // CfRolesService,
