@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { PaginationMonitorFactory } from 'frontend/packages/store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from 'frontend/packages/store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import { delay, distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -265,13 +265,10 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     const releaseEntityConfig = entityCatalog.getEntity(action);
 
     // Wait for result of request
-    return of(true).pipe(
-      delay(1),
-      switchMap(() => releaseEntityConfig.getEntityMonitor(this.store, action.guid).updatingSection$),
-      map(updatingSection => updatingSection[action.updatingKey]),
-      filter(update => !!update),
+    return releaseEntityConfig.getEntityMonitor(this.store, action.guid).entityRequest$.pipe(
+      filter(state => !!state),
       pairwise(),
-      filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
+      filter(([oldVal, newVal]) => (oldVal.creating && !newVal.creating)),
       map(([, newVal]) => newVal),
       map(result => ({
         success: !result.error,
@@ -280,7 +277,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
           path: !result.error ? `workloads/${values.endpoint}:${values.releaseNamespace}:${values.releaseName}/summary` : ''
         },
         message: !result.error ? '' : result.message
-      })),
+      }))
     );
   }
 

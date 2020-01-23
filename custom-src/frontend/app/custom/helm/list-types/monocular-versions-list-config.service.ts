@@ -11,6 +11,7 @@ import { IListConfig, ListViewTypes } from '../../../shared/components/list/list
 import { HelmVersion } from '../store/helm.types';
 import { HelmVersionsDataSource } from './monocular-versions-list-source';
 
+// TODO: RC/NWM This isn't used anywhere, can HelmVersionsListConfig & HelmVersionsDataSource be deleted?
 @Injectable()
 export class HelmVersionsListConfig implements IListConfig<HelmVersion> {
   isLocal = true;

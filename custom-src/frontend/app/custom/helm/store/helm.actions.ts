@@ -66,11 +66,9 @@ export class GetHelmVersions implements MonocularPaginationAction {
 }
 
 export class HelmInstall implements EntityRequestAction {
-  static HELM_INSTALLING_KEY = 'installing';
   type = HELM_INSTALL;
   endpointType = KUBERNETES_ENDPOINT_TYPE;
   entityType = helmReleaseEntityKey;
-  updatingKey = HelmInstall.HELM_INSTALLING_KEY;
   guid: string;
   constructor(public values: HelmInstallValues) {
     this.guid = '<New Release>' + this.values.releaseName;
