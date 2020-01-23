@@ -1,12 +1,13 @@
 import { Component, ComponentFactoryResolver, OnDestroy, OnInit } from '@angular/core';
 import { Edge, Node } from '@swimlane/ngx-graph';
-import { PanelPreviewService } from 'frontend/packages/core/src/shared/services/panel-preview.service';
+import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 import {
   HelmReleaseResourcePreviewComponent,
 } from './helm-release-resource-preview/helm-release-resource-preview.component';
+
 
 interface Colors {
   bg: string;
@@ -44,7 +45,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
     private helper: HelmReleaseHelperService,
-    private previewPanel: PanelPreviewService) { }
+    private previewPanel: SidePanelService) { }
 
   ngOnInit() {
 
