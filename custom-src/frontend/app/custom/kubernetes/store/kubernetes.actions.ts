@@ -1,4 +1,6 @@
 import { SortDirection } from '@angular/material';
+import { getActions } from 'frontend/packages/store/src/actions/action.helper';
+import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
 
 import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../../../store/src/actions/metrics.actions';
 import { getPaginationKey } from '../../../../../store/src/actions/pagination.actions';
@@ -51,6 +53,8 @@ export const GET_NAMESPACES_INFO_FAILURE = '[KUBERNETES Endpoint] Get Namespaces
 export const GET_NAMESPACE_INFO = '[KUBERNETES Endpoint] Get Namespace Info';
 export const GET_NAMESPACE_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Namespace Info Success';
 export const GET_NAMESPACE_INFO_FAILURE = '[KUBERNETES Endpoint] Get Namespace Info Failure';
+
+export const CREATE_NAMESPACE = '[KUBERNETES Endpoint] Create Namespace';
 
 export const GET_KUBERNETES_APP_INFO = '[KUBERNETES Endpoint] Get Kubernetes App Info';
 export const GET_KUBERNETES_APP_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Kubernetes App Info Success';
@@ -156,6 +160,20 @@ export class GetKubernetesNamespace implements KubeAction {
   ];
 }
 
+export class CreateKubernetesNamespace implements KubeAction {
+  public guid: string;
+  constructor(public namespaceName: string, public kubeGuid: string) {
+    this.guid = `Creating-${namespaceName}-${kubeGuid}`;
+  }
+
+  type = CREATE_NAMESPACE;
+  entityType = kubernetesNamespacesEntityType;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
+  entity = [kubernetesEntityFactory(kubernetesNamespacesEntityType)];
+  actions = getActions('Namespace', 'Create');
+  requestType: ApiRequestTypes = 'create';
+}
+
 export class GetKubernetesPods implements KubePaginationAction {
   constructor(public kubeGuid) {
     this.paginationKey = getPaginationKey(kubernetesPodsEntityType, 'k8', kubeGuid);
@@ -235,7 +253,7 @@ export class GetKubernetesPodsInNamespace implements PaginatedAction, KubeAction
 }
 
 export class GetKubernetesNamespaces implements KubePaginationAction {
-  constructor(public kubeGuid) {
+  constructor(public kubeGuid: string) {
     this.paginationKey = getPaginationKey(kubernetesNamespacesEntityType, kubeGuid || 'all');
   }
   type = GET_NAMESPACES_INFO;
@@ -365,3 +383,5 @@ export class FetchKubernetesChartMetricsAction extends MetricsChartAction {
     );
   }
 }
+
+
