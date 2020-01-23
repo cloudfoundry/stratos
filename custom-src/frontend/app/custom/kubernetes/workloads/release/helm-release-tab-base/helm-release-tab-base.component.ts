@@ -19,7 +19,7 @@ import {
   GetHelmReleaseResource,
   GetHelmReleaseServices,
 } from '../../store/workloads.actions';
-import { HelmReleaseGuid, HelmReleasePod } from '../../workload.types';
+import { HelmReleaseGraph, HelmReleaseGuid, HelmReleasePod } from '../../workload.types';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 
 type IDGetterFunction = (data: any) => string;
@@ -119,7 +119,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           const releasePodsAction = new GetHelmReleasePods(this.helmReleaseHelper.endpointGuid, this.helmReleaseHelper.releaseTitle);
           this.populateList(releasePodsAction, pods, getKubeAPIResourceGuid);
         } else if (messageObj.kind === 'Graph') {
-          const graph = messageObj.data;
+          const graph: HelmReleaseGraph = messageObj.data;
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
           graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
           const releaseGraphAction = new GetHelmReleaseGraph(graph.endpointId, graph.releaseTitle);

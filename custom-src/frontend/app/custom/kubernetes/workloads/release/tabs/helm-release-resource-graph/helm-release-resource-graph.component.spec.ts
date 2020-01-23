@@ -1,5 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { NgxGraphModule } from '@swimlane/ngx-graph';
+import { PanelPreviewService } from 'frontend/packages/core/src/shared/services/panel-preview.service';
+import { TabNavService } from 'frontend/packages/core/tab-nav.service';
 
+import { HelmReleaseProviders, KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
 import { HelmReleaseResourceGraphComponent } from './helm-release-resource-graph.component';
 
 describe('HelmReleaseResourceGraphComponent', () => {
@@ -8,9 +12,18 @@ describe('HelmReleaseResourceGraphComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HelmReleaseResourceGraphComponent ]
+      imports: [
+        ...KubernetesBaseTestModules,
+        NgxGraphModule
+      ],
+      declarations: [HelmReleaseResourceGraphComponent],
+      providers: [
+        ...HelmReleaseProviders,
+        PanelPreviewService,
+        TabNavService,
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

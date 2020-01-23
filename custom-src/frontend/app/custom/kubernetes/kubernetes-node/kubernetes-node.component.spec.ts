@@ -1,7 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../tab-nav.service';
-import { KubernetesBaseTestModules } from '../kubernetes.testing.module';
+import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../kubernetes.testing.module';
 import { KubernetesNodeComponent } from './kubernetes-node.component';
 
 describe('KubernetesNodeComponent', () => {
@@ -12,7 +13,21 @@ describe('KubernetesNodeComponent', () => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeComponent],
       imports: KubernetesBaseTestModules,
-      providers: [TabNavService]
+      providers: [
+        TabNavService,
+        KubeBaseGuidMock,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {
+                endpointId: 'anything'
+              },
+              queryParams: {}
+            }
+          }
+        }
+      ]
     })
       .compileComponents();
   }));

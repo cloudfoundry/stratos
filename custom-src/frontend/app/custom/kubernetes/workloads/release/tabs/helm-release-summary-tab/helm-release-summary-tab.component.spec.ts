@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { TabNavService } from 'frontend/packages/core/tab-nav.service';
 
-import { HelmBaseTestModules, HelmBaseTestProviders } from '../../../helm-testing.module';
+import { HelmReleaseProviders, KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
 import { HelmReleaseSummaryTabComponent } from './helm-release-summary-tab.component';
 
 describe('HelmReleaseSummaryTabComponent', () => {
@@ -10,11 +11,12 @@ describe('HelmReleaseSummaryTabComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...HelmBaseTestModules
+        ...KubernetesBaseTestModules
       ],
       declarations: [HelmReleaseSummaryTabComponent],
       providers: [
-        ...HelmBaseTestProviders
+        ...HelmReleaseProviders,
+        TabNavService
       ]
     })
       .compileComponents();

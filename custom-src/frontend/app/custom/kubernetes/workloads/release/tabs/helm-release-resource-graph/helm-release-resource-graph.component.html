@@ -9,28 +9,15 @@
   </button>
 </app-page-sub-nav>
 
-<ngx-graph
-  class="chart-container"
-  (zoomChange)="onZoomChanged($event)"
-  [links]="links"
-  [nodes]="nodes"
-  [update$]="update$"
-  [zoomToFit$]="fit$"
-  [layout]="layout"
->
+<ngx-graph *ngIf="nodes && nodes.length" class="chart-container" [links]="links" [nodes]="nodes" [update$]="update$"
+  [zoomToFit$]="fit$" [layout]="layout">
   <ng-template #nodeTemplate let-node>
     <svg:g class="node" (click)="onNodeClick(node)">
-      <svg:rect
-        [attr.width]="node.dimension.width"
-        [attr.height]="node.dimension.height"
-        [attr.fill]="node.data.fill"
+      <svg:rect [attr.width]="node.dimension.width" [attr.height]="node.dimension.height" [attr.fill]="node.data.fill"
         class="node"></svg:rect>
       />
-      <svg:text
-      class="no-style"
-      alignment-baseline="central"
-      [attr.fill]="node.data.text"
-      [attr.x]="10" [attr.y]="node.dimension.height / 2">
+      <svg:text class="no-style" alignment-baseline="central" [attr.fill]="node.data.text" [attr.x]="10"
+        [attr.y]="node.dimension.height / 2">
         {{node.label}} ({{node.data.kind}})
       </svg:text>
     </svg:g>

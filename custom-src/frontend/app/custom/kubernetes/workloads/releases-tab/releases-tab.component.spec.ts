@@ -1,26 +1,32 @@
-import { HelmBaseTestModules } from '../../../helm/helm-testing.module';
-import { DatePipe } from './@angular/common';
-import { async, ComponentFixture, TestBed } from './@angular/core/testing';
+import { DatePipe } from '@angular/common';
+import { async, TestBed } from '@angular/core/testing';
+import { TabNavService } from 'frontend/packages/core/tab-nav.service';
+
+import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
+import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
 import { HelmReleasesTabComponent } from './releases-tab.component';
 
 describe('ReleasesTabComponent', () => {
   let component: HelmReleasesTabComponent;
-  let fixture: ComponentFixture<HelmReleasesTabComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...HelmBaseTestModules
+        ...KubernetesBaseTestModules
       ],
       declarations: [HelmReleasesTabComponent],
-      providers: [DatePipe]
+      providers: [
+        DatePipe,
+        HelmReleaseHelperService,
+        TabNavService
+      ]
 
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(HelmReleasesTabComponent);
+    const fixture = TestBed.createComponent(HelmReleasesTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

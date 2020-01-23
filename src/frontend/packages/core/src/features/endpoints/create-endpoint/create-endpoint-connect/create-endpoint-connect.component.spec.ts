@@ -1,7 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { createBasicStoreModule } from '@stratos/store/testing';
+import { PanelPreviewService } from 'frontend/packages/core/src/shared/services/panel-preview.service';
 
 import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import { ConnectEndpointComponent } from '../../connect-endpoint/connect-endpoint.component';
@@ -15,13 +17,17 @@ describe('CreateEndpointConnectComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         CreateEndpointConnectComponent,
-        ConnectEndpointComponent
+        ConnectEndpointComponent,
       ],
       imports: [
         CoreModule,
         SharedModule,
         CoreTestingModule,
+        RouterTestingModule,
         createBasicStoreModule(),
+      ],
+      providers: [
+        PanelPreviewService,
       ]
     })
       .compileComponents();

@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { KubernetesBaseTestModules } from '../../../../../kubernetes.testing.module';
 import { HelmReleaseResourcePreviewComponent } from './helm-release-resource-preview.component';
 
 describe('HelmReleaseResourcePreviewComponent', () => {
@@ -8,9 +9,12 @@ describe('HelmReleaseResourcePreviewComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HelmReleaseResourcePreviewComponent ]
+      imports: [
+        ...KubernetesBaseTestModules
+      ],
+      declarations: [HelmReleaseResourcePreviewComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

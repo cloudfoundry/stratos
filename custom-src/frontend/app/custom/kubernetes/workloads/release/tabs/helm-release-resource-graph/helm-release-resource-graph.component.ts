@@ -1,7 +1,7 @@
 import { Component, ComponentFactoryResolver, OnDestroy, OnInit } from '@angular/core';
 import { Edge, Node } from '@swimlane/ngx-graph';
 import { PanelPreviewService } from 'frontend/packages/core/src/shared/services/panel-preview.service';
-import { Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 import {
@@ -28,12 +28,12 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   // see: https://swimlane.github.io/ngx-graph/#/#quick-start
 
-  public nodes = [] as Node[];
-  public links = [] as Edge[];
+  public nodes: Node[] = [];
+  public links: Edge[] = [];
 
-  update$: Subject<boolean> = new Subject();
+  update$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
-  fit$: Subject<boolean> = new Subject();
+  fit$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   public layout = 'dagre';
 
@@ -49,7 +49,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   ngOnInit() {
 
     // Listen for the graph
-    this.graph = this.helper.fetchReleaseGraph().subscribe((g: any) => {
+    this.graph = this.helper.fetchReleaseGraph().subscribe(g => {
       const newNodes = [];
       Object.values(g.nodes).forEach((node: any) => {
         const colors = this.getColor(node.data.status);
@@ -135,10 +135,6 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
           fg: 'white'
         };
     }
-  }
-
-  public onZoomChanged(e) {
-    // console.log(e);
   }
 
 }
