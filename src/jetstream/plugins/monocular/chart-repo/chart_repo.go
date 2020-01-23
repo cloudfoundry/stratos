@@ -48,7 +48,7 @@ func init() {
 
 		//Flags for optional FoundationDB + Document Layer backend
 		cmd.Flags().String("doclayer-url", "mongodb://dev-fdbdoclayer/27016", "FoundationDB Document Layer URL")
-		cmd.Flags().String("doclayer-database", "charts", "FoundationDB Document-Layer database")
+		cmd.Flags().String("doclayer-database", "monocular-plugin", "FoundationDB Document-Layer database")
 
 		// see version.go
 		cmd.Flags().StringVarP(&utils.UserAgentComment, "user-agent-comment", "", "", "UserAgent comment used during outbound requests")

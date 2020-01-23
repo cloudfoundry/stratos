@@ -68,6 +68,9 @@ func setupRoutes() http.Handler {
 }
 
 func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
+	//Running in serve mode, we dont want to close the db client connection after a request
+	var clientKeepAlive = true
+
 	type syncParams struct {
 		RepoURL string `json:"repoURL"`
 	}
@@ -90,7 +93,7 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 	}
 
 	startTime := time.Now()
-	if err := fdb.SyncRepo(fdbClient, fDBName, repoName, repoURL, authorizationHeader); err != nil {
+	if err := fdb.SyncRepo(fdbClient, fDBName, repoName, repoURL, authorizationHeader, clientKeepAlive); err != nil {
 		log.Fatalf("Can't sync chart repository with database: %v", err)
 		return
 	}
@@ -105,7 +108,10 @@ func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 		log.Fatal("No Repository name provided in request for Delete action.")
 	}
 
-	if err := fdb.DeleteRepo(fdbClient, fDBName, repoName); err != nil {
+	//Running in serve mode, we dont want to close the db client connection after a request
+	var clientKeepAlive = true
+
+	if err := fdb.DeleteRepo(fdbClient, fDBName, repoName, clientKeepAlive); err != nil {
 		log.Fatalf("Can't delete chart repository %s from database: %v", repoName, err)
 	}
 }

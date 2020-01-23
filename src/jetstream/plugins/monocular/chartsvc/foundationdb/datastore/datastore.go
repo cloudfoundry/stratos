@@ -78,6 +78,7 @@ func (c *mongoClient) Database(dbName string) (Database, func()) {
 	db := &mongoDatabase{c.Client.Database(dbName)}
 
 	return db, func() {
+		log.Infof("Closing db connection")
 		err := c.Client.Disconnect(context.Background())
 
 		if err != nil {

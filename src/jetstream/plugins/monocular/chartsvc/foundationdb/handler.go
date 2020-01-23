@@ -120,7 +120,7 @@ func uniqChartList(charts []*models.Chart) []*models.Chart {
 }
 
 func getPaginatedChartList(repo string, pageNumber, pageSize int, showDuplicates bool) (utils.ApiListResponse, interface{}, error) {
-	log.Debugf("Request for paginated chart list..")
+	log.Debugf("Request for paginated chart list for repo %v", repo)
 
 	//Find all charts for repo name and sort by chart name
 	collection := db.Collection(chartCollection)

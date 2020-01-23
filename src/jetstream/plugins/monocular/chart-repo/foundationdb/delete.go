@@ -56,8 +56,10 @@ func Delete(cmd *cobra.Command, args []string) {
 
 	log.Debugf("Client created.")
 
-	if err = DeleteRepo(client, fDB, args[0]); err != nil {
-		log.Fatalf("Can't delete chart repository %s from database: %v", args[0], err)
+	//Close db client after serving request
+	var clientKeepAlive = false
+	if err = DeleteRepo(client, fDB, args[0], clientKeepAlive); err != nil {
+		log.Fatalf("Can't delete chart repository %s from database: %v", args[0], err, clientKeepAlive)
 	}
 
 	log.Infof("Successfully deleted the chart repository %s from database", args[0])

@@ -79,7 +79,7 @@ func main() {
 
 	//Flags for optional FoundationDB + Document Layer backend
 	fdbURL := flag.String("doclayer-url", "mongodb://fdb-service/27016", "FoundationDB Document Layer URL")
-	fDB := flag.String("doclayer-database", "charts", "FoundationDB Document-Layer database")
+	fDB := flag.String("doclayer-database", "monocular-plugin", "FoundationDB Document-Layer database")
 
 	flag.Parse()
 

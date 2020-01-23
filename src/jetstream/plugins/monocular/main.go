@@ -145,10 +145,12 @@ func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 func (m *Monocular) handleAPI(c echo.Context) error {
 	// Modify the path to remove our prefix for the Chart Service API
 	path := c.Request().URL.Path
+	log.Debugf("URL to chartsvc requested: %v", path)
 	if strings.Index(path, prefix) == 0 {
 		path = path[len(prefix)-1:]
 		c.Request().URL.Path = path
 	}
+	log.Debugf("URL to chartsvc requested after modification: %v", path)
 	m.chartSvcRoutes.ServeHTTP(c.Response().Writer, c.Request())
 	return nil
 }

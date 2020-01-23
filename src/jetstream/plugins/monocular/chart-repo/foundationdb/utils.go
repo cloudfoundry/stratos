@@ -67,10 +67,14 @@ func init() {
 // These steps are processed in this way to ensure relevant chart data is
 // imported into the database as fast as possible. E.g. we want all icons for
 // charts before fetching readmes for each chart and version pair.
-func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHeader string) error {
+func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHeader string, clientKeepAlive bool) error {
 
 	db, closer := dbClient.Database(dbName)
-	defer closer()
+
+	log.Infof("Keeping client alive: %v", clientKeepAlive)
+	if !clientKeepAlive {
+		defer closer()
+	}
 
 	url, err := common.ParseRepoURL(repoURL)
 	if err != nil {
@@ -191,9 +195,13 @@ func updateLastCheck(db Database, repoName string, checksum string, now time.Tim
 	return err
 }
 
-func DeleteRepo(dbClient Client, dbName, repoName string) error {
+func DeleteRepo(dbClient Client, dbName, repoName string, clientKeepAlive bool) error {
 	db, closer := dbClient.Database(dbName)
-	defer closer()
+
+	log.Infof("Keeping client alive: %v", clientKeepAlive)
+	if !clientKeepAlive {
+		defer closer()
+	}
 
 	log.Debugf("Checking database connection and readiness...")
 	collection := db.Collection("numbers")
