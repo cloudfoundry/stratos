@@ -1,14 +1,13 @@
 import { Inject, ModuleWithProviders, NgModule } from '@angular/core';
 import { ReducerManager, Store } from '@ngrx/store';
 
-import {
-  requestDataReducerFactory,
-} from './reducers/api-request-data-reducer/request-data-reducer.factory';
-import { chainApiReducers, requestActions } from './reducers/api-request-reducers.generator.helpers';
 import { InitCatalogEntitiesAction } from './entity-catalog.actions';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity';
 import { entityCatalog } from './entity-catalog/entity-catalog.service';
+import { requestDataReducerFactory } from './reducers/api-request-data-reducer/request-data-reducer.factory';
+import { chainApiReducers, requestActions } from './reducers/api-request-reducers.generator.helpers';
 
+// FIXME: Needs spelling update
 export const CATALOGUE_ENTITIES = '__CATALOGUE_ENTITIES__';
 
 @NgModule({})
