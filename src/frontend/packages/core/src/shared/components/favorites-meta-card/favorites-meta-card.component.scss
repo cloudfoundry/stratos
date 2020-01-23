@@ -30,9 +30,38 @@
   &__clickable {
     cursor: pointer;
   }
+  &__header-text-panel {
+    width: 100%;
+  }
   &__header {
     display: flex;
     white-space: nowrap;
+  }
+  &__icon-panel {
+    display: flex;
+    justify-content: center;
+    width: 56px;
+  }
+  &__icon {
+    height: 48px;
+    margin-right: 8px;
+    width: auto;
+  }
+  &__panel {
+    display: flex;
+    :first-child {
+      flex: 1;
+    }
+  }
+  &__disconnected {
+    align-self: center;
+    border-radius: 2px;
+    display: flex;
+    font-size: 14px;
+    font-weight: normal;
+    margin-right: 8px;
+    margin-top: -2px;
+    padding: 2px 4px;
   }
 }
 
@@ -52,3 +81,5 @@
 .subtle-text {
   opacity: .6;
 }
+
+

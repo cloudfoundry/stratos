@@ -148,6 +148,8 @@ export function setupCfUserRemovalTests(
     // apply roles removal changes
     removeUsersStepper.next();
 
+    confirmStep.actionTable.table.waitUntilNotBusy();
+
     // Wait until all of the spinners have gone
     const spinners = element.all(by.tagName('mat-progress-spinner'));
     browser.wait(() => spinners.isPresent().then((present) => !present));

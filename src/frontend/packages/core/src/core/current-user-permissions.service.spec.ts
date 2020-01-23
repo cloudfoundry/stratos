@@ -9,7 +9,7 @@ import { APIResource } from '../../../store/src/types/api.types';
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
 import { BaseEntityValues } from '../../../store/src/types/entity.types';
 import { PaginationState } from '../../../store/src/types/pagination.types';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '../../test-framework/store-test-helper';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratos/store/testing';
 import { endpointEntitySchema } from '../base-entity-schemas';
 import { generateStratosEntities } from '../base-entity-types';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';

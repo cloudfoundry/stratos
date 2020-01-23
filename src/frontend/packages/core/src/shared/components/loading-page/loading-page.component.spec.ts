@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 
 import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { MDAppModule } from '../../../core/md.module';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { SharedModule } from '../../shared.module';

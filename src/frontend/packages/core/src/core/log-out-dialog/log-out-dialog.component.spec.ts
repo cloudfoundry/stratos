@@ -4,7 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
 
 import { CoreTestingModule } from '../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { SharedModule } from '../../shared/shared.module';
 import { CoreModule } from '../core.module';
 import { LogOutDialogComponent } from './log-out-dialog.component';

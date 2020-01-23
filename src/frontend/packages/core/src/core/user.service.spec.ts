@@ -1,7 +1,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 
 import { CoreTestingModule } from '../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { SharedModule } from '../shared/shared.module';
 import { CoreModule } from './core.module';
 import { UserService } from './user.service';

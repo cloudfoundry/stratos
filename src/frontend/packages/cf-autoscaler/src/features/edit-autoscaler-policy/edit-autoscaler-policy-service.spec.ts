@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 
 import { ApplicationsModule } from '../../../../cloud-foundry/src/features/applications/applications.module';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { createEmptyStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { createEmptyStoreModule } from '@stratos/store/testing';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
 describe('EditAutoscalerPolicyService', () => {
