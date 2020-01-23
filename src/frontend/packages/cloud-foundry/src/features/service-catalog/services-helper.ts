@@ -253,6 +253,17 @@ export const getServiceBrokerName = (
   );
 };
 
+export const getServiceBrokerName = (
+  serviceBrokerGuid: string,
+  cfGuid: string,
+  entityServiceFactory: EntityServiceFactory): Observable<string> => {
+  return getServiceBroker(serviceBrokerGuid, cfGuid, entityServiceFactory).waitForEntity$.pipe(
+    filter(res => !!res),
+    map(a => a.entity.entity.name),
+    first()
+  );
+};
+
 export const getCfService = (
   serviceGuid: string,
   cfGuid: string,
