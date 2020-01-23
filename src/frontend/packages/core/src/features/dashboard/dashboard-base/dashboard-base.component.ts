@@ -4,6 +4,8 @@ import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewCon
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
@@ -16,15 +18,13 @@ import {
 import { CloseSideNav, DisableMobileNav, EnableMobileNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { PanelPreviewService } from '../../../shared/services/panel-preview.service';
+import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
 
@@ -67,7 +67,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService,
     private ngZone: NgZone,
-    public panelPreviewService: PanelPreviewService,
+    public sidePanelService: SidePanelService,
     private cs: CustomizationService
   ) {
     this.noMargin$ = this.router.events.pipe(
@@ -128,11 +128,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   sideHelpClosed() {
-    this.panelPreviewService.hide();
+    this.sidePanelService.hide();
   }
 
   ngAfterViewInit() {
-    this.panelPreviewService.setContainer(this.previewPanelContainer);
+    this.sidePanelService.setContainer(this.previewPanelContainer);
   }
 
   ngOnInit() {

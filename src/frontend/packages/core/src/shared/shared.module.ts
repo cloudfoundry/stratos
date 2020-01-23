@@ -224,6 +224,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     SimpleListComponent,
     ListHostDirective,
     CopyToClipboardComponent,
+    SidepanelPreviewComponent,
     TileSelectorTileComponent,
     SidepanelPreviewComponent
   ],
@@ -317,13 +318,15 @@ import { UserPermissionDirective } from './user-permission.directive';
     SimpleListComponent,
     ListHostDirective,
     CopyToClipboardComponent,
+    SidepanelPreviewComponent,
     TileSelectorTileComponent,
     SidepanelPreviewComponent
   ],
   entryComponents: [
     DialogConfirmComponent,
     EnvVarViewComponent,
-    SnackBarReturnComponent
+    SnackBarReturnComponent,
+    MarkdownPreviewComponent,
   ],
   providers: [
     ListConfig,
