@@ -1,4 +1,3 @@
-import { kubernetesDashboardEntityType } from './../../../../../../../../custom-src/frontend/app/custom/kubernetes/kubernetes-entity-factory';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -29,7 +28,6 @@ import {
   KubePaginationAction,
 } from '../store/kubernetes.actions';
 import { KubeDashboardStatus } from '../store/kubernetes.effects';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 
 @Injectable()
 export class KubernetesEndpointService {
