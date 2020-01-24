@@ -1,8 +1,6 @@
 import { of } from 'rxjs';
 
-import {
-  IListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { IListDataSource } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { CardTypes } from '../../../../../../../core/src/shared/components/list/list-cards/card/card.component';
 import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';

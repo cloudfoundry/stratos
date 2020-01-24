@@ -10,6 +10,11 @@ echo "====================================================================="
 echo "Running E2E tests"
 echo "====================================================================="
 
+echo "Updating web driver based on Chrome version ..."
+CHROME_VERSION=$(google-chrome --version | grep -iEo "[0-9.]{10,20}")
+echo "Chrome version: ${CHROME_VERSION}"
+npm run update-webdriver -- --versions.chrome=${CHROME_VERSION}
+
 echo "Test suite: $SUITE"
 echo "Test URL  : $URL"
 
@@ -27,7 +32,7 @@ FFMPEG=$!
 export STRATOS_E2E_BASE_URL=${URL}
 
 export STRATOS_E2E_LOG_TIME=true
-./node_modules/.bin/ng e2e --dev-server-target= --base-url=${URL} ${SUITE}
+./node_modules/.bin/ng e2e --no-webdriver-update --dev-server-target= --base-url=${URL} ${SUITE}
 RESULT=$?
 
 echo "Stopping video capture"

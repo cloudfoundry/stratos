@@ -1,5 +1,4 @@
 import { PaginatedAction } from '../../types/pagination.types';
-
 import { EntityRequestAction } from '../../types/request.types';
 
 export function patchActionWithForcedConfig(action: EntityRequestAction) {
@@ -8,6 +7,7 @@ export function patchActionWithForcedConfig(action: EntityRequestAction) {
     const forced = pagAction.__forcedPageEntityConfig__;
     return {
       ...pagAction,
+      entity: null,
       entityType: forced.entityType,
       endpointType: forced.endpointType,
       schemaKey: forced.schemaKey,

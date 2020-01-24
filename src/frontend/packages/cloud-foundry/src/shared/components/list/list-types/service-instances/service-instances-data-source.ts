@@ -1,6 +1,5 @@
 import { Store } from '@ngrx/store';
 
-import { GetServiceInstances } from '../../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   serviceInstancesEntityType,
@@ -13,12 +12,12 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class ServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, serviceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
