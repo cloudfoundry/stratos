@@ -1,15 +1,17 @@
 import { TestBed } from '@angular/core/testing';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratos/store/testing';
 import { first, tap } from 'rxjs/operators';
 
 import { cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
 import { generateCFEntities } from '../../../cloud-foundry/src/cf-entity-generator';
 import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { AppState } from '../../../store/src/app-state';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../store/src/entity-catalog-test.module';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../store/src/types/api.types';
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
 import { BaseEntityValues } from '../../../store/src/types/entity.types';
 import { PaginationState } from '../../../store/src/types/pagination.types';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratos/store/testing';
 import { endpointEntitySchema } from '../base-entity-schemas';
 import { generateStratosEntities } from '../base-entity-types';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
@@ -22,8 +24,6 @@ import {
   ScopeStrings,
 } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
-import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../store/src/entity-catalog-test.module';
-import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 
 const ffSchema = cfEntityFactory(featureFlagEntityType);
 
@@ -65,7 +65,6 @@ describe('CurrentUserPermissionsService', () => {
         },
         metricsAvailable: false,
         connectionStatus: 'connected',
-        registered: true,
         system_shared_token: false,
         sso_allowed: false
       },
@@ -104,7 +103,6 @@ describe('CurrentUserPermissionsService', () => {
         },
         metricsAvailable: false,
         connectionStatus: 'connected',
-        registered: true,
         system_shared_token: false,
         sso_allowed: false
       }
