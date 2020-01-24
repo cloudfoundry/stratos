@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
 
 import { KubernetesBaseTestModules } from '../../../../../kubernetes.testing.module';
 import { HelmReleaseResourcePreviewComponent } from './helm-release-resource-preview.component';
@@ -12,7 +13,8 @@ describe('HelmReleaseResourcePreviewComponent', () => {
       imports: [
         ...KubernetesBaseTestModules
       ],
-      declarations: [HelmReleaseResourcePreviewComponent]
+      declarations: [HelmReleaseResourcePreviewComponent],
+      providers: [SidePanelService]
     })
       .compileComponents();
   }));

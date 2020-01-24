@@ -10,7 +10,7 @@ import { appReducers } from '../../../../../store/src/reducers.module';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';
 import { PageHeaderService } from '../../../core/page-header-service/page-header.service';
-import { PanelPreviewService } from '../../../shared/services/panel-preview.service';
+import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { MetricsService } from '../../metrics/services/metrics-service';
 import { PageSideNavComponent } from '../page-side-nav/page-side-nav.component';
@@ -42,7 +42,7 @@ describe('DashboardBaseComponent', () => {
         TabNavService,
         HttpClient,
         HttpHandler,
-        PanelPreviewService
+        SidePanelService
       ],
     })
       .compileComponents();

@@ -6,7 +6,6 @@ import { DashboardState } from '../reducers/dashboard-reducer';
 export const OPEN_SIDE_NAV = '[Dashboard] Open side nav';
 export const CLOSE_SIDE_NAV = '[Dashboard] Close side nav';
 export const TOGGLE_SIDE_NAV = '[Dashboard] Toggle side nav';
-export const SET_HEADER_EVENT = '[Dashboard] Set header event';
 
 export const ENABLE_SIDE_NAV_MOBILE_MODE = '[Dashboard] Enable mobile nav';
 export const DISABLE_SIDE_NAV_MOBILE_MODE = '[Dashboard] Disable mobile nav';
@@ -32,11 +31,6 @@ export class CloseSideNav implements Action {
 export class ToggleSideNav implements Action {
   constructor() { }
   type = TOGGLE_SIDE_NAV;
-}
-
-export class SetHeaderEvent implements Action {
-  constructor(public minimised = false) { }
-  type = SET_HEADER_EVENT;
 }
 
 export class EnableMobileNav implements Action {

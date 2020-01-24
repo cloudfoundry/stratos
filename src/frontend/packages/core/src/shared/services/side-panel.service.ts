@@ -4,10 +4,20 @@ import { asapScheduler, BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, observeOn, publishReplay, refCount, tap } from 'rxjs/operators';
 import { DOCUMENT } from '@angular/common';
 
+/**
+ * Service to allow the overlay side panel to be shown or hidden.
+ *
+ * Supports two modes:
+ *  - with show(...) - Brings in side panel below the top nav
+ *  - with showModal(...) - Brings in side panel overlaying the top nav
+ */
 @Injectable()
-export class PanelPreviewService {
+export class SidePanelService {
   private openedSubject: BehaviorSubject<boolean>;
   public opened$: Observable<boolean>;
+
+  private previewModeSubject: BehaviorSubject<boolean>;
+  public previewMode$: Observable<boolean>;
 
   private container: ViewContainerRef;
 
@@ -19,26 +29,58 @@ export class PanelPreviewService {
     this.openedSubject = new BehaviorSubject(false);
     this.opened$ = this.observeSubject(this.openedSubject);
 
+    this.previewModeSubject = new BehaviorSubject(false);
+    this.previewMode$ = this.observeSubject(this.previewModeSubject);
+
     this.setupRouterListener();
   }
 
   public setContainer(container: ViewContainerRef) {
     if (this.container) {
-      throw new Error('PanelPreviewService: container already set');
+      throw new Error('SidePanelService: container already set');
     }
 
     this.container = container;
   }
 
+  /**
+   * Show the preview panel in a preview style - does not overlap title bar and colours are more muted
+   */
   public show(component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
     if (!this.container) {
-      throw new Error('PanelPreviewService: container must be set');
+      throw new Error('SidePanelService: container must be set');
     }
 
     this.render(component, props, componentFactoryResolver);
-    this.openedSubject.next(true);
+    this.previewModeSubject.next(true);
+    this.open();
+  }
 
+  /**
+   * Show the preview panel in a modal style - full height overlaps title bar
+   */
+  public showModal(component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
+    if (!this.container) {
+      throw new Error('SidePanelService: container must be set');
+    }
+
+    this.render(component, props, componentFactoryResolver);
+    this.previewModeSubject.next(false);
+    this.open();
+  }
+
+  private open() {
+    this.openedSubject.next(true);
     this.document.addEventListener('keydown', this.onKeyDown);
+  }
+
+  public hide() {
+    if (!this.container) {
+      throw new Error('SidePanelService: container must be set');
+    }
+
+    this.openedSubject.next(false);
+    this.document.removeEventListener('keydown', this.onKeyDown);
   }
 
   onKeyDown = (event) => {
@@ -47,25 +89,16 @@ export class PanelPreviewService {
     }
   }
 
-  public hide() {
-    if (!this.container) {
-      throw new Error('PanelPreviewService: container must be set');
-    }
-
-    this.openedSubject.next(false);
-    this.document.removeEventListener('keydown', this.onKeyDown);
-
-  }
-
-  render(component: object, props: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
+  render(
+    component: object,
+    props: { [key: string]: any },
+    componentFactoryResolver: ComponentFactoryResolver = this.componentFactoryResolver
+  ) {
     if (this.container.length) {
       this.container.remove(0);
     }
 
-    // Use the supplied component factory resolver if provided
-    const resolver = componentFactoryResolver ||  this.componentFactoryResolver;
-
-    const factory: ComponentFactory<any> = resolver.resolveComponentFactory(component as any);
+    const factory: ComponentFactory<any> = componentFactoryResolver.resolveComponentFactory(component as any);
     const componentRef: ComponentRef<any> = this.container.createComponent(factory);
 
     if (props) {

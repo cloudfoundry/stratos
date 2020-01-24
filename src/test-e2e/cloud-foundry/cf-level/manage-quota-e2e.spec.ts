@@ -66,6 +66,7 @@ describe('Manage Quota', () => {
 
       // should go to quotas when cancelled
       quotaFormPage.stepper.cancel();
+      quotaFormPage.stepper.waitUntilNotShown();
       expect(cfTopLevelPage.subHeader.getTitleText()).toBe('Organization Quotas');
     });
 
@@ -84,7 +85,7 @@ describe('Manage Quota', () => {
   });
 
   describe('#destroy', () => {
-    beforeEach(() => {
+    beforeAll(() => {
       cfTopLevelPage = CfTopLevelPage.forEndpoint(cfGuid);
       cfTopLevelPage.navigateTo();
       cfTopLevelPage.goToQuotasTab();
@@ -92,6 +93,8 @@ describe('Manage Quota', () => {
 
     it('- should delete quota', () => {
       cfTopLevelPage.deleteQuota(secondQuotaName);
+      const table = new TableComponent();
+      table.waitUntilNotBusy();
     });
 
     it('- should not delete quota if attached to org', () => {

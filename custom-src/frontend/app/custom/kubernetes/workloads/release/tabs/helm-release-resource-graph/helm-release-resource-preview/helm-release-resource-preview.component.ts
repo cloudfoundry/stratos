@@ -22,7 +22,7 @@ export class HelmReleaseResourcePreviewComponent implements PreviewableComponent
         newItem.age = moment(item.metadata.creationTimestamp).fromNow(true);
 
         newItem.labels = [];
-        Object.keys(item.metadata.labels).forEach(labelName => {
+        Object.keys(item.metadata.labels || []).forEach(labelName => {
           newItem.labels.push({
             name: labelName,
             value: item.metadata.labels[labelName]
@@ -31,7 +31,7 @@ export class HelmReleaseResourcePreviewComponent implements PreviewableComponent
 
         if (item.metadata && item.metadata.annotations) {
           newItem.annotations = [];
-          Object.keys(item.metadata.annotations).forEach(labelName => {
+          Object.keys(item.metadata.annotations || []).forEach(labelName => {
             newItem.annotations.push({
               name: labelName,
               value: item.metadata.annotations[labelName]
