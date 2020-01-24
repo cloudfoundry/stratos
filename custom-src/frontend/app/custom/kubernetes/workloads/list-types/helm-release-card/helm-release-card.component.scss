@@ -1,0 +1,6 @@
+.release-card {
+  cursor: pointer;
+  &:focus {
+    outline: 0;
+  }
+}
