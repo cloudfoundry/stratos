@@ -3,6 +3,7 @@ import { ITableColumn } from '../../../../shared/components/list/list-table/tabl
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { KubeService } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
+import { createKubeAgeColumn } from '../kube-list.helper';
 import { KubernetesServicePortsComponent } from '../kubernetes-service-ports/kubernetes-service-ports.component';
 import { KubeServiceCardComponent } from './kubernetes-service-card/kubernetes-service-card.component';
 
@@ -42,6 +43,7 @@ export abstract class BaseKubernetesServicesListConfig implements IListConfig<Ku
       cellComponent: KubernetesServicePortsComponent,
       cellFlex: '4'
     },
+    createKubeAgeColumn()
   ];
 
   pageSizeOptions = defaultHelmKubeListPageSize;

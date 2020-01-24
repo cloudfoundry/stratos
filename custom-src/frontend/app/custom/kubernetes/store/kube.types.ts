@@ -10,9 +10,7 @@ export const KubernetesDefaultState = {
 };
 
 export interface BasicKubeAPIResource {
-  metadata: {
-    uid: string
-  };
+  metadata: Metadata;
   status: any;
   spec: any;
 }

@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import {
   IListDataSource,
 } from 'frontend/packages/core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import * as moment from 'moment';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
@@ -11,15 +10,25 @@ import { IListConfig, ListViewTypes } from '../../../../shared/components/list/l
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesPod } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
+import { createKubeAgeColumn } from '../kube-list.helper';
 import { KubernetesPodReadinessComponent } from './kubernetes-pod-readiness/kubernetes-pod-readiness.component';
+import { KubernetesPodStatusComponent } from './kubernetes-pod-status/kubernetes-pod-status.component';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 import { PodNameLinkComponent } from './pod-name-link/pod-name-link.component';
 
 export abstract class BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
 
+  static namespaceColumnId = 'namespace';
   public showNamespaceLink = true;
 
-  constructor(private kubeId: string) { }
+  constructor(
+    private kubeId: string,
+    showNamespaces = false
+  ) {
+    if (!showNamespaces) {
+      this.columns = this.columns.filter(column => column.columnId !== BaseKubernetesPodsListConfigService.namespaceColumnId);
+    }
+  }
 
   columns: Array<ITableColumn<KubernetesPod>> = [
     {
@@ -39,7 +48,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
     //   cellFlex: '5',
     // },
     {
-      columnId: 'namespace', headerCell: () => 'Namespace',
+      columnId: BaseKubernetesPodsListConfigService.namespaceColumnId, headerCell: () => 'Namespace',
       cellDefinition: {
         valuePath: 'metadata.namespace',
         getLink: row => this.showNamespaceLink ? `/kubernetes/${this.kubeId}/namespaces/${row.metadata.namespace}` : null
@@ -66,9 +75,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
     },
     {
       columnId: 'status', headerCell: () => 'Status',
-      cellDefinition: {
-        valuePath: 'status.phase'
-      },
+      cellComponent: KubernetesPodStatusComponent,
       sort: {
         type: 'sort',
         orderKey: 'status',
@@ -87,21 +94,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
       },
       cellFlex: '1'
     },
-    {
-      columnId: 'age',
-      headerCell: () => 'Age',
-      cellDefinition: {
-        getValue: (row: any) => {
-          return moment(row.metadata.creationTimestamp).fromNow(true);
-        }
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'age',
-        field: 'metadata.creationTimestamp'
-      },
-      cellFlex: '1'
-    }
+    createKubeAgeColumn()
   ];
 
   pageSizeOptions = defaultHelmKubeListPageSize;
@@ -130,7 +123,7 @@ export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfi
     store: Store<AppState>,
     kubeId: BaseKubeGuid,
   ) {
-    super(kubeId.guid);
+    super(kubeId.guid, true);
     this.podsDataSource = new KubernetesPodsDataSource(store, kubeId, this);
   }
 

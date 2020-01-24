@@ -60,7 +60,8 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'namespace',
       headerCell: () => 'Namespace',
       cellDefinition: {
-        valuePath: 'namespace'
+        valuePath: 'namespace',
+        getLink: row => `/kubernetes/${row.endpointId}/namespaces/${row.namespace}`
       },
       sort: {
         type: 'sort',
@@ -73,7 +74,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'status',
       headerCell: () => 'Status',
       cellDefinition: {
-        valuePath: 'status'
+        getValue: row => row.status.charAt(0).toUpperCase() + row.status.substring(1)
       },
       sort: {
         type: 'sort',
