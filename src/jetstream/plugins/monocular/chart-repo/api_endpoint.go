@@ -31,6 +31,7 @@ import (
 	"github.com/urfave/negroni"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"github.com/helm/monocular/chartrepo/common"
 	fdb "github.com/helm/monocular/chartrepo/foundationdb"
 	responses "github.com/helm/monocular/chartsvc/utils"
 )
@@ -40,8 +41,6 @@ const pathPrefix = "/v1"
 var fdbClient fdb.Client
 var fDBName string
 var authorizationHeader string
-
-var repoJobStatus map[string]string
 
 // Params a key-value map of path params
 type Params map[string]string
@@ -66,7 +65,6 @@ func setupRoutes() http.Handler {
 	apiv1 := r.PathPrefix(pathPrefix).Subrouter()
 	apiv1.Methods("PUT").Path("/sync/{repo}").Handler(WithParams(OnDemandSync))
 	apiv1.Methods("PUT").Path("/delete/{repo}").Handler(WithParams(OnDemandDelete))
-
 	apiv1.Methods("GET").Path("/status/{repo}").Handler(WithParams(RepoSyncStatus))
 
 	n := negroni.Classic()
@@ -120,11 +118,8 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 
 	go fdb.SyncRepo(fdbClient, fDBName, repoName, repoURL, authorizationHeader, clientKeepAlive)
 
-	//TODO Kate maintain repo sync status with last successful/failed/in-progress sync UUID
-	repoJobStatus[repoName]
-
 	//Return sync status in response
-	response := responses.SyncStatusResponse{requestUUID.String(), "Syncing"}
+	response := responses.SyncStatusResponse{requestUUID.String(), common.SyncStatusInProgress}
 	js, err := json.Marshal(response)
 	if err != nil {
 		log.Error(err.Error())
@@ -176,7 +171,8 @@ func RepoSyncStatus(w http.ResponseWriter, req *http.Request, params Params) {
 	if repoName == "" {
 		log.Fatal("No Repository name provided in request for status.")
 	}
-
+	//TODO kate write status to response
+	GetRepoSyncStatus(repoName)
 }
 
 func initOnDemandEndpoint(fdbURL string, fdbName string, authHeader string, debug bool) {

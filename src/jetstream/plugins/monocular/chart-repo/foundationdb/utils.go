@@ -49,6 +49,7 @@ const (
 )
 
 var netClient common.HTTPClient = &http.Client{}
+var repoSyncStatus common.SyncStatusMap
 
 func init() {
 	var err error
@@ -69,6 +70,9 @@ func init() {
 // charts before fetching readmes for each chart and version pair.
 func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHeader string, clientKeepAlive bool) error {
 
+	//TODO Kate maintain repo sync status with last successful/failed/in-progress sync UUID
+	repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusInProgress})
+
 	db, closer := dbClient.Database(dbName)
 
 	log.Infof("Keeping client alive: %v", clientKeepAlive)
@@ -78,7 +82,8 @@ func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHe
 
 	url, err := common.ParseRepoURL(repoURL)
 	if err != nil {
-		log.WithFields(log.Fields{"url": repoURL}).WithError(err).Error("failed to parse URL")
+		log.WithFields(log.Fields{"url": repoURL}).WithError(err).Error("Failed to parse Repo URL")
+		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
 		return err
 	}
 
@@ -87,8 +92,9 @@ func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHe
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	res, err := collection.InsertOne(ctx, bson.M{"name": "pi", "value": 3.14159}, options.InsertOne())
 	if err != nil {
-		log.Fatalf("Database readiness/connection test failed: %v", err)
+		log.Errorf("Database readiness/connection test failed: %v", err)
 		cancel()
+		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
 		return err
 	}
 	id := res.InsertedID
@@ -100,33 +106,43 @@ func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHe
 	r := common.Repo{Name: repoName, URL: url.String(), AuthorizationHeader: authorizationHeader}
 	repoBytes, err := common.FetchRepoIndex(r, netClient)
 	if err != nil {
+		log.Errorf("Failed to fetch repo index: %v", err)
+		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
 		return err
 	}
 
 	repoChecksum, err := common.GetSha256(repoBytes)
 	if err != nil {
+		log.Errorf("Failed to generate repo checksum: %v", err)
+		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
 		return err
 	}
 
 	// Check if the repo has been already processed
 	if repoAlreadyProcessed(db, repoName, repoChecksum) {
 		log.WithFields(log.Fields{"url": repoURL}).Info("Skipping repository since there are no updates")
+		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusSuccess})
 		return nil
 	}
 
 	index, err := common.ParseRepoIndex(repoBytes)
 	if err != nil {
+		log.Errorf("Error parsing repo index: %v", err)
+		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
 		return err
 	}
 
 	charts := common.ChartsFromIndex(index, r)
 	log.Debugf("%v Charts in index of repo: %v", len(charts), repoURL)
 	if len(charts) == 0 {
+		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, "Synchronized"})
 		return errors.New("no charts in repository index")
 	}
 
 	err = importCharts(db, dbName, charts)
 	if err != nil {
+		log.Errorf("Error importing charts: %v", err)
+		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
 		return err
 	}
 
@@ -174,10 +190,12 @@ func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHe
 
 	// Update cache in the database
 	if err = updateLastCheck(db, repoName, repoChecksum, time.Now()); err != nil {
+		log.Errorf("Error updating last repo check timestamp: %v", err)
+		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
 		return err
 	}
 	log.WithFields(log.Fields{"url": repoURL}).Info("Stored repository update in cache")
-
+	repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusSuccess})
 	return nil
 }
 
@@ -472,6 +490,10 @@ func fetchAndImportFiles(db Database, name string, r common.Repo, cv common.Char
 	}
 	log.Debugf("Chart files import success. (update one) Upserted: %v Updated: %v", updateResult.UpsertedCount, updateResult.ModifiedCount)
 	return nil
+}
+
+func GetRepoSyncStatus(repo string) common.RepoSyncStatus {
+	return repoSyncStatus.Get(repo)
 }
 
 func database(client *mongo.Client, dbName string) (*mongo.Database, func()) {

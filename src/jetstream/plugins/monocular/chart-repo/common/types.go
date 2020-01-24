@@ -18,6 +18,7 @@ package common
 
 import (
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -87,3 +88,30 @@ type ImportChartFilesJob struct {
 type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
+
+type RepoSyncStatus struct {
+	Repo   string `json:"repo"`
+	URL    string `json:"url"`
+	Status string `json:"status"`
+}
+
+type SyncStatusMap struct {
+	mut       sync.Mutex
+	statusMap map[string]RepoSyncStatus
+}
+
+func (m *SyncStatusMap) Set(repo string, status RepoSyncStatus) {
+	m.mut.Lock()
+	defer m.mut.Unlock()
+	m.statusMap[repo] = status
+}
+
+func (m *SyncStatusMap) Get(repo string) RepoSyncStatus {
+	m.mut.Lock()
+	defer m.mut.Unlock()
+	return m.statusMap[repo]
+}
+
+const SyncStatusFailed = "Failed"
+const SyncStatusSuccess = "Synchronized"
+const SyncStatusInProgress = "Synchronizing"
