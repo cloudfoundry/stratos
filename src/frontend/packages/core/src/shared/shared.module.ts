@@ -224,6 +224,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
+    CardProgressOverlayComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -316,6 +317,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
+    CardProgressOverlayComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,
