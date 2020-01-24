@@ -9,6 +9,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
+import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
@@ -36,11 +37,9 @@ import {
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
-import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 
 
-
-export const listTableCells = [
+export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
   TableCellSelectComponent,
@@ -50,7 +49,6 @@ export const listTableCells = [
   TableCellEndpointNameComponent,
   TableCellBooleanIndicatorComponent,
   TableCellRadioComponent,
-  TableCellRequestMonitorIconComponent,
   TableCellCommitAuthorComponent,
   TableCellRequestMonitorIconComponent,
   TableCellFavoriteComponent,
