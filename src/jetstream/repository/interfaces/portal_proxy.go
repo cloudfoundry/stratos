@@ -28,6 +28,7 @@ type PortalProxy interface {
 	GetSessionInt64Value(c echo.Context, key string) (int64, error)
 	GetSessionStringValue(c echo.Context, key string) (string, error)
 	SaveSession(c echo.Context, session *sessions.Session) error
+	GetSessionDataStore() SessionDataStore
 
 	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
 	DoLoginToCNSI(c echo.Context, cnsiGUID string, systemSharedToken bool) (*LoginRes, error)

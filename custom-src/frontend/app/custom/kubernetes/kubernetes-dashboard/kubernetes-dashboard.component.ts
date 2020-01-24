@@ -8,6 +8,7 @@ import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-h
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
+import { EndpointMissingMessageParts } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
 
 @Component({
   selector: 'app-kubernetes-dashboard',
@@ -44,31 +45,27 @@ export class KubernetesDashboardTabComponent implements OnInit {
   }
 
   source: SafeResourceUrl;
+  href = '';
   isLoading$ = new BehaviorSubject<boolean>(true);
+  hasError$ = new BehaviorSubject<boolean>(false);
   expanded = false;
 
-  searchTerms: any;
-
-  href = '';
-
+  private loadCheckTries = 0;
   private haveSetupEventLister = false;
   private hasIframeLoaded = false;
-
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+
+  public errorMsg$ = new BehaviorSubject<EndpointMissingMessageParts>({} as EndpointMissingMessageParts);
 
   constructor(public kubeEndpointService: KubernetesEndpointService, private sanitizer: DomSanitizer, public renderer: Renderer2) { }
 
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
-
     let href = window.location.href;
     const index = href.indexOf('dashboard');
     href = href.substr(index + 9);
-    // console.log(href);
     this.href = href;
-    this.source = this.sanitizer.bypassSecurityTrustResourceUrl(`/pp/v1/kubedash/ui/${guid}/`);
-    // console.log(window.location);
-
+    this.source = this.sanitizer.bypassSecurityTrustResourceUrl(`/pp/v1/kubedash/${guid}/login`);
     this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
         breadcrumbs: [
@@ -79,14 +76,55 @@ export class KubernetesDashboardTabComponent implements OnInit {
     );
   }
 
+  public configUrl(): string {
+    const guid = this.kubeEndpointService.baseKube.guid;
+    return `/kubernetes/${guid}/dashboard-config`;
+  }
+
   iframeLoaded() {
+    if (!this.kubeDash) {
+      return;
+    }
+    this.loadCheckTries = 20;
+    this.checkPageLoad();
+    this.hasIframeLoaded = true;
+    this.setupEventListener();
+  }
+
+  checkPageLoad() {
+    let hasLoaded = false;
+    const errMsg = this.getStratosError();
+    if (!!errMsg) {
+      hasLoaded = true;
+      this.errorMsg$.next({
+        firstLine: errMsg,
+        secondLine: { text: ''}
+      });
+      this.hasError$.next(true);
+    }
+
     const kdToolbar = this.getKubeDashToolbar();
     if (!!kdToolbar) {
+      hasLoaded = true;
+    }
+    if (this.getKubeDashLogin()) {
+      hasLoaded = true;
+    }
+
+    if (!hasLoaded) {
+      this.loadCheckTries--;
+      if (this.loadCheckTries > 0) {
+        setTimeout(() => this.checkPageLoad(), 350);
+      } else {
+        hasLoaded = true;
+      }
+    }
+
+    if (hasLoaded) {
       this.isLoading$.next(false);
       this.toggle(false);
     }
-    this.hasIframeLoaded = true;
-    this.setupEventListener();
+
   }
 
   setupEventListener() {
@@ -95,36 +133,22 @@ export class KubernetesDashboardTabComponent implements OnInit {
     }
 
     this.haveSetupEventLister = true;
-
     const iframeWindow = this.kubeDash.nativeElement.contentWindow;
-    // console.log('iframe loaded');
-
     iframeWindow.addEventListener('hashchange', () => {
-      // Object.defineProperty( event, "oldURL", { enumerable: true, configurable: true, value: lastURL } );
-      // Object.defineProperty( event, "newURL", { enumerable: true, configurable: true, value: document.URL } );
-      // lastURL = document.URL;
-      // console.log('iframe hashchange');
-      // console.log(event);
-
-      // console.log(iframeWindow.location);
-
-      // console.log(this.href);
-
       if (this.href) {
         let h2 = decodeURI(this.href);
         h2 = decodeURI(h2);
 
         h2 = h2.replace('%3F', '?');
         h2 = h2.replace('%3D', '=');
-        // console.log(h2);
         h2 = '#!' + h2;
-        // console.log('Changing location hash');
         iframeWindow.location.hash = h2;
         this.href = '';
       }
     });
   }
 
+  // toggle visibility of the kube dashboard header bar
   toggle(val: boolean) {
     if (val !== undefined) {
       this.expanded = val;
@@ -140,6 +164,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
     }
   }
 
+  // Can we detect the dashboard's toolbar (implies dashboard UI has loaded)
   private getKubeDashToolbar() {
     if (this.kubeDash &&
       this.kubeDash.nativeElement &&
@@ -147,11 +172,40 @@ export class KubernetesDashboardTabComponent implements OnInit {
       this.kubeDash.nativeElement.contentDocument.getElementsByTagName) {
       const kdChrome = this.kubeDash.nativeElement.contentDocument.getElementsByTagName('kd-chrome')[0];
       if (kdChrome) {
-        const kdToolbar = kdChrome.getElementsByTagName('md-toolbar')[0];
-        return kdToolbar;
+        const kdToolbar = kdChrome.getElementsByTagName('mat-toolbar')[0];
+        if (kdToolbar) {
+          return kdToolbar;
+        }
+        const mdToolbar = kdChrome.getElementsByTagName('md-toolbar')[0];
+        return mdToolbar;
       }
     }
     return null;
   }
 
+  // Can we detect the dashboard login page?
+  private getKubeDashLogin(): boolean {
+    if (this.kubeDash &&
+      this.kubeDash.nativeElement &&
+      this.kubeDash.nativeElement.contentDocument &&
+      this.kubeDash.nativeElement.contentDocument.getElementsByTagName) {
+      const kdLogin = this.kubeDash.nativeElement.contentDocument.getElementsByTagName('kd-login');
+      return kdLogin.length === 1;
+    }
+    return false;
+  }
+
+  // Can we detect a Stratos error message page?
+  private getStratosError(): string {
+    if (this.kubeDash &&
+      this.kubeDash.nativeElement &&
+      this.kubeDash.nativeElement.contentDocument &&
+      this.kubeDash.nativeElement.contentDocument.getElementsByTagName) {
+      const stratosError = this.kubeDash.nativeElement.contentDocument.getElementsByTagName('stratos-error');
+      if (stratosError.length === 1) {
+        return stratosError[0].innerText;
+      }
+    }
+    return null;
+  }
 }

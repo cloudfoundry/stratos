@@ -112,8 +112,16 @@ func (c *KubernetesSpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
 func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 
 	// Kubernetes Dashboard Proxy
-	echoGroup.GET("/kubedash/ui/:guid/*", c.kubeDashboardProxy)
+	echoGroup.Any("/apps/kubedash/ui/:guid/*", c.kubeDashboardProxy)
+
+	echoGroup.GET("/kubedash/:guid/login", c.kubeDashboardLogin)
 	echoGroup.GET("/kubedash/:guid/status", c.kubeDashboardStatus)
+
+	echoGroup.POST("/kubedash/:guid/serviceAccount", c.kubeDashboardCreateServiceAccount)
+	echoGroup.DELETE("/kubedash/:guid/serviceAccount", c.kubeDashboardDeleteServiceAccount)
+
+	echoGroup.POST("/kubedash/:guid/installation", c.kubeDashboardInstallDashboard)
+	echoGroup.DELETE("/kubedash/:guid/installation", c.kubeDashboardDeleteDashboard)
 
 	// Helm Routes
 	echoGroup.GET("/helm/releases", c.ListReleases)
@@ -121,6 +129,7 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/helm/versions", c.GetHelmVersions)
 	echoGroup.DELETE("/helm/releases/:endpoint/:name", c.DeleteRelease)
 	echoGroup.GET("/helm/releases/:endpoint/:name", c.GetRelease)
+
 }
 
 func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {

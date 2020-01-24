@@ -15,6 +15,7 @@ type portalProxy struct {
 	DatabaseConnectionPool *sql.DB
 	SessionStore           interfaces.SessionStorer
 	SessionStoreOptions    *sessions.Options
+	SessionDataStore       interfaces.SessionDataStore
 	Plugins                map[string]interfaces.StratosPlugin
 	PluginsStatus          map[string]bool
 	Diagnostics            *interfaces.Diagnostics

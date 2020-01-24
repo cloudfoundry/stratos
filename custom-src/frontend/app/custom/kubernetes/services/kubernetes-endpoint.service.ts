@@ -28,6 +28,7 @@ import {
   KubePaginationAction,
 } from '../store/kubernetes.actions';
 import { KubeDashboardStatus } from '../store/kubernetes.effects';
+import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 
 @Injectable()
 export class KubernetesEndpointService {
@@ -43,6 +44,10 @@ export class KubernetesEndpointService {
   services$: Observable<KubeService[]>;
   pods$: Observable<KubernetesPod[]>;
   kubeDashboardEnabled$: Observable<boolean>;
+  kubeDashboardVersion$: Observable<string>;
+  kubeDashboardStatus$: Observable<KubeDashboardStatus>;
+  kubeDashboardLabel$: Observable<string>;
+  kubeDashboardConfigured$: Observable<boolean>;
 
   constructor(
     public baseKube: BaseKubeGuid,
@@ -88,21 +93,48 @@ export class KubernetesEndpointService {
       kubernetesServicesEntityType
     );
 
-    const kubeDashboardEnabled$ = this.store.select('auth').pipe(
+    this.kubeDashboardEnabled$ = this.store.select('auth').pipe(
       filter(auth => !!auth.sessionData['plugin-config']),
-      map(auth => auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true'),
-      first(),
+      map(auth => auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true')
     );
 
-    this.kubeDashboardEnabled$ = kubeDashboardEnabled$.pipe(
+    this.kubeDashboardStatus$ = this.kubeDashboardEnabled$.pipe(
       filter(enabled => enabled),
       switchMap(() => this.entityServiceFactory.create<KubeDashboardStatus>(
-        this.kubeGuid,
-        new GetKubernetesDashboard(this.kubeGuid),
-      ).waitForEntity$.pipe(map(status => status.entity.installed))
-      ),
-      startWith(false),
+      kubernetesDashboardSchemaKey,
+      entityFactory(kubernetesDashboardSchemaKey),
+      this.kubeGuid,
+      new GetKubernetesDashboard(this.kubeGuid),
+      false
+    ).waitForEntity$.pipe(map(status => status.entity)).pipe(
+      startWith(null),
+    )
+    ));
+
+    this.kubeDashboardConfigured$ = this.kubeDashboardStatus$.pipe(
+      filter(status => !!status),
+      map(status => {
+        return status.installed && !!status.serviceAccount && !!status.service;
+      }),
+      startWith(false)
     );
+
+    this.kubeDashboardLabel$ = this.kubeDashboardStatus$.pipe(
+      filter(status => !!status),
+      map(status => {
+        if (!status.installed) {
+          return 'Not installed';
+        } else if (!status.serviceAccount) {
+          return 'Not configured';
+        } else {
+          return status.version;
+        }
+      })
+    );
+  }
+
+  public refreshKubernetesDashboardStatus() {
+    this.store.dispatch(new GetKubernetesDashboard(this.kubeGuid));
   }
 
   private getObservable<T>(paginationAction: KubePaginationAction, schemaKey: string): Observable<T[]> {

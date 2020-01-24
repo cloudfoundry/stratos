@@ -70,9 +70,28 @@ import {
   KubePaginationAction,
 } from './kubernetes.actions';
 
+export interface KubeDashboardContainer {
+  name: string;
+  image: string;
+}
+
 export interface KubeDashboardStatus {
   guid: string;
   installed: boolean;
+  stratosInstalled: boolean;
+  running: boolean;
+  pod: {
+    spec: {
+      containers: KubeDashboardContainer[]
+    }
+  };
+  version: string;
+  service: {
+    namespace: string;
+    name: string;
+    scheme: string;
+  };
+  serviceAccount: any;
 }
 
 type GetID<T> = (p: T) => string;
