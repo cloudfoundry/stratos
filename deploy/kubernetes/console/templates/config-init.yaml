@@ -29,16 +29,11 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - "configmaps"
   - "secrets"
   verbs:
   - "create"
   - "post"
   - "get"
-  - "list"
-  - "patch"
-  - "update"
-  - "delete"
 {{- end }}
 ---
 # Role binding for service account "config-init" and role "config-init-role"
@@ -134,7 +129,8 @@ spec:
         persistentVolumeClaim:
           claimName: "{{ .Release.Name }}-encryption-key-volume"
 ---
-# Cleanup job will delete the created secret when the release is deleted
+{{- if .Values.autoCleanup }}
+Cleanup job will delete the created secret when the release is deleted
 apiVersion: "batch/v1"
 kind: "Job"
 metadata:
@@ -184,3 +180,4 @@ spec:
       serviceAccountName: "config-init"
       {{- end }}
       terminationGracePeriodSeconds: 30
+{{- end }}

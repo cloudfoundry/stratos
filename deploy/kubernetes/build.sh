@@ -19,7 +19,7 @@ BOLD="\033[1m"
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
-BASE_IMAGE_TAG=opensuse
+BASE_IMAGE_TAG=leap15_1
 OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
@@ -197,7 +197,6 @@ if [ "${CHART_ONLY}" == "false" ]; then
   # Build and push an image based on the nginx container (Front-end)
   log "-- Building/publishing the runtime container image for the Console web server (frontend)"
   patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
-
 fi
 
 log "-- Building Helm Chart"

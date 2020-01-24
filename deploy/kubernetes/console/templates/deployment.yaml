@@ -133,6 +133,10 @@ spec:
             secretKeyRef:
               name: "{{ .Release.Name }}-secret"
               key: clientSecret
+        {{- if .Values.console.autoRegisterCF }}
+        - name: AUTO_REG_CF_URL
+          value: {{ .Values.console.autoRegisterCF }}
+        {{- end }}
         # Local admin user
         {{- if .Values.console.localAdminPassword }}
         - name: CONSOLE_ADMIN_SCOPE 
@@ -155,7 +159,7 @@ spec:
         {{- if or .Values.env.UAA_HOST .Values.env.DOMAIN }}  
         - name: UAA_ENDPOINT 
           value: {{ template "scfUaaEndpoint" . }}
-        {{- if .Values.env.DOMAIN }}  
+        {{- if and .Values.env.DOMAIN (not .Values.console.autoRegisterCF) }}
         - name: AUTO_REG_CF_URL
           value: https://api.{{.Values.env.DOMAIN}}
         {{- end }}
@@ -223,6 +227,11 @@ spec:
           value: {{ default "" .Values.console.userInviteSubject | quote }}
         - name: ENABLE_TECH_PREVIEW
           value: {{ default "false" .Values.console.techPreview | quote }}
+        readinessProbe:
+          tcpSocket:
+            port: 3003
+          initialDelaySeconds: 3
+          periodSeconds: 3
         ports:
         - containerPort: 3003
           name: proxy
@@ -249,13 +258,13 @@ spec:
       volumes:
       - name: "{{ .Release.Name }}-encryption-key-volume"
         secret:
-          secretName: "{{ .Release.Name }}-key-{{ .Release.Revision }}"
+          secretName: "{{ .Release.Name }}-key"
       - name: "{{ .Release.Name }}-cert-volume"
         secret:
           {{- if .Values.console.tlsSecretName }}
           secretName: "{{ .values.console.tlsSecretName }}"
           {{- else }}
-          secretName: "{{ .Release.Name }}-cert-{{ .Release.Revision }}"
+          secretName: "{{ .Release.Name }}-cert"
           {{- end }}
       - name: "{{ .Release.Name }}-db-secret"
         secret:
