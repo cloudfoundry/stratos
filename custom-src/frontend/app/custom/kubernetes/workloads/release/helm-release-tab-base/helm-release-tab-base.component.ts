@@ -98,12 +98,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
       }),
       map((message: string) => message),
       catchError(e => {
-        // TODO: RC/NWM Remove comments/handle error. Raise wrapper failed action to push error to store & notification bar?
-        console.log('WS Error');
-        console.log(e);
-        if (e.type === 'error') {
-          console.log(e);
-        }
+        console.error('Workload WS error: ', e);
         return [];
       })
     );

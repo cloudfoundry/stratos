@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
 
-import { HelmReleasePodsListConfig } from '../../../list-types/monocular-release-pods-list-config.service';
+import { HelmReleasePodsListConfig } from '../../../list-types/helm-release-pods-list-config.service';
 
 @Component({
   selector: 'app-helm-release-pods-tab',

@@ -4,7 +4,7 @@ import { AppState } from 'frontend/packages/store/src/app-state';
 
 import { BaseKubernetesPodsListConfigService } from '../../list-types/kubernetes-pods/kubernetes-pods-list-config.service';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
-import { HelmReleasePodsDataSource } from './monocular-release-pods-list-source';
+import { HelmReleasePodsDataSource } from './helm-release-pods-list-source';
 
 
 @Injectable()

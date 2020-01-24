@@ -99,8 +99,6 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	}
 
 	// In Helm 3, the namespace must already exist
-	// Check to see if the namespace exists
-	// TODO
 
 	kubeClient, _ := c.GetConfigForEndpointUser(endpointGUID, userGUID)
 	clientset, _ := kubernetes.NewForConfig(kubeClient)
@@ -112,11 +110,8 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 		return interfaces.NewJetstreamError(msg)
 	}
 
-	// Create the namespace if it does not exist and the user asked us to
-	// TODO
-
 	// Check release name is valid and does not already exist
-	// TODO
+	// TODO: NWM
 
 	install := action.NewInstall(config)
 	install.ReleaseName = params.Name

@@ -88,7 +88,7 @@ export class WorkloadsEffects {
     // Release name is unique for an endpoint - for Helm 3, include the namespace
     helmRelease.guid = endpointId + ':' + data.namespace + ':' + data.name;
     // Make a note of the guid of the endpoint for the release
-    helmRelease.status = this.mapHelmStatus(data.info.status);
+    helmRelease.status = data.info.status;
     helmRelease.lastDeployed = this.mapHelmModifiedDate(data.info.last_deployed);
     helmRelease.firstDeployed = this.mapHelmModifiedDate(data.info.first_deployed);
     return helmRelease;
@@ -117,16 +117,6 @@ export class WorkloadsEffects {
         })
       ])
     );
-  }
-
-  // function _mapHelmStatus(status: number) {
-  //   return HelmStatus[status].replace('_', ' ');
-  // }
-
-  private mapHelmStatus(status: string) {
-    // TODO: Capitalize first letter
-    return status;
-    // return HelmStatus[status].replace('_', ' ');
   }
 
   private mapHelmModifiedDate(date: any) {

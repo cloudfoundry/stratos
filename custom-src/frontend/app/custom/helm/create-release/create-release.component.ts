@@ -78,10 +78,12 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     // Fetch the values.yaml for the Chart
     const valuesYamlUrl = `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.chartName}/versions/${chart.version}/values.yaml`;
 
-    // TODO: RC Error handling
-    this.httpClient.get(valuesYamlUrl, { responseType: 'text' }).subscribe(response => {
-      this.valuesYaml = response;
-    });
+    this.httpClient.get(valuesYamlUrl, { responseType: 'text' })
+      .subscribe(response => {
+        this.valuesYaml = response;
+      }, err => {
+        console.error('Failed to fetch chart values: ', err.message || err);
+      });
   }
 
   private setupDetailsStep() {

@@ -16,8 +16,8 @@ import { filter, map } from 'rxjs/operators';
 
 import { defaultHelmKubeListPageSize } from '../../list-types/kube-helm-list-types';
 import { HelmRelease } from '../workload.types';
+import { HelmReleasesDataSource } from './helm-releases-list-source';
 import { KubernetesNamespacesFilterItem, KubernetesNamespacesFilterService } from './kube-namespaces-filter-config.service';
-import { HelmReleasesDataSource } from './monocular-releases-list-source';
 
 @Injectable()
 export class HelmReleasesListConfig implements IListConfig<HelmRelease> {

@@ -7,7 +7,7 @@ import {
   BaseKubernetesServicesListConfig,
 } from '../../list-types/kubernetes-services/kubernetes-service-list-config.service';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
-import { HelmReleaseServicesDataSource } from './monocular-release-services-list-source';
+import { HelmReleaseServicesDataSource } from './helm-release-services-list-source';
 
 @Injectable()
 export class HelmReleaseServicesListConfig extends BaseKubernetesServicesListConfig {
