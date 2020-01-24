@@ -19,10 +19,12 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/heptiolabs/healthcheck"
 	log "github.com/sirupsen/logrus"
@@ -30,6 +32,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	fdb "github.com/helm/monocular/chartrepo/foundationdb"
+	responses "github.com/helm/monocular/chartsvc/utils"
 )
 
 const pathPrefix = "/v1"
@@ -37,6 +40,8 @@ const pathPrefix = "/v1"
 var fdbClient fdb.Client
 var fDBName string
 var authorizationHeader string
+
+var repoJobStatus map[string]string
 
 // Params a key-value map of path params
 type Params map[string]string
@@ -62,6 +67,8 @@ func setupRoutes() http.Handler {
 	apiv1.Methods("PUT").Path("/sync/{repo}").Handler(WithParams(OnDemandSync))
 	apiv1.Methods("PUT").Path("/delete/{repo}").Handler(WithParams(OnDemandDelete))
 
+	apiv1.Methods("GET").Path("/status/{repo}").Handler(WithParams(RepoSyncStatus))
+
 	n := negroni.Classic()
 	n.UseHandler(r)
 	return n
@@ -78,42 +85,98 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 	dec := json.NewDecoder(req.Body)
 	var url syncParams
 	if err := dec.Decode(&url); err != nil {
-		log.Fatal(err)
+		log.Error(err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, "Error decoding sync request repository URL: "+err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	repoURL := url.RepoURL
 	repoName := params["repo"]
 
 	if repoURL == "" {
-		log.Fatal("No Repository URL provided in request for Sync action.")
+		err := fmt.Errorf("No Repository URL provided in request for Sync action.")
+		log.Error(err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	if repoName == "" {
-		log.Fatal("No Repository name provided in request for Sync action.")
-	}
-
-	startTime := time.Now()
-	if err := fdb.SyncRepo(fdbClient, fDBName, repoName, repoURL, authorizationHeader, clientKeepAlive); err != nil {
-		log.Fatalf("Can't sync chart repository with database: %v", err)
+		err := fmt.Errorf("No Repository name provided in request for Sync action.")
+		log.Error(err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	timeTaken := time.Since(startTime).Seconds()
-	log.Infof("Successfully added the chart repository %s to database in %v seconds", repoName, timeTaken)
+
+	requestUUID, err := uuid.NewUUID()
+	if err != nil {
+		log.Error(err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	go fdb.SyncRepo(fdbClient, fDBName, repoName, repoURL, authorizationHeader, clientKeepAlive)
+
+	//TODO Kate maintain repo sync status with last successful/failed/in-progress sync UUID
+	repoJobStatus[repoName]
+
+	//Return sync status in response
+	response := responses.SyncStatusResponse{requestUUID.String(), "Syncing"}
+	js, err := json.Marshal(response)
+	if err != nil {
+		log.Error(err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Server", "ChartRepo (On-Demand)")
+	w.Write(js)
+	w.WriteHeader(200)
 }
 
 func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 	repoName := params["repo"]
 
 	if repoName == "" {
-		log.Fatal("No Repository name provided in request for Delete action.")
+		err := fmt.Errorf("No Repository name provided in request for Delete action.")
+		log.Error(err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	//Running in serve mode, we dont want to close the db client connection after a request
 	var clientKeepAlive = true
 
-	if err := fdb.DeleteRepo(fdbClient, fDBName, repoName, clientKeepAlive); err != nil {
-		log.Fatalf("Can't delete chart repository %s from database: %v", repoName, err)
+	go fdb.DeleteRepo(fdbClient, fDBName, repoName, clientKeepAlive)
+
+	//Return delete status in response
+	requestUUID, err := uuid.NewUUID()
+	response := responses.SyncStatusResponse{requestUUID.String(), "Deleting"}
+	js, err := json.Marshal(response)
+	if err != nil {
+		log.Error(err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Server", "ChartRepo (On-Demand)")
+	w.Write(js)
+	w.WriteHeader(200)
+}
+
+func RepoSyncStatus(w http.ResponseWriter, req *http.Request, params Params) {
+	repoName := params["repo"]
+	if repoName == "" {
+		log.Fatal("No Repository name provided in request for status.")
+	}
+
 }
 
 func initOnDemandEndpoint(fdbURL string, fdbName string, authHeader string, debug bool) {

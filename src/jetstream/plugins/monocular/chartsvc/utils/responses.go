@@ -39,6 +39,11 @@ type ApiResponse struct {
 //ApiListResponse is an API response in list format
 type ApiListResponse []*ApiResponse
 
+type SyncStatusResponse struct {
+	UUID  string `json:"uuid"`
+	State string `json:"state"`
+}
+
 //SelfLink the self-referencing URL to a chart in a response
 type SelfLink struct {
 	Self string `json:"self"`
