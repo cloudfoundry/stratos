@@ -2,20 +2,20 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/src/cf-types';
 import {
   serviceBrokerEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/src/cf-types';
 import {
   getCfService,
   getServiceName,
 } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceBroker, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { TableCellCustom } from '../../../list.types';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 
 // TODO: Move CF code to CF Module #3769
 

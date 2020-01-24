@@ -8,6 +8,9 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import {
   ApplicationInstanceChartComponent,
 } from '../../../cloud-foundry/src/features/applications/application/application-instance-chart/application-instance-chart.component';
+import { EntityMonitorFactory } from '../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
 import { CoreModule } from '../core/core.module';
 import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -107,9 +110,6 @@ import {
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { GitSCMService } from './data-services/scm/scm.service';
-import { EntityMonitorFactory } from '../../../store/src/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { PercentagePipe } from './pipes/percentage.pipe';
