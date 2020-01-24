@@ -1,3 +1,4 @@
+import { kubernetesDashboardEntityType } from './../../../../../../../../custom-src/frontend/app/custom/kubernetes/kubernetes-entity-factory';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -101,11 +102,8 @@ export class KubernetesEndpointService {
     this.kubeDashboardStatus$ = this.kubeDashboardEnabled$.pipe(
       filter(enabled => enabled),
       switchMap(() => this.entityServiceFactory.create<KubeDashboardStatus>(
-      kubernetesDashboardSchemaKey,
-      entityFactory(kubernetesDashboardSchemaKey),
       this.kubeGuid,
       new GetKubernetesDashboard(this.kubeGuid),
-      false
     ).waitForEntity$.pipe(map(status => status.entity)).pipe(
       startWith(null),
     )
