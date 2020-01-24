@@ -53,8 +53,8 @@ import { AppReducersModule } from './reducers.module';
       UsersRolesEffects,
       RecursiveDeleteEffect,
       AppEffects,
-      UserFavoritesEffect,
-    ]),
+      UserFavoritesEffect
+    ])
   ]
 })
 export class AppStoreModule { }

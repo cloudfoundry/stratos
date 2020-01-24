@@ -14,12 +14,12 @@ import {
 } from 'rxjs/operators';
 
 import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import { sortStringify } from '../../../../core/src/core/utils.service';
-import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import {
@@ -201,7 +201,7 @@ function getObservables<T = any>(
         ).subscribe(actions => actions.forEach(action => store.dispatch(action)));
       }
     }),
-    map(([prevPag, newPag]) => newPag)
+    map(([, newPag]) => newPag)
   );
 
   let lastValidationFootprint: string;
@@ -211,12 +211,12 @@ function getObservables<T = any>(
       fetchPagination$,
     )
       .pipe(
-        filter(([ent, pagination]) => {
+        filter(([, pagination]) => {
           return !!pagination && isPageReady(pagination, isLocal);
         }),
         publishReplay(1),
         refCount(),
-        tap(([ent, pagination]) => {
+        tap(([, pagination]) => {
           const newValidationFootprint = getPaginationCompareString(pagination);
           if (lastValidationFootprint !== newValidationFootprint) {
             lastValidationFootprint = newValidationFootprint;
