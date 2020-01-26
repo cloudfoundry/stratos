@@ -130,7 +130,7 @@ spec:
           claimName: "{{ .Release.Name }}-encryption-key-volume"
 ---
 {{- if .Values.autoCleanup }}
-Cleanup job will delete the created secret when the release is deleted
+# Cleanup job will delete the created secret when the release is deleted
 apiVersion: "batch/v1"
 kind: "Job"
 metadata:
