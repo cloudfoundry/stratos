@@ -124,6 +124,7 @@ import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundr
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { TableCellSidePanelComponent } from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 
 
 @NgModule({
@@ -229,7 +230,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
-    SidepanelPreviewComponent
+    SidepanelPreviewComponent,
+    TableCellSidePanelComponent
   ],
   exports: [
     ApplicationStateIconPipe,
