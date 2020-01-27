@@ -26,7 +26,7 @@ entries:
     digest: 7ff51682d63a9f72df67a5300a5a89a6ec2a1bae1caa516b9d6a98955e6061e3
     name: console
     urls:
-    - https://github.com/cloudfoundry-incubator/stratos/releases/download/2.6.0/console-helm-chart-2.6.0-c6a507ead.tgz
+    - https://github.com/cloudfoundry/stratos/releases/download/2.6.0/console-helm-chart-2.6.0-c6a507ead.tgz
     version: 2.6.0
   - apiVersion: v1
     appVersion: 2.6.0
@@ -347,7 +347,7 @@ entries:
     sources:
     - https://github.com/SUSE/stratos-metrics
     urls:
-    - https://github.com/cloudfoundry/stratos/releases/download/1.1.2-rc.2/metrics-helm-chart-1.1.2-rc.2-85daaa2.tgz
+    - https://github.com/SUSE/stratos-metrics/releases/download/1.1.2-rc.2/metrics-helm-chart-1.1.2-rc.2-85daaa2.tgz
     version: 1.1.2-rc.2
   - apiVersion: v1
     appVersion: 1.5.2
