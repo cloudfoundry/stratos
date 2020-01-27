@@ -6,19 +6,6 @@ import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes/kubernetes-entity-factory
 
 const customRoutes: Routes = [
   {
-    path: 'kubernetes',
-    loadChildren: './kubernetes/kubernetes.module#KubernetesModule',
-    data: {
-      stratosNavigation: {
-        text: 'Kubernetes',
-        matIcon: 'kubernetes',
-        matIconFont: 'stratos-icons', // TODO: get these from entity config?
-        position: 60,
-        requiresEndpointType: KUBERNETES_ENDPOINT_TYPE
-      }
-    }
-  },
-  {
     path: 'workloads',
     loadChildren: () => import('./kubernetes/workloads/workloads.module').then(m => m.WorkloadsModule),
     data: {
@@ -27,6 +14,19 @@ const customRoutes: Routes = [
         text: 'Workloads',
         matIcon: 'apps',
         // matIconFont: 'stratos-icons',
+        position: 60,
+        requiresEndpointType: KUBERNETES_ENDPOINT_TYPE
+      }
+    }
+  },
+  {
+    path: 'kubernetes',
+    loadChildren: './kubernetes/kubernetes.module#KubernetesModule',
+    data: {
+      stratosNavigation: {
+        text: 'Kubernetes',
+        matIcon: 'kubernetes',
+        matIconFont: 'stratos-icons', // TODO: get these from entity config?
         position: 64,
         requiresEndpointType: KUBERNETES_ENDPOINT_TYPE
       }

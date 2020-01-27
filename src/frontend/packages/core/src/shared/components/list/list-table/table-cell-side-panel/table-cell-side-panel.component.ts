@@ -17,7 +17,7 @@ export interface TableCellSidePanelConfig<T> {
 })
 export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustom<T> {
 
-  private actualConfig: TableCellSidePanelConfig<A>;
+  public actualConfig: TableCellSidePanelConfig<A>;
 
   private pRow: T;
   @Input('row')
