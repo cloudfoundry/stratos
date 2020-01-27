@@ -146,7 +146,7 @@ func main() {
 		log.SetLevel(level)
 	}
 
-	// Intially, default state is that DB Migrations can be performed
+	// Initially, default state is that DB Migrations can be performed
 	portalConfig.CanMigrateDatabaseSchema = true
 
 	log.Info("Configuration loaded.")
