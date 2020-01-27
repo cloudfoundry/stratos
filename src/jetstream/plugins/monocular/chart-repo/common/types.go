@@ -113,9 +113,8 @@ func (m *SyncStatusMap) Get(repo string) RepoSyncStatus {
 }
 
 const SyncStatusFailed = "Failed"
-const SyncStatusSuccess = "Synchronized"
+const SyncStatusSynced = "Synchronized"
 const SyncStatusInProgress = "Synchronizing"
-const SyncStatusStarted = "Started"
 
 type RepoDeleteStatus struct {
 	Repo   string `json:"repo"`
@@ -141,6 +140,15 @@ func (m *DeleteStatusMap) Get(repo string) RepoDeleteStatus {
 }
 
 const DeleteStatusFailed = "Failed"
-const DeleteStatusSuccess = "Deleted"
+const DeleteStatusDeleted = "Deleted"
 const DeleteStatusInProgress = "Deleting"
-const DeleteStatusStarted = "Started"
+
+type SyncJobStatusResponse struct {
+	UUID  string `json:"uuid"`
+	Status string `json:"status"`
+}
+
+type DeleteJobStatusResponse struct {
+	UUID  string `json:"uuid"`
+	Status string `json:"status"`
+}

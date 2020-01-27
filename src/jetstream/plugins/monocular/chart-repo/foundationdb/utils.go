@@ -121,7 +121,7 @@ func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHe
 	// Check if the repo has been already processed
 	if repoAlreadyProcessed(db, repoName, repoChecksum) {
 		log.WithFields(log.Fields{"url": repoURL}).Info("Skipping repository since there are no updates")
-		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusSuccess})
+		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusSynced})
 		return nil
 	}
 
@@ -195,7 +195,7 @@ func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHe
 		return err
 	}
 	log.WithFields(log.Fields{"url": repoURL}).Info("Stored repository update in cache")
-	repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusSuccess})
+	repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusSynced})
 	return nil
 }
 

@@ -33,7 +33,6 @@ import (
 
 	"github.com/helm/monocular/chartrepo/common"
 	fdb "github.com/helm/monocular/chartrepo/foundationdb"
-	responses "github.com/helm/monocular/chartrepo/utils"
 )
 
 const pathPrefix = "/v1"
@@ -93,7 +92,7 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 	var status string
 	var currentRepoStatus = fdb.GetRepoSyncStatus(repoName).Status
 	//If this repo is already syncing, don't start another sync, but return in progress response
-	activeSyncJob := currentRepoStatus == common.SyncStatusInProgress || currentRepoStatus == common.SyncStatusStarted
+	activeSyncJob := currentRepoStatus == common.SyncStatusInProgress || currentRepoStatus == common.SyncStatusInProgress
 	if activeSyncJob {
 		status = common.SyncStatusInProgress
 	} else {
@@ -119,13 +118,13 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 
 		go fdb.SyncRepo(fdbClient, fDBName, repoName, repoURL, authorizationHeader, clientKeepAlive)
 
-		status = common.SyncStatusStarted
+		status = common.SyncStatusInProgress
 	}
 
 	requestUUID, err := uuid.NewUUID()
 
 	//Return sync status in response
-	response := responses.SyncJobStatusResponse{requestUUID.String(), status}
+	response := common.SyncJobStatusResponse{requestUUID.String(), status}
 	js, err := json.Marshal(response)
 	if err != nil {
 		log.Error(err.Error())
@@ -153,7 +152,7 @@ func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 	var status string
 	var currentRepoStatus = fdb.GetRepoSyncStatus(repoName).Status
 	//If this repo is already being deleted, don't start another delete, but return in progress response
-	activeDeleteJob := currentRepoStatus == common.DeleteStatusInProgress || currentRepoStatus == common.DeleteStatusStarted
+	activeDeleteJob := currentRepoStatus == common.DeleteStatusInProgress || currentRepoStatus == common.DeleteStatusInProgress
 	if activeDeleteJob {
 		status = common.DeleteStatusInProgress
 	} else {
@@ -162,12 +161,12 @@ func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 		var clientKeepAlive = true
 
 		go fdb.DeleteRepo(fdbClient, fDBName, repoName, clientKeepAlive)
-		status = common.DeleteStatusStarted
+		status = common.DeleteStatusInProgress
 	}
 
 	//Return delete status in response
 	requestUUID, err := uuid.NewUUID()
-	response := responses.DeleteJobStatusResponse{requestUUID.String(), status}
+	response := common.DeleteJobStatusResponse{requestUUID.String(), status}
 	js, err := json.Marshal(response)
 	if err != nil {
 		log.Error(err.Error())
@@ -191,7 +190,7 @@ func RepoSyncStatus(w http.ResponseWriter, req *http.Request, params Params) {
 	status := fdb.GetRepoSyncStatus(repoName)
 
 	requestUUID, err := uuid.NewUUID()
-	response := responses.SyncJobStatusResponse{requestUUID.String(), status.Status}
+	response := common.SyncJobStatusResponse{requestUUID.String(), status.Status}
 	js, err := json.Marshal(response)
 	if err != nil {
 		log.Error(err.Error())
@@ -214,7 +213,7 @@ func RepoDeleteStatus(w http.ResponseWriter, req *http.Request, params Params) {
 
 	status := fdb.GetRepoDeleteStatus(repoName)
 	requestUUID, err := uuid.NewUUID()
-	response := responses.DeleteJobStatusResponse{requestUUID.String(), status.Status}
+	response := common.DeleteJobStatusResponse{requestUUID.String(), status.Status}
 	js, err := json.Marshal(response)
 	if err != nil {
 		log.Error(err.Error())
