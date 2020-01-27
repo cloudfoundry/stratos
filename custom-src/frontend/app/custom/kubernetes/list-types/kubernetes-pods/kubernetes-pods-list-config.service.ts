@@ -3,18 +3,28 @@ import { Store } from '@ngrx/store';
 import {
   IListDataSource,
 } from 'frontend/packages/core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { of } from 'rxjs';
 
 import { AppState } from '../../../../../../store/src/app-state';
+import {
+  TableCellSidePanelComponent,
+  TableCellSidePanelConfig,
+} from '../../../../shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
+import {
+  KubernetesResourceViewerComponent,
+  KubernetesResourceViewerConfig,
+} from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { KubernetesPod } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { createKubeAgeColumn } from '../kube-list.helper';
 import { KubernetesPodReadinessComponent } from './kubernetes-pod-readiness/kubernetes-pod-readiness.component';
 import { KubernetesPodStatusComponent } from './kubernetes-pod-status/kubernetes-pod-status.component';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
-import { PodNameLinkComponent } from './pod-name-link/pod-name-link.component';
+
+type a = TableCellSidePanelComponent<KubernetesPod, KubernetesResourceViewerConfig>;
 
 export abstract class BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
 
@@ -33,13 +43,22 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
   columns: Array<ITableColumn<KubernetesPod>> = [
     {
       columnId: 'name', headerCell: () => 'Name',
-      cellComponent: PodNameLinkComponent,
+      cellComponent: TableCellSidePanelComponent,
       sort: {
         type: 'sort',
         orderKey: 'name',
         field: 'metadata.name'
       },
       cellFlex: '3',
+      cellConfig: (pod): TableCellSidePanelConfig<KubernetesResourceViewerConfig> => ({
+        text: pod.metadata.name,
+        sidePanelComponent: KubernetesResourceViewerComponent,
+        sidePanelConfig: {
+          title: `Pod Summary: ${pod.metadata.name}`,
+          resourceKind: 'pod',
+          resource$: of(pod)
+        }
+      })
     },
     // TODO: See #150 - keep out RC bring back after demo
     // {

@@ -12,9 +12,6 @@ import { HelmReleasePodsTabComponent } from './release/tabs/helm-release-pods/he
 import {
   HelmReleaseResourceGraphComponent,
 } from './release/tabs/helm-release-resource-graph/helm-release-resource-graph.component';
-import {
-  HelmReleaseResourcePreviewComponent,
-} from './release/tabs/helm-release-resource-graph/helm-release-resource-preview/helm-release-resource-preview.component';
 import { HelmReleaseServicesTabComponent } from './release/tabs/helm-release-services/helm-release-services-tab.component';
 import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summary-tab/helm-release-summary-tab.component';
 import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
@@ -41,11 +38,9 @@ import { WorkloadsRouting } from './workloads.routing';
     HelmReleasePodsTabComponent,
     HelmReleaseServicesTabComponent,
     HelmReleaseResourceGraphComponent,
-    HelmReleaseResourcePreviewComponent,
     HelmReleaseCardComponent,
   ],
   entryComponents: [
-    HelmReleaseResourcePreviewComponent,
     HelmReleaseCardComponent
   ]
 })
