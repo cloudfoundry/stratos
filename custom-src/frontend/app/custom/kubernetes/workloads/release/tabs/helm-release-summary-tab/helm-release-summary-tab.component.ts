@@ -9,7 +9,7 @@ import { RouterNav } from 'frontend/packages/store/src/actions/router.actions';
 import { HideSnackBar, ShowSnackBar } from 'frontend/packages/store/src/actions/snackBar.actions';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import { GetHelmReleases } from '../../../store/workloads.actions';
 import { HelmReleaseChartData, HelmReleaseResource } from '../../../workload.types';
@@ -26,6 +26,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
   private busyDeletingSubject = new ReplaySubject<boolean>();
   public isBusy$: Observable<boolean>;
+  public hasResources$: Observable<boolean>;
   private readonly DEFAULT_LOADING_MESSAGE = 'Retrieving Release Details';
   public loadingMessage = this.DEFAULT_LOADING_MESSAGE;
 
@@ -110,7 +111,16 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
           resources[node.data.kind].statuses.push(node.data.status);
         });
         return Object.values(resources).sort((a: any, b: any) => a.kind.localeCompare(b.kind));
-      })
+      }),
+      publishReplay(1),
+      refCount()
+    );
+
+    this.hasResources$ = combineLatest([
+      this.chartData$,
+      this.resources$
+    ]).pipe(
+      map(([chartData, resources]) => !!chartData && !!resources)
     );
 
     this.deleteReleaseConfirmation = new ConfirmationDialogConfig(
@@ -172,5 +182,14 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     if (this.deleted) {
       this.store.dispatch(new HideSnackBar());
     }
+  }
+
+  public createRouterLink(namespace: string): string[] {
+    return [
+      `/kubernetes`,
+      this.helmReleaseHelper.endpointGuid,
+      `namespaces`,
+      namespace
+    ];
   }
 }
