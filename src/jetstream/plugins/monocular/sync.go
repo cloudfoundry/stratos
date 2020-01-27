@@ -56,7 +56,8 @@ func (m *Monocular) processSyncRequests() {
 			}
 			m.portalProxy.UpdateEndointMetadata(job.Endpoint.GUID, marshalSyncMetadata(metadata))
 			//Hit the sync server container endpoint to trigger a sync for given repo
-			err := putRequest("http://127.0.0.1:8080" + chartRepoPathPrefix + "/sync/" + job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
+			response, err := putRequest("http://127.0.0.1:8080"+chartRepoPathPrefix+"/sync/"+job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
+			//TODO kate extract status from response
 			metadata.Busy = false
 			if err != nil {
 				log.Warn("Request to sync repository failed: %v+", err)
@@ -70,7 +71,8 @@ func (m *Monocular) processSyncRequests() {
 		} else if job.Action == 1 {
 			log.Infof("Deleting Helm Repository: %s", job.Endpoint.Name)
 			//Hit the sync server container endpoint to trigger a delete for given repo
-			err := putRequest("http://127.0.0.1:8080" + chartRepoPathPrefix + "/delete/" + job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
+			response, err := putRequest("http://127.0.0.1:8080"+chartRepoPathPrefix+"/delete/"+job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
+			//TODO kate extract status from response
 			if err != nil {
 				log.Warn("Request to delete repository failed: %v+", err)
 			}
@@ -96,11 +98,12 @@ func (m *Monocular) updateMetadata(endpoint string, metadata SyncMetadata) {
 }
 
 //https://gist.github.com/maniankara/a10d19960293b34b608ac7ef068a3d63
-func putRequest(url string, data io.Reader) error {
+func putRequest(url string, data io.Reader) (*http.Response, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodPut, url, data)
+	var resp *http.Response
 	if err == nil {
-		_, err = client.Do(req)
+		resp, err = client.Do(req)
 	}
-	return err
+	return resp, err
 }

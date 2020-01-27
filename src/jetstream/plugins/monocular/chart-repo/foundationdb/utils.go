@@ -50,6 +50,7 @@ const (
 
 var netClient common.HTTPClient = &http.Client{}
 var repoSyncStatus common.SyncStatusMap
+var repoDeleteStatus common.DeleteStatusMap
 
 func init() {
 	var err error
@@ -70,7 +71,6 @@ func init() {
 // charts before fetching readmes for each chart and version pair.
 func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHeader string, clientKeepAlive bool) error {
 
-	//TODO Kate maintain repo sync status with last successful/failed/in-progress sync UUID
 	repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusInProgress})
 
 	db, closer := dbClient.Database(dbName)
@@ -494,6 +494,10 @@ func fetchAndImportFiles(db Database, name string, r common.Repo, cv common.Char
 
 func GetRepoSyncStatus(repo string) common.RepoSyncStatus {
 	return repoSyncStatus.Get(repo)
+}
+
+func GetRepoDeleteStatus(repo string) common.RepoDeleteStatus {
+	return repoDeleteStatus.Get(repo)
 }
 
 func database(client *mongo.Client, dbName string) (*mongo.Database, func()) {

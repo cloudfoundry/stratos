@@ -33,7 +33,7 @@ import (
 
 	"github.com/helm/monocular/chartrepo/common"
 	fdb "github.com/helm/monocular/chartrepo/foundationdb"
-	responses "github.com/helm/monocular/chartsvc/utils"
+	responses "github.com/helm/monocular/chartrepo/utils"
 )
 
 const pathPrefix = "/v1"
@@ -73,6 +73,7 @@ func setupRoutes() http.Handler {
 }
 
 func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
+
 	//Running in serve mode, we dont want to close the db client connection after a request
 	var clientKeepAlive = true
 
@@ -80,26 +81,7 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 		RepoURL string `json:"repoURL"`
 	}
 
-	dec := json.NewDecoder(req.Body)
-	var url syncParams
-	if err := dec.Decode(&url); err != nil {
-		log.Error(err.Error())
-		w.Header().Set("Server", "ChartRepo (On-Demand)")
-		http.Error(w, "Error decoding sync request repository URL: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	repoURL := url.RepoURL
 	repoName := params["repo"]
-
-	if repoURL == "" {
-		err := fmt.Errorf("No Repository URL provided in request for Sync action.")
-		log.Error(err.Error())
-		w.Header().Set("Server", "ChartRepo (On-Demand)")
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 	if repoName == "" {
 		err := fmt.Errorf("No Repository name provided in request for Sync action.")
 		log.Error(err.Error())
@@ -108,18 +90,42 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 		return
 	}
 
-	requestUUID, err := uuid.NewUUID()
-	if err != nil {
-		log.Error(err.Error())
-		w.Header().Set("Server", "ChartRepo (On-Demand)")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	var status string
+	var currentRepoStatus = fdb.GetRepoSyncStatus(repoName).Status
+	//If this repo is already syncing, don't start another sync, but return in progress response
+	activeSyncJob := currentRepoStatus == common.SyncStatusInProgress || currentRepoStatus == common.SyncStatusStarted
+	if activeSyncJob {
+		status = common.SyncStatusInProgress
+	} else {
+
+		dec := json.NewDecoder(req.Body)
+		var url syncParams
+		if err := dec.Decode(&url); err != nil {
+			log.Error(err.Error())
+			w.Header().Set("Server", "ChartRepo (On-Demand)")
+			http.Error(w, "Error decoding sync request repository URL: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		repoURL := url.RepoURL
+
+		if repoURL == "" {
+			err := fmt.Errorf("No Repository URL provided in request for Sync action.")
+			log.Error(err.Error())
+			w.Header().Set("Server", "ChartRepo (On-Demand)")
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		go fdb.SyncRepo(fdbClient, fDBName, repoName, repoURL, authorizationHeader, clientKeepAlive)
+
+		status = common.SyncStatusStarted
 	}
 
-	go fdb.SyncRepo(fdbClient, fDBName, repoName, repoURL, authorizationHeader, clientKeepAlive)
+	requestUUID, err := uuid.NewUUID()
 
 	//Return sync status in response
-	response := responses.SyncStatusResponse{requestUUID.String(), common.SyncStatusInProgress}
+	response := responses.SyncJobStatusResponse{requestUUID.String(), status}
 	js, err := json.Marshal(response)
 	if err != nil {
 		log.Error(err.Error())
@@ -144,14 +150,24 @@ func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	//Running in serve mode, we dont want to close the db client connection after a request
-	var clientKeepAlive = true
+	var status string
+	var currentRepoStatus = fdb.GetRepoSyncStatus(repoName).Status
+	//If this repo is already being deleted, don't start another delete, but return in progress response
+	activeDeleteJob := currentRepoStatus == common.DeleteStatusInProgress || currentRepoStatus == common.DeleteStatusStarted
+	if activeDeleteJob {
+		status = common.DeleteStatusInProgress
+	} else {
 
-	go fdb.DeleteRepo(fdbClient, fDBName, repoName, clientKeepAlive)
+		//Running in serve mode, we dont want to close the db client connection after a request
+		var clientKeepAlive = true
+
+		go fdb.DeleteRepo(fdbClient, fDBName, repoName, clientKeepAlive)
+		status = common.DeleteStatusStarted
+	}
 
 	//Return delete status in response
 	requestUUID, err := uuid.NewUUID()
-	response := responses.SyncStatusResponse{requestUUID.String(), "Deleting"}
+	response := responses.DeleteJobStatusResponse{requestUUID.String(), status}
 	js, err := json.Marshal(response)
 	if err != nil {
 		log.Error(err.Error())
@@ -169,10 +185,48 @@ func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 func RepoSyncStatus(w http.ResponseWriter, req *http.Request, params Params) {
 	repoName := params["repo"]
 	if repoName == "" {
-		log.Fatal("No Repository name provided in request for status.")
+		log.Fatal("No Repository name provided in request for sync status.")
 	}
-	//TODO kate write status to response
-	GetRepoSyncStatus(repoName)
+
+	status := fdb.GetRepoSyncStatus(repoName)
+
+	requestUUID, err := uuid.NewUUID()
+	response := responses.SyncJobStatusResponse{requestUUID.String(), status.Status}
+	js, err := json.Marshal(response)
+	if err != nil {
+		log.Error(err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Server", "ChartRepo (On-Demand)")
+	w.Write(js)
+	w.WriteHeader(200)
+}
+
+func RepoDeleteStatus(w http.ResponseWriter, req *http.Request, params Params) {
+	repoName := params["repo"]
+	if repoName == "" {
+		log.Fatal("No Repository name provided in request for delete status.")
+	}
+
+	status := fdb.GetRepoDeleteStatus(repoName)
+	requestUUID, err := uuid.NewUUID()
+	response := responses.DeleteJobStatusResponse{requestUUID.String(), status.Status}
+	js, err := json.Marshal(response)
+	if err != nil {
+		log.Error(err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Server", "ChartRepo (On-Demand)")
+	w.Write(js)
+	w.WriteHeader(200)
 }
 
 func initOnDemandEndpoint(fdbURL string, fdbName string, authHeader string, debug bool) {

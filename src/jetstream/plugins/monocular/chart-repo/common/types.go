@@ -115,3 +115,32 @@ func (m *SyncStatusMap) Get(repo string) RepoSyncStatus {
 const SyncStatusFailed = "Failed"
 const SyncStatusSuccess = "Synchronized"
 const SyncStatusInProgress = "Synchronizing"
+const SyncStatusStarted = "Started"
+
+type RepoDeleteStatus struct {
+	Repo   string `json:"repo"`
+	URL    string `json:"url"`
+	Status string `json:"status"`
+}
+
+type DeleteStatusMap struct {
+	mut       sync.Mutex
+	statusMap map[string]RepoDeleteStatus
+}
+
+func (m *DeleteStatusMap) Set(repo string, status RepoDeleteStatus) {
+	m.mut.Lock()
+	defer m.mut.Unlock()
+	m.statusMap[repo] = status
+}
+
+func (m *DeleteStatusMap) Get(repo string) RepoDeleteStatus {
+	m.mut.Lock()
+	defer m.mut.Unlock()
+	return m.statusMap[repo]
+}
+
+const DeleteStatusFailed = "Failed"
+const DeleteStatusSuccess = "Deleted"
+const DeleteStatusInProgress = "Deleting"
+const DeleteStatusStarted = "Started"
