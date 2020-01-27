@@ -146,6 +146,9 @@ func main() {
 		log.SetLevel(level)
 	}
 
+	// Intially, default state is that DB Migrations can be performed
+	portalConfig.CanMigrateDatabaseSchema = true
+
 	log.Info("Configuration loaded.")
 	isUpgrading := isConsoleUpgrading(envLookup)
 
@@ -298,8 +301,6 @@ func main() {
 
 	portalProxy.Plugins = initedPlugins
 	log.Info("Plugins initialized")
-
-	portalProxy.SetCanPerformMigrations(portalConfig.CanMigrateDatabaseSchema)
 
 	var needSetupMiddleware bool
 
