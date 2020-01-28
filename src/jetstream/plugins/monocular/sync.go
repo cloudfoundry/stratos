@@ -6,6 +6,9 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
+
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/helm/monocular/chartrepo/common"
@@ -22,7 +25,11 @@ type SyncMetadata struct {
 	Busy   bool   `json:"busy"`
 }
 
-const chartRepoPathPrefix = "/v1"
+const (
+	chartRepoPathPrefix = "/v1"
+	statusPollInterval = 30
+	statusPollTimeout = 240
+)
 
 // Sync Channel
 var syncChan = make(chan SyncJob, 100)
@@ -62,23 +69,32 @@ func (m *Monocular) processSyncRequests() {
 			if err != nil {
 				log.Warn("Request to sync repository failed: %v", err)
 				metadata.Status = "Sync Failed"
-				m.updateMetadata(job.Endpoint.GUID, metadata)
 			} else {
-			//TODO kate extract status from response
-			statusResponse := common.SyncJobStatusResponse{}
-			defer response.Body.Close()
-			err := json.NewDecoder(response.Body).Decode(&statusResponse)
-			if err != nil { 
-				log.Errorf("Unable to parse response from chart-repo server, sync request may not be processed: %v", err)
-				metadata.Status = "Sync Failed"
-			} else if statusResponse != common.SyncStatusInProgress {
-				log.Errorf("Failed to synchronize repo: %v, response: %v, statusResponse", job.Endpoint.Name, err)
-				metadata.Status = "Sync Failed"
-			} else {
-				metadata.Status = "Synchronizing"
-				m.updateMetadata(job.Endpoint.GUID, metadata)
+				//TODO kate extract status from response
+				statusResponse := common.SyncJobStatusResponse{}
+				defer response.Body.Close()
+				err := json.NewDecoder(response.Body).Decode(&statusResponse)
+				if err != nil { 
+					log.Errorf("Unable to parse response from chart-repo server, sync request may not be processed: %v", err)
+					metadata.Status = "Sync Failed"
+				} else if statusResponse.Status != common.SyncStatusInProgress {
+					log.Errorf("Failed to synchronize repo: %v, response: %v, statusResponse", job.Endpoint.Name, err)
+					metadata.Status = "Sync Failed"
+				} else {
+					metadata.Status = "Synchronizing"
+					m.updateMetadata(job.Endpoint.GUID, metadata)
+					log.Infof("Sync in progress for repository: %s", job.Endpoint.APIEndpoint.String())
+					//Now wait for success
+					err := waitForSyncComplete(job.Endpoint.APIEndpoint.String())
+					if err == nil {
+						metadata.Status = "Synchronized"
+					} else {
+						metadata.Status = "Sync Failed"
+						log.Errorf("Failed to fetch sync status for repo: %v, v%", job.Endpoint.Name, err)
+					}
+				}
 			}
-			log.Infof("Sync in progress for repository: %s", job.Endpoint.APIEndpoint.String())
+			m.updateMetadata(job.Endpoint.GUID, metadata)
 		} else if job.Action == 1 {
 			log.Infof("Deleting Helm Repository: %s", job.Endpoint.Name)
 			//Hit the sync server container endpoint to trigger a delete for given repo
@@ -87,13 +103,12 @@ func (m *Monocular) processSyncRequests() {
 			if err != nil {
 				log.Warn("Request to delete repository failed: %v+", err)
 			} else {
-				//TODO kate extract status from response
 				statusResponse := common.SyncJobStatusResponse{}
 				defer response.Body.Close()
 				err := json.NewDecoder(response.Body).Decode(&statusResponse)
 				if err != nil { 
 					log.Errorf("Unable to parse response from chart-repo server, delete request may not be processed: %v", err)
-				} else if statusResponse != common.DeleteStatusInProgress {
+				} else if statusResponse.Status != common.DeleteStatusInProgress {
 					log.Errorf("Failed to delete repo: %v, response: %v, statusResponse", job.Endpoint.Name, err)
 				}
 			}	
@@ -101,6 +116,24 @@ func (m *Monocular) processSyncRequests() {
 	}
 
 	log.Debug("processSyncRequests finished")
+}
+
+func waitForSyncComplete (url string) error {
+	return wait.Poll(statusPollInterval * time.Second, time.Duration(statusPollTimeout)*time.Second, func() (bool, error) {
+		var complete = false
+		resp, err := http.Get(url)
+		defer resp.Body.Close()
+		if err != nil {
+			statusResponse := common.SyncJobStatusResponse{}
+			err := json.NewDecoder(resp.Body).Decode(&statusResponse)
+			if err != nil {
+				if statusResponse.Status == common.SyncStatusSynced {
+					complete = true
+				}
+			}
+		}
+		return complete, err
+	})
 }
 
 func marshalSyncMetadata(metadata SyncMetadata) string {
@@ -120,6 +153,17 @@ func (m *Monocular) updateMetadata(endpoint string, metadata SyncMetadata) {
 
 //https://gist.github.com/maniankara/a10d19960293b34b608ac7ef068a3d63
 func putRequest(url string, data io.Reader) (*http.Response, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPut, url, data)
+	var resp *http.Response
+	if err == nil {
+		resp, err = client.Do(req)
+	}
+	return resp, err
+}
+
+//https://gist.github.com/maniankara/a10d19960293b34b608ac7ef068a3d63
+func getRequest(url string, data io.Reader) (*http.Response, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodPut, url, data)
 	var resp *http.Response

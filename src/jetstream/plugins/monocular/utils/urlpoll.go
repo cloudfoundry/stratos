@@ -11,7 +11,7 @@ import (
 
 const (
 	numPollers     = 2                // number of Poller goroutines to launch
-	pollInterval   = 60 * time.Second // how often to poll each URL
+	pollInterval   = 20 * time.Second // how often to poll each URL
 	statusInterval = 10 * time.Second // how often to log status to stdout
 	errTimeout     = 10 * time.Second // back-off timeout on error
 )
@@ -79,7 +79,7 @@ func (r *Resource) PollHead() string {
 
 // Poll executes an HTTP GET request for url
 // and returns the HTTP status string, body as a string.
-func (r *Resource) PollGet() string, error {
+func (r *Resource) PollGet() (string, string, error) {
 
 	var body = ""
 	resp, err := http.Get(r.url)
