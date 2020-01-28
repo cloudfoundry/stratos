@@ -27,9 +27,11 @@
 }
 
 .setup {
-  display: flex;
-  flex: 1;
-  margin: 0 100px;
+  &__container {
+    display: flex;
+    flex: 1;
+    margin: 0 100px;
+  }
 
   &__intro {
     font-size: 28px;
