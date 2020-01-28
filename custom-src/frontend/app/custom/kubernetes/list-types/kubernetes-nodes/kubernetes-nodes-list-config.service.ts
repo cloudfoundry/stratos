@@ -56,7 +56,6 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
         conditionType: ConditionType.Ready
       },
       cellComponent: ConditionCellComponent,
-
       sort: getConditionSort(ConditionType.Ready),
       cellFlex: '2',
     },

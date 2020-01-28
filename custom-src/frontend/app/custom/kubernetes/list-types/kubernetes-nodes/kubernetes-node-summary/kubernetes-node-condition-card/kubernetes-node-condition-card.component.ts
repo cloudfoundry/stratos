@@ -5,7 +5,4 @@ import { Component } from '@angular/core';
   templateUrl: './kubernetes-node-condition-card.component.html',
   styleUrls: ['./kubernetes-node-condition-card.component.scss']
 })
-export class KubernetesNodeConditionCardComponent {
-
-
-}
+export class KubernetesNodeConditionCardComponent { }
