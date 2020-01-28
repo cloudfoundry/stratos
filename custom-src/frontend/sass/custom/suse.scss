@@ -39,6 +39,11 @@ body.stratos {
     color: #333;
   }
 
+  .setup .page-header .mat-toolbar.mat-primary {
+    background-color: $suse-primary-color;
+    color: $suse-text;
+  }
+
   app-page-subheader {
     .page-subheader {
       background-color: #fff;
