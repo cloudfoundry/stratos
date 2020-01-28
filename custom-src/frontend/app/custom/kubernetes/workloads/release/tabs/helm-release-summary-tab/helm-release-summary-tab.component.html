@@ -17,7 +17,7 @@
             {{ release.chart.metadata.appVersion || '-' }}
           </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Namespace">
-            <a [routerLink]="createRouterLink(release.namespace)">{{ release.namespace | titlecase }}</a>
+            <a [routerLink]="createNamespaceLink(release.namespace)">{{ release.namespace | titlecase }}</a>
           </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Release Version">{{ release.version }}
           </app-metadata-item>
@@ -38,7 +38,8 @@
         <app-tile-group *ngIf="chartData$ | async as chartData">
           <app-tile>
             <mat-card class="full-card">
-              <app-ring-chart [data]="chartData.podsChartData" label="Pods"></app-ring-chart>
+              <app-ring-chart [customColors]="podChartColors" [data]="chartData.podsChartData" label="Pods">
+              </app-ring-chart>
             </mat-card>
           </app-tile>
           <app-tile>

@@ -33,16 +33,26 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   public podsChartData = [];
   public containersChartData = [];
 
+  private successChartColor = '#4DD3A7';
+
+  public podChartColors = [
+    {
+      name: 'Running',
+      value: this.successChartColor
+    },
+  ];
+
   public containersChartColors = [
     {
       name: 'Ready',
-      value: '#4DD3A7'
+      value: this.successChartColor
     },
     {
       name: 'Not Ready',
       value: '#E7727D'
     }
   ];
+
 
   public iconMappings = {
     Pod: {
@@ -184,7 +194,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     }
   }
 
-  public createRouterLink(namespace: string): string[] {
+  public createNamespaceLink(namespace: string): string[] {
     return [
       `/kubernetes`,
       this.helmReleaseHelper.endpointGuid,
