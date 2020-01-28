@@ -49,8 +49,8 @@ const (
 )
 
 var netClient common.HTTPClient = &http.Client{}
-var repoSyncStatus common.SyncStatusMap
-var repoDeleteStatus common.DeleteStatusMap
+var repoSyncStatus *common.SyncStatusMap = common.NewSyncStatusMap()
+var repoDeleteStatus *common.DeleteStatusMap = common.NewDeleteStatusMap()
 
 func init() {
 	var err error
@@ -492,12 +492,20 @@ func fetchAndImportFiles(db Database, name string, r common.Repo, cv common.Char
 	return nil
 }
 
-func GetRepoSyncStatus(repo string) common.RepoSyncStatus {
-	return repoSyncStatus.Get(repo)
+func GetRepoSyncStatus(repo string) (common.RepoSyncStatus, error) {
+	status := repoSyncStatus.Get(repo)
+	if status == (common.RepoSyncStatus{}) {
+		return status, errors.New("Repo does not exist in database.")
+	}
+	return status, nil
 }
 
-func GetRepoDeleteStatus(repo string) common.RepoDeleteStatus {
-	return repoDeleteStatus.Get(repo)
+func GetRepoDeleteStatus(repo string) (common.RepoDeleteStatus, error) {
+	status := repoDeleteStatus.Get(repo)
+	if status == (common.RepoDeleteStatus{}) {
+		return status, errors.New("Repo does not exist in database.")
+	}
+	return status, nil
 }
 
 func database(client *mongo.Client, dbName string) (*mongo.Database, func()) {

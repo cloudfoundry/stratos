@@ -100,6 +100,10 @@ type SyncStatusMap struct {
 	statusMap map[string]RepoSyncStatus
 }
 
+func NewSyncStatusMap() *SyncStatusMap {
+	return &SyncStatusMap{sync.Mutex{}, make(map[string]RepoSyncStatus)}
+}
+
 func (m *SyncStatusMap) Set(repo string, status RepoSyncStatus) {
 	m.mut.Lock()
 	defer m.mut.Unlock()
@@ -127,6 +131,10 @@ type DeleteStatusMap struct {
 	statusMap map[string]RepoDeleteStatus
 }
 
+func NewDeleteStatusMap() *DeleteStatusMap {
+	return &DeleteStatusMap{sync.Mutex{}, make(map[string]RepoDeleteStatus)}
+}
+
 func (m *DeleteStatusMap) Set(repo string, status RepoDeleteStatus) {
 	m.mut.Lock()
 	defer m.mut.Unlock()
@@ -144,11 +152,11 @@ const DeleteStatusDeleted = "Deleted"
 const DeleteStatusInProgress = "Deleting"
 
 type SyncJobStatusResponse struct {
-	UUID  string `json:"uuid"`
+	UUID   string `json:"uuid"`
 	Status string `json:"status"`
 }
 
 type DeleteJobStatusResponse struct {
-	UUID  string `json:"uuid"`
+	UUID   string `json:"uuid"`
 	Status string `json:"status"`
 }

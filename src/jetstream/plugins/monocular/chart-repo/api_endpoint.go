@@ -90,9 +90,10 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 	}
 
 	var status string
-	var currentRepoStatus = fdb.GetRepoSyncStatus(repoName).Status
 	//If this repo is already syncing, don't start another sync, but return in progress response
-	activeSyncJob := currentRepoStatus == common.SyncStatusInProgress || currentRepoStatus == common.SyncStatusInProgress
+	//Ignore error return value when fetching status - we don't care if the repo does not exist yet
+	currentRepoStatus, _ := fdb.GetRepoSyncStatus(repoName)
+	activeSyncJob := currentRepoStatus.Status == common.SyncStatusInProgress || currentRepoStatus.Status == common.SyncStatusInProgress
 	if activeSyncJob {
 		status = common.SyncStatusInProgress
 	} else {
@@ -136,12 +137,11 @@ func OnDemandSync(w http.ResponseWriter, req *http.Request, params Params) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Server", "ChartRepo (On-Demand)")
 	w.Write(js)
-	w.WriteHeader(200)
 }
 
 func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 	repoName := params["repo"]
-
+	requestUUID, err := uuid.NewUUID()
 	if repoName == "" {
 		err := fmt.Errorf("No Repository name provided in request for Delete action.")
 		log.Error(err.Error())
@@ -150,9 +150,15 @@ func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 	}
 
 	var status string
-	var currentRepoStatus = fdb.GetRepoSyncStatus(repoName).Status
+	currentRepoStatus, err := fdb.GetRepoSyncStatus(repoName)
+	if err != nil {
+		log.Errorf("Request: requestUUID, %v", err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
 	//If this repo is already being deleted, don't start another delete, but return in progress response
-	activeDeleteJob := currentRepoStatus == common.DeleteStatusInProgress || currentRepoStatus == common.DeleteStatusInProgress
+	activeDeleteJob := currentRepoStatus.Status == common.DeleteStatusInProgress || currentRepoStatus.Status == common.DeleteStatusInProgress
 	if activeDeleteJob {
 		status = common.DeleteStatusInProgress
 	} else {
@@ -165,7 +171,7 @@ func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 	}
 
 	//Return delete status in response
-	requestUUID, err := uuid.NewUUID()
+	
 	response := common.DeleteJobStatusResponse{requestUUID.String(), status}
 	js, err := json.Marshal(response)
 	if err != nil {
@@ -178,7 +184,6 @@ func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Server", "ChartRepo (On-Demand)")
 	w.Write(js)
-	w.WriteHeader(200)
 }
 
 func RepoSyncStatus(w http.ResponseWriter, req *http.Request, params Params) {
@@ -187,13 +192,19 @@ func RepoSyncStatus(w http.ResponseWriter, req *http.Request, params Params) {
 		log.Fatal("No Repository name provided in request for sync status.")
 	}
 
-	status := fdb.GetRepoSyncStatus(repoName)
-
 	requestUUID, err := uuid.NewUUID()
+	status, err := fdb.GetRepoSyncStatus(repoName)
+	if err != nil {
+		log.Errorf("Request: requestUUID, %v, %v", requestUUID, err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	
 	response := common.SyncJobStatusResponse{requestUUID.String(), status.Status}
 	js, err := json.Marshal(response)
 	if err != nil {
-		log.Error(err.Error())
+		log.Errorf("Request: requestUUID, %v, %v", requestUUID, err.Error())
 		w.Header().Set("Server", "ChartRepo (On-Demand)")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -202,7 +213,6 @@ func RepoSyncStatus(w http.ResponseWriter, req *http.Request, params Params) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Server", "ChartRepo (On-Demand)")
 	w.Write(js)
-	w.WriteHeader(200)
 }
 
 func RepoDeleteStatus(w http.ResponseWriter, req *http.Request, params Params) {
@@ -211,12 +221,19 @@ func RepoDeleteStatus(w http.ResponseWriter, req *http.Request, params Params) {
 		log.Fatal("No Repository name provided in request for delete status.")
 	}
 
-	status := fdb.GetRepoDeleteStatus(repoName)
 	requestUUID, err := uuid.NewUUID()
+	status, err := fdb.GetRepoDeleteStatus(repoName)
+	if err != nil {
+		log.Errorf("Request: requestUUID, %v", err.Error())
+		w.Header().Set("Server", "ChartRepo (On-Demand)")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
 	response := common.DeleteJobStatusResponse{requestUUID.String(), status.Status}
 	js, err := json.Marshal(response)
 	if err != nil {
-		log.Error(err.Error())
+		log.Errorf("Request: requestUUID, %v", err.Error())
 		w.Header().Set("Server", "ChartRepo (On-Demand)")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -225,7 +242,6 @@ func RepoDeleteStatus(w http.ResponseWriter, req *http.Request, params Params) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Server", "ChartRepo (On-Demand)")
 	w.Write(js)
-	w.WriteHeader(200)
 }
 
 func initOnDemandEndpoint(fdbURL string, fdbName string, authHeader string, debug bool) {

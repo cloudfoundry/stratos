@@ -28,7 +28,7 @@ type SyncMetadata struct {
 const (
 	chartRepoPathPrefix = "/v1"
 	statusPollInterval = 30
-	statusPollTimeout = 240
+	statusPollTimeout = 320
 )
 
 // Sync Channel
@@ -85,12 +85,12 @@ func (m *Monocular) processSyncRequests() {
 					m.updateMetadata(job.Endpoint.GUID, metadata)
 					log.Infof("Sync in progress for repository: %s", job.Endpoint.APIEndpoint.String())
 					//Now wait for success
-					err := waitForSyncComplete(job.Endpoint.APIEndpoint.String())
+					err := waitForSyncComplete("http://127.0.0.1:8080"+chartRepoPathPrefix+"/status/"+job.Endpoint.Name)
 					if err == nil {
 						metadata.Status = "Synchronized"
 					} else {
 						metadata.Status = "Sync Failed"
-						log.Errorf("Failed to fetch sync status for repo: %v, v%", job.Endpoint.Name, err)
+						log.Errorf("Failed to fetch sync status for repo: %v, %v", job.Endpoint.Name, err)
 					}
 				}
 			}
@@ -121,15 +121,15 @@ func (m *Monocular) processSyncRequests() {
 func waitForSyncComplete (url string) error {
 	return wait.Poll(statusPollInterval * time.Second, time.Duration(statusPollTimeout)*time.Second, func() (bool, error) {
 		var complete = false
+		log.Infof("Making GET request to: %v", url)
 		resp, err := http.Get(url)
 		defer resp.Body.Close()
-		if err != nil {
+		if err == nil {
 			statusResponse := common.SyncJobStatusResponse{}
 			err := json.NewDecoder(resp.Body).Decode(&statusResponse)
-			if err != nil {
-				if statusResponse.Status == common.SyncStatusSynced {
-					complete = true
-				}
+			log.Infof("%v",statusResponse)
+			if err == nil && statusResponse.Status == common.SyncStatusSynced {
+				complete = true
 			}
 		}
 		return complete, err
