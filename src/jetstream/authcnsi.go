@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,15 +8,13 @@ import (
 	"net/url"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/labstack/echo"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
-
 )
-
 
 // CFAdminIdentifier - The scope that Cloud Foundry uses to convey administrative level perms
 const CFAdminIdentifier = "cloud_controller.admin"
@@ -184,7 +181,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 				p.ClearCNSIToken(cnsiRecord, userID)
 				return nil, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
-					"Could not connect to the endpoint",
+					"Could not connect to the endpoint", // TODO: RC/NWM
 					"Could not connect to the endpoint: %s", err)
 			}
 

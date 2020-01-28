@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"fmt"
 	"net/url"
 	"strconv"
 
@@ -64,7 +65,12 @@ func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interface
 	}
 
 	if response.StatusCode >= 400 {
-		return errors.New("Unable to connect to endpoint")
+		// isSSLRelatedError
+		// errorResponse := []byte(fmt.Sprintf("%q", response.Body))
+		// log.Errorf("Validate: %+v", errorResponse)
+		// TODO: RC/NWM
+		// WARN[Tue Jan 28 15:26:54 GMT 2020] Passthrough response: URL: https://192.168.39.75:8443/api/v1/pods?limit=1, Status Code: 500, Status: Error proxing request, Content Type: Unknown, Length: -1
+		return fmt.Errorf("Unable to connect to endpoint: %s", response.Error.Error())
 	}
 
 	return nil
