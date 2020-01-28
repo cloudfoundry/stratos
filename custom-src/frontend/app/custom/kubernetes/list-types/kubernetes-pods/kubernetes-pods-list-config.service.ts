@@ -24,8 +24,6 @@ import { KubernetesPodReadinessComponent } from './kubernetes-pod-readiness/kube
 import { KubernetesPodStatusComponent } from './kubernetes-pod-status/kubernetes-pod-status.component';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 
-type a = TableCellSidePanelComponent<KubernetesPod, KubernetesResourceViewerConfig>;
-
 export abstract class BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
 
   static namespaceColumnId = 'namespace';
@@ -83,7 +81,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
       columnId: 'node', headerCell: () => 'Node',
       cellDefinition: {
         valuePath: 'spec.nodeName',
-        getLink: () => `/kubernetes/${this.kubeId}/summary`
+        getLink: pod => `/kubernetes/${this.kubeId}/nodes/${pod.spec.nodeName}/summary`
       },
       sort: {
         type: 'sort',
