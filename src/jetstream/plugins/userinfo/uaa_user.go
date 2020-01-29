@@ -135,9 +135,7 @@ func (userInfo *UaaUserInfo) doAPIRequest(sessionUser string, url string, echoRe
 		return 0, nil, nil, err
 	}
 
-	// Copy original headers through, except custom portal-proxy Headers
-	fwdHeaders(echoReq, req)
-
+	// Add the authorization header
 	req.Header.Set("Authorization", "bearer "+tokenRec.AuthToken)
 
 	client := userInfo.portalProxy.GetHttpClient(userInfo.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation)
@@ -155,25 +153,6 @@ func (userInfo *UaaUserInfo) doAPIRequest(sessionUser string, url string, echoRe
 	return res.StatusCode, data, &res.Header, err
 }
 
-func fwdHeaders(uaaReq *http.Request, req *http.Request) {
-	log.Debug("fwdHeaders")
-
-	for k, headers := range uaaReq.Header {
-		switch {
-		// Skip these
-		//  - "Referer" causes CF to fail with a 403
-		//  - "Connection", "x-cap-*" and "Cookie" are consumed by us
-		case k == "Connection", k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cap-"):
-
-		// Forwarding everything else
-		default:
-			for _, h := range headers {
-				req.Header.Add(k, h)
-			}
-		}
-	}
-}
-
 func fwdResponseHeaders(src *http.Header, dest http.Header) {
 	log.Debug("fwdResponseHeaders")
 
@@ -182,7 +161,9 @@ func fwdResponseHeaders(src *http.Header, dest http.Header) {
 		// Skip these
 		//  - "Referer" causes CF to fail with a 403
 		//  - "Connection", "x-cap-*" and "Cookie" are consumed by us
-		case k == "Connection", k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cap-"):
+		case k == "Connection", k == "Cookie", k == "Referer", k == "Accept-Encoding",
+			strings.HasPrefix(strings.ToLower(k), "x-cap-"),
+			strings.HasPrefix(strings.ToLower(k), "x-forwarded-"):
 
 		// Forwarding everything else
 		default:
