@@ -6,8 +6,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 )
 
 // LocalUserInfo is a plugin to fetch user info
@@ -21,21 +21,21 @@ func InitLocalUserInfo(portalProxy interfaces.PortalProxy) Provider {
 }
 
 // GetUserInfo gets info for the specified user
-func (userInfo *LocalUserInfo) GetUserInfo(id string) (int, []byte, error) {
+func (userInfo *LocalUserInfo) GetUserInfo(id string) (int, []byte, *http.Header, error) {
 
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(userInfo.portalProxy.GetDatabaseConnection())
 	if err != nil {
-		return 500, nil, err
+		return 500, nil, nil, err
 	}
 
 	user, err := localUsersRepo.FindUser(id)
 	if err != nil {
-		return 500, nil, err
+		return 500, nil, nil, err
 	}
 
 	uaaUser := &uaaUser{
-		ID: id,
-		Origin: "local",
+		ID:       id,
+		Origin:   "local",
 		Username: user.Username,
 	}
 
@@ -55,14 +55,14 @@ func (userInfo *LocalUserInfo) GetUserInfo(id string) (int, []byte, error) {
 
 	jsonString, err := json.Marshal(uaaUser)
 	if err != nil {
-		return 500, nil, err
+		return 500, nil, nil, err
 	}
 
-	return 200, jsonString, nil
+	return 200, jsonString, nil, nil
 }
 
 // UpdateUserInfo updates the user's info
-func (userInfo *LocalUserInfo) UpdateUserInfo(profile *uaaUser) (error) {
+func (userInfo *LocalUserInfo) UpdateUserInfo(profile *uaaUser) error {
 
 	// Fetch the user, make updates and save
 	id := profile.ID
@@ -85,7 +85,7 @@ func (userInfo *LocalUserInfo) UpdateUserInfo(profile *uaaUser) (error) {
 
 	if len(profile.Emails) == 1 {
 		email := profile.Emails[0]
-		if len(email.Value) >0 {
+		if len(email.Value) > 0 {
 			user.Email = email.Value
 		}
 	}
@@ -102,7 +102,7 @@ func (userInfo *LocalUserInfo) UpdateUserInfo(profile *uaaUser) (error) {
 }
 
 // UpdatePassword updates the user's password
-func (userInfo *LocalUserInfo) UpdatePassword(id string, passwordInfo *passwordChangeInfo) (error) {
+func (userInfo *LocalUserInfo) UpdatePassword(id string, passwordInfo *passwordChangeInfo) error {
 
 	// Fetch the user, make updates and save
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(userInfo.portalProxy.GetDatabaseConnection())
