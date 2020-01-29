@@ -268,7 +268,7 @@ func (r *HelmRelease) processPodOwners(pod v1.Pod) {
 				r.addJobForResource(owner.Kind, owner.APIVersion, owner.Name)
 			}
 		} else {
-			log.Warn("Unexpected Pod owner kind: %s", owner.Kind)
+			log.Debugf("Unexpected Pod owner kind: %s", owner.Kind)
 		}
 	}
 }
