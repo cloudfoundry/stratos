@@ -1,3 +1,5 @@
+import { KubernetesPodExpandedStatus } from '../services/kubernetes-expanded-state';
+
 export interface KubernetesInfo {
   nodes: {};
   pods: {};
@@ -199,6 +201,8 @@ export interface KubernetesPod extends BasicKubeAPIResource {
   metadata: Metadata;
   status: PodStatus;
   spec: PodSpec;
+  deletionTimestamp?: any;
+  expandedStatus: KubernetesPodExpandedStatus;
 }
 
 export enum KubernetesStatus {
@@ -226,10 +230,14 @@ export interface PodStatus {
   reason?: string;
   hostIP?: string;
   podIP?: string;
+  podIPs?: {
+    ip: string
+  }[];
   startTime?: Date;
   containerStatuses?: ContainerStatus[];
   qosClass?: string;
   initContainerStatuses?: ContainerStatus[];
+  nominatedNodeName: string;
 }
 export interface KubernetesCondition {
   type: ConditionType;
@@ -252,6 +260,9 @@ export interface ContainerStatus {
 export interface State {
   [key: string]: {
     startedAt: Date;
+    reason: string;
+    signal: number;
+    exitCode: number
   };
 }
 
@@ -271,7 +282,9 @@ export interface PodSpec {
   hostNetwork?: boolean;
   initContainers: InitContainer[];
   // nodeSelector?: NodeSelector;
+  readinessGates: any[];
 }
+
 export interface InitContainer {
   name: string;
   image: string;

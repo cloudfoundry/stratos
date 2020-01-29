@@ -11,7 +11,9 @@ import { Observable, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, map, share, switchMap } from 'rxjs/operators';
 
+import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';
 import { getKubeAPIResourceGuid } from '../../../store/kube.selectors';
+import { KubernetesPod } from '../../../store/kube.types';
 import { getHelmReleaseServiceId } from '../../store/workloads-entity-factory';
 import {
   GetHelmReleaseGraph,
@@ -110,9 +112,10 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
         if (messageObj.kind === 'ReleasePrefix') {
           prefix = messageObj.data;
         } else if (messageObj.kind === 'Pods') {
-          const pods = messageObj.data;
+          const pods: KubernetesPod[] = messageObj.data || [];
+          const podsWithInfo: KubernetesPod[] = pods.map(pod => KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod));
           const releasePodsAction = new GetHelmReleasePods(this.helmReleaseHelper.endpointGuid, this.helmReleaseHelper.releaseTitle);
-          this.populateList(releasePodsAction, pods, getKubeAPIResourceGuid);
+          this.populateList(releasePodsAction, podsWithInfo, getKubeAPIResourceGuid);
         } else if (messageObj.kind === 'Graph') {
           const graph: HelmReleaseGraph = messageObj.data;
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
