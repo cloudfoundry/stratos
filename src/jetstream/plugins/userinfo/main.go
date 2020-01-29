@@ -97,17 +97,18 @@ func (userInfo *UserInfo) userInfo(c echo.Context) error {
 	}
 
 	provider := userInfo.getProvider(c)
-	statusCode, body, err := provider.GetUserInfo(id)
+	statusCode, body, headers, err := provider.GetUserInfo(id)
 	if err != nil {
 		return err
 	}
+
+	fwdResponseHeaders(headers, c.Response().Header())
 
 	c.Response().WriteHeader(statusCode)
 	_, _ = c.Response().Write(body)
 
 	return nil
 }
-
 
 // update the user info for the current user
 func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
@@ -142,8 +143,8 @@ func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 			"Unable to update user profile",
 			"Unable to update user profile: %v", err,
 		)
-	}		
-	
+	}
+
 	c.Response().WriteHeader(http.StatusOK)
 
 	return nil
@@ -182,8 +183,8 @@ func (userInfo *UserInfo) updateUserPassword(c echo.Context) error {
 			"Unable to update user password",
 			"Unable to update user password: %v", err,
 		)
-	}		
-	
+	}
+
 	c.Response().WriteHeader(http.StatusOK)
 
 	return nil
