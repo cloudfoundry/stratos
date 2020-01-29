@@ -61,8 +61,6 @@ func (r *HelmReleaseGraph) AddLink(source, target string) {
 // ParseManifest
 func (r *HelmReleaseGraph) ParseManifest(release *HelmRelease) {
 	for _, item := range release.Resources {
-		log.Warn(item.Kind)
-
 		node := ReleaseNode{
 			ID:    fmt.Sprintf("%s-%s", item.Kind, item.Metadata.Name),
 			Label: item.Metadata.Name,
@@ -150,7 +148,7 @@ func (r *HelmReleaseGraph) generateTemporaryNode(id string) {
 }
 
 func getShortResourceId(kind, name string) string {
-	// // TODO: FIX
+	// // TODO: FIX - empty kind is a pod
 	// if len(kind) == 0 {
 	// 	kind = "Pod"
 	// }

@@ -208,7 +208,7 @@ func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			}
 			return shadowError.HTTPError
 		} else if jetstreamError, ok := err.(interfaces.JetstreamError); ok {
-			return jetstreamError.HTTPError()
+			return jetstreamError.HTTPErrorInContext(c)
 		}
 
 		return err

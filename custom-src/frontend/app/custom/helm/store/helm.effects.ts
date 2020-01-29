@@ -161,18 +161,25 @@ export class HelmEffects {
       } else if (err.message) {
         // Http error
         return err.message;
+      } else if (err.error.status) {
+        // Jetstream error
+        return err.error.status;
       }
     }
-    return 'Monocular API request error';
+    return 'Helm API request error';
   }
 
   private createHelmError(err: any): { status: string, message: string } {
-    const jetstreamError = isJetstreamError(err);
+    let unwrapped = err;
+    if (err.error) {
+      unwrapped = err.error;
+    }
+    const jetstreamError = isJetstreamError(unwrapped);
     if (jetstreamError) {
       // Wrapped error
       return {
         status: jetstreamError.error.statusCode.toString(),
-        message: this.createHelmErrorMessage(jetstreamError.errorResponse)
+        message: this.createHelmErrorMessage(jetstreamError)
       };
     }
     return {

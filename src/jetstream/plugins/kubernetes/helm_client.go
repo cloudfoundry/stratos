@@ -78,11 +78,10 @@ func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, nam
 	rcg := newJetStreamRCGetter([]byte(kubeconfigcontents), hc.Folder, namespace)
 
 	var nopLogger = func(a string, b ...interface{}) {
-		log.Infof(a, b)
+		log.Debugf(a, b)
 	}
 
 	var actionConfig action.Configuration
-	// kubeconfig := kube.GetConfig(kubeConfigPath, "kube", namespace)
 
 	kc := kube.New(rcg)
 	kc.Log = nopLogger
@@ -101,7 +100,6 @@ func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, nam
 	actionConfig.KubeClient = kc
 	actionConfig.Releases = store
 	actionConfig.Log = nopLogger
-	//actionConfig.
 
 	return &actionConfig, hc, nil
 }

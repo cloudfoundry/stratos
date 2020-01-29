@@ -135,10 +135,7 @@ func (r *HelmRelease) processResource(obj runtime.Object) {
 			t.Resource = obj
 			t.Manifest = true
 			r.setResource(t)
-			log.Infof("Got resource: %s : %s", t.Kind, t.Metadata.Name)
-			// if t.Kind == "Deployment" || t.Kind == "StatefulSet" || t.Kind == "DaemonSet" || t.Kind =={
-			// 	r.processController(t)
-			// }
+			log.Debugf("Got resource: %s : %s", t.Kind, t.Metadata.Name)
 			r.processController(t)
 			r.addJobForResource(t.Kind, t.APIVersion, t.Metadata.Name)
 		} else {
@@ -183,7 +180,7 @@ func (r *HelmRelease) processController(kres KubeResource) {
 		r.processPodSelector(kres, o.Spec.Selector)
 	default:
 		// Ignore - not a controller
-		log.Errorf("Ignoring: non-controller type: %s", reflect.TypeOf(o))
+		log.Debugf("Ignoring: non-controller type: %s", reflect.TypeOf(o))
 	}
 }
 

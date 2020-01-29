@@ -1,7 +1,6 @@
 package helm
 
 import (
-	log "github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 )
@@ -10,11 +9,16 @@ import (
 type NodeStatus string
 
 const (
-	NodeOK      NodeStatus = "ok"
-	NodeWarn    NodeStatus = "warn"
-	NodeError   NodeStatus = "error"
+	// NodeOK indicates OK Status
+	NodeOK NodeStatus = "ok"
+	// NodeWarn indicates Warning Status
+	NodeWarn NodeStatus = "warn"
+	// NodeError indicates Error Status
+	NodeError NodeStatus = "error"
+	// NodeUnknown indicates status is unknown
 	NodeUnknown NodeStatus = "unknown"
-	NodeNone    NodeStatus = "none"
+	// NodeNone indicates node has no status
+	NodeNone NodeStatus = "none"
 )
 
 func mapDeploymentStatus(replicas, ready, available, unavailable int32) NodeStatus {
@@ -78,7 +82,5 @@ func mapPodStatus(phase v1.PodPhase) NodeStatus {
 	case v1.PodPending:
 		status = NodeWarn
 	}
-
-	log.Infof("Map Pod Status: %s => %s", phase, status)
 	return status
 }
