@@ -181,7 +181,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 				p.ClearCNSIToken(cnsiRecord, userID)
 				return nil, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
-					"Could not connect to the endpoint", // TODO: RC/NWM
+					"Could not connect to the endpoint",
 					"Could not connect to the endpoint: %s", err)
 			}
 
