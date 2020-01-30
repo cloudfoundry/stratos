@@ -11,10 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/kubernetes/pkg/api/legacyscheme"
-	api "k8s.io/kubernetes/pkg/apis/core"
-	k8s_api_v1 "k8s.io/kubernetes/pkg/apis/core/v1"
 )
 
 const (
@@ -31,24 +27,24 @@ const (
 // ServiceInfo represents the information for the Dashboard Service
 // that we need to proxy the service
 type ServiceInfo struct {
-	Namespace   string `json:"namespace"`
-	ServiceName string `json:"name"`
-	Scheme      string `json:"scheme"`
-	StratosInstalled bool `json:"-"`
+	Namespace        string `json:"namespace"`
+	ServiceName      string `json:"name"`
+	Scheme           string `json:"scheme"`
+	StratosInstalled bool   `json:"-"`
 }
 
 // StatusResponse is the response from the dashboard status check
 type StatusResponse struct {
-	Endpoint      string             `json:"guid"`
-	Installed     bool               `json:"installed"`
-	StratosInstalled bool `json:"stratosInstalled"`
-	Running       bool               `json:"running"`
-	Pod           *v1.Pod            `json:"pod"`
-	Version       string             `json:"version"`
-	Service       *ServiceInfo       `json:"service"`
-	HasToken      bool               `json:"tokenExists"`
-	ServiceAccont *v1.ServiceAccount `json:"serviceAccount"`
-	Token         string             `json:"-"`
+	Endpoint         string             `json:"guid"`
+	Installed        bool               `json:"installed"`
+	StratosInstalled bool               `json:"stratosInstalled"`
+	Running          bool               `json:"running"`
+	Pod              *v1.Pod            `json:"pod"`
+	Version          string             `json:"version"`
+	Service          *ServiceInfo       `json:"service"`
+	HasToken         bool               `json:"tokenExists"`
+	ServiceAccont    *v1.ServiceAccount `json:"serviceAccount"`
+	Token            string             `json:"-"`
 }
 
 // Determine if the specified Kube endpoint has the dashboard installed and ready
@@ -200,24 +196,15 @@ func hasAnnotation(annotations map[string]string, key, value string) bool {
 	return false
 }
 
-func tryDecodePodList(data []byte) (parsed bool, pods v1.PodList, err error) {
-	obj, err := runtime.Decode(legacyscheme.Codecs.UniversalDecoder(), data)
+func tryDecodePodList(data []byte) (bool, v1.PodList, error) {
+	var pods v1.PodList
+	var err error
+
+	err = json.Unmarshal(data, &pods)
 	if err != nil {
 		return false, pods, err
 	}
-
-	newPods, ok := obj.(*api.PodList)
-	// Check whether the object could be converted to list of pods.
-	if !ok {
-		err = fmt.Errorf("invalid pods list: %#v", obj)
-		return false, pods, err
-	}
-
-	v1Pods := &v1.PodList{}
-	if err := k8s_api_v1.Convert_core_PodList_To_v1_PodList(newPods, v1Pods, nil); err != nil {
-		return true, pods, err
-	}
-	return true, *v1Pods, err
+	return true, pods, err
 }
 
 func tryDecodeServiceList(data []byte) (bool, v1.ServiceList, error) {

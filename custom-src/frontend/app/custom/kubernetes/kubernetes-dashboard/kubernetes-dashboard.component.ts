@@ -57,7 +57,9 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   public errorMsg$ = new BehaviorSubject<EndpointMissingMessageParts>({} as EndpointMissingMessageParts);
 
-  constructor(public kubeEndpointService: KubernetesEndpointService, private sanitizer: DomSanitizer, public renderer: Renderer2) { }
+  constructor(public kubeEndpointService: KubernetesEndpointService, private sanitizer: DomSanitizer, public renderer: Renderer2) {
+    this.hasError$.next(false);
+  }
 
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
@@ -82,7 +84,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
   }
 
   iframeLoaded() {
-    if (!this.kubeDash) {
+    if (!this.pKubeDash) {
       return;
     }
     this.loadCheckTries = 20;
@@ -128,12 +130,12 @@ export class KubernetesDashboardTabComponent implements OnInit {
   }
 
   setupEventListener() {
-    if (this.haveSetupEventLister || !this.kubeDash || !this.hasIframeLoaded) {
+    if (this.haveSetupEventLister || !this.pKubeDash || !this.hasIframeLoaded) {
       return;
     }
 
     this.haveSetupEventLister = true;
-    const iframeWindow = this.kubeDash.nativeElement.contentWindow;
+    const iframeWindow = this.pKubeDash.nativeElement.contentWindow;
     iframeWindow.addEventListener('hashchange', () => {
       if (this.href) {
         let h2 = decodeURI(this.href);
@@ -166,11 +168,11 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   // Can we detect the dashboard's toolbar (implies dashboard UI has loaded)
   private getKubeDashToolbar() {
-    if (this.kubeDash &&
-      this.kubeDash.nativeElement &&
-      this.kubeDash.nativeElement.contentDocument &&
-      this.kubeDash.nativeElement.contentDocument.getElementsByTagName) {
-      const kdChrome = this.kubeDash.nativeElement.contentDocument.getElementsByTagName('kd-chrome')[0];
+    if (this.pKubeDash &&
+      this.pKubeDash.nativeElement &&
+      this.pKubeDash.nativeElement.contentDocument &&
+      this.pKubeDash.nativeElement.contentDocument.getElementsByTagName) {
+      const kdChrome = this.pKubeDash.nativeElement.contentDocument.getElementsByTagName('kd-chrome')[0];
       if (kdChrome) {
         const kdToolbar = kdChrome.getElementsByTagName('mat-toolbar')[0];
         if (kdToolbar) {
@@ -185,11 +187,11 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   // Can we detect the dashboard login page?
   private getKubeDashLogin(): boolean {
-    if (this.kubeDash &&
-      this.kubeDash.nativeElement &&
-      this.kubeDash.nativeElement.contentDocument &&
-      this.kubeDash.nativeElement.contentDocument.getElementsByTagName) {
-      const kdLogin = this.kubeDash.nativeElement.contentDocument.getElementsByTagName('kd-login');
+    if (this.pKubeDash &&
+      this.pKubeDash.nativeElement &&
+      this.pKubeDash.nativeElement.contentDocument &&
+      this.pKubeDash.nativeElement.contentDocument.getElementsByTagName) {
+      const kdLogin = this.pKubeDash.nativeElement.contentDocument.getElementsByTagName('kd-login');
       return kdLogin.length === 1;
     }
     return false;
@@ -197,11 +199,11 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   // Can we detect a Stratos error message page?
   private getStratosError(): string {
-    if (this.kubeDash &&
-      this.kubeDash.nativeElement &&
-      this.kubeDash.nativeElement.contentDocument &&
-      this.kubeDash.nativeElement.contentDocument.getElementsByTagName) {
-      const stratosError = this.kubeDash.nativeElement.contentDocument.getElementsByTagName('stratos-error');
+    if (this.pKubeDash &&
+      this.pKubeDash.nativeElement &&
+      this.pKubeDash.nativeElement.contentDocument &&
+      this.pKubeDash.nativeElement.contentDocument.getElementsByTagName) {
+      const stratosError = this.pKubeDash.nativeElement.contentDocument.getElementsByTagName('stratos-error');
       if (stratosError.length === 1) {
         return stratosError[0].innerText;
       }
