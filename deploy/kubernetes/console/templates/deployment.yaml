@@ -7,6 +7,21 @@ apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
   name: stratos
+{{- if .Values.console.statefulSetAnnotations }}
+  annotations:
+{{ toYaml .Values.console.statefulSetAnnotations | indent 4 }}
+{{- end }}
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    app: "{{ .Release.Name }}"
+    component: stratos
+{{- if .Values.console.statefulSetExtraLabels }}
+{{ toYaml .Values.console.statefulSetExtraLabels | nindent 4 }}
+{{- end}}        
 spec:
   serviceName: stratos
   replicas: 1
@@ -16,6 +31,10 @@ spec:
       app.kubernetes.io/component: "stratos"
   template:
     metadata:
+{{- if .Values.console.podAnnotations }}
+      annotations:
+{{ toYaml .Values.console.podAnnotations | indent 8 }}
+{{- end }}
       labels:
         app.kubernetes.io/name: "stratos"
         app.kubernetes.io/instance: "{{ .Release.Name }}"
@@ -24,6 +43,9 @@ spec:
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         app: "{{ .Release.Name }}"
         component: stratos
+        {{- if .Values.console.podExtraLabels}}
+        {{ toYaml .Values.console.podExtraLabels | nindent 8 }}
+        {{- end}}        
     spec:
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}

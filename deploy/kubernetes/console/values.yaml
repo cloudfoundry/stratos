@@ -72,6 +72,15 @@ console:
   tlsSecretName:
 
   autoRegisterCF: ~
+
+  statefulSetAnnotations: ~
+
+  statefulSetExtraLabels: ~
+
+  podAnnotations: ~
+
+  podExtraLabels: ~
+
   
 images:
   console: stratos-console
