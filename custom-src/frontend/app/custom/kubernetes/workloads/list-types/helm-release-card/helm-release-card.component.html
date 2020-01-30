@@ -5,7 +5,7 @@
       <div class='release-title--icon'>
         <img *ngIf="icon; else noIcon" [src]="icon" (error)="loadImageError()">
         <ng-template #noIcon>
-          <!-- // TODO: RC -->
+          <!-- // TODO: RC. missing icon & svg via backend? -->
           <mat-icon fontSet="stratos-icons">service</mat-icon>
         </ng-template>
       </div>
