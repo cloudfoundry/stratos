@@ -62,23 +62,23 @@ func (userInfo *LocalUserInfo) GetUserInfo(id string) (int, []byte, *http.Header
 }
 
 // UpdateUserInfo updates the user's info
-func (userInfo *LocalUserInfo) UpdateUserInfo(profile *uaaUser) error {
+func (userInfo *LocalUserInfo) UpdateUserInfo(profile *uaaUser) (int, error) {
 
 	// Fetch the user, make updates and save
 	id := profile.ID
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(userInfo.portalProxy.GetDatabaseConnection())
 	if err != nil {
-		return err
+		return 500, err
 	}
 
 	user, err := localUsersRepo.FindUser(id)
 	if err != nil {
-		return err
+		return 500, err
 	}
 
 	hash, err := localUsersRepo.FindPasswordHash(id)
 	if err != nil {
-		return err
+		return 500, err
 	}
 
 	user.PasswordHash = hash
@@ -95,36 +95,36 @@ func (userInfo *LocalUserInfo) UpdateUserInfo(profile *uaaUser) error {
 
 	err = localUsersRepo.UpdateLocalUser(user)
 	if err != nil {
-		return err
+		return 500, err
 	}
 
-	return nil
+	return 200, nil
 }
 
 // UpdatePassword updates the user's password
-func (userInfo *LocalUserInfo) UpdatePassword(id string, passwordInfo *passwordChangeInfo) error {
+func (userInfo *LocalUserInfo) UpdatePassword(id string, passwordInfo *passwordChangeInfo) (int, error) {
 
 	// Fetch the user, make updates and save
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(userInfo.portalProxy.GetDatabaseConnection())
 	if err != nil {
-		return err
+		return 500, err
 	}
 
 	user, err := localUsersRepo.FindUser(id)
 	if err != nil {
-		return err
+		return 500, err
 	}
 
 	hash, err := localUsersRepo.FindPasswordHash(id)
 	if err != nil {
-		return err
+		return 500, err
 	}
 
 	// Check old password is correct
 	err = bcrypt.CompareHashAndPassword(hash, []byte(passwordInfo.OldPassword))
 	if err != nil {
 		// Old password is incorrect
-		return interfaces.NewHTTPShadowError(
+		return 500, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Current password is incorrect",
 			"Current password is incorrect: %v", err,
@@ -133,16 +133,16 @@ func (userInfo *LocalUserInfo) UpdatePassword(id string, passwordInfo *passwordC
 
 	passwordHash, err := HashPassword(passwordInfo.NewPassword)
 	if err != nil {
-		return err
+		return 500, err
 	}
 
 	user.PasswordHash = passwordHash
 
 	err = localUsersRepo.UpdateLocalUser(user)
 	if err != nil {
-		return err
+		return 500, err
 	}
-	return nil
+	return 200, nil
 }
 
 //HashPassword accepts a plaintext password string and generates a salted hash
