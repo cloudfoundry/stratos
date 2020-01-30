@@ -173,22 +173,3 @@ func fwdResponseHeaders(src *http.Header, dest http.Header) {
 		}
 	}
 }
-
-func fwdResponseHeaders(src *http.Header, dest http.Header) {
-	log.Debug("fwdResponseHeaders")
-
-	for k, headers := range *src {
-		switch {
-		// Skip these
-		//  - "Referer" causes CF to fail with a 403
-		//  - "Connection", "x-cap-*" and "Cookie" are consumed by us
-		case k == "Connection", k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cap-"):
-
-		// Forwarding everything else
-		default:
-			for _, h := range headers {
-				dest.Add(k, h)
-			}
-		}
-	}
-}
