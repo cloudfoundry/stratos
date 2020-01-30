@@ -100,10 +100,12 @@ func (userInfo *UserInfo) userInfo(c echo.Context) error {
 	}
 
 	provider := userInfo.getProvider(c)
-	statusCode, body, err := provider.GetUserInfo(id)
+	statusCode, body, headers, err := provider.GetUserInfo(id)
 	if err != nil {
 		return err
 	}
+
+	fwdResponseHeaders(headers, c.Response().Header())
 
 	c.Response().WriteHeader(statusCode)
 	_, _ = c.Response().Write(body)
