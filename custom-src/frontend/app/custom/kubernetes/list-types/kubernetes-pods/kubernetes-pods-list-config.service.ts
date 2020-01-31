@@ -20,8 +20,6 @@ import {
 import { KubernetesPod } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { createKubeAgeColumn } from '../kube-list.helper';
-import { KubernetesPodReadinessComponent } from './kubernetes-pod-readiness/kubernetes-pod-readiness.component';
-import { KubernetesPodStatusComponent } from './kubernetes-pod-status/kubernetes-pod-status.component';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 
 export abstract class BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
@@ -91,23 +89,36 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
       cellFlex: '2',
     },
     {
-      columnId: 'status', headerCell: () => 'Status',
-      cellComponent: KubernetesPodStatusComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'status',
-        field: 'status.phase'
-      },
-      cellFlex: '1',
-    },
-    {
       columnId: 'ready',
       headerCell: () => 'Ready',
-      cellComponent: KubernetesPodReadinessComponent,
+      cellDefinition: {
+        getValue: pod => `${pod.expandedStatus.readyContainers}/${pod.expandedStatus.totalContainers}`
+      },
+      cellFlex: '1'
+    },
+    {
+      columnId: 'expandedStatus',
+      headerCell: () => 'Status',
+      cellDefinition: {
+        valuePath: 'expandedStatus.status'
+      },
       sort: {
         type: 'sort',
-        orderKey: 'ready',
-        field: 'ready'
+        orderKey: 'expandedStatus',
+        field: 'expandedStatus.status'
+      },
+      cellFlex: '2'
+    },
+    {
+      columnId: 'restarts',
+      headerCell: () => 'Restarts',
+      cellDefinition: {
+        getValue: pod => pod.expandedStatus.restarts.toString()
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'restarts',
+        field: 'expandedStatus.restarts'
       },
       cellFlex: '1'
     },
