@@ -4,8 +4,9 @@ import { KubedashConfigurationComponent } from './kubedash-configuration.compone
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { TabNavService } from '../../../../../tab-nav.service';
 import { HttpClient, HttpHandler } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 
-describe('KubedashConfigurationComponent', () => {
+fdescribe('KubedashConfigurationComponent', () => {
   let component: KubedashConfigurationComponent;
   let fixture: ComponentFixture<KubedashConfigurationComponent>;
 
@@ -14,6 +15,17 @@ describe('KubedashConfigurationComponent', () => {
       imports: [...KubernetesBaseTestModules],
       declarations: [ KubedashConfigurationComponent ],
       providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {
+                endpointId: 'anything'
+              },
+              queryParams: {}
+            }
+          }
+        },
         TabNavService,
         HttpClient,
         HttpHandler,

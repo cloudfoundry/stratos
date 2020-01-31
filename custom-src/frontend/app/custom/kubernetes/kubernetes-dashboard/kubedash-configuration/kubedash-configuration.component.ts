@@ -5,9 +5,9 @@ import {
 import { KubernetesService } from '../../services/kubernetes.service';
 import { ActivatedRoute } from '@angular/router';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Observable, BehaviorSubject, Subscription } from 'rxjs';
-import { map, distinctUntilChanged, tap, filter } from 'rxjs/operators';
+import { map, distinctUntilChanged, filter } from 'rxjs/operators';
 import { KubeDashboardStatus } from '../../store/kubernetes.effects';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { HttpClient } from '@angular/common/http';
@@ -37,7 +37,7 @@ type ReadyFilter = (status: KubeDashboardStatus) => boolean;
     KubernetesEndpointService,
   ]
 })
-export class KubedashConfigurationComponent implements OnInit, OnDestroy {
+export class KubedashConfigurationComponent implements OnDestroy {
 
   // Confirmation dialog
   deleteServiceAccountConfirmation = new ConfirmationDialogConfig(
@@ -110,10 +110,8 @@ export class KubedashConfigurationComponent implements OnInit, OnDestroy {
       filter(status => !!status.version),
       map(status => status.version.indexOf('azure') !== -1)
     );
-  }
 
-  ngOnInit() {
-    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
+    this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
         breadcrumbs: [{ value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` }]
       }]))
