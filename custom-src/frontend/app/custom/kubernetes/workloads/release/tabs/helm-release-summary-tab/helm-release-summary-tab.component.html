@@ -17,7 +17,10 @@
             {{ release.chart.metadata.appVersion || '-' }}
           </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Namespace">
-            <a [routerLink]="createNamespaceLink(release.namespace)">{{ release.namespace | titlecase }}</a>
+            <a [routerLink]="createClusterLink()">{{ getClusterName() | async }}</a>
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Namespace">
+            <a [routerLink]="createNamespaceLink(release.namespace)">{{ release.namespace }}</a>
           </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Release Version">{{ release.version }}
           </app-metadata-item>
