@@ -10,9 +10,7 @@ export const KubernetesDefaultState = {
 };
 
 export interface BasicKubeAPIResource {
-  metadata: {
-    uid: string
-  };
+  metadata: Metadata;
   status: any;
   spec: any;
 }
@@ -135,14 +133,16 @@ export enum ConditionType {
   MemoryPressure = 'MemoryPressure',
   DiskPressure = 'DiskPressure',
   Ready = 'Ready',
-  PIDPressure = 'PIDPressure'
+  PIDPressure = 'PIDPressure',
+  NetworkUnavailable = 'NetworkUnavailable'
 }
 export const ConditionTypeLabels = {
   [ConditionType.Ready]: 'Ready',
   [ConditionType.OutOfDisk]: 'Out of Disk',
   [ConditionType.MemoryPressure]: 'Memory Pressure',
   [ConditionType.DiskPressure]: 'Disk Pressure',
-  [ConditionType.PIDPressure]: 'PID Pressure'
+  [ConditionType.PIDPressure]: 'PID Pressure',
+  [ConditionType.NetworkUnavailable]: 'Network Unavailable'
 };
 
 export enum ConditionStatus {

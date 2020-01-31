@@ -24,7 +24,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
     logoUrl: '/core/assets/custom/helm.svg',
     urlValidation: undefined,
     unConnectable: true,
-    techPreview: true,
+    techPreview: false,
     authTypes: [],
     renderPriority: 10,
   };

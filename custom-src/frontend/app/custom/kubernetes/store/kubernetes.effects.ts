@@ -304,7 +304,7 @@ export class KubernetesEffects {
         first(),
         map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
       );
-    let pKubeIds;
+    let pKubeIds: string[];
 
     return getKubeIds.pipe(
       switchMap(kubeIds => {

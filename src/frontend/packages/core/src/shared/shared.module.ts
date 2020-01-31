@@ -65,6 +65,9 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
+import {
+  TableCellEndpointNameComponent,
+} from './components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { ListHostDirective } from './components/list/simple-list/list-host.directive';
@@ -121,6 +124,7 @@ import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundr
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { TableCellSidePanelComponent } from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 
 
 @NgModule({
@@ -226,7 +230,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
-    SidepanelPreviewComponent
+    SidepanelPreviewComponent,
+    TableCellSidePanelComponent
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -320,7 +325,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
-    SidepanelPreviewComponent
+    SidepanelPreviewComponent,
+    TableCellEndpointNameComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

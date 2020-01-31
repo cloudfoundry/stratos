@@ -34,9 +34,16 @@ body.stratos {
     display: initial;
   }
 
-  .page-header .mat-toolbar.mat-primary {
+  .page-header .mat-toolbar.mat-primary,
+  .sidepanel-preview__header
+   {
     background-color: #fff;
     color: #333;
+  }
+
+  .setup .page-header .mat-toolbar.mat-primary {
+    background-color: $suse-primary-color;
+    color: $suse-text;
   }
 
   app-page-subheader {

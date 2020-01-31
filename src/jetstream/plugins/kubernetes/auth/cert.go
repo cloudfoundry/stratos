@@ -133,7 +133,7 @@ func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *h
 			Dial:                dial,
 			TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: cnsi.SkipSSLValidation,
 				Certificates:       []tls.Certificate{cert},
 			},
 			MaxIdleConnsPerHost: 6, // (default is 2)

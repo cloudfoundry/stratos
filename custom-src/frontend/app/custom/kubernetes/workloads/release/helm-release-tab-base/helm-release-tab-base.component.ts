@@ -64,7 +64,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
     { link: 'notes', label: 'Notes', icon: 'subject' },
     { link: 'values', label: 'Values', icon: 'list' },
     { link: '-', label: 'Resources' },
-    { link: 'graph', label: 'Overview', icon: 'share' },
+    // { link: 'graph', label: 'Overview', icon: 'share' },
     { link: 'pods', label: 'Pods', icon: 'adjust' },
     { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' }
   ];

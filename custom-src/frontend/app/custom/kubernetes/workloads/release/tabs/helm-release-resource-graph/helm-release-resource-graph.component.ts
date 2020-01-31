@@ -1,12 +1,14 @@
 import { Component, ComponentFactoryResolver, OnDestroy, OnInit } from '@angular/core';
 import { Edge, Node } from '@swimlane/ngx-graph';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { filter, first, map } from 'rxjs/operators';
 
-import { HelmReleaseHelperService } from '../helm-release-helper.service';
 import {
-  HelmReleaseResourcePreviewComponent,
-} from './helm-release-resource-preview/helm-release-resource-preview.component';
+  KubernetesResourceViewerComponent,
+} from '../../../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
+import { KubeAPIResource } from '../../../../store/kube.types';
+import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
 
 interface Colors {
@@ -89,12 +91,10 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   // Open side panel when node is clicked
   public onNodeClick(node: any) {
     this.previewPanel.show(
-      HelmReleaseResourcePreviewComponent,
+      KubernetesResourceViewerComponent,
       {
-        node,
-        helper: this.helper,
-        endpoint: this.helper.endpointGuid,
-        releaseTitle: this.helper.releaseTitle
+        title: 'Helm Release Resource Preview',
+        resource$: this.getResource(node)
       },
       this.componentFactoryResolver
     );
@@ -136,6 +136,14 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
           fg: 'white'
         };
     }
+  }
+
+  private getResource(node: any): Observable<KubeAPIResource> {
+    return this.helper.fetchReleaseResources().pipe(
+      filter(r => !!r),
+      map((r: any[]) => Object.values(r).find((res: any) => res.metadata.name === node.label && res.metadata.kind === node.kind)),
+      first(),
+    );
   }
 
 }

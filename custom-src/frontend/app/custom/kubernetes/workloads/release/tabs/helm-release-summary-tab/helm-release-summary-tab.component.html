@@ -16,10 +16,13 @@
           <app-metadata-item class="chart-details__item" label="Application Version">
             {{ release.chart.metadata.appVersion || '-' }}
           </app-metadata-item>
-          <app-metadata-item class="chart-details__item" label="Namespace">{{ release.namespace }}</app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Namespace">
+            <a [routerLink]="createNamespaceLink(release.namespace)">{{ release.namespace | titlecase }}</a>
+          </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Release Version">{{ release.version }}
           </app-metadata-item>
-          <app-metadata-item class="chart-details__item" label="Status">{{ release.status }}</app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Status">{{ release.status | titlecase }}
+          </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="First Deployed">
             {{ release.info.first_deployed | date:'medium' }}
           </app-metadata-item>
@@ -27,32 +30,43 @@
             {{ release.info.last_deployed | date:'medium' }}
           </app-metadata-item>
         </div>
-        <app-tile-grid>
-          <app-tile-group *ngIf="chartData$ | async as chartData">
-            <app-tile>
-              <mat-card class="full-card">
-                <app-ring-chart [data]="chartData.podsChartData" label="Pods"></app-ring-chart>
-              </mat-card>
-            </app-tile>
-            <app-tile>
-              <mat-card class="full-card">
-                <app-ring-chart [customColors]="containersChartColors" [data]="chartData.containersChartData"
-                  label="Containers"></app-ring-chart>
-              </mat-card>
-            </app-tile>
-          </app-tile-group>
-        </app-tile-grid>
-
       </div>
-      <app-metadata-item class="chart-details__item" label="Resources"></app-metadata-item>
+    </app-entity-summary-title>
+    <div *ngIf="hasResources$ | async; else loadingResources" class="resources">
+      <app-metadata-item class="chart-details__item" label="Pods and Containers"></app-metadata-item>
+      <app-tile-grid>
+        <app-tile-group *ngIf="chartData$ | async as chartData">
+          <app-tile>
+            <mat-card class="full-card">
+              <app-ring-chart [customColors]="podChartColors" [data]="chartData.podsChartData" label="Pods">
+              </app-ring-chart>
+            </mat-card>
+          </app-tile>
+          <app-tile>
+            <mat-card class="full-card">
+              <app-ring-chart [customColors]="containersChartColors" [data]="chartData.containersChartData"
+                label="Containers"></app-ring-chart>
+            </mat-card>
+          </app-tile>
+        </app-tile-group>
+      </app-tile-grid>
 
+      <app-metadata-item class="chart-details__item" label="All Resources"></app-metadata-item>
       <div *ngIf="resources$ | async as resources" class="grid">
         <app-card-number-metric *ngFor="let res of resources" label="{{ res.label }}" icon="{{ res.icon.name }}"
           iconFont="{{ res.icon.font }}" value="{{ res.count }}">
         </app-card-number-metric>
       </div>
-    </app-entity-summary-title>
+    </div>
+    <ng-template #loadingResources>
+      <div class="resources__loading">
+        <div class="resources_loading__content">
+          Loading Resources
+          <mat-progress-bar class="" [color]="'primary'" mode="indeterminate">
+          </mat-progress-bar>
+        </div>
+      </div>
 
-
+    </ng-template>
   </ng-container>
 </app-loading-page>
