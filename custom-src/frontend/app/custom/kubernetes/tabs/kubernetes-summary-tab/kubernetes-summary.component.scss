@@ -2,22 +2,23 @@
   margin-bottom: 0;
   margin-left: 20px;
   margin-top: 10px;
-  
   &__metrics {
     max-width: 350px;
+
+    &--namespace {
+      padding-left: 0;
+    }
   }
-  
   &__header {
     margin: 0;
   }
-  
   &__graphs {
     margin: 10px;
   }
   &__graph {
     display: inline-block;
-    padding: 10px;
-    width: 33%;
+    padding: 0 20px 20px 0;
+    width: 250px;
   }
   &__dashboard {
     font-size: 14px;

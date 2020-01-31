@@ -861,7 +861,7 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
 function generateCfEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   return new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/cloud-foundry/${metadata.guid}`,
+    metadata => `/cloud-foundry/${metadata.guid}`
   );
 }
 

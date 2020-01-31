@@ -8,21 +8,10 @@ import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.ty
 import {
   HELM_ENDPOINT_TYPE,
   helmEntityFactory,
-  helmReleaseEntityKey,
-  helmReleasePodEntityType,
-  helmReleaseServiceEntityType,
-  helmReleaseStatusEntityType,
   helmVersionsEntityType,
   monocularChartsEntityType,
 } from './helm-entity-factory';
-import {
-  HelmRelease,
-  HelmReleasePod,
-  HelmReleaseService,
-  HelmReleaseStatus,
-  HelmVersion,
-  MonocularChart,
-} from './store/helm.types';
+import { HelmVersion, MonocularChart } from './store/helm.types';
 
 
 export function generateHelmEntities(): StratosBaseCatalogEntity[] {
@@ -42,11 +31,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
   return [
     generateEndpointEntity(endpointDefinition),
     generateChartEntity(endpointDefinition),
-    generateReleaseEntity(endpointDefinition),
     generateVersionEntity(endpointDefinition),
-    generateReleaseStatusEntity(endpointDefinition),
-    generateReleasePodEntity(endpointDefinition),
-    generateReleaseServiceEntity(endpointDefinition),
   ];
 }
 
@@ -66,15 +51,6 @@ function generateChartEntity(endpointDefinition: StratosEndpointExtensionDefinit
   return new StratosCatalogEntity<IFavoriteMetadata, MonocularChart>(definition);
 }
 
-function generateReleaseEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: helmReleaseEntityKey,
-    schema: helmEntityFactory(helmReleaseEntityKey),
-    endpoint: endpointDefinition
-  };
-  return new StratosCatalogEntity<IFavoriteMetadata, HelmRelease>(definition);
-}
-
 function generateVersionEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: helmVersionsEntityType,
@@ -84,30 +60,4 @@ function generateVersionEntity(endpointDefinition: StratosEndpointExtensionDefin
   return new StratosCatalogEntity<IFavoriteMetadata, HelmVersion>(definition);
 }
 
-function generateReleaseStatusEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: helmReleaseStatusEntityType,
-    schema: helmEntityFactory(helmReleaseStatusEntityType),
-    endpoint: endpointDefinition
-  };
-  return new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseStatus>(definition);
-}
-
-function generateReleasePodEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: helmReleasePodEntityType,
-    schema: helmEntityFactory(helmReleasePodEntityType),
-    endpoint: endpointDefinition
-  };
-  return new StratosCatalogEntity<IFavoriteMetadata, HelmReleasePod>(definition);
-}
-
-function generateReleaseServiceEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: helmReleaseServiceEntityType,
-    schema: helmEntityFactory(helmReleaseServiceEntityType),
-    endpoint: endpointDefinition
-  };
-  return new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseService>(definition);
-}
 

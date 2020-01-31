@@ -1,0 +1,25 @@
+<app-page-sub-nav>
+  <button mat-button name="fit" (click)="fitGraph()" matTooltip="Fit">
+    <mat-icon>all_out</mat-icon>
+    <span>Fit</span>
+  </button>
+  <button mat-button name="toggle" (click)="toggleLayout()" matTooltip="Toggle Layout">
+    <mat-icon>view_quilt</mat-icon>
+    <span>Toggle Layout</span>
+  </button>
+</app-page-sub-nav>
+
+<ngx-graph *ngIf="nodes && nodes.length" class="chart-container" [links]="links" [nodes]="nodes" [update$]="update$"
+  [zoomToFit$]="fit$" [layout]="layout">
+  <ng-template #nodeTemplate let-node>
+    <svg:g class="node" (click)="onNodeClick(node)">
+      <svg:rect [attr.width]="node.dimension.width" [attr.height]="node.dimension.height" [attr.fill]="node.data.fill"
+        class="node"></svg:rect>
+      />
+      <svg:text class="no-style" alignment-baseline="central" [attr.fill]="node.data.text" [attr.x]="10"
+        [attr.y]="node.dimension.height / 2">
+        {{node.label}} ({{node.data.kind}})
+      </svg:text>
+    </svg:g>
+  </ng-template>
+</ngx-graph>

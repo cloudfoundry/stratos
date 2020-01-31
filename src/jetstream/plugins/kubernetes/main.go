@@ -118,9 +118,9 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// Helm Routes
 	echoGroup.GET("/helm/releases", c.ListReleases)
 	echoGroup.POST("/helm/install", c.InstallRelease)
-	echoGroup.GET("/helm/versions", c.GetHelmVersions)
-	echoGroup.DELETE("/helm/releases/:endpoint/:name", c.DeleteRelease)
-	echoGroup.GET("/helm/releases/:endpoint/:name", c.GetRelease)
+	echoGroup.DELETE("/helm/releases/:endpoint/:namespace/:name", c.DeleteRelease)
+	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name/status", c.GetReleaseStatus)
+	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name", c.GetRelease)
 }
 
 func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {

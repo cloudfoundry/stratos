@@ -23,10 +23,6 @@ import (
 	"k8s.io/client-go/transport"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/kubernetes/pkg/api/legacyscheme"
-	api "k8s.io/kubernetes/pkg/apis/core"
-	k8s_api_v1 "k8s.io/kubernetes/pkg/apis/core/v1"
 )
 
 // GET /api/v1/namespaces/{namespace}/pods/{name}/proxy
@@ -324,22 +320,15 @@ func (k *KubernetesSpecification) getKubeDashboardPod(c echo.Context, labelSelec
 	return &pod, nil
 }
 
-func tryDecodePodList(data []byte) (parsed bool, pods v1.PodList, err error) {
-	obj, err := runtime.Decode(legacyscheme.Codecs.UniversalDecoder(), data)
+func tryDecodePodList(data []byte) (bool, v1.PodList, error) {
+
+	var pods v1.PodList
+	var err error
+
+	err = json.Unmarshal(data, &pods)
 	if err != nil {
 		return false, pods, err
 	}
 
-	newPods, ok := obj.(*api.PodList)
-	// Check whether the object could be converted to list of pods.
-	if !ok {
-		err = fmt.Errorf("invalid pods list: %#v", obj)
-		return false, pods, err
-	}
-
-	v1Pods := &v1.PodList{}
-	if err := k8s_api_v1.Convert_core_PodList_To_v1_PodList(newPods, v1Pods, nil); err != nil {
-		return true, pods, err
-	}
-	return true, *v1Pods, err
+	return true, pods, err
 }

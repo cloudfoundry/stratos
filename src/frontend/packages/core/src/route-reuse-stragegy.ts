@@ -13,6 +13,14 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
     const isDashboard = curr.component === DashboardBaseComponent && future.component === DashboardBaseComponent;
     const isAppComp = curr.component === AppComponent && future.component === AppComponent;
-    return isDashboard || isAppComp;
+
+    let reuse = false;
+    if (curr.data.reuseRoute === true) {
+      reuse = curr.data.reuseRoute && future.data.reuseRoute && !curr.component && !future.component;
+    } else {
+      // Expect it to be a component
+      reuse = curr.component === curr.data.reuseRoute && future.component === future.data.reuseRoute;
+    }
+    return isDashboard || isAppComp || reuse;
   }
 }

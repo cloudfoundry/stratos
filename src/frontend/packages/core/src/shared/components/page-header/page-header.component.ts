@@ -9,18 +9,17 @@ import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
+import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { TabNavService } from '../../../../tab-nav.service';
-import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
+import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { StratosStatus } from '../../shared.types';
 import { FavoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
-import { TabNavItem } from '../../../../tab-nav.types';
-import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 
 @Component({
   selector: 'app-page-header',
@@ -52,9 +51,9 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     if (tabs) {
       this.pTabs = tabs.map(tab => ({
         ...tab,
-        link: this.router.createUrlTree([tab.link], {
-          relativeTo: this.route
-        }).toString()
+        link: tab.link === '-' ?
+          TabNavService.TabsNoLinkValue :
+          this.router.createUrlTree([tab.link], { relativeTo: this.route }).toString()
       }));
       this.tabNavService.setTabs(this.pTabs);
     }
@@ -66,7 +65,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       this.tabNavService.setHeader(header);
     }
   }
-
 
   @Input() showUnderFlow = false;
 

@@ -21,6 +21,11 @@ mat-tab-body {
     margin-bottom: 1.5em;
   }
 
+  &__section {
+    display: flex;
+    flex-direction: column;
+  }
+
   .mat-input-element {
     .mat-input-wrapper {
       margin: 1em 0 .5em;
