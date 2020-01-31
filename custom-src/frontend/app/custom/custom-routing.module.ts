@@ -25,8 +25,8 @@ const customRoutes: Routes = [
       reuseRoute: true,
       stratosNavigation: {
         text: 'Workloads',
-        matIcon: 'apps',
-        // matIconFont: 'stratos-icons',
+        matIcon: 'workloads',
+        matIconFont: 'stratos-icons',
         position: 64,
         requiresEndpointType: KUBERNETES_ENDPOINT_TYPE
       }

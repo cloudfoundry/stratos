@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
 <metadata>
-Created by FontForge 20180321 at Wed Mar  6 19:07:45 2019
+Created by FontForge 20180321 at Fri Jan 31 19:10:36 2020
  By Neil MacDougall
 </metadata>
 <defs>
@@ -18,7 +18,7 @@ Created by FontForge 20180321 at Wed Mar  6 19:07:45 2019
     bbox="-0.595506 -64.5 512 448"
     underline-thickness="25"
     underline-position="-76"
-    unicode-range="U+005F-F140"
+    unicode-range="U+005F-F141"
   />
 <missing-glyph horiz-adv-x="187" 
 d="M17 0v341h136v-341h-136zM34 17h102v307h-102v-307z" />
@@ -242,6 +242,9 @@ t62.5 -150.5q0 -27 -11 -62.5t-27 -58.5l-31 31q6 8 10.5 19.5t8 23.5t5.5 24.5t2 22
 d="M491 213h21v-42h-43q-7 -73 -62.5 -129t-128.5 -63v-43h-42v42q-73 7 -129 63t-63 129h-44v42h44q7 72 63 128.5t128 63.5v44h42v-44q73 -7 129 -63t63 -128h22zM293 213h51q-6 22 -25.5 41.5t-41.5 25.5v-51q10 -6 16 -16zM344 171h-51q-6 -10 -16 -16v-51
 q22 6 41.5 25.5t25.5 41.5zM235 361q-55 -7 -98 -50t-50 -98h48q7 35 36 64t64 36v48zM219 213q6 10 16 16v51q-22 -6 -41.5 -25.5t-25.5 -41.5h51zM235 155q-10 6 -16 16h-51q6 -22 25.5 -41.5t41.5 -25.5v51zM87 171q4 -36 25.5 -68.5t54 -54t68.5 -25.5v48q-35 7 -64 36
 t-36 64h-48zM277 23q36 4 68.5 25.5t54 54t25.5 68.5h-48q-7 -35 -36 -64t-64 -36v-48zM377 213h48q-7 55 -50 98t-98 50v-48q35 -7 64 -36t36 -64z" />
+    <glyph glyph-name="workloads" unicode="workloads" horiz-adv-x="427" 
+d="M43 320v-299h298v-42h-298q-18 0 -30.5 12.5t-12.5 29.5v299h43zM171 192v43h170v-43h-170zM171 128v43h170v-43h-170zM245 342l24 -43l-24 -43h-50l-24 43l24 43h50zM384 405q18 0 30.5 -12.5t12.5 -29.5v-256q0 -12 -6 -22t-15.5 -15.5t-21.5 -5.5h-256
+q-18 0 -30.5 12.5t-12.5 30.5v256q0 11 6 21t15.5 15.5t21.5 5.5h256zM384 107v256h-256v-256h256z" />
     <glyph glyph-name="wrench" unicode="wrench" 
 d="M501 39q10 -9 10.5 -21.5t-8.5 -21.5l-51 -51q-9 -9 -21.5 -8.5t-21.5 10.5l-197 230q-32 -17 -68 -17q-60 0 -102 42t-42 102q0 21 6 42l83 -83q10 -10 23 -10t23 10l50 50q10 10 10 23t-10 23l-83 83q21 6 42 6q60 0 102 -42t42 -102q0 -36 -17 -68z" />
     <glyph glyph-name=".notdef" horiz-adv-x="187" 
