@@ -45,9 +45,4 @@ export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
     this.icon = null;
   }
 
-  loadImageError() {
-    console.log('sdfdsf');
-    this.icon = null;
-  }
-
 }
