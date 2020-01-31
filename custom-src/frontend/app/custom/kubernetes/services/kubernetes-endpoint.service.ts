@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
@@ -187,14 +187,16 @@ export class KubernetesEndpointService {
       first(),
     );
 
+    const kubeDashboard$ = this.entityServiceFactory.create<KubeDashboardStatus>(
+      this.kubeGuid,
+      new GetKubernetesDashboard(this.kubeGuid),
+    ).waitForEntity$.pipe(
+      map(status => status.entity.installed)
+    );
+
     this.kubeDashboardEnabled$ = kubeDashboardEnabled$.pipe(
-      filter(enabled => enabled),
-      switchMap(() => this.entityServiceFactory.create<KubeDashboardStatus>(
-        this.kubeGuid,
-        new GetKubernetesDashboard(this.kubeGuid),
-      ).waitForEntity$.pipe(map(status => status.entity.installed))
-      ),
-      startWith(false),
+      switchMap(enabled => enabled ? kubeDashboard$ : of(false)),
+      first(),
     );
   }
 

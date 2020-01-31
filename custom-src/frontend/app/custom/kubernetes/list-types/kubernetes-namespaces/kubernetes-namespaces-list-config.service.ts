@@ -31,16 +31,17 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
       },
       cellFlex: '5',
     },
-    {
-      columnId: 'view', headerCell: () => 'Dashboard',
-      cellDefinition: {
-        getValue: () => 'View',
-        getLink: (row: KubernetesNamespace) => {
-          return `/kubernetes/${this.kubeId.guid}/dashboard/overview?namespace=${row.metadata.name}`;
-        },
-      },
-      cellFlex: '3',
-    },
+    // FIXME: Hide link until the link is fixed
+    // {
+    //   columnId: 'view', headerCell: () => 'Dashboard',
+    //   cellDefinition: {
+    //     getValue: () => 'View',
+    //     getLink: (row: KubernetesNamespace) => {
+    //       return `/kubernetes/${this.kubeId.guid}/dashboard/overview?namespace=${row.metadata.name}`;
+    //     },
+    //   },
+    //   cellFlex: '3',
+    // },
     {
       columnId: 'pods', headerCell: () => 'Pods',
       cellComponent: KubeNamespacePodCountComponent,
