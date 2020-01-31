@@ -6,17 +6,15 @@ import { Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
 import { CfCellHelper } from '../../../../../../../core/src/features/cloud-foundry/cf-cell.helpers';
-import {
-  BooleanIndicatorType,
-} from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import { BooleanIndicatorType } from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import {
   TableCellBooleanIndicatorComponent,
   TableCellBooleanIndicatorComponentConfig,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import {
