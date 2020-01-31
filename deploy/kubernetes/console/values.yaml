@@ -69,7 +69,7 @@ console:
   migrateVolumes: true
   
   # Enable/disable Tech Preview
-  techPreview: false
+  techPreview: true
 
   # Use local admin user instead of UAA - set to a password to enable
   localAdminPassword: ~

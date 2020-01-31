@@ -28,7 +28,7 @@ spec:
         image: {{ template "fdb.image" .Values.fdbserver.image }}
         env:
         - name: FDB_COORDINATOR
-          value: {{ template "fullname" . }}-fdbserver.monocular.svc.cluster.local
+          value: {{ template "fullname" . }}-fdbserver.console.svc.cluster.local
         - name: CLUSTER_ID
           value: chartdb:erlklkg
         ports:
