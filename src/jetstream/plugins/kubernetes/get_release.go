@@ -3,10 +3,7 @@ package kubernetes
 import (
 	"encoding/json"
 	"fmt"
-
 	"time"
-
-	//"fmt"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
@@ -105,9 +102,7 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 	// this back incrementally
 
 	// Parse the manifest
-	log.Info("Got release")
 	rel := helm.NewHelmRelease(res, endpointGUID, userID)
-	log.Info("Done")
 
 	graph := helm.NewHelmReleaseGraph(rel)
 
@@ -200,7 +195,6 @@ func readLoop(c *websocket.Conn, stopchan chan<- bool) {
 }
 
 func sendResource(ws *websocket.Conn, kind string, data interface{}) error {
-
 	var err error
 	var txt []byte
 	if txt, err = json.Marshal(data); err == nil {
