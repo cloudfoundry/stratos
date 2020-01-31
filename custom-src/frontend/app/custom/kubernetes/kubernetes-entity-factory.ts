@@ -99,6 +99,10 @@ entityCache[kubernetesDashboardEntityType] = new KubernetesEntitySchema(
 
 entityCache[metricEntityType] = new KubernetesEntitySchema(metricEntityType);
 
+export function addKubernetesEntitySchema(key: string, newSchema: EntitySchema) {
+  entityCache[key] = newSchema;
+}
+
 export function kubernetesEntityFactory(key: string): EntitySchema {
   const entity = entityCache[key];
   if (!entity) {

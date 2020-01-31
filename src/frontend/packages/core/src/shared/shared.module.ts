@@ -49,6 +49,7 @@ import { FileInputComponent } from './components/file-input/file-input.component
 import { FocusDirective } from './components/focus.directive';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
+import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
@@ -220,11 +221,13 @@ import { CardProgressOverlayComponent } from './components/card-progress-overlay
     SnackBarReturnComponent,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
+    JsonViewerComponent,
     SimpleListComponent,
     ListHostDirective,
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
+    SidepanelPreviewComponent,
     CardProgressOverlayComponent,
   ],
   exports: [
@@ -313,11 +316,13 @@ import { CardProgressOverlayComponent } from './components/card-progress-overlay
     AppNameUniqueDirective,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
+    JsonViewerComponent,
     SimpleListComponent,
     ListHostDirective,
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
+    SidepanelPreviewComponent,
     CardProgressOverlayComponent,
   ],
   entryComponents: [

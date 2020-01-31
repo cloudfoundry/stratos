@@ -9,7 +9,10 @@ import { createBasicStoreModule } from '../../../../store/testing/public-api';
 import { generateStratosEntities } from '../../base-entity-types';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
+import { HelmReleaseActivatedRouteMock, HelmReleaseGuidMock } from '../helm/helm-testing.module';
 import { generateKubernetesEntities } from './kubernetes-entity-generator';
+import { BaseKubeGuid } from './kubernetes-page.types';
+import { HelmReleaseHelperService } from './workloads/release/tabs/helm-release-helper.service';
 
 @NgModule({
   imports: [{
@@ -35,7 +38,31 @@ export const KubernetesBaseTestModules = [
   RouterTestingModule,
   CoreModule,
   createBasicStoreModule(),
+  // createBasicStoreModule({
+  //   auth: {
+  //     error: false,
+  //     errorResponse: {},
+  //     loggedIn: false,
+  //     loggingIn: false,
+  //     sessionData: {
+  //       config: {},
+  //       plugins: null,
+  //       sessionExpiresOn: 0,
+  //       valid: false,
+  //     },
+  //     user: null,
+  //     verifying: false,
+  //   },
+  // }),
   NoopAnimationsModule,
   HttpClientModule,
   SharedModule,
 ];
+
+export const HelmReleaseProviders = [
+  HelmReleaseHelperService,
+  HelmReleaseActivatedRouteMock,
+  HelmReleaseGuidMock,
+];
+
+export const KubeBaseGuidMock = { provide: BaseKubeGuid, useValue: { guid: 'anything' } };

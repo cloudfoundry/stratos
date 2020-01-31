@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
@@ -13,15 +13,23 @@ import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import {
   kubernetesDeploymentsEntityType,
+  kubernetesNodesEntityType,
   kubernetesPodsEntityType,
   kubernetesServicesEntityType,
   kubernetesStatefulSetsEntityType,
 } from '../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
-import { KubernetesDeployment, KubernetesPod, KubernetesStatefulSet, KubeService } from '../store/kube.types';
+import {
+  KubernetesDeployment,
+  KubernetesNode,
+  KubernetesPod,
+  KubernetesStatefulSet,
+  KubeService,
+} from '../store/kube.types';
 import {
   GeKubernetesDeployments,
   GetKubernetesDashboard,
+  GetKubernetesNodes,
   GetKubernetesPods,
   GetKubernetesServices,
   GetKubernetesStatefulSets,
@@ -42,6 +50,7 @@ export class KubernetesEndpointService {
   statefulSets$: Observable<KubernetesStatefulSet[]>;
   services$: Observable<KubeService[]>;
   pods$: Observable<KubernetesPod[]>;
+  nodes$: Observable<KubernetesNode[]>;
   kubeDashboardEnabled$: Observable<boolean>;
   kubeDashboardVersion$: Observable<string>;
   kubeDashboardStatus$: Observable<KubeDashboardStatus>;
@@ -54,7 +63,16 @@ export class KubernetesEndpointService {
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
-    this.kubeGuid = baseKube.guid;
+    const kubeGuid = baseKube.guid;
+
+    if (kubeGuid) {
+      this.initialize(kubeGuid);
+    }
+  }
+
+  initialize(kubeGuid) {
+    this.kubeGuid = kubeGuid;
+
     this.kubeEndpointEntityService = this.entityServiceFactory.create(
       this.kubeGuid,
       new GetAllEndpoints()
@@ -63,7 +81,77 @@ export class KubernetesEndpointService {
     this.constructCoreObservables();
   }
 
-  constructCoreObservables() {
+  getNodeKubeVersions(nodes$: Observable<KubernetesNode[]> = this.nodes$) {
+    return nodes$.pipe(
+      map(nodes => {
+        const versions = {};
+        nodes.forEach(node => {
+          const v = node.status.nodeInfo.kubeletVersion;
+          if (!versions[v]) {
+            versions[v] = v;
+          }
+        });
+        return Object.keys(versions).join(',');
+      })
+    );
+  }
+
+  getCountObservable(entities$: Observable<any[]>) {
+    return entities$.pipe(
+      map(entities => entities.length),
+      startWith(null)
+    );
+  }
+
+  getPodCapacity(nodes$: Observable<KubernetesNode[]> = this.nodes$, pods$: Observable<KubernetesPod[]> = this.pods$) {
+    return combineLatest(nodes$, pods$).pipe(
+      map(([nodes, pods]) => ({
+        total: nodes.reduce((cap, node) => {
+          return cap + parseInt(node.status.capacity.pods, 10);
+        }, 0),
+        used: pods.length
+      }))
+    );
+  }
+
+  getNodeStatusCount(
+    nodes$: Observable<KubernetesNode[]>,
+    conditionType: string,
+    valueLabels: object = {},
+    countStatus = 'True'
+  ) {
+    return nodes$.pipe(
+      map(nodes => {
+        const total = nodes.length;
+        const { unknown, unavailable, used } = nodes.reduce((cap, node) => {
+          const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
+          if (!conditionStatus || !conditionStatus.status) {
+            ++cap.unavailable;
+          } else {
+            if (conditionStatus.status === countStatus) {
+              ++cap.used;
+            } else if (conditionStatus.status === 'Unknown') {
+              ++cap.unknown;
+            }
+          }
+          return cap;
+        }, { unavailable: 0, used: 0, unknown: 0 });
+        const result = {
+          total,
+          supported: total !== unavailable,
+          // Depends on K8S version as to what is supported
+          unavailable,
+          used,
+          unknown,
+          ...valueLabels
+        };
+        result.supported = result.total !== result.unavailable;
+        return result;
+      })
+    );
+  }
+
+  private constructCoreObservables() {
     this.endpoint$ = this.kubeEndpointEntityService.waitForEntity$;
 
     this.connected$ = this.endpoint$.pipe(
@@ -80,6 +168,11 @@ export class KubernetesEndpointService {
     this.pods$ = this.getObservable<KubernetesPod>(
       new GetKubernetesPods(this.kubeGuid),
       kubernetesPodsEntityType
+    );
+
+    this.nodes$ = this.getObservable<KubernetesNode>(
+      new GetKubernetesNodes(this.kubeGuid),
+      kubernetesNodesEntityType
     );
 
     this.statefulSets$ = this.getObservable<KubernetesStatefulSet>(

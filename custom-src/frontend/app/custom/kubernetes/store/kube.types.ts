@@ -43,6 +43,7 @@ export interface DeploymentSpec {
   revisionHistoryLimit: number;
   progressDeadlineSeconds: number;
   type?: string;
+  clusterIP?: string;
 }
 
 export interface KubernetesDeployment extends BasicKubeAPIResource {
@@ -204,6 +205,7 @@ export enum KubernetesStatus {
   ACTIVE = 'Active',
   RUNNING = 'Running',
   FAILED = 'Failed',
+  PENDING = 'Pending'
 }
 export interface KubernetesNamespace extends BasicKubeAPIResource {
   metadata: Metadata;
@@ -449,9 +451,9 @@ export interface Volume {
 }
 
 
-export interface ConfigMap {
+export interface ConfigMap<T = Item> {
   name: string;
-  items: Item[];
+  items: T[];
   defaultMode: number;
 }
 

@@ -19,6 +19,12 @@
 
 form {
   flex: 1;
+
+  mat-checkbox {
+    display: flex;
+    height: 23px;
+    margin-top: 10px;
+  }
 }
 
 .overrides {

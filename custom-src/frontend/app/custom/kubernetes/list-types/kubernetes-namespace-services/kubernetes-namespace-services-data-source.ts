@@ -5,7 +5,7 @@ import { IListConfig } from '../../../../shared/components/list/list.component.t
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubeService } from '../../store/kube.types';
 import { GetKubernetesServicesInNamespace } from '../../store/kubernetes.actions';
-import { BaseKubernetesServicesDataSource } from '../kubernetes-services-data-source';
+import { BaseKubernetesServicesDataSource } from '../kubernetes-services/kubernetes-services-data-source';
 
 
 export class KubernetesNamespaceServicesDataSource extends BaseKubernetesServicesDataSource {

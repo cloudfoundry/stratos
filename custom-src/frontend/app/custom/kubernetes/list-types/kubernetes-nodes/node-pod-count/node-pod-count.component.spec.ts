@@ -1,7 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseKubeGuid } from '../../../kubernetes-page.types';
-import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
+import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { NodePodCountComponent } from './node-pod-count.component';
 
@@ -13,7 +12,7 @@ describe('NodePodCountComponent', () => {
     TestBed.configureTestingModule({
       declarations: [NodePodCountComponent],
       imports: KubernetesBaseTestModules,
-      providers: [BaseKubeGuid, KubernetesEndpointService]
+      providers: [KubeBaseGuidMock, KubernetesEndpointService]
     })
       .compileComponents();
   }));

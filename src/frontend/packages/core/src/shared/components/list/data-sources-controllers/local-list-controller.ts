@@ -61,7 +61,9 @@ export class LocalListController<T = any> {
         }
         return { paginationEntity, entities };
       }),
-      tap(({ paginationEntity, entities }) => this.setResultCount(paginationEntity, entities)),
+      tap(({ paginationEntity, entities }) => {
+        this.setResultCount(paginationEntity, entities);
+      }),
       map(({ entities }) => entities)
     );
     return cleanPagination$.pipe(

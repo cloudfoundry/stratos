@@ -38,6 +38,7 @@ import {
   KubernetesStatefulSet,
   KubeService,
 } from './store/kube.types';
+import { generateWorkloadsEntities } from './workloads/store/workloads-entity-generator';
 
 const enum KubeEndpointAuthTypes {
   CERT_AUTH = 'kube-cert-auth',
@@ -146,14 +147,15 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     generateNamespacesEntity(endpointDefinition),
     generateServicesEntity(endpointDefinition),
     generateDashboardEntity(endpointDefinition),
-    generateMetricEntity(endpointDefinition)
+    generateMetricEntity(endpointDefinition),
+    ...generateWorkloadsEntities(endpointDefinition)
   ];
 }
 
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   return new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/kubernetes/${metadata.guid}`,
+    metadata => `/kubernetes/${metadata.guid}`
   );
 }
 

@@ -7,7 +7,7 @@ import { HelmEffects } from './store/helm.effects';
   imports: [
     EffectsModule.forFeature([
       HelmEffects
-    ])
+    ]),
   ]
 })
 export class HelmStoreModule { }

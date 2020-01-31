@@ -1,8 +1,12 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
-import { catchError, combineLatest, flatMap, mergeMap } from 'rxjs/operators';
+import { Action, Store } from '@ngrx/store';
+import { ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
+import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
+import { connectedEndpointsOfTypesSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
+import { of } from 'rxjs';
+import { catchError, first, flatMap, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -13,9 +17,9 @@ import {
   WrapperRequestActionSuccess,
 } from '../../../../../store/src/types/request.types';
 import { environment } from '../../../environments/environment';
+import { isJetstreamError } from '../../../jetstream.helpers';
 import {
   KUBERNETES_ENDPOINT_TYPE,
-  kubernetesAppsEntityType,
   kubernetesDashboardEntityType,
   kubernetesDeploymentsEntityType,
   kubernetesNamespacesEntityType,
@@ -26,8 +30,6 @@ import {
 } from '../kubernetes-entity-factory';
 import { getKubeAPIResourceGuid } from './kube.selectors';
 import {
-  ConfigMap,
-  KubernetesConfigMap,
   KubernetesDeployment,
   KubernetesNamespace,
   KubernetesNode,
@@ -36,12 +38,13 @@ import {
   KubeService,
 } from './kube.types';
 import {
+  CREATE_NAMESPACE,
+  CreateKubernetesNamespace,
   GeKubernetesDeployments,
   GET_KUBE_DASHBOARD,
   GET_KUBE_DEPLOYMENT,
   GET_KUBE_POD,
   GET_KUBE_STATEFULSETS,
-  GET_KUBERNETES_APP_INFO,
   GET_NAMESPACE_INFO,
   GET_NAMESPACES_INFO,
   GET_NODE_INFO,
@@ -49,10 +52,8 @@ import {
   GET_POD_INFO,
   GET_PODS_IN_NAMESPACE_INFO,
   GET_PODS_ON_NODE_INFO,
-  GET_RELEASE_POD_INFO,
   GET_SERVICE_INFO,
   GET_SERVICES_IN_NAMESPACE_INFO,
-  GetKubernetesApps,
   GetKubernetesDashboard,
   GetKubernetesNamespace,
   GetKubernetesNamespaces,
@@ -62,7 +63,6 @@ import {
   GetKubernetesPods,
   GetKubernetesPodsInNamespace,
   GetKubernetesPodsOnNode,
-  GetKubernetesReleasePods,
   GetKubernetesServices,
   GetKubernetesServicesInNamespace,
   GetKubernetesStatefulSets,
@@ -137,20 +137,6 @@ export class KubernetesEffects {
             error
           })
         ]));
-    })
-  );
-
-  @Effect()
-  fetchReleasePodsInfo$ = this.actions$.pipe(
-    ofType<GetKubernetesReleasePods>(GET_RELEASE_POD_INFO),
-    flatMap(action => {
-      const nodeEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNodesEntityType);
-      return this.processListAction<KubernetesPod>(
-        action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
-        nodeEntityConfig.entityKey,
-        getKubeAPIResourceGuid
-      );
     })
   );
 
@@ -271,6 +257,26 @@ export class KubernetesEffects {
     })
   );
 
+
+  @Effect()
+  createNamespace$ = this.actions$.pipe(
+    ofType<CreateKubernetesNamespace>(CREATE_NAMESPACE),
+    flatMap(action => {
+      const namespaceEntityConfig = entityCatalog.getEntity(action);
+      return this.processSingleItemAction<KubernetesNamespace>(action,
+        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`,
+        namespaceEntityConfig.entityKey,
+        getKubeAPIResourceGuid,
+        {
+          kind: 'Namespace',
+          apiVersion: 'v1',
+          metadata: {
+            name: action.namespaceName,
+          },
+        });
+    })
+  );
+
   @Effect()
   fetchStatefulSets$ = this.actions$.pipe(
     ofType<GetKubernetesStatefulSets>(GET_KUBE_STATEFULSETS),
@@ -295,87 +301,7 @@ export class KubernetesEffects {
     })
   );
 
-  @Effect()
-  fetchKubernetesAppsInfo$ = this.actions$.pipe(
-    ofType<GetKubernetesApps>(GET_KUBERNETES_APP_INFO),
-    flatMap(action => {
-      this.store.dispatch(new StartRequestAction(action));
-      const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
-      const requestArgs = {
-        headers
-      };
-      const appsEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesAppsEntityType);
-      return this.http
-        .get<ConfigMap>(`/pp/${this.proxyAPIVersion}/proxy/api/v1/configmaps`, requestArgs)
-        .pipe(
-          combineLatest(
-            this.http.get<ConfigMap>(`/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`, requestArgs),
-            this.http.get<ConfigMap>(`/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/statefulsets`, requestArgs)),
-          mergeMap(([configMapsResponse, deploymentsResponse, statefulesetResponse]) => {
-            const { kubeGuid: kubeId } = action;
-            const items = configMapsResponse[kubeId].items as Array<any>;
-            const deployments = deploymentsResponse[kubeId].items as Array<KubernetesDeployment>;
-            const statefulSets = statefulesetResponse[kubeId].items as Array<any>;
-
-            const getChartName = (name: string, labelName: string): string => {
-              // Might not have a label (e.g. Dex)
-              const releaseDeployment = deployments.filter(d =>
-                d.metadata.labels && d.metadata.labels['app.kubernetes.io/instance'] === name);
-              const releaseStatefulSets = statefulSets.filter(d =>
-                d.metadata.labels && d.metadata.labels['app.kubernetes.io/instance'] === name);
-
-              if (releaseDeployment.length !== 0) {
-                return releaseDeployment[0].metadata.labels[labelName];
-              }
-              if (releaseStatefulSets.length !== 0) {
-                return releaseStatefulSets[0].metadata.labels[labelName];
-              }
-            };
-            const releases = items
-              .filter((configMap) => !!configMap.metadata.labels &&
-                !!configMap.metadata.labels.NAME &&
-                configMap.metadata.labels.OWNER === 'TILLER'
-              )
-              .map((configMap: KubernetesConfigMap) => ({
-                name: configMap.metadata.labels.NAME,
-                kubeId,
-                createdAt: configMap.metadata.creationTimestamp,
-                status: configMap.metadata.labels.STATUS,
-                version: configMap.metadata.labels.VERSION,
-                chartName: getChartName(configMap.metadata.labels.NAME, 'helm.sh/chart'),
-                appVersion: getChartName(configMap.metadata.labels.NAME, 'app.kubernetes.io/version')
-              })
-              ).reduce((res, app) => {
-                const id = `${app.kubeId}-${app.name}`;
-                res.entities[appsEntityConfig.entityKey][id] = app;
-                if (res.result.indexOf(id) === -1) {
-                  res.result.push(id);
-                }
-                return res;
-              }, {
-                entities: { [appsEntityConfig.entityKey]: {} },
-                result: []
-              } as NormalizedResponse);
-
-            return [
-              new WrapperRequestActionSuccess(releases, action)
-            ];
-          }),
-          catchError(error => [
-            new WrapperRequestActionFailed(error.message, action, 'fetch', {
-              endpointIds: [action.kubeGuid],
-              url: error.url || `/pp/${this.proxyAPIVersion}/proxy/api/v1/configmaps`,
-              eventCode: error.status ? error.status + '' : '500',
-              message: 'Kubernetes API request error',
-              error
-            })
-          ])
-        );
-    })
-  );
-
-
-  private processNodeAction(action: GetKubernetesReleasePods | GetKubernetesNodes) {
+  private processNodeAction(action: GetKubernetesNodes) {
     const nodeEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNodesEntityType);
     return this.processListAction<KubernetesNode>(action,
       `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes`,
@@ -383,33 +309,57 @@ export class KubernetesEffects {
       getKubeAPIResourceGuid);
   }
 
-
-  private processListAction<T>(
+  private processListAction<T = any>(
     action: KubePaginationAction | KubeAction,
     url: string,
     entityKey: string,
     getId: GetID<T>,
     filterResults?: Filter<T>) {
     this.store.dispatch(new StartRequestAction(action));
-    const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
-    const requestArgs = {
-      headers,
-      params: null
-    };
-    const paginationAction = action as KubePaginationAction;
-    if (paginationAction.initialParams) {
-      requestArgs.params = Object.keys(paginationAction.initialParams).reduce((httpParams, initialKey: string) => {
-        return httpParams.set(initialKey, paginationAction.initialParams[initialKey].toString());
-      }, new HttpParams());
-    }
-    return this.http
-      .get(url, requestArgs)
-      .pipe(mergeMap(response => {
+
+    const getKubeIds = action.kubeGuid ?
+      of([action.kubeGuid]) :
+      this.store.select(connectedEndpointsOfTypesSelector(KUBERNETES_ENDPOINT_TYPE)).pipe(
+        first(),
+        map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
+      );
+    let pKubeIds;
+
+    return getKubeIds.pipe(
+      switchMap(kubeIds => {
+        pKubeIds = kubeIds;
+        const headers = new HttpHeaders({ 'x-cap-cnsi-list': pKubeIds });
+        // const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, endpointGuids);
+        const requestArgs = {
+          headers,
+          params: null
+        };
+        const paginationAction = action as KubePaginationAction;
+        if (paginationAction.initialParams) {
+          requestArgs.params = Object.keys(paginationAction.initialParams).reduce((httpParams, initialKey: string) => {
+            return httpParams.set(initialKey, paginationAction.initialParams[initialKey].toString());
+          }, new HttpParams());
+        }
+        return this.http.get(url, requestArgs);
+      }),
+      mergeMap(allRes => {
         const base = {
           entities: { [entityKey]: {} },
           result: []
         } as NormalizedResponse;
-        const items = response[action.kubeGuid].items as Array<any>;
+
+        const items: Array<T> = Object.entries(allRes).reduce((combinedRes, [kubeId, res]) => {
+          if (!res.items) {
+            // The request to this endpoint has failed. Note - throwing this hides any other failures,
+            // however we follow the same approach elsewhere
+            throw res;
+          }
+          res.items.forEach(item => {
+            item.metadata.kubeId = kubeId;
+            combinedRes.push(item);
+          });
+          return combinedRes;
+        }, []);
         const processesData = items.filter((res) => !!filterResults ? filterResults(res) : true)
           .reduce((res, data) => {
             const id = getId(data);
@@ -420,49 +370,93 @@ export class KubernetesEffects {
         return [
           new WrapperRequestActionSuccess(processesData, action)
         ];
-      }), catchError(error => [
-        new WrapperRequestActionFailed(error.message, action, 'fetch', {
-          endpointIds: [action.kubeGuid],
-          url: error.url || url,
-          eventCode: error.status ? error.status + '' : '500',
-          message: 'Kubernetes API request error',
-          error
-        })
-      ]));
+      }),
+      catchError(error => {
+        const { status, message } = this.createKubeError(error);
+        return [
+          new WrapperRequestActionFailed(message, action, 'fetch', {
+            endpointIds: pKubeIds,
+            url: error.url || url,
+            eventCode: status,
+            message,
+            error,
+          })
+        ];
+      })
+    );
   }
 
-  private processSingleItemAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T>) {
-    this.store.dispatch(new StartRequestAction(action));
-    const headers = new HttpHeaders({ 'x-cap-cnsi-list': action.kubeGuid });
+  private processSingleItemAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T>, body?: any) {
+    const requestType: ApiRequestTypes = body ? 'create' : 'fetch';
+    this.store.dispatch(new StartRequestAction(action, requestType));
+    const headers = new HttpHeaders({
+      'x-cap-cnsi-list': action.kubeGuid,
+      'x-cap-passthrough': 'true'
+    },
+    );
     const requestArgs = {
       headers
     };
-    return this.http
-      .get(url, requestArgs)
-      .pipe(mergeMap(response => {
-        const base = {
-          entities: { [schemaKey]: {} },
-          result: []
-        } as NormalizedResponse;
-        const items = [response[action.kubeGuid]];
-        const processesData = items.reduce((res, data) => {
-          const id = getId(data);
-          res.entities[schemaKey][id] = data;
+    const request = body ? this.http.post(url, body, requestArgs) : this.http.get(url, requestArgs);
+
+    return request
+      .pipe(
+        mergeMap((response: T) => {
+          const res = {
+            entities: { [schemaKey]: {} },
+            result: []
+          } as NormalizedResponse;
+          const id = getId(response);
+          res.entities[schemaKey][id] = response;
           res.result.push(id);
-          return res;
-        }, base);
-        return [
-          new WrapperRequestActionSuccess(processesData, action)
-        ];
-      }), catchError(error => [
-        new WrapperRequestActionFailed(error.message, action, 'fetch', {
-          endpointIds: [action.kubeGuid],
-          url: error.url || url,
-          eventCode: error.status ? error.status + '' : '500',
-          message: 'Kubernetes API request error',
-          error
+          const actions: Action[] = [
+            new WrapperRequestActionSuccess(res, action)
+          ];
+          if (requestType === 'create') {
+            actions.push(new ClearPaginationOfType(action));
+          }
+          return actions;
+        }),
+        catchError(error => {
+          const { status, message } = this.createKubeError(error);
+          return [
+            new WrapperRequestActionFailed(message, action, requestType, {
+              endpointIds: [action.kubeGuid],
+              url: error.url || url,
+              eventCode: status,
+              message,
+              error
+            })
+          ];
         })
-      ]));
+      );
   }
 
+  private createKubeErrorMessage(err: any): string {
+    if (err) {
+      if (err.error && err.error.message) {
+        // Kube error
+        return err.error.message;
+      } else if (err.message) {
+        // Http error
+        return err.message;
+      }
+    }
+    return 'Kubernetes API request error';
+  }
+
+  private createKubeError(err: any): { status: string, message: string } {
+    const jetstreamError = isJetstreamError(err);
+    if (jetstreamError) {
+      // Wrapped error
+      return {
+        status: jetstreamError.error.statusCode.toString(),
+        message: this.createKubeErrorMessage(jetstreamError.errorResponse)
+      };
+    }
+    return {
+      status: err && err.status ? err.status + '' : '500',
+      message: this.createKubeErrorMessage(err)
+    };
+  }
 }
