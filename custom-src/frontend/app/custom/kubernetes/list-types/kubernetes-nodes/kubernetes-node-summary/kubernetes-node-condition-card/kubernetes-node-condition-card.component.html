@@ -12,6 +12,10 @@
         </app-kubernetes-node-condition>
         <app-kubernetes-node-condition [inverse]="true" [subtle]="true" condition="OutOfDisk">
         </app-kubernetes-node-condition>
+        <app-kubernetes-node-condition [inverse]="true" [subtle]="true" condition="PIDPressure">
+        </app-kubernetes-node-condition>
+        <app-kubernetes-node-condition [inverse]="true" [subtle]="true" condition="NetworkUnavailable">
+        </app-kubernetes-node-condition>
       </div>
     </mat-card-content>
   </mat-card>

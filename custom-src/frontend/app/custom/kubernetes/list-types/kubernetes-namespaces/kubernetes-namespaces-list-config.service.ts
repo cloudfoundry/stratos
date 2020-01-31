@@ -10,6 +10,7 @@ import { KubernetesNamespace } from '../../../kubernetes/store/kube.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
+import { createKubeAgeColumn } from '../kube-list.helper';
 import { KubeNamespacePodCountComponent } from './kube-namespace-pod-count/kube-namespace-pod-count.component';
 import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link/kubernetes-namespace-link.component';
 import { KubernetesNamespacesDataSource } from './kubernetes-namespaces-data-source';
@@ -41,7 +42,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
       cellFlex: '3',
     },
     {
-      columnId: 'pods', headerCell: () => 'No. of Pods',
+      columnId: 'pods', headerCell: () => 'Pods',
       cellComponent: KubeNamespacePodCountComponent,
       cellFlex: '5',
     },
@@ -57,6 +58,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
       },
       cellFlex: '5',
     },
+    createKubeAgeColumn()
   ];
 
   pageSizeOptions = defaultHelmKubeListPageSize;

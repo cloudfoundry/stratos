@@ -34,7 +34,8 @@ describe('KubernetesNodeLabelsComponent', () => {
         containers: [],
         nodeName: 'test',
         schedulerName: 'test',
-        initContainers: []
+        initContainers: [],
+        readinessGates: []
       }
     };
     fixture.detectChanges();

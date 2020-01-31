@@ -28,8 +28,10 @@ import {
   kubernetesServicesEntityType,
   kubernetesStatefulSetsEntityType,
 } from '../kubernetes-entity-factory';
+import { KubernetesPodExpandedStatusHelper } from '../services/kubernetes-expanded-state';
 import { getKubeAPIResourceGuid } from './kube.selectors';
 import {
+  BasicKubeAPIResource,
   KubernetesDeployment,
   KubernetesNamespace,
   KubernetesNode,
@@ -159,7 +161,8 @@ export class KubernetesEffects {
       return this.processListAction<KubernetesPod>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
         podsEntityConfig.entityKey,
-        getKubeAPIResourceGuid);
+        getKubeAPIResourceGuid
+      );
     })
   );
 
@@ -210,7 +213,8 @@ export class KubernetesEffects {
       return this.processListAction<KubernetesPod>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods/${action.podName}`,
         podsEntityConfig.entityKey,
-        getKubeAPIResourceGuid);
+        getKubeAPIResourceGuid
+      );
     })
   );
 
@@ -304,13 +308,12 @@ export class KubernetesEffects {
         first(),
         map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
       );
-    let pKubeIds;
+    let pKubeIds: string[];
 
     return getKubeIds.pipe(
       switchMap(kubeIds => {
         pKubeIds = kubeIds;
         const headers = new HttpHeaders({ 'x-cap-cnsi-list': pKubeIds });
-        // const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, endpointGuids);
         const requestArgs = {
           headers,
           params: null
@@ -341,10 +344,14 @@ export class KubernetesEffects {
           });
           return combinedRes;
         }, []);
-        const processesData = items.filter((res) => !!filterResults ? filterResults(res) : true)
+        const filteredItems = filterResults ? items.filter(res => filterResults(res)) : items;
+        const processesData = filteredItems
           .reduce((res, data) => {
             const id = getId(data);
-            res.entities[entityKey][id] = data;
+            const updatedData = action.entityType === kubernetesPodsEntityType ?
+              KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(data as unknown as KubernetesPod) :
+              data;
+            res.entities[entityKey][id] = updatedData;
             res.result.push(id);
             return res;
           }, base);
@@ -367,7 +374,12 @@ export class KubernetesEffects {
     );
   }
 
-  private processSingleItemAction<T>(action: KubeAction, url: string, schemaKey: string, getId: GetID<T>, body?: any) {
+  private processSingleItemAction<T extends BasicKubeAPIResource>(
+    action: KubeAction,
+    url: string,
+    schemaKey: string,
+    getId: GetID<T>,
+    body?: any) {
     const requestType: ApiRequestTypes = body ? 'create' : 'fetch';
     this.store.dispatch(new StartRequestAction(action, requestType));
     const headers = new HttpHeaders({
@@ -388,7 +400,10 @@ export class KubernetesEffects {
             result: []
           } as NormalizedResponse;
           const id = getId(response);
-          res.entities[schemaKey][id] = response;
+          const data = action.entityType === kubernetesPodsEntityType ?
+            KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(response as unknown as KubernetesPod) :
+            response;
+          res.entities[schemaKey][id] = data;
           res.result.push(id);
           const actions: Action[] = [
             new WrapperRequestActionSuccess(res, action)

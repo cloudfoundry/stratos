@@ -1,8 +1,19 @@
+import { of } from 'rxjs';
+
 import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
+import {
+  TableCellSidePanelComponent,
+  TableCellSidePanelConfig,
+} from '../../../../shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
+import {
+  KubernetesResourceViewerComponent,
+  KubernetesResourceViewerConfig,
+} from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { KubeService } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
+import { createKubeAgeColumn } from '../kube-list.helper';
 import { KubernetesServicePortsComponent } from '../kubernetes-service-ports/kubernetes-service-ports.component';
 import { KubeServiceCardComponent } from './kubernetes-service-card/kubernetes-service-card.component';
 
@@ -10,15 +21,21 @@ export abstract class BaseKubernetesServicesListConfig implements IListConfig<Ku
   columns: Array<ITableColumn<KubeService>> = [
     {
       columnId: 'name', headerCell: () => 'Name',
-      cellDefinition: {
-        valuePath: 'metadata.name'
-      },
+      cellComponent: TableCellSidePanelComponent,
       sort: {
         type: 'sort',
         orderKey: 'name',
         field: 'metadata.name'
       },
       cellFlex: '4',
+      cellConfig: (service): TableCellSidePanelConfig<KubernetesResourceViewerConfig> => ({
+        text: service.metadata.name,
+        sidePanelComponent: KubernetesResourceViewerComponent,
+        sidePanelConfig: {
+          title: `Service Summary: ${service.metadata.name}`,
+          resource$: of(service)
+        }
+      })
     },
     {
       columnId: 'clusterIp',
@@ -42,6 +59,7 @@ export abstract class BaseKubernetesServicesListConfig implements IListConfig<Ku
       cellComponent: KubernetesServicePortsComponent,
       cellFlex: '4'
     },
+    createKubeAgeColumn()
   ];
 
   pageSizeOptions = defaultHelmKubeListPageSize;

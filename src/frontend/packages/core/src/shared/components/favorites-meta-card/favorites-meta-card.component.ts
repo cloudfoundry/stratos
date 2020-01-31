@@ -75,7 +75,7 @@ export class FavoritesMetaCardComponent {
       const endpoint$ = this.store.select(endpointEntitiesSelector).pipe(
         map(endpoints => endpoints[favoriteEntity.favorite.endpointId])
       );
-      this.endpointConnected$ = endpoint$.pipe(map(endpoint => !!endpoint.user));
+      this.endpointConnected$ = endpoint$.pipe(map(endpoint => isEndpointConnected(endpoint)));
       this.actions$ = this.endpointConnected$.pipe(
         map(connected => connected ? this.config.menuItems : [])
       );
@@ -100,13 +100,11 @@ export class FavoritesMetaCardComponent {
       const config = cardMapper && favorite && favorite.metadata ? cardMapper(favorite.metadata) : null;
 
       if (config) {
+        this.name$ = observableOf(config.name);
         if (this.endpoint) {
-          // this.name$ = endpoint$.pipe(map(endpoint => config.name + (endpoint.user ? '' : ' (Disconnected)')));
-          this.name$ = observableOf(config.name);
-          this.routerLink$ = endpoint$.pipe(map(endpoint => isEndpointConnected(endpoint) ? config.routerLink : '/endpoints'));
+          this.routerLink$ = this.endpointConnected$.pipe(map(connected => connected ? config.routerLink : '/endpoints'));
         } else {
-          this.name$ = observableOf(config.name);
-          this.routerLink$ = endpoint$.pipe(map(endpoint => isEndpointConnected(endpoint) ? config.routerLink : null));
+          this.routerLink$ = this.endpointConnected$.pipe(map(connected => connected ? config.routerLink : null));
         }
         config.lines = this.mapLinesToObservables(config.lines);
         this.config = config;

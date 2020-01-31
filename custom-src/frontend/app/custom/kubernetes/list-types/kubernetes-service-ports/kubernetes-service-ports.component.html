@@ -5,12 +5,14 @@
       <th>Protocol</th>
       <th>Port</th>
       <th>Target Port</th>
+      <th>Node Port</th>
     </tr>
     <tr *ngFor="let port of kubeService.spec?.ports">
       <td>{{port.name}}</td>
       <td>{{port.protocol}}</td>
       <td>{{port.port}}</td>
       <td>{{port.targetPort}}</td>
+      <td>{{port.nodePort}}</td>
     </tr>
   </table>
 </ng-container>

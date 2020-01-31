@@ -35,6 +35,7 @@ import {
   TableCellRequestMonitorIconComponent,
 } from '../table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
+import { TableCellSidePanelComponent } from '../table-cell-side-panel/table-cell-side-panel.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
 
@@ -53,6 +54,7 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellRequestMonitorIconComponent,
   TableCellFavoriteComponent,
   TableCellEndpointDetailsComponent,
+  TableCellSidePanelComponent,
   ...coreEndpointListDetailsComponents
 ];
 

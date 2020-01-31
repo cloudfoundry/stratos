@@ -9,7 +9,7 @@ import { IListConfig, IListFilter, ListViewTypes } from '../../../../shared/comp
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { ConditionType, KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
-import { getConditionSort } from '../kube-sort.helper';
+import { createKubeAgeColumn, getConditionSort } from '../kube-list.helper';
 import { ConditionCellComponent } from './condition-cell/condition-cell.component';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity/kubernetes-node-capacity.component';
 import { KubernetesNodeIpsComponent } from './kubernetes-node-ips/kubernetes-node-ips.component';
@@ -56,7 +56,6 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
         conditionType: ConditionType.Ready
       },
       cellComponent: ConditionCellComponent,
-
       sort: getConditionSort(ConditionType.Ready),
       cellFlex: '2',
     },
@@ -66,7 +65,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
       cellFlex: '2',
     },
     {
-      columnId: 'numPods', headerCell: () => 'No. of Pods',
+      columnId: 'numPods', headerCell: () => 'Pods',
       cellComponent: NodePodCountComponent,
       cellFlex: '2',
     },
@@ -81,6 +80,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     //   cellComponent: KubernetesLabelsCellComponent,
     //   cellFlex: '6',
     // },
+    createKubeAgeColumn()
   ];
   filters: IListFilter[] = [
     {
