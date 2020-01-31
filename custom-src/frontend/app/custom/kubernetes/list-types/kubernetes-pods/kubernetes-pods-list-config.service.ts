@@ -25,18 +25,23 @@ import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 export abstract class BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
 
   static namespaceColumnId = 'namespace';
+  static nodeColumnId = 'node';
   public showNamespaceLink = true;
 
   constructor(
     private kubeId: string,
-    showNamespaces = false
+    hideColumns: string[] = [
+      BaseKubernetesPodsListConfigService.namespaceColumnId,
+      BaseKubernetesPodsListConfigService.nodeColumnId
+    ]
   ) {
-    if (!showNamespaces) {
-      this.columns = this.columns.filter(column => column.columnId !== BaseKubernetesPodsListConfigService.namespaceColumnId);
+    if (hideColumns && hideColumns.filter.length) {
+      this.columns = this.columns.filter(column => hideColumns.indexOf(column.columnId) < 0);
     }
   }
 
   columns: Array<ITableColumn<KubernetesPod>> = [
+    // Name
     {
       columnId: 'name', headerCell: () => 'Name',
       cellComponent: TableCellSidePanelComponent,
@@ -62,6 +67,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
     //   cellComponent: KubernetesPodTagsComponent,
     //   cellFlex: '5',
     // },
+    // Namespace
     {
       columnId: BaseKubernetesPodsListConfigService.namespaceColumnId, headerCell: () => 'Namespace',
       cellDefinition: {
@@ -70,20 +76,21 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
       },
       sort: {
         type: 'sort',
-        orderKey: 'namespace',
+        orderKey: BaseKubernetesPodsListConfigService.namespaceColumnId,
         field: 'metadata.namespace'
       },
       cellFlex: '2',
     },
+    // Node
     {
-      columnId: 'node', headerCell: () => 'Node',
+      columnId: BaseKubernetesPodsListConfigService.nodeColumnId, headerCell: () => 'Node',
       cellDefinition: {
         valuePath: 'spec.nodeName',
         getLink: pod => `/kubernetes/${this.kubeId}/nodes/${pod.spec.nodeName}/summary`
       },
       sort: {
         type: 'sort',
-        orderKey: 'node',
+        orderKey: BaseKubernetesPodsListConfigService.nodeColumnId,
         field: 'spec.nodeName'
       },
       cellFlex: '2',
@@ -151,7 +158,7 @@ export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfi
     store: Store<AppState>,
     kubeId: BaseKubeGuid,
   ) {
-    super(kubeId.guid, true);
+    super(kubeId.guid, []);
     this.podsDataSource = new KubernetesPodsDataSource(store, kubeId, this);
   }
 
