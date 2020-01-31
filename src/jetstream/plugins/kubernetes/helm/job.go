@@ -70,7 +70,7 @@ func (j *KubeAPIJob) Run() []KubeResourceJobResult {
 func (j *KubeAPIJob) restWorker(jetstream interfaces.PortalProxy, id int, jobs <-chan KubeResourceJob, results chan<- KubeResourceJobResult) {
 	for job := range jobs {
 		response, err := j.Jetstream.DoProxySingleRequest(job.Endpoint, job.User, "GET", job.URL, nil, nil)
-		log.Infof("Rest Worker finished for: %s - %d", job.URL, response.StatusCode)
+		log.Debugf("Rest Worker finished for: %s - %d", job.URL, response.StatusCode)
 		res := KubeResourceJobResult{
 			KubeResourceJob: job,
 			StatusCode:      response.StatusCode,

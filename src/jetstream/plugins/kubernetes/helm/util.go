@@ -16,11 +16,9 @@ func podSelectorToQueryString(selector *metav1.LabelSelector) string {
 
 	// Match labels
 	for k, v := range selector.MatchLabels {
-		fmt.Printf("key[%s] value[%s]\n", k, v)
 		if len(ml) > 0 {
 			sep = ","
 		}
-
 		ml = fmt.Sprintf("%s%s%s%%3D%s", ml, sep, k, v)
 	}
 
