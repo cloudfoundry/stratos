@@ -1,5 +1,8 @@
+import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
+import { HelmRelease } from '../../workload.types';
 import { HelmReleaseCardComponent } from './helm-release-card.component';
 
 describe('HelmReleaseCardComponent', () => {
@@ -8,14 +11,24 @@ describe('HelmReleaseCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HelmReleaseCardComponent ]
+      declarations: [HelmReleaseCardComponent],
+      imports: KubernetesBaseTestModules,
+      providers: [
+        DatePipe,
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseCardComponent);
     component = fixture.componentInstance;
+    component.row = {
+      status: 'status',
+      info: {
+        last_deployed: null
+      }
+    } as HelmRelease;
     fixture.detectChanges();
   });
 
