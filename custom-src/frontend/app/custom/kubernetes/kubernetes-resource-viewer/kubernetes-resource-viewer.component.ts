@@ -39,31 +39,40 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
     this.title = props.title;
     this.resource$ = props.resource$.pipe(
       map((item: any) => {// KubeAPIResource
+        const resource = {} as any;
+        const newItem = {} as any;
 
-        const newItem = { ...item };
-        newItem.age = moment(item.metadata.creationTimestamp).fromNow(true);
+        Object.keys(item || []).forEach(k => {
+          if (k !== 'endpointId' && k !== 'releaseTitle' && k !== 'expandedStatus') {
+            newItem[k] = item[k];
+          }
+        });
 
-        newItem.labels = [];
+        resource.raw = newItem;
+        resource.age = moment(item.metadata.creationTimestamp).fromNow(true);
+        resource.creationTimestamp = item.metadata.creationTimestamp;
+
+        resource.labels = [];
         Object.keys(item.metadata.labels || []).forEach(labelName => {
-          newItem.labels.push({
+          resource.labels.push({
             name: labelName,
             value: item.metadata.labels[labelName]
           });
         });
 
         if (item.metadata && item.metadata.annotations) {
-          newItem.annotations = [];
+          resource.annotations = [];
           Object.keys(item.metadata.annotations || []).forEach(labelName => {
-            newItem.annotations.push({
+            resource.annotations.push({
               name: labelName,
               value: item.metadata.annotations[labelName]
             });
           });
         }
 
-        newItem.kind = item.kind || props.resourceKind;
-        newItem.apiVersion = item.apiVersion || this.getVersionFromSelfLink(item.metadata.selfLink);
-        return newItem;
+        resource.kind = item.kind || props.resourceKind;
+        resource.apiVersion = item.apiVersion || this.getVersionFromSelfLink(item.metadata.selfLink);
+        return resource;
       }),
       publishReplay(1),
       refCount()
@@ -102,7 +111,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
   }
 
   private getEndpointId(res): string {
-    return this.kubeEndpointService.kubeGuid || res.endpointId || res.metadata.kubeId;
+    return this.kubeEndpointService.kubeGuid || res.endpointId || res.raw.metadata.kubeId;
   }
 
 }

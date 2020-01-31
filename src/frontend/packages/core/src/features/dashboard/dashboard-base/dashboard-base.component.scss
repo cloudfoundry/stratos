@@ -25,7 +25,7 @@ $app-header-height: 56px;
 
   &__side_preview {
     top: $app-header-height;
-    height: calc(100vw - #{$app-header-height});
+    height: calc(100vw - #{$app-header-height} - 1px);
   }
 
   &__page-tabs {
