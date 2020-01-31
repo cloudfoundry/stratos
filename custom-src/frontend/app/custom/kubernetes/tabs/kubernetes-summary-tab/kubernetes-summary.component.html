@@ -10,7 +10,7 @@
     <app-entity-summary-title *ngIf="endpointDetails$ | async as details" [imagePath]="details.imagePath"
       [title]="details.name" [subTitle]="details.label"
       info="Kubernetes Node Version: {{ (kubeNodeVersions$ | async) }}">
-      <app-tile-grid class="kube-details__metrics" fit="true">
+      <app-tile-grid class="kube-details__metrics">
         <app-tile-group>
           <app-tile>
             <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/nodes"
