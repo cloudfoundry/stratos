@@ -20,6 +20,7 @@ import {
 import { KubernetesPod } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { createKubeAgeColumn } from '../kube-list.helper';
+import { KubernetesPodStatusComponent } from './kubernetes-pod-status/kubernetes-pod-status.component';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 
 export abstract class BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
@@ -106,9 +107,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
     {
       columnId: 'expandedStatus',
       headerCell: () => 'Status',
-      cellDefinition: {
-        valuePath: 'expandedStatus.status'
-      },
+      cellComponent: KubernetesPodStatusComponent,
       sort: {
         type: 'sort',
         orderKey: 'expandedStatus',
