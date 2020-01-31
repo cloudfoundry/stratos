@@ -31,17 +31,17 @@ func (userInfo *UaaUserInfo) GetUserInfo(id string) (int, []byte, *http.Header, 
 }
 
 // UpdateUserInfo updates the user's info
-func (userInfo *UaaUserInfo) UpdateUserInfo(profile *uaaUser) error {
+func (userInfo *UaaUserInfo) UpdateUserInfo(profile *uaaUser) (int, error) {
 	target := fmt.Sprintf("Users/%s", profile.ID)
-	_, _, _, err := userInfo.uaa(target, profile.Raw)
-	return err
+	statusCode, _, _, err := userInfo.uaa(target, profile.Raw)
+	return statusCode, err
 }
 
 // UpdatePassword updates the user's password
-func (userInfo *UaaUserInfo) UpdatePassword(id string, passwordInfo *passwordChangeInfo) error {
+func (userInfo *UaaUserInfo) UpdatePassword(id string, passwordInfo *passwordChangeInfo) (int, error) {
 	target := fmt.Sprintf("Users/%s/password", id)
-	_, _, _, err := userInfo.uaa(target, passwordInfo.Raw)
-	return err
+	statusCode, _, _, err := userInfo.uaa(target, passwordInfo.Raw)
+	return statusCode, err
 }
 
 func (userInfo *UaaUserInfo) uaa(target string, body []byte) (int, []byte, *http.Header, error) {
@@ -137,6 +137,13 @@ func (userInfo *UaaUserInfo) doAPIRequest(sessionUser string, url string, echoRe
 
 	// Add the authorization header
 	req.Header.Set("Authorization", "bearer "+tokenRec.AuthToken)
+	if echoReq.Method == http.MethodPost || echoReq.Method == http.MethodPut {
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Accept", "application/json")
+		copyHeaderIfSet(echoReq, req, "If-Match")
+		copyHeaderIfSet(echoReq, req, "X-Identity-Zone-Id")
+		copyHeaderIfSet(echoReq, req, "X-Identity-Zone-Subdomain")
+	}
 
 	client := userInfo.portalProxy.GetHttpClient(userInfo.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation)
 	res, err = client.Do(req)
@@ -149,8 +156,16 @@ func (userInfo *UaaUserInfo) doAPIRequest(sessionUser string, url string, echoRe
 	defer res.Body.Close()
 
 	log.Debug("User profile request completed OK")
-
 	return res.StatusCode, data, &res.Header, err
+}
+
+func copyHeaderIfSet(src *http.Request, dest *http.Request, name string) {
+	if value, ok := src.Header[name]; ok {
+		if len(value) > 0 {
+			// We only expect headers to be single valued
+			dest.Header.Set(name, value[0])
+		}
+	}
 }
 
 func fwdResponseHeaders(src *http.Header, dest http.Header) {
