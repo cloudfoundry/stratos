@@ -6,7 +6,7 @@ import { TabNavService } from '../../../../../tab-nav.service';
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 
-fdescribe('KubedashConfigurationComponent', () => {
+describe('KubedashConfigurationComponent', () => {
   let component: KubedashConfigurationComponent;
   let fixture: ComponentFixture<KubedashConfigurationComponent>;
 
