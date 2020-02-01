@@ -27,7 +27,7 @@ require (
 	github.com/domodwyer/mailyak v3.1.1+incompatible
 	github.com/dsnet/compress v0.0.0-20171208185109-cc9eb1d7ad76 // indirect
 	github.com/fatih/color v1.7.0 // indirect
-	github.com/go-sql-driver/mysql v1.4.1
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
