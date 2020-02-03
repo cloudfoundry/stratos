@@ -112,7 +112,8 @@ export class HelmReleaseHelperService {
     };
 
     pods.forEach(pod => {
-      const status = pod.status.phase;
+      const status = pod.expandedStatus.status;
+
       if (!podPhases[status]) {
         podPhases[status] = 1;
       } else {

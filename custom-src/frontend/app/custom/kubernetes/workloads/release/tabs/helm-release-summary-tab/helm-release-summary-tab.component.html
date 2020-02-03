@@ -17,7 +17,7 @@
           <app-metadata-item class="chart-details__item" label="Application Version">
             {{ release.chart.metadata.appVersion || '-' }}
           </app-metadata-item>
-          <app-metadata-item class="chart-details__item" label="Namespace">
+          <app-metadata-item class="chart-details__item" label="Cluster">
             <a [routerLink]="createClusterLink()">{{ getClusterName() | async }}</a>
           </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Namespace">
