@@ -125,6 +125,7 @@ import { LongRunningOperationsService } from './services/long-running-op.service
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 import { TableCellSidePanelComponent } from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
+import { CardProgressOverlayComponent } from './components/card-progress-overlay/card-progress-overlay.component';
 
 
 @NgModule({
@@ -231,7 +232,8 @@ import { TableCellSidePanelComponent } from './components/list/list-table/table-
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
     SidepanelPreviewComponent,
-    TableCellSidePanelComponent
+    TableCellSidePanelComponent,
+    CardProgressOverlayComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -326,7 +328,8 @@ import { TableCellSidePanelComponent } from './components/list/list-table/table-
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
     SidepanelPreviewComponent,
-    TableCellEndpointNameComponent
+    TableCellEndpointNameComponent,
+    CardProgressOverlayComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,

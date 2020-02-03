@@ -1,6 +1,6 @@
 <div>
   <app-page-sub-nav>
-    <button *ngIf="kubeEndpointService.kubeDashboardEnabled$ | async" [routerLink]="dashboardLink" mat-button>
+    <button *ngIf="kubeEndpointService.kubeDashboardConfigured$ | async" [routerLink]="dashboardLink" mat-button>
       <mat-icon>dashboard</mat-icon>
       <span class="kube-details__button">View Dashboard</span>
     </button>
@@ -8,8 +8,7 @@
 
   <app-loading-page [isLoading]="isLoading$" [text]="'Retrieving Kubernetes details'">
     <app-entity-summary-title *ngIf="endpointDetails$ | async as details" [imagePath]="details.imagePath"
-      [title]="details.name" [subTitle]="details.label"
-      info="Kubernetes Node Version: {{ (kubeNodeVersions$ | async) }}">
+      [title]="details.name" [subTitle]="details.label">
       <app-tile-grid class="kube-details__metrics" fit="true">
         <app-tile-group>
           <app-tile>
@@ -30,6 +29,24 @@
           </app-tile>
         </app-tile-group>
       </app-tile-grid>
+
+      <div class="app-metadata">
+        <div class="app-metadata__two-cols">
+          <app-metadata-item label="Node version">
+            {{ (kubeNodeVersions$ | async) }}
+          </app-metadata-item>
+        </div>
+        <div class="app-metadata__two-cols" *ngIf="kubeEndpointService.kubeDashboardEnabled$ | async">
+          <app-metadata-item label="Kubernetes Dashboard">
+            <div class="kube-details__dashboard-version">
+            <div *ngIf="(kubeEndpointService.kubeDashboardStatus$ | async) !== null" class="kube-details__dashboard-version-label">{{ (kubeEndpointService.kubeDashboardLabel$ | async) }}</div>
+            <button class="kube-details__dashboard-configure" *ngIf="(kubeEndpointService.kubeDashboardStatus$ | async) !== null" color="primary" mat-button (click)="configureDashboard()">Configure</button>
+            <mat-spinner *ngIf="(kubeEndpointService.kubeDashboardStatus$ | async) === null" diameter="20"></mat-spinner>
+          </div>
+          </app-metadata-item>
+        </div>
+      </div>
+
       <div class="kube-details__graphs">
         <div class="kube-details__graphs-group">
           <div class="kube-details__graph">

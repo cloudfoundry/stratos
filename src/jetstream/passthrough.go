@@ -471,6 +471,11 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		req.Header.Set(longRunningTimeoutHeader, "true")
 	}
 
+	// If this is a long running request, add a header which we can use at request time to change the timeout
+	if cnsiRequest.LongRunning {
+		req.Header.Set(longRunningTimeoutHeader, "true")
+	}
+
 	// Find the auth provider for the auth type - default ot oauthflow
 	authHandler := p.GetAuthProvider(tokenRec.AuthType)
 	if authHandler.Handler != nil {

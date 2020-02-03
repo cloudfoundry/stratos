@@ -103,6 +103,12 @@ func (p *portalProxy) xsrfMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		if c.Request().Method == "GET" || c.Request().Method == "HEAD" {
 			return h(c)
 		}
+
+		// Routes registered with /apps are assumed to be web apps that do their own XSRF
+		if strings.HasPrefix(c.Request().URL.String(), "/pp/v1/apps/") {
+			return h(c)
+		}
+
 		errMsg := "Failed to get stored XSRF token from user session"
 		token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
 		if err == nil {

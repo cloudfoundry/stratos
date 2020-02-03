@@ -22,6 +22,7 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
+import { KubedashConfigurationComponent } from './kubernetes-dashboard/kubedash-configuration/kubedash-configuration.component';
 
 const kubernetes: Routes = [{
   path: '',
@@ -124,6 +125,10 @@ const kubernetes: Routes = [{
       }
     }
   ]
+},
+{
+  path: ':endpointId/dashboard-config',
+  component: KubedashConfigurationComponent,
 }
 ];
 
