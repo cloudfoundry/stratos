@@ -1,21 +1,19 @@
-import { IHeaderBreadcrumb } from './../../../../shared/components/page-header/page-header.types';
-import {
-  KubernetesEndpointService
-} from '../../services/kubernetes-endpoint.service';
-import { KubernetesService } from '../../services/kubernetes.service';
-import { ActivatedRoute } from '@angular/router';
-import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { Component, OnDestroy } from '@angular/core';
-import { Observable, BehaviorSubject, Subscription } from 'rxjs';
-import { map, distinctUntilChanged, filter } from 'rxjs/operators';
-import { KubeDashboardStatus } from '../../store/kubernetes.effects';
-import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { HttpClient } from '@angular/common/http';
-import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
+import { Component, OnDestroy } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { delay, distinctUntilChanged, filter, map } from 'rxjs/operators';
+
+import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
+import { BaseKubeGuid } from '../../kubernetes-page.types';
+import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
+import { KubernetesService } from '../../services/kubernetes.service';
+import { KubeDashboardStatus } from '../../store/kubernetes.effects';
+import { IHeaderBreadcrumb } from './../../../../shared/components/page-header/page-header.types';
 
 type MessageUpdater = (msg: string) => void;
-type ReadyFilter = (status: KubeDashboardStatus) => boolean;
 
 @Component({
   selector: 'app-kubedash-configuration',
@@ -94,9 +92,9 @@ export class KubedashConfigurationComponent implements OnDestroy {
     private httpClient: HttpClient,
     private confirmDialog: ConfirmationDialogService,
     private snackBar: MatSnackBar,
-) {
+  ) {
     this.kubeDashboardStatus$ = kubeEndpointService.kubeDashboardStatus$;
-    // Clear the updatind status when we get back new dashboard status
+    // Clear the updating status when we get back new dashboard status
     this.sub = this.kubeDashboardStatus$.pipe(distinctUntilChanged()).subscribe(status => {
       if (status !== null) {
         this.isUpdatingStatus = false;
@@ -135,11 +133,11 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   public doCreateServiceAccount() {
     this.makeRequest('post',
-    'serviceAccount',
-    'Creating Service Account ...',
-    'Service Account created', 'An error occurred creating the Service Account',
-    this.serviceAccountBusy$,
-    (msg) => this.serviceAccountMsg = msg
+      'serviceAccount',
+      'Creating Service Account ...',
+      'Service Account created', 'An error occurred creating the Service Account',
+      this.serviceAccountBusy$,
+      (msg) => this.serviceAccountMsg = msg
     );
   }
 
@@ -165,11 +163,11 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   public doInstallDashboard() {
     this.makeRequest('post',
-    'installation',
-    'Installing Kubernetes Dashboard ...',
-    'Kubernetes Dashboard installed', 'An error occurred installing the Kubernetes Dashboard',
-    this.dashboardUIBusy$,
-    (msg) => this.dashboardUIMsg = msg
+      'installation',
+      'Installing Kubernetes Dashboard ...',
+      'Kubernetes Dashboard installed', 'An error occurred installing the Kubernetes Dashboard',
+      this.dashboardUIBusy$,
+      (msg) => this.dashboardUIMsg = msg
     );
   }
 
@@ -181,43 +179,49 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   public doDeleteDashboard() {
     this.makeRequest('delete',
-    'installation',
-    'Deleting Kubernetes Dashboard ...',
-    'Kubernetes Dashboard deleted', 'An error occurred deleting the Kubernetes Dashboard',
-    this.dashboardUIBusy$,
-    (msg) => this.dashboardUIMsg = msg
+      'installation',
+      'Deleting Kubernetes Dashboard ...',
+      'Kubernetes Dashboard deleted', 'An error occurred deleting the Kubernetes Dashboard',
+      this.dashboardUIBusy$,
+      (msg) => this.dashboardUIMsg = msg
     );
   }
 
-  private makeRequest(method: string, op: string, busyMsg: string, okMsg: string, errorMsg: string,
-                      busy: BehaviorSubject<boolean>, msgUpdater: MessageUpdater) {
-   const guid = this.kubeEndpointService.kubeGuid;
-   const url = `/pp/v1/kubedash/${guid}/${op}`;
-   let obs;
-   msgUpdater(busyMsg);
-   busy.next(true);
-   this.isBusy$.next(true);
-   if (method === 'post') {
-     obs =  this.httpClient.post(url, {});
-   } else if (method === 'delete') {
-    obs =  this.httpClient.delete(url, {});
-   } else {
-     console.error('Unsupported http method');
-     return;
-   }
+  private makeRequest(
+    method: string,
+    op: string,
+    busyMsg: string,
+    okMsg: string,
+    errorMsg: string,
+    busy: BehaviorSubject<boolean>,
+    msgUpdater: MessageUpdater) {
+    const guid = this.kubeEndpointService.kubeGuid;
+    const url = `/pp/v1/kubedash/${guid}/${op}`;
+    let obs;
+    msgUpdater(busyMsg);
+    busy.next(true);
+    this.isBusy$.next(true);
+    if (method === 'post') {
+      obs = this.httpClient.post(url, {});
+    } else if (method === 'delete') {
+      obs = this.httpClient.delete(url, {});
+    } else {
+      console.error('Unsupported http method');
+      return;
+    }
 
-   obs.subscribe(() => {
-     this.snackBar.open(okMsg, 'Dismiss', { duration: 3000 });
-     busy.next(false);
-     this.refresh();
-   }, (e) => {
-     let msg = errorMsg;
-     if (e && e.error && e.error.error) {
-       msg = e.error.error;
-     }
-     this.snackBarRef = this.snackBar.open(msg, 'Dismiss');
-     busy.next(false);
-     this.refresh();
+    obs.pipe(delay(999999999)).subscribe(() => {
+      this.snackBar.open(okMsg, 'Dismiss', { duration: 3000 });
+      busy.next(false);
+      this.refresh();
+    }, (e) => {
+      let msg = errorMsg;
+      if (e && e.error && e.error.error) {
+        msg = e.error.error;
+      }
+      this.snackBarRef = this.snackBar.open(msg, 'Dismiss');
+      busy.next(false);
+      this.refresh();
     });
   }
 

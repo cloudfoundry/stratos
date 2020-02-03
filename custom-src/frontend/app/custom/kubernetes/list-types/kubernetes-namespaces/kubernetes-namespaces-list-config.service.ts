@@ -86,7 +86,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
   ) {
     this.podsDataSource = new KubernetesNamespacesDataSource(store, this.kubeId, this);
 
-    const hasDashboard = kubeService.kubeDashboardEnabled$.pipe(
+    const hasDashboard = kubeService.kubeDashboardConfigured$.pipe(
       first(),
       tap((enabled) => {
         if (!enabled) {
