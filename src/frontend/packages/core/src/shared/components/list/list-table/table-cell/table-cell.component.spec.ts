@@ -33,6 +33,7 @@ import { ApplicationStateService } from '../../../application-state/application-
 import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../chips/chips.component';
 import { GithubCommitAuthorComponent } from '../../../github-commit-author/github-commit-author.component';
+import { ServiceInstanceLastOpComponent } from '../../../service-instance-last-op/service-instance-last-op.component';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { listTableCells, TableCellComponent } from './table-cell.component';
 
@@ -64,6 +65,7 @@ describe('TableCellComponent', () => {
         ServicePlanPriceComponent,
         ServicePlanPublicComponent,
         CfOrgSpaceLinksComponent,
+        ServiceInstanceLastOpComponent
       ],
       imports: [
         CoreModule

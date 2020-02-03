@@ -1,6 +1,5 @@
-// tslint:disable:max-line-length
 import { CommonModule } from '@angular/common';
-import { ApplicationModule, NgModule } from '@angular/core';
+import { ApplicationModule, NgModule, Type } from '@angular/core';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
@@ -13,6 +12,7 @@ import {
 import {
   TableCellServiceComponent,
 } from '../../../../core/src/shared/components/list/list-types/cf-spaces-service-instances/table-cell-service/table-cell-service.component';
+import { CardCell, TableCellCustom } from '../../../../core/src/shared/components/list/list.types';
 import {
   ServiceInstanceLastOpComponent,
 } from '../../../../core/src/shared/components/service-instance-last-op/service-instance-last-op.component';
@@ -138,12 +138,6 @@ import {
   TableCellServiceInstanceTagsComponent,
 } from './list/list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
 import {
-  TableCellServiceNameComponent,
-} from './list/list-types/cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
-import {
-  TableCellServicePlanComponent,
-} from './list/list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-import {
   TableCellSpaceNameComponent,
 } from './list/list-types/cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
 import { CfSpaceCardComponent } from './list/list-types/cf-spaces/cf-space-card/cf-space-card.component';
@@ -182,9 +176,64 @@ import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
 
-
-
+// tslint:disable:max-line-length
 // tslint:enable:max-line-length
+
+const cfListTableCells: Type<TableCellCustom<any>>[] = [
+  TableCellServiceInstanceAppsAttachedComponent,
+  TableCellServiceComponent,
+  TableCellServiceLastOpComponent,
+  TableCellRouteAppsAttachedComponent,
+  CfOrgPermissionCellComponent,
+  CfSpacePermissionCellComponent,
+  TableCellFeatureFlagStateComponent,
+  TableCellConfirmOrgSpaceComponent,
+  TableCellSelectOrgComponent,
+  TableCellAppStatusComponent,
+  TableCellRoleOrgSpaceComponent,
+  TableCellConfirmRoleAddRemComponent,
+  TableCellSpaceNameComponent,
+  TableCellAppCfOrgSpaceHeaderComponent,
+  TableCellAppCfOrgSpaceComponent,
+  TableCellAServicePlanPublicComponent,
+  TableCellAServicePlanPriceComponent,
+  TableCellAServicePlanExtrasComponent,
+  TableCellCfCellComponent,
+  TableCellRouteComponent,
+  TableCellTCPRouteComponent,
+  TableCellAppInstancesComponent,
+  TableCellAppNameComponent,
+  TableCellEditVariableComponent,
+  TableCellEventTimestampComponent,
+  TableCellEventTypeComponent,
+  TableCellEventActionComponent,
+  TableCellEventDetailComponent,
+  TableCellUsageComponent,
+  TableCellQuotaComponent,
+  TableCellEventActeeComponent,
+  TableCellServiceTagsComponent,
+  TableCellServiceCfBreadcrumbsComponent,
+  TableCellServiceProviderComponent,
+  TableCellServiceBindableComponent,
+  TableCellServiceActiveComponent,
+  TableCellServiceReferencesComponent,
+  TableCellServiceInstanceTagsComponent
+];
+
+const cfListCards: Type<CardCell<any>>[] = [
+  AppServiceBindingCardComponent,
+  CardAppComponent,
+  CfOrgCardComponent,
+  CfSpaceCardComponent,
+  CfBuildpackCardComponent,
+  CfSecurityGroupsCardComponent,
+  CfStacksCardComponent,
+  CfServiceCardComponent,
+  ServiceInstanceCardComponent,
+  UserProvidedServiceInstanceCardComponent,
+];
+
+// listTableCells.push();
 
 @NgModule({
   imports: [
@@ -228,66 +277,13 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
     RunningInstancesComponent,
     ServicePlanPublicComponent,
     ServicePlanPriceComponent,
-    ServiceInstanceLastOpComponent,
-
-    AppServiceBindingCardComponent,
-    CardAppComponent,
-    CfOrgCardComponent,
-    CfSpaceCardComponent,
-    CfBuildpackCardComponent,
-    CfSecurityGroupsCardComponent,
-    CfStacksCardComponent,
-    CfServiceCardComponent,
-    ServiceInstanceCardComponent,
-    UserProvidedServiceInstanceCardComponent,
-
-    TableCellSelectOrgComponent,
-    TableCellAppStatusComponent,
-    TableCellRoleOrgSpaceComponent,
-    TableCellServiceInstanceAppsAttachedComponent,
-    TableCellServiceInstanceTagsComponent,
-    TableCellServicePlanComponent,
-    TableCellServiceNameComponent,
-    TableCellConfirmOrgSpaceComponent,
-    TableCellConfirmRoleAddRemComponent,
-    TableCellRouteAppsAttachedComponent,
-    CfOrgPermissionCellComponent,
-    CfSpacePermissionCellComponent,
-    TableCellFeatureFlagStateComponent,
-    TableCellSpaceNameComponent,
-    TableCellAppCfOrgSpaceHeaderComponent,
-    TableCellAppCfOrgSpaceComponent,
-    TableCellAServicePlanPublicComponent,
-    TableCellAServicePlanPriceComponent,
-    TableCellAServicePlanExtrasComponent,
-    TableCellCfCellComponent,
-    TableCellRouteComponent,
-    TableCellTCPRouteComponent,
-    TableCellAppInstancesComponent,
-    TableCellAppNameComponent,
     CreateApplicationStep1Component,
     EventTabActorIconPipe,
-    TableCellEditVariableComponent,
-    TableCellEventTimestampComponent,
-    TableCellEventTypeComponent,
-    TableCellEventActionComponent,
-    TableCellEventDetailComponent,
-    TableCellUsageComponent,
-    TableCellQuotaComponent,
-    TableCellEventActeeComponent,
     CloudFoundryEventsListComponent,
     EventMetadataComponent,
-    TableCellServiceComponent,
-    TableCellServiceLastOpComponent,
-    TableCellServiceTagsComponent,
-    TableCellServiceCfBreadcrumbsComponent,
-    TableCellServiceProviderComponent,
-    TableCellServiceBindableComponent,
-    TableCellServiceActiveComponent,
-    TableCellServiceReferencesComponent,
-
-    CloudFoundryEventsListComponent,
-    EventMetadataComponent
+    ...cfListTableCells,
+    ...cfListCards,
+    ServiceInstanceLastOpComponent
   ],
   exports: [
     ServiceIconComponent,
@@ -330,62 +326,10 @@ import { ServicePlanPublicComponent } from './service-plan-public/service-plan-p
   entryComponents: [
     CfEndpointDetailsComponent,
     NoServicePlansComponent,
+    EventMetadataComponent,
 
-    AppServiceBindingCardComponent,
-    CardAppComponent,
-    CfOrgCardComponent,
-    CfSpaceCardComponent,
-    CfBuildpackCardComponent,
-    CfSecurityGroupsCardComponent,
-    CfStacksCardComponent,
-    CfServiceCardComponent,
-    ServiceInstanceCardComponent,
-    UserProvidedServiceInstanceCardComponent,
-
-    TableCellSelectOrgComponent,
-    TableCellAppStatusComponent,
-    TableCellRoleOrgSpaceComponent,
-    TableCellServiceInstanceAppsAttachedComponent,
-    TableCellServiceInstanceTagsComponent,
-    TableCellServicePlanComponent,
-    TableCellServiceNameComponent,
-    TableCellConfirmOrgSpaceComponent,
-    TableCellConfirmRoleAddRemComponent,
-    TableCellRouteAppsAttachedComponent,
-    CfOrgPermissionCellComponent,
-    CfSpacePermissionCellComponent,
-    TableCellFeatureFlagStateComponent,
-    TableCellSpaceNameComponent,
-    TableCellAppCfOrgSpaceHeaderComponent,
-    TableCellAppCfOrgSpaceComponent,
-    TableCellAServicePlanPublicComponent,
-    TableCellAServicePlanPriceComponent,
-    TableCellAServicePlanExtrasComponent,
-    TableCellCfCellComponent,
-    TableCellRouteComponent,
-    TableCellTCPRouteComponent,
-    TableCellAppInstancesComponent,
-    TableCellAppNameComponent,
-    TableCellEditVariableComponent,
-    TableCellEventTimestampComponent,
-    TableCellEventTypeComponent,
-    TableCellEventActionComponent,
-    TableCellEventDetailComponent,
-    TableCellUsageComponent,
-    TableCellQuotaComponent,
-    TableCellEventActeeComponent,
-    TableCellServiceComponent,
-    TableCellServiceLastOpComponent,
-    TableCellServiceTagsComponent,
-    TableCellServiceCfBreadcrumbsComponent,
-    TableCellServiceProviderComponent,
-    TableCellServiceBindableComponent,
-    TableCellServiceActiveComponent,
-    TableCellServiceReferencesComponent,
-    TableCellServiceLastOpComponent,
-
-    EventMetadataComponent
-
+    ...cfListTableCells,
+    ...cfListCards
   ]
 })
 export class CloudFoundryComponentsModule { }

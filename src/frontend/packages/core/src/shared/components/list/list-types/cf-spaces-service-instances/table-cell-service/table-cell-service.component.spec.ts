@@ -1,5 +1,4 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { EntityMonitorFactory } from 'frontend/packages/store/src/monitors/entity-monitor.factory.service';
 
 import {
   LongRunningCfOperationsService,
@@ -7,6 +6,7 @@ import {
 import {
   generateCfBaseTestModulesNoShared,
 } from '../../../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import { TableCellServiceComponent } from './table-cell-service.component';

@@ -2,9 +2,9 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
 
 import { TabNavService } from '../../../../tab-nav.service';
+import { generateBaseTestStoreModules } from '../../../../test-framework/core-test.helper';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
@@ -27,12 +27,12 @@ describe('SetupWelcomeComponent', () => {
         PageHeaderModule,
         ReactiveFormsModule,
         MDAppModule,
-        StoreModule.forRoot({}),
+        ...generateBaseTestStoreModules(),
         NoopAnimationsModule,
       ],
       providers: [TabNavService]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

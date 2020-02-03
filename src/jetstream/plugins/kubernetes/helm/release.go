@@ -5,9 +5,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
-
-	//	"io"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -105,6 +104,9 @@ func getResourceIdentifier(typeMeta metav1.TypeMeta, objectMeta metav1.ObjectMet
 func (r *HelmRelease) setResource(res KubeResource) {
 	r.Resources[res.getID()] = res
 }
+func (r *HelmRelease) deleteResource(res KubeResource) {
+	delete(r.Resources, res.getID())
+}
 
 // GetResources gets all fo the resources for the release
 func (r *HelmRelease) GetResources() []interface{} {
@@ -135,10 +137,7 @@ func (r *HelmRelease) processResource(obj runtime.Object) {
 			t.Resource = obj
 			t.Manifest = true
 			r.setResource(t)
-			log.Infof("Got resource: %s : %s", t.Kind, t.Metadata.Name)
-			// if t.Kind == "Deployment" || t.Kind == "StatefulSet" || t.Kind == "DaemonSet" || t.Kind =={
-			// 	r.processController(t)
-			// }
+			log.Debugf("Got resource: %s : %s", t.Kind, t.Metadata.Name)
 			r.processController(t)
 			r.addJobForResource(t.Kind, t.APIVersion, t.Metadata.Name)
 		} else {
@@ -183,7 +182,7 @@ func (r *HelmRelease) processController(kres KubeResource) {
 		r.processPodSelector(kres, o.Spec.Selector)
 	default:
 		// Ignore - not a controller
-		log.Errorf("Ignoring: non-controller type: %s", reflect.TypeOf(o))
+		log.Debugf("Ignoring: non-controller type: %s", reflect.TypeOf(o))
 	}
 }
 
@@ -214,6 +213,8 @@ func (r *HelmRelease) UpdatePods(jetstream interfaces.PortalProxy) {
 		jobs = append(jobs, job)
 	}
 
+	pods := make(map[string]*KubeResource)
+
 	runner := NewKubeAPIJob(jetstream, jobs)
 	res := runner.Run()
 	for _, j := range res {
@@ -232,10 +233,20 @@ func (r *HelmRelease) UpdatePods(jetstream interfaces.PortalProxy) {
 				podCopy := &v1.Pod{}
 				*podCopy = pod
 				res.Resource = podCopy
+				pods[res.getID()] = &res
 
 				r.setResource(res)
 				r.processPodOwners(pod)
 			}
+		}
+	}
+
+	// Now remove all pods that have not just been retrieved
+	// These are stale pods
+	for _, res := range r.Resources {
+		_, exists := pods[res.getID()]
+		if res.Kind == "Pod" && !exists {
+			r.deleteResource(res)
 		}
 	}
 }
@@ -271,7 +282,7 @@ func (r *HelmRelease) processPodOwners(pod v1.Pod) {
 				r.addJobForResource(owner.Kind, owner.APIVersion, owner.Name)
 			}
 		} else {
-			log.Warn("Unexpected Pod owner kind: %s", owner.Kind)
+			log.Debugf("Unexpected Pod owner kind: %s", owner.Kind)
 		}
 	}
 }
@@ -291,8 +302,6 @@ func (r *HelmRelease) UpdateResources(jetstream interfaces.PortalProxy) {
 	res := runner.Run()
 	for _, j := range res {
 
-		// TODO: If the status was 404, then we should remove the resource
-
 		// Add a kube resource
 		res := KubeResource{
 			Kind:       j.Kind,
@@ -300,8 +309,19 @@ func (r *HelmRelease) UpdateResources(jetstream interfaces.PortalProxy) {
 		}
 		res.Metadata.Name = j.Name
 
-		// TODO: This should carry over
-		res.Manifest = false
+		// TODO: If the status was 404, then we should remove the resource
+		if j.StatusCode == http.StatusNotFound {
+			log.Debugf("Resource has been deleted - removing: %s -> %s", j.Kind, j.Name)
+			r.deleteResource(res)
+		}
+
+		// Manifest should carry over - indicates if the resource was in the Helm manifest
+		// Pods are an example of a reosurce which is not in the manifest
+		if existing, ok := r.Resources[res.getID()]; ok {
+			res.Manifest = existing.Manifest
+		} else {
+			res.Manifest = false
+		}
 
 		decode := scheme.Codecs.UniversalDeserializer().Decode
 		obj, _, err := decode(j.Data, nil, nil)
@@ -329,7 +349,5 @@ func getRestURL(namespace, kind, apiVersion, name string) string {
 		}
 	}
 	restURL = fmt.Sprintf("/%s/%s/namespaces/%s/%ss/%s", base, apiVersion, namespace, strings.ToLower(kind), name)
-
-	//log.Errorf("%s %s %s -> %s", kind, apiVersion, name, restURL)
 	return restURL
 }
