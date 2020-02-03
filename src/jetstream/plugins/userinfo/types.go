@@ -7,8 +7,8 @@ import (
 // Provider manages user info for a provider
 type Provider interface {
 	GetUserInfo(id string) (int, []byte, *http.Header, error)
-	UpdateUserInfo(*uaaUser) error
-	UpdatePassword(id string, info *passwordChangeInfo) error
+	UpdateUserInfo(*uaaUser) (int, error)
+	UpdatePassword(id string, info *passwordChangeInfo) (int, error)
 }
 
 type uaaUserEmail struct {

@@ -135,7 +135,7 @@ func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid message body")
 	}
 
-	err = provider.UpdateUserInfo(updatedProfile)
+	statusCode, err := provider.UpdateUserInfo(updatedProfile)
 	if err != nil {
 		if httpError, ok := err.(interfaces.ErrHTTPShadow); ok {
 			return httpError
@@ -148,7 +148,7 @@ func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 		)
 	}
 
-	c.Response().WriteHeader(http.StatusOK)
+	c.Response().WriteHeader(statusCode)
 
 	return nil
 }
@@ -175,7 +175,7 @@ func (userInfo *UserInfo) updateUserPassword(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid message body")
 	}
 
-	err = provider.UpdatePassword(id, passwordInfo)
+	statusCode, err := provider.UpdatePassword(id, passwordInfo)
 	if err != nil {
 		if httpError, ok := err.(interfaces.ErrHTTPShadow); ok {
 			return httpError
@@ -188,7 +188,7 @@ func (userInfo *UserInfo) updateUserPassword(c echo.Context) error {
 		)
 	}
 
-	c.Response().WriteHeader(http.StatusOK)
+	c.Response().WriteHeader(statusCode)
 
 	return nil
 }
