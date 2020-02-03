@@ -23,8 +23,7 @@ export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
       this.status = row.status.charAt(0).toUpperCase() + row.status.substring(1);
       this.lastDeployed = this.datePipe.transform(row.info.last_deployed, 'medium');
       this.icon = row.chart.metadata.icon;
-      // TODO: RC Check out when updated helm is merged
-      // console.log(row);
+      // FIXME: See #304
       // this.icon = '/pp/v1/chartsvc/v1/assets/aerospike/aerospike-enterprise/logo';
       // this.icon = 'chartsvc/v1/assets/ntppool/geoip/logo'
       // chart summary - /pp/v1/chartsvc/v1/assets/charts/aerospike/logo-160x160-fit.png

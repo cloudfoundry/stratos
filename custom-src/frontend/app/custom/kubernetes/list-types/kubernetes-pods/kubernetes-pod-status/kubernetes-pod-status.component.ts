@@ -29,7 +29,6 @@ export class KubernetesPodStatusComponent extends TableCellCustom<KubernetesPod>
   }
 
   private convertStatus(status: string): string {
-    // TODO: RC Run through
     if (!status) {
       return 'tentative';
     }
