@@ -1,5 +1,26 @@
 # Change Log
 
+## 2.7.0
+
+[Full Changelog](https://github.com/SUSE/stratos/compare/2.6.1...2.7.0)
+
+This release sees a change in branding to "SUSE Stratos Console" along with numerous fixes and improvements
+to the Kubernetes Dashboard integration.
+
+Details:
+
+**Fixes:**
+
+- Kubernetes Dashboard integration is hard to configure [\#270](https://github.com/SUSE/stratos/pull/270)
+- Kubernetes Dashboard integration does not work with CaaSP 4.1 [\#269](https://github.com/SUSE/stratos/pull/269)
+- Fix long running service actions [\#4049] (https://github.com/cloudfoundry/stratos/pull/4049)
+
+**Improvements:**
+
+- Update branding to "SUSE Stratos Console" [\#271](https://github.com/SUSE/stratos/pull/271)
+- Show last operation and service broker info for service instances [\#4038](https://github.com/cloudfoundry/stratos/pull/4038)
+- Disable Volume Migration Job [\#279](https://github.com/SUSE/stratos/issues/279)
+
 ## 2.6.1
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/2.6.0...2.6.1)

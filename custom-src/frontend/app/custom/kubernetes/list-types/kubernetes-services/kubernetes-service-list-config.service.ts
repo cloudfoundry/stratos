@@ -32,8 +32,9 @@ export abstract class BaseKubernetesServicesListConfig implements IListConfig<Ku
         text: service.metadata.name,
         sidePanelComponent: KubernetesResourceViewerComponent,
         sidePanelConfig: {
-          title: `Service Summary: ${service.metadata.name}`,
-          resource$: of(service)
+          title: service.metadata.name,
+          resource$: of(service),
+          resourceKind: 'service'
         }
       })
     },

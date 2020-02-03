@@ -56,7 +56,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
         text: pod.metadata.name,
         sidePanelComponent: KubernetesResourceViewerComponent,
         sidePanelConfig: {
-          title: `Pod Summary: ${pod.metadata.name}`,
+          title: pod.metadata.name,
           resourceKind: 'pod',
           resource$: of(pod)
         }

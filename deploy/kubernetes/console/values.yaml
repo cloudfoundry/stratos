@@ -66,7 +66,7 @@ console:
   userInviteSubject: ~
 
   # Whether to perform the volume migration job on install/upgrade (migrate to secrets)
-  migrateVolumes: true
+  migrateVolumes: false
   
   # Enable/disable Tech Preview
   techPreview: false

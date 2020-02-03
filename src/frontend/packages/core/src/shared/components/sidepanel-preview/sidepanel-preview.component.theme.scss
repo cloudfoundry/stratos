@@ -1,9 +1,12 @@
 @mixin app-sidepanel-preview-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
+  $background-color: map-get($app-theme, app-background-color);
+  $darker-background-color: darken($background-color, 4%);
+  $foreground: map-get($theme, foreground);
 
   .sidepanel-preview__header {
-    background-color: mat-color($primary);
-    color: mat-contrast($primary, 500);
+    background-color: $darker-background-color;
+    border-top: 1px solid mat-color($foreground, divider);
   }
 
   .sidepanel-preview__content {

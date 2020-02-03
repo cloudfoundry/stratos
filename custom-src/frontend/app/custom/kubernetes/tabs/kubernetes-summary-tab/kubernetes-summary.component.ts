@@ -17,6 +17,7 @@ import {
 } from '../../../../shared/components/simple-usage-chart/simple-usage-chart.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { GetKubernetesNamespaces, GetKubernetesNodes, GetKubernetesPods } from '../../store/kubernetes.actions';
+import { Router } from '@angular/router';
 
 interface IValueLabels {
   usedLabel?: string;
@@ -99,10 +100,16 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     public httpClient: HttpClient,
     public paginationMonitorFactory: PaginationMonitorFactory,
     private store: Store<AppState>,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private router: Router,
   ) {
   }
 
+  // Go the Kubernetes Dashboard configuration page
+  public configureDashboard() {
+    const guid = this.kubeEndpointService.baseKube.guid;
+    this.router.navigate([`/kubernetes/${guid}/dashboard-config`]);
+  }
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
 
