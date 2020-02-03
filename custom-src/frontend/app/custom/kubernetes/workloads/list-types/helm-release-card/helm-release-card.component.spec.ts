@@ -27,6 +27,9 @@ describe('HelmReleaseCardComponent', () => {
       status: 'status',
       info: {
         last_deployed: null
+      },
+      chart: {
+        metadata: {}
       }
     } as HelmRelease;
     fixture.detectChanges();
