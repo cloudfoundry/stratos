@@ -23,7 +23,6 @@ import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { IUserProvidedServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe, urlValidationExpression } from '../../../../../../core/src/core/utils.service';
 import { environment } from '../../../../../../core/src/environments/environment';
 import {
@@ -34,6 +33,7 @@ import { isValidJsonValidator } from '../../../../../../core/src/shared/form-val
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
@@ -124,6 +124,17 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       ),
       map(valid => this.validAndChanged(valid)),
     );
+    this.subscriptions.push(this.tagsChanged.subscribe(() => {
+      if (this.formMode === CreateServiceFormMode.CreateServiceInstance) {
+        this.createEditServiceInstance.markAsTouched();
+        this.createEditServiceInstance.markAsDirty();
+        this.createEditServiceInstance.updateValueAndValidity();
+      } else {
+        this.bindExistingInstance.markAsTouched();
+        this.bindExistingInstance.markAsDirty();
+        this.bindExistingInstance.updateValueAndValidity();
+      }
+    }));
     this.subscriptions.push(obs.subscribe(valid => this.valid.next(valid)));
   }
 
@@ -252,10 +263,10 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     ).pipe(
       combineLatest(this.store.select(selectCreateServiceInstance)),
       switchMap(([request, state]) => {
-        const newGuid = request.response.result[0];
         const success = !request.error;
         const redirect = !request.error;
         if (!!state.bindAppGuid && success) {
+          const newGuid = request.response.result[0];
           return this.createApplicationServiceBinding(newGuid, state);
         }
         return observableOf({
@@ -293,7 +304,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       );
   }
 
-  private onNextUpdate() {
+  private onNextUpdate(): Observable<StepOnNextResult> {
     const updateData = this.getServiceData();
     return this.upsService.updateUserProvidedService(
       this.cfGuid,
@@ -302,7 +313,8 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     ).pipe(
       map(er => ({
         success: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error,
-        redirect: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error
+        redirect: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error,
+        message: `Failed to update service instance: ${er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].message}`
       }))
     );
   }
