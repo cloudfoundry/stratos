@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
@@ -7,12 +6,23 @@ import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/ope
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PreviewableComponent } from '../../../shared/previewable-component';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
-import { BasicKubeAPIResource } from '../store/kube.types';
+import { BasicKubeAPIResource, KubeAPIResource } from '../store/kube.types';
 
 export interface KubernetesResourceViewerConfig {
   title: string;
   resource$: Observable<BasicKubeAPIResource>;
-  resourceKind?: string;
+  resourceKind: string;
+}
+
+interface KubernetesResourceViewerResource {
+  raw: any;
+  jsonView: KubeAPIResource;
+  age: string;
+  creationTimestamp: string;
+  labels: { name: string, value: string }[];
+  annotations: { name: string, value: string }[];
+  kind: string;
+  apiVersion: string;
 }
 
 @Component({
@@ -23,14 +33,13 @@ export interface KubernetesResourceViewerConfig {
 export class KubernetesResourceViewerComponent implements PreviewableComponent {
 
   constructor(
-    private activatedRoute: ActivatedRoute,
     private endpointsService: EndpointsService,
     private kubeEndpointService: KubernetesEndpointService
   ) {
   }
 
   public title: string;
-  public resource$: Observable<any>;
+  public resource$: Observable<KubernetesResourceViewerResource>;
 
   public hasPodMetrics$: Observable<boolean>;
   public podRouterLink$: Observable<string[]>;
@@ -39,8 +48,10 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
     this.title = props.title;
     this.resource$ = props.resource$.pipe(
       map((item: any) => {// KubeAPIResource
-        const resource = {} as any;
+        const resource: KubernetesResourceViewerResource = {} as KubernetesResourceViewerResource;
         const newItem = {} as any;
+
+        resource.raw = item;
 
         Object.keys(item || []).forEach(k => {
           if (k !== 'endpointId' && k !== 'releaseTitle' && k !== 'expandedStatus') {
@@ -48,7 +59,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
           }
         });
 
-        resource.raw = newItem;
+        resource.jsonView = newItem;
         resource.age = moment(item.metadata.creationTimestamp).fromNow(true);
         resource.creationTimestamp = item.metadata.creationTimestamp;
 
@@ -78,14 +89,12 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
       refCount()
     );
 
-    this.hasPodMetrics$ = this.resource$.pipe(
-      switchMap(resource => {
-        return resource.kind === 'pod' ?
-          this.endpointsService.hasMetrics(this.getEndpointId(resource)) :
-          of(false);
-      }),
-      first(),
-    );
+    this.hasPodMetrics$ = props.resourceKind === 'pod' ?
+      this.resource$.pipe(
+        switchMap(resource => this.endpointsService.hasMetrics(this.getEndpointId(resource.raw))),
+        first(),
+      ) :
+      of(false);
 
     this.podRouterLink$ = this.hasPodMetrics$.pipe(
       filter(hasPodMetrics => hasPodMetrics),
@@ -93,10 +102,10 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
       map(pod => {
         return [
           `/kubernetes`,
-          this.getEndpointId(pod),
+          this.getEndpointId(pod.raw),
           `pods`,
-          pod.metadata.namespace,
-          pod.metadata.name
+          pod.raw.metadata.namespace,
+          pod.raw.metadata.name
         ];
       })
     );
@@ -111,7 +120,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
   }
 
   private getEndpointId(res): string {
-    return this.kubeEndpointService.kubeGuid || res.endpointId || res.raw.metadata.kubeId;
+    return this.kubeEndpointService.kubeGuid || res.endpointId || res.metadata.kubeId;
   }
 
 }

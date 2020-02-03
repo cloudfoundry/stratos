@@ -1,14 +1,14 @@
 <app-sidepanel-preview title="{{title}}">
 
   <div *ngIf="resource$ | async as resource">
-  <div class="resource-preview__side-by-side">
-    <app-metadata-item label="API Version">{{ resource.apiVersion }}</app-metadata-item>
-    <app-metadata-item label="Kind">{{ resource.kind | titlecase }}</app-metadata-item>
-    <div class="resource-preview__metrics">
-      <a *ngIf="hasPodMetrics$ | async" [routerLink]="podRouterLink$ | async">View Metrics</a>
+    <div class="resource-preview__side-by-side">
+      <app-metadata-item label="API Version">{{ resource.apiVersion }}</app-metadata-item>
+      <app-metadata-item label="Kind">{{ resource.kind | titlecase }}</app-metadata-item>
+      <div class="resource-preview__metrics">
+        <a *ngIf="hasPodMetrics$ | async" [routerLink]="podRouterLink$ | async">View Metrics</a>
+      </div>
     </div>
-  </div>
-  <div class="resource-preview__side-by-side">
+    <div class="resource-preview__side-by-side">
       <app-metadata-item label="Created">{{ resource.creationTimestamp | date:'medium' }}</app-metadata-item>
       <app-metadata-item label="Age">{{ resource.age }}</app-metadata-item>
     </div>
@@ -27,7 +27,7 @@
       </div>
     </app-metadata-item>
 
-    <app-json-viewer #viewer [json]="resource.raw"></app-json-viewer>
+    <app-json-viewer #viewer [json]="resource.jsonView"></app-json-viewer>
 
   </div>
 </app-sidepanel-preview>
