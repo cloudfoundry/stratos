@@ -3,14 +3,14 @@
   &__labels {
     display: table;
   }
-  
+
   &__label {
     display: table-row;
   }
 
   &__label-name {
     display: table-cell;
-    opacity: 0.8;
+    opacity: .8;
     padding: 2px 20px 2px 2px;
   }
 
@@ -24,7 +24,7 @@
     app-metadata-item {
       margin-right: 40px;
     }
-    
+
   }
 
 }

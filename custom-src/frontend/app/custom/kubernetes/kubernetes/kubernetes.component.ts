@@ -1,13 +1,16 @@
 import { Component } from '@angular/core';
-import { KubernetesService } from '../services/kubernetes.service';
 import { Store } from '@ngrx/store';
-import { map, filter, first } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { AppState } from '../../../../../store/src/app-state';
+import { filter, first, map } from 'rxjs/operators';
+
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { ListConfig } from '../../../shared/components/list/list.component.types';
-import {KubernetesEndpointsListConfigService} from '../list-types/kubernetes-endpoints/kubernetes-endpoints-list-config.service';
+import { AppState } from '../../../../../store/src/app-state';
 import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
+import { ListConfig } from '../../../shared/components/list/list.component.types';
+import {
+  KubernetesEndpointsListConfigService,
+} from '../list-types/kubernetes-endpoints/kubernetes-endpoints-list-config.service';
+import { KubernetesService } from '../services/kubernetes.service';
 
 @Component({
   selector: 'app-kubernetes',
@@ -27,7 +30,7 @@ export class KubernetesComponent {
   connectedEndpoints$: Observable<number>;
   constructor(
     private store: Store<AppState>,
-    private kubeService: KubernetesService
+    kubeService: KubernetesService
   ) {
     this.connectedEndpoints$ = kubeService.kubeEndpoints$.pipe(
       map(kubeEndpoints => {

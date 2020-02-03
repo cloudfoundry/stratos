@@ -14,8 +14,10 @@ import {
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { filter, map } from 'rxjs/operators';
 
+import { ListView } from '../../../../../../store/src/actions/list.actions';
 import { defaultHelmKubeListPageSize } from '../../list-types/kube-helm-list-types';
 import { HelmRelease } from '../workload.types';
+import { HelmReleaseCardComponent } from './helm-release-card/helm-release-card.component';
 import { HelmReleasesDataSource } from './helm-releases-list-source';
 import { KubernetesNamespacesFilterItem, KubernetesNamespacesFilterService } from './kube-namespaces-filter-config.service';
 
@@ -24,7 +26,8 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
 
   isLocal = true;
   dataSource: HelmReleasesDataSource;
-  viewType = ListViewTypes.TABLE_ONLY;
+  viewType = ListViewTypes.BOTH;
+  defaultView = 'cards' as ListView;
   text = {
     title: '',
     filter: 'Filter by Name',
@@ -32,6 +35,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
   pageSizeOptions = defaultHelmKubeListPageSize;
   enableTextFilter = true;
   tableFixedRowHeight = true;
+  cardComponent = HelmReleaseCardComponent;
   columns: ITableColumn<HelmRelease>[] = [
     {
       columnId: 'name',
@@ -60,7 +64,8 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'namespace',
       headerCell: () => 'Namespace',
       cellDefinition: {
-        valuePath: 'namespace'
+        valuePath: 'namespace',
+        getLink: row => `/kubernetes/${row.endpointId}/namespaces/${row.namespace}`
       },
       sort: {
         type: 'sort',
@@ -73,7 +78,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'status',
       headerCell: () => 'Status',
       cellDefinition: {
-        valuePath: 'status'
+        getValue: row => row.status.charAt(0).toUpperCase() + row.status.substring(1)
       },
       sort: {
         type: 'sort',

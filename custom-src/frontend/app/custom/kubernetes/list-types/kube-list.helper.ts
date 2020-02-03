@@ -1,5 +1,8 @@
+import * as moment from 'moment';
+
 import { DataFunction } from '../../../shared/components/list/data-sources-controllers/list-data-source';
-import { ConditionType, KubernetesNode } from '../store/kube.types';
+import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
+import { BasicKubeAPIResource, ConditionType, KubernetesNode } from '../store/kube.types';
 
 export function getConditionSort(condition: ConditionType): DataFunction<KubernetesNode> {
   return (entities, paginationState) => {
@@ -30,4 +33,22 @@ export function getContainerLengthSort(entities, paginationState) {
       return bConditionValue - aConditionValue;
     }
   });
+}
+
+export function createKubeAgeColumn<T extends BasicKubeAPIResource>(): ITableColumn<T> {
+  return {
+    columnId: 'age',
+    headerCell: () => 'Age',
+    cellDefinition: {
+      getValue: (row: T) => {
+        return moment(row.metadata.creationTimestamp).fromNow(true);
+      }
+    },
+    sort: {
+      type: 'sort',
+      orderKey: 'age',
+      field: 'metadata.creationTimestamp'
+    },
+    cellFlex: '1'
+  };
 }

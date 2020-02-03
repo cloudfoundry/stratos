@@ -30,6 +30,8 @@ export class KubernetesNodeConditionComponent implements OnInit {
     OutOfDisk: ['storage', 'material-icons'],
     MemoryPressure: ['memory', 'material-icons'],
     DiskPressure: ['storage', 'material-icons'],
+    PIDPressure: ['vertical_align_center', 'material-icons'],
+    NetworkUnavailable: ['settings_ethernet', 'material-icons']
   };
 
   constructor(

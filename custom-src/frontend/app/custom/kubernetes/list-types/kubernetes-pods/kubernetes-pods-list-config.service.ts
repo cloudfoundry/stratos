@@ -3,34 +3,58 @@ import { Store } from '@ngrx/store';
 import {
   IListDataSource,
 } from 'frontend/packages/core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import * as moment from 'moment';
+import { of } from 'rxjs';
 
 import { AppState } from '../../../../../../store/src/app-state';
+import {
+  TableCellSidePanelComponent,
+  TableCellSidePanelConfig,
+} from '../../../../shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
+import {
+  KubernetesResourceViewerComponent,
+  KubernetesResourceViewerConfig,
+} from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { KubernetesPod } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
-import { KubernetesPodReadinessComponent } from './kubernetes-pod-readiness/kubernetes-pod-readiness.component';
+import { createKubeAgeColumn } from '../kube-list.helper';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
-import { PodNameLinkComponent } from './pod-name-link/pod-name-link.component';
 
 export abstract class BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
 
+  static namespaceColumnId = 'namespace';
   public showNamespaceLink = true;
 
-  constructor(private kubeId: string) { }
+  constructor(
+    private kubeId: string,
+    showNamespaces = false
+  ) {
+    if (!showNamespaces) {
+      this.columns = this.columns.filter(column => column.columnId !== BaseKubernetesPodsListConfigService.namespaceColumnId);
+    }
+  }
 
   columns: Array<ITableColumn<KubernetesPod>> = [
     {
       columnId: 'name', headerCell: () => 'Name',
-      cellComponent: PodNameLinkComponent,
+      cellComponent: TableCellSidePanelComponent,
       sort: {
         type: 'sort',
         orderKey: 'name',
         field: 'metadata.name'
       },
       cellFlex: '3',
+      cellConfig: (pod): TableCellSidePanelConfig<KubernetesResourceViewerConfig> => ({
+        text: pod.metadata.name,
+        sidePanelComponent: KubernetesResourceViewerComponent,
+        sidePanelConfig: {
+          title: `Pod Summary: ${pod.metadata.name}`,
+          resourceKind: 'pod',
+          resource$: of(pod)
+        }
+      })
     },
     // TODO: See #150 - keep out RC bring back after demo
     // {
@@ -39,7 +63,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
     //   cellFlex: '5',
     // },
     {
-      columnId: 'namespace', headerCell: () => 'Namespace',
+      columnId: BaseKubernetesPodsListConfigService.namespaceColumnId, headerCell: () => 'Namespace',
       cellDefinition: {
         valuePath: 'metadata.namespace',
         getLink: row => this.showNamespaceLink ? `/kubernetes/${this.kubeId}/namespaces/${row.metadata.namespace}` : null
@@ -55,7 +79,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
       columnId: 'node', headerCell: () => 'Node',
       cellDefinition: {
         valuePath: 'spec.nodeName',
-        getLink: () => `/kubernetes/${this.kubeId}/summary`
+        getLink: pod => `/kubernetes/${this.kubeId}/nodes/${pod.spec.nodeName}/summary`
       },
       sort: {
         type: 'sort',
@@ -65,43 +89,40 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
       cellFlex: '2',
     },
     {
-      columnId: 'status', headerCell: () => 'Status',
-      cellDefinition: {
-        valuePath: 'status.phase'
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'status',
-        field: 'status.phase'
-      },
-      cellFlex: '1',
-    },
-    {
       columnId: 'ready',
       headerCell: () => 'Ready',
-      cellComponent: KubernetesPodReadinessComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'ready',
-        field: 'ready'
+      cellDefinition: {
+        getValue: pod => `${pod.expandedStatus.readyContainers}/${pod.expandedStatus.totalContainers}`
       },
       cellFlex: '1'
     },
     {
-      columnId: 'age',
-      headerCell: () => 'Age',
+      columnId: 'expandedStatus',
+      headerCell: () => 'Status',
       cellDefinition: {
-        getValue: (row: any) => {
-          return moment(row.metadata.creationTimestamp).fromNow(true);
-        }
+        valuePath: 'expandedStatus.status'
       },
       sort: {
         type: 'sort',
-        orderKey: 'age',
-        field: 'metadata.creationTimestamp'
+        orderKey: 'expandedStatus',
+        field: 'expandedStatus.status'
+      },
+      cellFlex: '2'
+    },
+    {
+      columnId: 'restarts',
+      headerCell: () => 'Restarts',
+      cellDefinition: {
+        getValue: pod => pod.expandedStatus.restarts.toString()
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'restarts',
+        field: 'expandedStatus.restarts'
       },
       cellFlex: '1'
-    }
+    },
+    createKubeAgeColumn()
   ];
 
   pageSizeOptions = defaultHelmKubeListPageSize;
@@ -130,7 +151,7 @@ export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfi
     store: Store<AppState>,
     kubeId: BaseKubeGuid,
   ) {
-    super(kubeId.guid);
+    super(kubeId.guid, true);
     this.podsDataSource = new KubernetesPodsDataSource(store, kubeId, this);
   }
 

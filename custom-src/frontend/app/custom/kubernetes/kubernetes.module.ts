@@ -26,6 +26,7 @@ import {
 import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-pods/kubernetes-node-pods.component';
 import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.component';
 import { BaseKubeGuid } from './kubernetes-page.types';
+import { KubernetesResourceViewerComponent } from './kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab-base.component';
 import { KubernetesRoutingModule } from './kubernetes.routing';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
@@ -70,13 +71,9 @@ import {
 } from './list-types/kubernetes-nodes/kubernetes-node-summary/kubernetes-node-tags-card/kubernetes-node-tags-card.component';
 import { NodePodCountComponent } from './list-types/kubernetes-nodes/node-pod-count/node-pod-count.component';
 import {
-  KubernetesPodReadinessComponent,
-} from './list-types/kubernetes-pods/kubernetes-pod-readiness/kubernetes-pod-readiness.component';
-import {
   KubernetesPodStatusComponent,
 } from './list-types/kubernetes-pods/kubernetes-pod-status/kubernetes-pod-status.component';
 import { KubernetesPodTagsComponent } from './list-types/kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';
-import { PodNameLinkComponent } from './list-types/kubernetes-pods/pod-name-link/pod-name-link.component';
 import { KubernetesServicePortsComponent } from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
 import {
   KubeServiceCardComponent,
@@ -90,7 +87,6 @@ import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kuberne
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 import { KubedashConfigurationComponent } from './kubernetes-dashboard/kubedash-configuration/kubedash-configuration.component';
-
 
 
 /* tslint:enable */
@@ -138,11 +134,11 @@ import { KubedashConfigurationComponent } from './kubernetes-dashboard/kubedash-
     KubernetesNamespacePodsComponent,
     KubernetesNamespaceServicesComponent,
     KubeNamespacePodCountComponent,
-    PodNameLinkComponent,
     NodePodCountComponent,
     KubernetesServicePortsComponent,
     KubernetesPodStatusComponent,
-    KubernetesPodReadinessComponent,
+    KubeServiceCardComponent,
+    KubernetesResourceViewerComponent,
     KubeServiceCardComponent,
     KubedashConfigurationComponent,
   ],
@@ -163,12 +159,14 @@ import { KubedashConfigurationComponent } from './kubernetes-dashboard/kubedash-
     ConditionCellComponent,
     KubernetesNamespaceLinkComponent,
     KubeNamespacePodCountComponent,
-    PodNameLinkComponent,
     NodePodCountComponent,
     KubernetesServicePortsComponent,
     KubernetesPodStatusComponent,
-    KubernetesPodReadinessComponent,
-    KubeServiceCardComponent
+    KubeServiceCardComponent,
+    KubernetesResourceViewerComponent
+  ],
+  exports: [
+    KubernetesResourceViewerComponent
   ]
 })
 export class KubernetesModule { }
