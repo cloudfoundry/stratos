@@ -18,9 +18,9 @@ export class KubernetesNodeSimpleMetricComponent {
   unit: string;
 
   public formatValue() {
-    switch(this.unit) {
+    switch (this.unit) {
       case 'secs':
-        return formatCPUTime(this.value.toString());
+        return formatCPUTime(this.value);
       default:
         const unit = this.unit || '';
         return `${this.value} ${unit}`;

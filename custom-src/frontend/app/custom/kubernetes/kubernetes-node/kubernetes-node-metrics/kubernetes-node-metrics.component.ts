@@ -6,7 +6,7 @@ import { IMetricMatrixResult, ChartSeries } from '../../../../../../store/src/ty
 import { IMetricApplication } from '../../../../../../store/src/types/metric.types';
 import { FetchKubernetesChartMetricsAction } from '../../store/kubernetes.actions';
 import { ChartDataTypes, getMetricsChartConfigBuilder } from '../../../../shared/components/metrics-chart/metrics.component.helpers';
-import { formatCPUTime } from '../../kubernetes-metrics.helpers';
+import { formatCPUTime, formatAxisCPUTime } from '../../kubernetes-metrics.helpers';
 
 @Component({
   selector: 'app-kubernetes-node-metrics',
@@ -62,7 +62,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
         'Memory Usage (MB)',
         ChartDataTypes.BYTES,
         (series: ChartSeries[]) => {
-          return series.filter(s => !(s.name.indexOf('/') === 0) && !!s.metadata.container_name && s.metadata.container_name !== 'POD');
+          return series.filter(s => s.name.indexOf('/') !== 0 && !!s.metadata.container_name && s.metadata.container_name !== 'POD');
         },
         null,
         (value: string) => value + ' MB'
@@ -74,11 +74,11 @@ export class KubernetesNodeMetricsComponent implements OnInit {
           `${KubeNodeMetric.CPU}{instance="${this.kubeNodeService.nodeName}"}`
         ),
         'CPU Usage (secs)',
-        null,
+        ChartDataTypes.CPU_TIME,
         (series: ChartSeries[]) => {
-          return series.filter(s => !(s.name.indexOf('/') === 0) && s.name.indexOf('POD') === -1);
+          return series.filter(s => s.name.indexOf('/') !== 0 && !!s.metadata.container_name && s.metadata.container_name !== 'POD');
         },
-        (t) => formatCPUTime(t),
+        (t) => formatAxisCPUTime(t),
         (t) => formatCPUTime(t)
       )
     ];

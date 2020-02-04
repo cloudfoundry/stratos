@@ -1,6 +1,44 @@
+import { ValidatorFn } from '@angular/forms';
 import * as moment from 'moment';
 
-export function formatCPUTime(value: string) {
+
+export function formatCPUTime(value: string | number, debug = false): string {
+
+  const cpuTimeFormat = {
+    day: 86400,
+    hour: 3600,
+    minute: 60,
+    second: 1
+  };
+  const cpuTimeFormatOrder = ['day', 'hour', 'minute', 'second'];
+
+  let num = (typeof value === 'number') ? value : parseFloat(replaceAll(value, ',', ''));
+  if (isNaN(num)) {
+    return '-';
+  }
+
+  // Duration is in seconds
+  const result = [];
+  cpuTimeFormatOrder.forEach(key => {
+    const v = Math.floor(num / cpuTimeFormat[key]);
+    num -= v * cpuTimeFormat[key];
+    if (v > 0 || result.length > 0) {
+      result.push(v + key.substr(0, 1));
+    }
+  });
+
+  if (result.length === 0) {
+    result.push('0s');
+  }
+
+  return result.join(' ');
+}
+
+function replaceAll(str, find, replace) {
+  return str.replace(new RegExp(find, 'g'), replace);
+}
+
+export function formatAxisCPUTime(value: string) {
   const duration = moment.duration(parseFloat(value) * 1000);
   if (duration.asDays() >= 1) {
     return `${duration.asDays().toPrecision(2)} d`;

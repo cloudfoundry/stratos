@@ -59,8 +59,8 @@ export class KubernetesNodeService {
 
 
   public setupMetricObservable(metric: KubeNodeMetric, metricStatistic: MetricStatistic) {
-
-    const query = `${metricStatistic}(${metricStatistic}_over_time(${metric}{kubernetes_io_hostname="${this.nodeName}"}[1h]))`;
+    const containerFilter = ',container_name!="POD", container_name!=""';
+    const query = `${metricStatistic}(${metricStatistic}_over_time(${metric}{kubernetes_io_hostname="${this.nodeName}"${containerFilter}}[1h]))`;
     const metricsAction = new FetchKubernetesMetricsAction(this.nodeName, this.kubeGuid, query);
     const metricsId = MetricsAction.buildMetricKey(this.nodeName, new MetricQueryConfig(query), true, MetricQueryType.QUERY);
     const metricsMonitor = this.entityMonitorFactory.create<any>(metricsId, metricsAction);

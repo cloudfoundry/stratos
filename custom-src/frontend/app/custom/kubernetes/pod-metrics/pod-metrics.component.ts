@@ -23,7 +23,7 @@ import { KubernetesEndpointService } from '../services/kubernetes-endpoint.servi
 import { KubernetesService } from '../services/kubernetes.service';
 import { KubernetesPod } from '../store/kube.types';
 import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kubernetes.actions';
-import { formatCPUTime } from '../kubernetes-metrics.helpers';
+import { formatCPUTime, formatAxisCPUTime } from '../kubernetes-metrics.helpers';
 
 @Component({
   selector: 'app-pod-metrics',
@@ -97,7 +97,7 @@ export class PodMetricsComponent {
         (series: ChartSeries[]) => {
           return series.filter(s => !!s.metadata.container_name && s.metadata.container_name !== 'POD');
         },
-        (tick: string) => formatCPUTime(tick),
+        (tick: string) => formatAxisCPUTime(tick),
         (value: string) => formatCPUTime(value),
       ),
       networkChartConfigBuilder(
