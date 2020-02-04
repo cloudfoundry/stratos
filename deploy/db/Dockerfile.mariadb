@@ -6,11 +6,6 @@ RUN \
 		| xargs -0 grep -lZE '^(bind-address|log)' \
 		| xargs -rt -0 sed -Ei 's/^(bind-address|log)/#&/'; 
 
-# Permissions
-# comment out any "user" entires in the MySQL config ("docker-entrypoint.sh" or "--user" will handle user switching)
-#RUN sed -ri 's/^user\s/#&/' /etc/mysql/my.cnf /etc/mysql/conf.d/* && \
-# ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
-
 COPY mariadb-entrypoint.sh /docker-entrypoint.sh
 COPY mariadb-ping.sh /dbping.sh
 
