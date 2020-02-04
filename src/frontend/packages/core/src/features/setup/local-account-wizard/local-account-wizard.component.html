@@ -1,31 +1,32 @@
-<div class="page-container">
-    <app-page-header hideMenu="true" [showHistory]="false">
-      <h1>{{title}} Setup with Local Admin Account</h1>
-    </app-page-header>
-    <app-show-page-header></app-show-page-header>
-    <div class="local-setup-wizard">
-      <app-steppers>
-        <app-step title="Local Account Informatiomn" [valid]="validateLocalAuthForm | async" [onNext]="next">
-          <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration"
-            text="Please wait - this will take a few moments">
-            <div class="local-setup-wizard__form">
-              <p class="local-setup-wizard__form-section">
-                Please choose a password to use for the local Administrator account.</p>
-              <p>This will configure Stratos with a single, built-in account with the username <span class="local-setup-wizard__form-username">admin</span>
-                and the password that you choose below.</p>
-              <form class="local-setup-wizard__form" [formGroup]="passwordForm" class="stepper-form">
-                <div class="local-setup-wizard__form-block">
-                  <mat-form-field>
-                    <input matInput formControlName="adminPassword" placeholder="Password" type="password">
-                  </mat-form-field>
-                  <mat-form-field>
-                    <input matInput formControlName="adminPasswordConfirm" placeholder="Confirm Password" type="password">
-                  </mat-form-field>
-                </div>
-              </form>
-            </div>
-          </app-loading-page>
-        </app-step>
-      </app-steppers>
-    </div>
+<div class="page-container setup">
+  <app-page-header hideMenu="true" [showHistory]="false">
+    <h1>{{title}} Setup with Local Admin Account</h1>
+  </app-page-header>
+  <app-show-page-header></app-show-page-header>
+  <div class="local-setup-wizard">
+    <app-steppers>
+      <app-step title="Local Account Informatiomn" [valid]="validateLocalAuthForm | async" [onNext]="next">
+        <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration"
+          text="Please wait - this will take a few moments">
+          <div class="local-setup-wizard__form">
+            <p class="local-setup-wizard__form-section">
+              Please choose a password to use for the local Administrator account.</p>
+            <p>This will configure Stratos with a single, built-in account with the username <span
+                class="local-setup-wizard__form-username">admin</span>
+              and the password that you choose below.</p>
+            <form class="local-setup-wizard__form" [formGroup]="passwordForm" class="stepper-form">
+              <div class="local-setup-wizard__form-block">
+                <mat-form-field>
+                  <input matInput formControlName="adminPassword" placeholder="Password" type="password">
+                </mat-form-field>
+                <mat-form-field>
+                  <input matInput formControlName="adminPasswordConfirm" placeholder="Confirm Password" type="password">
+                </mat-form-field>
+              </div>
+            </form>
+          </div>
+        </app-loading-page>
+      </app-step>
+    </app-steppers>
   </div>
+</div>

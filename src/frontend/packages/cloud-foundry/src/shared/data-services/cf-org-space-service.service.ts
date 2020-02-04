@@ -1,5 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { endpointsCfEntitiesConnectedSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -32,7 +33,6 @@ import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { endpointsRegisteredEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
@@ -218,7 +218,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createCf() {
-    const list$ = this.store.select(endpointsRegisteredEntitiesSelector).pipe(
+    const list$ = this.store.select(endpointsCfEntitiesConnectedSelector).pipe(
       // Ensure we have endpoints
       filter(endpoints => endpoints && !!Object.keys(endpoints).length),
       publishReplay(1),

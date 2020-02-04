@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { getIdFromRoute } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { getIdFromRoute } from '../../../core/utils.service';
 
 @Component({
   selector: 'app-create-endpoint',

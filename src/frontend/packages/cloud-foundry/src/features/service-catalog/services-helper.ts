@@ -13,7 +13,7 @@ import {
   IServicePlanExtra,
   IServicePlanVisibility,
 } from '../../../../core/src/core/cf-api-svc.types';
-import { safeStringToObj } from '../../../../core/src/core/utils.service';
+import { getIdFromRoute, safeStringToObj } from '../../../../core/src/core/utils.service';
 import { StratosStatus } from '../../../../core/src/shared/shared.types';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityService } from '../../../../store/src/entity-service';
@@ -35,7 +35,7 @@ import {
 } from '../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { QParam, QParamJoiners } from '../../shared/q-param';
-import { fetchTotalResults, getIdFromRoute } from '../cloud-foundry/cf.helpers';
+import { fetchTotalResults } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
 
 export const getSvcAvailability = (
