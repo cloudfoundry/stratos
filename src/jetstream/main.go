@@ -183,7 +183,6 @@ func main() {
 
 	// Store database provider name for diagnostics
 	portalConfig.DatabaseProviderName = dc.DatabaseProvider
-	portalConfig.CanMigrateDatabaseSchema = true
 
 	cnsis.InitRepositoryProvider(dc.DatabaseProvider)
 	tokens.InitRepositoryProvider(dc.DatabaseProvider)
@@ -191,7 +190,6 @@ func main() {
 	localusers.InitRepositoryProvider(dc.DatabaseProvider)
 
 	// Establish a Postgresql connection pool
-	// var databaseConnectionPool *sql.DB
 	databaseConnectionPool, migratorConf, err := initConnPool(dc, envLookup)
 	if err != nil {
 		log.Fatal(err.Error())

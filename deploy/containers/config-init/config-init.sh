@@ -83,7 +83,7 @@ KEY=""
 # Just look for the secret - if its not there, we need to create it - otherwise leave it alone
 
 # Check whether the secret already exists
-echo "Fresh installation - checking encryption key secret does not already exist ..."
+echo "Checking encryption key secret does not already exist ..."
 curl -k -s \
     --fail \
     -H "Authorization: Bearer $KUBE_TOKEN" \
@@ -120,9 +120,11 @@ else
     "type": "Opaque",
     "metadata": {
       "name": "@@NAME@@",
-      "stratos-helm-resource": "@@NAME@@",
-      "app.kubernetes.io/name": "stratos",
-      "app.kubernetes.io/instance": "@@RELEASE_NAME@@"
+      labels: {
+        "stratos-helm-resource": "@@NAME@@",
+        "app.kubernetes.io/name": "stratos",
+        "app.kubernetes.io/instance": "@@RELEASE_NAME@@"
+      }
     },
     "data": {
       "key": "@@KEY@@"
@@ -199,9 +201,11 @@ else
       "type": "kubernetes.io/tls",
       "metadata": {
         "name": "@@NAME@@",
-        "stratos-helm-resource": "@@NAME@@",
-        "app.kubernetes.io/name": "stratos",
-        "app.kubernetes.io/instance": "@@RELEASE_NAME@@"
+        labels: {
+          "stratos-helm-resource": "@@NAME@@",
+          "app.kubernetes.io/name": "stratos",
+          "app.kubernetes.io/instance": "@@RELEASE_NAME@@"
+        }
       },
       "data": {
         "tls.crt": "@@CRT@@",
