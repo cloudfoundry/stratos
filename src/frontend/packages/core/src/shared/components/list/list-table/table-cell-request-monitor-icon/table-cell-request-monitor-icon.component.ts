@@ -1,7 +1,9 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { schema } from 'normalizr';
-import { AppMonitorComponentTypes } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
+
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { AppMonitorComponentTypes } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
+import { TableCellCustom } from '../../list.types';
 
 export interface ITableCellRequestMonitorIconConfig {
   entityKey: string;
@@ -16,7 +18,7 @@ export interface ITableCellRequestMonitorIconConfig {
   templateUrl: './table-cell-request-monitor-icon.component.html',
   styleUrls: ['./table-cell-request-monitor-icon.component.scss']
 })
-export class TableCellRequestMonitorIconComponent implements OnInit {
+export class TableCellRequestMonitorIconComponent extends TableCellCustom<any> implements OnInit {
   public configObj: ITableCellRequestMonitorIconConfig;
 
   @Input()
@@ -28,6 +30,7 @@ export class TableCellRequestMonitorIconComponent implements OnInit {
   public id: string;
 
   constructor() {
+    super();
   }
 
   ngOnInit() {

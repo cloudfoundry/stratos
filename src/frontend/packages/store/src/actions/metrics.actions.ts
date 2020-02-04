@@ -40,6 +40,7 @@ export class MetricQueryConfig {
 // FIXME: Final solution for Metrics - STRAT-152
 export class MetricsAction implements EntityRequestAction {
   constructor(
+    // FIXME: This is ignored in all cases - STRAT-152
     guid: string,
     public endpointGuid: string,
     public query: MetricQueryConfig,

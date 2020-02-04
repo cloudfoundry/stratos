@@ -35,6 +35,20 @@
       text-align: center;
     }
   }
+  &__item-sep {
+    align-items: center;
+    border-color: transparent;
+    cursor: default;
+    display: flex;
+    font-size: 12px;
+    letter-spacing: .01em;
+    line-height: 18px;
+    outline: 0;
+    padding: 10px;
+    padding-left: $item-header-padding;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
   &__items {
     border-bottom: 1px solid $border-color;
     display: none;

@@ -7,7 +7,6 @@ import { combineLatest, map, switchMap } from 'rxjs/operators';
 import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { FetchApplicationMetricsAction } from '../../../../../../../cloud-foundry/src/actions/cf-metrics.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { UtilsService } from '../../../../../../../core/src/core/utils.service';
 import { CfCellHelper } from '../../../../../../../core/src/features/cloud-foundry/cf-cell.helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
@@ -16,14 +15,11 @@ import {
   getIntegerFieldSortFunction,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  IListAction,
-  IListConfig,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { IListAction, IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
