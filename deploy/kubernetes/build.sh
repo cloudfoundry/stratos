@@ -27,8 +27,9 @@ TAG_LATEST="false"
 NO_PUSH="true"
 DOCKER_REG_DEFAULTS="true"
 CHART_ONLY="false"
+ADD_GITHASH_TO_TAG="true"
 
-while getopts ":ho:r:t:Tclb:Op" opt; do
+while getopts ":ho:r:t:Tclb:Opn" opt; do
   case $opt in
     h)
       echo
@@ -67,7 +68,10 @@ while getopts ":ho:r:t:Tclb:Op" opt; do
       ;;      
     c)
       CHART_ONLY="true"
-      ;;      
+      ;;     
+    n)
+      ADD_GITHASH_TO_TAG="false"
+      ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
       exit 1
@@ -177,7 +181,9 @@ cleanup
 # rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.bak
 # rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.patched.bak
 
-updateTagForRelease
+if [ "${ADD_GITHASH_TO_TAG}" == "true" ]; then
+  updateTagForRelease
+fi
 
 if [ "${CHART_ONLY}" == "false" ]; then
   # Build all of the components that make up the Console
