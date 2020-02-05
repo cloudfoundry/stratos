@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../shared/components/list/list.types';
-import { KubernetesPod, KubernetesStatus } from '../../../store/kube.types';
+import { KubernetesPodExpandedStatusTypes } from '../../../services/kubernetes-expanded-state';
+import { KubernetesPod } from '../../../store/kube.types';
 
 @Component({
   selector: 'app-kubernetes-pod-status',
@@ -22,20 +23,23 @@ export class KubernetesPodStatusComponent extends TableCellCustom<KubernetesPod>
     }
   }
 
-  updateStatus() {
-    let status: string;
-    switch (this.row.status.phase) {
-      case 'Running':
-        status = 'success';
-        break;
-      case KubernetesStatus.PENDING:
-        status = 'warning';
-        break;
-      default:
-        status = 'tentative';
-        break;
-    }
-
+  private updateStatus() {
+    const status = this.convertStatus(this.row.expandedStatus.status);
     this.style = `border-${status} text-${status}`;
+  }
+
+  private convertStatus(status: string): string {
+    if (!status) {
+      return 'tentative';
+    }
+    // Everything is fine
+    if (
+      status === KubernetesPodExpandedStatusTypes.RUNNING ||
+      status === KubernetesPodExpandedStatusTypes.COMPLETED) {
+      return 'success';
+    }
+    // Everything else... probably some kind of issue (still coming up or failed)
+    // Includes pods with init containers in anything other than terminated with exit code = 0
+    return 'warning';
   }
 }

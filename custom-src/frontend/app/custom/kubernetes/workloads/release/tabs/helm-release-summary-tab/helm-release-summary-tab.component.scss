@@ -5,8 +5,8 @@
   padding: 0 10px;
 
   &__loading {
-        display: flex;
-        justify-content: center;
+    display: flex;
+    justify-content: center;
     &__content {
       margin-top: 50px;
       mat-progress-bar {

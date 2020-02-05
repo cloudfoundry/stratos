@@ -8,7 +8,8 @@
 <app-loading-page [isLoading]="isBusy$" [text]="loadingMessage">
   <ng-container *ngIf="helmReleaseHelper.release$ | async as release">
     <app-entity-summary-title [imagePath]="release.chart.metadata.icon" [title]="release.name"
-      [subText]="release.chart.metadata.description" [subTitle]="release.chart.metadata.name">
+      [subText]="release.chart.metadata.description" [subTitle]="release.chart.metadata.name"
+      [fallBackIcon]="'workloads'" [fallBackIconFont]="'stratos-icons'">
       <div class="summary">
         <div class="chart-details">
           <app-metadata-item class="chart-details__item" label="Chart Version">{{ release.chart.metadata.version }}
@@ -16,8 +17,11 @@
           <app-metadata-item class="chart-details__item" label="Application Version">
             {{ release.chart.metadata.appVersion || '-' }}
           </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Cluster">
+            <a [routerLink]="createClusterLink()">{{ getClusterName() | async }}</a>
+          </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Namespace">
-            <a [routerLink]="createNamespaceLink(release.namespace)">{{ release.namespace | titlecase }}</a>
+            <a [routerLink]="createNamespaceLink(release.namespace)">{{ release.namespace }}</a>
           </app-metadata-item>
           <app-metadata-item class="chart-details__item" label="Release Version">{{ release.version }}
           </app-metadata-item>
@@ -60,7 +64,7 @@
     </div>
     <ng-template #loadingResources>
       <div class="resources__loading">
-        <div class="resources_loading__content">
+        <div class="resources__loading__content">
           Loading Resources
           <mat-progress-bar class="" [color]="'primary'" mode="indeterminate">
           </mat-progress-bar>

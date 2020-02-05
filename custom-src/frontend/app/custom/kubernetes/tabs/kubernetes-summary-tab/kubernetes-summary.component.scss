@@ -5,8 +5,13 @@
   &__metrics {
     max-width: 350px;
 
-    &--namespace {
-      padding-left: 0;
+    app-tile {
+      flex: 0;
+      &:nth-child(2) {
+        display: flex;
+        flex: 2;
+        justify-content: center;
+      }
     }
   }
   &__header {

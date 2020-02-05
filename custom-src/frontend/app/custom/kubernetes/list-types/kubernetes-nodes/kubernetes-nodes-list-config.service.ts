@@ -72,7 +72,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     {
       columnId: 'capacity', headerCell: () => 'Capacity',
       cellComponent: KubernetesNodeCapacityComponent,
-      cellFlex: '4',
+      cellFlex: '3',
     },
     // Display labels as the usual chip list
     // {

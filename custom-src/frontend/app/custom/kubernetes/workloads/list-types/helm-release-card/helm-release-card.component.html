@@ -1,6 +1,14 @@
 <app-meta-card class="release-card" [routerLink]="row.guid">
   <app-meta-card-title>
-    <app-multiline-title>{{ row.name }}</app-multiline-title>
+    <div class="release-title">
+      <app-multiline-title>{{ row.name }}</app-multiline-title>
+      <div class='release-title--icon'>
+        <img *ngIf="icon; else noIcon" [src]="icon" (error)="loadImageError()">
+        <ng-template #noIcon>
+          <mat-icon fontSet="stratos-icons">workloads</mat-icon>
+        </ng-template>
+      </div>
+    </div>
   </app-meta-card-title>
   <app-meta-card-item>
     <app-meta-card-key>Cluster</app-meta-card-key>

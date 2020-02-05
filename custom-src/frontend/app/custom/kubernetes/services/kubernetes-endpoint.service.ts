@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
@@ -190,27 +190,27 @@ export class KubernetesEndpointService {
       map(auth => auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true')
     );
 
-    this.kubeDashboardStatus$ = this.kubeDashboardEnabled$.pipe(
-      filter(enabled => enabled),
-      switchMap(() => this.entityServiceFactory.create<KubeDashboardStatus>(
+    const kubeDashboardStatus$ = this.entityServiceFactory.create<KubeDashboardStatus>(
       this.kubeGuid,
       new GetKubernetesDashboard(this.kubeGuid),
-    ).waitForEntity$.pipe(map(status => status.entity)).pipe(
-      startWith(null),
-    )
-    ));
+    ).waitForEntity$.pipe(
+      map(status => status.entity),
+      filter(status => !!status)
+    );
+
+    this.kubeDashboardStatus$ = this.kubeDashboardEnabled$.pipe(
+      switchMap(enabled => enabled ? kubeDashboardStatus$ : of(null)),
+    );
 
     this.kubeDashboardConfigured$ = this.kubeDashboardStatus$.pipe(
-      filter(status => !!status),
-      map(status => {
-        return status.installed && !!status.serviceAccount && !!status.service;
-      }),
-      startWith(false)
+      map(status => status && status.installed && !!status.serviceAccount && !!status.service),
     );
 
     this.kubeDashboardLabel$ = this.kubeDashboardStatus$.pipe(
-      filter(status => !!status),
       map(status => {
+        if (!status) {
+          return '';
+        }
         if (!status.installed) {
           return 'Not installed';
         } else if (!status.serviceAccount) {
