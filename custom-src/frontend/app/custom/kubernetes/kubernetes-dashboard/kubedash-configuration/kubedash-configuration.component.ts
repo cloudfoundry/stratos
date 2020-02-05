@@ -3,7 +3,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { delay, distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
@@ -210,7 +210,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
       return;
     }
 
-    obs.pipe(delay(999999999)).subscribe(() => {
+    obs.subscribe(() => {
       this.snackBar.open(okMsg, 'Dismiss', { duration: 3000 });
       busy.next(false);
       this.refresh();
