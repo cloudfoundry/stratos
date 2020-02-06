@@ -30,7 +30,6 @@ Stratos UI can be deployed in a number of environments:
 
 * Deployed in Cloud Foundry, as an application. See [guide](../deploy/cloud-foundry)
 * Deployed in Kubernetes, using a Helm chart. See [guide](../deploy/kubernetes)
-* Deployed in Docker, using docker compose. See [guide](../deploy/docker-compose)
 * Deployed in Docker, single container deploying all components. See [guide](../deploy/all-in-one)
 
 There are differences between the deployments as follows:
@@ -46,7 +45,9 @@ In this case, Stratos is deployed in a manner optimized for the management of a 
 
 In this case, the front-end web application static resources are served by the API Server back-end rather than a separate web server.
 
-A non-persistent SQLite database is used - by automatically registering the cloud foundry endpoint and connecting to it on login, all data stored in the database can be treated as ephimeral, since it will be re-created next time a user logs in. Cloud Foundry Session Affinity is used to ensure that when scaling up the Console Application to multiple instances, the user is also directed to the instance which will know about them and their endpoints (since each Application instance will have its own local SQLite store).
+By defaut, a non-persistent SQLite database is used - by automatically registering the cloud foundry endpoint and connecting to it on login, all data stored in the database can be treated as ephimeral, since it will be re-created next time a user logs in. Cloud Foundry Session Affinity is used to ensure that when scaling up the Console Application to multiple instances, the user is also directed to the instance which will know about them and their endpoints (since each Application instance will have its own local SQLite store).
+
+Alternatively, Stratos can be configured [with a persistent Cloud Foundry database service](deploy/cloud-foundry/db-migration/README.md), which enables features requiring persistence such as user favorites.
 
 ### Deployed in Kubernetes
 
@@ -55,15 +56,6 @@ In this case, a Helm chart is used to deploy the Console into a Kubernetes envir
 At the outer-level there are two services - the external service that provides the Console itself and a private service that provides a Postgres DB to the Console service.
 
 The Console service is provided by a deployment consisting of two containers, one providing the static front-end web application resources, served by an nginx instance, the other providing the API Server back-end.
-
-### Deployed in Docker using docker compose and multiple containers
-
-In this case, Docker Compose is used to deploy the Console into Docker. The docker compose file describes 4 services:
-
-- postgres - providing a Postgres DB for Console
-- goose - to initialize the Postgres DB with the Console DB schema
-- nginx - providing an nginx server that serves the front-end web application resources
-- proxy - providing the back-end API Server
 
 ### Deployed in Docker using a single container
 

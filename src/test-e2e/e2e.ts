@@ -1,9 +1,11 @@
+import { browser, promise, protractor } from 'protractor';
+
 import { ConsoleUserType, E2EHelpers } from './helpers/e2e-helpers';
 import { RequestHelpers } from './helpers/request-helpers';
 import { ResetsHelpers } from './helpers/reset-helpers';
 import { SecretsHelpers } from './helpers/secrets-helpers';
+import { ssoHelper } from './helpers/sso-helper';
 
-import { browser, promise, protractor } from 'protractor';
 
 /**
  * E2E Helper - just use this via the 'e2e' const - don't import the helpers directly
@@ -11,7 +13,7 @@ import { browser, promise, protractor } from 'protractor';
 export class E2E {
 
   // Turn on debug logging for test helpers
-  public static DEBUG_LOGGING = !!process.env['STRATOS_E2E_DEBUG'] || false;
+  public static DEBUG_LOGGING = !!process.env.STRATOS_E2E_DEBUG || false;
 
   // General helpers
   public helper = new E2EHelpers();
@@ -24,7 +26,9 @@ export class E2E {
 
   static debugLog(log) {
     if (E2E.DEBUG_LOGGING) {
+      /* tslint:disable:no-console*/
       console.log(log);
+      /* tslint:disable */
     }
   }
 
@@ -38,15 +42,29 @@ export class E2E {
   /**
    * Convenience for sleep
    */
-  sleep(duration) {
-    browser.driver.sleep(duration);
+  sleep(duration: number): promise.Promise<any> {
+    return browser.driver.sleep(duration);
   }
 
   /**
    * Log message in the control flow
    */
-  log(log) {
-    protractor.promise.controlFlow().execute(() => console.log(log));
+  log(log: string, ...optionalParams: any[]) {
+    /* tslint:disable:no-console*/
+    if (optionalParams && optionalParams.length) {
+      protractor.promise.controlFlow().execute(() => console.log(log, optionalParams));
+    } else {
+      protractor.promise.controlFlow().execute(() => console.log(log));
+    }
+    /* tslint:disable */
+  }
+
+
+  /**
+   * Log message in the control flow if debug logging is set
+   */
+  debugLog(log: string) {
+    protractor.promise.controlFlow().execute(() => E2E.debugLog(log));
   }
 }
 
@@ -57,8 +75,6 @@ export class E2ESetup {
   public adminReq: any;
   public userReq: any;
   private setupOps: any[] = [];
-  private userType: ConsoleUserType;
-  private loginUserType: ConsoleUserType;
   private reqHelper = new RequestHelpers();
   private resetsHelper = new ResetsHelpers();
 
@@ -69,18 +85,22 @@ export class E2ESetup {
     return new E2ESetup(userType);
   }
 
-  constructor(userType: ConsoleUserType) {
-    this.userType = userType;
-    this.loginUserType = userType;
+  constructor(public loginUserType: ConsoleUserType) {
     // Create requests in case we need to make any API requests as admin and/or user
     this.adminReq = this.reqHelper.newRequest();
     this.userReq = this.reqHelper.newRequest();
+
+    // Get the SSO login Status if needed
+    if (!ssoHelper.ssoEnabledFetched) {
+      this.getSSOLoginStatus();
+    }
+
     // The setup sequence won't be executed until the appropriate stage in the control flow
     protractor.promise.controlFlow().execute(() => this.doSetup());
     // Adds the setup flow to the browser chain - this will run after all of the setup ops
     const that = this;
     protractor.promise.controlFlow().execute(() => {
-      E2E.debugLog('Logging in as user: ' + (userType === ConsoleUserType.admin ? 'admin' : 'user'));
+      E2E.debugLog('Logging in as user: ' + (that.loginUserType === ConsoleUserType.admin ? 'admin' : 'user'));
       return e2e.helper.setupApp(that.loginUserType);
     });
   }
@@ -94,11 +114,17 @@ export class E2ESetup {
   // Don't login after setup is done
   doNotLogin() {
     this.loginUserType = null;
+    return this;
   }
 
   // Ensure that an admin session is created, even if it is not needed by the setup process
   requireAdminSession() {
     this.needAdminSession = true;
+  }
+
+  private getSSOLoginStatus() {
+    return this.addSetupOp(this.resetsHelper.getSSOLoginStatus.bind(this.resetsHelper, null, ssoHelper),
+      'Check SSO Login Status');
   }
 
   /**
@@ -153,7 +179,7 @@ export class E2ESetup {
   }
 
 
-  // NOTE: You don't need to explictly call createSession
+  // NOTE: You don't need to explicitly call createSession
   // Create a new session with Stratos so that we can make API requests
   private createSession = (req, userType) => {
     return protractor.promise.controlFlow().execute(() => {
@@ -191,7 +217,6 @@ export class E2ESetup {
   }
 
   private addSetupOp(fn: Function, desc?: string) {
-    const that = this;
     this.setupOps.push(() => protractor.promise.controlFlow().execute(() => {
       E2E.debugLog(desc || 'Performing setup op');
       return fn();
@@ -209,5 +234,3 @@ export class E2ESetup {
 
 // This is the 'e2e' global that you should import into your spec files
 export const e2e = new E2E();
-
-

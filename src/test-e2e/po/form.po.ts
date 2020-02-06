@@ -1,8 +1,10 @@
-import { by, element, promise } from 'protractor';
+import { browser, by, element, promise } from 'protractor';
 import { ElementArrayFinder, ElementFinder, protractor } from 'protractor/built';
 import { Key } from 'selenium-webdriver';
 
 import { Component } from './component.po';
+
+const until = protractor.ExpectedConditions;
 
 export interface FormItemMap {
   [k: string]: FormItem;
@@ -24,7 +26,44 @@ export interface FormItem {
   tag: string;
   valid: string;
   error: string;
+  id: string;
+  multiple: boolean;
 }
+
+// Page Object for a form field
+export class FormField {
+
+  public element: ElementFinder;
+
+  constructor(public form: FormComponent, public name: string) {
+    this.element = this.form.getField(name);
+  }
+
+  set(v: string): promise.Promise<void> {
+    return this.form.fill({ [this.name]: v });
+  }
+
+  clear(): promise.Promise<void> {
+    return this.form.clearField(this.name);
+  }
+
+  isDisabled(): promise.Promise<boolean> {
+    return this.form.isFieldDisabled(this.name);
+  }
+
+  isInvalid(): promise.Promise<boolean> {
+    return this.form.isFieldInvalid(this.name);
+  }
+
+  getError(): promise.Promise<string> {
+    return this.form.getFieldErrorText(this.name);
+  }
+
+  focus(): promise.Promise<void> {
+    return this.form.focusField(this.name);
+  }
+}
+
 
 /**
  * Page Object for a form
@@ -40,13 +79,17 @@ export class FormComponent extends Component {
     return this.locator.all(by.tagName('input, mat-select, textarea'));
   }
 
+  getFieldsCount(): promise.Promise<any> {
+    return this.getFields().count();
+  }
+
   getFieldsMapped(): promise.Promise<FormItem[]> {
     return this.getFields().map(this.mapField);
   }
 
   mapField(elm: ElementFinder, index: number): FormItem | any {
     return {
-      index: index,
+      index,
       name: elm.getAttribute('name'),
       formControlName: elm.getAttribute('formcontrolname'),
       placeholder: elm.getAttribute('placeholder'),
@@ -61,21 +104,29 @@ export class FormComponent extends Component {
       clear: elm.clear,
       click: elm.click,
       tag: elm.getTagName(),
+      id: elm.getAttribute('id'),
+      multiple: elm.getAttribute('multiple'),
     };
   }
 
   // Get the form field with the specified name or formcontrolname
   getField(ctrlName: string): ElementFinder {
-    const fields = this.getFields().filter((elm => {
-      return elm.getAttribute('name').then(name => {
-        return elm.getAttribute('formcontrolname').then(formcontrolname => {
-          const nameAtt = name || formcontrolname;
-          return nameAtt.toLowerCase() === ctrlName;
-        });
-      });
-    }));
-    expect(fields.count()).toBe(1);
-    return fields.first();
+    const fields = this.getFields();
+    const newFields = fields
+      .filter(elm => elm.isDisplayed())
+      .filter(elm => elm.isPresent())
+      .filter(elm => promise.all([
+        elm.getAttribute('name'),
+        elm.getAttribute('formcontrolname'),
+        elm.getAttribute('id')
+      ]).then(([name, formcontrolname, id]) => {
+        const nameAtt = name || formcontrolname || id;
+        return nameAtt.toLowerCase() === ctrlName;
+      }));
+    expect(newFields.count()).toBe(1);
+    const field = newFields.first();
+    browser.wait(until.presenceOf(field));
+    return field;
   }
 
   // Get form field object for the specfied field (see below for FormField)
@@ -116,7 +167,7 @@ export class FormComponent extends Component {
     return this.getFieldsMapped().then(items => {
       const form = {};
       items.forEach((item: FormItem) => {
-        const id = item.name || item.formControlName;
+        const id = item.name || item.formControlName || item.id;
         form[id.toLowerCase()] = item;
       });
       return form;
@@ -124,12 +175,12 @@ export class FormComponent extends Component {
   }
 
   // Fill the form fields in the specified object
-  fill(fields: { [fieldKey: string]: string | boolean }): promise.Promise<void> {
+  fill(fields: { [fieldKey: string]: string | boolean | number[] }, expectFailure = false): promise.Promise<void> {
     return this.getControlsMap().then(ctrls => {
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
-        const value = fields[field];
-        expect(ctrl).toBeDefined();
+        const value: any = fields[field];
+        expect(ctrl).toBeDefined(`Could not find form control with id '${field}'. Found ctrls with ids '${Object.keys(ctrls)}'`);
         if (!ctrl) {
           return;
         }
@@ -141,17 +192,62 @@ export class FormComponent extends Component {
               ctrl.sendKeys(' ');
             }
             break;
+          case 'date':
+            const datePattern = '(1|2)[0-9][0-9][0-9]/(?:(?:0[1-9])|(?:1[0-2]))/(?:(?:[0-2][1-9])|(?:[1-3][0-1]))';
+            expect(new RegExp(`^${datePattern}$`).test(value)).toBe(true, `Form input '${value}' of date is invalid`);
+            this.sendMultipleKeys(ctrl, value);
+            break;
+          case 'time':
+            // TODO: These should be detected by browser/locale?
+            // const timePattern = '([0-1]?[0-9]|2[0-3]):([0-5][0-9]) [AP]M';
+            // expect(new RegExp(`^${timePattern}$`).test(value)).toBe(true, `Form input '${value}' of time is invalid`);
+            this.sendMultipleKeys(ctrl, value);
+            break;
+          case 'datetime-local':
+            // TODO: These should be detected by browser/locale?
+            // const dateTimePattern = '(1|2)[0-9][0-9][0-9]/(?:(?:0[1-9])|(?:1[0-2]))/(?:(?:[0-2][1-9])|(?:[1-3][0-1])),([0-1]?[0-9]|2[0-3]):([0-5][0-9]) [AP]M';
+            // expect(new RegExp(`^${dateTimePattern}$`).test(value)).toBe(true, `Form input '${value}' of datetime-local is invalid`);
+            this.sendMultipleKeys(ctrl, value);
+            break;
           case 'mat-select':
+            if (ctrl.multiple) {
+              expect(value instanceof Array).toBe(true, `Form input '${value}' of multiple select must be array`);
+              value.sort();
+              ctrl.click();
+              for (let option = 1; option <= value[value.length - 1]; option++) {
+                if (value.indexOf(option) >= 0) {
+                  ctrl.sendKeys(Key.RETURN);
+                }
+                ctrl.sendKeys(Key.ARROW_DOWN);
+              }
+              ctrl.sendKeys(Key.ESCAPE);
+              break;
+            }
+            let strValue = value as string;
+            // Handle spaces in text. (sendKeys sends space bar.. which closes drop down)
+            // Bonus - Sending string without space works... up until last character...which deselects desired option and selects top option
+            const containsSpace = strValue.indexOf(' ');
+            if (containsSpace >= 0) {
+              strValue = strValue.slice(0, containsSpace);
+            }
             ctrl.click();
-            ctrl.sendKeys(value);
+            ctrl.sendKeys(strValue);
             ctrl.sendKeys(Key.RETURN);
-            expect(this.getText(field)).toBe(value);
+            if (!expectFailure) {
+              expect(this.getText(field)).toBe(value, `Failed to set field ${field} with ${strValue}`);
+            } else {
+              expect(this.getText(field)).not.toBe(value);
+            }
             break;
           default:
             ctrl.click();
             ctrl.clear();
             ctrl.sendKeys(value);
-            expect(this.getText(field)).toBe(value);
+            if (!expectFailure) {
+              expect(this.getText(field)).toBe(value);
+            } else {
+              expect(this.getText(field)).not.toBe(value);
+            }
             break;
         }
       });
@@ -166,39 +262,17 @@ export class FormComponent extends Component {
     this.getField(name).sendKeys(' ');
     return this.getField(name).sendKeys(protractor.Key.BACK_SPACE);
   }
+
+  sendMultipleKeys(ctrl: FormItem, keyString: string) {
+    keyString.split(/[ ,:\/]/).forEach((key) => {
+      ctrl.sendKeys(key);
+      if (key.length === 4) {
+        ctrl.sendKeys(Key.ARROW_RIGHT);
+      }
+    });
+    ctrl.sendKeys(Key.RETURN);
+  }
+
 }
 
 
-// Page Object for a form field
-export class FormField {
-
-  public element: ElementFinder;
-
-  constructor(public form: FormComponent, public name: string) {
-    this.element = this.form.getField(name);
-  }
-
-  set(v: string): promise.Promise<void> {
-    return this.form.fill({ [this.name]: v });
-  }
-
-  clear(): promise.Promise<void> {
-    return this.form.clearField(this.name);
-  }
-
-  isDisabled(): promise.Promise<boolean> {
-    return this.form.isFieldDisabled(this.name);
-  }
-
-  isInvalid(): promise.Promise<boolean> {
-    return this.form.isFieldInvalid(this.name);
-  }
-
-  getError(): promise.Promise<string> {
-    return this.form.getFieldErrorText(this.name);
-  }
-
-  focus(): promise.Promise<void> {
-    return this.form.focusField(this.name);
-  }
-}

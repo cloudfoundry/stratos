@@ -12,7 +12,7 @@ function buildAndPublishImage {
   IMAGE_URL=${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:${TAG}
   echo Building Docker Image for ${NAME}
 
-  pushd ${FOLDER} > /dev/null 2>&1
+  pushd "${FOLDER}" > /dev/null 2>&1
   pwd
 
   SET_TARGET=""
@@ -42,7 +42,8 @@ function buildAndPublishImage {
 }
 
 # Proxy support
-BUILD_ARGS=""
+# Remove intermediate containers after a successful build
+BUILD_ARGS="--rm=true --squash"
 RUN_ARGS=""
 if [ -n "${http_proxy:-}" -o -n "${HTTP_PROXY:-}" ]; then
   BUILD_ARGS="${BUILD_ARGS} --build-arg http_proxy=${http_proxy:-${HTTP_PROXY}}"
@@ -52,15 +53,26 @@ if [ -n "${https_proxy:-}" -o -n "${HTTPS_PROXY:-}" ]; then
   BUILD_ARGS="${BUILD_ARGS} --build-arg https_proxy=${https_proxy:-${HTTPS_PROXY}}"
   RUN_ARGS="${RUN_ARGS} -e https_proxy=${https_proxy:-${HTTPS_PROXY}}"
 fi
+
+# Use correct sed command for Mac
+SED="sed -r"
+unamestr=`uname`
+if [[ "$unamestr" == 'Darwin' ]]; then
+   SED="sed -E"
+fi   
+
 # Trim leading/trailing whitespace
-BUILD_ARGS="$(echo -e "${BUILD_ARGS}" | sed -r -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
-RUN_ARGS="$(echo -e "${RUN_ARGS}" | sed -r -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
+BUILD_ARGS="$(echo -e "${BUILD_ARGS}" | $SED -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
+RUN_ARGS="$(echo -e "${RUN_ARGS}" | $SED -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
 
 if [ -n "${BUILD_ARGS}" ]; then
   echo "Web Proxy detected from environment. Running Docker with:"
   echo -e "- BUILD_ARGS:\t'${BUILD_ARGS}'"
   echo -e "- RUN_ARGS:\t'${RUN_ARGS}'"
 fi
+
+# Grab and store the git metadata so we can report in this in the UI Diagnostics
+"${STRATOS_PATH}/build/store-git-metadata.sh"
 
 function updateTagForRelease {
   # Reset the TAG variable for a release to be of the form:
@@ -71,7 +83,7 @@ function updateTagForRelease {
   #     <prefix> = git commit prefix - always 'g'
   #     <hash> = git commit hash for the current branch
   # Reference: See the examples section here -> https://git-scm.com/docs/git-describe
-  pushd ${STRATOS_PATH} > /dev/null 2>&1
+  pushd "${STRATOS_PATH}" > /dev/null 2>&1
   GIT_HASH=$(git rev-parse --short HEAD)
   echo "GIT_HASH: ${GIT_HASH}"
   TAG="${TAG}-g${GIT_HASH}"

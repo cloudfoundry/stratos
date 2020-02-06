@@ -1,0 +1,28 @@
+<div class="edit-space">
+  <form [formGroup]="editSpaceForm" class="stepper-form">
+    <mat-form-field>
+      <input matInput formControlName="spaceName" [(ngModel)]="spaceName" placeholder="Space Name" [appFocus]="true">
+      <mat-error *ngIf="!validate()">
+        A space with this name already exists. Please enter a different one.
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field *ngIf="hasSpaceQuotas$ | async">
+      <mat-select class="form-control" formControlName="quotaDefinition" placeholder="Quota Definition">
+        <mat-option [value]="0" *ngIf="hasSpaceQuotas$ | async">None</mat-option>
+        <mat-option *ngFor="let quota of quotaDefinitions$ | async" [value]="quota.metadata.guid">{{ quota.entity.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="edit-space__stepper-form__ssh">
+      <div>
+        Toggle SSH access in Space
+      </div>
+      <div>
+        <mat-slide-toggle formControlName="toggleSsh">
+          <div *ngIf="editSpaceForm.value.toggleSsh">Enabled</div>
+          <div *ngIf="!editSpaceForm.value.toggleSsh">Disabled</div>
+        </mat-slide-toggle>
+      </div>
+    </div>
+  </form>
+</div>

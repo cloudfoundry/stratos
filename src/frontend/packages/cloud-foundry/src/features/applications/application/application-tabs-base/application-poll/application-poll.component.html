@@ -1,0 +1,2 @@
+<app-polling-indicator [manualPoll]="true" [isPolling]="appPollingService.isPolling$ | async"
+  (poll)="appPollingService.poll(true)"></app-polling-indicator>

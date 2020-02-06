@@ -1,4 +1,5 @@
 import { promise } from 'protractor';
+
 import { e2e } from '../e2e';
 import { E2EEndpointConfig } from '../e2e.types';
 import { ConsoleUserType } from './e2e-helpers';
@@ -16,7 +17,7 @@ export class ResetsHelpers {
   constructor() { }
 
   /**
-   * Get all of the registered Endpoints and comnnect all of them for which credentials
+   * Get all of the registered Endpoints and connect all of them for which credentials
    * have been configured
    */
   connectAllEndpoints(req, userType: ConsoleUserType = ConsoleUserType.admin) {
@@ -42,7 +43,7 @@ export class ResetsHelpers {
   }
 
   /**
-   * Get all of the registered Endpoints and comnnect all of them for which credentials
+   * Get all of the registered Endpoints and connect all of them for which credentials
    * have been configured
    */
   connectEndpoint(req, endpointName: string, userType: ConsoleUserType = ConsoleUserType.admin) {
@@ -74,6 +75,26 @@ export class ResetsHelpers {
       });
   }
 
+  getSSOLoginStatus(req, setup) {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/auth/session/verify' })
+      .then(response => {
+        // Look for the header
+        setup.ssoEnabled = this.parseSSOLoginStatus(response);
+        setup.ssoEnabledFetched = true;
+        return setup.sso;
+      }).catch(e => {
+        // 404 when no session
+        setup.ssoEnabled = this.parseSSOLoginStatus(e.response);
+        setup.ssoEnabledFetched = true;
+        return setup.sso;
+      });
+  }
+
+  private parseSSOLoginStatus(response: any): boolean {
+    const sso = response.headers['x-stratos-sso-login'];
+    return !!sso && sso.length > 0;
+  }
+
   /**
    *
    * Ensure we have multiple Cloud Foundries registered
@@ -91,9 +112,11 @@ export class ResetsHelpers {
         fail('You must configure multiple Cloud Foundry endpoints in secrets.yaml');
       }
       endpointsOfType.forEach((ep) => {
-        p.then(() => reqHelpers.sendRequest(
-          req, { method: 'POST', url: 'pp/v1/register/' + endpointType }, null, this.makeRegisterFormData(ep)
-        ));
+        if (!ep.skip) {
+          p.then(() => reqHelpers.sendRequest(
+            req, { method: 'POST', url: 'pp/v1/register/' + endpointType }, null, this.makeRegisterFormData(ep)
+          ));
+        }
       });
     });
     return p;
@@ -123,11 +146,28 @@ export class ResetsHelpers {
     });
   }
 
+  removeEndpoint(req, endpointName): promise.Promise<any> {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' }).then((data) => {
+      if (!data || !data.length) {
+        return;
+      }
+      data = data.trim();
+      data = JSON.parse(data);
+      const p = promise.fulfilled({});
+      data.forEach((c) => {
+        if (c.name === endpointName) {
+          p.then(() => reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/unregister' }, null, { cnsi_guid: c.guid }));
+        }
+      });
+      return p;
+    });
+  }
+
   private doConnectEndpoint(req, cnsiGuid, username, password) {
     return reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/cnsi' }, null, {
       cnsi_guid: cnsiGuid,
-      username: username,
-      password: password
+      username,
+      password
     });
   }
 

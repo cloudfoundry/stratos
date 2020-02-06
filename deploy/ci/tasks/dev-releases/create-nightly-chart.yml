@@ -2,14 +2,14 @@
 platform: linux
 inputs:
 - name: stratos
-- name: stratos-master
+- name: helm-repo
 outputs:
 - name: helm-chart
 image_resource:
   type: docker-image
   source:
-  # Generated using Dockerfile.stratos-helm
-   repository:  splatform/ci-stratos-helm
+   # Generated using scripts/Dockerfile.stratos-ci
+   repository: splatform/stratos-ci-concourse
    tag: "latest"
 
 run:
@@ -17,23 +17,30 @@ run:
   args:
     - -xc
     - |
-
-      helm init || true
+      # Initialize Helm for client-side use
+      helm init --client-only
       ROOT_DIR=$PWD
       STRATOS=${ROOT_DIR}/stratos
       source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
-      STRATOS_MASTER=${ROOT_DIR}/stratos-master
+      HELM_REPO=${ROOT_DIR}/helm-repo
       cd ${STRATOS}/deploy/kubernetes/
       TAG=$(nightlyTag)
-      IMAGE_TAG=$(fetchImageTag)
-      # Patch Helm chart
-      patchHelmChart ${IMAGE_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
+      IMAGE_TAG=${TAG}
+      VERSION=$(cat ${STRATOS}/package.json | grep version | grep -Po "([0-9\.]?)*")
 
+      # Patch Helm chart
+      patchHelmChartDev ${IMAGE_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console ${IMAGE_TAG} ${VERSION}
+
+      echo ${IMAGE_TAG}
+      echo ${TAG}
+      
       # Generate Helm package
+      updateHelmDependency
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-v${IMAGE_TAG}.tgz
+
       cd ${ROOT_DIR}/helm-chart/
-      INDEX_FILE=${STRATOS_MASTER}/index.yaml
+      INDEX_FILE=${HELM_REPO}/index.yaml
       CHART_FILE=${ROOT_DIR}/helm-chart/console-helm-chart-v${IMAGE_TAG}.tgz
       if [ -f ${INDEX_FILE} ]; then
             NIGHTLY_EXISTS=$(cat  ${INDEX_FILE} | grep ${TAG})
@@ -66,10 +73,10 @@ run:
               cp  ${INDEX_FILE} ${ROOT_DIR}/helm-chart/
               MERGE_INDEX="--merge index.yaml"
               helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${TAG}/
-              cp index.yaml ${STRATOS_MASTER}/
+              cp index.yaml ${HELM_REPO}/
             fi
       fi
 
       # Update Helm Repository
-      cd ${STRATOS_MASTER}
+      cd ${HELM_REPO}
       setupAndPushChange

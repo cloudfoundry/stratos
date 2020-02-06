@@ -13,18 +13,24 @@
   var replace = require('replace-in-file');
   var execSync = require('child_process').execSync;
 
-  const CUSTOM_YAML_MANIFEST = path.resolve(__dirname, '../src/frontend/misc/custom/custom.yaml');
-  const INDEX_TEMPLATE = path.resolve(__dirname, '../src/frontend/misc/custom/index.html');
-  const INDEX_HTML = path.resolve(__dirname, '../src/frontend/index.html');
+  const CUSTOM_YAML_MANIFEST = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom/custom.yaml');
+  const INDEX_TEMPLATE = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom/index.html');
+  const INDEX_HTML = path.resolve(__dirname, '../src/frontend/packages/core/src/index.html');
   const CUSTOM_METADATA = path.resolve(__dirname, '../custom-src/stratos.yaml');
   const GIT_FOLDER = path.resolve(__dirname, '../.git');
   const GIT_METADATA = path.resolve(__dirname, '../.stratos-git-metadata.json');
+  const INDEX_LOADING_HTML_CUSTOM = path.resolve(__dirname, '../custom-src/frontend/loading.html');
+  const INDEX_LOADING_HTML_DEFAULT = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom/loading.html');
+  const INDEX_LOADING_CSS_CUSTOM = path.resolve(__dirname, '../custom-src/frontend/loading.css');
+  const INDEX_LOADING_CSS_DEFAULT = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom/loading.css');
 
   // Apply any customizations
   // Symlink customizations of the default resources for Stratos
   gulp.task('customize', function (cb) {
+    doShowVersions()
     doCustomize(false);
     doGenerateIndexHtml(true);
+    console.log('Finished applying customizations')
     cb();
   });
 
@@ -32,6 +38,7 @@
   gulp.task('customize-default', function (cb) {
     doCustomize(true);
     doGenerateIndexHtml(false);
+    console.log('Finished applying default customizations')
     cb();
   });
 
@@ -39,6 +46,7 @@
   gulp.task('customize-reset', function (cb) {
     doCustomize(true, true);
     doGenerateIndexHtml(false);
+    console.log('Finished resetting customizations')
     cb();
   });
 
@@ -48,6 +56,16 @@
     cb();
   });
 
+  function doShowVersions() {
+    console.log('Node Version: ' + process.versions.node || 'N/A');
+    try {
+      var response = execSync('npm --v');
+      var npmVersion = response.toString().trim();
+      console.log('NPM Version : ' + npmVersion || 'N/A');
+    } catch (e) {
+      console.log('NPM Version : N/A');
+    }
+  }
 
   function doCustomize(forceDefaults, reset) {
     var msg = !forceDefaults ? 'Checking for and applying customizations' : 'Removing customizations and applying defaults';
@@ -63,20 +81,22 @@
       process.exit(1);
     }
 
-    const baseFolder = path.resolve(__dirname, '../src/frontend');
+    const baseFolder = path.resolve(__dirname, '../src/frontend/packages/core');
     const customBaseFolder = path.resolve(__dirname, '../custom-src/frontend');
     doCustomizeFiles(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
     doCustomizeFolders(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
+    doCustomizeCreateModule(forceDefaults, reset, customConfig, baseFolder, customBaseFolder);
 
-    const backendBaseFolder = path.resolve(__dirname, '../src/backend');
-    const backendCustomBaseFolder = path.resolve(__dirname, '../custom-src/backend');
+    const backendBaseFolder = path.resolve(__dirname, '../src/jetstream/plugins');
+    const backendCustomBaseFolder = path.resolve(__dirname, '../custom-src/jetstream');
 
-    // There are no defaults for the backend - its the same as removing all of the custom plugins that be there
+    // There are no defaults for the backend - its the same as removing all of the custom plugins that are there
     doCustomizeBackend(forceDefaults || reset, backendBaseFolder, backendCustomBaseFolder);
   };
 
   function doCustomizeFiles(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
-    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/misc/custom');
+    // This is where we find the default files, if there are no customizations
+    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom');
     // Symlink custom files
     Object.keys(customConfig.files).forEach(file => {
       const dest = customConfig.files[file];
@@ -95,10 +115,11 @@
       try {
         const existingLink = fs.readlinkSync(destFile);
         fs.unlinkSync(destFile);
-      } catch (e) {}
+      } catch (e) { }
 
       if (!reset) {
         fs.symlinkSync(srcFile, destFile);
+        console.log('  + Linking file   : ' + srcFile + ' ==> ' + destFile);
       }
     })
 
@@ -107,15 +128,52 @@
   function doCustomizeFolders(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
     // Symlink custom app folders if they are present
     customConfig.folders.forEach(folder => {
-      var destFolder = path.join(baseFolder, folder);
-      var srcFolder = path.join(customBaseFolder, folder);
+      var parts = folder.split(':')
+      var src = parts[0];
+      var dest = src;
+      if (parts.length > 1) {
+        dest = parts[1];
+      }
+      var destFolder = path.join(baseFolder, dest);
+      var srcFolder = path.join(customBaseFolder, src);
       if (fs.existsSync(destFolder)) {
         fs.unlinkSync(destFolder);
       }
       if (!reset && fs.existsSync(srcFolder)) {
         fs.symlinkSync(srcFolder, destFolder);
+        console.log('  + Linking folder : ' + srcFolder + ' ==> ' + destFolder);
       }
     });
+  }
+
+  // Copy the correct custom module to either import the supplied custom module or provide an empty module
+  function doCustomizeCreateModule(forceDefaults, reset, customConfig, baseFolder, customBaseFolder) {
+    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/packages/core/misc/custom');
+    const destFile = path.join(baseFolder, 'src/custom-import.module.ts');
+    const customModuleFile = path.join(baseFolder, 'src/custom/custom.module.ts');
+    const customRoutingModuleFile = path.join(baseFolder, 'src/custom/custom-routing.module.ts');
+
+    // Delete the existing file if it exists
+    if (fs.existsSync(destFile)) {
+      fs.unlinkSync(destFile)
+    }
+
+    if (!reset) {
+      let srcFile = 'custom.module.ts_';
+      if (fs.existsSync(customModuleFile)) {
+        srcFile = 'custom-src.module.ts_';
+        if (fs.existsSync(customRoutingModuleFile)) {
+          srcFile = 'custom-src-routing.module.ts_';
+          console.log('  + Found custom module with routing');
+        } else {
+          console.log('  + Found custom module without routing');
+        }
+        } else {
+        console.log('  + No custom module found - linking empty custom module');
+      }
+      fs.copySync(path.join(defaultSrcFolder, srcFile), destFile);
+      console.log('  + Copying file   : ' + path.join(defaultSrcFolder, srcFile) + ' ==> ' + destFile);
+    }
   }
 
   function doCustomizeBackend(reset, baseFolder, customBaseFolder) {
@@ -162,6 +220,8 @@
 
   // Generate index.html from template
   function doGenerateIndexHtml(customize) {
+
+    console.log('  + Generating index.html');
     // Copy the default
     fs.copySync(INDEX_TEMPLATE, INDEX_HTML);
 
@@ -177,20 +237,29 @@
       }
     }
 
+    if (metadata.title) {
+      console.log('  + Overridding title to: "' + metadata.title + '"');
+    }
+
     // Patch different page title if there is one
     var title = metadata.title || 'Stratos';
     replace.sync({ files: INDEX_HTML, from: /@@TITLE@@/g, to: title });
 
     // Read in the stored Git metadata if it is there, default to empty metadata
     var gitMetadata = {
-      project: '',
-      branch: '',
-      commit: ''
+      project: process.env.project || process.env.STRATOS_PROJECT || '',
+      branch: process.env.branch || process.env.STRATOS_BRANCH || '',
+      commit: process.env.commit || process.env.STRATOS_COMMIT || ''
     };
 
     if (fs.existsSync(GIT_METADATA)) {
       gitMetadata = JSON.parse(fs.readFileSync(GIT_METADATA));
+      console.log('  + Project Metadata file read OK');
+    } else {
+      console.log('  + Project Metadata file does not exist');
     }
+
+    console.log("  + Project Metadata: " + JSON.stringify(gitMetadata));
 
     // Git Information
     replace.sync({ files: INDEX_HTML, from: '@@stratos_git_project@@', to: gitMetadata.project });
@@ -199,6 +268,22 @@
 
     // Date and Time that the build was made (approximately => it is when this script is run)
     replace.sync({ files: INDEX_HTML, from: '@@stratos_build_date@@', to: new Date() });
+
+    // Replace loading indicator - HTML
+    let loadingHtmlFile = INDEX_LOADING_HTML_DEFAULT;
+    if (fs.existsSync(INDEX_LOADING_HTML_CUSTOM)) {
+      loadingHtmlFile = INDEX_LOADING_HTML_CUSTOM
+    }
+    const loadingHtml = fs.readFileSync(loadingHtmlFile, 'utf8');
+    replace.sync({ files: INDEX_HTML, from: '<!-- @@LOADING_HTML@@ -->', to: loadingHtml });
+
+    // Replace loading indicator - CSS
+    let loadingCssFile = INDEX_LOADING_CSS_DEFAULT;
+    if (fs.existsSync(INDEX_LOADING_CSS_CUSTOM)) {
+      loadingCssFile = INDEX_LOADING_CSS_CUSTOM
+    }
+    const loadingCss = fs.readFileSync(loadingCssFile, 'utf8');
+    replace.sync({ files: INDEX_HTML, from: '/** @@LOADING_CSS@@ **/', to: loadingCss });
   }
 
   // We can only do this if we have a git repository checkout
@@ -207,6 +292,7 @@
   function storeGitRepositoryMetadata() {
     // Do we have a git folder?
     if (!fs.existsSync(GIT_FOLDER)) {
+      console.log('  + Unable to store git repository metadata - .git folder not found');
       return;
     }
     var gitMetadata = {

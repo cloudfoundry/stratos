@@ -1,0 +1,25 @@
+mat-card-header {
+  .autoscaler-metric-subtitle {
+    font-size: .9em;
+    margin-top: .3em;
+  }
+}
+
+.autoscaler-chart-card {
+  display: flex;
+  height: 250px;
+  width: 100%;
+
+  .autoscaler-chart-gauge {
+    height: 200px;
+    margin: 40px 20px 0 0;
+    width: 20%;
+    ngx-charts-gauge {
+      width: 100%;
+    }
+  }
+  .autoscaler-chart-combo {
+    margin-top: 1em;
+    width: 80%;
+  }
+}

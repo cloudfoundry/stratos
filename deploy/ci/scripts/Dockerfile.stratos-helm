@@ -1,9 +1,0 @@
-FROM opensuse:latest
-ENV VERSION v2.6.1
-ENV FILENAME helm-${VERSION}-linux-amd64.tar.gz
-RUN zypper in -y curl tar git openssh
-RUN curl -L http://storage.googleapis.com/kubernetes-helm/${FILENAME} | tar xzv && \
-    mv /linux-amd64/helm /bin/helm
-RUN mkdir ~/.ssh
-RUN touch ~/.ssh/config
-RUN echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config

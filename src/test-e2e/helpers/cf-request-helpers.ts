@@ -1,10 +1,10 @@
 import { promise } from 'protractor';
 
-import { CFResponse } from '../../frontend/app/store/types/api.types';
-import { EndpointModel } from '../../frontend/app/store/types/endpoint.types';
-import { E2ESetup } from '../e2e';
+import { EndpointModel } from '../../frontend/packages/store/src/types/endpoint.types';
+import { e2e, E2ESetup } from '../e2e';
 import { E2EHelpers } from './e2e-helpers';
 import { RequestHelpers } from './request-helpers';
+import { CFResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
 
 export class CFRequestHelpers extends RequestHelpers {
 
@@ -19,7 +19,7 @@ export class CFRequestHelpers extends RequestHelpers {
     'x-cap-passthrough': true
   })
 
-  getCfCnsi = (cfName?: string): promise.Promise<EndpointModel> => {
+  getCfInfo = (cfName?: string): promise.Promise<EndpointModel> => {
     cfName = cfName || this.e2eHelper.secrets.getDefaultCFEndpoint().name;
     return this.sendRequestAdminSession('pp/v1/cnsis', 'GET', {})
       .then((response: string) => {
@@ -28,18 +28,34 @@ export class CFRequestHelpers extends RequestHelpers {
       });
   }
 
-  sendCfGet = (cfGuid: string, url: string): promise.Promise<CFResponse> => this.sendCfRequest(cfGuid, url, 'GET').then(JSON.parse);
+  getDefaultCFEndpoint = () => {
+    return this.e2eHelper.secrets.getDefaultCFEndpoint();
+  }
 
-  sendCfPost = (cfGuid: string, url: string, body: any): promise.Promise<CFResponse> =>
-    this.sendCfRequest(cfGuid, url, 'POST', body).then(JSON.parse)
+  getCfGuid = (cfName?: string): promise.Promise<string> =>
+    this.getCfInfo(cfName).then((endpoint: EndpointModel) => endpoint ? endpoint.guid : null)
 
-  sendCfPut = (cfGuid: string, url: string, body?: any): promise.Promise<CFResponse> =>
-    this.sendCfRequest(cfGuid, url, 'PUT', body).then(JSON.parse)
+  sendCfGet<T = CFResponse>(cfGuid: string, url: string): promise.Promise<T> {
+    return this.sendCfRequest(cfGuid, url, 'GET').then(JSON.parse);
+  }
+
+  sendCfPost<T = CFResponse>(cfGuid: string, url: string, body: any): promise.Promise<T> {
+    return this.sendCfRequest(cfGuid, url, 'POST', body).then(JSON.parse);
+  }
+
+  sendCfPut<T = CFResponse>(cfGuid: string, url: string, body?: any): promise.Promise<T> {
+    return this.sendCfRequest(cfGuid, url, 'PUT', body).then(JSON.parse);
+  }
 
   sendCfDelete = (cfGuid: string, url: string): promise.Promise<any> => this.sendCfRequest(cfGuid, url, 'DELETE');
 
   private sendCfRequest = (cfGuid: string, url: string, method: string, body?: string): promise.Promise<any> =>
     this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid), body)
+      .catch(error => {
+        // Track the url against the error. Sometimes we don't get this from the stack trace
+        e2e.log(`Failed to handle request to url: '${url}'. Reason: '${error}'`);
+        throw error;
+      })
 
   private sendRequestAdminSession = (url: string, method: string, headers: object, body?: any) =>
     this.sendRequest(this.e2eSetup.adminReq, {
@@ -47,4 +63,5 @@ export class CFRequestHelpers extends RequestHelpers {
       method,
       url
     }, body)
+
 }

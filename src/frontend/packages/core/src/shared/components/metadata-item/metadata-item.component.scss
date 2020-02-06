@@ -1,0 +1,43 @@
+:host {
+  display: flex;
+  margin: 12px 0;
+}
+
+.metadata-item {
+  display: flex;
+  flex-direction: row;
+  &__icon {
+    flex: 0 0 24px;
+    margin-right: 8px;
+  }
+  &__icon_spacer {
+    visibility: hidden;
+  }
+  &__content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+
+    &-label-only {
+      align-self: center;
+    }
+  }
+  &__label {
+    display: flex;
+    flex: 1;
+    opacity: .7;
+    padding-bottom: 3px;
+
+    &-only {
+      padding-bottom: 0;
+    }
+  }
+  &__value {
+    flex: 1;
+  }
+
+  &__label-copy {
+    flex: none;
+    margin-right: 24px;
+  }
+}

@@ -7,7 +7,7 @@ describe('Login', () => {
 
   beforeAll(() => {
     e2e.setup(ConsoleUserType.admin)
-    .doNotLogin();
+      .doNotLogin();
   });
 
   beforeEach(() => {
@@ -16,7 +16,6 @@ describe('Login', () => {
 
   it('- should reach log in page', () => {
     expect(loginPage.isLoginPage()).toBeTruthy();
-    expect<any>(loginPage.getTitle()).toEqual('STRATOS');
     expect(loginPage.loginButton().isPresent()).toBeTruthy();
   });
 

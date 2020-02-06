@@ -1,7 +1,7 @@
 # Troubleshooting
 
 ## Deploying as a Cloud Foundry Application
-See the custom troubleshooting guide [here](../deploy/cloud-foundry/README#Troubleshooting).
+See the custom troubleshooting guide [here](../deploy/cloud-foundry#troubleshooting).
 
 ## Usernames appear as long random characters when connected to IBM Cloud
 

@@ -1,0 +1,6 @@
+<div class="app-code-block" [ngClass]="{ 'app-code-block__pre': codeBlockStyle === 'pre'}">
+  <div class="app-code-block__content" #preBlock>
+    <ng-content></ng-content>
+  </div>
+  <app-copy-to-clipboard *ngIf="!hideCopy" class="app-code-block__copy" [text]="text"></app-copy-to-clipboard>
+</div>

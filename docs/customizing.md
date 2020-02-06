@@ -6,6 +6,7 @@ Stratos provides a mechanism for customization - the following customizations ar
 - Changing certain image assets (favorite icon, login background and logo)
 - Overriding styles
 - Adding new functionality
+- Changing the initial loading indicator
 
 ## Approach
 
@@ -33,7 +34,10 @@ The following image resources can be changed by creating the specified file in t
 |---|---|---|
 |favicon.ico|custom-src/frontend|Favorite icon to use|
 |logo.png|custom-src/frontend/assets|Logo to use on login screen and about page|
+|nav-logo.png|custom-src/frontend/assets|Logo to use in the top-left side navigation for the application logo|
 |login-bg.jpg|custom-src/frontend/assets|Image to use for the login page background|
+
+> NOTE: The `nav-logo.png` logo should have a height of 36px and a maximum width of 180 pixels.
 
 ### Customizing the Theme
 
@@ -47,7 +51,7 @@ In this file you can set any or all of the following variables:
 |---|---|
 |$stratos-theme|The main theme to use for Stratos|
 |$stratos-nav-theme|Theme to use for the side navigation panel|
-$stratos-status-theme|Theme to use for displaying status in Stratos|
+|$stratos-status-theme|Theme to use for displaying status in Stratos|
 
 Note that you do not have to specify all of these - defaults will be used if they are not set.
 
@@ -69,6 +73,24 @@ $suse-app-theme: mat-light-theme($suse-app-primary, $suse-app-primary, $suse-the
 $stratos-theme: $suse-app-theme;
 ```
 
+#### Creating or disabling the Dark theme
+
+You can also change the Dark theme, if you wish, by defining the following variables:
+
+|Variable|Purpose|
+|---|---|
+|$stratos-dark-theme|The dark theme to use for Stratos|
+|$stratos-dark-nav-theme|Dark theme to use for the side navigation panel|
+|$stratos-dark-status-theme|Dark theme to use for displaying status in Stratos|
+
+Note that minimally you must supply `stratos-dark-theme` to create a dark theme.
+
+By default a dark theme is assumed to be available and the default will be used if not overridden. You can disable dark theme support in the UI by setting the following variable in your `custom.scss`:
+
+```
+$stratos-dark-theme-supported: false;
+```
+
 ### Changing Styles
 
 We don't generally recommend modifying styles, since from version to version of Stratos, we may change the styles used slightly which can mean any modifications you made will need updating. Should you wish to do so, you can modify these in the same `custom.scss` file that is used for theming.
@@ -85,8 +107,40 @@ Note that the class `stratos` has been placed on the `BODY` tag of the Stratos a
 
 ### Adding new Features
 
-Code for new features should be placed within the `custom-src/frontend/app/custom` folder. You can obviously create any sub-folder structure within this folder.
+Code for new features should be placed within the `custom-src/frontend/app/custom` folder. You can create any sub-folder structure within this folder.
 
-Stratos imports the module `CustomModule` into the application. This must be defined in the file `custom-src/frontend/app`.
+When you perform an `npm install` or explicitly run `npm run customize`, the customize script is run and will symlink the folder `custom-src/frontend/app/custom` to `src/frontend/app/custom`. It will also create a module to import your custom code - this is placed in the file `src/frontend/app/custom/custom-import.module.ts`. You should _not_ edit this file.
 
-> More detail on overriding the login page, adding routes and extending the UI will be added over time.
+Within the `custom-src/frontend/app/custom` folder you must create a module in the file `custom.module.ts` named `CustomModule` - this will be imported into the Stratos application and is the mechanism by which you can add custom code to the front-end.
+
+We currently expose the following extension points in the Stratos UI:
+
+- Changing the component to use for the login screen
+- Adding new items to the side navigation menu
+- Adding new tabs to the Application, Cloud Foundry, Organization and Space views
+- Adding new action buttons to the Application Wall, Application, Cloud Foundry, Organization and Space and Endpoint views
+
+We use Decorators to annotate components to indicate that they are Stratos extensions.
+
+See [Extensions](extensions.md) for more detail and examples of front-end extensions.
+
+
+### Changing the Initial Loading Indicator
+
+On slower connections, it can take a few seconds to load the main Javascript resources for Stratos.
+
+In order to give the user some initial feedback that Stratos is loading, a loading indicator is included in the `index.html` file. This gets shown as early as possible, as soon as this main html file has loaded. Once the main code has been fetched, the view refreshes to show the application.
+
+A default loading indicator is provided that can be changed. To do so, create the following two files:
+
+- `custom-src/frontend/loading.css` - CSS styles to be included in a style block in the head of the index page
+- `custom-src/frontend/loading.html` - HTML markup to be included the the index page to render the loading indicator
+
+The files for the default indicator can be found in the `src/frontend/packages/core/misc/custom` folder.
+
+An example of a different loading indicator is included with the ACME sample in `examples/custom-src/frontend`.
+
+The customization task will insert the appropriate CSS and HTML files into the main index.html file when it runs.
+
+Take a look at the template for the `index.html` file in `src/frontend/packages/core/misc/custom/index.html`. The CSS file is inserted where the marker `/** @@LOADING_CSS@@ **/` is and the HTML file where `<!-- @@LOADING_HTML@@ -->` is.
+

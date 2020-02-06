@@ -1,0 +1,43 @@
+@import '../../../../sass/mixins';
+.event-page {
+  @include breakpoint(tablet) {
+    margin: 0 20%;
+  }
+  &__filter {
+    margin-bottom: 10px;
+  }
+  &__event-row-icon {
+    margin-right: 15px;
+  }
+  &__event-row-button {
+    margin-left: auto;
+    margin-right: 10px;
+    &:last-of-type {
+      margin-right: 0;
+    }
+  }
+  &__event-message {
+    flex: 1;
+    margin: 15px;
+  }
+  &__event-row-card {
+    margin-bottom: 15px;
+  }
+  &__unread-header {
+    height: 60px;
+    margin: 0;
+    padding-top: 20px;
+  }
+  &__list-has-read {
+    margin-top: 0;
+  }
+  &__no-event-message {
+    align-items: center;
+    display: flex;
+
+    height: 80px;
+  }
+  &__no-event-message-inner {
+    padding: 0 16px;
+  }
+}

@@ -1,11 +1,96 @@
-import { browser, by, element } from 'protractor';
+import { browser, by, element, promise } from 'protractor';
 import { ElementFinder } from 'protractor/built';
+
 import { E2EEndpointConfig } from '../e2e.types';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
-import { ListComponent, ListTableComponent } from '../po/list.po';
+import { ListCardComponent, ListComponent, ListHeaderComponent, ListTableComponent } from '../po/list.po';
+import { MetaCard, MetaCardItem } from '../po/meta-card.po';
 import { Page } from '../po/page.po';
-import { SnackBarComponent } from '../po/snackbar.po';
+import { SnackBarPo } from '../po/snackbar.po';
 
+export class EndpointCards extends ListCardComponent {
+  constructor(locator: ElementFinder, header: ListHeaderComponent) {
+    super(locator, header);
+  }
+
+  findCardByTitle(title: string, subtitle = 'Cloud Foundry'): promise.Promise<MetaCard> {
+    return super.findCardByTitle(`${title}\n${subtitle}`);
+  }
+
+  getEndpointDataForEndpoint(title: string, subtitle = 'Cloud Foundry'): promise.Promise<EndpointMetadata> {
+    return this.findCardByTitle(title, subtitle).then(card => this.getEndpointData(card));
+  }
+
+  getEndpointData(card: MetaCard): promise.Promise<EndpointMetadata> {
+    const title = card.getTitle();
+    const metaCardItems = card.getMetaCardItemsAsText();
+    return promise.all<string | MetaCardItem<string>[]>([
+      title,
+      metaCardItems
+    ]).then(([t, m]: [string, MetaCardItem<string>[]]) => {
+      const details = m.find(item => item.key === 'Details');
+      // Protect against zero details
+      const safeDetails = details ? details.value : '';
+      // If we have details, assume they're cf details
+      const cleanDetails = safeDetails.split('\n');
+      const user = cleanDetails[1] ? cleanDetails[1].replace(' (Administrator)', '') : '';
+      const isAdmin = safeDetails.endsWith(' (Administrator)');
+      const urlField = m.find(item => item.key === 'Address').value;
+      const url = urlField.replace('content_copy', '').trim();
+      return {
+        name: t.substring(0, t.indexOf('\n')),
+        connected: m.find(item => item.key === 'Status').value === 'Connected\ncloud_done',
+        type: t.substring(t.indexOf('\n') + 1, t.length),
+        user,
+        isAdmin,
+        url
+        // favorite: data[6]
+      };
+    });
+  }
+}
+
+export class EndpointsTable extends ListTableComponent {
+
+  constructor(locator: ElementFinder) {
+    super(locator);
+  }
+
+  getEndpointData(row: ElementFinder): promise.Promise<EndpointMetadata> {
+    // Get all of the columns
+    return row.all(by.tagName('app-table-cell')).map(col => col.getText()).then((data: string[]) => {
+      return {
+        name: data[0],
+        connected: data[1] === 'cloud_done',
+        type: data[2],
+        user: data[3],
+        isAdmin: data[4].indexOf('Yes') !== -1,
+        url: data[5],
+        favorite: data[6]
+      } as EndpointMetadata;
+    });
+  }
+
+  getAllData() {
+    return this.getRows().map(row => this.getEndpointData(row));
+  }
+
+  getRowForEndpoint(name: string) {
+    return this.getAllData().then(data => {
+      const index = data.findIndex((ep: E2EEndpointConfig) => ep.name === name);
+      return this.getRows().get(index);
+    });
+  }
+
+  getEndpointDataForEndpoint(name: string) {
+    return this.getAllData().then(data => data.find((d: EndpointMetadata) => d.name === name));
+  }
+
+  openActionMenu(row: ElementFinder) {
+    row.element(by.css('app-table-cell-actions button')).click();
+  }
+
+}
 export function resetToLoggedIn(stateSetter, isAdmin) {
   return browser.driver.wait(stateSetter())
     .then(() => {
@@ -23,6 +108,7 @@ export class EndpointsPage extends Page {
 
   // Endpoints table (as opposed to generic list.table)
   public table = new EndpointsTable(this.list.getComponent());
+  public cards = new EndpointCards(this.list.locator, this.list.header);
 
   constructor() {
     super('/endpoints');
@@ -38,9 +124,12 @@ export class EndpointsPage extends Page {
     });
   }
 
-  isWelcomeMessageAdmin() {
+  isWelcomeMessageAdmin(shouldHavePrompt = true) {
     return this.isWelcomeMessageNonAdmin().then(okay => {
-      return okay ? this.isWelcomePromptAdmin() : false;
+      if (okay) {
+        return shouldHavePrompt ? this.isWelcomePromptAdmin() : true;
+      }
+      return false;
     });
   }
 
@@ -52,7 +141,7 @@ export class EndpointsPage extends Page {
     return this.checkWelcomeMessageText('There are no registered endpoints');
   }
 
-  isNoneConnectedSnackBar(snackBar: SnackBarComponent) {
+  isNoneConnectedSnackBar(snackBar: SnackBarPo) {
     return snackBar.hasMessage(NONE_CONNECTED_MSG);
   }
 
@@ -81,44 +170,8 @@ export interface EndpointMetadata {
   name: string;
   url: string;
   type: string;
+  user: string;
+  isAdmin: boolean;
   connected: boolean;
 }
 
-export class EndpointsTable extends ListTableComponent {
-
-  constructor(locator: ElementFinder) {
-    super(locator);
-  }
-
-  getEndpointData(row: ElementFinder) {
-    // Get all of the columns
-    return row.all(by.tagName('app-table-cell')).map(col => col.getText()).then(data => {
-      return {
-        name: data[0],
-        connected: data[1] === 'cloud_done',
-        type: data[2],
-        url: data[3]
-      } as EndpointMetadata;
-    });
-  }
-
-  getAllData() {
-    return this.getRows().map(row => this.getEndpointData(row));
-  }
-
-  getRowForEndpoint(name: string) {
-    return this.getAllData().then(data => {
-      const index = data.findIndex((ep: E2EEndpointConfig) => ep.name === name);
-      return this.getRows().get(index);
-    });
-  }
-
-  getEndpointDataForEndpoint(name: string) {
-    return this.getAllData().then(data => data.find((d: EndpointMetadata) => d.name === name));
-  }
-
-  openActionMenu(row: ElementFinder) {
-    row.element(by.css('app-table-cell-actions button')).click();
-  }
-
-}

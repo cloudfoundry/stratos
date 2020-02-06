@@ -1,0 +1,7 @@
+<div *ngIf="component" class="cards {{'cards__columns-' + columns}}">
+  <ng-container *ngFor="let item of dataSource.page$ | async; trackBy: multiActionTrackBy()">
+    <app-card [item]="item" [component]="component" [dataSource]="dataSource">
+    </app-card>
+  </ng-container>
+  <app-card class="row-filler"></app-card>
+</div>

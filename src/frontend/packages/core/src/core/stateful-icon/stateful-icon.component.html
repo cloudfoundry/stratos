@@ -1,0 +1,9 @@
+<div class="stateful-icon" *ngIf="selectedState || stateKey === allStateKeys.BUSY">
+  <mat-icon [inline]="inline"
+    [ngClass]="{'warning': stateKey === allStateKeys.WARNING, 'error': stateKey === allStateKeys.ERROR, 'ok': stateKey === allStateKeys.OK }"
+    *ngIf="stateKey !== allStateKeys.BUSY; else spinner">
+    {{ selectedState.icon }}</mat-icon>
+</div>
+<ng-template #spinner>
+  <mat-spinner diameter="20"></mat-spinner>
+</ng-template>
