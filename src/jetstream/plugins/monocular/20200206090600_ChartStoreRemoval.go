@@ -2,7 +2,6 @@ package monocular
 
 import (
 	"database/sql"
-	"strings"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
 
