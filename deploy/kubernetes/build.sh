@@ -207,7 +207,7 @@ DEST_HELM_CHART_PATH="${STRATOS_PATH}/deploy/kubernetes/helm-chart"
 
 rm -rf ${DEST_HELM_CHART_PATH}
 mkdir -p ${DEST_HELM_CHART_PATH}
-cp -R ${SRC_HELM_CHART_PATH}/ ${DEST_HELM_CHART_PATH}/
+cp -RT ${SRC_HELM_CHART_PATH}/ ${DEST_HELM_CHART_PATH}/
 
 pushd ${DEST_HELM_CHART_PATH} > /dev/null
 
@@ -220,6 +220,7 @@ fi
 # Fetch subcharts
 helm dependency update
 
+# Commands:
 sed -i.bak -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' values.yaml
 sed -i.bak -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' values.yaml
 sed -i.bak -e 's/hostname: docker.io/hostname: '"${DOCKER_REGISTRY}"'/g' values.yaml
@@ -230,7 +231,6 @@ rm -rf *.bak
 
 # Generate image list
 echo ${STRATOS_PATH}
-echo
 ${STRATOS_PATH}/deploy/kubernetes/imagelist-gen.sh .
 
 popd > /dev/null

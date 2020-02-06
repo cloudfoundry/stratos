@@ -6,12 +6,11 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/kubeapps/common/datastore"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/helm/monocular/chartrepo"
 	"github.com/helm/monocular/chartsvc"
+	"github.com/helm/monocular/chartsvc/foundationdb"
 )
 
 const (
@@ -23,10 +22,8 @@ const prefix = "/pp/v1/chartsvc/"
 // Monocular is a plugin for Monocular
 type Monocular struct {
 	portalProxy    interfaces.PortalProxy
-	dbSession      datastore.Session
 	chartSvcRoutes http.Handler
-	Store          chartrepo.ChartRepoDatastore
-	QueryStore     chartsvc.ChartSvcDatastore
+	RepoQueryStore chartsvc.ChartSvcDatastore
 }
 
 // Init creates a new Monocular
@@ -34,18 +31,17 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 	return &Monocular{portalProxy: portalProxy}, nil
 }
 
-func (m *Monocular) GetDBSession() datastore.Session {
-	return m.dbSession
-}
-
 func (m *Monocular) GetChartStore() chartsvc.ChartSvcDatastore {
-	return m.QueryStore
+	return m.RepoQueryStore
 }
 
 // Init performs plugin initialization
 func (m *Monocular) Init() error {
-	m.ConfigureSQL()
-	m.chartSvcRoutes = chartsvc.GetRoutes()
+	fdbURL := "mongodb://127.0.0.1:27016"
+	fDB := "monocular-plugin"
+	debug := false
+	m.ConfigureChartSVC(&fdbURL, &fDB, &debug)
+	m.chartSvcRoutes = chartsvc.SetupRoutes()
 	m.InitSync()
 	m.syncOnStartup()
 	return nil
@@ -54,7 +50,7 @@ func (m *Monocular) Init() error {
 func (m *Monocular) syncOnStartup() {
 
 	// Get the repositories that we currently have
-	repos, err := m.QueryStore.ListRepositories()
+	repos, err := foundationdb.ListRepositories()
 	if err != nil {
 		log.Errorf("Chart Repostiory Startup: Unable to sync repositories: %v+", err)
 		return
@@ -104,53 +100,8 @@ func arrayContainsString(a []string, x string) bool {
 	return false
 }
 
-// func (m *Monocular) ConfigureMonocular() error {
-// 	log.Info("Connecting to MongoDB...")
-
-// 	var host = "127.0.0.1"
-// 	var db = "monocular"
-// 	var user = "mongoadmin"
-// 	var password = "secret"
-
-// 	session, err := chartsvc.SetMongoConfig(&host, &db, &user, password)
-// 	if err != nil {
-// 		log.Warn("Could not connect to MongoDB")
-// 		return err
-// 	}
-
-// 	store, err := chartsvc.NewMongoDBChartSvcDatastore(session)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	chartsvc.SetStore(store)
-// 	m.QueryStore = store
-
-// 	syncStore, err := chartrepo.NewMongoDBChartRepoDatastore(session)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	m.Store = syncStore
-// 	log.Info("Connected to MongoDB")
-
-// 	return nil
-// }
-
-func (m *Monocular) ConfigureSQL() error {
-
-	log.Info("Connecting to SQL Helm Chart store")
-
-	InitRepositoryProvider(m.portalProxy.GetConfig().DatabaseProviderName)
-
-	store, err := NewSQLDBCMonocularDatastore(m.portalProxy.GetDatabaseConnection())
-	if err != nil {
-		return err
-	}
-
-	m.Store = store
-	m.QueryStore = store
-
-	chartsvc.SetStore(store)
-	return nil
+func (m *Monocular) ConfigureChartSVC(fdbURL *string, fDB *string, debug *bool) {
+	chartsvc.InitFDBDocLayerConnection(fdbURL, fDB, debug)
 }
 
 func (m *Monocular) OnEndpointNotification(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
@@ -190,10 +141,12 @@ func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 func (m *Monocular) handleAPI(c echo.Context) error {
 	// Modify the path to remove our prefix for the Chart Service API
 	path := c.Request().URL.Path
+	log.Debugf("URL to chartsvc requested: %v", path)
 	if strings.Index(path, prefix) == 0 {
 		path = path[len(prefix)-1:]
 		c.Request().URL.Path = path
 	}
+	log.Debugf("URL to chartsvc requested after modification: %v", path)
 	m.chartSvcRoutes.ServeHTTP(c.Response().Writer, c.Request())
 	return nil
 }

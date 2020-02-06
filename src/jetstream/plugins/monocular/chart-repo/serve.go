@@ -14,37 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package chartrepo
+package main
 
 import (
-	"fmt"
+	"os"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var (
-	version          = "devel"
-	userAgentComment string
-)
-
-// Returns the user agent to be used during calls to the chart repositories
-// Examples:
-// chart-repo/devel
-// chart-repo/1.0
-// chart-repo/1.0 (monocular v1.0-beta4)
-// More info here https://github.com/kubeapps/kubeapps/issues/767#issuecomment-436835938
-func userAgent() string {
-	ua := "chart-repo/" + version
-	if userAgentComment != "" {
-		ua = fmt.Sprintf("%s (%s)", ua, userAgentComment)
-	}
-	return ua
-}
-
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "returns version information",
+//ServeCmd Start an HTTP server to allow on-demand trigger of sync or delete
+var ServeCmd = &cobra.Command{
+	Use:   "serve",
+	Short: "Start an HTTP server for on-demand trigger of sync or delete",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(version)
+		fdbURL, err := cmd.Flags().GetString("doclayer-url")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fDB, err := cmd.Flags().GetString("doclayer-database")
+		if err != nil {
+			log.Fatal(err)
+		}
+		debug, err := cmd.Flags().GetBool("debug")
+		if err != nil {
+			log.Fatal(err)
+		}
+		authorizationHeader := os.Getenv("AUTHORIZATION_HEADER")
+
+		initOnDemandEndpoint(fdbURL, fDB, authorizationHeader, debug)
 	},
 }
