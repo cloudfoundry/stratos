@@ -30,10 +30,30 @@ spec:
     spec:
       containers:
       - name: chartrepo
-        image: docker.io/kreinecke/suse-fdb-chart-repo:latest
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-chartsync:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         command: ["/chartrepo"]
         args: ["serve", "--debug=true","--doclayer-url=mongodb://{{ .Release.Name }}-chartrepo:27016"]
         ports:
         - name: endpoint
           containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Release.Name }}-chartrepo"
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos-chartrepo-service"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  type: ClusterIP
+  ports:
+  - name: chartrepo
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: "{{ .Release.Name }}"
+    app.kubernetes.io/component: "stratos-chartrepo"

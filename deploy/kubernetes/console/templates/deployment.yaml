@@ -101,6 +101,8 @@ spec:
         imagePullPolicy: {{.Values.imagePullPolicy}}
         name: proxy
         env:
+        - name: STRATOS_HELM_RELEASE
+          value: "{{ .Release.Name }}"
         - name: DB_USER
           value: "{{ .Values.mariadb.mariadbUser }}"
         - name: DB_PASSWORD

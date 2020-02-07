@@ -19,7 +19,7 @@ BOLD="\033[1m"
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
-BASE_IMAGE_TAG=opensuse
+BASE_IMAGE_TAG=openleap15_1
 OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
@@ -196,6 +196,10 @@ if [ "${CHART_ONLY}" == "false" ]; then
   # Build and push an image based on the nginx container (Front-end)
   log "-- Building/publishing the runtime container image for the Console web server (frontend)"
   patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
+
+  # Build and push an image for the Helm Repo Sync Tool
+  log "-- Building/publishing Monocular Chart Repo"
+  patchAndPushImage stratos-chartsync Dockerfile "${STRATOS_PATH}/src/jetstream/plugins/monocular/chart-repo"
 fi
 
 log "-- Building Helm Chart"
@@ -207,7 +211,7 @@ DEST_HELM_CHART_PATH="${STRATOS_PATH}/deploy/kubernetes/helm-chart"
 
 rm -rf ${DEST_HELM_CHART_PATH}
 mkdir -p ${DEST_HELM_CHART_PATH}
-cp -RT ${SRC_HELM_CHART_PATH}/ ${DEST_HELM_CHART_PATH}/
+cp -R ${SRC_HELM_CHART_PATH}/ ${DEST_HELM_CHART_PATH}/
 
 pushd ${DEST_HELM_CHART_PATH} > /dev/null
 

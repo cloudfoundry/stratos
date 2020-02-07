@@ -27,8 +27,8 @@ type SyncMetadata struct {
 
 const (
 	chartRepoPathPrefix = "/v1"
-	statusPollInterval = 30
-	statusPollTimeout = 320
+	statusPollInterval  = 30
+	statusPollTimeout   = 320
 )
 
 // Sync Channel
@@ -63,8 +63,10 @@ func (m *Monocular) processSyncRequests() {
 				Busy:   true,
 			}
 			m.portalProxy.UpdateEndointMetadata(job.Endpoint.GUID, marshalSyncMetadata(metadata))
+			syncURL := fmt.Sprintf("%s%s/sync/%s", m.SyncServiceURL, chartRepoPathPrefix, job.Endpoint.Name)
+
 			//Hit the sync server container endpoint to trigger a sync for given repo
-			response, err := putRequest("http://127.0.0.1:8080"+chartRepoPathPrefix+"/sync/"+job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
+			response, err := putRequest(syncURL, strings.NewReader(repoSyncRequestParams))
 			metadata.Busy = false
 			if err != nil {
 				log.Warn("Request to sync repository failed: %v", err)
@@ -74,7 +76,7 @@ func (m *Monocular) processSyncRequests() {
 				statusResponse := common.SyncJobStatusResponse{}
 				defer response.Body.Close()
 				err := json.NewDecoder(response.Body).Decode(&statusResponse)
-				if err != nil { 
+				if err != nil {
 					log.Errorf("Unable to parse response from chart-repo server, sync request may not be processed: %v", err)
 					metadata.Status = "Sync Failed"
 				} else if statusResponse.Status != common.SyncStatusInProgress {
@@ -85,7 +87,8 @@ func (m *Monocular) processSyncRequests() {
 					m.updateMetadata(job.Endpoint.GUID, metadata)
 					log.Infof("Sync in progress for repository: %s", job.Endpoint.APIEndpoint.String())
 					//Now wait for success
-					err := waitForSyncComplete("http://127.0.0.1:8080"+chartRepoPathPrefix+"/status/"+job.Endpoint.Name)
+					statusURL := fmt.Sprintf("%s%s/status/%s", m.SyncServiceURL, chartRepoPathPrefix, job.Endpoint.Name)
+					err := waitForSyncComplete(statusURL)
 					if err == nil {
 						metadata.Status = "Synchronized"
 					} else {
@@ -98,7 +101,8 @@ func (m *Monocular) processSyncRequests() {
 		} else if job.Action == 1 {
 			log.Infof("Deleting Helm Repository: %s", job.Endpoint.Name)
 			//Hit the sync server container endpoint to trigger a delete for given repo
-			response, err := putRequest("http://127.0.0.1:8080"+chartRepoPathPrefix+"/delete/"+job.Endpoint.Name, strings.NewReader(repoSyncRequestParams))
+			deleteURL := fmt.Sprintf("%s%s/delete/%s", m.SyncServiceURL, chartRepoPathPrefix, job.Endpoint.Name)
+			response, err := putRequest(deleteURL, strings.NewReader(repoSyncRequestParams))
 			//Extract status from response
 			if err != nil {
 				log.Warn("Request to delete repository failed: %v+", err)
@@ -106,20 +110,20 @@ func (m *Monocular) processSyncRequests() {
 				statusResponse := common.SyncJobStatusResponse{}
 				defer response.Body.Close()
 				err := json.NewDecoder(response.Body).Decode(&statusResponse)
-				if err != nil { 
+				if err != nil {
 					log.Errorf("Unable to parse response from chart-repo server, delete request may not be processed: %v", err)
 				} else if statusResponse.Status != common.DeleteStatusInProgress {
 					log.Errorf("Failed to delete repo: %v, response: %v, statusResponse", job.Endpoint.Name, err)
 				}
-			}	
+			}
 		}
 	}
 
 	log.Debug("processSyncRequests finished")
 }
 
-func waitForSyncComplete (url string) error {
-	return wait.Poll(statusPollInterval * time.Second, time.Duration(statusPollTimeout)*time.Second, func() (bool, error) {
+func waitForSyncComplete(url string) error {
+	return wait.Poll(statusPollInterval*time.Second, time.Duration(statusPollTimeout)*time.Second, func() (bool, error) {
 		var complete = false
 		log.Infof("Making GET request to: %v", url)
 		resp, err := http.Get(url)
@@ -127,7 +131,7 @@ func waitForSyncComplete (url string) error {
 		if err == nil {
 			statusResponse := common.SyncJobStatusResponse{}
 			err := json.NewDecoder(resp.Body).Decode(&statusResponse)
-			log.Infof("%v",statusResponse)
+			log.Infof("%v", statusResponse)
 			if err == nil && statusResponse.Status == common.SyncStatusSynced {
 				complete = true
 			}

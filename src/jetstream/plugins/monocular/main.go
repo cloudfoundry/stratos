@@ -2,6 +2,7 @@ package monocular
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -14,16 +15,24 @@ import (
 )
 
 const (
-	helmEndpointType = "helm"
+	helmEndpointType      = "helm"
+	prefix                = "/pp/v1/chartsvc/"
+	kubeReleaseNameEnvVar = "STRATOS_HELM_RELEASE"
+	foundationDBURLEnvVar = "HELM_FDB_URL"
+	syncServerURLEnvVar   = "HELM_SYNC_SERVER_URL"
+	// e.g. MY_CONSOLE_FDBDOCLAYER_FDBDOCLAYER_PORT=tcp://10.105.215.71:27016
+	fdbHostPortEnvVar = "FDBDOCLAYER_FDBDOCLAYER_PORT"
+	//MY_CONSOLE_CHARTREPO_PORT=tcp://10.108.171.246:8080
+	syncServerHostPortEnvVar = "CHARTREPO_PORT"
 )
-
-const prefix = "/pp/v1/chartsvc/"
 
 // Monocular is a plugin for Monocular
 type Monocular struct {
-	portalProxy    interfaces.PortalProxy
-	chartSvcRoutes http.Handler
-	RepoQueryStore chartsvc.ChartSvcDatastore
+	portalProxy     interfaces.PortalProxy
+	chartSvcRoutes  http.Handler
+	RepoQueryStore  chartsvc.ChartSvcDatastore
+	FoundationDBURL string
+	SyncServiceURL  string
 }
 
 // Init creates a new Monocular
@@ -37,7 +46,12 @@ func (m *Monocular) GetChartStore() chartsvc.ChartSvcDatastore {
 
 // Init performs plugin initialization
 func (m *Monocular) Init() error {
-	fdbURL := "mongodb://127.0.0.1:27016"
+	log.Debug("Monocular init .... ")
+	if err := m.configure(); err != nil {
+		return err
+	}
+
+	fdbURL := m.FoundationDBURL
 	fDB := "monocular-plugin"
 	debug := false
 	m.ConfigureChartSVC(&fdbURL, &fDB, &debug)
@@ -45,6 +59,39 @@ func (m *Monocular) Init() error {
 	m.InitSync()
 	m.syncOnStartup()
 	return nil
+}
+
+func (m *Monocular) configure() error {
+	if releaseName, ok := m.portalProxy.Env().Lookup(kubeReleaseNameEnvVar); ok {
+		// We are deployed in Kubernetes
+		releaseNameEnvVarPrefix := getReleaseNameEnvVarPrefix(releaseName)
+		if url, ok := m.portalProxy.Env().Lookup(fmt.Sprintf("%s_%s", releaseNameEnvVarPrefix, fdbHostPortEnvVar)); ok {
+			m.FoundationDBURL = strings.ReplaceAll(url, "tcp://", "mongodb://")
+		}
+		if url, ok := m.portalProxy.Env().Lookup(fmt.Sprintf("%s_%s", releaseNameEnvVarPrefix, syncServerHostPortEnvVar)); ok {
+			m.SyncServiceURL = strings.ReplaceAll(url, "tcp://", "http://")
+		}
+
+	} else {
+		// Env var lookup when not running in Kubernetes
+		m.FoundationDBURL = m.portalProxy.Env().String(foundationDBURLEnvVar, "")
+		m.SyncServiceURL = m.portalProxy.Env().String(syncServerURLEnvVar, "")
+	}
+
+	log.Debugf("Foundation DB : %s", m.FoundationDBURL)
+	log.Debugf("Sync Server   : %s", m.SyncServiceURL)
+
+	if len(m.FoundationDBURL) == 0 || len(m.SyncServiceURL) == 0 {
+		return errors.New("Helm Monocular DB and/or Sync server are not configured")
+	}
+
+	return nil
+}
+
+func getReleaseNameEnvVarPrefix(name string) string {
+	prefix := strings.ToUpper(name)
+	prefix = strings.ReplaceAll(prefix, "-", "_")
+	return prefix
 }
 
 func (m *Monocular) syncOnStartup() {
