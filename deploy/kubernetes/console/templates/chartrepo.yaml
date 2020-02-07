@@ -33,7 +33,7 @@ spec:
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-chartsync:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         command: ["/chartrepo"]
-        args: ["serve", "--debug=true","--doclayer-url=mongodb://{{ .Release.Name }}-chartrepo:27016"]
+        args: ["serve", "--debug=true","--doclayer-url=mongodb://{{ .Release.Name }}-fdbdoclayer-fdbdoclayer:27016"]
         ports:
         - name: endpoint
           containerPort: 8080
