@@ -104,6 +104,7 @@ Generate self-signed certificate
 {{- $cert := genSignedCert ( include "console.certName" . ) nil $altNames 365 $ca -}}
 tls.crt: {{ $cert.Cert | b64enc }}
 tls.key: {{ $cert.Key | b64enc }}
+tls.ca:  {{ $ca.Cert | b64enc }}
 {{- end -}}
 
 {{/*

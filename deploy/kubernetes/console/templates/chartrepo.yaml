@@ -30,6 +30,13 @@ spec:
     spec:
       containers:
       - name: chartrepo
+        env:
+        - name: CONSOLE_PROXY_CERT_PATH
+          value: "/{{ .Release.Name }}-encryption-key-volume/console.crt" 
+        - name: CONSOLE_PROXY_CERT_KEY_PATH
+          value: "/{{ .Release.Name }}-encryption-key-volume/console.key" 
+        - name: CONSOLE_PROXY_CERT_KEY_PATH
+          value: "/{{ .Release.Name }}-encryption-key-volume/ca.crt" 
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-chartsync:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         command: ["/chartrepo"]
