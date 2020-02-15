@@ -1,0 +1,23 @@
+{{/*
+Generate self-signed certificate
+*/}}
+{{- define "fdbdoclayer.generateCertificate" -}}
+{{- $altNames := list ( printf "%s%s.%s" (include "fullname" .) "-fdbdoclayer" .Release.Namespace ) ( printf "%s.%s.svc" (include "console.certName" .) .Release.Namespace ) -}}
+{{- $ca := genCA "stratos-ca" 365 -}}
+{{- $cert := genSignedCert "fdbdoclayer" nil $altNames 365 $ca -}}
+fdbtls.crt: {{ $cert.Cert | b64enc }}
+fdbtls.key: {{ $cert.Key | b64enc }}
+fdbtls.ca:  {{ $ca.Cert | b64enc }}
+{{- end -}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}-fdbdoclayer
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: {{ template "fullname" . }}-fdbdoclayer
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+data:
+  {{ (include "fdbdoclayer.generateCertificate" .) | trim | quote }}
