@@ -36,12 +36,24 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		cACert, err := cmd.Flags().GetString("cafile")
+		if err != nil {
+			log.Fatal(err)
+		}
+		key, err := cmd.Flags().GetString("keyfile")
+		if err != nil {
+			log.Fatal(err)
+		}
+		cert, err := cmd.Flags().GetString("certfile")
+		if err != nil {
+			log.Fatal(err)
+		}
 		debug, err := cmd.Flags().GetBool("debug")
 		if err != nil {
 			log.Fatal(err)
 		}
 		authorizationHeader := os.Getenv("AUTHORIZATION_HEADER")
 
-		initOnDemandEndpoint(fdbURL, fDB, authorizationHeader, debug)
+		initOnDemandEndpoint(fdbURL, fDB, cACert, cert, key, authorizationHeader, debug)
 	},
 }
