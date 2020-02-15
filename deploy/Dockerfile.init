@@ -1,4 +1,4 @@
-FROM splatform/stratos-bk-base:opensuse
+FROM splatform/stratos-bk-base:leap15_1
 RUN zypper in -y curl openssh jq
 COPY /deploy/containers/config-init/config-init.sh /config-init.sh
 COPY /deploy/tools/generate_cert.sh /generate_cert.sh
