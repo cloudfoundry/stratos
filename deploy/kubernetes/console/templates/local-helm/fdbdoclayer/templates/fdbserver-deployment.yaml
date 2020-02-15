@@ -36,8 +36,6 @@ spec:
           value: {{ template "fullname" . }}-fdbserver.console.svc.cluster.local
         - name: CLUSTER_ID
           value: chartdb:erlklkg
-        - name: ENABLE_TLS
-          value: $v.fdbserver.tls
         ports:
         - containerPort: {{ $v.fdbserver.service.port }}
         livenessProbe:

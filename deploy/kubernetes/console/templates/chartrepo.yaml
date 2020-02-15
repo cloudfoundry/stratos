@@ -30,13 +30,6 @@ spec:
     spec:
       containers:
       - name: chartrepo
-        env:
-        - name: CONSOLE_PROXY_CERT_PATH
-          value: "/{{ .Release.Name }}-encryption-key-volume/console.crt" 
-        - name: CONSOLE_PROXY_CERT_KEY_PATH
-          value: "/{{ .Release.Name }}-encryption-key-volume/console.key" 
-        - name: CONSOLE_PROXY_CERT_KEY_PATH
-          value: "/{{ .Release.Name }}-encryption-key-volume/ca.crt" 
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-chartsync:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         command: ["/chartrepo"]
@@ -44,6 +37,14 @@ spec:
         ports:
         - name: endpoint
           containerPort: 8080
+        volumeMounts:
+        - name: certs
+          mountPath: "/etc/certs"
+          readOnly: true
+      volumes:
+        - name: certs
+          secret:
+            secretName: {{ template "fullname" . }}-fdbdoclayer-certs
 ---
 apiVersion: v1
 kind: Service

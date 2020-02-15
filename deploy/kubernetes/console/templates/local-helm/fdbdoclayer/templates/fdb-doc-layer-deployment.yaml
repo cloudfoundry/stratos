@@ -31,13 +31,17 @@ spec:
       containers:
       - name: fdbdoclayer
         image: {{ template "fdb.image" $v.fdbdoclayer.image }}
+        volumeMounts:
+        - name: certs
+          mountPath: "/etc/secrets"
+          readOnly: true
         env:
         - name: FDB_COORDINATOR
           value: {{ template "fullname" . }}-fdbserver
         - name: CLUSTER_ID
           value: chartdb:erlklkg
         - name: ENABLE_TLS
-          value: $v.fdbserver.tls
+          value: $v.fdbdoclayer.tls
         ports:
         - containerPort: {{ $v.fdbdoclayer.service.port }}
         livenessProbe:
@@ -50,3 +54,7 @@ spec:
             port: {{ $v.fdbdoclayer.service.port }}
           initialDelaySeconds: 3
           periodSeconds: 10
+      volumes:
+        - name: certs
+          secret:
+            secretName: {{ template "fullname" . }}-fdbdoclayer-certs
