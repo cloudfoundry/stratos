@@ -51,6 +51,7 @@ func init() {
 		cmd.Flags().String("doclayer-database", "monocular-plugin", "FoundationDB Document-Layer database")
 
 		//Flags for Serve-Mode TLS
+		cmd.Flags().Bool("tls", false, "Enable Mutual TLS")
 		cmd.Flags().String("cafile", "", "Path to CA certificate to use for client verification.")
 		cmd.Flags().String("certfile", "", "Path to TLS certificate.")
 		cmd.Flags().String("keyfile", "", "Path to TLS key.")
