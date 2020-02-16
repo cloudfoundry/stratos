@@ -74,7 +74,7 @@ require (
 	google.golang.org/appengine v1.6.5
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
-	gopkg.in/yaml.v2 v2.2.7
+	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/apiextensions-apiserver v0.0.0 // indirect
 	k8s.io/kubectl v0.0.0 // indirect
 )

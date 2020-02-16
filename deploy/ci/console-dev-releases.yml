@@ -29,12 +29,12 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-repository))/stratos-jetstream
-- name: postflight-image
+- name: config-init-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-repository))/stratos-postflight-job
+    repository: ((docker-repository))/stratos-config-init
 - name: mariadb-image
   type: docker-image
   source:
@@ -122,9 +122,9 @@ jobs:
           build_args_file: image-tag/build-args
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      - put: postflight-image
+      - put: config-init-image
         params:
-          dockerfile: stratos/deploy/Dockerfile.bk
+          dockerfile: stratos/deploy/Dockerfile.init
           build: stratos/
           target_name:  postflight-job
           tag: image-tag/v2-alpha-tag
