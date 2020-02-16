@@ -24,6 +24,9 @@ const (
 	fdbHostPortEnvVar = "FDBDOCLAYER_FDBDOCLAYER_PORT"
 	//MY_CONSOLE_CHARTREPO_PORT=tcp://10.108.171.246:8080
 	syncServerHostPortEnvVar = "CHARTREPO_PORT"
+	caCertEnvVar             = "MONOCULAR_CA_PATH"
+	tlsKeyEnvVar             = "MONOCULAR_KEY_PATH"
+	TLSCertEnvVar            = "MONOCULAR_CRT_PATH"
 )
 
 // Monocular is a plugin for Monocular
@@ -33,9 +36,6 @@ type Monocular struct {
 	RepoQueryStore  chartsvc.ChartSvcDatastore
 	FoundationDBURL string
 	SyncServiceURL  string
-	CACertFile      string
-	TLSKey          string
-	TLSCert         string
 }
 
 // Init creates a new Monocular
@@ -57,7 +57,7 @@ func (m *Monocular) Init() error {
 	fdbURL := m.FoundationDBURL
 	fDB := "monocular-plugin"
 	debug := false
-	m.ConfigureChartSVC(&fdbURL, &fDB, &m.CACertFile, &m.TLSCert, &m.TLSKey, &debug)
+	m.ConfigureChartSVC(&fdbURL, &fDB, caCertEnvVar, TLSCertEnvVar, tlsKeyEnvVar, &debug)
 	m.chartSvcRoutes = chartsvc.SetupRoutes()
 	m.InitSync()
 	m.syncOnStartup()
@@ -150,10 +150,10 @@ func arrayContainsString(a []string, x string) bool {
 	return false
 }
 
-func (m *Monocular) ConfigureChartSVC(fdbURL *string, fDB *string, cACertFile *string, certFile *string, keyFile *string, debug *bool) error {
+func (m *Monocular) ConfigureChartSVC(fdbURL *string, fDB *string, cACertFile string, certFile string, keyFile string, debug *bool) error {
 	//TLS options must either be all set to enabled TLS, or none set to disable TLS
-	var tlsEnabled = *cACertFile != "" && *keyFile != "" && *certFile != ""
-	if !(tlsEnabled || (*cACertFile == "" && *keyFile == "" && *certFile == "")) {
+	var tlsEnabled = cACertFile != "" && keyFile != "" && certFile != ""
+	if !(tlsEnabled || (cACertFile == "" && keyFile == "" && certFile == "")) {
 		return errors.New("To enable TLS, all 3 TLS cert paths must be set.")
 	}
 	chartsvc.InitFDBDocLayerConnection(fdbURL, fDB, &tlsEnabled, cACertFile, certFile, keyFile, debug)

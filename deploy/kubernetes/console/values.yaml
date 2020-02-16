@@ -29,7 +29,7 @@ console:
     loadBalancerIP:
     loadBalancerSourceRanges: []
     servicePort: 443
-    # nodePort: 30000
+    nodePort: 30000
     type: ClusterIP
     externalName:
     ingress:
@@ -57,7 +57,7 @@ console:
     http:
       enabled: false
       servicePort: 80
-      # nodePort: 30001
+      ## nodePort: 30001
 
   # Name of config map that provides the template files for user invitation emails
   templatesConfigMapName:

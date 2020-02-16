@@ -1,4 +1,5 @@
 ---
+{{- $v := $.Files.Get "fdbvalues.yaml" | fromYaml }}
 {{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major .Capabilities.KubeVersion.Minor)}}
 apiVersion: apps/v1
 {{- else }}
@@ -33,18 +34,24 @@ spec:
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-chartsync:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         command: ["/chartrepo"]
-        args: ["serve", "--debug=true","--doclayer-url=mongodb://{{ .Release.Name }}-fdbdoclayer-fdbdoclayer:27016"]
+        {{- if $v.fdbdoclayer.tls }}
+        args: ["serve", "--debug=true","--doclayer-url=mongodb://{{ .Release.Name }}-fdbdoclayer:27016", "--cafile=/etc/certs/ca.crt", "--certfile=/etc/certs/tls.crt", "--keyfile=/etc/certs/tls.key"]
+        {{- else }}
+        args: ["serve", "--debug=true","--doclayer-url=mongodb://{{ .Release.Name }}-fdbdoclayer:27016"]
+        {{- end }}
         ports:
         - name: endpoint
           containerPort: 8080
+      {{- if $v.fdbdoclayer.tls }}
         volumeMounts:
         - name: certs
           mountPath: "/etc/certs"
-          readOnly: true
+          readOnly: true   
       volumes:
         - name: certs
           secret:
             secretName: {{ template "fullname" . }}-fdbdoclayer-certs
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service

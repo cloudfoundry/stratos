@@ -19,7 +19,7 @@ fdbdoclayer:
   service:
     name: fdbdoclayer
     port: 27016
-  tls: false
+  tls: true
 
 # Installs networkPolicy for the services. This will allow communication betweeen the services in
 # environments where the default policy is deny

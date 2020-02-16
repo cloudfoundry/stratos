@@ -101,7 +101,7 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	InitFDBDocLayerConnection(fdbURL, fDB, &tlsEnabled, cACertFile, certFile, keyFile, debug)
+	InitFDBDocLayerConnection(fdbURL, fDB, &tlsEnabled, *cACertFile, *certFile, *keyFile, debug)
 
 	n := SetupRoutes()
 
@@ -114,7 +114,7 @@ func main() {
 	http.ListenAndServe(addr, n)
 }
 
-func InitFDBDocLayerConnection(fdbURL *string, fDB *string, tlsEnabled *bool, CAFile *string, certFile *string, keyFile *string, debug *bool) {
+func InitFDBDocLayerConnection(fdbURL *string, fDB *string, tlsEnabled *bool, CAFile string, certFile string, keyFile string, debug *bool) {
 
 	log.Debugf("Attempting to connect to FDB: %v, %v, debug: %v", *fdbURL, *fDB, *debug)
 
@@ -122,7 +122,7 @@ func InitFDBDocLayerConnection(fdbURL *string, fDB *string, tlsEnabled *bool, CA
 
 	if *tlsEnabled {
 		//Load CA Cert from file here
-		CA, err := ioutil.ReadFile(*CAFile) // just pass the file name
+		CA, err := ioutil.ReadFile(CAFile) // just pass the file name
 		if err != nil {
 			log.Fatalf("Cannot load CA certificate from file: %v.", err)
 			return
@@ -134,7 +134,7 @@ func InitFDBDocLayerConnection(fdbURL *string, fDB *string, tlsEnabled *bool, CA
 			return
 		}
 		//Now load the key pair and create tls options struct
-		clientKeyPair, err := tls.LoadX509KeyPair(*certFile, *keyFile)
+		clientKeyPair, err := tls.LoadX509KeyPair(certFile, keyFile)
 		if err != nil {
 			log.Fatalf("Cannot load server keypair: %v", err)
 			return
