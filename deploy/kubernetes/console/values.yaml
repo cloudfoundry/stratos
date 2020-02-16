@@ -1,9 +1,7 @@
 # Tag for images - do not edit
 consoleVersion: latest
 dockerRegistrySecret: regsecret
-# Specify default DB password
-dbPassword: changeme
-dbProvider: mysql
+
 # Provide Proxy settings if required
 #httpProxy: proxy.corp.net
 #httpsProxy: proxy.corp.net
@@ -11,8 +9,7 @@ dbProvider: mysql
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
 imagePullPolicy: IfNotPresent
-# useLb is deprecated - use console.service.type
-useLb: false
+
 console:
   cookieDomain:
   # externalIP deprecated - use console.service.externalIPs
@@ -65,43 +62,55 @@ console:
   # Email subject of the user invitation message 
   userInviteSubject: ~
 
-  # Whether to perform the volume migration job on install/upgrade (migrate to secrets)
-  migrateVolumes: false
-  
   # Enable/disable Tech Preview
   techPreview: false
 
   # Use local admin user instead of UAA - set to a password to enable
   localAdminPassword: ~
 
+  # Secret containing certificate for the Console
+  tlsSecretName:
+
+  autoRegisterCF: ~
+
+  statefulSetAnnotations: ~
+
+  statefulSetExtraLabels: ~
+
+  podAnnotations: ~
+
+  podExtraLabels: ~
+
+  
 images:
   console: stratos-console
   proxy: stratos-jetstream
-  postflight: stratos-postflight-job
   mariadb: stratos-mariadb
+  configInit: stratos-config-init
 
 # Specify which storage class should be used for PVCs
 #storageClass: default
-#consoleCert: |
-#    -----BEGIN CERTIFICATE-----
-#   MIIDXTCCAkWgAwIBAgIJAJooOiQWl1v1MA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
-#   ...
-#    -----END CERTIFICATE-----
-#consoleCertKey: |
-#    -----BEGIN PRIVATE KEY-----
-#    MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkdgEAAoIBAQDV9+ySh0xZzM41
-#    ...
-#    -----END PRIVATE KEYE-----
-# MariaDB chart configuration
+
+# Database configuration
 mariadb:
-  # Only required for creating the databases
-  mariadbRootPassword: changeme
-  adminUser: root
-  # Credentials for user
-  mariadbUser: console
-  mariadbPassword: changeme
-  mariadbDatabase: console
-  usePassword: true
+  # Whether or not to use an external database in place of the in-build MariaDB
+  external: false
+  database: console
+  user: console
+  # Leave password blank to auto-generate
+  userPassword:
+  # Leave password blank to auto-generate (not needed for external database)
+  rootPassword:
+
+  # DB Host (when using an external database)
+  host:
+
+  # Override port (default 3306) (when using an external database)
+  port:
+
+  # Override DB type - default is mysql
+  type:
+
   resources:
     requests:
       memory: 256Mi
@@ -115,16 +124,17 @@ uaa:
   protocol: https://
   port: 
   host: 
-  consoleClient:  
+  consoleClient: 
   consoleClientSecret: 
   consoleAdminIdentifier: 
   skipSSLValidation: false
+
 # SCF values compatability 
 env:
   DOMAIN:
   UAA_HOST: 
   UAA_PORT: 2793
-  # UAA Zone (namespace cf ias deployed to when deployed to Kubernetes)
+  # UAA Zone (namespace cf is deployed to when deployed to Kubernetes)
   UAA_ZONE: scf
 
   # SMTP Settings for Email Sending (User Invites)
@@ -158,7 +168,16 @@ kube:
     username:
     password:
     email: default
+
+# ================================================================================
+# Values below are for internal use only - do not use
+# ================================================================================
+
+autoCleanup: false
+
 services:
   loadbalanced: false
-metrics:
-  enabled: false
+
+# useLb is deprecated - use console.service.type
+useLb: false
+

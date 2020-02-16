@@ -2,8 +2,8 @@ import { HttpRequest } from '@angular/common/http';
 import { combineLatest, Observable, of, range } from 'rxjs';
 import { map, mergeMap, reduce } from 'rxjs/operators';
 
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import { PaginatedAction } from '../../types/pagination.types';
 import {
   ActionDispatcher,
@@ -116,7 +116,7 @@ export class PaginationPageIterator<R = any, E = any> {
           this.getValidNumber(totalPages),
           this.getValidNumber(totalResults)
         ).pipe(
-          map(([initialRequestResponse]) => [initialRequestResponse]),
+          map(([initialRequestResponse, othersResponse]) => [initialRequestResponse, ...othersResponse]),
           map(responsePages => this.reducePages(responsePages)),
         );
       })
