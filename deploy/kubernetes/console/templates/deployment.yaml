@@ -69,6 +69,8 @@ spec:
         imagePullPolicy: {{.Values.imagePullPolicy}}
         name: proxy
         env:
+        - name: STRATOS_HELM_RELEASE
+          value: "{{ .Release.Name }}"
         - name: DB_USER
           valueFrom:
             secretKeyRef:

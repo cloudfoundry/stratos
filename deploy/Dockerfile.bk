@@ -13,7 +13,6 @@ RUN chmod +x /srv/jetstream
 
 # use --target=prod-build to build a backend image for Kubernetes
 FROM splatform/stratos-bk-base:leap15_1 as prod-build
-RUN zypper in -y curl
 COPY deploy/containers/proxy/entrypoint.sh /entrypoint.sh
 COPY /deploy/tools/generate_cert.sh /generate_cert.sh
 COPY --from=common-build /srv /srv
