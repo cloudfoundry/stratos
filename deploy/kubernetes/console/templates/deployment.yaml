@@ -255,7 +255,7 @@ spec:
           value: {{ default "false" .Values.console.techPreview | quote }}
         readinessProbe:
           httpGet:
-            path: /pp/v1/version
+            path: /pp/v1/ping
             scheme: HTTPS
             port: 3003
         ports:
