@@ -28,6 +28,7 @@ NO_PUSH="true"
 DOCKER_REG_DEFAULTS="true"
 CHART_ONLY="false"
 ADD_GITHASH_TO_TAG="true"
+HAS_CUSTOM_BUILD="false"
 
 while getopts ":ho:r:t:Tclb:Opcn" opt; do
   case $opt in
@@ -132,6 +133,11 @@ __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 STRATOS_PATH=${__DIRNAME}/../../
 source ${STRATOS_PATH}/deploy/common-build.sh
 
+if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/custom-build.sh" ]; then
+  source "${STRATOS_PATH}/custom-src/deploy/kubernetes/custom-build.sh"
+  HAS_CUSTOM_BUILD="true"
+fi
+
 function patchAndPushImage {
   NAME=${1}
   DOCKER_FILE=${2}
@@ -185,7 +191,6 @@ if [ "${ADD_GITHASH_TO_TAG}" == "true" ]; then
   updateTagForRelease
 fi
 
-
 if [ "${CHART_ONLY}" == "false" ]; then
 
   # Build all of the components that make up the Console
@@ -204,9 +209,10 @@ if [ "${CHART_ONLY}" == "false" ]; then
   log "-- Building/publishing the runtime container image for the Console web server (frontend)"
   patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
 
-  # Build and push an image for the Helm Repo Sync Tool
-  log "-- Building/publishing Monocular Chart Repo"
-  patchAndPushImage stratos-chartsync Dockerfile "${STRATOS_PATH}/src/jetstream/plugins/monocular/chart-repo"
+  # Build any custom images added by a fork
+  if [ "${HAS_CUSTOM_BUILD}" == "true" ]; then
+    custom_image_build
+  fi
 fi
 
 log "-- Building Helm Chart"
