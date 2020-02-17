@@ -33,10 +33,6 @@ case $1 in
 
     cp -r $CONFIG_DIR/* /var/vcap/packages/backend/
 
-    <% if p('stratos_ui.backend.use_mysql') == true %>
-    cp -f $CONFIG_DIR/dbconf.yml /var/vcap/packages/backend/deploy/db/dbconf.yml
-    <% end %>
-
     cd /var/vcap/packages/backend/
     
     chmod +x portal-proxy

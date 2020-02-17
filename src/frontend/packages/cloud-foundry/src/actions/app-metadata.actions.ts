@@ -1,15 +1,11 @@
+import { HttpRequest } from '@angular/common/http';
+
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction, RequestEntityLocation } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
-import {
-  appEnvVarsEntityType,
-  applicationEntityType,
-  appStatsEntityType,
-  appSummaryEntityType,
-} from '../cf-entity-types';
+import { appEnvVarsEntityType, applicationEntityType, appStatsEntityType, appSummaryEntityType } from '../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
-import { HttpRequest } from '@angular/common/http';
 
 export enum AppMetadataTypes {
   STATS,
@@ -67,7 +63,7 @@ export class GetAppEnvVarsAction extends CFStartAction implements PaginatedActio
     '[App Metadata] EnvVars success',
     '[App Metadata] EnvVars failed',
   ];
-  flattenPagination: false;
+  flattenPagination = false;
   initialParams = {
     'order-direction': 'desc',
     'order-direction-field': 'name',
