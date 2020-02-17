@@ -120,7 +120,7 @@ else
     "type": "Opaque",
     "metadata": {
       "name": "@@NAME@@",
-      labels: {
+      "labels": {
         "stratos-helm-resource": "@@NAME@@",
         "app.kubernetes.io/name": "stratos",
         "app.kubernetes.io/instance": "@@RELEASE_NAME@@"
@@ -201,7 +201,7 @@ else
       "type": "kubernetes.io/tls",
       "metadata": {
         "name": "@@NAME@@",
-        labels: {
+        "labels": {
           "stratos-helm-resource": "@@NAME@@",
           "app.kubernetes.io/name": "stratos",
           "app.kubernetes.io/instance": "@@RELEASE_NAME@@"
