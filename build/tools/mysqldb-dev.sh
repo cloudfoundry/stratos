@@ -41,15 +41,6 @@ rm dockerize
 echo "Just waiting a few seconds for the DB to come online ..."
 docker exec -t ${ID} /dockerize -wait file:///var/run/mysql/mysql.sock -timeout 1m
 
-echo "Database ready"
 docker exec -t ${ID} /init.sh
 
-mkdir -p ${STRATOS_PATH}/src/jetstream/db
-cp ${STRATOS_PATH}/deploy/db/dbconf.yml ${STRATOS_PATH}/src/jetstream/db
-
-if [ -f ${STRATOS_PATH}/src/jetstream/jetstream ]; then
-  ${STRATOS_PATH}/src/jetstream/jetstream --env=mariadb-dev up
-else
-  echo "Build the Stratos backend and run db migrations with:"
-  echo "  ./jetstream --env=mariadb-local up"
-fi
+echo "Database ready"
