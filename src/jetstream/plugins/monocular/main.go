@@ -24,7 +24,7 @@ const (
 	fdbHostPortEnvVar = "FDBDOCLAYER_PORT"
 	//MY_CONSOLE_CHARTREPO_PORT=tcp://10.108.171.246:8080
 	syncServerHostPortEnvVar = "CHARTREPO_PORT"
-	caCertEnvVar             = "MONOCULAR_CA_PATH"
+	caCertEnvVar             = "MONOCULAR_CA_CRT_PATH"
 	tlsKeyEnvVar             = "MONOCULAR_KEY_PATH"
 	TLSCertEnvVar            = "MONOCULAR_CRT_PATH"
 )
