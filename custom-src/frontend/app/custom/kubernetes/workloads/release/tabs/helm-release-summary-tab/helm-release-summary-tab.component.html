@@ -56,11 +56,22 @@
       </app-tile-grid>
 
       <app-metadata-item class="chart-details__item" label="All Resources"></app-metadata-item>
-      <div *ngIf="resources$ | async as resources" class="grid">
-        <app-card-number-metric *ngFor="let res of resources" label="{{ res.label }}" icon="{{ res.icon.name }}"
-          iconFont="{{ res.icon.font }}" value="{{ res.count }}">
-        </app-card-number-metric>
+      <div *ngIf="hasAllResources$ | async; else stillLoadingResources">
+        <div *ngIf="resources$ | async as resources" class="grid">
+          <app-card-number-metric *ngFor="let res of resources" label="{{ res.label }}" icon="{{ res.icon.name }}"
+            iconFont="{{ res.icon.font }}" value="{{ res.count }}">
+          </app-card-number-metric>
+        </div>
       </div>
+      <ng-template #stillLoadingResources>
+        <div class="resources__loading">
+          <div class="resources__loading__content">
+            Updating Resource Information
+            <mat-progress-bar class="" [color]="'primary'" mode="indeterminate">
+            </mat-progress-bar>
+          </div>
+        </div>
+      </ng-template>
     </div>
     <ng-template #loadingResources>
       <div class="resources__loading">
