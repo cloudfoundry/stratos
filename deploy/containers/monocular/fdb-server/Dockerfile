@@ -19,7 +19,7 @@
 # limitations under the License.
 #
 
-FROM splatform/stratos-bk-base:leap15_1
+FROM splatform/stratos-bk-build-base:leap15_1 as builder
 
 # Install dependencies
 
@@ -29,42 +29,39 @@ FROM splatform/stratos-bk-base:leap15_1
 # 	rm -r /var/lib/apt/lists/*
 
 # NOTE: Dependencies are in the base image
-# TODO: Add bind-utils to base image
-# curl is already in our base image
-
-# TODO: Can remove this
-RUN zypper update -y && \
-    zypper in -y bind-utils && \
-    zypper in -y hostname && \
-    zypper in -y tar xz gzip
 
 # Install FoundationDB Binaries
 
 ARG FDB_VERSION=6.2.15
 ARG FDB_WEBSITE=https://www.foundationdb.org
 
-WORKDIR /var/fdb/tmp
-
-# /mnt/website folder is empty
-RUN mkdir -p /mnt/website
-# ADD website /mnt/website
-# RUN ls -l /mnt/website
-
+USER root
+WORKDIR /home/stratos/tmp
+WORKDIR /home/stratos
+RUN pwd && ls -al
 RUN curl $FDB_WEBSITE/downloads/$FDB_VERSION/linux/fdb_$FDB_VERSION.tar.gz -o fdb_$FDB_VERSION.tar.gz && \
 	tar -xzf fdb_$FDB_VERSION.tar.gz --strip-components=1 && \
 	rm fdb_$FDB_VERSION.tar.gz && \
 	chmod u+x fdbbackup fdbcli fdbdr fdbmonitor fdbrestore fdbserver backup_agent dr_agent && \
-	mv fdbbackup fdbcli fdbdr fdbmonitor fdbrestore fdbserver backup_agent dr_agent /usr/bin && \
-	rm -r /var/fdb/tmp
+	mv fdbbackup fdbcli fdbdr fdbmonitor fdbrestore fdbserver backup_agent dr_agent /home/stratos/tmp
+
+
+# Main container
+FROM splatform/stratos-bk-base:leap15_1
 
 WORKDIR /var/fdb
 
 # Install FoundationDB Client Libraries
 
+ARG FDB_VERSION=6.2.15
 ARG FDB_ADDITIONAL_VERSIONS="5.1.7"
+ARG FDB_WEBSITE=https://www.foundationdb.org
+
+COPY --from=builder /home/stratos/tmp /usr/bin
 
 COPY download_multiversion_libraries.bash scripts/
 
+RUN mkdir -p /mnt/website
 RUN curl $FDB_WEBSITE/downloads/$FDB_VERSION/linux/libfdb_c_$FDB_VERSION.so -o /usr/lib/libfdb_c.so && \
 	bash scripts/download_multiversion_libraries.bash $FDB_WEBSITE $FDB_ADDITIONAL_VERSIONS && \
 	rm -rf /mnt/website
