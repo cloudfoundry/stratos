@@ -21,7 +21,7 @@ const (
 	foundationDBURLEnvVar = "HELM_FDB_URL"
 	syncServerURLEnvVar   = "HELM_SYNC_SERVER_URL"
 	// e.g. MY_CONSOLE_FDBDOCLAYER_FDBDOCLAYER_PORT=tcp://10.105.215.71:27016
-	fdbHostPortEnvVar = "FDBDOCLAYER_FDBDOCLAYER_PORT"
+	fdbHostPortEnvVar = "FDBDOCLAYER_PORT"
 	//MY_CONSOLE_CHARTREPO_PORT=tcp://10.108.171.246:8080
 	syncServerHostPortEnvVar = "CHARTREPO_PORT"
 	caCertEnvVar             = "MONOCULAR_CA_PATH"
@@ -65,10 +65,16 @@ func (m *Monocular) Init() error {
 }
 
 func (m *Monocular) configure() error {
+
+	log.Debugf("Looking up kubeReleaseNameEnvVar: %v", kubeReleaseNameEnvVar)
 	if releaseName, ok := m.portalProxy.Env().Lookup(kubeReleaseNameEnvVar); ok {
 		// We are deployed in Kubernetes
 		releaseNameEnvVarPrefix := getReleaseNameEnvVarPrefix(releaseName)
+		log.Debugf("Release name: %v, releaseNameEnvVarPrefix: %v", releaseName, releaseNameEnvVarPrefix)
+		val, _ := m.portalProxy.Env().Lookup(fdbHostPortEnvVar)
+		log.Debugf("fdbHostPortEnvVar lookup: %v", val)
 		if url, ok := m.portalProxy.Env().Lookup(fmt.Sprintf("%s_%s", releaseNameEnvVarPrefix, fdbHostPortEnvVar)); ok {
+			log.Debugf("URL: %v", url)
 			m.FoundationDBURL = strings.ReplaceAll(url, "tcp://", "mongodb://")
 		}
 		if url, ok := m.portalProxy.Env().Lookup(fmt.Sprintf("%s_%s", releaseNameEnvVarPrefix, syncServerHostPortEnvVar)); ok {
