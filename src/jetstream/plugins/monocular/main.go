@@ -57,7 +57,10 @@ func (m *Monocular) Init() error {
 	fdbURL := m.FoundationDBURL
 	fDB := "monocular-plugin"
 	debug := false
-	m.ConfigureChartSVC(&fdbURL, &fDB, caCertEnvVar, TLSCertEnvVar, tlsKeyEnvVar, &debug)
+	caCertPath, _ := m.portalProxy.Env().Lookup(caCertEnvVar)
+	TLSCertPath, _ := m.portalProxy.Env().Lookup(TLSCertEnvVar)
+	tlsKeyPath, _ := m.portalProxy.Env().Lookup(tlsKeyEnvVar)
+	m.ConfigureChartSVC(&fdbURL, &fDB, caCertPath, TLSCertPath, tlsKeyPath, &debug)
 	m.chartSvcRoutes = chartsvc.SetupRoutes()
 	m.InitSync()
 	m.syncOnStartup()
@@ -66,15 +69,12 @@ func (m *Monocular) Init() error {
 
 func (m *Monocular) configure() error {
 
-	log.Debugf("Looking up kubeReleaseNameEnvVar: %v", kubeReleaseNameEnvVar)
 	if releaseName, ok := m.portalProxy.Env().Lookup(kubeReleaseNameEnvVar); ok {
 		// We are deployed in Kubernetes
 		releaseNameEnvVarPrefix := getReleaseNameEnvVarPrefix(releaseName)
-		log.Debugf("Release name: %v, releaseNameEnvVarPrefix: %v", releaseName, releaseNameEnvVarPrefix)
-		val, _ := m.portalProxy.Env().Lookup(fdbHostPortEnvVar)
-		log.Debugf("fdbHostPortEnvVar lookup: %v", val)
 		if url, ok := m.portalProxy.Env().Lookup(fmt.Sprintf("%s_%s", releaseNameEnvVarPrefix, fdbHostPortEnvVar)); ok {
-			log.Debugf("URL: %v", url)
+			//TODO kate - fetch hostname/port dynamically here (We need the hostname to match the server certificate)
+			url = fmt.Sprintf("%s%s-%s", "tcp://", releaseName, "fdbdoclayer:27016")
 			m.FoundationDBURL = strings.ReplaceAll(url, "tcp://", "mongodb://")
 		}
 		if url, ok := m.portalProxy.Env().Lookup(fmt.Sprintf("%s_%s", releaseNameEnvVarPrefix, syncServerHostPortEnvVar)); ok {
