@@ -254,10 +254,10 @@ spec:
         - name: ENABLE_TECH_PREVIEW
           value: {{ default "false" .Values.console.techPreview | quote }}
         readinessProbe:
-          tcpSocket:
+          httpGet:
+            path: /pp/v1/version
+            scheme: HTTPS
             port: 3003
-          initialDelaySeconds: 3
-          periodSeconds: 3
         ports:
         - containerPort: 3003
           name: proxy
