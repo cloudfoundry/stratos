@@ -714,6 +714,14 @@ func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeo
 	httpClientMutatingSkipSSL.Timeout = time.Duration(timeoutMutating) * time.Second
 }
 
+func echoShouldNotLog(ec echo.Context) bool {
+	// Don't log readiness probes
+	if ec.Request().RequestURI == "/pp/v1/ping" {
+		return true
+	}
+	return false
+}
+
 func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool) error {
 	log.Debug("start")
 	e := echo.New()
@@ -729,6 +737,8 @@ func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware b
 			`Method:"${method}" Path:"${path}" Status:${status} Latency:${latency_human} ` +
 			`Bytes-In:${bytes_in} Bytes-Out:${bytes_out}` + "\n",
 	}
+	customLoggerConfig.Skipper = echoShouldNotLog
+
 	e.Use(middleware.LoggerWithConfig(customLoggerConfig))
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -872,6 +882,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// Version info
 	pp.GET("/v1/version", p.getVersions)
+
+	// Ping - returns version (but is not logged)
+	pp.GET("/v1/ping", p.getVersions)
 
 	// All routes in the session group need the user to be authenticated
 	sessionGroup := pp.Group("/v1")

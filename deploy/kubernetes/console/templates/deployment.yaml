@@ -258,8 +258,6 @@ spec:
             path: /pp/v1/ping
             scheme: HTTPS
             port: 3003
-          initialDelaySeconds: 3
-          periodSeconds: 3
         ports:
         - containerPort: 3003
           name: proxy
