@@ -266,10 +266,10 @@ spec:
         - name: HELM_SYNC_SERVER_URL
           value: "http://{{ .Release.Name }}-{{ .Values.chartrepo.service.name }}:{{ .Values.chartrepo.service.port }}"
         readinessProbe:
-          tcpSocket:
+          httpGet:
+            path: /pp/v1/ping
+            scheme: HTTPS
             port: 3003
-          initialDelaySeconds: 3
-          periodSeconds: 3
         ports:
         - containerPort: 3003
           name: proxy
@@ -326,3 +326,9 @@ spec:
           secretName: {{ template "fullname" . }}-fdbdoclayer-certs
       {{- end }}
 
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
