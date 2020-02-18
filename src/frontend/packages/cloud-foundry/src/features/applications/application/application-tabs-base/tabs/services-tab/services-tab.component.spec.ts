@@ -4,14 +4,13 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   ApplicationStateService,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
-import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   generateTestApplicationServiceProvider,
 } from '../../../../../../../../core/test-framework/application-service-helper';
-import {
-  generateCfBaseTestModules,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ServiceActionHelperService } from '../../../../../../shared/data-services/service-action-helper.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { ServicesTabComponent } from './services-tab.component';
 
@@ -29,7 +28,8 @@ describe('ServicesTabComponent', () => {
         ApplicationEnvVarsHelper,
         ApplicationStateService,
         PaginationMonitorFactory,
-        DatePipe
+        DatePipe,
+        ServiceActionHelperService
       ]
     })
       .compileComponents();

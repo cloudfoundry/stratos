@@ -1,12 +1,15 @@
 import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { CfCellHelper } from '../../../../../../core/src/features/cloud-foundry/cf-cell.helpers';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  CfCellsListConfigService,
-} from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
+import { AppState } from '../../../../../../store/src/app-state';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
+import { CfCellsListConfigService } from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
 import { getActiveRouteCfCellProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+
 
 @Component({
   selector: 'app-cloud-foundry-cells',
@@ -23,7 +26,12 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 export class CloudFoundryCellsComponent {
   hasCellMetrics$: Observable<boolean>;
 
-  constructor(cfEndpointService: CloudFoundryEndpointService) {
-    this.hasCellMetrics$ = cfEndpointService.hasCellMetrics(cfEndpointService.cfGuid);
+  constructor(
+    cfEndpointService: CloudFoundryEndpointService,
+    store: Store<AppState>,
+    paginationMonitorFactory: PaginationMonitorFactory
+  ) {
+    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
+    this.hasCellMetrics$ = cellHelper.hasCellMetrics(cfEndpointService.cfGuid);
   }
 }

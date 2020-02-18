@@ -2,8 +2,8 @@ import { HttpRequest } from '@angular/common/http';
 import { combineLatest, Observable, of, range } from 'rxjs';
 import { map, mergeMap, reduce } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import { PaginatedAction } from '../../types/pagination.types';
 import {
   ActionDispatcher,
@@ -35,7 +35,7 @@ export class PaginationPageIterator<R = any, E = any> {
   private makeRequest(httpRequest: HttpRequest<JetstreamResponse<R>>) {
     return this.httpClient.pipelineRequest<JetstreamResponse<R>>(
       httpRequest,
-      entityCatalogue.getEndpoint(this.action.endpointType, this.action.subType),
+      entityCatalog.getEndpoint(this.action.endpointType, this.action.subType),
       this.action.endpointGuid,
       this.action.externalRequest
     );
@@ -90,7 +90,7 @@ export class PaginationPageIterator<R = any, E = any> {
       // We're maxed so only respond with the first page of results.
       if (maxCount < totalResults) {
         const { entityType, endpointType, paginationKey, __forcedPageEntityConfig__ } = action;
-        const forcedEntityKey = entityCatalogue.getEntityKey(__forcedPageEntityConfig__);
+        const forcedEntityKey = entityCatalog.getEntityKey(__forcedPageEntityConfig__);
         this.actionDispatcher(
           new UpdatePaginationMaxedState(maxCount, totalResults, entityType, endpointType, paginationKey, forcedEntityKey)
         );
@@ -116,7 +116,7 @@ export class PaginationPageIterator<R = any, E = any> {
           this.getValidNumber(totalPages),
           this.getValidNumber(totalResults)
         ).pipe(
-          map(([initialRequestResponse]) => [initialRequestResponse]),
+          map(([initialRequestResponse, othersResponse]) => [initialRequestResponse, ...othersResponse]),
           map(responsePages => this.reducePages(responsePages)),
         );
       })

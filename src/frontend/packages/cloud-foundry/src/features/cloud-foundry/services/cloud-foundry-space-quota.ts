@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { IApp, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';
-import { EntityMonitorFactory } from '../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';

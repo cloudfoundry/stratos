@@ -3,15 +3,13 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
 import { IApp, IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityService } from '../../../../../../core/src/core/entity-service';
+import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import {
   getActionsFromExtensions,
   getTabsFromExtensions,
@@ -32,15 +30,17 @@ import { IHeaderBreadcrumb } from '../../../../../../core/src/shared/components/
 import { GitSCMService, GitSCMType } from '../../../../../../core/src/shared/data-services/scm/scm.service';
 import { ENTITY_SERVICE } from '../../../../../../core/src/shared/entity.tokens';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../../../store/src/entity-service';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { UpdateExistingApplication } from '../../../../actions/application.actions';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { ApplicationService } from '../../application.service';
 import { ApplicationPollingService } from './application-polling.service';
-import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
-import { UpdateExistingApplication } from '../../../../actions/application.actions';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -72,8 +72,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private favoritesConfigMapper: FavoritesConfigMapper,
     private appPollingService: ApplicationPollingService
   ) {
-    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-    this.schema = catalogueEntity.getSchema();
+    const catalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    this.schema = catalogEntity.getSchema();
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
       withLatestFrom(

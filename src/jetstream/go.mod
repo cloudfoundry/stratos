@@ -35,7 +35,7 @@ require (
 	github.com/gorilla/context v1.1.1
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.1.3
-	github.com/gorilla/websocket v1.4.0
+	github.com/gorilla/websocket v1.4.1
 	github.com/govau/cf-common v0.0.7
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
@@ -50,12 +50,15 @@ require (
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
-	github.com/mattn/go-sqlite3 v1.10.0
+	github.com/mattn/go-sqlite3 v1.13.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/moby/moby v1.13.1 // indirect
+	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/nwmac/sqlitestore v0.0.0-20180824125213-7d2ab221fb3f
+	github.com/onsi/ginkgo v1.11.0 // indirect
+	github.com/onsi/gomega v1.8.1 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/satori/go.uuid v1.2.0
@@ -72,7 +75,7 @@ require (
 	google.golang.org/appengine v1.5.0 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.0.0-00010101000000-000000000000
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.8
 )
 
 replace (

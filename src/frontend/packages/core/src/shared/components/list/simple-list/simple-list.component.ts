@@ -1,10 +1,11 @@
 import { Component, OnInit, Input, ChangeDetectorRef, NgZone, ComponentFactoryResolver, ViewChild, Injector } from '@angular/core';
-import { StratosCatalogueEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
+import { StratosCatalogEntity } from '../../../../../../store/src/entity-catalog/entity-catalog-entity';
 import { ListComponent } from '../list.component';
 import { ListConfig, ListViewTypes } from '../list.component.types';
 import { ListHostDirective } from './list-host.directive';
-import { CatalogueEntityDrivenListDataSource } from './entity-catalogue-datasource';
+import { CatalogEntityDrivenListDataSource } from './entity-catalog-datasource';
 import { Store } from '@ngrx/store';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-simple-list',
@@ -17,9 +18,9 @@ import { Store } from '@ngrx/store';
 export class SimpleListComponent implements OnInit {
 
   @Input()
-  public catalogueEntity: StratosCatalogueEntity;
+  public catalogEntity: StratosCatalogEntity;
 
-  @ViewChild(ListHostDirective)
+  @ViewChild(ListHostDirective, { static: true })
   public listHost: ListHostDirective;
 
   private listConfig: ListConfig<any>;
@@ -29,17 +30,19 @@ export class SimpleListComponent implements OnInit {
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
     private injector: Injector,
-    private store: Store<any>
+    private store: Store<any>,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ListComponent);
-
+    const urlParams = this.route.snapshot.params;
+    const endpointGuid = urlParams.endpointId || urlParams.endpointGuid;
     const viewContainerRef = this.listHost.viewContainerRef;
     viewContainerRef.clear();
-    const dataSource = new CatalogueEntityDrivenListDataSource<any>(
-      this.catalogueEntity,
-      {},
+    const dataSource = new CatalogEntityDrivenListDataSource<any>(
+      this.catalogEntity,
+      endpointGuid ? { endpointGuid } : {},
       this.store,
     );
     const componentRef = viewContainerRef.createComponent(

@@ -6,13 +6,14 @@ import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';
+import { GeneralAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../core/core.module';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { SharedModule } from '../../shared.module';
 import { ApplicationStateService } from '../application-state/application-state.service';
 import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
@@ -20,7 +21,6 @@ import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers'
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
-import { InternalAppState, GeneralAppState } from '../../../../../store/src/app-state';
 
 class MockedNgZone {
   run = fn => fn();
@@ -43,6 +43,7 @@ describe('ListComponent', () => {
         getInitialised: () => null,
         getMultiActions: () => null,
         getMultiFiltersConfigs: () => null,
+        getFilters: () => null,
         getSingleActions: () => null,
         isLocal: false,
         pageSizeOptions: [1],
@@ -153,6 +154,7 @@ describe('ListComponent', () => {
     describe('Header', () => {
       it('Nothing enabled', () => {
         component.config.getMultiFiltersConfigs = () => [];
+        component.config.getFilters = () => [];
         component.config.enableTextFilter = false;
         component.config.viewType = ListViewTypes.CARD_ONLY;
         component.config.defaultView = 'card' as ListView;
@@ -210,6 +212,19 @@ describe('ListComponent', () => {
             }
           ];
         };
+        component.config.getFilters = () => ([
+          {
+            default: true,
+            key: 'a',
+            label: 'A',
+            placeholder: 'Filter by A'
+          },
+          {
+            key: 'b',
+            label: 'B',
+            placeholder: 'Filter by B'
+          }
+        ]);
         component.config.enableTextFilter = true;
         component.config.viewType = ListViewTypes.CARD_ONLY;
         component.config.defaultView = 'card' as ListView;

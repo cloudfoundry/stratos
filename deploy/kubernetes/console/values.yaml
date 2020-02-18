@@ -71,6 +71,17 @@ console:
   # Secret containing certificate for the Console
   tlsSecretName:
 
+  autoRegisterCF: ~
+
+  statefulSetAnnotations: ~
+
+  statefulSetExtraLabels: ~
+
+  podAnnotations: ~
+
+  podExtraLabels: ~
+
+  
 images:
   console: stratos-console
   proxy: stratos-jetstream
@@ -82,6 +93,7 @@ images:
 
 # Database configuration
 mariadb:
+  # Whether or not to use an external database in place of the in-build MariaDB
   external: false
   database: console
   user: console
@@ -90,10 +102,10 @@ mariadb:
   # Leave password blank to auto-generate (not needed for external database)
   rootPassword:
 
-  # DB Host
+  # DB Host (when using an external database)
   host:
 
-  # Override port (default 3306)
+  # Override port (default 3306) (when using an external database)
   port:
 
   # Override DB type - default is mysql
@@ -158,11 +170,14 @@ kube:
     email: default
 
 # ================================================================================
-# Values below are for internal use only for SCF compatability - subject to change
+# Values below are for internal use only - do not use
 # ================================================================================
+
+autoCleanup: false
 
 services:
   loadbalanced: false
 
 # useLb is deprecated - use console.service.type
 useLb: false
+

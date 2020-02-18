@@ -14,7 +14,7 @@ import {
 import {
   ApplicationStateService,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
-import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { TableCellAppStatusComponent } from './table-cell-app-status.component';
 

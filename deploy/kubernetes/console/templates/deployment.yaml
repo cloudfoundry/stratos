@@ -1,8 +1,27 @@
 ---
+{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
+apiVersion: apps/v1
+{{- else }}
 apiVersion: apps/v1beta1
+{{- end }}
 kind: StatefulSet
 metadata:
   name: stratos
+{{- if .Values.console.statefulSetAnnotations }}
+  annotations:
+{{ toYaml .Values.console.statefulSetAnnotations | indent 4 }}
+{{- end }}
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    app: "{{ .Release.Name }}"
+    component: stratos
+{{- if .Values.console.statefulSetExtraLabels }}
+{{ toYaml .Values.console.statefulSetExtraLabels | nindent 4 }}
+{{- end}}        
 spec:
   serviceName: stratos
   replicas: 1
@@ -12,6 +31,10 @@ spec:
       app.kubernetes.io/component: "stratos"
   template:
     metadata:
+{{- if .Values.console.podAnnotations }}
+      annotations:
+{{ toYaml .Values.console.podAnnotations | indent 8 }}
+{{- end }}
       labels:
         app.kubernetes.io/name: "stratos"
         app.kubernetes.io/instance: "{{ .Release.Name }}"
@@ -20,6 +43,9 @@ spec:
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         app: "{{ .Release.Name }}"
         component: stratos
+        {{- if .Values.console.podExtraLabels}}
+        {{ toYaml .Values.console.podExtraLabels | nindent 8 }}
+        {{- end}}        
     spec:
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
@@ -43,6 +69,8 @@ spec:
         imagePullPolicy: {{.Values.imagePullPolicy}}
         name: proxy
         env:
+        - name: STRATOS_HELM_RELEASE
+          value: "{{ .Release.Name }}"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -74,6 +102,8 @@ spec:
           value: "30"
         - name: HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS
           value: "120"
+        - name: HTTP_CLIENT_TIMEOUT_LONGRUNNING_IN_SECS
+          value: "600"
         - name: SKIP_TLS_VERIFICATION
           value: "false"
         - name: CONSOLE_PROXY_TLS_ADDRESS
@@ -129,6 +159,10 @@ spec:
             secretKeyRef:
               name: "{{ .Release.Name }}-secret"
               key: clientSecret
+        {{- if .Values.console.autoRegisterCF }}
+        - name: AUTO_REG_CF_URL
+          value: {{ .Values.console.autoRegisterCF }}
+        {{- end }}
         # Local admin user
         {{- if .Values.console.localAdminPassword }}
         - name: CONSOLE_ADMIN_SCOPE 
@@ -151,7 +185,7 @@ spec:
         {{- if or .Values.env.UAA_HOST .Values.env.DOMAIN }}  
         - name: UAA_ENDPOINT 
           value: {{ template "scfUaaEndpoint" . }}
-        {{- if .Values.env.DOMAIN }}  
+        {{- if and .Values.env.DOMAIN (not .Values.console.autoRegisterCF) }}
         - name: AUTO_REG_CF_URL
           value: https://api.{{.Values.env.DOMAIN}}
         {{- end }}
@@ -219,6 +253,11 @@ spec:
           value: {{ default "" .Values.console.userInviteSubject | quote }}
         - name: ENABLE_TECH_PREVIEW
           value: {{ default "false" .Values.console.techPreview | quote }}
+        readinessProbe:
+          httpGet:
+            path: /pp/v1/ping
+            scheme: HTTPS
+            port: 3003
         ports:
         - containerPort: 3003
           name: proxy
@@ -245,13 +284,13 @@ spec:
       volumes:
       - name: "{{ .Release.Name }}-encryption-key-volume"
         secret:
-          secretName: "{{ .Release.Name }}-key-{{ .Release.Revision }}"
+          secretName: "{{ .Release.Name }}-key"
       - name: "{{ .Release.Name }}-cert-volume"
         secret:
           {{- if .Values.console.tlsSecretName }}
           secretName: "{{ .values.console.tlsSecretName }}"
           {{- else }}
-          secretName: "{{ .Release.Name }}-cert-{{ .Release.Revision }}"
+          secretName: "{{ .Release.Name }}-cert"
           {{- end }}
       - name: "{{ .Release.Name }}-db-secret"
         secret:
@@ -264,3 +303,9 @@ spec:
         configMap:
           name: {{ .Values.console.templatesConfigMapName }}
       {{- end }}
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1

@@ -1,6 +1,6 @@
 import { HttpParams } from '@angular/common/http';
 
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
 import { InternalAppState } from '../../app-state';
 import { resultPerPageParam, resultPerPageParamDefault } from '../../reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
@@ -30,21 +30,10 @@ function setRequestParams(
 
 export function getPaginationParamsPipe(
   action: PaginatedAction,
-  catalogueEntity: StratosBaseCatalogueEntity,
-  appState: InternalAppState,
+  paginationState: PaginationEntityState,
 ): HttpParams {
   const params = setRequestParams(new HttpParams(), action.initialParams);
-
-  // Set params from store
-  const paginationState = selectPaginationState(
-    catalogueEntity.entityKey,
-    action.paginationKey,
-  )(appState);
   const paginationParams = getPaginationParams(paginationState);
-  // TODO We shouldn't be modifying this here as it is a unexpected side effect. #3977
-  action.pageNumber = paginationState
-    ? paginationState.currentPage
-    : 1;
   const paramsFromPagination = setRequestParams(params, paginationParams);
   if (!paramsFromPagination.has(resultPerPageParam)) {
     return paramsFromPagination.set(

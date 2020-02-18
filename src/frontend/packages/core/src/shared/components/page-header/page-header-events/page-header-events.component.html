@@ -1,9 +1,21 @@
 <div *ngIf="errorMessage$ | async as message" class="header-event--error">
-  <div [ngClass]="{'header-event--minimized' : eventMinimized$ | async}" class="header-event__outer">
+  <div class="header-event__outer">
     <span class="header-event">
-      <mat-icon class="header-event__error-icon">error</mat-icon>
-      <!-- <ng-container [ngTemplateOutlet]="eventIcon" [ngTemplateOutletContext]="{eventServerity: eventServerity}"></ng-container> -->
-      <div class="header-event__message-wrapper">{{ message }}</div><mat-icon (click)="toggleEvent()" class="header-event__minimize">{{ (eventMinimized$ | async) ? 'error' : 'close' }}</mat-icon>
+      <span class="header-event__error-message">
+        <mat-icon class="header-event__error-icon">error</mat-icon>
+        <div class="header-event__message-wrapper">{{ message }} -
+          <span *ngIf="!endpointId">
+            <a class="header-event__details-link" [routerLink]="['/events/endpoints']">view details</a>
+          </span>
+          <span *ngIf="endpointId">
+            <a class="header-event__details-link" [routerLink]="['/errors/', endpointId]">view details</a>
+          </span>
+        </div>
+      </span>
+      <!-- *ngIf="endpointId"  -->
+      <mat-icon class="header-event__error-dismiss" (click)="markEventsAsRead()">
+        clear
+      </mat-icon>
     </span>
   </div>
 </div>

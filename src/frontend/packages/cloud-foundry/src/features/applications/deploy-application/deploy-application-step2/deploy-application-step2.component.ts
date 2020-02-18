@@ -1,9 +1,11 @@
+import { HttpClient } from '@angular/common/http';
 import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   combineLatest as observableCombineLatest,
+  combineLatest,
   Observable,
   of as observableOf,
   Subscription,
@@ -25,7 +27,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cf-types';
 import {
   FetchBranchesForProject,
   FetchCommit,
@@ -38,28 +40,28 @@ import {
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { gitBranchesEntityType, gitCommitEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import {
+  selectDeployAppState,
   selectDeployBranchName,
   selectNewProjectCommit,
   selectPEProjectName,
   selectProjectExists,
   selectSourceType,
 } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
-import { GitAppDetails, SourceType } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
+import {
+  DeployApplicationState,
+  SourceType,
+} from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { GitCommit, GitRepo } from '../../../../../../cloud-foundry/src/store/types/git.types';
 import { GitBranch } from '../../../../../../cloud-foundry/src/store/types/github.types';
-import { entityCatalogue } from '../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityServiceFactory } from '../../../../../../core/src/core/entity-service-factory.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { GitSCM } from '../../../../../../core/src/shared/data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../../../core/src/shared/data-services/scm/scm.service';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { EntityInfo } from '../../../../../../store/src/types/api.types';
-import {
-  DEPLOY_TYPES_IDS,
-  getApplicationDeploySourceTypes,
-  getAutoSelectedDeployType,
-} from '../deploy-application-steps.types';
+import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -72,46 +74,60 @@ export class DeployApplicationStep2Component
   @Input() isRedeploy = false;
 
   commitInfo: GitCommit;
-  sourceTypes: SourceType[] = getApplicationDeploySourceTypes();
+  sourceTypes: SourceType[];
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
   sourceType$: Observable<SourceType>;
   INITIAL_SOURCE_TYPE = 0; // GitHub by default
-  repositoryBranches$: Observable<any>;
   validate: Observable<boolean>;
-  projectInfo$: Observable<GitRepo>;
-  commitSubscription: Subscription;
 
-  // ngModel Properties
-  sourceType: SourceType;
-  repositoryBranch: GitBranch = { name: null, commit: null };
-  repository: string;
   stepperText = 'Please specify the source';
-
-  // Git URL
-  gitUrl: string;
-  gitUrlBranchName: string;
 
   // Observables for source types
   sourceTypeGithub$: Observable<boolean>;
   sourceTypeNeedsUpload$: Observable<boolean>;
-
-  scm: GitSCM;
-
-  // We don't have any repositories to suggest initially - need user to start typing
-  suggestedRepos$: Observable<string[]>;
-
-  cachedSuggestions = {};
+  // tslint:disable-next-line:ban-types
+  canDeployType$: Observable<Boolean>;
+  isLoading$: Observable<boolean>;
 
   // Local FS data when file or folder upload
   // @Input('fsSourceData') fsSourceData;
 
-  @ViewChild('sourceSelectionForm') sourceSelectionForm: NgForm;
+  // ---- GIT ----------
+  repositoryBranches$: Observable<any>;
+
+  projectInfo$: Observable<GitRepo>;
+  commitSubscription: Subscription;
+
+  sourceType: SourceType;
+  repositoryBranch: GitBranch = { name: null, commit: null };
+  repository: string;
+
+  scm: GitSCM;
+
+  cachedSuggestions = {};
+
+  // We don't have any repositories to suggest initially - need user to start typing
+  suggestedRepos$: Observable<string[]>;
+
+  // Git URL
+  gitUrl: string;
+  gitUrlBranchName: string;
+  // --------------
+
+  // ---- Docker ----------
+  dockerAppName: string;
+  dockerImg: string;
+  dockerUsername: string;
+  // --------------
+
+  @ViewChild('sourceSelectionForm', { static: true }) sourceSelectionForm: NgForm;
   subscriptions: Array<Subscription> = [];
 
-  @ViewChild('fsChooser') fsChooser;
+  @ViewChild('fsChooser', { static: false }) fsChooser;
+
   public selectedSourceType: SourceType = null;
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.subscriptions.forEach(p => p.unsubscribe());
     if (this.commitSubscription) {
       this.commitSubscription.unsubscribe();
@@ -123,9 +139,12 @@ export class DeployApplicationStep2Component
     private store: Store<CFAppState>,
     route: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private scmService: GitSCMService
+    private scmService: GitSCMService,
+    private httpClient: HttpClient,
+    private appDeploySourceTypes: ApplicationDeploySourceTypes
   ) {
-    this.selectedSourceType = getAutoSelectedDeployType(route);
+    this.sourceTypes = appDeploySourceTypes.getTypes();
+    this.selectedSourceType = appDeploySourceTypes.getAutoSelectedType(route);
     if (this.selectedSourceType) {
       this.stepperText = this.selectedSourceType.helpText;
     }
@@ -133,23 +152,26 @@ export class DeployApplicationStep2Component
 
   onNext: StepOnNextFunction = () => {
     // Set the details based on which source type is selected
-    let details: GitAppDetails;
     if (this.sourceType.group === 'gitscm') {
-      details = {
+      this.store.dispatch(new SaveAppDetails({
         projectName: this.repository,
         branch: this.repositoryBranch,
         url: this.scm.getCloneURL(this.repository)
-      };
+      }, null));
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
-      details = {
+      this.store.dispatch(new SaveAppDetails({
         projectName: this.gitUrl,
         branch: {
           name: this.gitUrlBranchName
         }
-      };
+      }, null));
+    } else if (this.sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
+      this.store.dispatch(new SaveAppDetails(null, {
+        applicationName: this.dockerAppName,
+        dockerImage: this.dockerImg,
+        dockerUsername: this.dockerUsername,
+      }));
     }
-
-    this.store.dispatch(new SaveAppDetails(details));
     return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
   }
 
@@ -170,6 +192,51 @@ export class DeployApplicationStep2Component
       map(type => type.id === DEPLOY_TYPES_IDS.FOLDER || type.id === DEPLOY_TYPES_IDS.FILE)
     );
 
+    const setInitialSourceType$ = this.store.select(selectSourceType).pipe(
+      filter(p => !p),
+      first(),
+      tap(p => {
+        this.setSourceType(this.selectedSourceType || this.sourceTypes[this.INITIAL_SOURCE_TYPE]);
+        if (this.selectedSourceType) {
+          this.sourceType = this.selectedSourceType;
+        }
+      })
+    );
+
+    const cfGuid$ = this.store.select(selectDeployAppState).pipe(
+      filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails),
+      map((appDetail: DeployApplicationState) => appDetail.cloudFoundryDetails.cloudFoundry)
+    );
+
+    this.canDeployType$ = combineLatest([
+      cfGuid$,
+      this.sourceType$
+    ]).pipe(
+      filter(([cfGuid, sourceType]) => !!cfGuid && !!sourceType),
+      switchMap(([cfGuid, sourceType]) => this.appDeploySourceTypes.canDeployType(cfGuid, sourceType.id)),
+      publishReplay(1),
+      refCount()
+    );
+
+    this.subscriptions.push(setInitialSourceType$.subscribe());
+  }
+
+  setSourceType = (sourceType: SourceType) => {
+    if (sourceType.group === 'gitscm' || sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
+      this.setupForGit();
+    }
+
+    this.store.dispatch(new SetAppSourceDetails(sourceType));
+  }
+
+  ngAfterContentInit() {
+    this.validate = this.sourceSelectionForm.statusChanges.pipe(map(() => {
+      return this.sourceSelectionForm.valid || this.isRedeploy;
+    }));
+  }
+
+  /* Git ------------------*/
+  private setupForGit() {
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
       filter(p => !!p),
       map(p => (!!p.exists && !!p.data) ? p.data : null),
@@ -206,7 +273,7 @@ export class DeployApplicationStep2Component
         }),
         // Find the specific branch we're interested inS
         withLatestFrom(deployBranchName$),
-        filter(([branches, branchName]) => !!branchName),
+        filter(([, branchName]) => !!branchName),
         tap(([branches, branchName]) => {
           this.repositoryBranch = branches.find(
             branch => branch.name === branchName
@@ -229,7 +296,7 @@ export class DeployApplicationStep2Component
           this.store.dispatch(new SetBranch(branch));
           const commitSha = commit || branch.commit.sha;
           const entityID = projectInfo.full_name + '-' + commitSha;
-          const gitCommitEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
+          const gitCommitEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
           const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('get');
           const fetchCommitAction = fetchCommitActionBuilder(null, null, {
             scm: this.scm,
@@ -254,17 +321,6 @@ export class DeployApplicationStep2Component
 
     this.subscriptions.push(updateBranchAndCommit.subscribe());
 
-    const setInitialSourceType$ = this.store.select(selectSourceType).pipe(
-      filter(p => !p),
-      first(),
-      tap(p => {
-        this.setSourceType(this.selectedSourceType || this.sourceTypes[this.INITIAL_SOURCE_TYPE]);
-        if (this.selectedSourceType) {
-          this.sourceType = this.selectedSourceType;
-        }
-      })
-    );
-
     const setSourceTypeModel$ = this.store.select(selectSourceType).pipe(
       filter(p => !!p),
       tap(p => {
@@ -280,7 +336,7 @@ export class DeployApplicationStep2Component
             this.repositoryBranch = null;
             this.store.dispatch(new SetBranch(null));
             this.store.dispatch(new ProjectDoesntExist(''));
-            this.store.dispatch(new SaveAppDetails({ projectName: '', branch: null }));
+            this.store.dispatch(new SaveAppDetails({ projectName: '', branch: null }, null));
           }
           this.scm = newScm;
         }
@@ -295,7 +351,6 @@ export class DeployApplicationStep2Component
       })
     );
 
-    this.subscriptions.push(setInitialSourceType$.subscribe());
     this.subscriptions.push(setSourceTypeModel$.subscribe());
     this.subscriptions.push(setProjectName.subscribe());
 
@@ -304,7 +359,7 @@ export class DeployApplicationStep2Component
       startWith(''),
       pairwise(),
       filter(([oldName, newName]) => oldName !== newName),
-      switchMap(([oldName, newName]) => this.updateSuggestedRepositories(newName))
+      switchMap(([, newName]) => this.updateSuggestedRepositories(newName))
     );
   }
 
@@ -320,21 +375,15 @@ export class DeployApplicationStep2Component
 
     return observableTimer(500).pipe(
       take(1),
-      switchMap(() => this.scm.getMatchingRepositories(name)),
+      switchMap(() => this.scm.getMatchingRepositories(this.httpClient, name)),
       catchError(e => observableOf(null)),
       tap(suggestions => this.cachedSuggestions[cacheName] = suggestions)
     );
   }
 
-  setSourceType = (sourceType: SourceType) => this.store.dispatch(new SetAppSourceDetails(sourceType));
-
   updateBranchName(branch: GitBranch) {
     this.store.dispatch(new SetDeployBranch(branch.name));
   }
 
-  ngAfterContentInit() {
-    this.validate = this.sourceSelectionForm.statusChanges.pipe(map(() => {
-      return this.sourceSelectionForm.valid || this.isRedeploy;
-    }));
-  }
+
 }

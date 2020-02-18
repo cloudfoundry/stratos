@@ -37,6 +37,8 @@ func TestConsoleSetup(t *testing.T) {
 		envLookup := env.NewVarSet()
 		envLookup.AppendSource(console_config.ConfigLookup)
 		portal := &portalProxy{env: envLookup}
+		// Initalize for testing
+		portal.GetConfig().CanMigrateDatabaseSchema = true
 		err = console_config.MigrateSetupData(portal, configStore)
 		if err != nil {
 			t.Errorf("Could not migrate config settings: %v", err)

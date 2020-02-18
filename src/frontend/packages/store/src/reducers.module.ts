@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { ActionReducer, ActionReducerMap, StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { storeFreeze } from 'ngrx-store-freeze';
+
 import { localStorageSync } from 'ngrx-store-localstorage';
 
 import { environment } from '../../core/src/environments/environment';
@@ -36,7 +36,7 @@ export const appReducers = {
   endpoints: endpointsReducer,
   pagination: requestPaginationReducer,
   request: requestReducer,
-  // This is added as part of the entity catalogue module.
+  // This is added as part of the entity catalog module.
   // requestData,
   dashboard: dashboardReducer,
   actionHistory: actionHistoryReducer,
@@ -72,16 +72,15 @@ export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionRedu
   })(reducer);
 }
 const metaReducers = [localStorageSyncReducer];
-if (!environment.production) {
-  metaReducers.push(storeFreeze);
-  // if (environment.logEnableConsoleActions) {
-  //   metaReducers.push(logger);
-  // }
-}
+
 const storeModule = StoreModule.forRoot(
   appReducers,
   {
-    metaReducers
+    metaReducers,
+    runtimeChecks: {
+      strictStateImmutability: true,
+      strictActionImmutability: false
+    }
   }
 );
 const imports = environment.production ? [

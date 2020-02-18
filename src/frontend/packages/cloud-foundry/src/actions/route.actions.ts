@@ -1,5 +1,3 @@
-import { RequestOptions, URLSearchParams } from '@angular/http';
-
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
@@ -11,6 +9,7 @@ import {
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
+import { HttpRequest, HttpParams } from '@angular/common/http';
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';
@@ -45,24 +44,25 @@ export abstract class BaseRouteAction extends CFStartAction implements ICFAction
   actions: string[];
   entity = [cfEntityFactory(routeEntityType)];
   entityType = routeEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class CreateRoute extends BaseRouteAction {
   constructor(guid: string, endpointGuid: string, route: NewRoute) {
     super(guid, endpointGuid);
-    this.options = new RequestOptions();
-    this.options.url = 'routes';
-    this.options.method = 'post';
-    this.options.body = {
-      ...route
-    };
-    const isTCP = !route.host && route.port;
-    if (isTCP && route.port === -1) {
-      this.options.params = new URLSearchParams();
-      this.options.params.set('generate_port', 'true');
-      delete this.options.body.port;
-    }
+    const generatePort = (!route.host && route.port) && route.port === -1;
+    this.options = new HttpRequest<any>(
+      'POST',
+      'routes',
+      {
+        ...route,
+        port: generatePort ? undefined : route.port
+      }, {
+        params: new HttpParams(generatePort ? {
+          fromObject: { generate_port: 'true' }
+        } : {})
+      }
+    );
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
 }
@@ -77,12 +77,18 @@ export class DeleteRoute extends BaseRouteAction {
     public recursive: boolean = true
   ) {
     super(guid, endpointGuid, appGuid);
-    this.options = new RequestOptions();
-    this.options.url = `routes/${guid}`;
-    this.options.method = 'delete';
-    this.options.params = new URLSearchParams();
-    this.options.params.append('recursive', recursive ? 'true' : 'false');
-    this.options.params.append('async', async ? 'true' : 'false');
+    this.options = new HttpRequest(
+      'DELETE',
+      `routes/${guid}`,
+      {
+        params: new HttpParams({
+          fromObject: {
+            recursive: recursive ? 'true' : 'false',
+            async: async ? 'true' : 'false'
+          }
+        })
+      }
+    );
   }
   actions = [
     RouteEvents.DELETE,
@@ -103,10 +109,10 @@ export class UnmapRoute extends BaseRouteAction {
     public clearPaginationKey?: string,
   ) {
     super(routeGuid, endpointGuid, appGuid);
-    this.options = new RequestOptions();
-    this.options.url = `routes/${routeGuid}/apps/${appGuid}`;
-    this.options.method = 'delete';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'DELETE',
+      `routes/${routeGuid}/apps/${appGuid}`
+    );
   }
   actions = [
     RouteEvents.UNMAP_ROUTE,
@@ -129,14 +135,15 @@ export class GetAllRoutes extends CFStartAction implements PaginatedAction, Enti
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `routes`;
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      'routes'
+    );
     this.paginationKey = createEntityRelationPaginationKey('cf', this.endpointGuid);
   }
   entity = [cfEntityFactory(routeEntityType)];
   entityType = routeEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   actions = getActions('Routes', 'Fetch all');
   initialParams = {
     'results-per-page': 100,

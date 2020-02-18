@@ -2,32 +2,27 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { combineLatest, filter, map, switchMap } from 'rxjs/operators';
+import { combineLatest, map, switchMap } from 'rxjs/operators';
 
 import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { FetchApplicationMetricsAction } from '../../../../../../../cloud-foundry/src/actions/cf-metrics.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
-import {
-  CloudFoundryEndpointService,
-} from '../../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
 import { UtilsService } from '../../../../../../../core/src/core/utils.service';
+import { CfCellHelper } from '../../../../../../../core/src/features/cloud-foundry/cf-cell.helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
   getIntegerFieldSortFunction,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  IListAction,
-  IListConfig,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { IListAction, IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
+import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
@@ -199,10 +194,11 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
     entityServiceFactory: EntityServiceFactory,
-    cfEndpointService: CloudFoundryEndpointService
+    paginationMonitorFactory: PaginationMonitorFactory
   ) {
+    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
 
-    this.initialised$ = cfEndpointService.hasCellMetrics(appService.cfGuid).pipe(
+    this.initialised$ = cellHelper.hasCellMetrics(appService.cfGuid).pipe(
       map(hasMetrics => {
         if (hasMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);

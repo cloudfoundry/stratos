@@ -1,15 +1,14 @@
-import { HttpClient, HttpHandler } from '@angular/common/http';
-import { Http, HttpModule } from '@angular/http';
+import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../core/src/core/core.module';
-import { EntityServiceFactory } from '../../core/src/core/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
+import { EntityMonitorFactory } from '../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 import { SharedModule } from '../../core/src/shared/shared.module';
-import { testSCFEndpointGuid } from '../../core/test-framework/store-test-helper';
+import { testSCFEndpointGuid } from '@stratos/store/testing';
 import { CfUserServiceTestProvider } from '../../core/test-framework/user-service-helper';
 import { appReducers } from '../../store/src/reducers.module';
 import { CFAppState } from '../src/cf-app-state';
@@ -80,7 +79,7 @@ export function generateTestCfUserServiceProvider(guid = testSCFEndpointGuid) {
         entityServiceFactory,
       );
     },
-    deps: [Store, PaginationMonitorFactory, EntityServiceFactory, Http]
+    deps: [Store, PaginationMonitorFactory, EntityServiceFactory, HttpClient]
   };
 }
 
@@ -153,7 +152,7 @@ export function generateCfStoreModules() {
   return [
     CloudFoundryTestingModule,
     StoreModule.forRoot(
-      appReducers,
+      appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } },
       // Do not include initial store here, it's properties will be ignored as they won't have corresponding reducers in appReducers
     )
   ];
@@ -165,7 +164,7 @@ export function generateCfBaseTestModulesNoShared() {
     RouterTestingModule,
     CoreModule,
     NoopAnimationsModule,
-    HttpModule
+    HttpClientModule
   ];
 }
 

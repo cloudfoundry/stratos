@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, withLatestFrom } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 import {
   UsersRolesActions,
   UsersRolesClearUpdateState,
@@ -15,7 +15,7 @@ import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { OrgUserRoleNames } from '../../../cloud-foundry/src/store/types/user.types';
 import { CfRoleChange } from '../../../cloud-foundry/src/store/types/users-roles.types';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
 import { SessionDataEndpoint } from '../types/auth.types';
@@ -126,7 +126,7 @@ export class UsersRolesEffects {
   }
 
   private createActionObs(action: ChangeUserRole): Observable<boolean> {
-    return entityCatalogue.getEntity(action)
+    return entityCatalog.getEntity(action)
       .getEntityMonitor(
         this.store,
         action.guid

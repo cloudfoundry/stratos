@@ -4,8 +4,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { EntityMonitorFactory } from '../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { UsersRolesSetUsers } from '../../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../../cf-app-state';

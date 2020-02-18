@@ -4,11 +4,12 @@ import { SimpleListComponent } from './simple-list.component';
 import { SharedModule } from '../../../shared.module';
 import { CoreModule } from '../../../../core/core.module';
 import { AppReducersModule } from '../../../../../../store/src/reducers.module';
-import { StratosCatalogueEntity, StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
-import { StratosEndpointExtensionDefinition } from '../../../../core/entity-catalogue/entity-catalogue.types';
+import { StratosCatalogEntity, StratosCatalogEndpointEntity } from '../../../../../../store/src/entity-catalog/entity-catalog-entity';
+import { StratosEndpointExtensionDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
-import { EntityCatalogueTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../core/entity-catalogue-test.module';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../../../store/src/entity-catalog-test.module';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('SimpleListComponent', () => {
   let component: SimpleListComponent;
@@ -23,27 +24,27 @@ describe('SimpleListComponent', () => {
     authTypes: [],
   } as StratosEndpointExtensionDefinition;
 
-  const catalogueEntityEndpoint = new StratosCatalogueEndpointEntity(endpoint);
-  const ceType = 'testCatalogueEntity';
-  const catalogueEntity = new StratosCatalogueEntity({
+  const catalogEntityEndpoint = new StratosCatalogEndpointEntity(endpoint);
+  const ceType = 'testCatalogEntity';
+  const catalogEntity = new StratosCatalogEntity({
     type: ceType,
     schema: new EntitySchema('key', endpoint.type),
     endpoint,
   }, {
-      entityBuilder: {
-        getLines: () => ([]),
-        getMetadata: () => ({ name: 'test' }),
-        getGuid: () => 'test',
-      },
-      actionBuilders: {
-        getMultiple: () => ({
-          type: 'testAction',
-          paginationKey: 'testPagKey',
-          entityType: ceType,
-          endpointType: endpoint.type
-        })
-      }
-    });
+    entityBuilder: {
+      getLines: () => ([]),
+      getMetadata: () => ({ name: 'test' }),
+      getGuid: () => 'test',
+    },
+    actionBuilders: {
+      getMultiple: () => ({
+        type: 'testAction',
+        paginationKey: 'testPagKey',
+        entityType: ceType,
+        endpointType: endpoint.type
+      })
+    }
+  });
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -51,14 +52,16 @@ describe('SimpleListComponent', () => {
         SharedModule,
         CoreModule,
         AppReducersModule,
+        RouterTestingModule,
+        SharedModule,
         NoopAnimationsModule,
         {
-          ngModule: EntityCatalogueTestModule,
+          ngModule: EntityCatalogTestModule,
           providers: [
             {
               provide: TEST_CATALOGUE_ENTITIES, useValue: [
-                catalogueEntityEndpoint,
-                catalogueEntity
+                catalogEntityEndpoint,
+                catalogEntity
               ]
             }
           ]
@@ -71,7 +74,7 @@ describe('SimpleListComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(SimpleListComponent);
     component = fixture.componentInstance;
-    component.catalogueEntity = catalogueEntity;
+    component.catalogEntity = catalogEntity;
     fixture.detectChanges();
   });
 

@@ -3,12 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import {
   ApplicationStateService,
 } from '../../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../core/src/shared/entity.tokens';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 

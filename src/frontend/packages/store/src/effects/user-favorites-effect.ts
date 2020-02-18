@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { UserFavoriteManager } from '../../../core/src/core/user-favorite-manager';
 import { environment } from '../../../core/src/environments/environment.prod';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
@@ -69,7 +69,7 @@ export class UserFavoritesEffect {
         endpointType: userFavoritesEntitySchema.endpointType,
         type: action.type
       } as PaginatedAction;
-      const favEntityKey = entityCatalogue.getEntityKey(apiAction);
+      const favEntityKey = entityCatalog.getEntityKey(apiAction);
       return this.http.get<UserFavorite<IFavoriteMetadata>[]>(favoriteUrlPath).pipe(
         map(favorites => {
           const mappedData = favorites.reduce<NormalizedResponse<UserFavorite<IFavoriteMetadata>>>((data, favorite) => {

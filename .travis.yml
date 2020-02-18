@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "8.11.2"
+  - "12.13.0"
 sudo: required
 dist: bionic
 services:
@@ -12,7 +12,6 @@ before_install:
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1366x768x24"
   - sleep 3
 install:
-  - npm install npm@5.6.0 -g
   - npm install
   - ssh-keyscan -t rsa bitbucket.org >> ~/.ssh/known_hosts
 filter_secrets: false
@@ -40,7 +39,7 @@ jobs:
       before_script:
         - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
         - chmod +x ~/bin/gimme
-        - eval "$(gimme 1.12.4)"
+        - eval "$(gimme 1.13.4)"
         - go get -u golang.org/x/lint/golint
       script:
         - golint src/jetstream/...
@@ -62,7 +61,7 @@ jobs:
       before_script:
         - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
         - chmod +x ~/bin/gimme
-        - eval "$(gimme 1.12.4)"
+        - eval "$(gimme 1.13.4)"
       script:
         - npm run test-backend
     - name: Helm Chart Unit Tests
@@ -83,6 +82,11 @@ jobs:
         - "./deploy/ci/travis/job-e2e-before_script.sh true"
       script:
         - "./deploy/ci/travis/job-e2e-script.sh core"
+    - name: E2E Tests - Autoscaler
+      before_script:
+        - "./deploy/ci/travis/job-e2e-before_script.sh"
+      script:
+        - "./deploy/ci/travis/job-e2e-script.sh autoscaler"
     - name: E2E Tests - All Other Suite
       before_script:
         - "./deploy/ci/travis/job-e2e-before_script.sh"

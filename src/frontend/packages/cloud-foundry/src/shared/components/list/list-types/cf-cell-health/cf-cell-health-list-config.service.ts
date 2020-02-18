@@ -2,26 +2,27 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { first, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  BooleanIndicatorType,
-} from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import { CfCellHelper } from '../../../../../../../core/src/features/cloud-foundry/cf-cell.helpers';
+import { BooleanIndicatorType } from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import {
   TableCellBooleanIndicatorComponent,
   TableCellBooleanIndicatorComponentConfig,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+import { CFAppState } from '../../../../../cf-app-state';
 import {
   CloudFoundryCellService,
 } from '../../../../../features/cloud-foundry/tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
+
 
 // TODO: Move file to CF package (#3769)
 // tslint:enable:max-line-length
@@ -37,6 +38,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     title: 'Cell Health History',
     noEntries: 'Cell has no health history'
   };
+  private init$: Observable<any>;
 
   private boolIndicatorConfig: TableCellBooleanIndicatorComponentConfig<CfCellHealthEntry> = {
     isEnabled: (row: CfCellHealthEntry) =>
@@ -46,25 +48,28 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     showText: true
   };
 
-  constructor(store: Store<CFAppState>, cloudFoundryCellService: CloudFoundryCellService, private datePipe: DatePipe) {
+  constructor(
+    private store: Store<CFAppState>,
+    cloudFoundryCellService: CloudFoundryCellService,
+    private datePipe: DatePipe,
+    private paginationMonitorFactory: PaginationMonitorFactory) {
     super();
-    const action = this.createMetricsAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId);
-    this.dataSource = new CfCellHealthDataSource(store, this, action);
+
+    this.init$ = this.createMetricsAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId).pipe(
+      first(),
+      tap(action => {
+        this.dataSource = new CfCellHealthDataSource(this.store, this, action);
+      })
+    );
     this.showCustomTime = true;
   }
 
-  private createMetricsAction(cfGuid: string, cellId: string): FetchCFCellMetricsPaginatedAction {
-    const action = new FetchCFCellMetricsPaginatedAction(
-      cfGuid,
-      cellId,
-      new MetricQueryConfig(`firehose_value_metric_rep_unhealthy_cell{bosh_job_id="${cellId}"}`, {}),
-      MetricQueryType.QUERY
-    );
-    action.initialParams['order-direction-field'] = 'dateTime';
-    action.initialParams['order-direction'] = 'asc';
-    return action;
+  private createMetricsAction(cfGuid: string, cellId: string): Observable<FetchCFCellMetricsPaginatedAction> {
+    const cellHelper = new CfCellHelper(this.store, this.paginationMonitorFactory);
+    return cellHelper.createCellMetricAction(cfGuid, cellId);
   }
 
+  getInitialised = () => this.init$;
   getColumns = (): ITableColumn<CfCellHealthEntry>[] => [
     {
       columnId: 'dateTime',

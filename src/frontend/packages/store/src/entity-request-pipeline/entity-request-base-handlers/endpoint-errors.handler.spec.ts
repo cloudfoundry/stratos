@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
 import { SendEventAction } from '../../actions/internal-events.actions';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { InternalEventSeverity } from '../../types/internal-events.types';
@@ -10,10 +10,10 @@ import { JetstreamError } from './handle-multi-endpoints.pipe';
 
 
 describe('endpoint-error-handler', () => {
-  it('correct actions are fried', (done) => {
+  it('correct actions are fired', (done) => {
     const entityType = 'key';
 
-    const entity = new StratosBaseCatalogueEntity({
+    const entity = new StratosBaseCatalogEntity({
       type: entityType,
       schema: new EntitySchema(
         entityType,

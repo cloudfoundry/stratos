@@ -1,5 +1,15 @@
 import { Injectable } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
+
+export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
+  if (activatedRoute.snapshot.params[id]) {
+    return activatedRoute.snapshot.params[id];
+  } else if (activatedRoute.parent) {
+    return getIdFromRoute(activatedRoute.parent, id);
+  }
+  return null;
+}
 
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
@@ -266,4 +276,28 @@ export const sortStringify = (obj: { [key: string]: string | string[] | number }
   return keys.reduce((res, key) => {
     return res += `${key}-${obj[key]},`;
   }, '');
+};
+
+/**
+ * Real basic, shallow check
+ */
+export const arraysEqual = (a: any[], b: any[]): boolean => {
+  // Both falsy
+  if (!a && !b) {
+    return true;
+  }
+  // Both truthy
+  if (a && b) {
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (const vA of a) {
+      if (!b.includes(vA)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  // Falsy/Truthy
+  return false;
 };

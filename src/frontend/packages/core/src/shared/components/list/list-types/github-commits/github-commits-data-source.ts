@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/src/cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CFEntitySchema } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
 import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
@@ -30,7 +30,7 @@ export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
     sha: string,
     commitSha?: string,
   ) {
-    const gitCommitEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
+    const gitCommitEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
     const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const fetchCommitAction = fetchCommitActionBuilder(sha, null, {
       scm,

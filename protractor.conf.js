@@ -100,14 +100,19 @@ const coreSuite = globby.sync([
   './src/test-e2e/metrics/metrics-registration-e2e.spec.ts',
 ])
 
+const autoscalerSuite = globby.sync([
+  './src/test-e2e/application/application-autoscaler-e2e.spec.ts',
+])
+
 const fullMinusOtherSuites = globby.sync([
   ...fullSuite,
   ...longSuite.map(file => '!' + file),
   ...manageUsersSuite.map(file => '!' + file),
   ...coreSuite.map(file => '!' + file),
+  ...autoscalerSuite.map(file => '!' + file),
 ])
 
-exports.config = {
+const config = {
   allScriptsTimeout: timeout,
   // Exclude the dashboard tests from all suites for now
   exclude: [
@@ -129,6 +134,10 @@ exports.config = {
     ]),
     core: globby.sync([
       ...coreSuite,
+      ...excludeTests
+    ]),
+    autoscaler: globby.sync([
+      ...autoscalerSuite,
       ...excludeTests
     ]),
     fullMinusOtherSuites: globby.sync([
@@ -231,10 +240,15 @@ exports.config = {
       .on("error", (err) => {
         defer.reject('Failed to validate Github API Url: ' + err.message);
       });
-    return defer.promise;
+
+    // Print out success, errors fall through
+    return defer.promise.then(res => console.log(res));
   }
 };
-
+if (process.env['STRATOS_E2E_BASE_URL']) {
+  config.baseUrl = process.env['STRATOS_E2E_BASE_URL'];
+}
+exports.config = config
 // Should we run e2e tests in headless Chrome?
 const headless = secrets.headless || process.env['STRATOS_E2E_HEADLESS'];
 if (headless) {

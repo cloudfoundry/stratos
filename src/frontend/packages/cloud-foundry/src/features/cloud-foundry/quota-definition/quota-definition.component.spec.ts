@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../../core/tab-nav.service';
-import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from '../../../../../core/test-framework/store-test-helper';
+import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from '@stratos/store/testing';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,

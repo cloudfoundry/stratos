@@ -1,12 +1,12 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { HttpModule } from '@angular/http';
 import { EffectsModule } from '@ngrx/effects';
 
 import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
 import { AppEffects } from './effects/app.effects';
 import { AuthEffect } from './effects/auth.effects';
+import { DashboardEffect } from './effects/dashboard.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { EndpointsEffect } from './effects/endpoint.effects';
 import { MetricsEffect } from './effects/metrics.effects';
@@ -22,8 +22,8 @@ import { UpdateAppEffects } from './effects/update-app-effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
-import { AppReducersModule } from './reducers.module';
 import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-client.service';
+import { AppReducersModule } from './reducers.module';
 
 
 @NgModule({
@@ -32,9 +32,9 @@ import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-clien
   ],
   imports: [
     AppReducersModule,
-    HttpModule,
     HttpClientModule,
     EffectsModule.forRoot([
+      DashboardEffect,
       APIEffect,
       EndpointApiError,
       AuthEffect,
@@ -53,8 +53,8 @@ import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-clien
       UsersRolesEffects,
       RecursiveDeleteEffect,
       AppEffects,
-      UserFavoritesEffect,
-    ]),
+      UserFavoritesEffect
+    ])
   ]
 })
 export class AppStoreModule { }

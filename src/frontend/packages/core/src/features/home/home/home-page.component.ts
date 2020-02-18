@@ -10,7 +10,7 @@ import { UserFavorite } from '../../../../../store/src/types/user-favorites.type
 import { EndpointsService } from '../../../core/endpoints.service';
 import { LoggerService } from '../../../core/logger.service';
 import { UserFavoriteManager } from '../../../core/user-favorite-manager';
-import { EntityCatalogueHelpers } from '../../../core/entity-catalogue/entity-catalogue.helper';
+import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
 
 @Component({
   selector: 'app-home-page',
@@ -54,7 +54,7 @@ export class HomePageComponent {
       map(([, favEntities]: [IUserFavoritesGroups, IRequestEntityTypeState<UserFavorite>]) => {
         if (favEntities) {
           for (const favEntity of Object.values(favEntities)) {
-            if (favEntity.entityType !== EntityCatalogueHelpers.endpointType) {
+            if (favEntity.entityType !== EntityCatalogHelpers.endpointType) {
               return true;
             }
           }

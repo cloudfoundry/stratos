@@ -75,16 +75,44 @@ describe('DialogConfirmComponent', () => {
     expect(confirm.disabled).toBeFalsy();
   });
 
-  it('should show warning icon if is critical', () => {
-    expect(element.querySelector('mat-icon')).toBeFalsy();
-
+  it('should not show warning icon if critical', () => {
     component.data = {
       ...component.data,
+      message: {
+        textToMatch: '',
+      },
       critical: true,
     };
     fixture.detectChanges();
 
     expect(element.querySelector('mat-icon').textContent).toEqual('warning');
+  });
+
+  it('should show warning icon if text to match', () => {
+    component.data = {
+      ...component.data,
+      message: {
+        textToMatch: 'text',
+      },
+      critical: false,
+    };
+    fixture.detectChanges();
+
+    expect(element.querySelector('mat-icon').textContent).toEqual('warning');
+  });
+
+  it('should show warning icon if is critical', () => {
+    component.data = {
+      ...component.data,
+      message: {
+        textToMatch: '',
+      },
+      critical: true,
+    };
+    fixture.detectChanges();
+
+    expect(element.querySelector('mat-icon').textContent).toEqual('warning');
+
   });
 
   it('should disable confirm button if not matching text', () => {

@@ -6,7 +6,7 @@ import { EMPTY, of as observableOf } from 'rxjs';
 
 import { ListSort } from '../../../../../../store/src/actions/list.actions';
 import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../../core/core.module';
 import { UtilsService } from '../../../../core/utils.service';
 import { SharedModule } from '../../../shared.module';
@@ -85,13 +85,13 @@ describe('TableComponent', () => {
       disconnect: () => null,
       isTableLoading$: observableOf(false)
     };
-    @ViewChild('basicColumnsTable')
+    @ViewChild('basicColumnsTable', { static: true })
     public basicColumnsTable: TableComponent<any>;
-    @ViewChild('selectionColumnsTable')
+    @ViewChild('selectionColumnsTable', { static: true })
     public selectionColumnsTable: TableComponent<any>;
-    @ViewChild('actionColumnsTable')
+    @ViewChild('actionColumnsTable', { static: true })
     public actionColumnsTable: TableComponent<any>;
-    @ViewChild('actionAndSelectionColumnsTable')
+    @ViewChild('actionAndSelectionColumnsTable', { static: true })
     public actionAndSelectionColumnsTable: TableComponent<any>;
   }
   let component: TableHostComponent;

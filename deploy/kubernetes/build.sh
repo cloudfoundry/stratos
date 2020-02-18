@@ -19,7 +19,7 @@ BOLD="\033[1m"
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
-BASE_IMAGE_TAG=opensuse
+BASE_IMAGE_TAG=leap15_1
 OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
@@ -27,8 +27,9 @@ TAG_LATEST="false"
 NO_PUSH="true"
 DOCKER_REG_DEFAULTS="true"
 CHART_ONLY="false"
+ADD_GITHASH_TO_TAG="true"
 
-while getopts ":ho:r:t:Tclb:Opc" opt; do
+while getopts ":ho:r:t:Tclb:Opcn" opt; do
   case $opt in
     h)
       echo
@@ -67,7 +68,10 @@ while getopts ":ho:r:t:Tclb:Opc" opt; do
       ;;      
     c)
       CHART_ONLY="true"
-      ;;      
+      ;;     
+    n)
+      ADD_GITHASH_TO_TAG="false"
+      ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
       exit 1
@@ -177,7 +181,9 @@ cleanup
 # rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.bak
 # rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.patched.bak
 
-updateTagForRelease
+if [ "${ADD_GITHASH_TO_TAG}" == "true" ]; then
+  updateTagForRelease
+fi
 
 
 if [ "${CHART_ONLY}" == "false" ]; then
@@ -197,7 +203,6 @@ if [ "${CHART_ONLY}" == "false" ]; then
   # Build and push an image based on the nginx container (Front-end)
   log "-- Building/publishing the runtime container image for the Console web server (frontend)"
   patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
-
 fi
 
 log "-- Building Helm Chart"
@@ -216,19 +221,7 @@ pushd ${DEST_HELM_CHART_PATH} > /dev/null
 # Run customization script if there is one
 if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" ]; then
   printf "${YELLOW}${BOLD}Applying Helm Chart customizations${RESET}\n"
-  ${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh "${DEST_HELM_CHART_PATH}"
-fi
-
-# Look for custom config metadata with product version metadata
-if [ -f "${STRATOS_PATH}/custom-src/stratos.yaml" ]; then
-  PROD_VERSION=$(cat "${STRATOS_PATH}/custom-src/stratos.yaml" | grep "productVersion")
-  if [ ! -z "${PROD_VERSION}" ]; then
-    PROD_VERSION=$(echo $PROD_VERSION | grep --extended --only-matching '[0-9\.]+')
-    if [ ! -z "${PROD_VERSION}" ]; then
-      echo "Setting appVersion to: ${PROD_VERSION}"
-      sed -i.bak -e 's/appVersion: [0-9\.]*/appVersion: '"${PROD_VERSION}"'/g' ${DEST_HELM_CHART_PATH}/Chart.yaml
-    fi
-  fi
+  ${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh "${STRATOS_PATH}"
 fi
 
 # Fetch subcharts

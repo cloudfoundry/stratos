@@ -10,7 +10,7 @@ import {
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IApp } from '../../../../../../../core/src/core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../../../core/src/core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';

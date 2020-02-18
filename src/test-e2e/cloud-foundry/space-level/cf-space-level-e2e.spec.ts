@@ -4,6 +4,7 @@ import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { CFHelpers } from '../../helpers/cf-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../../helpers/extend-test-helpers';
 import { CFPage } from '../../po/cf-page.po';
 import { ListComponent } from '../../po/list.po';
 import { MetaCardTitleType } from '../../po/meta-card.po';
@@ -42,36 +43,45 @@ describe('CF - Space Level -', () => {
   }
 
   function navToPage() {
-    const page = new CFPage();
-    page.sideNav.goto(SideNavMenuItem.CloudFoundry);
-    CfTopLevelPage.detect().then(cfPage => {
-      cfPage.waitForPageOrChildPage();
-      cfPage.loadingIndicator.waitUntilNotShown();
-      cfPage.goToOrgTab();
+    describe('', () => {
 
-      // Find the Org and click on it
-      const list = new ListComponent();
-      list.cards.findCardByTitle(defaultCf.testOrg, MetaCardTitleType.CUSTOM, true).then(card => {
-        expect(card).toBeDefined();
-        card.click();
-      });
-      CfOrgLevelPage.detect().then(orgPage => {
-        orgPage.waitForPageOrChildPage();
-        orgPage.loadingIndicator.waitUntilNotShown();
-        orgPage.goToSpacesTab();
+      // Allow additional time for navigation
+      extendE2ETestTime(70000);
 
-        // Find the Space and click on it
-        const spaceList = new ListComponent();
-        spaceList.cards.findCardByTitle(defaultCf.testSpace, MetaCardTitleType.CUSTOM, true).then(card => {
-          expect(card).toBeDefined();
-          card.click();
+      // Tests that the given users can navigate through the org and space lists
+      it('Nav to Space', () => {
+        const page = new CFPage();
+        page.sideNav.goto(SideNavMenuItem.CloudFoundry);
+        CfTopLevelPage.detect().then(cfPage => {
+          cfPage.waitForPageOrChildPage();
+          cfPage.loadingIndicator.waitUntilNotShown();
+          cfPage.goToOrgTab();
+
+          // Find the Org and click on it
+          const list = new ListComponent();
+          list.cards.findCardByTitle(defaultCf.testOrg, MetaCardTitleType.CUSTOM, true).then(card => {
+            expect(card).toBeDefined();
+            card.click();
+          });
+          CfOrgLevelPage.detect().then(orgPage => {
+            orgPage.waitForPageOrChildPage();
+            orgPage.loadingIndicator.waitUntilNotShown();
+            orgPage.goToSpacesTab();
+
+            // Find the Space and click on it
+            const spaceList = new ListComponent();
+            spaceList.cards.findCardByTitle(defaultCf.testSpace, MetaCardTitleType.CUSTOM, true).then(card => {
+              expect(card).toBeDefined();
+              card.click();
+            });
+            CfSpaceLevelPage.detect().then(s => {
+              spacePage = s;
+              spacePage.waitForPageOrChildPage();
+              spacePage.loadingIndicator.waitUntilNotShown();
+            });
+
+          });
         });
-        CfSpaceLevelPage.detect().then(s => {
-          spacePage = s;
-          spacePage.waitForPageOrChildPage();
-          spacePage.loadingIndicator.waitUntilNotShown();
-        });
-
       });
     });
   }
@@ -106,7 +116,7 @@ describe('CF - Space Level -', () => {
     });
 
     describe('Basic Tests -', () => {
-      beforeEach(navToPage);
+      navToPage();
 
       it('Breadcrumb', testBreadcrumb);
 
@@ -134,7 +144,7 @@ describe('CF - Space Level -', () => {
     });
 
     describe('Basic Tests -', () => {
-      beforeEach(navToPage);
+      navToPage();
 
       it('Breadcrumb', testBreadcrumb);
 

@@ -1,8 +1,6 @@
-import { RequestMethod } from '@angular/http';
 import { Store } from '@ngrx/store';
-
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import { pathGet } from '../../../../core/src/core/utils.service';
 import { APIResponse } from '../../actions/request.actions';
 import { BaseRequestState, GeneralAppState } from '../../app-state';
@@ -19,7 +17,7 @@ import {
   WrapperRequestActionSuccess,
 } from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
-import { BaseEntityRequestAction } from '../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
 
 export function getEntityRequestState(
   state: BaseRequestState,
@@ -55,7 +53,7 @@ function getKeyFromActionOrKey(actionOrKey: BaseEntityRequestAction | string) {
   if (typeof actionOrKey === 'string') {
     return actionOrKey;
   }
-  return entityCatalogue.getEntityKey(actionOrKey) || actionOrKey.entityType;
+  return entityCatalog.getEntityKey(actionOrKey) || actionOrKey.entityType;
 }
 
 export function createRequestStateFromResponse(
@@ -93,16 +91,6 @@ export function getRequestTypeFromMethod(action: EntityRequestAction): ApiReques
       return 'update';
     }
     if (method === 'delete') {
-      return 'delete';
-    }
-  } else if (typeof method === 'number') {
-    if (method === RequestMethod.Post) {
-      return 'create';
-    }
-    if (method === RequestMethod.Put) {
-      return 'update';
-    }
-    if (method === RequestMethod.Delete) {
       return 'delete';
     }
   }
@@ -192,7 +180,7 @@ export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
   store: Store<T>,
   apiAction: EntityRequestAction,
   error,
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes = 'fetch',
   internalEndpointError?: InternalEndpointError
 ) {
@@ -200,7 +188,7 @@ export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
     apiAction,
     error,
     requestType,
-    catalogueEntity,
+    catalogEntity,
     internalEndpointError
   );
   store.dispatch(actions[0]);
@@ -211,11 +199,11 @@ export function getFailApiRequestActions(
   apiAction: EntityRequestAction,
   error,
   requestType: ApiRequestTypes = 'fetch',
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   internalEndpointError?: InternalEndpointError,
 ) {
   return [
-    new APISuccessOrFailedAction(catalogueEntity.getRequestType('failure', apiAction), apiAction, error.message),
+    new APISuccessOrFailedAction(catalogEntity.getRequestType('failure', apiAction), apiAction, error.message),
     new WrapperRequestActionFailed(
       error.message,
       apiAction,
