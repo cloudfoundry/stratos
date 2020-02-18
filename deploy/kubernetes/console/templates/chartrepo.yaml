@@ -1,5 +1,4 @@
 ---
-.Values.
 {{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major .Capabilities.KubeVersion.Minor)}}
 apiVersion: apps/v1
 {{- else }}
