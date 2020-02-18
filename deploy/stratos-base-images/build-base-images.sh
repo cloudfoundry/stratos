@@ -81,10 +81,10 @@ fi
 
 if [ -n "${IS_SLE}" ]; then
   # Check env vars
-  : "${SMT_INTERNAL?Environment variable must be set when building SLE images}"
-  : "${SMT_INTERNAL_UPDATE?Environment variable must be set when building SLE images}"
-  : "${SMT_INTERNAL_SDK?Environment variable must be set when building SLE images}"
-  : "${SMT_INTERNAL_SERVER?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_BASE_GA?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_BASE_UPDATE?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_SP_GA?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_SP_UPDATE?Environment variable must be set when building SLE images}"
 fi
 
 set -x
