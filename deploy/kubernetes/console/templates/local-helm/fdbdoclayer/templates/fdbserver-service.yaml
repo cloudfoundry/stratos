@@ -1,4 +1,4 @@
-{{- $v := $.Files.Get "fdbvalues.yaml" | fromYaml }}
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -11,10 +11,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: {{ $v.fdbserver.service.port }}
-    targetPort: {{ $v.fdbserver.service.port }}
+  - port: {{ .Values.fdbserver.service.port }}
+    targetPort: {{ .Values.fdbserver.service.port }}
     protocol: TCP
-    name: {{ $v.fdbserver.service.name }}
+    name: {{ .Values.fdbserver.service.name }}
   selector:
     app: {{ template "fullname" . }}-fdbserver
     release: {{ .Release.Name }}

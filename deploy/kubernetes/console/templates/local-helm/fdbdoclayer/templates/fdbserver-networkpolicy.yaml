@@ -1,5 +1,5 @@
-{{- $v := $.Files.Get "fdbvalues.yaml" | fromYaml }}
-{{- if $v.networkPolicy.enabled }}
+
+{{- if .Values.fdbserver.networkPolicy.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -16,6 +16,6 @@ spec:
       release: {{ .Release.Name }}
   ingress:
   - ports:
-    - port: {{ $v.fdbserver.service.port }}
+    - port: {{ .Values.fdbserver.service.port }}
       protocol: TCP
 {{- end }}

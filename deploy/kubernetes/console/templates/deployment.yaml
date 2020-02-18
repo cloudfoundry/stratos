@@ -1,5 +1,4 @@
 ---
-{{- $v := $.Files.Get "fdbvalues.yaml" | fromYaml }}
 {{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
 apiVersion: apps/v1
 {{- else }}
@@ -254,14 +253,18 @@ spec:
           value: {{ default "" .Values.console.userInviteSubject | quote }}
         - name: ENABLE_TECH_PREVIEW
           value: {{ default "false" .Values.console.techPreview | quote }}
-        {{- if $v.fdbdoclayer.tls }}
+        {{- if .Values.fdbdoclayer.tls }}
         - name: MONOCULAR_CRT_PATH
           value: "/etc/monocular-certs/tls.crt"
         - name: MONOCULAR_KEY_PATH
           value: "/etc/monocular-certs/tls.key"
         - name: MONOCULAR_CA_CRT_PATH
-          value: "/etc/monocular-certs/ca.crt"  
+          value: "/etc/monocular-certs/ca.crt"
         {{- end }}
+        - name: HELM_FDB_URL
+          value: "mongodb://{{ .Release.Name }}-{{ .Values.fdbdoclayer.service.name }}:{{ .Values.fdbdoclayer.service.port }}"
+        - name: HELM_SYNC_SERVER_URL
+          value: "http://{{ .Release.Name }}-{{ .Values.chartrepo.service.name }}:{{ .Values.chartrepo.service.port }}"
         readinessProbe:
           tcpSocket:
             port: 3003
@@ -286,7 +289,7 @@ spec:
           name: "{{ .Release.Name }}-templates"
           readOnly: true
         {{- end }}
-        {{- if $v.fdbdoclayer.tls }}
+        {{- if .Values.fdbdoclayer.tls }}
         - mountPath: "/etc/monocular-certs"
           name: "{{ .Release.Name }}-monocular-certs"
           readOnly: true
@@ -317,7 +320,7 @@ spec:
         configMap:
           name: {{ .Values.console.templatesConfigMapName }}
       {{- end }}
-      {{- if $v.fdbdoclayer.tls }}
+      {{- if .Values.fdbdoclayer.tls }}
       - name: "{{ .Release.Name }}-monocular-certs"
         secret:
           secretName: {{ template "fullname" . }}-fdbdoclayer-certs

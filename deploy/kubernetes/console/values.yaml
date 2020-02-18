@@ -129,6 +129,39 @@ uaa:
   consoleAdminIdentifier: 
   skipSSLValidation: false
 
+fdbserver:
+  replicas: 1
+  image:
+    registry: docker.io
+    repository: kreinecke/foundationdb
+    tag: 6.0.18-k8s
+  service:
+    name: fdbserver
+    port: 4500
+  networkPolicy:
+    enabled: false
+
+fdbdoclayer:
+  replicas: 1
+  image:
+    registry: docker.io
+    repository: kreinecke/fdb-document-layer-k8s-tls
+    tag: latest
+  service:
+    name: fdbdoclayer
+    port: 27016
+  tls: true
+  networkPolicy:
+    enabled: false
+
+chartrepo:
+  service:
+    name: chartrepo
+    port: 8080
+  tls: true
+  networkPolicy:
+    enabled: false
+
 # SCF values compatability 
 env:
   DOMAIN:

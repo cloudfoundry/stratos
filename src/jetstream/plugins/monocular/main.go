@@ -2,7 +2,6 @@ package monocular
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -69,23 +68,9 @@ func (m *Monocular) Init() error {
 
 func (m *Monocular) configure() error {
 
-	if releaseName, ok := m.portalProxy.Env().Lookup(kubeReleaseNameEnvVar); ok {
-		// We are deployed in Kubernetes
-		releaseNameEnvVarPrefix := getReleaseNameEnvVarPrefix(releaseName)
-		if url, ok := m.portalProxy.Env().Lookup(fmt.Sprintf("%s_%s", releaseNameEnvVarPrefix, fdbHostPortEnvVar)); ok {
-			//TODO kate - fetch hostname/port dynamically here (We need the hostname to match the server certificate)
-			url = fmt.Sprintf("%s%s-%s", "tcp://", releaseName, "fdbdoclayer:27016")
-			m.FoundationDBURL = strings.ReplaceAll(url, "tcp://", "mongodb://")
-		}
-		if url, ok := m.portalProxy.Env().Lookup(fmt.Sprintf("%s_%s", releaseNameEnvVarPrefix, syncServerHostPortEnvVar)); ok {
-			m.SyncServiceURL = strings.ReplaceAll(url, "tcp://", "http://")
-		}
-
-	} else {
-		// Env var lookup when not running in Kubernetes
-		m.FoundationDBURL = m.portalProxy.Env().String(foundationDBURLEnvVar, "")
-		m.SyncServiceURL = m.portalProxy.Env().String(syncServerURLEnvVar, "")
-	}
+	// Env var lookup when not running in Kubernetes
+	m.FoundationDBURL = m.portalProxy.Env().String(foundationDBURLEnvVar, "")
+	m.SyncServiceURL = m.portalProxy.Env().String(syncServerURLEnvVar, "")
 
 	log.Debugf("Foundation DB : %s", m.FoundationDBURL)
 	log.Debugf("Sync Server   : %s", m.SyncServiceURL)

@@ -1,4 +1,4 @@
-{{- $v := $.Files.Get "fdbvalues.yaml" | fromYaml }}
+
 {{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
 apiVersion: apps/v1
 {{- else }}
@@ -13,7 +13,7 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  replicas: {{ $v.fdbserver.replicas }}
+  replicas: {{ .Values.fdbserver.replicas }}
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-fdbserver
@@ -24,13 +24,13 @@ spec:
         app: {{ template "fullname" . }}-fdbserver
         release: {{ .Release.Name }}
     spec:
-{{- with $v.securityContext }}
+{{- with .Values.securityContext }}
       securityContext:
 {{ toYaml . | indent 8 }}
 {{- end }}
       containers:
       - name: fdbserver
-        image: {{ template "fdb.image" $v.fdbserver.image }}
+        image: {{ template "fdb.image" .Values.fdbserver.image }}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         - name: FDB_COORDINATOR
@@ -38,14 +38,14 @@ spec:
         - name: CLUSTER_ID
           value: chartdb:erlklkg
         ports:
-        - containerPort: {{ $v.fdbserver.service.port }}
+        - containerPort: {{ .Values.fdbserver.service.port }}
         livenessProbe:
           tcpSocket:
-            port: {{ $v.fdbserver.service.port }}
+            port: {{ .Values.fdbserver.service.port }}
           initialDelaySeconds: 3
           periodSeconds: 20
         readinessProbe:
           tcpSocket:
-            port: {{ $v.fdbserver.service.port }}
+            port: {{ .Values.fdbserver.service.port }}
           initialDelaySeconds: 3
           periodSeconds: 10
