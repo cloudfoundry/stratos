@@ -68,7 +68,7 @@ func (m *Monocular) Init() error {
 
 func (m *Monocular) configure() error {
 
-	// Env var lookup when not running in Kubernetes
+	// Env var lookup for Monocular services
 	m.FoundationDBURL = m.portalProxy.Env().String(foundationDBURLEnvVar, "")
 	m.SyncServiceURL = m.portalProxy.Env().String(syncServerURLEnvVar, "")
 

@@ -196,18 +196,18 @@ if [ "${CHART_ONLY}" == "false" ]; then
   # Build all of the components that make up the Console
 
   log "-- Build & publish the runtime container image for Jetstream (backend)"
-  #patchAndPushImage stratos-jetstream deploy/Dockerfile.bk "${STRATOS_PATH}" prod-build
+  patchAndPushImage stratos-jetstream deploy/Dockerfile.bk "${STRATOS_PATH}" prod-build
 
   log "-- Build & publish the runtime container image for Install Config Job"
-  #patchAndPushImage stratos-config-init deploy/Dockerfile.init "${STRATOS_PATH}"
+  patchAndPushImage stratos-config-init deploy/Dockerfile.init "${STRATOS_PATH}"
 
   # Build and push an image based on the mariab db container
   log "-- Building/publishing MariaDB"
-  #patchAndPushImage stratos-mariadb Dockerfile.mariadb "${STRATOS_PATH}/deploy/db"
+  patchAndPushImage stratos-mariadb Dockerfile.mariadb "${STRATOS_PATH}/deploy/db"
 
   # Build and push an image based on the nginx container (Front-end)
   log "-- Building/publishing the runtime container image for the Console web server (frontend)"
-  #patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
+  patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
 
   # Build any custom images added by a fork
   if [ "${HAS_CUSTOM_BUILD}" == "true" ]; then
