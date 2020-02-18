@@ -171,6 +171,9 @@ build_and_push_image stratos-bk-build-base Dockerfile.stratos-bk-build-base
 # Used for building the DB image
 build_and_push_image stratos-db-base Dockerfile.stratos-mariadb-base
 
+# Used for building the init image
+build_and_push_image stratos-bk-init-base Dockerfile.stratos-bk-init-base
+
 # Used for building the AIO image
 tag_and_push_image stratos-bk-build-base stratos-aio-base
 

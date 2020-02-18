@@ -19,7 +19,7 @@ BOLD="\033[1m"
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
-BASE_IMAGE_TAG=opensuse
+BASE_IMAGE_TAG=leap15_1
 OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
@@ -29,7 +29,7 @@ DOCKER_REG_DEFAULTS="true"
 CHART_ONLY="false"
 ADD_GITHASH_TO_TAG="true"
 
-while getopts ":ho:r:t:Tclb:Opn" opt; do
+while getopts ":ho:r:t:Tclb:Opcn" opt; do
   case $opt in
     h)
       echo
@@ -185,15 +185,16 @@ if [ "${ADD_GITHASH_TO_TAG}" == "true" ]; then
   updateTagForRelease
 fi
 
+
 if [ "${CHART_ONLY}" == "false" ]; then
+
   # Build all of the components that make up the Console
 
   log "-- Build & publish the runtime container image for Jetstream (backend)"
   patchAndPushImage stratos-jetstream deploy/Dockerfile.bk "${STRATOS_PATH}" prod-build
 
-  # Build the postflight container
-  log "-- Build & publish the runtime container image for the postflight job"
-  patchAndPushImage stratos-postflight-job deploy/Dockerfile.bk "${STRATOS_PATH}" postflight-job
+  log "-- Build & publish the runtime container image for Install Config Job"
+  patchAndPushImage stratos-config-init deploy/Dockerfile.init "${STRATOS_PATH}"
 
   # Build and push an image based on the mariab db container
   log "-- Building/publishing MariaDB"
