@@ -8,13 +8,13 @@ dockerRegistrySecret: regsecret
 #noProxy: localhost
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
-imagePullPolicy: Always
+imagePullPolicy: IfNotPresent
 
 console:
   cookieDomain:
   # externalIP deprecated - use console.service.externalIPs
 # externalIP: 127.0.0.1
-  backendLogLevel: debug
+  backendLogLevel: info
   ssoLogin: false
   ssoOptions:
   # Session Store Secret
@@ -26,7 +26,7 @@ console:
     loadBalancerIP:
     loadBalancerSourceRanges: []
     servicePort: 443
-    ## nodePort: 30000
+    # nodePort: 30000
     type: ClusterIP
     externalName:
     ingress:
@@ -54,7 +54,7 @@ console:
     http:
       enabled: false
       servicePort: 80
-      ## nodePort: 30001
+      # nodePort: 30001
 
   # Name of config map that provides the template files for user invitation emails
   templatesConfigMapName:
