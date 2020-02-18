@@ -81,10 +81,3 @@ tests:
           value: VEVTVF9QQVNTV09SRA==
         template: secrets.yaml
         documentIndex: 0
-
-
-
-
-
-
-
