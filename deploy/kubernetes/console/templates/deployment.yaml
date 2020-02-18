@@ -20,8 +20,8 @@ metadata:
     app: "{{ .Release.Name }}"
     component: stratos
 {{- if .Values.console.statefulSetExtraLabels }}
-{{ toYaml .Values.console.statefulSetExtraLabels | nindent 4 }}
-{{- end}}        
+{{ toYaml .Values.console.statefulSetExtraLabels | indent 4 }}
+{{- end }}
 spec:
   serviceName: stratos
   replicas: 1
@@ -44,8 +44,8 @@ spec:
         app: "{{ .Release.Name }}"
         component: stratos
         {{- if .Values.console.podExtraLabels}}
-        {{ toYaml .Values.console.podExtraLabels | nindent 8 }}
-        {{- end}}        
+        {{ toYaml .Values.console.podExtraLabels | indent 8 }}
+        {{- end }}
     spec:
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}

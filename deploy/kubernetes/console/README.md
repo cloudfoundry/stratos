@@ -4,6 +4,11 @@ Stratos is an Open Source Web-based Management console for Cloud Foundry. It all
 
 ## Installation
 
+Stratos can be installed to a Kubernetes cluster using Helm. Either Helm 2 or Helm 3 can be used, although we recommend using the newer Helm 3 version.
+
+Ensure the [Helm](https://github.com/helm/helm) client and [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) CLIs are installed. If you are using Helm 2, ensure you've initialized Tiller into your cluster with the appropriate
+Service Account.
+
 The Helm chart is published to the Stratos Helm repository.
 
 You will need to have the Stratos Helm repository added to your Helm setup, if you do not, run:
@@ -11,22 +16,30 @@ You will need to have the Stratos Helm repository added to your Helm setup, if y
 ```
 helm repo add stratos https://cloudfoundry.github.io/stratos
 ```
-Check the repository was successfully added by searching for the `console`
+
+Check the repository was successfully added by searching for the `console`, for example:
+
 ```
 helm search console
 NAME               	CHART VERSION   APP VERSION	DESCRIPTION                                  
-stratos/console    	2.6.0           2.6.0      	A Helm chart for deploying Stratos UI Console
+stratos/console    	3.0.0           3.0.0      	A Helm chart for deploying Stratos UI Console
 ```
+
 To install Stratos:
 
 ```
+kubectl create namespace console
 helm install stratos/console --namespace=console --name my-console
 ```
+
+> **Note**: The first `kubectl` command will create a namespace for Stratos. With Helm 3 you must create a namespace before installing.
+We recommend installing Stratos into a separate namespace.
+
 > **Note**: This assumes that a storage class exists in the Kubernetes cluster that has been marked as `default`. If no such storage class exists, a specific storage class needs to be specified, please see the following section *Specifying a custom Storage Class*. 
 
 > You can change the namespace (--namespace) and the release name (--name) to values of your choice.
 
-This will create a Console instance named `my-console` in a namespace called `console` in your Kubernetes cluster.
+This will create a Stratos instance named `my-console` in a namespace called `console` in your Kubernetes cluster.
 
 After the install, you should be able to access the Console in a web browser by following [the instructions](#accessing-the-console) below.
 
@@ -42,7 +55,6 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.sessionStoreSecret|Secret to use when encrypting session tokens|auto-generated random value|
 |console.ssoLogin|Whether to enable SSO Login and use the UAA Login UI instead of the built-in one|false|
 |console.backendLogLevel|Log level for backend (info, debug)|info|
-|console.service.annotations|Annotations to add to the console service|[]|
 |console.service.externalIPs|External IPs to add to the console service|[]|
 |console.service.loadBalancerIP|IP address to assign to the load balancer for the metrics service (if supported)||
 |console.service.loadBalancerSourceRanges|List of IP CIDRs allowed access to load balancer (if supported)|[]|
@@ -51,8 +63,6 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.service.externalName|External name for the console service when service type is ExternalName||
 |console.service.nodePort|Node port to use for the console service when service type is NodePort or LoadBalancer||
 |console.ingress.enabled|Enable ingress for the console service|false|
-|console.ingress.annotations|Annotations to add to the ingress resource|{}|
-|console.ingress.extraLabels|Extra labels to add to the ingress resource|{}|
 |console.ingress.host|Host for the ingress resource|||
 |console.ingress.secretName|Name of an existing secret containing the TLS certificate for ingress|||
 |console.service.http.enabled|Enabled HTTP access to the console service (as well as HTTPS)|false|
@@ -88,6 +98,18 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |kube.registry.hostname|Hostname of registry to use when pulling images|docker.io|
 |kube.registry.username|Username to use when pulling images from the registry||
 |kube.registry.password|Password to use when pulling images from the registry||
+|console.podAnnotations|Annotations to be added to all pod resources||
+|console.podExtraLabels|Additional labels to be added to all pod resources||
+|console.statefulSetAnnotations|Annotations to be added to all statefulset resources||
+|console.statefulSetExtraLabels|Additional labels to be added to all statefulset resources||
+|console.deploymentAnnotations|Annotations to be added to all deployment resources||
+|console.deploymentExtraLabels|Additional labels to be added to all deployment resources||
+|console.jobAnnotations|Annotations to be added to all job resources||
+|console.jobExtraLabels|Additional labels to be added to all job resources||
+|console.service.annotations|Annotations to be added to all service resources||
+|console.service.extraLabels|Additional labels to be added to all service resources||
+|console.service.ingress.annotations|Annotations to be added to the ingress resource||
+|console.service.ingress.extraLabels|Additional labels to be added to the ingress resource||
 
 ## Accessing the Console
 
@@ -129,6 +151,17 @@ $ helm upgrade my-console stratos/console --recreate-pods
 
 After the upgrade, perform a `helm list` to ensure your console is the latest version.
 
+## Uninstalling
+
+To uninstall Stratos, delete the Helm release and also delete the Kubernetes namespace:
+
+```
+helm delete --namespace=console --name my-console --purge
+kubectl delete namespace console
+```
+
+> Note: Stratos creates secrets in the namespace as part of an initialization job. These are not managed by Helm, so make sure you
+delete the namespace to remove these secrets. 
 
 # Advanced Topics
 
@@ -140,7 +173,7 @@ If your Kubernetes deployment supports automatic configuration of a load balance
 helm install stratos/console --namespace=console --name my-console --set console.service.type=LoadBalancer
 ```
 
-### Using an Ingress Controller
+## Using an Ingress Controller
 
 If your Kubernetes Cluster supports Ingress, you can expose Stratos through Ingress by supplying the appropriate ingress configuration when installing.
 
@@ -181,15 +214,15 @@ helm install stratos/console -f private_overrides.yaml --namespace=metrics
 
 ## Deploying with your own TLS certificates
 
-By default the console will generate self-signed certificates for demo purposes. To configure Stratos to use your provided TLS certificate, create a TLS secret in the namespace you are installing into and specify this secret name using the `` when installing.
+By default the console will generate self-signed certificates for demo purposes. To configure Stratos to use your provided TLS certificate, create a TLS secret in the namespace you are installing into and specify this secret name using the helm chart value `console.tlsSecretName` when installing.
 
 Assuming you have your certificate and key in the files `tls.crt` and `tls.key`, create the secret with:
 
 ```
-kubectl create secret tls -n NAMESPACE  stratos-tls-secret --cert=tls.crt --key=tls.key
+kubectl create secret tls -n NAMESPACE stratos-tls-secret --cert=tls.crt --key=tls.key
 ```
 
-> Where NAMESPACE is the namespace you are installing Stratos into - you will need to manually create the namespace first if it does not already exist.
+> Where `NAMESPACE` is the namespace you are installing Stratos into - you will need to manually create the namespace first if it does not already exist.
 
 You can now install Stratos with:
 
@@ -245,6 +278,27 @@ To deploy using the latest Helm chart directly from out GitHub repository
 $ helm install console --namespace console --name my-console --set console.localAdminPassword=<password>
 ```
 
+## Specifying Annotations and Labels
+
+In some scenarios it is useful to be able to add custom annotations and/or labels to the Kubernetes resources that the Stratos Helm chart creates.
+
+The Stratos Helm chart exposes a number of Helm chart values that cabe specified in order to do this - they are:
+
+|Parameter|Description|Default|
+|----|---|---|
+|console.podAnnotations|Annotations to be added to all pod resources||
+|console.podExtraLabels|Additional labels to be added to all pod resources||
+|console.statefulSetAnnotations|Annotations to be added to all statefulset resources|
+|console.statefulSetExtraLabels|Additional labels to be added to all statefulset resources||
+|console.deploymentAnnotations|Annotations to be added to all deployment resources||
+|console.deploymentExtraLabels|Additional labels to be added to all deployment resources||
+|console.jobAnnotations|Annotations to be added to all job resources||
+|console.jobExtraLabels|Additional labels to be added to all job resources||
+|console.service.annotations|Annotations to be added to all service resources||
+|console.service.extraLabels|Additional labels to be added to all service resources||
+|console.service.ingress.annotations|Annotations to be added to the ingress resource||
+|console.service.ingress.extraLabels|Additional labels to be added to the ingress resource||
+
 ## Requirements
 
 ### Storage Class
@@ -299,7 +353,7 @@ helm install -f override.yaml stratos/console
 ```
 
 #### Create a default Storage Class
-Alternatively, you can configure a storage class with `storageclass.kubernetes.io/is-default-class` set to `true`. For instance the following storage class will be declared as the default. If you don't have the `hostpath` provisioner available in your local cluster, please follow the instructions on [link] (https://github.com/kubernetes-incubator/external-storage/tree/master/docs/demo/hostpath-provisioner), to deploy one.
+Alternatively, you can configure a storage class with `storageclass.kubernetes.io/is-default-class` set to `true`. For instance the following storage class will be declared as the default. If you don't have the `hostpath` provisioner available in your local cluster, please follow the instructions on [link](https://github.com/kubernetes-incubator/external-storage/tree/master/docs/demo/hostpath-provisioner), to deploy one.
 
 If the hostpath provisioner is available, save the file to `storageclass.yaml`
 
@@ -319,5 +373,5 @@ To create it in your kubernetes cluster, execute the following.
 kubectl create -f storageclass.yaml
 ```
 
-See [Storage Class documentation] ( https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/) for more insformation.
+See [Storage Class documentation](https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/) for more information.
 
