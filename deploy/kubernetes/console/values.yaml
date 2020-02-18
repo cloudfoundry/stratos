@@ -21,7 +21,8 @@ console:
   sessionStoreSecret:
   # Stratos Services
   service:
-    annotations: []
+    annotations: {}
+    extraLabels: {}
     externalIPs: []
     loadBalancerIP:
     loadBalancerSourceRanges: []
@@ -71,16 +72,32 @@ console:
   # Secret containing certificate for the Console
   tlsSecretName:
 
+  # URL of a Cloud Foundry to use for authentication and to auto-register on login
   autoRegisterCF: ~
 
-  statefulSetAnnotations: ~
+  # Custom annotations to apply to Stateful sets
+  statefulSetAnnotations: {}
 
-  statefulSetExtraLabels: ~
+  # Extra labels to apply to Stateful sets
+  statefulSetExtraLabels: {}
 
-  podAnnotations: ~
+  # Custom annotations to apply to Deployments
+  deploymentAnnotations: {}
 
-  podExtraLabels: ~
+  # Extra labels to apply to Deployments
+  deploymentExtraLabels: {}
 
+  # Custom annotations to apply to Jobs
+  jobAnnotations: {}
+
+  # Extra labels to apply to Jobs
+  jobExtraLabels: {}
+
+  # Custom annotations to apply to Pods
+  podAnnotations: {}
+
+  # Extra labels to apply to Pods
+  podExtraLabels: {}
   
 images:
   console: stratos-console
