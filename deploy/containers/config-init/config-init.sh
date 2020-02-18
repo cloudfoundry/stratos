@@ -139,18 +139,16 @@ EOF
 
   echo "Creating secret for the Encryption Key: ${NAME}"
 
-  cat create-key-secret.yaml
-  
+ 
   # Create secret for the Encryption Key
   curl -k -s \
       --fail \
       -X POST \
-      -v \
       -d @create-key-secret.yaml \
       -H "Authorization: Bearer $KUBE_TOKEN" \
       -H 'Accept: application/json' \
       -H 'Content-Type: application/json' \
-      ${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/secrets
+      ${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/secrets > /dev/null &2>1
 
   RET_CREATE=$?
   echo "Create Encryption Key secret exit code: $RET_CREATE"
