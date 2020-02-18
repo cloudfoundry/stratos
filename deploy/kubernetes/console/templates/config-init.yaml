@@ -80,7 +80,6 @@ spec:
   template:
     metadata:
       name: "stratos-config-init"
-     
 {{- if .Values.console.podAnnotations }}
       annotations:
 {{ toYaml .Values.console.podAnnotations | indent 8 }}
