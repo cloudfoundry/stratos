@@ -30,7 +30,7 @@ spec:
 {{- end }}
       containers:
       - name: fdbserver
-        image: {{ template "fdb.image" .Values.fdbserver.image }}
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.fdbserver}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         - name: FDB_COORDINATOR

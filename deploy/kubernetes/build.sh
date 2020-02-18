@@ -207,7 +207,7 @@ if [ "${CHART_ONLY}" == "false" ]; then
 
   # Build and push an image based on the nginx container (Front-end)
   log "-- Building/publishing the runtime container image for the Console web server (frontend)"
-  patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
+  #patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
 
   # Build any custom images added by a fork
   if [ "${HAS_CUSTOM_BUILD}" == "true" ]; then

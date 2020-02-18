@@ -87,6 +87,8 @@ images:
   proxy: stratos-jetstream
   mariadb: stratos-mariadb
   configInit: stratos-config-init
+  fdbserver: stratos-fdbserver
+  fdbdoclayer: stratos-fdbdoclayer
 
 # Specify which storage class should be used for PVCs
 #storageClass: default
@@ -131,10 +133,6 @@ uaa:
 
 fdbserver:
   replicas: 1
-  image:
-    registry: docker.io
-    repository: kreinecke/foundationdb
-    tag: 6.0.18-k8s
   service:
     name: fdbserver
     port: 4500
@@ -143,10 +141,6 @@ fdbserver:
 
 fdbdoclayer:
   replicas: 1
-  image:
-    registry: docker.io
-    repository: kreinecke/fdb-document-layer-k8s-tls
-    tag: latest
   service:
     name: fdbdoclayer
     port: 27016

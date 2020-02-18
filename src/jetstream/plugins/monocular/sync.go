@@ -72,7 +72,6 @@ func (m *Monocular) processSyncRequests() {
 				log.Warn("Request to sync repository failed: %v", err)
 				metadata.Status = "Sync Failed"
 			} else {
-				//TODO kate extract status from response
 				statusResponse := common.SyncJobStatusResponse{}
 				defer response.Body.Close()
 				err := json.NewDecoder(response.Body).Decode(&statusResponse)
