@@ -224,7 +224,7 @@ DEST_HELM_CHART_PATH="${STRATOS_PATH}/deploy/kubernetes/helm-chart"
 
 rm -rf ${DEST_HELM_CHART_PATH}
 mkdir -p ${DEST_HELM_CHART_PATH}
-cp -RT ${SRC_HELM_CHART_PATH}/ ${DEST_HELM_CHART_PATH}/
+cp -R ${SRC_HELM_CHART_PATH}/. ${DEST_HELM_CHART_PATH}/
 
 pushd ${DEST_HELM_CHART_PATH} > /dev/null
 
