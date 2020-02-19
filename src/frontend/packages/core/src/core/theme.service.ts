@@ -2,7 +2,7 @@ import { OverlayContainer } from '@angular/cdk/overlay';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { first, map, filter } from 'rxjs/operators';
 
 import { SetThemeAction } from '../../../store/src/actions/dashboard-actions';
 import { DashboardOnlyAppState } from '../../../store/src/app-state';
@@ -57,6 +57,7 @@ export class ThemeService {
 
   getTheme(): Observable<StratosTheme> {
     return this.store.select(selectDashboardState).pipe(
+      filter(dashboardState => !!dashboardState),
       map(dashboardState => this.findTheme(dashboardState.themeKey)),
     );
   }
@@ -145,7 +146,7 @@ export class ThemeService {
     this.osThemeInfo.isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches;
 
     this.store.select(selectDashboardState).pipe(
-      first()
+      first(),
     ).subscribe(dashboardState => dashboardState.themeKey === osTheme.key && this.setTheme(osTheme.key));
   }
 }

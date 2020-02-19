@@ -9,8 +9,9 @@ import { RouterNav } from 'frontend/packages/store/src/actions/router.actions';
 import { HideSnackBar, ShowSnackBar } from 'frontend/packages/store/src/actions/snackBar.actions';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
+import { endpointsEntityRequestDataSelector } from '../../../../../../../../store/src/selectors/endpoint.selectors';
 import { GetHelmReleases } from '../../../store/workloads.actions';
 import { HelmReleaseChartData, HelmReleaseResource } from '../../../workload.types';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
@@ -27,6 +28,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private busyDeletingSubject = new ReplaySubject<boolean>();
   public isBusy$: Observable<boolean>;
   public hasResources$: Observable<boolean>;
+  public hasAllResources$: Observable<boolean>;
   private readonly DEFAULT_LOADING_MESSAGE = 'Retrieving Release Details';
   public loadingMessage = this.DEFAULT_LOADING_MESSAGE;
 
@@ -133,6 +135,13 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       map(([chartData, resources]) => !!chartData && !!resources)
     );
 
+    this.hasAllResources$ = combineLatest([
+      this.resources$,
+      this.hasResources$
+    ]).pipe(
+      map(([resources, hasSome]) => hasSome && resources && resources.length > 0)
+    );
+
     this.deleteReleaseConfirmation = new ConfirmationDialogConfig(
       `Delete Workload`,
       {
@@ -201,5 +210,20 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       `namespaces`,
       namespace
     ];
+  }
+
+  public createClusterLink(): string[] {
+    return [
+      `/kubernetes`,
+      this.helmReleaseHelper.endpointGuid,
+    ];
+  }
+
+  public getClusterName(): Observable<string> {
+    return this.store.select(endpointsEntityRequestDataSelector(this.helmReleaseHelper.endpointGuid)).pipe(
+      filter(e => !!e),
+      map(e => e.name),
+      first()
+    );
   }
 }

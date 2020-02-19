@@ -41,16 +41,24 @@ This will do the following:
 {{- end -}}
 {{ end }}
 
-
 {{/*
-Get SCf UAA Endpoint
+Get SCF UAA Endpoint
 */}}
 {{- define "scfUaaEndpoint" -}}
+
 {{- $uaa_zone := default "scf" .Values.env.UAA_ZONE -}}
 {{- if and .Values.env.DOMAIN (not .Values.env.UAA_HOST) -}}
-{{- printf "https://%s.uaa.%s:%v" $uaa_zone .Values.env.DOMAIN .Values.env.UAA_PORT -}}
+{{- if .Values.env.UAA_ZONE -}}
+{{- printf "https://%s.uaa.%s:%v" .Values.env.UAA_ZONE .Values.env.DOMAIN .Values.env.UAA_PORT -}}
+{{- else -}}
+{{- printf "https://uaa.%s:%v" .Values.env.DOMAIN .Values.env.UAA_PORT -}}
+{{- end -}}
 {{- else if .Values.env.UAA_HOST -}}
-{{- printf "https://%s.%s:%v" $uaa_zone .Values.env.UAA_HOST .Values.env.UAA_PORT -}}
+{{- if .Values.env.UAA_ZONE -}}
+{{- printf "https://%s.%s:%v" .Values.env.UAA_ZONE .Values.env.UAA_HOST .Values.env.UAA_PORT -}}
+{{- else -}}
+{{- printf "https://%s:%v" .Values.env.UAA_HOST .Values.env.UAA_PORT -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 

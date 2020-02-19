@@ -2,15 +2,6 @@
   <div class="legend-items-container">
     <div class="legend-items">
       <div class="legend-item" tabindex="-1">
-        <div class="item-value">{{ row.status.capacity.pods }}</div>
-        <div class="item-label">Pods</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="legend-items-container">
-    <div class="legend-items">
-      <div class="legend-item" tabindex="-1">
         <div class="item-value">{{ getMemory(row.status.capacity.memory) | bytesToHumanSize }}</div>
         <div class="item-label">Memory</div>
       </div>

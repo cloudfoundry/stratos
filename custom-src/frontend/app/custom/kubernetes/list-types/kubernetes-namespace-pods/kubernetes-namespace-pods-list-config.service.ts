@@ -17,7 +17,9 @@ export class KubernetesNamespacePodsListConfigService extends BaseKubernetesPods
     kubeId: BaseKubeGuid,
     public kubeNamespaceService: KubernetesNamespaceService,
   ) {
-    super(kubeId.guid);
+    super(kubeId.guid, [
+      BaseKubernetesPodsListConfigService.namespaceColumnId,
+    ]);
     this.podsDataSource = new KubernetesNamespacePodsDataSource(store, kubeId, this, kubeNamespaceService);
   }
 

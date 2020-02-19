@@ -23,7 +23,8 @@ describe('KubernetesPodStatusComponent', () => {
       },
       spec: {
         containers: []
-      }
+      },
+      expandedStatus: {}
     } as KubernetesPod;
     fixture.detectChanges();
   });

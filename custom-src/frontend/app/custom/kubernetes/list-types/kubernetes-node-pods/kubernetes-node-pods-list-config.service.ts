@@ -19,7 +19,9 @@ export class KubernetesNodePodsListConfigService extends BaseKubernetesPodsListC
     kubeId: BaseKubeGuid,
     public kubeNodeService: KubernetesNodeService,
   ) {
-    super(kubeId.guid);
+    super(kubeId.guid, [
+      BaseKubernetesPodsListConfigService.nodeColumnId
+    ]);
     this.podsDataSource = new KubernetesNodePodsDataSource(store, kubeId, this, kubeNodeService);
   }
 

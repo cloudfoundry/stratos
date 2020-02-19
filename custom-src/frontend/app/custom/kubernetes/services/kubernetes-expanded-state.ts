@@ -18,6 +18,17 @@ export enum KubernetesNodeConstants {
   NodeUnreachablePodReason = 'NodeLost'
 }
 
+/**
+ * List of known status that could be returned from `createPodExpandedStatus`
+ */
+export enum KubernetesPodExpandedStatusTypes {
+  RUNNING = 'Running',
+  UNKNOWN = 'Unknown',
+  TERMINATING = 'Terminating',
+  INIT = 'Init',
+  COMPLETED = 'Completed'
+}
+
 export class KubernetesPodExpandedStatusHelper {
 
   static updatePodWithExpandedStatus(pod: KubernetesPod): KubernetesPod {
@@ -56,19 +67,19 @@ export class KubernetesPodExpandedStatusHelper {
       } else if (!!state.terminated) {
         if (state.terminated.reason.length === 0) {
           if (state.terminated.signal !== 0) {
-            reason = `Init:Signal:${state.terminated.signal}`;
+            reason = `${KubernetesPodExpandedStatusTypes.INIT}:Signal:${state.terminated.signal}`;
           } else {
-            reason = `Init:ExitCode:${state.terminated.exitCode}`;
+            reason = `${KubernetesPodExpandedStatusTypes.INIT}:ExitCode:${state.terminated.exitCode}`;
           }
         } else {
-          reason = `Init:${state.terminated.reason}`;
+          reason = `${KubernetesPodExpandedStatusTypes.INIT}:${state.terminated.reason}`;
         }
         initializing = true;
       } else if (!!state.waiting && !!state.waiting.reason && state.waiting.reason !== 'PodInitializing') {
-        reason = `Init:${state.waiting.reason}`;
+        reason = `${KubernetesPodExpandedStatusTypes.INIT}:${state.waiting.reason}`;
         initializing = true;
       } else {
-        reason = `Init:${i}/${pod.spec.initContainers.length}`;
+        reason = `${KubernetesPodExpandedStatusTypes.INIT}:${i}/${pod.spec.initContainers.length}`;
         initializing = true;
       }
     }
@@ -98,15 +109,15 @@ export class KubernetesPodExpandedStatusHelper {
       }
 
       // change pod status back to "Running" if there is at least one container still reporting as "Running" status
-      if (reason === 'Completed' && hasRunning) {
-        reason = 'Running';
+      if (reason === KubernetesPodExpandedStatusTypes.COMPLETED && hasRunning) {
+        reason = KubernetesPodExpandedStatusTypes.RUNNING;
       }
     }
 
     if (!!pod.deletionTimestamp && pod.status.reason === KubernetesNodeConstants.NodeUnreachablePodReason) {
-      reason = 'Unknown';
+      reason = KubernetesPodExpandedStatusTypes.UNKNOWN;
     } else if (!!pod.deletionTimestamp) {
-      reason = 'Terminating';
+      reason = KubernetesPodExpandedStatusTypes.TERMINATING;
     }
 
 
