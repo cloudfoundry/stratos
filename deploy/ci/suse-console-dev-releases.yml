@@ -163,7 +163,6 @@ jobs:
         params:
           dockerfile: stratos/deploy/containers/monocular/fdb-server/Dockerfile
           build: stratos/deploy/containers/monocular/fdb-server/
-          target_name: prod-build
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
@@ -171,7 +170,6 @@ jobs:
         params:
           dockerfile: stratos/deploy/containers/monocular/fdb-doclayer/Dockerfile
           build: stratos/deploy/containers/monocular/fdb-doclayer/
-          target_name: prod-build
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
