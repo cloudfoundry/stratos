@@ -13,12 +13,13 @@ fdbdoclayer:
   replicas: 1
   image:
     registry: docker.io
-    repository: kreinecke/fdb-document-layer
-    tag: 1.6.3-k8s
+    repository: kreinecke/fdb-document-layer-k8s-tls
+    tag: latest
     pullPolicy: Always
   service:
     name: fdbdoclayer
     port: 27016
+  tls: true
 
 # Installs networkPolicy for the services. This will allow communication betweeen the services in
 # environments where the default policy is deny

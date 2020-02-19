@@ -18,7 +18,10 @@ package chartsvc
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
+	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -81,13 +84,24 @@ func main() {
 	fdbURL := flag.String("doclayer-url", "mongodb://fdb-service/27016", "FoundationDB Document Layer URL")
 	fDB := flag.String("doclayer-database", "monocular-plugin", "FoundationDB Document-Layer database")
 
+	//Flags for Serve-Mode TLS
+	cACertFile := flag.String("cafile", "", "Path to CA certificate to use for client verification.")
+	certFile := flag.String("certfile", "", "Path to TLS certificate.")
+	keyFile := flag.String("keyfile", "", "Path to TLS key.")
+
+	//TLS options must either be all set to enabled TLS, or none set to disable TLS
+	var tlsEnabled = *cACertFile != "" && *keyFile != "" && *certFile != ""
+	if !(tlsEnabled || (*cACertFile == "" && *keyFile == "" && *certFile == "")) {
+		log.Fatal("To enable TLS, all 3 TLS cert paths must be set.")
+	}
+
 	flag.Parse()
 
 	if *debug {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	InitFDBDocLayerConnection(fdbURL, fDB, debug)
+	InitFDBDocLayerConnection(fdbURL, fDB, &tlsEnabled, *cACertFile, *certFile, *keyFile, debug)
 
 	n := SetupRoutes()
 
@@ -100,11 +114,39 @@ func main() {
 	http.ListenAndServe(addr, n)
 }
 
-func InitFDBDocLayerConnection(fdbURL *string, fDB *string, debug *bool) {
+func InitFDBDocLayerConnection(fdbURL *string, fDB *string, tlsEnabled *bool, CAFile string, certFile string, keyFile string, debug *bool) {
 
 	log.Debugf("Attempting to connect to FDB: %v, %v, debug: %v", *fdbURL, *fDB, *debug)
 
+	var tlsConfig *tls.Config
+
+	if *tlsEnabled {
+		//Load CA Cert from file here
+		CA, err := ioutil.ReadFile(CAFile) // just pass the file name
+		if err != nil {
+			log.Fatalf("Cannot load CA certificate from file: %v.", err)
+			return
+		}
+		CACert := x509.NewCertPool()
+		ok := CACert.AppendCertsFromPEM([]byte(CA))
+		if !ok {
+			log.Fatalf("Cannot append CA certificate to certificate pool.")
+			return
+		}
+		//Now load the key pair and create tls options struct
+		clientKeyPair, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			log.Fatalf("Cannot load server keypair: %v", err)
+			return
+		}
+
+		tlsConfig = &tls.Config{RootCAs: CACert, Certificates: []tls.Certificate{clientKeyPair}}
+	}
+
 	clientOptions := options.Client().ApplyURI(*fdbURL)
+	if *tlsEnabled {
+		clientOptions.SetTLSConfig(tlsConfig)
+	}
 	client, err := fdbDatastore.NewDocLayerClient(context.Background(), clientOptions)
 	if err != nil {
 		log.Fatalf("Can't create client for FoundationDB document layer: %v. URL provided was: %v.", err, *fdbURL)

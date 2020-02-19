@@ -1,4 +1,4 @@
-IMAGE_REPO ?= docker.io/kreinecke/suse-fdb-chart-repo
+IMAGE_REPO ?= docker.io/kreinecke/suse-fdb-chart-repo-tls
 IMAGE_TAG ?= latest
 # Version of the binary to be produced
 VERSION ?= $$(git rev-parse HEAD)

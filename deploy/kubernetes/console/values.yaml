@@ -104,6 +104,8 @@ images:
   proxy: stratos-jetstream
   mariadb: stratos-mariadb
   configInit: stratos-config-init
+  fdbserver: stratos-fdbserver
+  fdbdoclayer: stratos-fdbdoclayer
 
 # Specify which storage class should be used for PVCs
 #storageClass: default
@@ -145,6 +147,31 @@ uaa:
   consoleClientSecret: 
   consoleAdminIdentifier: 
   skipSSLValidation: false
+
+fdbserver:
+  replicas: 1
+  service:
+    name: fdbserver
+    port: 4500
+  networkPolicy:
+    enabled: false
+
+fdbdoclayer:
+  replicas: 1
+  service:
+    name: fdbdoclayer
+    port: 27016
+  tls: true
+  networkPolicy:
+    enabled: false
+
+chartrepo:
+  service:
+    name: chartrepo
+    port: 8080
+  tls: true
+  networkPolicy:
+    enabled: false
 
 # SCF values compatability 
 env:

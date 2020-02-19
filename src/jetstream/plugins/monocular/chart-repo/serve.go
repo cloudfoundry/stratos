@@ -36,12 +36,32 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		cACert, err := cmd.Flags().GetString("cafile")
+		if err != nil {
+			log.Fatal(err)
+		}
+		key, err := cmd.Flags().GetString("keyfile")
+		if err != nil {
+			log.Fatal(err)
+		}
+		cert, err := cmd.Flags().GetString("certfile")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		//TLS options must either be all set to enabled TLS, or none set to disable TLS
+		var tlsEnabled = cACert != "" && key != "" && cert != ""
+		if !(tlsEnabled || (cACert == "" && key == "" && cert == "")) {
+			cmd.Help()
+			log.Fatal("To enable TLS, all 3 TLS cert paths must be set.")
+		}
+
 		debug, err := cmd.Flags().GetBool("debug")
 		if err != nil {
 			log.Fatal(err)
 		}
 		authorizationHeader := os.Getenv("AUTHORIZATION_HEADER")
 
-		initOnDemandEndpoint(fdbURL, fDB, authorizationHeader, debug)
+		initOnDemandEndpoint(fdbURL, fDB, tlsEnabled, cACert, cert, key, authorizationHeader, debug)
 	},
 }

@@ -1,4 +1,0 @@
-dependencies:
-- name: fdbdoclayer
-  version: 0.1.0
-  repository: file://./local-helm/fdbdoclayer/

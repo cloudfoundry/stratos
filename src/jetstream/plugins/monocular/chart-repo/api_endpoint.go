@@ -18,8 +18,11 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -171,7 +174,7 @@ func OnDemandDelete(w http.ResponseWriter, req *http.Request, params Params) {
 	}
 
 	//Return delete status in response
-	
+
 	response := common.DeleteJobStatusResponse{requestUUID.String(), status}
 	js, err := json.Marshal(response)
 	if err != nil {
@@ -200,7 +203,7 @@ func RepoSyncStatus(w http.ResponseWriter, req *http.Request, params Params) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	
+
 	response := common.SyncJobStatusResponse{requestUUID.String(), status.Status}
 	js, err := json.Marshal(response)
 	if err != nil {
@@ -244,7 +247,7 @@ func RepoDeleteStatus(w http.ResponseWriter, req *http.Request, params Params) {
 	w.Write(js)
 }
 
-func initOnDemandEndpoint(fdbURL string, fdbName string, authHeader string, debug bool) {
+func initOnDemandEndpoint(fdbURL string, fdbName string, tlsEnabled bool, caCertFile string, certFile string, keyFile string, authHeader string, debug bool) {
 
 	authorizationHeader = authHeader
 	fDBName = fdbName
@@ -253,7 +256,7 @@ func initOnDemandEndpoint(fdbURL string, fdbName string, authHeader string, debu
 		log.SetLevel(log.DebugLevel)
 	}
 
-	InitFDBDocLayerConnection(&fdbURL, &fdbName, &debug)
+	InitFDBDocLayerConnection(&fdbURL, &fdbName, &tlsEnabled, &caCertFile, &certFile, &keyFile, &debug)
 
 	n := setupRoutes()
 
@@ -263,14 +266,48 @@ func initOnDemandEndpoint(fdbURL string, fdbName string, authHeader string, debu
 	}
 	addr := ":" + port
 	log.Infof("On-Demand endpoint listening on: %v", addr)
+	if tlsEnabled {
+		log.Infof("TLS is enabled.")
+	} else {
+		log.Infof("TLS is disabled.")
+	}
 	http.ListenAndServe(addr, n)
 }
 
-func InitFDBDocLayerConnection(fdbURL *string, fDB *string, debug *bool) {
+func InitFDBDocLayerConnection(fdbURL *string, fDB *string, tlsEnabled *bool, CAFile *string, certFile *string, keyFile *string, debug *bool) {
 
 	log.Debugf("Attempting to connect to FDB: %v, %v, debug: %v", *fdbURL, *fDB, *debug)
 
+	var tlsConfig *tls.Config
+
+	if *tlsEnabled {
+		//Load CA Cert from file here
+		CA, err := ioutil.ReadFile(*CAFile) // just pass the file name
+		if err != nil {
+			log.Fatalf("Cannot load CA certificate from file: %v.", err)
+			return
+		}
+		CACert := x509.NewCertPool()
+		ok := CACert.AppendCertsFromPEM([]byte(CA))
+		if !ok {
+			log.Fatalf("Cannot append CA certificate to certificate pool.")
+			return
+		}
+		//Now load the key pair and create tls options struct
+		clientKeyPair, err := tls.LoadX509KeyPair(*certFile, *keyFile)
+		if err != nil {
+			log.Fatalf("Cannot load server keypair: %v", err)
+			return
+		}
+
+		tlsConfig = &tls.Config{RootCAs: CACert, Certificates: []tls.Certificate{clientKeyPair}}
+	}
+
+	//Init client options and open connection
 	clientOptions := options.Client().ApplyURI(*fdbURL).SetMinPoolSize(10).SetMaxPoolSize(100)
+	if *tlsEnabled {
+		clientOptions.SetTLSConfig(tlsConfig)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	client, err := fdb.NewDocLayerClient(ctx, clientOptions)
@@ -280,5 +317,4 @@ func InitFDBDocLayerConnection(fdbURL *string, fDB *string, debug *bool) {
 		return
 	}
 	log.Debugf("FDB Document Layer client created.")
-
 }

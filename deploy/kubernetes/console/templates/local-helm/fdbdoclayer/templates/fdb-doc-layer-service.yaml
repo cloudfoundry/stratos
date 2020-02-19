@@ -1,7 +1,8 @@
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "doclayer.fullname" . }}
+  name: {{ .Release.Name }}-fdbdoclayer
   labels:
     app: {{ template "fullname" . }}-fdbdoclayer
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"

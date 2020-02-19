@@ -1,3 +1,4 @@
+
 {{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
 apiVersion: apps/v1
 {{- else }}
@@ -29,7 +30,8 @@ spec:
 {{- end }}
       containers:
       - name: fdbserver
-        image: {{ template "fdb.image" .Values.fdbserver.image }}
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.fdbserver}}:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         - name: FDB_COORDINATOR
           value: {{ template "fullname" . }}-fdbserver.console.svc.cluster.local

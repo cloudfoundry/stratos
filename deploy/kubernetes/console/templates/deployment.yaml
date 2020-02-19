@@ -253,6 +253,18 @@ spec:
           value: {{ default "" .Values.console.userInviteSubject | quote }}
         - name: ENABLE_TECH_PREVIEW
           value: {{ default "false" .Values.console.techPreview | quote }}
+        {{- if .Values.fdbdoclayer.tls }}
+        - name: MONOCULAR_CRT_PATH
+          value: "/etc/monocular-certs/tls.crt"
+        - name: MONOCULAR_KEY_PATH
+          value: "/etc/monocular-certs/tls.key"
+        - name: MONOCULAR_CA_CRT_PATH
+          value: "/etc/monocular-certs/ca.crt"
+        {{- end }}
+        - name: HELM_FDB_URL
+          value: "mongodb://{{ .Release.Name }}-{{ .Values.fdbdoclayer.service.name }}:{{ .Values.fdbdoclayer.service.port }}"
+        - name: HELM_SYNC_SERVER_URL
+          value: "http://{{ .Release.Name }}-{{ .Values.chartrepo.service.name }}:{{ .Values.chartrepo.service.port }}"
         readinessProbe:
           httpGet:
             path: /pp/v1/ping
@@ -275,6 +287,11 @@ spec:
         {{- if .Values.console.templatesConfigMapName }}
         - mountPath: /etc/templates/
           name: "{{ .Release.Name }}-templates"
+          readOnly: true
+        {{- end }}
+        {{- if .Values.fdbdoclayer.tls }}
+        - mountPath: "/etc/monocular-certs"
+          name: "{{ .Release.Name }}-monocular-certs"
           readOnly: true
         {{- end }}
       {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
@@ -303,6 +320,12 @@ spec:
         configMap:
           name: {{ .Values.console.templatesConfigMapName }}
       {{- end }}
+      {{- if .Values.fdbdoclayer.tls }}
+      - name: "{{ .Release.Name }}-monocular-certs"
+        secret:
+          secretName: {{ template "fullname" . }}-fdbdoclayer-certs
+      {{- end }}
+
   replicas: 1
   strategy:
     type: RollingUpdate

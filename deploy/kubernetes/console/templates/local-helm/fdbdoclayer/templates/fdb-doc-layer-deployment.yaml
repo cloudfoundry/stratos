@@ -1,3 +1,4 @@
+
 {{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
 apiVersion: apps/v1
 {{- else }}
@@ -29,12 +30,23 @@ spec:
 {{- end }}
       containers:
       - name: fdbdoclayer
-        image: {{ template "fdb.image" .Values.fdbdoclayer.image }}
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.fdbdoclayer}}:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         - name: FDB_COORDINATOR
           value: {{ template "fullname" . }}-fdbserver
         - name: CLUSTER_ID
           value: chartdb:erlklkg
+        - name: ENABLE_TLS
+          value: {{ .Values.fdbdoclayer.tls  | quote }}
+        {{- if .Values.fdbdoclayer.tls }}
+        - name: SERVER_CRT
+          value: "/etc/secrets/tls.crt"
+        - name: SERVER_KEY
+          value: "/etc/secrets/tls.key"
+        - name: CA_CRT
+          value: "/etc/secrets/ca.crt"      
+        {{- end }}  
         ports:
         - containerPort: {{ .Values.fdbdoclayer.service.port }}
         livenessProbe:
@@ -47,3 +59,13 @@ spec:
             port: {{ .Values.fdbdoclayer.service.port }}
           initialDelaySeconds: 3
           periodSeconds: 10
+{{- if .Values.fdbdoclayer.tls }}
+        volumeMounts:
+        - name: certs
+          mountPath: "/etc/secrets"
+          readOnly: true
+      volumes:
+        - name: certs
+          secret:
+            secretName: {{ template "fullname" . }}-fdbdoclayer-certs
+{{- end }} 

@@ -2,7 +2,6 @@ package monocular
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -21,9 +20,12 @@ const (
 	foundationDBURLEnvVar = "HELM_FDB_URL"
 	syncServerURLEnvVar   = "HELM_SYNC_SERVER_URL"
 	// e.g. MY_CONSOLE_FDBDOCLAYER_FDBDOCLAYER_PORT=tcp://10.105.215.71:27016
-	fdbHostPortEnvVar = "FDBDOCLAYER_FDBDOCLAYER_PORT"
+	fdbHostPortEnvVar = "FDBDOCLAYER_PORT"
 	//MY_CONSOLE_CHARTREPO_PORT=tcp://10.108.171.246:8080
 	syncServerHostPortEnvVar = "CHARTREPO_PORT"
+	caCertEnvVar             = "MONOCULAR_CA_CRT_PATH"
+	tlsKeyEnvVar             = "MONOCULAR_KEY_PATH"
+	TLSCertEnvVar            = "MONOCULAR_CRT_PATH"
 )
 
 // Monocular is a plugin for Monocular
@@ -54,7 +56,10 @@ func (m *Monocular) Init() error {
 	fdbURL := m.FoundationDBURL
 	fDB := "monocular-plugin"
 	debug := false
-	m.ConfigureChartSVC(&fdbURL, &fDB, &debug)
+	caCertPath, _ := m.portalProxy.Env().Lookup(caCertEnvVar)
+	TLSCertPath, _ := m.portalProxy.Env().Lookup(TLSCertEnvVar)
+	tlsKeyPath, _ := m.portalProxy.Env().Lookup(tlsKeyEnvVar)
+	m.ConfigureChartSVC(&fdbURL, &fDB, caCertPath, TLSCertPath, tlsKeyPath, &debug)
 	m.chartSvcRoutes = chartsvc.SetupRoutes()
 	m.InitSync()
 	m.syncOnStartup()
@@ -62,21 +67,10 @@ func (m *Monocular) Init() error {
 }
 
 func (m *Monocular) configure() error {
-	if releaseName, ok := m.portalProxy.Env().Lookup(kubeReleaseNameEnvVar); ok {
-		// We are deployed in Kubernetes
-		releaseNameEnvVarPrefix := getReleaseNameEnvVarPrefix(releaseName)
-		if url, ok := m.portalProxy.Env().Lookup(fmt.Sprintf("%s_%s", releaseNameEnvVarPrefix, fdbHostPortEnvVar)); ok {
-			m.FoundationDBURL = strings.ReplaceAll(url, "tcp://", "mongodb://")
-		}
-		if url, ok := m.portalProxy.Env().Lookup(fmt.Sprintf("%s_%s", releaseNameEnvVarPrefix, syncServerHostPortEnvVar)); ok {
-			m.SyncServiceURL = strings.ReplaceAll(url, "tcp://", "http://")
-		}
 
-	} else {
-		// Env var lookup when not running in Kubernetes
-		m.FoundationDBURL = m.portalProxy.Env().String(foundationDBURLEnvVar, "")
-		m.SyncServiceURL = m.portalProxy.Env().String(syncServerURLEnvVar, "")
-	}
+	// Env var lookup for Monocular services
+	m.FoundationDBURL = m.portalProxy.Env().String(foundationDBURLEnvVar, "")
+	m.SyncServiceURL = m.portalProxy.Env().String(syncServerURLEnvVar, "")
 
 	log.Debugf("Foundation DB : %s", m.FoundationDBURL)
 	log.Debugf("Sync Server   : %s", m.SyncServiceURL)
@@ -147,8 +141,14 @@ func arrayContainsString(a []string, x string) bool {
 	return false
 }
 
-func (m *Monocular) ConfigureChartSVC(fdbURL *string, fDB *string, debug *bool) {
-	chartsvc.InitFDBDocLayerConnection(fdbURL, fDB, debug)
+func (m *Monocular) ConfigureChartSVC(fdbURL *string, fDB *string, cACertFile string, certFile string, keyFile string, debug *bool) error {
+	//TLS options must either be all set to enabled TLS, or none set to disable TLS
+	var tlsEnabled = cACertFile != "" && keyFile != "" && certFile != ""
+	if !(tlsEnabled || (cACertFile == "" && keyFile == "" && certFile == "")) {
+		return errors.New("To enable TLS, all 3 TLS cert paths must be set.")
+	}
+	chartsvc.InitFDBDocLayerConnection(fdbURL, fDB, &tlsEnabled, cACertFile, certFile, keyFile, debug)
+	return nil
 }
 
 func (m *Monocular) OnEndpointNotification(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
