@@ -165,9 +165,9 @@ fdbdoclayer:
   networkPolicy:
     enabled: false
 
-chartrepo:
+chartsync:
   service:
-    name: chartrepo
+    name: chartsync
     port: 8080
   tls: true
   networkPolicy:

@@ -60,6 +60,12 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-repository))/stratos-fdbdoclayer
+- name: chartsync-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repository))/stratos-chartsync
 
 # Artifacts
 - name: image-tag
@@ -135,13 +141,6 @@ jobs:
           build_args_file: image-tag/build-args
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      - put: config-init-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.init
-          build: stratos/
-          tag: image-tag/v2-alpha-tag
-          patch_base_reg: ((patch-base-reg))
-          patch_base_tag: ((patch-base-tag))
       - put: mariadb-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
@@ -159,6 +158,14 @@ jobs:
           build_args_file: image-tag/ui-build-args
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
+      - put: config-init-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.init
+          build: stratos/
+          tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
+    - do:
       - put: fdbserver-image
         params:
           dockerfile: stratos/deploy/containers/monocular/fdb-server/Dockerfile
@@ -170,6 +177,13 @@ jobs:
         params:
           dockerfile: stratos/deploy/containers/monocular/fdb-doclayer/Dockerfile
           build: stratos/deploy/containers/monocular/fdb-doclayer/
+          tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
+      - put: chartsync-image
+        params:
+          dockerfile: stratos/src/jetstream/plugins/monocular/chart-repo/Dockerfile
+          build: stratos/src/jetstream/plugins/monocular/chart-repo/
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))

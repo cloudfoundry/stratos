@@ -264,7 +264,7 @@ spec:
         - name: HELM_FDB_URL
           value: "mongodb://{{ .Release.Name }}-{{ .Values.fdbdoclayer.service.name }}:{{ .Values.fdbdoclayer.service.port }}"
         - name: HELM_SYNC_SERVER_URL
-          value: "http://{{ .Release.Name }}-{{ .Values.chartrepo.service.name }}:{{ .Values.chartrepo.service.port }}"
+          value: "http://{{ .Release.Name }}-{{ .Values.chartsync.service.name }}:{{ .Values.chartsync.service.port }}"
         readinessProbe:
           httpGet:
             path: /pp/v1/ping
