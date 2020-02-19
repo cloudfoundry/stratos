@@ -49,7 +49,7 @@ spec:
       volumes:
         - name: certs
           secret:
-            secretName: {{ template "fullname" . }}-fdbdoclayer-certs
+            secretName: {{ .Release.Name }}-fdbdoclayer-certs
       {{- end }}
 ---
 apiVersion: v1

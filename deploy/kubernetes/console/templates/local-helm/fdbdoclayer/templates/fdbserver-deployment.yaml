@@ -6,7 +6,7 @@ apiVersion: apps/v1beta2
 {{- end }}
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-fdbserver
+  name: stratos-fdbserver
   labels:
     app: {{ template "fullname" . }}-fdbserver
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -34,7 +34,7 @@ spec:
         imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         - name: FDB_COORDINATOR
-          value: {{ template "fullname" . }}-fdbserver.console.svc.cluster.local
+          value: {{ .Release.Name }}-fdbserver.console.svc.cluster.local
         - name: CLUSTER_ID
           value: chartdb:erlklkg
         ports:

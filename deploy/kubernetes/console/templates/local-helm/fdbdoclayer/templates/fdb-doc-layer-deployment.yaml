@@ -6,7 +6,7 @@ apiVersion: apps/v1beta2
 {{- end }}
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-fdbdoclayer
+  name: stratos-fdbdoclayer
   labels:
     app: {{ template "fullname" . }}-fdbdoclayer
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -34,7 +34,7 @@ spec:
         imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         - name: FDB_COORDINATOR
-          value: {{ template "fullname" . }}-fdbserver
+          value: {{ .Release.Name }}-fdbserver
         - name: CLUSTER_ID
           value: chartdb:erlklkg
         - name: ENABLE_TLS
@@ -67,5 +67,5 @@ spec:
       volumes:
         - name: certs
           secret:
-            secretName: {{ template "fullname" . }}-fdbdoclayer-certs
+            secretName: {{ .Release.Name }}-fdbdoclayer-certs
 {{- end }} 
