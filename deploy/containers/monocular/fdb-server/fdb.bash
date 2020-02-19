@@ -23,9 +23,9 @@
 source /var/fdb/scripts/create_server_environment.bash
 create_server_environment
 source /var/fdb/.fdbenv
-echo "Starting FDB server listening on: $PUBLIC_IP:$COORDINATOR_PORT public address: $PUBLIC_IP:$COORDINATOR_PORT"
+echo "Starting FDB server listening on: $PUBLIC_IP:$FDB_PORT public address: $PUBLIC_IP:$FDB_PORT"
 cat /var/fdb/fdb.cluster
 source /var/fdb/scripts/configure_db.bash
 configure_db &
-fdbserver --listen_address $PUBLIC_IP:$COORDINATOR_PORT --public_address $PUBLIC_IP:$COORDINATOR_PORT \
+fdbserver --listen_address $PUBLIC_IP:$FDB_PORT --public_address $PUBLIC_IP:$FDB_PORT \
 	--datadir /var/fdb/data --logdir /var/fdb/logs
