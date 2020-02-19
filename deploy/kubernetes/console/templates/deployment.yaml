@@ -262,7 +262,7 @@ spec:
         - name: HELM_FDB_URL
           value: "mongodb://{{ .Release.Name }}-fdbdoclayer:27016"
         - name: HELM_SYNC_SERVER_URL
-          value: "http://{{ .Release.Name }}-chartrepo:8080"
+          value: "http://{{ .Release.Name }}-chartsync:8080"
         readinessProbe:
           httpGet:
             path: /pp/v1/ping
