@@ -106,6 +106,7 @@ images:
   configInit: stratos-config-init
   fdbserver: stratos-fdbserver
   fdbdoclayer: stratos-fdbdoclayer
+  chartsync: stratos-chartsync
 
 # Specify which storage class should be used for PVCs
 #storageClass: default
@@ -148,30 +149,9 @@ uaa:
   consoleAdminIdentifier: 
   skipSSLValidation: false
 
-fdbserver:
-  replicas: 1
-  service:
-    name: fdbserver
-    port: 4500
-  networkPolicy:
-    enabled: false
-
-fdbdoclayer:
-  replicas: 1
-  service:
-    name: fdbdoclayer
-    port: 27016
-  tls: true
-  networkPolicy:
-    enabled: false
-
-chartrepo:
-  service:
-    name: chartrepo
-    port: 8080
-  tls: true
-  networkPolicy:
-    enabled: false
+# Replicas for FDB - do not edit
+fdbserverReplicas: 1
+fdbdoclayerReplicas: 1
 
 # SCF values compatability 
 env:

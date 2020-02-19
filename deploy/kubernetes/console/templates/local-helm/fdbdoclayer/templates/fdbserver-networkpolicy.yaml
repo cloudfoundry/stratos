@@ -16,6 +16,6 @@ spec:
       release: {{ .Release.Name }}
   ingress:
   - ports:
-    - port: {{ .Values.fdbserver.service.port }}
+    - port: 4500
       protocol: TCP
 {{- end }}

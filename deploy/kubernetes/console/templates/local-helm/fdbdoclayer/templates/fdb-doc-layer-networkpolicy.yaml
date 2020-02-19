@@ -16,6 +16,6 @@ spec:
       release: {{ .Release.Name }}
   ingress:
     ports:
-      port: {{ .Values.fdbdoclayer.service.port }}
+      port: 27016
       protocol: TCP
 {{- end }}
