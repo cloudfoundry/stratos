@@ -29,6 +29,8 @@ const StratosSSOHeader = "x-stratos-sso-login"
 const StratosSSOErrorHeader = "x-stratos-sso-error"
 
 func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error, doNotLog bool, msg string) error {
+	log.Debug("handleSessionError")
+
 	// Add header so front-end knows SSO login is enabled
 	if config.SSOLogin {
 		// A non-empty SSO Header means SSO is enabled
@@ -48,10 +50,14 @@ func handleSessionError(config interfaces.PortalConfig, c echo.Context, err erro
 		)
 	}
 
-	var logMessage = ""
-	if !doNotLog {
-		logMessage = msg + ": %v"
+	if doNotLog {
+		return interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			msg, msg,
+		)
 	}
+
+	var logMessage = msg + ": %v"
 
 	return interfaces.NewHTTPShadowError(
 		http.StatusUnauthorized,
