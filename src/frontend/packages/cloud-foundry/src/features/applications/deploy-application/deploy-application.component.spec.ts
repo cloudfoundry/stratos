@@ -1,8 +1,6 @@
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { ConnectionBackend, Http, HttpModule } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -28,6 +26,7 @@ import {
 } from './deploy-application-step2/deploy-application-fs/deploy-application-fs.component';
 import { DeployApplicationStep2Component } from './deploy-application-step2/deploy-application-step2.component';
 import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
+import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
 import { DeployApplicationComponent } from './deploy-application.component';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
 
@@ -46,18 +45,19 @@ describe('DeployApplicationComponent', () => {
         DeployApplicationStepSourceUploadComponent,
         DeployApplicationFsComponent,
         CommitListWrapperComponent,
-        GithubProjectExistsDirective
+        GithubProjectExistsDirective,
       ],
       providers: [
         CfOrgSpaceDataService,
         ApplicationEnvVarsHelper,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        Http,
+        HttpClient,
         {
-          provide: ConnectionBackend,
-          useClass: MockBackend
+          provide: HttpBackend,
+          useClass: HttpTestingController
         },
-        TabNavService
+        TabNavService,
+        ApplicationDeploySourceTypes
       ],
       imports: [
         ...generateCfStoreModules(),
@@ -68,7 +68,7 @@ describe('DeployApplicationComponent', () => {
         NoopAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule,
-        HttpModule,
+        HttpClientModule,
         CloudFoundryComponentsModule
       ]
     })

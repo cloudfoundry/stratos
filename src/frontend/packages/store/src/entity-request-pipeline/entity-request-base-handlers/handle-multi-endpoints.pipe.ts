@@ -1,7 +1,8 @@
 import { hasJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
 import { PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PaginationPageIteratorConfig } from '../pagination-request-base-handlers/pagination-iterator.pipe';
-import { NonJetstreamRequestHandler } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { stratosEndpointGuidKey } from '../pipeline.types';
+import { NonJetstreamRequestHandler } from '../../entity-catalog/entity-catalog.types';
 
 /**
  * Generic container for information about an errored request to a specific endpoint
@@ -96,14 +97,20 @@ function postProcessSuccessResponses(
   if (Array.isArray(entities)) {
     return {
       endpointGuid,
-      entities,
+      entities: entities.map(entity => ({
+        ...entity,
+        [stratosEndpointGuidKey]: endpointGuid
+      })),
       totalPages: flattenerConfig ? flattenerConfig.getTotalPages(jetStreamResponse) : 0,
       totalResults: flattenerConfig ? flattenerConfig.getTotalEntities(jetStreamResponse) : 0
     };
   }
   return {
     endpointGuid,
-    entities: [entities],
+    entities: [{
+      ...entities,
+      [stratosEndpointGuidKey]: endpointGuid
+    }],
     totalPages: null,
     totalResults: 1
   };

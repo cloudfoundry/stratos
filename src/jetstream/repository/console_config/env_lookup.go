@@ -56,8 +56,7 @@ func MigrateSetupData(portal interfaces.PortalProxy, configStore Repository) err
 	}
 
 	// If we got a value, then we should migrate
-
-	if !portal.CanPerformMigrations() {
+	if !portal.GetConfig().CanMigrateDatabaseSchema {
 		log.Info("Will not migrate setup data on this instance")
 		return nil
 	}
@@ -104,8 +103,14 @@ func MigrateSetupData(portal interfaces.PortalProxy, configStore Repository) err
 		return err
 	}
 
-	if err := migrateConfigSetting(portal.Env(), configStore, "SSO_LOGIN", strconv.FormatBool(config.UseSSO), "false"); err != nil {
-		return err
+	// Don't store previous SSO_LOGIN value if it's false.
+	// SSO_LOGIN was incorrectly being set in previous console config table, this was then transferred over here where the console expects
+	// previous values to have been explicitly set by user (and as such should take precedents over env vars)
+	// See https://github.com/cloudfoundry/stratos/issues/4013
+	if config.UseSSO == true {
+		if err := migrateConfigSetting(portal.Env(), configStore, "SSO_LOGIN", strconv.FormatBool(config.UseSSO), "false"); err != nil {
+			return err
+		}
 	}
 
 	// Delete the content form the legacy table

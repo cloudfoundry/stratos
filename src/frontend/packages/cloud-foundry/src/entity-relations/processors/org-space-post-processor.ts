@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { GetOrganization } from '../../actions/organization.actions';
 import { GetSpace } from '../../actions/space.actions';
 import {
@@ -10,7 +10,7 @@ import {
   spaceEntityType,
 } from '../../cf-entity-types';
 import { getCFEntityKey } from '../../cf-entity-helpers';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResponse } from '../../../../store/src/actions/request.actions';
 import { GeneralEntityAppState, GeneralRequestDataState, IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
@@ -69,10 +69,10 @@ export function orgSpacePostProcess(
   apiResponse: APIResponse,
   allEntities: GeneralRequestDataState): ValidateEntityResult {
   const entities = apiResponse ? apiResponse.response.entities : allEntities;
-  const { entityKey: cfOrgOrSpaceEntityKey } = entityCatalogue.getEntity(action.endpointType, action.entityType);
+  const { entityKey: cfOrgOrSpaceEntityKey } = entityCatalog.getEntity(action.endpointType, action.entityType);
   const orgOrSpace = entities[cfOrgOrSpaceEntityKey][action.guid];
-  const userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
-  const { entityKey: cfUserEntityKey } = userCatalogueEntity;
+  const userCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
+  const { entityKey: cfUserEntityKey } = userCatalogEntity;
   const users = entities[cfUserEntityKey];
   const existingUsers = allEntities[cfOrgOrSpaceEntityKey];
 
@@ -108,9 +108,9 @@ export function orgSpacePostProcess(
     const paginatedAction: PaginatedAction = {
       actions: [],
       endpointGuid: action.endpointGuid,
-      entity: userCatalogueEntity.getSchema(),
+      entity: userCatalogEntity.getSchema(),
       entityLocation: RequestEntityLocation.ARRAY,
-      entityType: userCatalogueEntity.definition.type,
+      entityType: userCatalogEntity.definition.type,
       endpointType: CF_ENDPOINT_TYPE,
       type: '[Entity] Post-process Org/Space Users',
       paginationKey: createEntityRelationPaginationKey(action.entityType, action.guid)

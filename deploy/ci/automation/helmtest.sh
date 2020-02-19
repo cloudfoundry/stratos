@@ -18,10 +18,12 @@ set -e
 
 NAME=stratos-test
 NAMESPACE=stratos-ns
-HELM_REPO=https://cloudfoundry-incubator.github.io/stratos
+HELM_REPO=https://cloudfoundry.github.io/stratos
 HELM_REPO_NAME=cfstratos
 
-DEV_IMAGE_VERSION=2.0.0-dev
+# Image tag to use - this script only builds the chart
+# Normally we use the nightly images for testing here
+DEV_IMAGE_VERSION=${STRATOS_IMAGE_TAG:-3.0.0-nightly}
 
 function deleteRelease {
   helm delete ${NAME} --purge

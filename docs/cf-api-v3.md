@@ -120,13 +120,13 @@ Then Stratos should either ..
   - To do this ...
     - Query params need to be converted when making v3 requests
     - v3 responses need to be converted into v2 format (entity/metadata, `<x>_url`, etc).
-- Update application deploy/lifecycle process to match new v3 process (https://github.com/cloudfoundry-incubator/stratos/issues/3150)
-- Support new 'processes' concept (https://github.com/cloudfoundry-incubator/stratos/issues/3154), including updating how
+- Update application deploy/lifecycle process to match new v3 process (https://github.com/cloudfoundry/stratos/issues/3150)
+- Support new 'processes' concept (https://github.com/cloudfoundry/stratos/issues/3154), including updating how
   we determine application state
 - Fully investigate non `get` methods (create an application, delete a space, etc)
 - Related Issues
-  - https://github.com/cloudfoundry-incubator/stratos/issues/2922
-  - https://github.com/cloudfoundry-incubator/stratos/issues/3149 (Container issue for related v3 api process changes)
+  - https://github.com/cloudfoundry/stratos/issues/2922
+  - https://github.com/cloudfoundry/stratos/issues/3149 (Container issue for related v3 api process changes)
 
 ### Questions
 - ~~Will `include` cover children of children? For instance `app` --> `route` --> `domain`~~

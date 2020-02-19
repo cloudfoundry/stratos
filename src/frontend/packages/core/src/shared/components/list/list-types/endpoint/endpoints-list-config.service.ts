@@ -4,11 +4,11 @@ import { Store } from '@ngrx/store';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
-import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { FavoritesConfigMapper } from '../../../favorites-meta-card/favorite-config-mapper';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
@@ -133,6 +133,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   public getMultiFiltersConfigs = () => [];
 
   private getEndpointTypeString(endpoint: EndpointModel): string {
-    return entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition.label;
+    return entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition.label;
   }
 }

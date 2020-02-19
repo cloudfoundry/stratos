@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
+import { endpointsCfEntitiesConnectedSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import {
   catchError,
@@ -16,16 +17,15 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { LoggerService } from '../../../../core/src/core/logger.service';
 import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../../../../store/src/actions/endpoint.actions';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   BaseHttpClientFetcher,
   flattenPagination,
   PaginationFlattener,
 } from '../../../../store/src/helpers/paginated-request-helpers';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { endpointsRegisteredCFEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { EndpointModel, INewlyConnectedEndpointInfo } from '../../../../store/src/types/endpoint.types';
 import { BasePaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
@@ -113,7 +113,7 @@ function fetchCfUserRole(store: Store<CFAppState>, action: GetUserRelations, htt
 }
 
 const fetchPaginationStateFromAction = (store: Store<CFAppState>, action: BasePaginatedAction) => {
-  const entityKey = entityCatalogue.getEntityKey(action);
+  const entityKey = entityCatalog.getEntityKey(action);
   return store.select(selectPaginationState(entityKey, action.paginationKey));
 };
 
@@ -146,7 +146,7 @@ export class PermissionsEffects {
 
   @Effect() getCurrentUsersPermissions$ = this.actions$.pipe(
     ofType<GetCurrentUsersRelations>(GET_CURRENT_USER_RELATIONS),
-    withLatestFrom(this.store.select(endpointsRegisteredCFEntitiesSelector)),
+    withLatestFrom(this.store.select(endpointsCfEntitiesConnectedSelector)),
     switchMap(([action, endpoints]) => {
       const endpointsArray = Object.values(endpoints);
       const isAllAdmins = endpointsArray.every(endpoint => !!endpoint.user.admin);

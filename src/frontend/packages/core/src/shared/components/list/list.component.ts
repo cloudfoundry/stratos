@@ -14,7 +14,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
-import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { SortDirection } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
 import {
   asapScheduler,
@@ -52,8 +53,8 @@ import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pa
 import { GeneralAppState } from '../../../../../store/src/app-state';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
   EntitySelectConfig,
@@ -103,6 +104,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   @Input() addForm: NgForm;
 
+  @Input() customFilters: TemplateRef<any>;
+
   @Input() noEntries: TemplateRef<any>;
 
   @Input() noEntriesForCurrentFilter: TemplateRef<any>;
@@ -115,7 +118,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   pPaginator: MatPaginator;
   private filterString: string;
 
-  @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
+  @ViewChild(MatPaginator, { static: false }) set setPaginator(paginator: MatPaginator) {
     if (!paginator || this.paginationWidgetToStore) {
       return;
     }
@@ -142,7 +145,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     });
   }
 
-  @ViewChild('filter') set setFilter(filterValue: NgModel) {
+  @ViewChild('filter', { static: false }) set setFilter(filterValue: NgModel) {
     if (!filterValue || this.filterWidgetToStore) {
       return;
     }
@@ -683,13 +686,13 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     return actions;
   }
 
-  private getRowStateGeneratorFromEntityMonitor(entityConfig: EntityCatalogueEntityConfig, dataSource: IListDataSource<T>) {
+  private getRowStateGeneratorFromEntityMonitor(entityConfig: EntityCatalogEntityConfig, dataSource: IListDataSource<T>) {
     return (row) => {
       if (!entityConfig || !row) {
         return observableOf(getDefaultRowState());
       }
-      const catalogueEntity = entityCatalogue.getEntity(entityConfig);
-      const entityMonitor = catalogueEntity.getEntityMonitor(
+      const catalogEntity = entityCatalog.getEntity(entityConfig);
+      const entityMonitor = catalogEntity.getEntityMonitor(
         this.store,
         dataSource.getRowUniqueId(row),
         {

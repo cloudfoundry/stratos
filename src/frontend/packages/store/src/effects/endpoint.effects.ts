@@ -1,11 +1,10 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
@@ -35,6 +34,7 @@ import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 import { DispatchOnlyAppState } from '../app-state';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
@@ -69,7 +69,7 @@ export class EndpointsEffect {
   @Effect() getAllEndpoints$ = this.actions$.pipe(
     ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS),
     mergeMap(action => {
-      const endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+      const endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
       const { associatedAction } = action;
       const actionType = 'fetch';
       const endpoints = action.payload.endpoints;
@@ -87,7 +87,6 @@ export class EndpointsEffect {
           mappedData.entities[endpointEntityKey][endpointInfo.guid] = {
             ...endpointInfo,
             connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
-            registered: !!endpointInfo.user,
           };
           mappedData.result.push(endpointInfo.guid);
         });
@@ -245,7 +244,7 @@ export class EndpointsEffect {
     return message;
   }
   private getEndpointUpdateAction(guid: string, type: string, updatingKey: string) {
-    const entityType = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+    const entityType = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
     return {
       entityType,
       guid,
@@ -255,7 +254,7 @@ export class EndpointsEffect {
   }
 
   private getEndpointDeleteAction(guid, type) {
-    const entityType = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+    const entityType = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
     return {
       entityType,
       guid,
@@ -273,12 +272,9 @@ export class EndpointsEffect {
     body?: string,
     errorMessageHandler?: (e: any) => string,
   ) {
-    const endpointEntityKey = entityCatalogue.getEntityKey(apiAction);
-    const headers = new HttpHeaders();
-    headers.set('Content-Type', 'application/x-www-form-urlencoded');
+    const endpointEntityKey = entityCatalog.getEntityKey(apiAction);
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
     return this.http.post(url, body || {}, {
-      headers,
       params
     }).pipe(
       mergeMap((endpoint: EndpointModel) => {

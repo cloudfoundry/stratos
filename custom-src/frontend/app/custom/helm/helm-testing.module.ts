@@ -1,28 +1,26 @@
-import { HttpClient, HttpHandler } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '../../../../store/src/entity-catalog.module';
+import { entityCatalog, TestEntityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { createBasicStoreModule } from '../../../../store/testing/public-api';
 import { generateStratosEntities } from '../../base-entity-types';
 import { CoreModule } from '../../core/core.module';
-import { CATALOGUE_ENTITIES, EntityCatalogueFeatureModule } from '../../core/entity-catalogue.module';
-import { entityCatalogue, TestEntityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
 import { SharedModule } from '../../shared/shared.module';
+import { HelmReleaseGuid } from '../kubernetes/workloads/workload.types';
 import { generateHelmEntities } from './helm-entity-generator';
-import { HelmReleaseHelperService } from './release/tabs/helm-release-helper.service';
-import { HelmReleaseGuid } from './store/helm.types';
 
 @NgModule({
   imports: [{
-    ngModule: EntityCatalogueFeatureModule,
+    ngModule: EntityCatalogFeatureModule,
     providers: [
       {
         provide: CATALOGUE_ENTITIES, useFactory: () => {
-          const testEntityCatalogue = entityCatalogue as TestEntityCatalogue;
-          testEntityCatalogue.clear();
+          const testEntityCatalog = entityCatalog as TestEntityCatalog;
+          testEntityCatalog.clear();
           return [
             ...generateStratosEntities(),
             ...generateHelmEntities(),
@@ -60,14 +58,11 @@ export const HelmBaseTestModules = [
   CoreModule,
   createBasicStoreModule(),
   NoopAnimationsModule,
-  HttpModule,
+  HttpClientModule,
   SharedModule
 ];
 
 export const HelmBaseTestProviders = [
-  HelmReleaseHelperService,
-  HelmReleaseActivatedRouteMock,
-  HelmReleaseGuidMock,
   HttpClient,
   HttpHandler
 ];

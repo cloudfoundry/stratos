@@ -1,19 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
-import { EntityMonitorFactory } from '../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
 import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import * as servicesHelpers from '../../../features/service-catalog/services-helper';
 import { ServicesService } from '../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../features/service-catalog/services.service.mock';
 import { ServicePlanPublicComponent } from './service-plan-public.component';
+import { EntityService } from '../../../../../store/src/entity-service';
 
 const getCfService = {
   waitForEntity$: {
     pipe() { }
   }
-};
+} as unknown as EntityService;
 
 describe('ServicePlanPublicComponent', () => {
   let component: ServicePlanPublicComponent;

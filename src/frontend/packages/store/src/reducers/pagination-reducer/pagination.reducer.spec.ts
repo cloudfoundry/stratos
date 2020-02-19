@@ -1,6 +1,4 @@
-import { RequestOptions } from '@angular/http';
-
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/src/cf-types';
 import { cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
 import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
 import { CFEntitySchema } from '../../../../cloud-foundry/src/cf-entity-schema-types';
@@ -9,6 +7,7 @@ import { RequestTypes } from '../../actions/request.actions';
 import { PaginatedAction } from '../../types/pagination.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../../types/request.types';
 import { createPaginationReducer } from './pagination.reducer';
+import { HttpRequest } from '@angular/common/http';
 
 function getReducer() {
   return createPaginationReducer([
@@ -20,7 +19,7 @@ function getReducer() {
 
 class MockPagAction implements PaginatedAction {
   actions = ['ONE', 'TWO', 'THREE'];
-  options = new RequestOptions();
+  options = new HttpRequest('GET', 'fake123');
   entity = cfEntityFactory(applicationEntityType);
   entityType = applicationEntityType;
   endpointType = CF_ENDPOINT_TYPE;
@@ -131,7 +130,7 @@ describe('PaginationReducer', () => {
         paginationKey,
         type: 'type',
         entity: {} as CFEntitySchema,
-        options: {} as RequestOptions,
+        options: new HttpRequest('GET', 'fake'),
         actions: []
       },
       'fetch',

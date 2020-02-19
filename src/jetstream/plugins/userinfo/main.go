@@ -54,11 +54,14 @@ func (userInfo *UserInfo) AddSessionGroupRoutes(echoGroup *echo.Group) {
 
 // Init performs plugin initialization
 func (userInfo *UserInfo) Init() error {
+
 	return nil
 }
 
 func (userInfo *UserInfo) getProvider(c echo.Context) Provider {
-	if interfaces.AuthEndpointTypes[userInfo.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType] == interfaces.Local {
+
+	log.Debugf("getUserInfoProvider: %v", userInfo.portalProxy.GetConfig().AuthEndpointType)
+	if interfaces.AuthEndpointTypes[userInfo.portalProxy.GetConfig().AuthEndpointType] == interfaces.Local {
 		return InitLocalUserInfo(userInfo.portalProxy)
 	}
 
@@ -97,17 +100,18 @@ func (userInfo *UserInfo) userInfo(c echo.Context) error {
 	}
 
 	provider := userInfo.getProvider(c)
-	statusCode, body, err := provider.GetUserInfo(id)
+	statusCode, body, headers, err := provider.GetUserInfo(id)
 	if err != nil {
 		return err
 	}
+
+	fwdResponseHeaders(headers, c.Response().Header())
 
 	c.Response().WriteHeader(statusCode)
 	_, _ = c.Response().Write(body)
 
 	return nil
 }
-
 
 // update the user info for the current user
 func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
@@ -131,7 +135,7 @@ func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid message body")
 	}
 
-	err = provider.UpdateUserInfo(updatedProfile)
+	statusCode, err := provider.UpdateUserInfo(updatedProfile)
 	if err != nil {
 		if httpError, ok := err.(interfaces.ErrHTTPShadow); ok {
 			return httpError
@@ -142,9 +146,9 @@ func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 			"Unable to update user profile",
 			"Unable to update user profile: %v", err,
 		)
-	}		
-	
-	c.Response().WriteHeader(http.StatusOK)
+	}
+
+	c.Response().WriteHeader(statusCode)
 
 	return nil
 }
@@ -171,7 +175,7 @@ func (userInfo *UserInfo) updateUserPassword(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid message body")
 	}
 
-	err = provider.UpdatePassword(id, passwordInfo)
+	statusCode, err := provider.UpdatePassword(id, passwordInfo)
 	if err != nil {
 		if httpError, ok := err.(interfaces.ErrHTTPShadow); ok {
 			return httpError
@@ -182,9 +186,9 @@ func (userInfo *UserInfo) updateUserPassword(c echo.Context) error {
 			"Unable to update user password",
 			"Unable to update user password: %v", err,
 		)
-	}		
-	
-	c.Response().WriteHeader(http.StatusOK)
+	}
+
+	c.Response().WriteHeader(statusCode)
 
 	return nil
 }

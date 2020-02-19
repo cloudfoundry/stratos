@@ -10,12 +10,12 @@ import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/a
 import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
+import { StratosCatalogEndpointEntity } from '../../../../../../store/src/entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
 import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
-import { StratosCatalogueEndpointEntity } from '../../../../core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { ConnectEndpointConfig } from '../../connect.service';
@@ -38,15 +38,15 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   validate: Observable<boolean>;
 
-  @ViewChild('form') form: NgForm;
-  @ViewChild('nameField') nameField: NgModel;
-  @ViewChild('urlField') urlField: NgModel;
-  @ViewChild('skipSllField') skipSllField: NgModel;
-  @ViewChild('ssoAllowedField') ssoAllowedField: NgModel;
+  @ViewChild('form', { static: true }) form: NgForm;
+  @ViewChild('nameField', { static: true }) nameField: NgModel;
+  @ViewChild('urlField', { static: true }) urlField: NgModel;
+  @ViewChild('skipSllField', { static: true }) skipSllField: NgModel;
+  @ViewChild('ssoAllowedField', { static: false }) ssoAllowedField: NgModel;
 
   // Optional Client ID and Client Secret
-  @ViewChild('clientIDField') clientIDField: NgModel;
-  @ViewChild('clientSecretField') clientSecretField: NgModel;
+  @ViewChild('clientIDField', { static: false }) clientIDField: NgModel;
+  @ViewChild('clientSecretField', { static: false }) clientSecretField: NgModel;
 
   urlValidation: string;
 
@@ -54,9 +54,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   clientRedirectURI: string;
 
   endpointTypeSupportsSSO = false;
-  endpoint: StratosCatalogueEndpointEntity;
+  endpoint: StratosCatalogEndpointEntity;
 
-  private endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+  private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
 
   constructor(private store: Store<GeneralEntityAppState>, activatedRoute: ActivatedRoute, ) {
 
@@ -76,7 +76,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
-    this.endpoint = entityCatalogue.getEndpoint(epType, epSubType);
+    this.endpoint = entityCatalog.getEndpoint(epType, epSubType);
     this.setUrlValidation(this.endpoint);
 
     // Client Redirect URI for SSO
@@ -143,13 +143,13 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       }));
   }
 
-  setUrlValidation(endpoint: StratosCatalogueEndpointEntity) {
+  setUrlValidation(endpoint: StratosCatalogEndpointEntity) {
     this.urlValidation = endpoint ? endpoint.definition.urlValidationRegexString : '';
     this.setAdvancedFields(endpoint);
   }
 
   // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
-  setAdvancedFields(endpoint: StratosCatalogueEndpointEntity) {
+  setAdvancedFields(endpoint: StratosCatalogEndpointEntity) {
     this.showAdvancedFields = endpoint.definition.type === 'cf';
 
     // Only allow SSL if the endpoint type is Cloud Foundry

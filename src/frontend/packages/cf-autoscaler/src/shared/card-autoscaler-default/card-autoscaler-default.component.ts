@@ -3,8 +3,8 @@ import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { EntityService } from '../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
+import { EntityService } from '../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
 import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
@@ -17,7 +17,7 @@ import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 })
 export class CardAutoscalerDefaultComponent implements OnInit {
 
-  @ViewChild('instanceField') instanceField: ElementRef;
+  @ViewChild('instanceField', { static: false }) instanceField: ElementRef;
 
   constructor(
     public appService: ApplicationService,

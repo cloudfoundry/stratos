@@ -5,13 +5,13 @@ import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/src/cf-types';
 import {
   QuotaDefinitionActionBuilder,
 } from '../../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityCatalogue } from '../../../../core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata } from '../../../../core/entity-catalogue/entity-catalogue.types';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
 import { quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
@@ -28,7 +28,7 @@ export class CreateQuotaStepComponent {
   cfGuid: string;
   quotaForm: FormGroup;
 
-  @ViewChild('form')
+  @ViewChild('form', { static: true })
   form: QuotaDefinitionFormComponent;
 
   constructor(
@@ -43,7 +43,7 @@ export class CreateQuotaStepComponent {
   submit: StepOnNextFunction = () => {
     const formValues = this.form.formGroup.value;
     const entityConfig =
-      entityCatalogue.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+      entityCatalog.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
     entityConfig.actionDispatchManager.dispatchCreate(formValues.name, this.cfGuid, formValues);
     return entityConfig.getEntityMonitor(this.store, formValues.name).entityRequest$.pipe(
       pairwise(),

@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { AppState, GeneralEntityAppState } from '../../../../store/src/app-state';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
-import { EntityServiceFactory } from '../entity-service-factory.service';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
@@ -21,7 +21,7 @@ export enum StratosTabType {
 export interface StratosTabMetadata {
   label: string;
   link: string;
-  icon: string;
+  icon?: string;
   iconFont?: string;
   hidden?: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => Observable<boolean>;
 }

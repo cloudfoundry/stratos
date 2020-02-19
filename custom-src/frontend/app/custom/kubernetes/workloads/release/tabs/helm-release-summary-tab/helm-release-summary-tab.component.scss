@@ -1,0 +1,69 @@
+
+@import '../../../../../../../../core/sass/mixins';
+
+.resources {
+  padding: 0 10px;
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    &__content {
+      margin-top: 50px;
+      mat-progress-bar {
+        margin-top: 15px;
+      }
+    }
+  }
+}
+.app-metadata {
+  display: flex;
+  flex-direction: row;
+  &__two-cols {
+    flex: 1;
+    app-metadata-item {
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
+}
+.chart-details {
+  display: flex;
+  flex-direction: row;
+  flex-flow: wrap;
+  padding: 0 10px 10px;
+  &__item {
+    margin-right: 40px;
+  }
+}
+.chart-description {
+  font-size: 15px;
+  max-width: 800px;
+  opacity: .6;
+}
+
+
+.grid {
+  $bottom-space: 20px;
+  display: grid;
+  grid-column-gap: 10px;
+  grid-row-gap: 10px;
+  grid-template-columns: 100%;
+  min-height: 0;
+  min-width: 0;
+
+  @include breakpoint(tablet) {
+    grid-column-gap: $bottom-space;
+    grid-row-gap: $bottom-space;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include breakpoint(laptop) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  @include breakpoint(desktop) {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+

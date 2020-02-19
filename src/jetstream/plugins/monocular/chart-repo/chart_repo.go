@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package chartrepo
+package main
 
 import (
 	"os"
+
+	"github.com/helm/monocular/chartrepo/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -38,16 +40,25 @@ func main() {
 }
 
 func init() {
-	cmds := []*cobra.Command{syncCmd, deleteCmd}
+
+	cmds := []*cobra.Command{SyncCmd, DeleteCmd, ServeCmd}
 
 	for _, cmd := range cmds {
 		rootCmd.AddCommand(cmd)
-		cmd.Flags().String("mongo-url", "localhost", "MongoDB URL (see https://godoc.org/github.com/globalsign/mgo#Dial for format)")
-		cmd.Flags().String("mongo-database", "charts", "MongoDB database")
-		cmd.Flags().String("mongo-user", "", "MongoDB user")
+
+		//Flags for optional FoundationDB + Document Layer backend
+		cmd.Flags().String("doclayer-url", "mongodb://dev-fdbdoclayer/27016", "FoundationDB Document Layer URL")
+		cmd.Flags().String("doclayer-database", "monocular-plugin", "FoundationDB Document-Layer database")
+
+		//Flags for Serve-Mode TLS
+		cmd.Flags().Bool("tls", false, "Enable Mutual TLS")
+		cmd.Flags().String("cafile", "", "Path to CA certificate to use for client verification.")
+		cmd.Flags().String("certfile", "", "Path to TLS certificate.")
+		cmd.Flags().String("keyfile", "", "Path to TLS key.")
+
 		// see version.go
-		cmd.Flags().StringVarP(&userAgentComment, "user-agent-comment", "", "", "UserAgent comment used during outbound requests")
+		cmd.Flags().StringVarP(&utils.UserAgentComment, "user-agent-comment", "", "", "UserAgent comment used during outbound requests")
 		cmd.Flags().Bool("debug", false, "verbose logging")
 	}
-	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(utils.VersionCmd)
 }

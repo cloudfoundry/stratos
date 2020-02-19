@@ -1,5 +1,6 @@
+import { Observable } from 'rxjs';
+
 import { DataFunction, DataFunctionDefinition } from '../data-sources-controllers/list-data-source';
-import { TableCellDefaultComponent } from './app-table-cell-default/app-table-cell-default.component';
 import { TableCellStatusDirective } from './table-cell-status.directive';
 import { listTableCells, TableCellComponent } from './table-cell/table-cell.component';
 import { TableRowComponent } from './table-row/table-row.component';
@@ -18,7 +19,7 @@ export interface ICellDefinition<T> {
   // Dot separated path to get the value from the row
   valuePath?: string;
   // Takes president over valuePath
-  getValue?: (row: T, schemaKey?: string) => string;
+  getValue?: (row: T, schemaKey?: string) => string | Observable<string>;
   // Should the value of getLink be used in a href or routerLink
   externalLink?: boolean;
   // Automatically turns the cell into a link
@@ -55,7 +56,6 @@ export const listTableComponents = [
   TableComponent,
   TableCellComponent,
   TableRowComponent,
-  TableCellDefaultComponent,
   ...listTableCells,
-  TableCellStatusDirective
+  TableCellStatusDirective,
 ];

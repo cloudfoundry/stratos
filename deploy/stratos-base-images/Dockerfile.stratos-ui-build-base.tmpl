@@ -1,20 +1,24 @@
 FROM {{BASE_IMAGE}}
 
 {{#IS_SLE}}
-RUN zypper addrepo  -G -c '{{SMT_INTERNAL}}' smt_internal
-RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_UPDATE}}' smt_internal_update
-RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SDK}}' smt_internal_sdk
-RUN zypper addrepo -t rpm-md -G -c '{{SMT_INTERNAL_SERVER}}' smt_internal_server
+RUN rm -f /usr/lib/zypp/plugins/services/container-suseconnect-zypp
+RUN zypper addrepo -G -c -p 90 '{{ZYP_REPO_BASE_GA}}' base_ga
+RUN zypper addrepo -G -c -p 80 '{{ZYP_REPO_BASE_UPDATE}}' base_update
+RUN zypper addrepo -G -c -p 70 '{{ZYP_REPO_SP_GA}}' sp_ga
+RUN zypper addrepo -G -c -p 60 '{{ZYP_REPO_SP_UPDATE}}' sp_update
 RUN zypper ref
 {{/IS_SLE}}
 
 RUN zypper -n ref && \
-zypper -n up && \
-zypper in -y wget tar git
-RUN cd / && wget https://nodejs.org/dist/v8.11.2/node-v8.11.2-linux-x64.tar.xz && \
-    tar -xf node-v8.11.2-linux-x64.tar.xz
+    zypper -n up && \
+    zypper in -y wget tar git xz && \
+    zypper clean -a && \
+    rm -f /var/log/zypper.log /var/log/zypp/history
+
+RUN cd / && wget https://nodejs.org/dist/v12.13.0/node-v12.13.0-linux-x64.tar.xz && \
+    tar -xf node-v12.13.0-linux-x64.tar.xz
 ENV USER=stratos
-ENV PATH=$PATH:/node-v8.11.2-linux-x64/bin
+ENV PATH=$PATH:/node-v12.13.0-linux-x64/bin
 RUN useradd -ms /bin/bash stratos && \
     mkdir -p /home/stratos && \
     chown -R stratos /home/stratos && \
@@ -24,11 +28,11 @@ RUN useradd -ms /bin/bash stratos && \
     chgrp users /usr/dist
 
 {{#IS_SLE}}
-RUN zypper rr  smt_internal
-RUN zypper rr  smt_internal_update
-RUN zypper rr  smt_internal_sdk
-RUN zypper rr  smt_internal_server
+RUN zypper rr base_ga
+RUN zypper rr base_update
+RUN zypper rr sp_ga
+RUN zypper rr sp_update
 {{/IS_SLE}}
 
-USER stratos
+USER stratos    
 WORKDIR /home/stratos

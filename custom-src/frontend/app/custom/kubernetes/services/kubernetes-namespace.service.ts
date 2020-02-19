@@ -5,9 +5,9 @@ import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getIdFromRoute } from '../../../core/utils.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { KubernetesNamespace } from '../store/kube.types';
 import { GetKubernetesNamespace } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';

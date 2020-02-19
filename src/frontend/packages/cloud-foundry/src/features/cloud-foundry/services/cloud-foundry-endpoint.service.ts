@@ -22,15 +22,14 @@ import {
 import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityService } from '../../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../../core/src/core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { QParam, QParamJoiners } from '../../../../../store/src/q-param';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   getPaginationObservables,
   PaginationObservables,
@@ -39,11 +38,12 @@ import { APIResource, EntityInfo } from '../../../../../store/src/types/api.type
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
 import { cfEntityFactory } from '../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { CfInfoDefinitionActionBuilders } from '../../../entity-action-builders/cf-info.action-builders';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import { QParam, QParamJoiners } from '../../../shared/q-param';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
 
@@ -85,7 +85,7 @@ export class CloudFoundryEndpointService {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
       : createEntityRelationPaginationKey(endpointSchemaKey);
-    const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const organizationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getAllOrganizationsAction = actionBuilder(cfGuid, paginationKey,
       {
@@ -104,7 +104,7 @@ export class CloudFoundryEndpointService {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
       : createEntityRelationPaginationKey(endpointSchemaKey);
-    const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const organizationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getAllOrganizationsAction = actionBuilder(cfGuid, paginationKey,
       {
@@ -149,7 +149,7 @@ export class CloudFoundryEndpointService {
       new GetAllEndpoints()
     );
 
-    const cfInfoEntity = entityCatalogue.getEntity<any, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType);
+    const cfInfoEntity = entityCatalog.getEntity<any, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType);
     const actionBuilder = cfInfoEntity.actionOrchestrator.getActionBuilder('get');
     const action = actionBuilder(this.cfGuid);
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
@@ -234,7 +234,7 @@ export class CloudFoundryEndpointService {
   }
 
   public fetchDomains = () => {
-    const domainEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, domainEntityType);
+    const domainEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, domainEntityType);
     const actionBuilder = domainEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const action = actionBuilder(this.cfGuid, null);
     this.paginationSubscription = getPaginationObservables<APIResource>(

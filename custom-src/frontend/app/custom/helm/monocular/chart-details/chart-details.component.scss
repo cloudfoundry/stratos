@@ -49,10 +49,10 @@ $icon-height: 150px;
       }
 
       &__repo {
-        color: md-color($monocular-app-accent);
+        color: mat-color($monocular-app-accent, 500);
 
         &.repo-incubator {
-          color: md-color($monocular-app-warn, 600);
+          color: mat-color($monocular-app-warn, 600);
         }
 
         a {

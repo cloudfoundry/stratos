@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	log "github.com/sirupsen/logrus"
 )

@@ -13,21 +13,24 @@ import {
   UpdateUserFavoriteMetadataAction,
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
+import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
+import { EntityActionDispatcher } from '../../store/src/entity-catalog/action-dispatcher/action-dispatcher';
+import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog.service';
 import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
-import { getAPIRequestDataState } from '../../store/src/selectors/api.selectors';
+import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
+import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
 import { AppStoreModule } from '../../store/src/store.module';
+import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';
+import { XSRFModule } from '../xsrf.module';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
 import { generateStratosEntities } from './base-entity-types';
 import { CoreModule } from './core/core.module';
 import { CustomizationService } from './core/customizations.types';
-import { EntityCatalogueModule } from './core/entity-catalogue.module';
-import { EntityActionDispatcher } from './core/entity-catalogue/action-dispatcher/action-dispatcher';
-import { entityCatalogue } from './core/entity-catalogue/entity-catalogue.service';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
@@ -42,9 +45,9 @@ import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
 import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
-import { GlobalEventData, GlobalEventService } from './shared/global-events.service';
+import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
+import { SidePanelService } from './shared/services/side-panel.service';
 import { SharedModule } from './shared/shared.module';
-import { XSRFModule } from './xsrf.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -74,7 +77,6 @@ export class CustomRouterStateSerializer
   }
 }
 
-
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
  */
@@ -85,7 +87,7 @@ export class CustomRouterStateSerializer
     NoEndpointsNonAdminComponent,
   ],
   imports: [
-    EntityCatalogueModule.forFeature(generateStratosEntities),
+    EntityCatalogModule.forFeature(generateStratosEntities),
     RouteModule,
     CloudFoundryPackageModule,
     AppStoreModule,
@@ -97,7 +99,7 @@ export class CustomRouterStateSerializer
     LoginModule,
     HomeModule,
     DashboardModule,
-    StoreRouterConnectingModule, // Create action for router navigation
+    StoreRouterConnectingModule.forRoot(), // Create action for router navigation
     AboutModule,
     CustomImportModule,
     XSRFModule,
@@ -109,6 +111,7 @@ export class CustomRouterStateSerializer
     LoggedInService,
     ExtensionService,
     DynamicExtensionRoutes,
+    SidePanelService,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy }
@@ -136,6 +139,39 @@ export class AppModule {
       key: 'pollingEnabledWarning',
       link: '/user-profile'
     });
+    eventService.addEventConfig<{
+      count: number,
+      endpoint: EndpointModel
+    }>({
+      eventTriggered: (state: GeneralEntityAppState) => {
+        const eventState = internalEventStateSelector(state);
+        return Object.entries(eventState.types.endpoint).reduce((res, [eventId, value]) => {
+          const backendErrors = value.filter(error => {
+            const eventCode = parseInt(error.eventCode, 10);
+            return eventCode >= 500;
+          });
+          if (!backendErrors.length) {
+            return res;
+          }
+          const entityConfig = entityCatalog.getEntity(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+          res.push(new GlobalEventData(true, {
+            endpoint: selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state),
+            count: backendErrors.length
+          }));
+          return res;
+        }, []);
+      },
+      message: data => {
+        const part1 = data.count > 1 ? `There are ${data.count} errors` : `There is an error`;
+        const part2 = data.endpoint ? ` associated with the endpoint '${data.endpoint.name}'` : ` associated with multiple endpoints`;
+        return part1 + part2;
+      },
+      key: data => `${endpointEventKey}-${data.endpoint.guid}`,
+      link: data => `/errors/${data.endpoint.guid}`,
+      type: 'error'
+    });
+
+
     // This should be brought back in in the future
     // eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
     //   {
@@ -187,7 +223,7 @@ export class AppModule {
       ([entities, recents]) => {
         Object.values(recents.entities).forEach(recentEntity => {
           const mapper = this.favoritesConfigMapper.getMapperFunction(recentEntity);
-          const entityKey = entityCatalogue.getEntityKey(recentEntity);
+          const entityKey = entityCatalog.getEntityKey(recentEntity);
           if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
             const entity = entities[entityKey][recentEntity.entityId];
             const entityToMetadata = this.favoritesConfigMapper.getEntityMetadata(recentEntity, entity);
@@ -208,10 +244,10 @@ export class AppModule {
     if (favorite) {
       const isEndpoint = (favorite.entityType === endpointSchemaKey);
       // If the favorite is an endpoint ensure we look in the stratosEndpoint part of the store instead of, for example, cfEndpoint
-      const entityKey = isEndpoint ? entityCatalogue.getEntityKey({
+      const entityKey = isEndpoint ? entityCatalog.getEntityKey({
         ...favorite,
         endpointType: STRATOS_ENDPOINT_TYPE
-      }) : entityCatalogue.getEntityKey(favorite);
+      }) : entityCatalog.getEntityKey(favorite);
       const entity = entities[entityKey][favorite.entityId || favorite.endpointId];
       if (entity) {
         const newMetadata = this.favoritesConfigMapper.getEntityMetadata(favorite, entity);

@@ -36,17 +36,14 @@ describe('CF - Top Level - ', () => {
     });
 
     describe('Basic Tests -', () => {
-      beforeEach(navToCfPage);
-
-      beforeEach(() => {
-      });
+      it('Nav to CF Page', navToCfPage);
 
       it('Breadcrumb', () => {
         expect(cfPage.header.getTitleText()).toBe(defaultCf.name);
       });
 
       it('Summary Panel', () => {
-        expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
+        expect(cfPage.waitForInstanceAddressValue()).toBe(defaultCf.url);
         expect(cfPage.waitForUsername().getValue()).toBe(`${defaultCf.creds.admin.username} (Administrator)`);
         expect(cfPage.isUserInviteConfigured(true)).toBeFalsy();
         expect(cfPage.canConfigureUserInvite()).toBeTruthy();
@@ -76,14 +73,14 @@ describe('CF - Top Level - ', () => {
 
     describe('Basic Tests -', () => {
 
-      beforeEach(navToCfPage);
+      it('Nav to CF Page', navToCfPage);
 
       it('Breadcrumb', () => {
         expect(cfPage.header.getTitleText()).toBe(defaultCf.name);
       });
 
       it('Summary Panel', () => {
-        expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
+        expect(cfPage.waitForInstanceAddressValue()).toBe(defaultCf.url);
         expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.nonAdmin.username);
         expect(cfPage.isUserInviteConfigured(false)).toBeFalsy();
         expect(cfPage.canConfigureUserInvite()).toBeFalsy();

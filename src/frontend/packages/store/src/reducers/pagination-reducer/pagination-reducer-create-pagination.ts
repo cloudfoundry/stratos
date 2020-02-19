@@ -1,11 +1,11 @@
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
 import { CreatePagination } from '../../actions/pagination.actions';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { spreadClientPagination } from './pagination-reducer.helper';
 
-function getPaginationKey(entityConfig: EntityCatalogueEntityConfig) {
-  return entityCatalogue.getEntityKey(entityConfig);
+function getPaginationKey(entityConfig: EntityCatalogEntityConfig) {
+  return entityCatalog.getEntityKey(entityConfig);
 }
 /**
  * Creates new pagination from default values or a seed pagination section.

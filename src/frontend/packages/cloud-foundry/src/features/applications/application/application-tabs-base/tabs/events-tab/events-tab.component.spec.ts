@@ -3,26 +3,27 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import {
-  getPaginationAction,
-} from '../../../../../../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator.spec.helpers';
-import { EntityCatalogueEntityConfig } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.types';
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
   ApplicationStateService,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
+import {
+  getPaginationAction,
+} from '../../../../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator.spec.helpers';
+import { EntityCatalogEntityConfig } from '../../../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { NormalizedResponse } from '../../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
 import { WrapperRequestActionSuccess } from '../../../../../../../../store/src/types/request.types';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
-import { appEventEntityType } from '../../../../../../cf-entity-types';
+import { cfEventEntityType } from '../../../../../../cf-entity-types';
+import {
+  CloudFoundryEventsListComponent,
+} from '../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { EventsTabComponent } from './events-tab.component';
-
-
 
 describe('EventsTabComponent', () => {
   class ApplicationServiceMock {
@@ -35,11 +36,14 @@ describe('EventsTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [EventsTabComponent],
+      declarations: [
+        EventsTabComponent,
+        CloudFoundryEventsListComponent
+      ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
-        ApplicationEnvVarsHelper,
+        ApplicationEnvVarsHelper
       ],
       imports: [
         ...generateCfStoreModules(),
@@ -50,7 +54,7 @@ describe('EventsTabComponent', () => {
       ]
     })
       .compileComponents();
-    const eventsConfig: EntityCatalogueEntityConfig = cfEntityFactory(appEventEntityType);
+    const eventsConfig: EntityCatalogEntityConfig = cfEntityFactory(cfEventEntityType);
 
     const mappedData = {
       entities: {},

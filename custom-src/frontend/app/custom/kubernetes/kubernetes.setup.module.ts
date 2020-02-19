@@ -3,10 +3,10 @@ import { NgModule, Optional, SkipSelf } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../store/src/app-state';
+import { EntityCatalogModule } from '../../../../store/src/entity-catalog.module';
 import { EndpointHealthCheck } from '../../../endpoints-health-checks';
 import { CoreModule } from '../../core/core.module';
 import { EndpointsService } from '../../core/endpoints.service';
-import { EntityCatalogueModule } from '../../core/entity-catalogue.module';
 import { SharedModule } from '../../shared/shared.module';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
@@ -18,23 +18,29 @@ import {
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
 import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes-entity-factory';
 import { generateKubernetesEntities } from './kubernetes-entity-generator';
+import { BaseKubeGuid } from './kubernetes-page.types';
 import { KubernetesStoreModule } from './kubernetes.store.module';
+import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 import { KubeHealthCheck } from './store/kubernetes.actions';
 
 
 @NgModule({
   imports: [
-    EntityCatalogueModule.forFeature(generateKubernetesEntities),
+    EntityCatalogModule.forFeature(generateKubernetesEntities),
     CoreModule,
     CommonModule,
     SharedModule,
-    KubernetesStoreModule,
+    KubernetesStoreModule
   ],
   declarations: [
     KubernetesCertsAuthFormComponent,
     KubernetesAWSAuthFormComponent,
     KubernetesConfigAuthFormComponent,
     KubernetesGKEAuthFormComponent,
+  ],
+  providers: [
+    BaseKubeGuid,
+    KubernetesEndpointService,
   ],
   entryComponents: [
     KubernetesCertsAuthFormComponent,

@@ -1,14 +1,9 @@
-import { RequestOptions } from '@angular/http';
+import { HttpRequest } from '@angular/common/http';
 
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction, RequestEntityLocation } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
-import {
-  appEnvVarsEntityType,
-  applicationEntityType,
-  appStatsEntityType,
-  appSummaryEntityType,
-} from '../cf-entity-types';
+import { appEnvVarsEntityType, applicationEntityType, appStatsEntityType, appSummaryEntityType } from '../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 
@@ -19,17 +14,17 @@ export enum AppMetadataTypes {
 }
 
 export class GetAppStatsAction extends CFStartAction implements PaginatedAction, ICFAction {
-  options: RequestOptions;
+  options: HttpRequest<any>;
   paginationKey: string;
   constructor(
     public guid: string,
     public endpointGuid: string
   ) {
     super();
-    this.options = new RequestOptions({
-      url: `apps/${guid}/stats`,
-      method: 'get'
-    });
+    this.options = new HttpRequest(
+      'GET',
+      `apps/${guid}/stats`
+    );
     this.paginationKey = createEntityRelationPaginationKey(applicationEntityType, guid);
   }
   entity = [cfEntityFactory(appStatsEntityType)];
@@ -48,17 +43,17 @@ export class GetAppStatsAction extends CFStartAction implements PaginatedAction,
 }
 
 export class GetAppEnvVarsAction extends CFStartAction implements PaginatedAction, ICFAction {
-  options: RequestOptions;
+  options: HttpRequest<any>;
   paginationKey: string;
   constructor(
     public guid: string,
     public endpointGuid: string,
   ) {
     super();
-    this.options = new RequestOptions({
-      url: `apps/${guid}/env`,
-      method: 'get'
-    });
+    this.options = new HttpRequest(
+      'GET',
+      `apps/${guid}/env`,
+    );
     this.paginationKey = createEntityRelationPaginationKey(applicationEntityType, guid);
   }
   entity = [cfEntityFactory(appEnvVarsEntityType)];
@@ -68,7 +63,7 @@ export class GetAppEnvVarsAction extends CFStartAction implements PaginatedActio
     '[App Metadata] EnvVars success',
     '[App Metadata] EnvVars failed',
   ];
-  flattenPagination: false;
+  flattenPagination = false;
   initialParams = {
     'order-direction': 'desc',
     'order-direction-field': 'name',
@@ -76,16 +71,16 @@ export class GetAppEnvVarsAction extends CFStartAction implements PaginatedActio
 }
 
 export class GetAppSummaryAction extends CFStartAction implements ICFAction {
-  options: RequestOptions;
+  options: HttpRequest<any>;
   constructor(
     public guid: string,
     public endpointGuid: string,
   ) {
     super();
-    this.options = new RequestOptions({
-      url: `apps/${guid}/summary`,
-      method: 'get'
-    });
+    this.options = new HttpRequest(
+      'GET',
+      `apps/${guid}/summary`,
+    );
   }
   entity = [cfEntityFactory(appSummaryEntityType)];
   entityType = appSummaryEntityType;

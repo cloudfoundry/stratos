@@ -3,8 +3,8 @@ import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { isEntityBlocked } from '../../../core/src/core/entity-service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { isEntityBlocked } from '../../../store/src/entity-service';
 import { pathGet } from '../../../core/src/core/utils.service';
 import { environment } from '../../../core/src/environments/environment';
 import { SetInitialParams } from '../../../store/src/actions/pagination.actions';
@@ -107,7 +107,7 @@ function createPaginationAction(config: HandleRelationsConfig) {
 }
 
 function createEntityWatcher(store, paramAction, guid: string): Observable<ValidateResultFetchingState> {
-  return store.select(selectRequestInfo(entityCatalogue.getEntityKey(paramAction), guid)).pipe(
+  return store.select(selectRequestInfo(entityCatalog.getEntityKey(paramAction), guid)).pipe(
     map((requestInfo: RequestInfoState) => {
       return { fetching: requestInfo ? requestInfo.fetching : true };
     })
@@ -293,7 +293,7 @@ function associateChildWithParent(
   // Fetch the child value to associate with parent. Will either be a guid or a list of guids
   if (action.child.isArray) {
     const { paginationKey } = action as FetchRelationPaginatedAction;
-    childValue = store.select(selectPaginationState(entityCatalogue.getEntityKey(action), paginationKey)).pipe(
+    childValue = store.select(selectPaginationState(entityCatalog.getEntityKey(action), paginationKey)).pipe(
       first(),
       map((paginationSate: PaginationEntityState) => paginationSate.ids[1] || [])
     );
@@ -307,19 +307,19 @@ function associateChildWithParent(
       if (!value) {
         return true;
       }
-      const catalogueEntity = entityCatalogue.getEntity(
+      const catalogEntity = entityCatalog.getEntity(
         action.parentEntityConfig.endpointType,
         action.parentEntityConfig.entityType,
         action.parentEntityConfig.subType
       );
       if (apiResponse) {
         // Part of an api call. Assign to apiResponse which is added to store later
-        apiResponse.response.entities[catalogueEntity.entityKey][action.parentGuid].entity[action.child.paramName] = value;
+        apiResponse.response.entities[catalogEntity.entityKey][action.parentGuid].entity[action.child.paramName] = value;
       } else {
         // Not part of an api call. We already have the entity in the store, so fire off event to link child with parent
         const response = {
           entities: {
-            [catalogueEntity.entityKey]: {
+            [catalogEntity.entityKey]: {
               [action.parentGuid]: {
                 entity: {
                   [action.child.paramName]: value
@@ -331,7 +331,7 @@ function associateChildWithParent(
         };
         const parentAction: EntityRequestAction = {
           endpointGuid: action.endpointGuid,
-          entity: catalogueEntity.getSchema(action.parentEntityConfig.schemaKey),
+          entity: catalogEntity.getSchema(action.parentEntityConfig.schemaKey),
           entityLocation: RequestEntityLocation.OBJECT,
           guid: action.parentGuid,
           entityType: action.parentEntityConfig.entityType,
@@ -414,8 +414,8 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
 
   if (!!pAction && pAction.__forcedPageEntityConfig__) {
     const entityConfig = pAction.__forcedPageEntityConfig__;
-    const catalogueEntity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType);
-    const forcedSchema = catalogueEntity.getSchema(entityConfig.schemaKey);
+    const catalogEntity = entityCatalog.getEntity(entityConfig.endpointType, entityConfig.entityType);
+    const forcedSchema = catalogEntity.getSchema(entityConfig.schemaKey);
     config.action = {
       ...config.action,
       entity: [forcedSchema],
@@ -448,7 +448,7 @@ function getRelationAction(action: EntityRequestAction): EntityInlineParentActio
   const pagAction = action as PaginatedAction;
   if (pagAction.__forcedPageEntityConfig__) {
     const entityConfig = pagAction.__forcedPageEntityConfig__;
-    const entity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType).getSchema(entityConfig.schemaKey);
+    const entity = entityCatalog.getEntity(entityConfig.endpointType, entityConfig.entityType).getSchema(entityConfig.schemaKey);
     return {
       ...action,
       entity
@@ -481,12 +481,12 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
   if (!eicAction || !action.flattenPagination) {
     return observableOf(action);
   }
-  const parentEntitySchema = entityCatalogue.getEntity(eicAction.parentEntityConfig).getSchema(eicAction.parentEntityConfig.schemaKey);
+  const parentEntitySchema = entityCatalog.getEntity(eicAction.parentEntityConfig).getSchema(eicAction.parentEntityConfig.schemaKey);
   const parentGuid = eicAction.parentGuid;
 
   // What the hell is going on here hey? Well I'll tell you...
   // Ensure that the parent is not blocked (fetching, updating, etc) before we check if it has the child param that we need
-  const parentEntityKey = entityCatalogue.getEntityKey(eicAction.parentEntityConfig);
+  const parentEntityKey = entityCatalog.getEntityKey(eicAction.parentEntityConfig);
   return store.select(selectEntity(parentEntityKey, parentGuid)).pipe(
     first(),
     mergeMap(entity => {
@@ -522,10 +522,10 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
             return;
           }
 
-          const catalogueEntity = entityCatalogue.getEntity(eicAction);
-          const entityKey = catalogueEntity.entityKey;
+          const catalogEntity = entityCatalog.getEntity(eicAction);
+          const entityKey = catalogEntity.entityKey;
           const normedEntities = entity.entity[paramName].reduce((newNormedEntities, guidOrEntity) => {
-            const guid = typeof (guidOrEntity) === 'string' ? guidOrEntity : catalogueEntity.getGuidFromEntity(guidOrEntity);
+            const guid = typeof (guidOrEntity) === 'string' ? guidOrEntity : catalogEntity.getGuidFromEntity(guidOrEntity);
             newNormedEntities[entityKey][guid] = guidOrEntity;
             return newNormedEntities;
           }, { [entityKey]: {} });

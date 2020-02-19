@@ -1,12 +1,13 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 
-import { ShowSideHelp } from '../../../../../store/src/actions/dashboard-actions';
 import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
 import { EndpointOnlyAppState } from '../../../../../store/src/app-state';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { MarkdownPreviewComponent } from '../../../shared/components/markdown-preview/markdown-preview.component';
+import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.service';
 
 
@@ -28,6 +29,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: ConnectEndpointConfig,
     private store: Store<EndpointOnlyAppState>,
     endpointsService: EndpointsService,
+    private sidePanelService: SidePanelService,
   ) {
     this.connectService = new ConnectEndpointService(store, endpointsService, data);
 
@@ -38,7 +40,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   }
 
   showHelp() {
-    this.store.dispatch(new ShowSideHelp(this.helpDocumentUrl));
+    this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
   }
 
   ngOnDestroy(): void {

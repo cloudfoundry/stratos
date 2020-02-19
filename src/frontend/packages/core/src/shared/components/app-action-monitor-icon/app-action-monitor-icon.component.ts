@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output } from '@angular/core';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { EntityMonitor } from '../../monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
 import { Observable } from 'rxjs';
 import { map, pairwise, distinctUntilChanged, startWith, withLatestFrom, tap } from 'rxjs/operators';
 import { rootUpdatingKey, RequestInfoState, ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';

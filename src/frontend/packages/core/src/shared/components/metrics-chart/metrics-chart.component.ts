@@ -11,9 +11,9 @@ import {
   MetricResultTypes,
   MetricsFilterSeries,
 } from '../../../../../store/src/types/base-metric.types';
-import { EntityMonitor } from '../../monitors/entity-monitor';
+import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
-import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { MetricsChartTypes, MetricsLineChartConfig } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
 
@@ -40,7 +40,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   @Input()
   public title: string;
 
-  @ContentChild(MetricsRangeSelectorComponent)
+  @ContentChild(MetricsRangeSelectorComponent, { static: true })
   public timeRangeSelector: MetricsRangeSelectorComponent;
 
   @Input()

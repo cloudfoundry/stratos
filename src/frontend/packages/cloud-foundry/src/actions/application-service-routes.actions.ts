@@ -1,8 +1,6 @@
-import { RequestOptions, URLSearchParams } from '@angular/http';
-
 import { getActions } from '../../../store/src/actions/action.helper';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CFEntityConfig } from '../../cf-types';
+import { CFEntityConfig } from '../cf-types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
@@ -18,6 +16,7 @@ import {
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
+import { HttpRequest } from '@angular/common/http';
 
 export const ASSIGN_ROUTE = '[Application] Assign route';
 export const ASSIGN_ROUTE_SUCCESS = '[Application] Assign route success';
@@ -37,10 +36,10 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/routes`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `apps/${guid}/routes`
+    );
     this.parentGuid = guid;
     this.paginationKey = paginationKey || createEntityRelationPaginationKey(applicationEntityType, guid);
   }
@@ -57,7 +56,7 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
   };
   entity = [cfEntityFactory(routeEntityType)];
   entityType = routeEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   flattenPagination = true;
   parentGuid: string;
   parentEntityConfig = new CFEntityConfig(applicationEntityType);
@@ -74,10 +73,10 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/service_bindings`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `apps/${guid}/service_bindings`
+    );
     this.paginationKey = paginationKey || createEntityRelationPaginationKey(applicationEntityType, guid);
   }
   actions = getActions('Application Service Bindings', 'Get All');
@@ -89,7 +88,7 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
   };
   entity = [cfEntityFactory(serviceBindingEntityType)];
   entityType = serviceBindingEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class AssignRouteToApplication extends CFStartAction
@@ -100,13 +99,15 @@ export class AssignRouteToApplication extends CFStartAction
     public endpointGuid: string
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/routes/${routeGuid}`;
-    this.options.method = 'put';
+    this.options = new HttpRequest(
+      'PUT',
+      `apps/${guid}/routes/${routeGuid}`,
+      {}
+    );
   }
   actions = [ASSIGN_ROUTE, ASSIGN_ROUTE_SUCCESS, ASSIGN_ROUTE_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   updatingKey = 'Assigning-Route';
 }

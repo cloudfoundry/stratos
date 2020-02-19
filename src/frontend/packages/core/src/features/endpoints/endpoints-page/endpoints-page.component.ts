@@ -10,7 +10,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { combineLatest, Subscription } from 'rxjs';
 import { delay, first, map, tap } from 'rxjs/operators';
@@ -46,7 +46,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
   private healthCheckTimeout: number;
 
-  @ViewChild('customNoEndpoints', { read: ViewContainerRef }) customNoEndpointsContainer;
+  @ViewChild('customNoEndpoints', { read: ViewContainerRef, static: true }) customNoEndpointsContainer;
   customContentComponentRef: ComponentRef<any>;
 
   private snackBarRef: MatSnackBarRef<SimpleSnackBar>;

@@ -2,19 +2,16 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
-import { filter, first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
+import { first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
-import {
-  endpointEntitiesSelector,
-  endpointsEntityRequestDataSelector,
-  endpointStatusSelector,
-} from '../../../store/src/selectors/endpoint.selectors';
+import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthCheck, EndpointHealthChecks } from '../../endpoints-health-checks';
-import { entityCatalogue } from './entity-catalogue/entity-catalogue.service';
+import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
 import { UserService } from './user.service';
 
 
@@ -31,10 +28,10 @@ export class EndpointsService implements CanActivate {
     if (!endpoint) {
       return '';
     }
-    const catalogueEntity = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-    const metadata = catalogueEntity.builders.entityBuilder.getMetadata(endpoint);
-    if (catalogueEntity) {
-      return catalogueEntity.builders.entityBuilder.getLink(metadata);
+    const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+    const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint);
+    if (catalogEntity) {
+      return catalogEntity.builders.entityBuilder.getLink(metadata);
     }
     return '';
   }
@@ -48,7 +45,7 @@ export class EndpointsService implements CanActivate {
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => {
-        const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+        const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
         if (!epType.definition) {
           return false;
         }
@@ -121,11 +118,7 @@ export class EndpointsService implements CanActivate {
   }
 
   hasMetrics(endpointId: string): Observable<boolean> {
-    return this.store.select(endpointsEntityRequestDataSelector(endpointId)).pipe(
-      filter(endpoint => !!endpoint),
-      map(endpoint => endpoint.metricsAvailable),
-      first()
-    );
+    return endpointHasMetricsByAvailable(this.store, endpointId);
   }
 
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
@@ -145,7 +138,7 @@ export class EndpointsService implements CanActivate {
       map(ep => {
         return Object.values(ep)
           .filter(endpoint => {
-            const epType = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
+            const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
             return endpoint.cnsi_type === type && (epType.unConnectable || endpoint.connectionStatus === 'connected');
           });
       })

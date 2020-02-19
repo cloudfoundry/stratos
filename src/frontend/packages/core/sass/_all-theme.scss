@@ -8,10 +8,10 @@
 @import '../src/shared/components/display-value/display-value.component.theme';
 @import '../src/shared/components/stepper/steppers/steppers.component.theme';
 @import '../src/shared/components/list/list.component.theme';
-@import '../src//shared/components/code-block/code-block.component.theme';
+@import '../src/shared/components/code-block/code-block.component.theme';
+@import '../src/shared/components/copy-to-clipboard/copy-to-clipboard.component.theme';
 @import '../src/shared/components/list/list-cards/cards.components.theme';
 @import '../src/shared/components/dialog-error/dialog-error.component.theme';
-@import '../src/shared/components/page-subheader/page-subheader.component.theme';
 @import '../src/shared/components/cards/card-status/card-status.component.theme';
 @import '../src/shared/components/usage-gauge/usage-gauge.component.theme';
 @import '../src/shared/components/ssh-viewer/ssh-viewer.component.theme';
@@ -33,22 +33,25 @@
 @import '../src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component.theme';
 @import '../src/shared/components/upload-progress-indicator/upload-progress-indicator.component.theme';
 @import '../src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component.theme';
+@import '../src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component.theme';
 @import '../src/shared/components/start-end-date/start-end-date.component.theme';
 @import '../src/shared/components/metrics-chart/metrics-chart.component.theme';
 @import '../src/shared/components/metrics-range-selector/metrics-range-selector.component.theme';
-@import '../src/shared/components/tile-selector/tile-selector.component.theme';
+@import '../src/shared/components/tile-selector-tile/tile-selector-tile.component.theme';
 @import '../src/shared/components/entity-summary-title/entity-summary-title.component.theme';
 @import '../src/shared/components/multiline-title/multiline-title.component.theme';
 @import '../src/features/user-profile/profile-info/profile-info.component.theme';
 @import '../src/core/stateful-icon/stateful-icon.component.theme';
-@import '../src/shared/components/markdown-preview/markdown-preview.component.theme';
-@import './components/mat-tabs.theme';
+@import './components/mat-snack-bar.theme';
+@import './components/ngx-charts-gauge.theme';
+@import '../src/shared/components/sidepanel-preview/sidepanel-preview.component.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
 @import './mat-themes';
 @import './fonts';
 @import './ansi-colors';
 @import '../src/shared/components/favorites-global-list/favorites-global-list.component.theme';
+@import '../src/shared/components/favorites-meta-card/favorites-meta-card.component.theme';
 
 @import '../../cloud-foundry/src/shared/components/schema-form/schema-form.component.theme';
 @import '../../cloud-foundry/src/features/services/services-wall/services-wall.component.theme';
@@ -60,6 +63,7 @@
 @import '../../cloud-foundry/src/features/cloud-foundry/tabs/cloud-foundry-firehose/cloud-foundry-firehose.component.theme';
 @import '../../cloud-foundry/src/features/service-catalog/service-catalog-page/service-catalog-page.component.theme';
 @import '../../cloud-foundry/src/features/applications/application-wall/application-wall.component.theme';
+@import '../../core/src/features/error-page/error-page/error-page.component.theme.scss';
 
 // Defaults
 $side-nav-light-text: #fff;
@@ -82,12 +86,10 @@ $side-nav-light-active: #484848;
   $warn: map-get($theme, warn);
   $subdued: mat-contrast($primary, 50);
 
-  @if $is-dark==true {
+  @if $is-dark == true {
     $app-background-color: lighten(mat-color($background-colors, background), 10%);
-    $subdued: darken($subdued, 50);
-  }
-
-  @else {
+    $subdued: lighten($subdued, 90);
+  } @else {
     $app-background-color: darken(mat-color($background-colors, background), 2%);
     $subdued: lighten($subdued, 50);
   }
@@ -106,8 +108,8 @@ $side-nav-light-active: #484848;
   @include steppers-theme($theme, $app-theme);
   @include list-theme($theme, $app-theme);
   @include app-base-page-theme($theme, $app-theme);
-  @include app-page-subheader-theme($theme, $app-theme);
-  @include app-mat-tabs-theme($theme, $app-theme);
+  @include app-mat-snack-bar-theme($theme, $app-theme);
+  @include ngx-charts-gauge($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
   @include app-card-status-theme($theme, $app-theme);
   @include app-usage-gauge-theme($theme, $app-theme);
@@ -139,25 +141,27 @@ $side-nav-light-active: #484848;
   @include metrics-chart-theme($theme, $app-theme);
   @include metrics-range-selector-theme($theme, $app-theme);
   @include app-multiline-title-theme($theme, $app-theme);
-  @include app-markdown-preview-theme($theme, $app-theme);
+  @include app-sidepanel-preview-theme($theme, $app-theme);
   @include tile-selector-theme($theme, $app-theme);
   @include profile-page-theme($theme, $app-theme);
   @include stateful-icon($theme, $app-theme);
-  @include app-markdown-preview-theme($theme, $app-theme);
   @include app-simple-usage-chart($theme, $app-theme);
   @include home-page-theme($theme, $app-theme);
   @include favorites-global-list-theme($theme, $app-theme);
+  @include favorites-meta-card-theme($theme, $app-theme);
   @include page-side-nav-theme($theme, $app-theme);
   @include cf-admin-add-user-warning($theme, $app-theme);
   @include entity-summary-title-theme($theme, $app-theme);
+  @include app-meta-card-item-theme($theme, $app-theme);
+  @include error-page-theme($theme, $app-theme);
+  @include code-block-theme($theme, $app-theme);
+  @include copy-to-clipboard-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
   @if ($nav-theme) {
     @return $nav-theme;
-  }
-
-  @else {
+  } @else {
     // Use default palette for side navigation
     @return (background: $side-nav-light-bg, background-top: $side-nav-light-bg, text: darken($side-nav-light-text, 10%), active: $side-nav-light-active, active-text: $side-nav-light-text, hover: $side-nav-light-hover, hover-text: $side-nav-light-text);
   }
@@ -166,9 +170,7 @@ $side-nav-light-active: #484848;
 @function app-generate-status-theme($theme, $status-theme: null) {
   @if ($status-theme) {
     @return $status-theme;
-  }
-
-  @else {
+  } @else {
     $warn: map-get($theme, warn);
     $primary: map-get($theme, primary);
     $white: #fff; // Use default palette for status

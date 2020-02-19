@@ -9,6 +9,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
+import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
@@ -34,13 +35,12 @@ import {
   TableCellRequestMonitorIconComponent,
 } from '../table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
+import { TableCellSidePanelComponent } from '../table-cell-side-panel/table-cell-side-panel.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
-import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
 
-/* tslint:disable:max-line-length */
-/* tslint:enable:max-line-length */
-export const listTableCells = [
+
+export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
   TableCellSelectComponent,
@@ -50,11 +50,11 @@ export const listTableCells = [
   TableCellEndpointNameComponent,
   TableCellBooleanIndicatorComponent,
   TableCellRadioComponent,
-  TableCellRequestMonitorIconComponent,
   TableCellCommitAuthorComponent,
   TableCellRequestMonitorIconComponent,
   TableCellFavoriteComponent,
   TableCellEndpointDetailsComponent,
+  TableCellSidePanelComponent,
   ...coreEndpointListDetailsComponents
 ];
 
@@ -68,7 +68,7 @@ export const listTableCells = [
   entryComponents: [...listTableCells]
 })
 export class TableCellComponent<T> implements OnInit {
-  @ViewChild('target', { read: ViewContainerRef })
+  @ViewChild('target', { read: ViewContainerRef, static: true })
   target: ViewContainerRef;
   private rcRow: T | MultiActionListEntity;
 

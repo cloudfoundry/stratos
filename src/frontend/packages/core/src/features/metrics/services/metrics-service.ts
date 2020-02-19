@@ -4,8 +4,8 @@ import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { endpointListKey, EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
 import { endpointEntitySchema } from '../../../base-entity-schemas';
 

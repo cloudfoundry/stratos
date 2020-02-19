@@ -2,22 +2,28 @@
   margin-bottom: 0;
   margin-left: 20px;
   margin-top: 10px;
-  
   &__metrics {
     max-width: 350px;
+
+    app-tile {
+      flex: 0;
+      &:nth-child(2) {
+        display: flex;
+        flex: 2;
+        justify-content: center;
+      }
+    }
   }
-  
   &__header {
     margin: 0;
   }
-  
   &__graphs {
     margin: 10px;
   }
   &__graph {
     display: inline-block;
-    padding: 10px;
-    width: 33%;
+    padding: 0 20px 20px 0;
+    width: 250px;
   }
   &__dashboard {
     font-size: 14px;
@@ -29,5 +35,32 @@
   }
   &__button {
     margin-left: 4px;
+  }
+  &__dashboard-version {
+    align-items: baseline;
+    display: flex;
+  }
+  &__dashboard-version-label {
+    margin-right: 10px;
+  }
+  &__dashboard-configure {
+    line-height: initial;
+    margin: 0;
+    min-width: auto;
+    padding: 0;    
+  }
+}
+
+.app-metadata {
+  display: flex;
+  flex-direction: row;
+  margin-left: 12px;
+
+  &__two-cols {
+    margin-right: 20px;
+
+    app-metadata-item:first-child {
+      margin-top: 0;
+    }
   }
 }

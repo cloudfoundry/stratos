@@ -5,9 +5,9 @@ import { map } from 'rxjs/internal/operators/map';
 import { GetAllEndpoints } from '../../../../../../../../store/src/actions/endpoint.actions';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { TableCellCustom } from '../../../list.types';
-import { entityCatalogue } from '../../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 
 export interface RowWithEndpointId {
   endpointId: string;
@@ -39,7 +39,7 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
     ).waitForEntity$.pipe(
       map(data => data.entity),
       map((data: any) => {
-        const ep = entityCatalogue.getEndpoint(data.cnsi_type, data.sub_type).definition;
+        const ep = entityCatalog.getEndpoint(data.cnsi_type, data.sub_type).definition;
         data.canShowLink = data.connectionStatus === 'connected' || ep.unConnectable;
         data.link = EndpointsService.getLinkForEndpoint(data);
         return data;

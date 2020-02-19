@@ -6,7 +6,7 @@ import { filter, first, map } from 'rxjs/operators';
 
 import { MetricsAPIAction, MetricsAPITargets } from '../../../../../store/src/actions/metrics-api.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { getIdFromRoute } from '../../../core/utils.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { EndpointIcon } from '../../endpoints/endpoint-helpers';
@@ -61,10 +61,10 @@ export class MetricsComponent {
       map((ep) => {
         const metadata = {};
         ep.endpoints.forEach(endpoint => {
-          const catalogueEndpoint = entityCatalogue.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+          const catalogEndpoint = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
           metadata[endpoint.guid] = {
-            type: catalogueEndpoint.definition.type,
-            icon: catalogueEndpoint.definition.icon
+            type: catalogEndpoint.definition.type,
+            icon: catalogEndpoint.definition.icon
           };
         });
         return {

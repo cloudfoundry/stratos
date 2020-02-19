@@ -1,4 +1,4 @@
-import { EntityCatalogueEntityConfig } from '../../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { DeleteApplication } from '../actions/application.actions';
 import {
   GetAllUserProvidedServices,
@@ -20,7 +20,7 @@ export interface UserProvidedServiceActionBuilder extends CFOrchestratedActionBu
     guid: string,
     endpointGuid: string,
     existingUserProvidedServiceInstance?: Partial<IUserProvidedServiceInstanceData>,
-    proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
+    proxyPaginationEntityConfig?: EntityCatalogEntityConfig
   ) => UpdateUserProvidedServiceInstance;
   getMultiple: (
     paginationKey?: string,
@@ -47,7 +47,7 @@ export const userProvidedServiceActionBuilder: UserProvidedServiceActionBuilder 
     guid: string,
     endpointGuid: string,
     existingUserProvidedServiceInstance?: Partial<IUserProvidedServiceInstanceData>,
-    proxyPaginationEntityConfig?: EntityCatalogueEntityConfig
+    proxyPaginationEntityConfig?: EntityCatalogEntityConfig
   ) => new UpdateUserProvidedServiceInstance(
     endpointGuid,
     guid,

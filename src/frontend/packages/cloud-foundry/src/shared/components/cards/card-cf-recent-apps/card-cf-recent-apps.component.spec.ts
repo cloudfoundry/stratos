@@ -10,12 +10,12 @@ import {
 import {
   PollingIndicatorComponent,
 } from '../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
-import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
+  generateActiveRouteCfOrgSpaceMock,
   generateCfBaseTestModulesNoShared,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ActiveRouteCfOrgSpace } from '../../../../features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { CfUserService } from '../../../data-services/cf-user.service';
 import { CardCfRecentAppsComponent } from './card-cf-recent-apps.component';
@@ -36,8 +36,8 @@ describe('CardCfRecentAppsComponent', () => {
       ],
       imports: generateCfBaseTestModulesNoShared(),
       providers: [
+        generateActiveRouteCfOrgSpaceMock(),
         CloudFoundryEndpointService,
-        ActiveRouteCfOrgSpace,
         EntityMonitorFactory,
         CfUserService,
         PaginationMonitorFactory

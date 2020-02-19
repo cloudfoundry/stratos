@@ -1,16 +1,15 @@
-import { RequestMethod, RequestOptions, URLSearchParams } from '@angular/http';
-
 import { IQuotaDefinition } from '../../../core/src/core/cf-api.types';
 import {
   QuotaFormValues,
 } from '../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CFEntityConfig } from '../../cf-types';
+import { CFEntityConfig } from '../cf-types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { organizationEntityType, quotaDefinitionEntityType, spaceQuotaEntityType } from '../cf-entity-types';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
+import { HttpRequest, HttpParams } from '@angular/common/http';
 
 export const GET_QUOTA_DEFINITION = '[QuotaDefinition] Get one';
 export const GET_QUOTA_DEFINITION_SUCCESS = '[QuotaDefinition] Get one success';
@@ -95,9 +94,10 @@ export class GetQuotaDefinitions extends CFStartAction implements PaginatedActio
     public populateMissing = false
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = 'quota_definitions';
-    this.options.method = RequestMethod.Get;
+    this.options = new HttpRequest(
+      'GET',
+      'quota_definitions'
+    );
   }
   actions = [
     GET_QUOTA_DEFINITIONS,
@@ -106,7 +106,7 @@ export class GetQuotaDefinitions extends CFStartAction implements PaginatedActio
   ];
   entity = [cfEntityFactory(quotaDefinitionEntityType)];
   entityType = quotaDefinitionEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -118,9 +118,10 @@ export class GetQuotaDefinitions extends CFStartAction implements PaginatedActio
 export class GetQuotaDefinition extends CFStartAction implements ICFAction, EntityInlineParentAction {
   constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = true) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `quota_definitions/${guid}`;
-    this.options.method = RequestMethod.Get;
+    this.options = new HttpRequest(
+      'GET',
+      `quota_definitions/${guid}`
+    );
   }
   actions = [
     GET_QUOTA_DEFINITION,
@@ -129,15 +130,16 @@ export class GetQuotaDefinition extends CFStartAction implements ICFAction, Enti
   ];
   entity = [cfEntityFactory(quotaDefinitionEntityType)];
   entityType = quotaDefinitionEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class GetSpaceQuotaDefinition extends CFStartAction implements ICFAction, EntityInlineParentAction {
   constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = true) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `space_quota_definitions/${guid}`;
-    this.options.method = RequestMethod.Get;
+    this.options = new HttpRequest(
+      'GET',
+      `space_quota_definitions/${guid}`
+    );
   }
   actions = [
     GET_SPACE_QUOTA_DEFINITION,
@@ -146,7 +148,7 @@ export class GetSpaceQuotaDefinition extends CFStartAction implements ICFAction,
   ];
   entity = [cfEntityFactory(spaceQuotaEntityType)];
   entityType = spaceQuotaEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class GetOrganizationSpaceQuotaDefinitions extends CFStartAction implements PaginatedAction, EntityInlineChildAction {
@@ -160,10 +162,10 @@ export class GetOrganizationSpaceQuotaDefinitions extends CFStartAction implemen
     public populateMissing = true
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `organizations/${orgGuid}/space_quota_definitions`;
-    this.options.method = RequestMethod.Get;
-    this.options.params = new URLSearchParams();
+    this.options = new HttpRequest(
+      'GET',
+      `organizations/${orgGuid}/space_quota_definitions`
+    );
     this.parentGuid = this.orgGuid;
   }
   actions = [
@@ -174,7 +176,7 @@ export class GetOrganizationSpaceQuotaDefinitions extends CFStartAction implemen
   parentEntityConfig = new CFEntityConfig(organizationEntityType);
   entity = [cfEntityFactory(spaceQuotaEntityType)];
   entityType = spaceQuotaEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -188,9 +190,11 @@ export class AssociateSpaceQuota extends CFStartAction implements ICFAction {
 
   constructor(public spaceGuid: string, public endpointGuid: string, spaceQuotaGuid: string) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `space_quota_definitions/${spaceQuotaGuid}/spaces/${spaceGuid}`;
-    this.options.method = RequestMethod.Put;
+    this.options = new HttpRequest(
+      'PUT',
+      `space_quota_definitions/${spaceQuotaGuid}/spaces/${spaceGuid}`,
+      {}
+    );
     this.guid = spaceQuotaGuid;
   }
   actions = [
@@ -200,7 +204,7 @@ export class AssociateSpaceQuota extends CFStartAction implements ICFAction {
   ];
   entity = [cfEntityFactory(spaceQuotaEntityType)];
   entityType = spaceQuotaEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   updatingKey = AssociateSpaceQuota.UpdateExistingSpaceQuota;
   guid: string;
 }
@@ -210,9 +214,10 @@ export class DisassociateSpaceQuota extends CFStartAction implements ICFAction {
 
   constructor(public spaceGuid: string, public endpointGuid: string, spaceQuotaGuid: string) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `space_quota_definitions/${spaceQuotaGuid}/spaces/${spaceGuid}`;
-    this.options.method = RequestMethod.Delete;
+    this.options = new HttpRequest(
+      'DELETE',
+      `space_quota_definitions/${spaceQuotaGuid}/spaces/${spaceGuid}`
+    );
     this.guid = spaceQuotaGuid;
   }
   actions = [
@@ -222,7 +227,7 @@ export class DisassociateSpaceQuota extends CFStartAction implements ICFAction {
   ];
   entity = [cfEntityFactory(spaceQuotaEntityType)];
   entityType = spaceQuotaEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   updatingKey = AssociateSpaceQuota.UpdateExistingSpaceQuota;
   guid: string;
 }
@@ -230,10 +235,11 @@ export class DisassociateSpaceQuota extends CFStartAction implements ICFAction {
 export class CreateQuotaDefinition extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string, public createQuota: QuotaFormValues) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `quota_definitions`;
-    this.options.method = RequestMethod.Post;
-    this.options.body = orgSpaceQuotaFormValuesToApiObject(createQuota);
+    this.options = new HttpRequest(
+      'POST',
+      `quota_definitions`,
+      orgSpaceQuotaFormValuesToApiObject(createQuota)
+    );
   }
   actions = [
     CREATE_QUOTA_DEFINITION,
@@ -242,7 +248,7 @@ export class CreateQuotaDefinition extends CFStartAction implements ICFAction {
   ];
   entity = [quotaDefinitionEntitySchema];
   entityType = quotaDefinitionEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class UpdateQuotaDefinition extends CFStartAction implements ICFAction {
@@ -251,10 +257,11 @@ export class UpdateQuotaDefinition extends CFStartAction implements ICFAction {
 
   constructor(public guid: string, public endpointGuid: string, updateQuota: QuotaFormValues) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `quota_definitions/${guid}`;
-    this.options.method = RequestMethod.Put;
-    this.options.body = orgSpaceQuotaFormValuesToApiObject(updateQuota);
+    this.options = new HttpRequest(
+      'PUT',
+      `quota_definitions/${guid}`,
+      orgSpaceQuotaFormValuesToApiObject(updateQuota)
+    );
   }
   actions = [
     UPDATE_QUOTA_DEFINITION,
@@ -263,19 +270,27 @@ export class UpdateQuotaDefinition extends CFStartAction implements ICFAction {
   ];
   entity = [quotaDefinitionEntitySchema];
   entityType = quotaDefinitionEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   updatingKey = UpdateQuotaDefinition.UpdateExistingQuota;
 }
 
 export class DeleteQuotaDefinition extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `quota_definitions/${guid}`;
-    this.options.method = 'delete';
-    this.options.params = new URLSearchParams();
-    this.options.params.append('recursive', 'true');
-    this.options.params.append('async', 'false');
+    this.options = new HttpRequest(
+      'DELETE',
+      `quota_definitions/${guid}`,
+      {
+        params: new HttpParams(
+          {
+            fromObject: {
+              recursive: 'true',
+              async: 'false'
+            }
+          }
+        )
+      }
+    );
   }
   actions = [
     DELETE_QUOTA_DEFINITION,
@@ -284,17 +299,18 @@ export class DeleteQuotaDefinition extends CFStartAction implements ICFAction {
   ];
   entity = [quotaDefinitionEntitySchema];
   entityType = quotaDefinitionEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   removeEntityOnDelete = true;
 }
 
 export class CreateSpaceQuotaDefinition extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string, orgGuid: string, public createQuota: QuotaFormValues) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `space_quota_definitions`;
-    this.options.method = RequestMethod.Post;
-    this.options.body = orgSpaceQuotaFormValuesToApiObject(createQuota, false, orgGuid);
+    this.options = new HttpRequest(
+      'POST',
+      `space_quota_definitions`,
+      orgSpaceQuotaFormValuesToApiObject(createQuota, false, orgGuid)
+    );
   }
   actions = [
     CREATE_SPACE_QUOTA_DEFINITION,
@@ -303,7 +319,7 @@ export class CreateSpaceQuotaDefinition extends CFStartAction implements ICFActi
   ];
   entity = [spaceQuotaEntitySchema];
   entityType = spaceQuotaEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class UpdateSpaceQuotaDefinition extends CFStartAction implements ICFAction {
@@ -312,10 +328,11 @@ export class UpdateSpaceQuotaDefinition extends CFStartAction implements ICFActi
 
   constructor(public guid: string, public endpointGuid: string, updateQuota: QuotaFormValues) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `space_quota_definitions/${guid}`;
-    this.options.method = RequestMethod.Put;
-    this.options.body = orgSpaceQuotaFormValuesToApiObject(updateQuota, false);
+    this.options = new HttpRequest(
+      'PUT',
+      `space_quota_definitions/${guid}`,
+      orgSpaceQuotaFormValuesToApiObject(updateQuota, false)
+    );
   }
   actions = [
     UPDATE_SPACE_QUOTA_DEFINITION,
@@ -324,19 +341,25 @@ export class UpdateSpaceQuotaDefinition extends CFStartAction implements ICFActi
   ];
   entity = [spaceQuotaEntitySchema];
   entityType = spaceQuotaEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   updatingKey = UpdateSpaceQuotaDefinition.UpdateExistingSpaceQuota;
 }
 
 export class DeleteSpaceQuotaDefinition extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `space_quota_definitions/${guid}`;
-    this.options.method = 'delete';
-    this.options.params = new URLSearchParams();
-    this.options.params.append('recursive', 'true');
-    this.options.params.append('async', 'false');
+    this.options = new HttpRequest(
+      'DELETE',
+      `space_quota_definitions/${guid}`,
+      {
+        params: new HttpParams({
+          fromObject: {
+            recursive: 'true',
+            async: 'false'
+          }
+        })
+      }
+    );
   }
   actions = [
     DELETE_SPACE_QUOTA_DEFINITION,
@@ -345,6 +368,6 @@ export class DeleteSpaceQuotaDefinition extends CFStartAction implements ICFActi
   ];
   entity = [spaceQuotaEntitySchema];
   entityType = spaceQuotaEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   removeEntityOnDelete = true;
 }

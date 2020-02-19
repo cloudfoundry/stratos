@@ -1,11 +1,12 @@
 // tslint:disable:max-line-length
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { first, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  BooleanIndicatorType,
-} from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import { CfCellHelper } from '../../../../../../../core/src/features/cloud-foundry/cf-cell.helpers';
+import { BooleanIndicatorType } from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import {
   TableCellBooleanIndicatorComponent,
   TableCellBooleanIndicatorComponentConfig,
@@ -13,11 +14,13 @@ import {
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellsDataSource } from './cf-cells-data-source';
+
 
 // tslint:enable:max-line-length
 
@@ -33,6 +36,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
     filter: 'Search by id',
     noEntries: 'There are no cells'
   };
+  private init$: Observable<any>;
 
   private boolIndicatorConfig: TableCellBooleanIndicatorComponentConfig<IMetricVectorResult<IMetricCell>> = {
     // "0 signifies healthy, and 1 signifies unhealthy"
@@ -98,11 +102,21 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
     },
   ];
 
-  constructor(store: Store<CFAppState>, private activeRouteCfCell: ActiveRouteCfCell) {
+  constructor(
+    store: Store<CFAppState>,
+    private activeRouteCfCell: ActiveRouteCfCell,
+    paginationMonitorFactory: PaginationMonitorFactory) {
     super();
-    this.dataSource = new CfCellsDataSource(store, activeRouteCfCell.cfGuid, this);
+    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
+    this.init$ = cellHelper.createCellMetricAction(activeRouteCfCell.cfGuid).pipe(
+      first(),
+      tap(action => {
+        this.dataSource = new CfCellsDataSource(store, this, action);
+      })
+    );
   }
 
+  getInitialised = () => this.init$;
   getColumns = () => this.columns;
   getDataSource = () => this.dataSource;
 }

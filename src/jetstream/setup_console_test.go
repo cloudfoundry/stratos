@@ -14,7 +14,7 @@ func TestConsoleSetup(t *testing.T) {
 
 	Convey("Check that we can migrate data from the old console_config table", t, func() {
 
-		db, err := datastore.GetSQLLiteConnectionWithPath("file::memory:?cache=shared", true)
+		db, _, err := datastore.GetInMemorySQLLiteConnection()
 		if err != nil {
 			t.Errorf("can not open sqlite database for testing: %v", err)
 		}
@@ -37,6 +37,8 @@ func TestConsoleSetup(t *testing.T) {
 		envLookup := env.NewVarSet()
 		envLookup.AppendSource(console_config.ConfigLookup)
 		portal := &portalProxy{env: envLookup}
+		// Initalize for testing
+		portal.GetConfig().CanMigrateDatabaseSchema = true
 		err = console_config.MigrateSetupData(portal, configStore)
 		if err != nil {
 			t.Errorf("Could not migrate config settings: %v", err)
@@ -60,7 +62,7 @@ func TestConsoleSetup(t *testing.T) {
 			t.Errorf("Could not get new config: %v", err)
 		}
 
-		// New config should be 
+		// New config should be
 
 		So(newConfig.UAAEndpoint.String(), ShouldEqual, "TEST_UAA")
 		So(newConfig.AuthorizationEndpoint.String(), ShouldEqual, "TEST_UAA")

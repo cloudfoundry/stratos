@@ -23,7 +23,7 @@
       }
     }
     &__item {
-      color: rgba(0, 0, 0, .6);
+      color: map-get($app-theme, subdued-color);
       &--active {
         background-color: transparentize($primary-color, .9);
         color: $primary-color;

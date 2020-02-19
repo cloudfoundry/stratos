@@ -9,14 +9,11 @@
 
   &__form-sections {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
 
     mat-checkbox {
       padding-top: 20px;
-    }
-
-    @include breakpoint(tablet) {
-      flex-direction: row;
     }
 
     &__form-section {
@@ -24,11 +21,16 @@
       flex: 1;
       flex-direction: column;
       max-width: 450px;
+      min-width: 450px;
       padding-bottom: 10px;
       padding-top: 15px;
 
-      &:first-of-type {
-        margin-right: 75px;
+      &:not(:last-of-type) {
+        margin-right: 60px;
+      }
+
+      .hidden {
+        display: none;
       }
     }
   }

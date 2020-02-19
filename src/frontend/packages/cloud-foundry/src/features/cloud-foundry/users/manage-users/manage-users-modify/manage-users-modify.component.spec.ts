@@ -1,9 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
-import { EntityMonitorFactory } from '../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
@@ -11,6 +10,7 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { UsersRolesModifyComponent } from './manage-users-modify.component';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('UsersRolesModifyComponent', () => {
   let component: UsersRolesModifyComponent;
@@ -23,7 +23,7 @@ describe('UsersRolesModifyComponent', () => {
         CoreModule,
         SharedModule,
         NoopAnimationsModule,
-        HttpModule
+        HttpClientModule
       ],
       providers: [
         ActiveRouteCfOrgSpace,

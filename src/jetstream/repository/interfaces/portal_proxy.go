@@ -14,12 +14,11 @@ type PortalProxy interface {
 	GetHttpClient(skipSSLValidation bool) http.Client
 	GetHttpClientForRequest(req *http.Request, skipSSLValidation bool) http.Client
 	RegisterEndpoint(c echo.Context, fetchInfo InfoFunc) error
-
 	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, subType string, fetchInfo InfoFunc) (CNSIRecord, error)
-
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
 	// Auth
+	GetStratosAuthService() StratosAuth
 	ConnectOAuth2(c echo.Context, cnsiRecord CNSIRecord) (*TokenRecord, error)
 	InitEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) TokenRecord
 
@@ -29,6 +28,7 @@ type PortalProxy interface {
 	GetSessionInt64Value(c echo.Context, key string) (int64, error)
 	GetSessionStringValue(c echo.Context, key string) (string, error)
 	SaveSession(c echo.Context, session *sessions.Session) error
+	GetSessionDataStore() SessionDataStore
 
 	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
 	DoLoginToCNSI(c echo.Context, cnsiGUID string, systemSharedToken bool) (*LoginRes, error)
@@ -49,11 +49,8 @@ type PortalProxy interface {
 	// UAA Token
 	GetUAATokenRecord(userGUID string) (TokenRecord, error)
 	RefreshUAAToken(userGUID string) (TokenRecord, error)
-
-	GetUsername(userid string) (string, error)
 	RefreshUAALogin(username, password string, store bool) error
 	GetUserTokenInfo(tok string) (u *JWTUserTokenInfo, err error)
-	GetUAAUser(userGUID string) (*ConnectedUser, error)
 
 	// Proxy API requests
 	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
@@ -76,16 +73,9 @@ type PortalProxy interface {
 	// Tokens - lower-level access
 	SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord) error
 	DeleteEndpointToken(cnsiGUID string, userGUID string) error
-
 	AddLoginHook(priority int, function LoginHookFunc) error
 	ExecuteLoginHooks(c echo.Context) error
 
 	// Plugins
 	GetPlugin(name string) interface{}
-
-	// SetCanPerformMigrations updates the state that records if we can perform Database migrations
-	SetCanPerformMigrations(bool)
-
-	// CanPerformMigrations returns if we can perform Database migrations
-	CanPerformMigrations() bool
 }

@@ -16,10 +16,8 @@
           <div class="list-component__header__left--metrics-range"
             *ngIf="config.showCustomTime && !(isAddingOrSelecting$ | async)">
             <app-metrics-range-selector [baseAction]="config.getDataSource().masterAction"
-              (metricsAction)="config.getDataSource().updateMetricsAction($event)"
-              [times]="config.customTimeWindows"
-              [selectedTimeValue]="config.customTimeInitialValue"
-              [pollInterval]="config.customTimePollingInterval"
+              (metricsAction)="config.getDataSource().updateMetricsAction($event)" [times]="config.customTimeWindows"
+              [selectedTimeValue]="config.customTimeInitialValue" [pollInterval]="config.customTimePollingInterval"
               [validate]="config.customTimeValidation">
             </app-metrics-range-selector>
           </div>
@@ -37,6 +35,11 @@
           <div class="list-component__header__left--text"
             *ngIf="!(multiActions && multiActions.length) && (dataSource.isSelecting$ | async)">
             {{dataSource.selectedRows.size}} Selected
+          </div>
+          <!-- Injected filters -->
+          <div *ngIf="customFilters">
+            <ng-container *ngTemplateOutlet="customFilters">
+            </ng-container>
           </div>
           <!-- Multi filters, such as filter app wall by cf/org/space -->
           <div class="list-component__header__left--multi-filters"
@@ -75,10 +78,7 @@
             [hidden]="filterColumns.length < 1 || !config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <mat-form-field>
               <mat-label>Filter Selection</mat-label>
-              <mat-select
-                [(value)]="filterSelected"
-                (selectionChange)="updateListFilter($event.value)"
-              >
+              <mat-select [(value)]="filterSelected" (selectionChange)="updateListFilter($event.value)">
                 <mat-option *ngFor="let filter of filterColumns" [value]="filter">
                   {{ filter.label }}
                 </mat-option>
@@ -89,8 +89,8 @@
             [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <mat-form-field floatLabel="never" class="list-component__header__right-filter">
               <input matInput [ngModel]="filterString" #filter="ngModel"
-                [disabled]="(filterColumns.length > 1 && filterSelected === undefined) || (dataSource.isLoadingPage$ | async)" name="filter"
-                placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter'}}">
+                [disabled]="(filterColumns.length > 1 && filterSelected === undefined) || (dataSource.isLoadingPage$ | async)"
+                name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter'}}">
             </mat-form-field>
           </div>
           <!-- Sort Button & Drop down -->
@@ -196,8 +196,8 @@
     <ng-template #defaultNoEntriesMaxedResults>
       <mat-card class="list-component__default-no-entries">
         <mat-card-content>
-          <div class="no-rows">{{config.text?.maxedResults || 'There are too many results. Please use the filters to
-            reduce the number of results.'}}</div>
+          <div class="no-rows">{{config.text?.maxedResults || 'There are too many results. If available please use the
+            filters to reduce the number of results.'}}</div>
         </mat-card-content>
       </mat-card>
     </ng-template>

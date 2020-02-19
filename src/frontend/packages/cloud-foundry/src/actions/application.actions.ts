@@ -1,13 +1,13 @@
-import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
+import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 
 import { IApp } from '../../../core/src/core/cf-api.types';
 import { pick } from '../../../store/src/helpers/reducer.helper';
 import { ActionMergeFunction } from '../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { applicationEntityType, appStatsEntityType } from '../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { AppMetadataTypes } from './app-metadata.actions';
 import { CFStartAction } from './cf-action.types';
@@ -51,15 +51,16 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
 
   constructor(public paginationKey: string, public endpointGuid: string, public includeRelations = [], public populateMissing = false) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = 'apps';
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      'apps'
+    );
   }
   actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
   endpointType = CF_ENDPOINT_TYPE;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   initialParams: PaginationParam = {
     'order-direction': 'asc',
     'order-direction-field': GetAllApplications.sortField,
@@ -73,14 +74,15 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
 export class GetApplication extends CFStartAction implements ICFAction, EntityInlineParentAction {
   constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = true) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}`;
-    this.options.method = 'get';
+    this.options = new HttpRequest(
+      'GET',
+      `apps/${guid}`
+    );
   }
   actions = [GET, GET_SUCCESS, GET_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class CreateNewApplication extends CFStartAction implements ICFAction {
@@ -90,18 +92,19 @@ export class CreateNewApplication extends CFStartAction implements ICFAction {
     application: IApp
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `apps`;
-    this.options.method = 'post';
-    this.options.body = {
-      name: application.name,
-      space_guid: application.space_guid
-    };
+    this.options = new HttpRequest(
+      'POST',
+      'apps',
+      {
+        name: application.name,
+        space_guid: application.space_guid
+      }
+    );
   }
   actions = [CREATE, CREATE_SUCCESS, CREATE_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export interface UpdateApplication {
@@ -130,15 +133,16 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
     public updateEntities?: AppMetadataTypes[]
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}`;
-    this.options.method = 'put';
-    this.options.body = newApplication;
+    this.options = new HttpRequest(
+      'PUT',
+      `apps/${guid}`,
+      newApplication
+    );
   }
   actions = [UPDATE, UPDATE_SUCCESS, UPDATE_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   updatingKey = UpdateExistingApplication.updateKey;
   entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
     const keepFromOld = pick(
@@ -158,20 +162,26 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
 
   constructor(public guid: string, public endpointGuid: string) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}`;
-    this.options.method = 'delete';
-    this.options.headers = new Headers();
-    const endpointPassthroughHeader = 'x-cap-passthrough';
-    this.options.headers.set(endpointPassthroughHeader, 'true');
-    this.options.params = new URLSearchParams();
-    // Delete the service instance and route bindings, but not the service instance and route themselves
-    this.options.params.set('recursive', 'true');
+    this.options = new HttpRequest(
+      'DELETE',
+      `apps/${guid}`,
+      null,
+      {
+        headers: new HttpHeaders({
+          'x-cap-passthrough': 'true'
+        }),
+        params: new HttpParams({
+          fromObject: {
+            recursive: 'true'
+          }
+        })
+      }
+    );
   }
   actions = [DELETE, DELETE_SUCCESS, DELETE_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 export class DeleteApplicationInstance extends CFStartAction
   implements ICFAction {
@@ -182,34 +192,42 @@ export class DeleteApplicationInstance extends CFStartAction
     public endpointGuid: string
   ) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${appGuid}/instances/${index}`;
-    this.options.method = 'delete';
-    this.options.headers = new Headers();
-    const endpointPassthroughHeader = 'x-cap-passthrough';
-    this.options.headers.set(endpointPassthroughHeader, 'true');
+    this.options = new HttpRequest(
+      'DELETE',
+      `apps/${appGuid}/instances/${index}`,
+      null,
+      {
+        headers: new HttpHeaders({
+          'x-cap-passthrough': 'true'
+        })
+      }
+    );
     this.guid = `${appGuid}-${index}`;
   }
   actions = [DELETE_INSTANCE, DELETE_INSTANCE_SUCCESS, DELETE_INSTANCE_FAILED];
   entity = [cfEntityFactory(appStatsEntityType)];
   entityType = appStatsEntityType;
   removeEntityOnDelete = true;
-  options: RequestOptions;
+  options: HttpRequest<any>;
 }
 
 export class RestageApplication extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string) {
     super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/restage`;
-    this.options.method = 'post';
-    this.options.headers = new Headers();
-    const endpointPassthroughHeader = 'x-cap-passthrough';
-    this.options.headers.set(endpointPassthroughHeader, 'true');
+    this.options = new HttpRequest(
+      'POST',
+      `apps/${guid}/restage`,
+      null,
+      {
+        headers: new HttpHeaders({
+          'x-cap-passthrough': 'true'
+        })
+      }
+    );
   }
   actions = [RESTAGE, RESTAGE_SUCCESS, RESTAGE_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: RequestOptions;
+  options: HttpRequest<any>;
   updatingKey = 'restaging';
 }

@@ -1,5 +1,5 @@
 import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
@@ -15,7 +15,7 @@ import { EndpointModel } from '../../../../../../../store/src/types/endpoint.typ
 import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { LoggerService } from '../../../../../core/logger.service';
 import {
   ConnectEndpointDialogComponent,
@@ -42,7 +42,7 @@ function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent 
 
 @Injectable()
 export class EndpointListHelper {
-  private endpointEntityKey = entityCatalogue.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+  private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
   constructor(
     private store: Store<CFAppState>,
     private dialog: MatDialog,
@@ -97,7 +97,7 @@ export class EndpointListHelper {
         label: 'Connect',
         description: '',
         createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => {
-          const ep = entityCatalogue.getEndpoint(row.cnsi_type, row.sub_type).definition;
+          const ep = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type).definition;
           return !ep.unConnectable && row.connectionStatus === 'disconnected';
         }))
       },

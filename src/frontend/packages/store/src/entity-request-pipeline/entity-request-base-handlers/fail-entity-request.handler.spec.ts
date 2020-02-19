@@ -1,11 +1,11 @@
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { EntityRequestAction } from '../../types/request.types';
 import { failedEntityHandler } from './fail-entity-request.handler';
 
 describe('failedEntityHandlers', () => {
   it('Should dispatch actions', () => {
-    const catalogueEntity = new StratosBaseCatalogueEntity({
+    const catalogEntity = new StratosBaseCatalogEntity({
       type: 'test',
       schema: new EntitySchema(
         'test',
@@ -17,7 +17,7 @@ describe('failedEntityHandlers', () => {
     const spyDispatcher = jasmine.createSpy();
     failedEntityHandler(
       spyDispatcher,
-      catalogueEntity,
+      catalogEntity,
       'fetch',
       {
         endpointType: 'end',
@@ -32,7 +32,7 @@ describe('failedEntityHandlers', () => {
     expect(spyDispatcher).toHaveBeenCalledTimes(2);
   });
   it('Should dispatch actions with recursive delete', () => {
-    const catalogueEntity = new StratosBaseCatalogueEntity({
+    const catalogEntity = new StratosBaseCatalogEntity({
       type: 'test',
       schema: new EntitySchema(
         'test',
@@ -44,7 +44,7 @@ describe('failedEntityHandlers', () => {
     const spyDispatcher = jasmine.createSpy();
     failedEntityHandler(
       spyDispatcher,
-      catalogueEntity,
+      catalogEntity,
       'fetch',
       {
         endpointType: 'end',

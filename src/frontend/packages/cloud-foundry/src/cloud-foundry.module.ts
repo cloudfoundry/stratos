@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { EntityCatalogueModule } from '../../core/src/core/entity-catalogue.module';
-import { ENTITY_INFO_HANDLER } from '../../core/src/core/entity-service';
+import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
+import { ENTITY_INFO_HANDLER } from '../../store/src/entity-service';
 import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
 import { ValidateEntitiesStart } from '../../store/src/actions/request.actions';
@@ -18,6 +18,7 @@ import { ServicesModule } from './features/services/services.module';
 import { CloudFoundryComponentsModule } from './shared/components/components.module';
 import { CfUserService } from './shared/data-services/cf-user.service';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
+import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
 
@@ -61,7 +62,7 @@ function infoValidator(action: ICFAction, dispatcher) {
 }
 @NgModule({
   imports: [
-    EntityCatalogueModule.forFeature(generateCFEntities),
+    EntityCatalogModule.forFeature(generateCFEntities),
     CommonModule,
     SharedModule,
     MDAppModule,
@@ -83,6 +84,7 @@ function infoValidator(action: ICFAction, dispatcher) {
     CfUserService,
     CloudFoundryService,
     ServiceActionHelperService,
+    LongRunningCfOperationsService
   ]
 })
 export class CloudFoundryPackageModule { }

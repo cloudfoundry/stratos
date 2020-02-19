@@ -1,4 +1,4 @@
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { CFEntitySchema } from '../cf-entity-schema-types';
 import { fetchEntityTree } from './entity-relations.tree';
 import { createEntityRelationKey, EntityInlineParentAction } from './entity-relations.types';

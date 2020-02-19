@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { DeleteUserProvidedInstance } from '../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import {
   applicationEntityType,
@@ -14,7 +14,7 @@ import {
 } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { IServiceBinding } from '../../../../../core/src/core/cf-api-svc.types';
 import { IApp, IRoute } from '../../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -22,10 +22,10 @@ import {
   DataFunctionDefinition,
 } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { EntityMonitor } from '../../../../../core/src/shared/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitor } from '../../../../../core/src/shared/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -165,10 +165,10 @@ export class ApplicationDeleteComponent<T> {
 
   public cancelUrl: string;
 
-  public appCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-  public routeCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
-  public siCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
-  public upsiCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
+  public appCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+  public routeCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+  public siCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+  public upsiCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
 
   constructor(
     private store: Store<GeneralEntityAppState>,
@@ -206,7 +206,7 @@ export class ApplicationDeleteComponent<T> {
       startWith(true)
     );
 
-    const appEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    const appEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('get');
     const getApplicationAction = actionBuilder(applicationService.appGuid, applicationService.cfGuid);
     this.store.dispatch(getApplicationAction);
@@ -240,7 +240,7 @@ export class ApplicationDeleteComponent<T> {
     const { appGuid, cfGuid } = this.applicationService;
     const instanceAction = AppServiceBindingDataSource.createGetAllServiceBindings(appGuid, cfGuid);
 
-    const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+    const routeEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
     const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
     const routesAction = actionBuilder(appGuid, cfGuid) as PaginatedAction;
 
@@ -317,7 +317,7 @@ export class ApplicationDeleteComponent<T> {
       return this.redirectToAppWall();
     }
     this.deleteStarted = true;
-    const applicationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+    const applicationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     const actionBuilder = applicationEntity.actionOrchestrator.getActionBuilder('remove');
     const deleteApplicationAction = actionBuilder(this.applicationService.appGuid, this.applicationService.cfGuid);
     this.store.dispatch(deleteApplicationAction);
@@ -327,7 +327,7 @@ export class ApplicationDeleteComponent<T> {
       tap(({ success }) => {
         if (success) {
           if (this.selectedRoutes && this.selectedRoutes.length) {
-            const routeEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
+            const routeEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
             const delActionBuilder = routeEntity.actionOrchestrator.getActionBuilder('delete');
             this.selectedRoutes.forEach(route => {
               const deleteRouteAction =
@@ -337,7 +337,7 @@ export class ApplicationDeleteComponent<T> {
           }
           if (this.selectedServiceInstances && this.selectedServiceInstances.length) {
             this.selectedServiceInstances.forEach(instance => {
-              const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+              const serviceInstanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
               if (isUserProvidedServiceInstance(instance.entity.service_instance.entity)) {
                 this.store.dispatch(new DeleteUserProvidedInstance(this.applicationService.cfGuid, instance.entity.service_instance_guid));
               } else {

@@ -15,24 +15,37 @@
       <br>
       <b>Specify name and namespace for the installation</b>
       <mat-form-field>
-        <input #releaseNameInputField matInput placeholder="Name" name="releaseName" formControlName="releaseName" autocomplete="off">
+        <input #releaseNameInputField matInput placeholder="Name" name="releaseName" formControlName="releaseName"
+          autocomplete="off">
       </mat-form-field>
 
       <mat-form-field>
-        <input matInput placeholder="Namespace" name="releaseNamespace" formControlName="releaseNamespace"
-          autocomplete="off">
+        <input type="text" placeholder="Namespace" matInput formControlName="releaseNamespace" [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
+          <mat-option *ngFor="let namespace of namespaces$ | async" [value]="namespace">
+            {{namespace}}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="details.controls.releaseNamespace.errors?.namespaceDoesNotExist">
+          Namespace does not exist
+        </mat-error>
       </mat-form-field>
+
+      <mat-checkbox matInput formControlName="createNamespace">Create Namespace</mat-checkbox>
+
     </form>
   </app-step>
   <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'" [onEnter]="onEnterOverrides">
     <form [formGroup]="overrides" class="stepper-form overrides_form">
       <div class="helm-create-release__heading">
         <h3 class="helm-create-release__title">Enter YAML Value Overrides</h3>
-        <button (click)="useValuesYaml()" [disabled]="!valuesYaml" class="helm-create-release__button" mat-button color="primary">Copy from values.yaml</button>
+        <button (click)="useValuesYaml()" [disabled]="!valuesYaml" class="helm-create-release__button" mat-button
+          color="primary">Copy from values.yaml</button>
       </div>
       <mat-form-field [floatLabel]="'always'" class="overrides_form-field">
         <mat-label>Values</mat-label>
-        <textarea #overridesYamlTextArea class="overrides__yaml" matInput formControlName="values" name="Values"  spellcheck="false"></textarea>
+        <textarea #overridesYamlTextArea class="overrides__yaml" matInput formControlName="values" name="Values"
+          spellcheck="false"></textarea>
       </mat-form-field>
     </form>
   </app-step>

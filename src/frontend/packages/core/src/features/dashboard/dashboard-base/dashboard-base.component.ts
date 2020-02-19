@@ -1,24 +1,21 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
-import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/cf-types';
 import { GetCurrentUsersRelations } from '../../../../../cloud-foundry/src/actions/permissions.actions';
 import { cfInfoEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/src/cf-types';
 import {
   CfInfoDefinitionActionBuilders,
 } from '../../../../../cloud-foundry/src/entity-action-builders/cf-info.action-builders';
-import {
-  CloseSideHelp,
-  CloseSideNav,
-  DisableMobileNav,
-  EnableMobileNav,
-} from '../../../../../store/src/actions/dashboard-actions';
+import { CloseSideNav, DisableMobileNav, EnableMobileNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
@@ -27,8 +24,7 @@ import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { entityCatalogue } from '../../../core/entity-catalogue/entity-catalogue.service';
-import { IEntityMetadata } from '../../../core/entity-catalogue/entity-catalogue.types';
+import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
 
@@ -39,16 +35,28 @@ import { SideNavItem } from './../side-nav/side-nav.component';
   styleUrls: ['./dashboard-base.component.scss']
 })
 
-export class DashboardBaseComponent implements OnInit, OnDestroy {
+export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
   public activeTabLabel$: Observable<string>;
   public subNavData$: Observable<[string, Portal<any>]>;
   public isMobile$: Observable<boolean>;
   public sideNavMode$: Observable<string>;
   public sideNavMode: string;
   public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean }>;
-  public rightNavState$: Observable<{ opened: boolean; documentUrl: string; }>;
+  public rightNavState$: Observable<{ opened: boolean, component?: object, props?: object }>;
   private dashboardState$: Observable<DashboardState>;
+  public noMargin$: Observable<boolean>;
+  private closeSub: Subscription;
+  private mobileSub: Subscription;
   private drawer: MatDrawer;
+  public iconModeOpen = false;
+  public sideNavWidth = 54;
+
+  sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
+  sideNaveMode = 'side';
+
+  @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer: ViewContainerRef;
+
+  @ViewChild('content', { static: false }) public content;
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -59,6 +67,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService,
     private ngZone: NgZone,
+    public sidePanelService: SidePanelService,
     private cs: CustomizationService
   ) {
     this.noMargin$ = this.router.events.pipe(
@@ -89,25 +98,12 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
         }
       })
     );
-    this.rightNavState$ = this.dashboardState$.pipe(
-      map(state => ({
-        opened: !!state.sideHelpDocument && state.sideHelpOpen,
-        documentUrl: state.sideHelpDocument
-      }))
-    );
+
     this.mobileSub = this.isMobile$
       .subscribe(isMobile => isMobile ? this.store.dispatch(new EnableMobileNav()) : this.store.dispatch(new DisableMobileNav()));
   }
 
-  public helpDocumentUrl: string;
-
-  private closeSub: Subscription;
-
-  public noMargin$: Observable<boolean>;
-
-  private mobileSub: Subscription;
-
-  @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
+  @ViewChild('sidenav', { static: false }) set sidenav(drawer: MatDrawer) {
     this.drawer = drawer;
     if (!this.closeSub) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
@@ -118,15 +114,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
       });
     }
   }
-
-  @ViewChild('content') public content;
-
-  sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
-
-  sideNaveMode = 'side';
-
-  public iconModeOpen = false;
-  public sideNavWidth = 54;
 
   public redrawSideNav() {
     // We need to do this to ensure there isn't a space left behind
@@ -140,6 +127,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     this.store.dispatch(new GetCurrentUsersRelations());
   }
 
+  sideHelpClosed() {
+    this.sidePanelService.hide();
+  }
+
+  ngAfterViewInit() {
+    this.sidePanelService.setContainer(this.previewPanelContainer);
+  }
+
   ngOnInit() {
     this.subNavData$ = combineLatest(
       this.tabNavService.getCurrentTabHeaderObservable().pipe(
@@ -150,7 +145,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     // TODO: Move cf code out to cf module #3849
     this.endpointsService.registerHealthCheck(
       new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => {
-        entityCatalogue.getEntity<IEntityMetadata, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType)
+        entityCatalog.getEntity<IEntityMetadata, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType)
           .actionDispatchManager.dispatchGet(endpoint.guid);
       })
     );
@@ -171,10 +166,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
       }
     }
     return false;
-  }
-
-  public sideHelpClosed() {
-    this.store.dispatch(new CloseSideHelp());
   }
 
   private getNavigationRoutes(): SideNavItem[] {

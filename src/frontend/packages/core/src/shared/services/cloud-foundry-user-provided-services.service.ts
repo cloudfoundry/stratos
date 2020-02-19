@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { debounceTime, filter, map } from 'rxjs/operators';
+import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/cf-types';
 import {
   CreateUserProvidedServiceInstance,
   getUserProvidedServiceInstanceRelations,
@@ -17,33 +16,40 @@ import {
   spaceEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/src/cf-types';
 import {
   UserProvidedServiceActionBuilder,
 } from '../../../../cloud-foundry/src/entity-action-builders/user-provided-service.action-builders';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { fetchTotalResults } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
+import { QParam, QParamJoiners } from '../../../../cloud-foundry/src/shared/q-param';
 import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { QParam, QParamJoiners } from '../../../../store/src/q-param';
+import { ClearPaginationOfType } from '../../../../store/src/actions/pagination.actions';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig, IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
-import { entityCatalogue } from '../../core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig, IEntityMetadata } from '../../core/entity-catalogue/entity-catalogue.types';
-import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
 
 @Injectable()
 export class CloudFoundryUserProvidedServicesService {
 
-  private serviceInstancesEntityConfig: EntityCatalogueEntityConfig = {
+  private serviceInstancesEntityConfig: EntityCatalogEntityConfig = {
     endpointType: CF_ENDPOINT_TYPE,
     entityType: serviceInstancesEntityType
   };
 
-  private userProvidedServiceEntity = entityCatalogue.getEntity<IEntityMetadata, any, UserProvidedServiceActionBuilder>(
+  private userProvidedServiceInstancesEntityConfig: EntityCatalogEntityConfig = {
+    endpointType: CF_ENDPOINT_TYPE,
+    entityType: userProvidedServiceInstanceEntityType
+  };
+
+  private userProvidedServiceEntity = entityCatalog.getEntity<IEntityMetadata, any, UserProvidedServiceActionBuilder>(
     CF_ENDPOINT_TYPE,
     userProvidedServiceInstanceEntityType
   );
@@ -114,12 +120,21 @@ export class CloudFoundryUserProvidedServicesService {
     guid: string,
     data: IUserProvidedServiceInstanceData
   ): Observable<RequestInfoState> {
-    const action = new CreateUserProvidedServiceInstance(cfGuid, guid, data, this.serviceInstancesEntityConfig);
+    const action = new CreateUserProvidedServiceInstance(cfGuid, guid, data, this.userProvidedServiceInstancesEntityConfig);
     const create$ = this.store.select(selectCfRequestInfo(userProvidedServiceInstanceEntityType, guid));
     this.store.dispatch(action);
     return create$.pipe(
-      debounceTime(250),
-      filter(a => !a.creating),
+      pairwise(),
+      filter(([oldV, newV]) => oldV.creating && !newV.creating),
+      map(([, newV]) => newV),
+      first(),
+      tap(v => {
+        if (!v.error) {
+          // Problem - Lists with multiple actions aren't updated following the creation of an entity based on secondary action
+          // Here the service instance list (1st action SI, 2nd action UPSI) isn't updated so manually do so
+          this.store.dispatch(new ClearPaginationOfType(this.serviceInstancesEntityConfig));
+        }
+      })
     );
   }
 
@@ -132,16 +147,18 @@ export class CloudFoundryUserProvidedServicesService {
       guid,
       cfGuid,
       data,
-      this.serviceInstancesEntityConfig
+      this.userProvidedServiceInstancesEntityConfig
     );
     return this.userProvidedServiceEntity.getEntityMonitor(
       this.store,
       guid
     ).entityRequest$.pipe(
-      filter(
-        er => er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance] &&
-          er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].busy
-      )
+      filter(v => !!v.updating[UpdateUserProvidedServiceInstance.updateServiceInstance]),
+      pairwise(),
+      filter(([oldV, newV]) =>
+        oldV.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].busy &&
+        !newV.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].busy),
+      map(([, newV]) => newV)
     );
   }
 

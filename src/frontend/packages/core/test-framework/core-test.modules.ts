@@ -1,18 +1,18 @@
 import { NgModule } from '@angular/core';
 
 import { generateStratosEntities } from '../../core/src/base-entity-types';
-import { CATALOGUE_ENTITIES, EntityCatalogueFeatureModule } from '../../core/src/core/entity-catalogue.module';
-import { entityCatalogue, TestEntityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '../../store/src/entity-catalog.module';
+import { entityCatalog, TestEntityCatalog } from '../../store/src/entity-catalog/entity-catalog.service';
 
 @NgModule({
   imports: [
     {
-      ngModule: EntityCatalogueFeatureModule,
+      ngModule: EntityCatalogFeatureModule,
       providers: [
         {
           provide: CATALOGUE_ENTITIES, useFactory: () => {
-            const testEntityCatalogue = entityCatalogue as TestEntityCatalogue;
-            testEntityCatalogue.clear();
+            const testEntityCatalog = entityCatalog as TestEntityCatalog;
+            testEntityCatalog.clear();
             return [
               ...generateStratosEntities()
             ];

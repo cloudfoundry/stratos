@@ -1,21 +1,18 @@
-<ng-container *ngIf="(kubeService$ | async) as kubeService; else noPorts">
+<ng-container *ngIf="row as kubeService; else noPorts">
   <table *ngIf="!!kubeService.spec?.ports.length; else noPorts">
     <tr>
       <th>Name</th>
       <th>Protocol</th>
       <th>Port</th>
       <th>Target Port</th>
+      <th>Node Port</th>
     </tr>
     <tr *ngFor="let port of kubeService.spec?.ports">
-      <td>
-        <a *ngIf="endpointId; else noLink" href="{{getServiceLink(kubeService, port)}}" target="_blank">
-          {{ port.name}}
-        </a>
-        <ng-template #noLink>{{port.name}}</ng-template>
-      </td>
+      <td>{{port.name}}</td>
       <td>{{port.protocol}}</td>
       <td>{{port.port}}</td>
       <td>{{port.targetPort}}</td>
+      <td>{{port.nodePort}}</td>
     </tr>
   </table>
 </ng-container>

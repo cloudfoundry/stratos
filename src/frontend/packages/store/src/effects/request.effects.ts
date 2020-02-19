@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
-import { RequestMethod } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { validateEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { UtilsService } from '../../../core/src/core/utils.service';
 import { ClearPaginationOfEntity, ClearPaginationOfType, SET_PAGE_BUSY } from '../actions/pagination.actions';
@@ -119,7 +118,7 @@ export class RequestEffect {
         .pipe(catchError(error => {
           this.logger.warn(`Entity validation process failed`, error);
           if (validateAction.apiRequestStarted) {
-            return getFailApiRequestActions(apiAction, error, requestType, entityCatalogue.getEntity(apiAction));
+            return getFailApiRequestActions(apiAction, error, requestType, entityCatalog.getEntity(apiAction));
           } else {
             this.update(apiAction, false, error.message);
             return [];
@@ -150,8 +149,7 @@ export class RequestEffect {
 
         if (
           !apiAction.updatingKey &&
-          (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
-            apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete)
+          (apiAction.options.method === 'POST' || apiAction.options.method === 'DELETE')
         ) {
           // FIXME: Look at using entity config instead of actions in these actions ctors #3975
           if (apiAction.removeEntityOnDelete) {

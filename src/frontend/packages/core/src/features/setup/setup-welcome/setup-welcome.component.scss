@@ -1,0 +1,81 @@
+@import '../../../../sass/mixins';
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.select-step {
+  width: calc(100vw - 320px);
+}
+
+.setup-tiles {
+
+  display: grid;
+  grid-column-gap: 10px;
+  grid-row-gap: 10px;
+  grid-template-columns: 100%;
+  margin: 0 10px;
+
+  @include breakpoint(tablet) {
+    grid-column-gap: 10%;
+    grid-template-columns: repeat(2, 1fr);
+    margin: 0 5%;
+  }
+
+}
+
+.setup {
+  &__container {
+    display: flex;
+    flex: 1;
+    margin: 0 100px;
+  }
+
+  &__intro {
+    font-size: 28px;
+    font-weight: 600;
+    padding-bottom: 20px;
+    text-align: center;
+  }
+
+  &__welcome {
+    line-height: 1.5em;
+    text-align: center;
+  }
+
+  &__config {
+    margin-bottom: 30px;
+    padding: 10px;
+  }
+
+  app-steppers {
+    display: flex;
+    flex: 1;
+    margin: 24px 0;
+    > .steppers__wrapper {
+      flex: 1;
+      width: 100%;
+    }
+    .stepper-form {
+      margin-top: 0;
+      max-width: none;
+    }
+    .mat-form-field {
+      max-width: 450px;
+    }
+    .steppers__contents {
+      margin: 0 48px;
+      overflow-y: auto;
+    }
+    .steppers__navigation {
+      margin-top: 36px;
+    }
+  }
+
+  app-stratos-title {
+    text-align: center;
+  }
+
+}

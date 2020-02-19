@@ -7,10 +7,10 @@ import { Observable, of } from 'rxjs';
 import { EntitySchema } from '../../../../../../../../store/src/helpers/entity-schema';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { CoreTestingModule } from '../../../../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import * as favoriteHelpers from '../../../../../../core/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
-import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { SharedModule } from '../../../../../shared.module';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
@@ -23,7 +23,7 @@ import { MetaCardComponent } from './meta-card.component';
     </app-meta-card>`
 })
 class WrapperComponent {
-  @ViewChild(MetaCardComponent)
+  @ViewChild(MetaCardComponent, { static: true })
   metaCard: MetaCardComponent;
 }
 

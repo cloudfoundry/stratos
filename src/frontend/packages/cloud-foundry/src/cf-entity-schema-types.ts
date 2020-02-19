@@ -1,7 +1,7 @@
 import { Schema, schema } from 'normalizr';
 
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
-import { CF_ENDPOINT_TYPE } from '../cf-types';
+import { CF_ENDPOINT_TYPE } from './cf-types';
 import {
   applicationEntityType,
   cfUserEntityType,

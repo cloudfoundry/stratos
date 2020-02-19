@@ -10,6 +10,7 @@ import { KubernetesNamespace } from '../../../kubernetes/store/kube.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
+import { createKubeAgeColumn } from '../kube-list.helper';
 import { KubeNamespacePodCountComponent } from './kube-namespace-pod-count/kube-namespace-pod-count.component';
 import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link/kubernetes-namespace-link.component';
 import { KubernetesNamespacesDataSource } from './kubernetes-namespaces-data-source';
@@ -30,18 +31,19 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
       },
       cellFlex: '5',
     },
+    // FIXME: Hide link until the link is fixed
+    // {
+    //   columnId: 'view', headerCell: () => 'Dashboard',
+    //   cellDefinition: {
+    //     getValue: () => 'View',
+    //     getLink: (row: KubernetesNamespace) => {
+    //       return `/kubernetes/${this.kubeId.guid}/dashboard/overview?namespace=${row.metadata.name}`;
+    //     },
+    //   },
+    //   cellFlex: '3',
+    // },
     {
-      columnId: 'view', headerCell: () => 'Dashboard',
-      cellDefinition: {
-        getValue: () => 'View',
-        getLink: (row: KubernetesNamespace) => {
-          return `/kubernetes/${this.kubeId.guid}/dashboard/overview?namespace=${row.metadata.name}`;
-        },
-      },
-      cellFlex: '3',
-    },
-    {
-      columnId: 'pods', headerCell: () => 'No. of Pods',
+      columnId: 'pods', headerCell: () => 'Pods',
       cellComponent: KubeNamespacePodCountComponent,
       cellFlex: '5',
     },
@@ -57,6 +59,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
       },
       cellFlex: '5',
     },
+    createKubeAgeColumn()
   ];
 
   pageSizeOptions = defaultHelmKubeListPageSize;
@@ -83,7 +86,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
   ) {
     this.podsDataSource = new KubernetesNamespacesDataSource(store, this.kubeId, this);
 
-    const hasDashboard = kubeService.kubeDashboardEnabled$.pipe(
+    const hasDashboard = kubeService.kubeDashboardConfigured$.pipe(
       first(),
       tap((enabled) => {
         if (!enabled) {

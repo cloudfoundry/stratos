@@ -6,10 +6,10 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../store/src/types/metric.types';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { getIdFromRoute } from '../../../core/utils.service';
 import { MetricsConfig } from '../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../shared/components/metrics-chart/metrics-chart.types';
@@ -19,7 +19,6 @@ import {
 } from '../../../shared/components/metrics-chart/metrics.component.helpers';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
-import { HelmReleaseService } from '../services/helm-release.service';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
 import { KubernetesPod } from '../store/kube.types';
@@ -42,7 +41,6 @@ import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kuberne
       ]
     },
     KubernetesService,
-    HelmReleaseService,
     KubernetesEndpointService
   ]
 })
@@ -58,7 +56,6 @@ export class PodMetricsComponent {
   ][];
 
   constructor(
-    public helmReleaseService: HelmReleaseService,
     public activatedRoute: ActivatedRoute,
     public store: Store<AppState>,
     public entityServiceFactory: EntityServiceFactory,
@@ -76,7 +73,7 @@ export class PodMetricsComponent {
       chartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          helmReleaseService.kubeGuid,
+          kubeEndpointService.kubeGuid,
           `container_memory_usage_bytes{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Memory Usage (MB)',
@@ -88,7 +85,7 @@ export class PodMetricsComponent {
       cpuChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          helmReleaseService.kubeGuid,
+          kubeEndpointService.kubeGuid,
           `container_cpu_usage_seconds_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'CPU Usage',
@@ -119,7 +116,7 @@ export class PodMetricsComponent {
       networkChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          helmReleaseService.kubeGuid,
+          kubeEndpointService.kubeGuid,
           `container_network_transmit_bytes_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data transmitted (MB)',
@@ -128,7 +125,7 @@ export class PodMetricsComponent {
       networkChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          helmReleaseService.kubeGuid,
+          kubeEndpointService.kubeGuid,
           `container_network_receive_bytes_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data received (MB)',
@@ -178,7 +175,7 @@ export class PodMetricsComponent {
     );
     this.podEntity$ = this.entityServiceFactory.create<KubernetesPod>(
       this.podName,
-      new GetKubernetesPod(this.podName, this.namespaceName, this.helmReleaseService.kubeGuid),
+      new GetKubernetesPod(this.podName, this.namespaceName, this.kubeEndpointService.kubeGuid),
     ).entityObs$;
   }
 }

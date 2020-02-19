@@ -1,6 +1,9 @@
 package kubernetes
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/url"
 	"strconv"
 
@@ -17,6 +20,23 @@ import (
 type KubernetesSpecification struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
+}
+
+type KubeStatus struct {
+	Kind       string      `json:"kind"`
+	ApiVersion string      `json:"apiVersion"`
+	Metadata   interface{} `json:"metadata"`
+	Status     string      `json:"status"`
+	Message    string      `json:"message"`
+	Reason     string      `json:"reason"`
+	Details    interface{} `json:"details"`
+	Code       int         `json:"code"`
+}
+
+type KubeAPIVersions struct {
+	Kind                       string        `json:"kind"`
+	Versions                   []string      `json:"versions"`
+	ServerAddressByClientCIDRs []interface{} `json:"serverAddressByClientCIDRs"`
 }
 
 const (
@@ -64,7 +84,7 @@ func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interface
 	}
 
 	if response.StatusCode >= 400 {
-		return errors.New("Unable to connect to endpoint")
+		return fmt.Errorf("Unable to connect to endpoint: %s", response.Error.Error())
 	}
 
 	return nil
@@ -112,18 +132,28 @@ func (c *KubernetesSpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
 func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 
 	// Kubernetes Dashboard Proxy
-	echoGroup.GET("/kubedash/ui/:guid/*", c.kubeDashboardProxy)
+	echoGroup.Any("/apps/kubedash/ui/:guid/*", c.kubeDashboardProxy)
+
+	echoGroup.GET("/kubedash/:guid/login", c.kubeDashboardLogin)
 	echoGroup.GET("/kubedash/:guid/status", c.kubeDashboardStatus)
+
+	echoGroup.POST("/kubedash/:guid/serviceAccount", c.kubeDashboardCreateServiceAccount)
+	echoGroup.DELETE("/kubedash/:guid/serviceAccount", c.kubeDashboardDeleteServiceAccount)
+
+	echoGroup.POST("/kubedash/:guid/installation", c.kubeDashboardInstallDashboard)
+	echoGroup.DELETE("/kubedash/:guid/installation", c.kubeDashboardDeleteDashboard)
 
 	// Helm Routes
 	echoGroup.GET("/helm/releases", c.ListReleases)
 	echoGroup.POST("/helm/install", c.InstallRelease)
-	echoGroup.GET("/helm/versions", c.GetHelmVersions)
-	echoGroup.DELETE("/helm/releases/:endpoint/:name", c.DeleteRelease)
-	echoGroup.GET("/helm/releases/:endpoint/:name", c.GetRelease)
+	echoGroup.DELETE("/helm/releases/:endpoint/:namespace/:name", c.DeleteRelease)
+	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name/status", c.GetReleaseStatus)
+	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name", c.GetRelease)
+
 }
 
 func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+
 	log.Debug("Kubernetes Info")
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
@@ -135,6 +165,46 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 		return newCNSI, nil, err
 	}
 
+	log.Debug("Request Kube API Versions")
+	var httpClient = c.portalProxy.GetHttpClient(skipSSLValidation)
+	res, err := httpClient.Get(apiEndpoint + "/api")
+	if err != nil {
+		// This should ultimately catch 503 cert errors
+		return newCNSI, nil, err
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return newCNSI, nil, err
+	}
+
+	if res.StatusCode < 400 {
+		// No auth on kube set up, expect a successful APIVersions response - KubeAPIVersions
+		log.Debug("Kube API Versions Succeeded")
+		apiVersions := KubeAPIVersions{}
+		err := json.Unmarshal(body, &apiVersions)
+		if err != nil {
+			return newCNSI, nil, fmt.Errorf("Failed to parse output as kube kind APIVersions: %+v", err)
+		}
+		if apiVersions.Kind != "APIVersions" {
+			return newCNSI, nil, fmt.Errorf("Failed to parse output as kube kind APIVersions: %+v", apiVersions)
+		}
+	} else if res.StatusCode == 403 {
+		// Expect an auth failed response - KubeStatus
+		log.Debug("Kube API Versions Failed (403)")
+		kubeStatus := KubeStatus{}
+		err := json.Unmarshal(body, &kubeStatus)
+		if err != nil {
+			return newCNSI, nil, fmt.Errorf("Failed to parse 403 output as kube kind status: %+v", err)
+		}
+		if kubeStatus.Kind != "Status" {
+			return newCNSI, nil, fmt.Errorf("Failed to parse 403 output as kube kind status: %+v", kubeStatus)
+		}
+	} else {
+		return newCNSI, nil, fmt.Errorf("Dissallowed response code from `/api` call: %+v", res.StatusCode)
+	}
+
+	log.Debug("Kube API Versions Acceptable Response")
 	newCNSI.TokenEndpoint = apiEndpoint
 	newCNSI.AuthorizationEndpoint = apiEndpoint
 

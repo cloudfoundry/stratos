@@ -1,16 +1,15 @@
 import 'hammerjs';
 
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpModule } from '@angular/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
 import {
   EntitySummaryTitleComponent,
 } from '../../../../shared/components/entity-summary-title/entity-summary-title.component';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ListItemComponent } from '../list-item/list-item.component';
 import { LoaderComponent } from '../loader/loader.component';
@@ -91,7 +90,6 @@ describe('ChartDetailsComponent', () => {
           BrowserModule,
           // Angulartics2Module,
           RouterTestingModule,
-          HttpModule,
           HttpClientModule,
           ...BaseTestModulesNoShared
         ],
@@ -110,6 +108,7 @@ describe('ChartDetailsComponent', () => {
           EntitySummaryTitleComponent
         ],
         providers: [
+          HttpClient,
           { provide: ChartsService, useValue: new MockChartService() },
           { provide: ConfigService, useValue: { appName: 'appName' } },
           // { provide: SeoService },

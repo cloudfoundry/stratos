@@ -2,8 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { NEVER, Observable, Subject, Subscription } from 'rxjs';
-import websocketConnect from 'rxjs-websockets';
-import { catchError, first, map } from 'rxjs/operators';
+import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
+import { catchError, first, map, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { IApp } from '../../../../../core/src/core/cf-api.types';
@@ -21,7 +21,7 @@ export class SshApplicationComponent implements OnInit {
 
   public messages: Observable<string>;
 
-  public connectionStatus: Observable<number>;
+  public connectionStatus = new Subject<number>();
 
   public sshInput: Subject<string>;
 
@@ -33,13 +33,11 @@ export class SshApplicationComponent implements OnInit {
 
   public appInstanceLink: string;
 
-  private connection: Subscription;
-
   public instanceId: string;
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
-  @ViewChild('sshViewer') sshViewer: SshViewerComponent;
+  @ViewChild('sshViewer', { static: true }) sshViewer: SshViewerComponent;
 
   private getBreadcrumbs(
     application: IApp,
@@ -61,7 +59,7 @@ export class SshApplicationComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-
+    this.connectionStatus.next(0);
     const { cfGuid, appGuid } = this.applicationService;
     const routeParams = this.activatedRoute.snapshot.params;
     this.instanceId = routeParams.index;
@@ -72,7 +70,6 @@ export class SshApplicationComponent implements OnInit {
 
     if (!cfGuid || !appGuid || !this.instanceId) {
       this.messages = NEVER;
-      this.connectionStatus = NEVER;
     } else {
       const host = window.location.host;
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
@@ -81,19 +78,18 @@ export class SshApplicationComponent implements OnInit {
       );
       this.sshInput = new Subject<string>();
       const connection = websocketConnect(
-        streamUrl,
-        this.sshInput
+        streamUrl
       );
 
-      this.messages = connection.messages.pipe(
-        catchError(e => {
-          if (e.type === 'error') {
+      this.messages = connection.pipe(
+        tap(() => this.connectionStatus.next(1)),
+        switchMap(getResponse => getResponse(this.sshInput)),
+        catchError((e: Error) => {
+          if (e.message !== normalClosureMessage) {
             this.errorMessage = 'Error connecting to web socket';
           }
           return [];
         }));
-
-      this.connectionStatus = connection.connectionStatus;
 
       this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
         map(app => this.getBreadcrumbs(app.entity.entity)),
