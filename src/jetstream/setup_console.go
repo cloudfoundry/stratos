@@ -25,6 +25,7 @@ const (
 	setupRequestRegex      = "^/pp/v1/setup/save$"
 	setupCheckRequestRegex = "^/pp/v1/setup/check$"
 	versionRequestRegex    = "^/pp/v1/version$"
+	pingRequestRegex       = "^/pp/v1/ping$"
 	backendRequestRegex    = "^/pp/v1/"
 	systemGroupName        = "env"
 )
@@ -250,7 +251,7 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interface
 			if consoleConfig.AuthorizationEndpoint == nil {
 				// No Authorization endpoint
 				consoleConfig.AuthorizationEndpoint = consoleConfig.UAAEndpoint
-				log.Infof("Using UAA Endpoint for Auth Endpoint: %s", consoleConfig.AuthorizationEndpoint)
+				log.Debugf("Using UAA Endpoint for Auth Endpoint: %s", consoleConfig.AuthorizationEndpoint)
 			}
 		} else {
 			//Auth endpoint type has been set to an invalid value
@@ -353,6 +354,12 @@ func (p *portalProxy) SetupMiddleware() echo.MiddlewareFunc {
 			if isVersionRequest {
 				return h(c)
 			}
+
+			isPingRequest, _ := regexp.MatchString(pingRequestRegex, requestURLPath)
+			if isPingRequest {
+				return h(c)
+			}
+
 			// Request is not a setup request, refuse backend requests and allow all others
 			isBackendRequest, _ := regexp.MatchString(backendRequestRegex, requestURLPath)
 			if !isBackendRequest {

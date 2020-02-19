@@ -9,6 +9,9 @@ RUN \
 COPY mariadb-entrypoint.sh /docker-entrypoint.sh
 COPY mariadb-ping.sh /dbping.sh
 
+RUN chmod 777 /docker-entrypoint.sh && \
+		chmod 777 /dbping.sh
+
 # ENTRYPOINT
 ENTRYPOINT ["/docker-entrypoint.sh"]
 

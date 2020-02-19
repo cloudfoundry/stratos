@@ -14,60 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package chartrepo
+package main
 
 import (
-	"os"
+	"github.com/helm/monocular/chartrepo/foundationdb"
 
-	"github.com/kubeapps/common/datastore"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var deleteCmd = &cobra.Command{
+//DeleteCmd Delete a chart repository from Monocular
+var DeleteCmd = &cobra.Command{
 	Use:   "delete [REPO NAME]",
 	Short: "delete a chart repository",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			logrus.Info("Need exactly one argument: [REPO NAME]")
+			log.Info("Need exactly one argument: [REPO NAME]")
 			cmd.Help()
 			return
 		}
-		mongoURL, err := cmd.Flags().GetString("mongo-url")
-		if err != nil {
-			logrus.Fatal(err)
-		}
-		mongoDB, err := cmd.Flags().GetString("mongo-database")
-		if err != nil {
-			logrus.Fatal(err)
-		}
-		mongoUser, err := cmd.Flags().GetString("mongo-user")
-		if err != nil {
-			logrus.Fatal(err)
-		}
-		mongoPW := os.Getenv("MONGO_PASSWORD")
-		debug, err := cmd.Flags().GetBool("debug")
-		if err != nil {
-			logrus.Fatal(err)
-		}
-		if debug {
-			logrus.SetLevel(logrus.DebugLevel)
-		}
-		mongoConfig := datastore.Config{URL: mongoURL, Database: mongoDB, Username: mongoUser, Password: mongoPW}
-		dbSession, err := datastore.NewSession(mongoConfig)
-		if err != nil {
-			logrus.Fatalf("Can't connect to mongoDB: %v", err)
-		}
 
-		monogoDB, err := NewMongoDBChartRepoDatastore(dbSession)
-		if err != nil {
-			logrus.Fatalf("Can't create data store for mongoDB: %v", err)
-		}
-
-		if err = monogoDB.DeleteRepo(args[0]); err != nil {
-			logrus.Fatalf("Can't delete chart repository %s from database: %v", args[0], err)
-		}
-
-		logrus.Infof("Successfully deleted the chart repository %s from database", args[0])
+		foundationdb.Delete(cmd, args)
 	},
 }

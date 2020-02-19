@@ -1,0 +1,6 @@
+dependencies:
+- name: fdbdoclayer
+  repository: file://./local-helm/fdbdoclayer/
+  version: 0.1.0
+digest: sha256:e783f9ae56e7661533bba491fae357ae2b8d18367ac0bde6715dcc68a982348f
+generated: "2019-12-10T13:27:53.911953269Z"

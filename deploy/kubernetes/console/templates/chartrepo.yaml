@@ -1,0 +1,73 @@
+---
+{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major .Capabilities.KubeVersion.Minor)}}
+apiVersion: apps/v1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Deployment
+metadata:
+  name: stratos-chartrepo
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos-chartrepo"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "stratos"
+      app.kubernetes.io/component: "stratos-chartrepo"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        app.kubernetes.io/component: "stratos-chartrepo"
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        app: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: chartrepo
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-chartsync:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
+        command: ["/chartrepo"]
+        {{- if .Values.fdbdoclayer.tls }}
+        args: ["serve", "--debug=true","--doclayer-url=mongodb://{{ .Release.Name }}-fdbdoclayer:27016", "--cafile=/etc/certs/ca.crt", "--certfile=/etc/certs/tls.crt", "--keyfile=/etc/certs/tls.key"]
+        {{- else }}
+        args: ["serve", "--debug=true","--doclayer-url=mongodb://{{ .Release.Name }}-fdbdoclayer:27016"]
+        {{- end }}
+        ports:
+        - name: endpoint
+          containerPort: 8080
+      {{- if .Values.fdbdoclayer.tls }}
+        volumeMounts:
+        - name: certs
+          mountPath: "/etc/certs"
+          readOnly: true   
+      volumes:
+        - name: certs
+          secret:
+            secretName: {{ template "fullname" . }}-fdbdoclayer-certs
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Release.Name }}-chartrepo"
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos-chartrepo-service"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  type: ClusterIP
+  ports:
+  - name: chartrepo
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: "{{ .Release.Name }}"
+    app.kubernetes.io/component: "stratos-chartrepo"

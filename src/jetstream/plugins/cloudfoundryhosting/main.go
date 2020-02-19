@@ -74,22 +74,19 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *interfaces.PortalConfig)
 		}
 	}
 
+	// Update Database migration status depending on app instance index and SQLite
+	if !isSQLite && envLookup.IsSet("CF_INSTANCE_INDEX") {
+		if appInstanceIndex, ok := envLookup.Lookup("CF_INSTANCE_INDEX"); ok {
+			if index, err := strconv.Atoi(appInstanceIndex); err == nil {
+				jetstreamConfig.CanMigrateDatabaseSchema = (index == 0)
+				log.Infof("Skipping DB migration => not index 0 (%d)", index)
+			}
+		}
+	}
 }
 
 // Init creates a new CFHosting plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
-
-	// Update Database migration status depending on app instance index and SQLite
-	if portalProxy.Env().IsSet(VCapApplication) {
-		isSQLite := portalProxy.GetConfig().DatabaseProviderName == SQLiteProviderName
-		if !isSQLite && portalProxy.Env().IsSet("CF_INSTANCE_INDEX") {
-			if appInstanceIndex, ok := portalProxy.Env().Lookup("CF_INSTANCE_INDEX"); ok {
-				if index, err := strconv.Atoi(appInstanceIndex); err == nil {
-					portalProxy.SetCanPerformMigrations(index == 0)
-				}
-			}
-		}
-	}
 
 	return &CFHosting{portalProxy: portalProxy}, nil
 }

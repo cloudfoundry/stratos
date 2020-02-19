@@ -78,10 +78,4 @@ type PortalProxy interface {
 
 	// Plugins
 	GetPlugin(name string) interface{}
-
-	// SetCanPerformMigrations updates the state that records if we can perform Database migrations
-	SetCanPerformMigrations(bool)
-
-	// CanPerformMigrations returns if we can perform Database migrations
-	CanPerformMigrations() bool
 }

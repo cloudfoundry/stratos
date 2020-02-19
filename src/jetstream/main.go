@@ -22,6 +22,7 @@ import (
 	"syscall"
 	"time"
 
+	"bitbucket.org/liamstask/goose/lib/goose"
 	"github.com/antonlindstrom/pgstore"
 	"github.com/cf-stratos/mysqlstore"
 	cfenv "github.com/cloudfoundry-community/go-cfenv"
@@ -121,12 +122,6 @@ func main() {
 	log.Info("")
 	log.Info("Initialization started.")
 
-	// Check to see if we are running as the database migrator
-	if migrateDatabase(envLookup) {
-		// End execution
-		return
-	}
-
 	// Load the portal configuration from env vars
 	var portalConfig interfaces.PortalConfig
 	portalConfig, err := loadPortalConfig(portalConfig, envLookup)
@@ -138,6 +133,9 @@ func main() {
 		level, _ := log.ParseLevel(portalConfig.LogLevel)
 		log.SetLevel(level)
 	}
+
+	// Initially, default state is that DB Migrations can be performed
+	portalConfig.CanMigrateDatabaseSchema = true
 
 	log.Info("Configuration loaded.")
 	isUpgrading := isConsoleUpgrading(envLookup)
@@ -181,8 +179,7 @@ func main() {
 	sessiondata.InitRepositoryProvider(dc.DatabaseProvider)
 
 	// Establish a Postgresql connection pool
-	var databaseConnectionPool *sql.DB
-	databaseConnectionPool, err = initConnPool(dc, envLookup)
+	databaseConnectionPool, migratorConf, err := initConnPool(dc, envLookup)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -191,11 +188,6 @@ func main() {
 		databaseConnectionPool.Close()
 	}()
 	log.Info("Database connection pool created.")
-
-	// Wait for Database Schema to be initialized (or exit if this times out)
-	if err = datastore.WaitForMigrations(databaseConnectionPool); err != nil {
-		log.Fatal(err)
-	}
 
 	// Before any changes it, log that we detected a non-default session store secret, so we can tell it has been set from the log
 	if portalConfig.SessionStoreSecret != defaultSessionSecret {
@@ -212,6 +204,21 @@ func main() {
 		// So for saftey, set a random value
 		log.Warn("When running in production, ensure you set SESSION_STORE_SECRET to a secure value")
 		portalConfig.SessionStoreSecret = uuid.NewV4().String()
+	}
+
+	// Config plugins get to determine if we should run migrations on this instance
+	if portalConfig.CanMigrateDatabaseSchema {
+		// Create the database schema otherwise wait for the datbase schema
+		err = datastore.ApplyMigrations(migratorConf, databaseConnectionPool)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Warn("Waiting for migrations ...")
+		// Wait for Database Schema to be initialized (or exit if this times out)
+		if err = datastore.WaitForMigrations(databaseConnectionPool); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// Initialize session store for Gorilla sessions
@@ -448,13 +455,13 @@ func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
 	return key, nil
 }
 
-func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
+func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, *goose.DBConf, error) {
 	log.Debug("initConnPool")
 
 	// initialize the database connection pool
-	pool, err := datastore.GetConnection(dc, env)
+	pool, conf, err := datastore.GetConnection(dc, env)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Ensure that the database is responsive
@@ -472,7 +479,7 @@ func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error)
 
 		// If our timeout boundary has been exceeded, bail out
 		if timeout.Sub(time.Now()) < 0 {
-			return nil, fmt.Errorf("timeout boundary of %d minutes has been exceeded. Exiting", TimeoutBoundary)
+			return nil, nil, fmt.Errorf("timeout boundary of %d minutes has been exceeded. Exiting", TimeoutBoundary)
 		}
 
 		// Circle back and try again
@@ -480,7 +487,7 @@ func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error)
 		time.Sleep(time.Second)
 	}
 
-	return pool, nil
+	return pool, conf, nil
 }
 
 func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int, env *env.VarSet) (HttpSessionStore, *sessions.Options, error) {
@@ -707,6 +714,14 @@ func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeo
 	httpClientMutatingSkipSSL.Timeout = time.Duration(timeoutMutating) * time.Second
 }
 
+func echoShouldNotLog(ec echo.Context) bool {
+	// Don't log readiness probes
+	if ec.Request().RequestURI == "/pp/v1/ping" {
+		return true
+	}
+	return false
+}
+
 func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool) error {
 	log.Debug("start")
 	e := echo.New()
@@ -722,6 +737,8 @@ func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware b
 			`Method:"${method}" Path:"${path}" Status:${status} Latency:${latency_human} ` +
 			`Bytes-In:${bytes_in} Bytes-Out:${bytes_out}` + "\n",
 	}
+	customLoggerConfig.Skipper = echoShouldNotLog
+
 	e.Use(middleware.LoggerWithConfig(customLoggerConfig))
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -865,6 +882,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// Version info
 	pp.GET("/v1/version", p.getVersions)
+
+	// Ping - returns version (but is not logged)
+	pp.GET("/v1/ping", p.getVersions)
 
 	// All routes in the session group need the user to be authenticated
 	sessionGroup := pp.Group("/v1")
