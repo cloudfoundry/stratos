@@ -6,11 +6,33 @@ COPY --chown=stratos:users . ./
 COPY --chown=stratos:users deploy/tools/generate_cert.sh generate_cert.sh
 COPY --chown=stratos:users deploy/all-in-one/config.all-in-one.properties config.properties
 
-RUN npm install \
-    && npm run build \
+ARG USE_PREBUILT_UI=true
+
+# RUN npm install \
+#     && npm run build \
+#     && npm run build-backend \
+#     && cp src/jetstream/jetstream . \
+#     && mv dist ui
+USER root
+RUN zypper install -y unzip
+USER stratos
+
+# USER root
+# RUN curl https://download.opensuse.org/repositories/openSUSE:/Leap:/15.1/standard/x86_64/unzip-6.00-lp151.5.1.x86_64.rpm -o unzip.rpm && zypper install unzip.rpm
+# USER stratos
+
+RUN if [ $USE_PREBUILT_UI = "true" ] ; then \
+    unzip stratos-frontend-prebuild.zip -d ./dist \
     && npm run build-backend \
     && cp src/jetstream/jetstream . \
-    && mv dist ui
+	&& mv dist ui ; \
+    else \
+		npm install \
+        && npm run build \
+        && npm run build-backend \
+        && cp  src/jetstream/jetstream . \
+        && mv dist ui ; \
+    fi
 
 # Generate dev-certs
 RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh \
@@ -18,7 +40,7 @@ RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh \
 
 # TODO Kate ##########################################################################################
 # Add fdbdoclayer, fdbserver and chart repo as additional builders here, then below use copy from builder to add the necessary parts to the final image
-# Create a script that starts the 2 database processes, the chart repo with the localhost URL for the doclayer. Config properties will need to 
+# Config properties for jetstream will need to 
 # have env vars for the chart repo and fdbdoclayer localhost URLS, so that jetstream can access them.
 
 FROM splatform/stratos-bk-build-base:leap15_1 as fdbserver-builder
@@ -75,7 +97,7 @@ COPY --from=jetstream-builder /home/stratos/src/jetstream/templates /srv/templat
 COPY --from=fdbserver-builder /usr/bin /usr/bin
 COPY --from=fdbserver-builder /var/fdb/scripts /var/fdb/scripts
 
-# Install FoundationDB Client Libraries directly here rther than in the fdbserver-builder as the download destination path depends on an external script.
+# Install FoundationDB Client Libraries directly here rather than in the fdbserver-builder as the target destination depends on an external script.
 ARG FDB_VERSION=6.2.15
 ARG FDB_ADDITIONAL_VERSIONS="5.1.7"
 ARG FDB_WEBSITE=https://www.foundationdb.org
