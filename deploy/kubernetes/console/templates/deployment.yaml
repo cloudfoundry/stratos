@@ -323,7 +323,7 @@ spec:
       {{- if .Values.fdbdoclayer.tls }}
       - name: "{{ .Release.Name }}-monocular-certs"
         secret:
-          secretName: {{ template "fullname" . }}-fdbdoclayer-certs
+          secretName: {{ .Release.Name }}-fdbdoclayer-certs
       {{- end }}
 
   replicas: 1
