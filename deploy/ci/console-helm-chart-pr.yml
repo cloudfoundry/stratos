@@ -7,7 +7,7 @@ resources:
     owner: ((helm-repo-github-organization))
     repository: ((helm-repo-github-repository))
     access_token: ((github-access-token))
-    tag_filter: 2\.[0-9]*\.[0-9]*
+    tag_filter: 3\.[0-9]*\.[0-9]*
 - name: helm-chart-repo
   type: git
   source:
