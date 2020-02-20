@@ -1,6 +1,7 @@
 #!/bin/bash
 
-CHART_PATH=$1
+STRATOS_PATH=$1
+CHART_PATH=$2
 
 # Script folder
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"

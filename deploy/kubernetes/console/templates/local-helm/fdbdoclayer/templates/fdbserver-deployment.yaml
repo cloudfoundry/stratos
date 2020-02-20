@@ -34,7 +34,7 @@ spec:
         imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         - name: FDB_COORDINATOR
-          value: {{ .Release.Name }}-fdbserver.console.svc.cluster.local
+          value: {{ .Release.Name }}-fdbserver.{{ .Release.Namespace }}.svc.cluster.local
         - name: CLUSTER_ID
           value: chartdb:erlklkg
         ports:
