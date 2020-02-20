@@ -6,20 +6,11 @@ COPY --chown=stratos:users . ./
 COPY --chown=stratos:users deploy/tools/generate_cert.sh generate_cert.sh
 COPY --chown=stratos:users deploy/all-in-one/config.all-in-one.properties config.properties
 
-ARG USE_PREBUILT_UI=true
+ARG USE_PREBUILT_UI=false
 
-# RUN npm install \
-#     && npm run build \
-#     && npm run build-backend \
-#     && cp src/jetstream/jetstream . \
-#     && mv dist ui
 USER root
 RUN zypper install -y unzip
 USER stratos
-
-# USER root
-# RUN curl https://download.opensuse.org/repositories/openSUSE:/Leap:/15.1/standard/x86_64/unzip-6.00-lp151.5.1.x86_64.rpm -o unzip.rpm && zypper install unzip.rpm
-# USER stratos
 
 RUN if [ $USE_PREBUILT_UI = "true" ] ; then \
     unzip stratos-frontend-prebuild.zip -d ./dist \
@@ -38,16 +29,11 @@ RUN if [ $USE_PREBUILT_UI = "true" ] ; then \
 RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh \
     && chmod +x jetstream
 
-# TODO Kate ##########################################################################################
-# Add fdbdoclayer, fdbserver and chart repo as additional builders here, then below use copy from builder to add the necessary parts to the final image
-# Config properties for jetstream will need to 
-# have env vars for the chart repo and fdbdoclayer localhost URLS, so that jetstream can access them.
-
+# Docker build for FDB Server component
 FROM splatform/stratos-bk-build-base:leap15_1 as fdbserver-builder
 
 
 # Install FoundationDB Binaries
-
 ARG FDB_VERSION=6.2.15
 ARG FDB_WEBSITE=https://www.foundationdb.org
 
@@ -79,7 +65,25 @@ COPY deploy/containers/monocular/fdb-server/configure_db.bash scripts/
 RUN chmod u+x scripts/*.bash && \
 	mkdir -p logs
 
-#####################################################################
+# Docker build for FDB Document Layer component
+FROM splatform/stratos-bk-build-base:leap15_1 as fdbdoclayer-builder
+
+# Install FoundationDB Document Layer Binaries
+ARG FDB_DOC_VERSION=1.6.3
+ARG FDB_WEBSITE=https://www.foundationdb.org
+
+WORKDIR /home/stratos
+RUN curl $FDB_WEBSITE/downloads/$FDB_DOC_VERSION/linux/fdb-document-layer-$FDB_DOC_VERSION-Linux.tar.gz -o fdb-document-layer-$FDB_DOC_VERSION-Linux.tar.gz && \
+    tar -xvf fdb-document-layer-$FDB_DOC_VERSION-Linux.tar.gz && \
+    mv fdb-document-layer-$FDB_DOC_VERSION-Linux doclayer
+ 
+# Docker build for Chart Repo component
+FROM splatform/stratos-bk-build-base:leap15_1 as chartrepo-builder
+
+COPY --chown=stratos:users src/jetstream/plugins/monocular/chart-repo /go/src/github.com/helm/monocular
+WORKDIR /go/src/github.com/helm/monocular
+ARG VERSION
+RUN GO111MODULE=on GOPROXY=https://gocenter.io CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags "-X main.version=$VERSION" .
 
 # use --target=aio to build All-in-one image
 FROM splatform/stratos-bk-base:leap15_1
@@ -93,16 +97,16 @@ COPY --from=jetstream-builder /home/stratos/config.properties /srv/config.proper
 # User Invite templates
 COPY --from=jetstream-builder /home/stratos/src/jetstream/templates /srv/templates
 
-# Pull in binaries and config from fdbserver-builder
+# Pull in binaries from fdbserver-builder
 COPY --from=fdbserver-builder /usr/bin /usr/bin
 COPY --from=fdbserver-builder /var/fdb/scripts /var/fdb/scripts
 
-# Install FoundationDB Client Libraries directly here rather than in the fdbserver-builder as the target destination depends on an external script.
+# Install FoundationDB Client Libraries directly here rather than in the fdbserver-builder, as the install destination depends on an external script.
 ARG FDB_VERSION=6.2.15
 ARG FDB_ADDITIONAL_VERSIONS="5.1.7"
 ARG FDB_WEBSITE=https://www.foundationdb.org
 RUN mkdir -p /mnt/website
-RUN curl $FDB_WEBSITE/downloads/$FDB_VERSION/linux/libfdb_c_$FDB_VERSION.so -o /usr/lib/libfdb_c.so && \
+RUN curl $FDB_WEBSITE/downloads/$FDB_VERSION/linux/libfdb_c_$FDB_VERSION.so -o /usr/lib64/libfdb_c.so && \
 	bash /var/fdb/scripts/download_multiversion_libraries.bash $FDB_WEBSITE $FDB_ADDITIONAL_VERSIONS && \
 	rm -rf /mnt/website
 VOLUME /var/fdb/data
@@ -112,10 +116,33 @@ ENV FDB_PORT 4500
 ENV FDB_CLUSTER_FILE /var/fdb/fdb.cluster
 # Set to networking mode to host, since all processes will be running in this single container
 ENV FDB_NETWORKING_MODE host
-ENV FDB_COORDINATOR ""
 ENV FDB_COORDINATOR_PORT 4500
-ENV FDB_CLUSTER_FILE_CONTENTS ""
 ENV FDB_PROCESS_CLASS unset
+ENV CLUSTER_ID docker:docker
+
+# Pull in binaries from fdbdoclayer-builder
+COPY --from=fdbdoclayer-builder /home/stratos/doclayer/bin/fdbdoc /usr/bin/fdbdoc
+COPY --from=fdbdoclayer-builder /home/stratos/doclayer/lib/foundationdb/document/fdbmonitor /usr/bin/fdbmonitor
+# Bring in doclayer startup script
+COPY deploy/containers/monocular/fdb-doclayer/fdbdoc.bash /var/fdb/scripts
+RUN chmod u+x /var/fdb/scripts/fdbdoc.bash
+
+# Doclayer startup script dependency
+RUN zypper install -y bind-utils
+
+# Document layer runtime var
+ENV FDB_COORDINATOR localhost
+ENV FDB_DOC_PORT 27016
+
+# Pull in binaries from chartrepo-builder
+COPY --from=chartrepo-builder /go/src/github.com/helm/monocular/chartrepo /chartrepo
+
+ENV HELM_FDB_URL mongodb://localhost:${FDB_DOC_PORT}
+ENV HELM_SYNC_SERVER_URL http://localhost:8080
+
+# TODO Kate ##########################################################################################
+# Config properties for jetstream will need to 
+# have env vars for the chart repo and fdbdoclayer localhost URLS, so that jetstream can access them.
 
 # Enable persistence features if canary build flag is set
 RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nFORCE_ENABLE_PERSISTENCE_FEATURES=true\n" >> /srv/config.properties ; fi
@@ -130,4 +157,4 @@ USER root
 
 COPY deploy/aio-entrypoint.sh .
 RUN chmod +x ./aio-entrypoint.sh
-ENTRYPOINT ["./aio-entrypoint.sh"]
+ENTRYPOINT ["bash", "-c", "./aio-entrypoint.sh -u mongodb://localhost:${FDB_DOC_PORT}"]
