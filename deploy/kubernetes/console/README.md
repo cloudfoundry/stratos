@@ -79,7 +79,8 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.mariadb.userPassword|Password of the user for accessing the database. Leave blank for the built-in database to generate a random password||
 |console.mariadb.rootPassword|Password of the root user for accessing the database. Leave blank for the built-in database to generate a random password||
 |console.mariadb.host|Hostname of the database when using an external db||
-|console.mariadb.port|Port of the database when using an external db||
+|console.mariadb.port|Port of the database when using an external db|3306|
+|console.mariadb.tls|TLS mode when connecting to database (true, false, skip-verify, preferred)|false|
 |console.uaa.protocol|Protocol to use when authenticating with the UAA|https://|
 |console.uaa.host|Host of the UAA to authenticate with ||
 |console.uaa.port|Port of the UAA to authenticate with ||
@@ -229,6 +230,29 @@ You can now install Stratos with:
 ```
 helm install stratos/console --namespace console --name my-console --set console.tlsSecretName=stratos-tls-secret
 ```
+
+## Using an External Database
+
+You can choose to use Stratos with an external database, rather than deploying a single-node MariaDB instance as part of the Helm install.
+
+To do so, specify `console.mariabdb.external=true` when deploying.
+
+You will also need to specify:
+
+- `console.mariadb.host` as the hostname of the external MariaDB database server
+- `console.mariadb.port` as the port of the external MariaDB database server (defaults to 3306)
+- `console.mariadb.tls` as the TLS mode (default is `false,` use `true` for a TLS connection to the database server)
+- `console.mariadb.database` as the name of the database
+- `console.mariadb.user` as the username to connect to the database server
+- `console.mariadb.userPassword` as the password to connect to the database server
+
+When using an external database server, Stratos expects that you have:
+
+- Created a user that will be used to access the database
+- Created a database for the Stratos tables and data
+- Granted appropriate permissions so that the user can access the database
+
+> Note: When using a database from a Cloud provider, ensure that the username is correct - in some cases this will be `username@servername` - check the provided connection documentation
 
 ## Specifying UAA configuration
 
