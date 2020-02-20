@@ -26,9 +26,10 @@ type SyncMetadata struct {
 }
 
 const (
-	chartRepoPathPrefix = "/v1"
-	statusPollInterval  = 30
-	statusPollTimeout   = 320
+	chartRepoPathPrefix        = "/v1"
+	statusPollInterval         = 30
+	statusPollTimeout          = 320
+	syncServiceTimeoutBoundary = 10
 )
 
 // Sync Channel
@@ -50,9 +51,43 @@ func (m *Monocular) Sync(action interfaces.EndpointAction, endpoint *interfaces.
 	syncChan <- job
 }
 
+func waitForSyncService(syncServiceURL string) error {
+	// Ensure that the database is responsive
+	for {
+
+		// establish an outer timeout boundary
+		timeout := time.Now().Add(time.Minute * syncServiceTimeoutBoundary)
+
+		// Ping the database
+		statusURL := fmt.Sprintf("%s%s/status/%s", syncServiceURL, chartRepoPathPrefix, "none")
+		resp, err := http.Get(statusURL)
+		log.Infof("Chart Repo ping test: %v, %v.", resp.Status, resp.Body)
+		defer resp.Body.Close()
+		if err == nil {
+			log.Info("Chart Repo appears to now be available.")
+			break
+		}
+
+		// If our timeout boundary has been exceeded, bail out
+		if timeout.Sub(time.Now()) < 0 {
+			return fmt.Errorf("timeout boundary of %d minutes has been exceeded.", syncServiceTimeoutBoundary)
+		}
+
+		// Circle back and try again
+		log.Infof("Waiting for Chart Repo to be responsive: %+v", err)
+		time.Sleep(time.Second)
+	}
+	return nil
+}
+
 func (m *Monocular) processSyncRequests() {
 	log.Info("Helm Repository Sync init")
 	for job := range syncChan {
+		err := waitForSyncService(m.SyncServiceURL)
+		if err != nil {
+			log.Errorf("Unable to process sync request for %v. Chart Repo not available after %v minutes. %v", job.Endpoint.Name, syncServiceTimeoutBoundary, err)
+			continue
+		}
 		log.Debugf("Processing Helm Repository Sync Job: %s", job.Endpoint.Name)
 		var repoSyncRequestParams string = fmt.Sprintf("{\"repoURL\":%q}", job.Endpoint.APIEndpoint.String())
 		// Could be delete or sync
