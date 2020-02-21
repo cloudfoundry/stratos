@@ -54,6 +54,7 @@ type DatabaseConfig struct {
 type SSLValidationMode string
 
 const (
+	// PGSQL SSL Modes
 	// SSLDisabled means no checking of SSL
 	SSLDisabled SSLValidationMode = "disable"
 	// SSLRequired requires SSL without validation
@@ -105,12 +106,15 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||
 			dc.SSLMode == string(SSLVerifyCA) || dc.SSLMode == string(SSLVerifyFull) {
 			return dc, nil
-		} else {
-			// Invalid SSL mode
-			return dc, fmt.Errorf("Invalid SSL mode: %s", dc.SSLMode)
 		}
+		// Invalid SSL mode
+		return dc, fmt.Errorf("Invalid SSL mode: %s", dc.SSLMode)
 	} else if dc.DatabaseProvider == MYSQL {
-		return dc, nil
+		if dc.SSLMode == "true" || dc.SSLMode == "false" || dc.SSLMode == "skip-verify" || dc.SSLMode == "preferred" {
+			return dc, nil
+		}
+		// Invalid SSL mode
+		return dc, fmt.Errorf("Invalid SSL mode: %s", dc.SSLMode)
 	}
 	return dc, fmt.Errorf("Invalid provider %v", dc)
 }
@@ -268,25 +272,23 @@ func buildConnectionString(dc DatabaseConfig) string {
 }
 
 func buildConnectionStringForMysql(dc DatabaseConfig) string {
-	log.Debug("buildConnectionString")
+	log.Debug("buildConnectionStringForMysql")
 	escapeStr := func(in string) string {
 		return strings.Replace(in, `'`, `\'`, -1)
 	}
 
-	connStr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true",
-		escapeStr(dc.Username),
-		escapeStr(dc.Password),
-		dc.Host,
-		dc.Port,
-		escapeStr(dc.Database))
-
-	log.Printf("DB Connection string: %s:*********@tcp(%s:%d)/%s?parseTime=true",
+	connStr := fmt.Sprintf("%s:%%s@tcp(%s:%d)/%s?parseTime=true",
 		escapeStr(dc.Username),
 		dc.Host,
 		dc.Port,
 		escapeStr(dc.Database))
 
-	return connStr
+	if len(dc.SSLMode) > 0 {
+		log.Infof("Setting SSL Mode for mysql: %s", dc.SSLMode)
+		connStr = fmt.Sprintf("%s&tls=%s", connStr, dc.SSLMode)
+	}
+	log.Infof(connStr, "*********")
+	return fmt.Sprintf(connStr, escapeStr(dc.Password))
 }
 
 // Ping - ping the database to ensure the connection/pool works.

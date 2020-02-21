@@ -11,10 +11,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: {{ .Values.fdbserver.service.port }}
-    targetPort: {{ .Values.fdbserver.service.port }}
+  - port: 4500
+    targetPort: 4500
     protocol: TCP
-    name: {{ .Values.fdbserver.service.name }}
+    name: fdbserver
   selector:
     app: {{ template "fullname" . }}-fdbserver
     release: {{ .Release.Name }}

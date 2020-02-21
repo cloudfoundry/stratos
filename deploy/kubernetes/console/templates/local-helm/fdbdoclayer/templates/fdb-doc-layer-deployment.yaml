@@ -13,7 +13,7 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  replicas: {{ .Values.fdbdoclayer.replicas }}
+  replicas: {{ default 1 .Values.fdbdoclayerReplicas }}
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-fdbdoclayer
@@ -30,7 +30,7 @@ spec:
 {{- end }}
       containers:
       - name: fdbdoclayer
-        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.fdbdoclayer}}:{{.Values.consoleVersion}}
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{ default "stratos-fdbdoclayer" .Values.images.fdbdoclayer}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         - name: FDB_COORDINATOR
@@ -38,28 +38,25 @@ spec:
         - name: CLUSTER_ID 
           value: chartdb:erlklkg
         - name: ENABLE_TLS
-          value: {{ .Values.fdbdoclayer.tls  | quote }}
-        {{- if .Values.fdbdoclayer.tls }}
+          value: "true"
         - name: SERVER_CRT
           value: "/etc/secrets/tls.crt"
         - name: SERVER_KEY
           value: "/etc/secrets/tls.key"
         - name: CA_CRT
           value: "/etc/secrets/ca.crt"      
-        {{- end }}  
         ports:
-        - containerPort: {{ .Values.fdbdoclayer.service.port }}
+        - containerPort: 27016
         livenessProbe:
           tcpSocket:
-            port: {{ .Values.fdbdoclayer.service.port }}
+            port: 27016
           initialDelaySeconds: 3
           periodSeconds: 20
         readinessProbe:
           tcpSocket:
-            port: {{ .Values.fdbdoclayer.service.port }}
+            port: 27016
           initialDelaySeconds: 3
           periodSeconds: 10
-{{- if .Values.fdbdoclayer.tls }}
         volumeMounts:
         - name: certs
           mountPath: "/etc/secrets"
@@ -68,4 +65,3 @@ spec:
         - name: certs
           secret:
             secretName: {{ .Release.Name }}-fdbdoclayer-certs
-{{- end }} 

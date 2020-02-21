@@ -13,7 +13,7 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  replicas: {{ .Values.fdbserver.replicas }}
+  replicas: {{ default 1 .Values.fdbserverReplicas }}
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-fdbserver
@@ -30,22 +30,22 @@ spec:
 {{- end }}
       containers:
       - name: fdbserver
-        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.fdbserver}}:{{.Values.consoleVersion}}
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{ default "stratos-fdbserver" .Values.images.fdbserver}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         - name: FDB_COORDINATOR
-          value: {{ .Release.Name }}-fdbserver.console.svc.cluster.local
+          value: {{ .Release.Name }}-fdbserver.{{ .Release.Namespace }}.svc.cluster.local
         - name: CLUSTER_ID
           value: chartdb:erlklkg
         ports:
-        - containerPort: {{ .Values.fdbserver.service.port }}
+        - containerPort: 4500
         livenessProbe:
           tcpSocket:
-            port: {{ .Values.fdbserver.service.port }}
+            port: 4500
           initialDelaySeconds: 3
           periodSeconds: 20
         readinessProbe:
           tcpSocket:
-            port: {{ .Values.fdbserver.service.port }}
+            port: 4500
           initialDelaySeconds: 3
           periodSeconds: 10

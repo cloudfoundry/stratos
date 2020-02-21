@@ -228,10 +228,13 @@ cp -R ${SRC_HELM_CHART_PATH}/. ${DEST_HELM_CHART_PATH}/
 
 pushd ${DEST_HELM_CHART_PATH} > /dev/null
 
+# Remove any .orig files
+rm -rf ${DEST_HELM_CHART_PATH}/**/*.orig
+
 # Run customization script if there is one
 if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" ]; then
   printf "${YELLOW}${BOLD}Applying Helm Chart customizations${RESET}\n"
-  ${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh "${STRATOS_PATH}"
+  ${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh "${STRATOS_PATH}" "${DEST_HELM_CHART_PATH}"
 fi
 
 # Fetch subcharts

@@ -21,7 +21,8 @@ console:
   sessionStoreSecret:
   # Stratos Services
   service:
-    annotations: []
+    annotations: {}
+    extraLabels: {}
     externalIPs: []
     loadBalancerIP:
     loadBalancerSourceRanges: []
@@ -71,16 +72,32 @@ console:
   # Secret containing certificate for the Console
   tlsSecretName:
 
+  # URL of a Cloud Foundry to use for authentication and to auto-register on login
   autoRegisterCF: ~
 
-  statefulSetAnnotations: ~
+  # Custom annotations to apply to Stateful sets
+  statefulSetAnnotations: {}
 
-  statefulSetExtraLabels: ~
+  # Extra labels to apply to Stateful sets
+  statefulSetExtraLabels: {}
 
-  podAnnotations: ~
+  # Custom annotations to apply to Deployments
+  deploymentAnnotations: {}
 
-  podExtraLabels: ~
+  # Extra labels to apply to Deployments
+  deploymentExtraLabels: {}
 
+  # Custom annotations to apply to Jobs
+  jobAnnotations: {}
+
+  # Extra labels to apply to Jobs
+  jobExtraLabels: {}
+
+  # Custom annotations to apply to Pods
+  podAnnotations: {}
+
+  # Extra labels to apply to Pods
+  podExtraLabels: {}
   
 images:
   console: stratos-console
@@ -89,6 +106,7 @@ images:
   configInit: stratos-config-init
   fdbserver: stratos-fdbserver
   fdbdoclayer: stratos-fdbdoclayer
+  chartsync: stratos-chartsync
 
 # Specify which storage class should be used for PVCs
 #storageClass: default
@@ -103,13 +121,12 @@ mariadb:
   userPassword:
   # Leave password blank to auto-generate (not needed for external database)
   rootPassword:
-
   # DB Host (when using an external database)
   host:
-
   # Override port (default 3306) (when using an external database)
   port:
-
+  # TLS Mode - can be true, false, skip-verify or preferred
+  tls:
   # Override DB type - default is mysql
   type:
 
@@ -131,30 +148,9 @@ uaa:
   consoleAdminIdentifier: 
   skipSSLValidation: false
 
-fdbserver:
-  replicas: 1
-  service:
-    name: fdbserver
-    port: 4500
-  networkPolicy:
-    enabled: false
-
-fdbdoclayer:
-  replicas: 1
-  service:
-    name: fdbdoclayer
-    port: 27016
-  tls: true
-  networkPolicy:
-    enabled: false
-
-chartrepo:
-  service:
-    name: chartrepo
-    port: 8080
-  tls: true
-  networkPolicy:
-    enabled: false
+# Replicas for FDB - do not edit
+fdbserverReplicas: 1
+fdbdoclayerReplicas: 1
 
 # SCF values compatability 
 env:

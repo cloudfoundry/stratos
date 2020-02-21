@@ -20,8 +20,8 @@ metadata:
     app: "{{ .Release.Name }}"
     component: stratos
 {{- if .Values.console.statefulSetExtraLabels }}
-{{ toYaml .Values.console.statefulSetExtraLabels | nindent 4 }}
-{{- end}}        
+{{ toYaml .Values.console.statefulSetExtraLabels | indent 4 }}
+{{- end }}
 spec:
   serviceName: stratos
   replicas: 1
@@ -43,9 +43,9 @@ spec:
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         app: "{{ .Release.Name }}"
         component: stratos
-        {{- if .Values.console.podExtraLabels}}
-        {{ toYaml .Values.console.podExtraLabels | nindent 8 }}
-        {{- end}}        
+{{- if .Values.console.podExtraLabels}}
+{{ toYaml .Values.console.podExtraLabels | indent 8 }}
+{{- end }}
     spec:
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
@@ -96,6 +96,8 @@ spec:
           value: {{ default "3306" .Values.mariadb.port | quote }}
         - name: DATABASE_PROVIDER
           value: {{ default "mysql" .Values.mariadb.type | quote }}
+        - name: DB_SSL_MODE
+          value: {{ default "false" .Values.mariadb.tls | quote }}
         - name: HTTP_CONNECTION_TIMEOUT_IN_SECS
           value: "10"
         - name: HTTP_CLIENT_TIMEOUT_IN_SECS
@@ -253,18 +255,16 @@ spec:
           value: {{ default "" .Values.console.userInviteSubject | quote }}
         - name: ENABLE_TECH_PREVIEW
           value: {{ default "false" .Values.console.techPreview | quote }}
-        {{- if .Values.fdbdoclayer.tls }}
         - name: MONOCULAR_CRT_PATH
           value: "/etc/monocular-certs/tls.crt"
         - name: MONOCULAR_KEY_PATH
           value: "/etc/monocular-certs/tls.key"
         - name: MONOCULAR_CA_CRT_PATH
           value: "/etc/monocular-certs/ca.crt"
-        {{- end }}
         - name: FDB_URL
-          value: "mongodb://{{ .Release.Name }}-{{ .Values.fdbdoclayer.service.name }}:{{ .Values.fdbdoclayer.service.port }}"
+          value: "mongodb://{{ .Release.Name }}-fdbdoclayer:27016"
         - name: SYNC_SERVER_URL
-          value: "http://{{ .Release.Name }}-{{ .Values.chartrepo.service.name }}:{{ .Values.chartrepo.service.port }}"
+          value: "http://{{ .Release.Name }}-chartsync:8080"
         readinessProbe:
           httpGet:
             path: /pp/v1/ping
@@ -289,11 +289,9 @@ spec:
           name: "{{ .Release.Name }}-templates"
           readOnly: true
         {{- end }}
-        {{- if .Values.fdbdoclayer.tls }}
         - mountPath: "/etc/monocular-certs"
           name: "{{ .Release.Name }}-monocular-certs"
           readOnly: true
-        {{- end }}
       {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
@@ -320,12 +318,9 @@ spec:
         configMap:
           name: {{ .Values.console.templatesConfigMapName }}
       {{- end }}
-      {{- if .Values.fdbdoclayer.tls }}
       - name: "{{ .Release.Name }}-monocular-certs"
         secret:
           secretName: {{ .Release.Name }}-fdbdoclayer-certs
-      {{- end }}
-
   replicas: 1
   strategy:
     type: RollingUpdate
