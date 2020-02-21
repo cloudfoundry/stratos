@@ -33,7 +33,7 @@ spec:
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{ default "stratos-chartsync" .Values.images.chartsync}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         command: ["/chartrepo"]
-        args: ["serve", "--debug=true","--doclayer-url=mongodb://{{ .Release.Name }}-fdbdoclayer:27016", "--cafile=/etc/certs/ca.crt", "--certfile=/etc/certs/tls.crt", "--keyfile=/etc/certs/tls.key"]
+        args: ["serve", "--doclayer-url=mongodb://{{ .Release.Name }}-fdbdoclayer:27016", "--cafile=/etc/certs/ca.crt", "--certfile=/etc/certs/tls.crt", "--keyfile=/etc/certs/tls.key"]
         ports:
         - name: endpoint
           containerPort: 8080
