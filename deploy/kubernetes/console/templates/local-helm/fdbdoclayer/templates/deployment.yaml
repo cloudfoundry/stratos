@@ -75,16 +75,16 @@ spec:
           value: host
         ports:
         - containerPort: 4500
-        livenessProbe:
-          tcpSocket:
-            port: 4500
-          initialDelaySeconds: 3
-          periodSeconds: 20
-        readinessProbe:
-          tcpSocket:
-            port: 4500
-          initialDelaySeconds: 3
-          periodSeconds: 10
+        # livenessProbe:
+        #   tcpSocket:
+        #     port: 4500
+        #   initialDelaySeconds: 3
+        #   periodSeconds: 20
+        # readinessProbe:
+        #   tcpSocket:
+        #     port: 4500
+        #   initialDelaySeconds: 3
+        #   periodSeconds: 10
       volumes:
         - name: certs
           secret:
