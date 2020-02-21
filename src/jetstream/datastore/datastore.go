@@ -296,7 +296,6 @@ func Ping(db *sql.DB) error {
 	log.Debug("Ping database")
 	err := db.Ping()
 	if err != nil {
-		log.Warn(db.Ping().Error())
 		return fmt.Errorf("Unable to ping the database: %+v", err)
 	}
 
