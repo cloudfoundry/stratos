@@ -9,11 +9,9 @@ COPY --chown=stratos:users deploy/all-in-one/config.all-in-one.properties config
 ARG USE_PREBUILT_UI=false
 
 USER root
-RUN zypper install -y unzip
-USER stratos
-
 RUN if [ $USE_PREBUILT_UI = "true" ] ; then \
-    unzip stratos-frontend-prebuild.zip -d ./dist \
+    zypper install -y unzip \
+    && unzip stratos-frontend-prebuild.zip -d ./dist \
     && npm run build-backend \
     && cp src/jetstream/jetstream . \
 	&& mv dist ui ; \
@@ -24,10 +22,11 @@ RUN if [ $USE_PREBUILT_UI = "true" ] ; then \
         && cp  src/jetstream/jetstream . \
         && mv dist ui ; \
     fi
+USER stratos
 
 # Generate dev-certs
-RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh \
-    && chmod +x jetstream
+RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh
+#    && chmod +x jetstream
 
 # Docker build for FDB Server component
 FROM splatform/stratos-bk-build-base:leap15_1 as fdbserver-builder
@@ -92,6 +91,7 @@ COPY --from=jetstream-builder /home/stratos/deploy/db /src/deploy/db
 COPY --from=jetstream-builder /home/stratos/dev-certs /srv/dev-certs
 COPY --from=jetstream-builder /home/stratos/ui /srv/ui
 COPY --from=jetstream-builder /home/stratos/jetstream /srv/jetstream
+RUN chmod +x /srv/jetstream
 COPY --from=jetstream-builder /home/stratos/config.properties /srv/config.properties
 
 # User Invite templates
@@ -111,14 +111,6 @@ RUN curl $FDB_WEBSITE/downloads/$FDB_VERSION/linux/libfdb_c_$FDB_VERSION.so -o /
 	rm -rf /mnt/website
 VOLUME /var/fdb/data
 RUN mkdir -p /var/fdb/logs
-# FDB runtime vars
-ENV FDB_PORT 4500
-ENV FDB_CLUSTER_FILE /var/fdb/fdb.cluster
-# Set to networking mode to host, since all processes will be running in this single container
-ENV FDB_NETWORKING_MODE host
-ENV FDB_COORDINATOR_PORT 4500
-ENV FDB_PROCESS_CLASS unset
-ENV CLUSTER_ID docker:docker
 
 # Pull in binaries from fdbdoclayer-builder
 COPY --from=fdbdoclayer-builder /home/stratos/doclayer/bin/fdbdoc /usr/bin/fdbdoc
@@ -126,23 +118,21 @@ COPY --from=fdbdoclayer-builder /home/stratos/doclayer/lib/foundationdb/document
 # Bring in doclayer startup script
 COPY deploy/containers/monocular/fdb-doclayer/fdbdoc.bash /var/fdb/scripts
 RUN chmod u+x /var/fdb/scripts/fdbdoc.bash
-
 # Doclayer startup script dependency
 RUN zypper install -y bind-utils
-
-# Document layer runtime var
+# FoundationDB environment variables
+ENV FDB_PORT 4500
+ENV FDB_CLUSTER_FILE /var/fdb/fdb.cluster
+# Set to host, since all processes run in single container
+ENV FDB_NETWORKING_MODE host 
+ENV FDB_COORDINATOR_PORT 4500
+ENV FDB_PROCESS_CLASS unset
+ENV CLUSTER_ID docker:docker
 ENV FDB_COORDINATOR localhost
 ENV FDB_DOC_PORT 27016
 
 # Pull in binaries from chartrepo-builder
 COPY --from=chartrepo-builder /go/src/github.com/helm/monocular/chartrepo /chartrepo
-
-ENV HELM_FDB_URL mongodb://localhost:${FDB_DOC_PORT}
-ENV HELM_SYNC_SERVER_URL http://localhost:8080
-
-# TODO Kate ##########################################################################################
-# Config properties for jetstream will need to 
-# have env vars for the chart repo and fdbdoclayer localhost URLS, so that jetstream can access them.
 
 # Enable persistence features if canary build flag is set
 RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nFORCE_ENABLE_PERSISTENCE_FEATURES=true\n" >> /srv/config.properties ; fi

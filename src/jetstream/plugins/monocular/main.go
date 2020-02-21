@@ -17,8 +17,8 @@ const (
 	helmEndpointType      = "helm"
 	prefix                = "/pp/v1/chartsvc/"
 	kubeReleaseNameEnvVar = "STRATOS_HELM_RELEASE"
-	foundationDBURLEnvVar = "HELM_FDB_URL"
-	syncServerURLEnvVar   = "HELM_SYNC_SERVER_URL"
+	foundationDBURLEnvVar = "FDB_URL"
+	syncServerURLEnvVar   = "SYNC_SERVER_URL"
 	// e.g. MY_CONSOLE_FDBDOCLAYER_FDBDOCLAYER_PORT=tcp://10.105.215.71:27016
 	fdbHostPortEnvVar = "FDBDOCLAYER_PORT"
 	//MY_CONSOLE_CHARTREPO_PORT=tcp://10.108.171.246:8080

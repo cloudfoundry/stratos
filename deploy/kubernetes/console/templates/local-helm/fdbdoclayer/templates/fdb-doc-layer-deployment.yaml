@@ -35,7 +35,7 @@ spec:
         env:
         - name: FDB_COORDINATOR
           value: {{ .Release.Name }}-fdbserver
-        - name: CLUSTER_ID
+        - name: CLUSTER_ID 
           value: chartdb:erlklkg
         - name: ENABLE_TLS
           value: {{ .Values.fdbdoclayer.tls  | quote }}

@@ -261,9 +261,9 @@ spec:
         - name: MONOCULAR_CA_CRT_PATH
           value: "/etc/monocular-certs/ca.crt"
         {{- end }}
-        - name: HELM_FDB_URL
+        - name: FDB_URL
           value: "mongodb://{{ .Release.Name }}-{{ .Values.fdbdoclayer.service.name }}:{{ .Values.fdbdoclayer.service.port }}"
-        - name: HELM_SYNC_SERVER_URL
+        - name: SYNC_SERVER_URL
           value: "http://{{ .Release.Name }}-{{ .Values.chartrepo.service.name }}:{{ .Values.chartrepo.service.port }}"
         readinessProbe:
           httpGet:

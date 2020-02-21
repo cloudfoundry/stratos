@@ -26,10 +26,11 @@ type SyncMetadata struct {
 }
 
 const (
-	chartRepoPathPrefix        = "/v1"
-	statusPollInterval         = 30
-	statusPollTimeout          = 320
-	syncServiceTimeoutBoundary = 10
+	chartRepoPathPrefix          = "/v1"
+	statusPollInterval           = 30
+	statusPollTimeout            = 320
+	syncServiceTimeoutBoundary   = 10
+	syncServiceReadyPollInterval = 5
 )
 
 // Sync Channel
@@ -52,30 +53,32 @@ func (m *Monocular) Sync(action interfaces.EndpointAction, endpoint *interfaces.
 }
 
 func waitForSyncService(syncServiceURL string) error {
-	// Ensure that the database is responsive
+	// Ensure that the chart repo sync service is responsive
 	for {
-
 		// establish an outer timeout boundary
 		timeout := time.Now().Add(time.Minute * syncServiceTimeoutBoundary)
 
-		// Ping the database
+		// Make a dummy status request to the chart repo - if it is up we should get a 404
 		statusURL := fmt.Sprintf("%s%s/status/%s", syncServiceURL, chartRepoPathPrefix, "none")
 		resp, err := http.Get(statusURL)
-		log.Infof("Chart Repo ping test: %v, %v.", resp.Status, resp.Body)
-		defer resp.Body.Close()
+		if resp != nil {
+			defer resp.Body.Close()
+		}
 		if err == nil {
-			log.Info("Chart Repo appears to now be available.")
+			log.Info("Sync service is reachable and ready.")
 			break
+		} else {
+			log.Debugf("Result of chart repo request: %v", err)
+			log.Info("Sync service not yet ready. Waiting for sync service to be available...")
 		}
 
 		// If our timeout boundary has been exceeded, bail out
 		if timeout.Sub(time.Now()) < 0 {
-			return fmt.Errorf("timeout boundary of %d minutes has been exceeded.", syncServiceTimeoutBoundary)
+			return fmt.Errorf("timeout boundary of %d minutes has been exceeded", syncServiceTimeoutBoundary)
 		}
 
 		// Circle back and try again
-		log.Infof("Waiting for Chart Repo to be responsive: %+v", err)
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * syncServiceReadyPollInterval)
 	}
 	return nil
 }
