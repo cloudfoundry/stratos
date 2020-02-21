@@ -11,10 +11,10 @@
       <div *ngIf="!ssoLogin" class="suse-login__form-title">Sign in</div>
       <div class="suse-login__form-outer">
         <form class="suse-login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-          <mat-form-field *ngIf="!ssoLogin">
+          <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
             <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
           </mat-form-field>
-          <mat-form-field *ngIf="!ssoLogin">
+          <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
             <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
           </mat-form-field>
           <button class="suse-login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button
