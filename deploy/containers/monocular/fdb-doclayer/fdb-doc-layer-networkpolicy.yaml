@@ -1,21 +1,21 @@
 
-{{- if .Values.fdbserver.networkPolicy.enabled }}
+{{- if .Values.fdbdoclayer.networkPolicy.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ template "fullname" . }}-fdbserver
+  name: {{ template "fullname" . }}-fdbdoclayer
   labels:
-    app: {{ template "fullname" . }}-fdbserver
+    app: {{ template "fullname" . }}-fdbdoclayer
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
   podSelector:
     matchLabels:
-      app: {{ template "fullname" . }}-fdbserver
+      app: {{ template "fullname" . }}-fdbdoclayer
       release: {{ .Release.Name }}
   ingress:
-  - ports:
-    - port: {{ .Values.fdbserver.service.port }}
+    ports:
+      port: 27016
       protocol: TCP
 {{- end }}
