@@ -94,6 +94,7 @@ src/jetstream/jetstream
 src/jetstream/console-database.db
 src/jetstream/config.properties
 src/jetstream/db/dbconf.yml
+src/jetstream/plugins/monocular/chart-repo/chartrepo
 
 # Customisations
 
