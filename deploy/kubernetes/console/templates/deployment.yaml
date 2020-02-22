@@ -321,4 +321,3 @@ spec:
       - name: "{{ .Release.Name }}-monocular-certs"
         secret:
           secretName: {{ .Release.Name }}-fdbdoclayer-certs
-  replicas: 1
