@@ -27,5 +27,12 @@ echo "Starting FDB server listening on: $PUBLIC_IP:$FDB_PORT public address: $PU
 cat /var/fdb/fdb.cluster
 source /var/fdb/scripts/configure_db.bash
 configure_db &
-fdbserver --listen_address $PUBLIC_IP:$FDB_PORT --public_address $PUBLIC_IP:$FDB_PORT \
+
+if [ -n ${FDB_LISTEN_IP} ]; then
+	LISTEN_IP=${FDB_LISTEN_IP}
+else
+	LISTEN_IP=${PUBLIC_IP}
+fi
+
+fdbserver --listen_address $LISTEN_IP:$FDB_PORT --public_address $PUBLIC_IP:$FDB_PORT \
 	--datadir /var/fdb/data --logdir /var/fdb/logs

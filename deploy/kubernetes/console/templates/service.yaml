@@ -79,6 +79,7 @@ spec:
     {{ else if .Release.IsUpgrade }}
     nodePort:
     {{- end }}
+{{- if not .Values.mariadb.external }}
 ---
 apiVersion: v1
 kind: Service
@@ -109,3 +110,5 @@ spec:
     targetPort: mysql
   selector:
     app: "{{ .Release.Name }}"
+    app.kubernetes.io/component: stratos-db
+{{- end -}}

@@ -6,23 +6,42 @@ apiVersion: apps/v1beta2
 {{- end }}
 kind: Deployment
 metadata:
-  name: stratos-fdbdoclayer
+  name: stratos-chartstore
+{{- if .Values.console.deploymentAnnotations }}
+  annotations:
+{{ toYaml .Values.console.deploymentAnnotations | indent 4 }}
+{{- end }}
   labels:
-    app: {{ template "fullname" . }}-fdbdoclayer
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos-chartstore"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- if .Values.console.deploymentExtraLabels }}
+{{ toYaml .Values.console.deploymentExtraLabels | indent 4 }}
+{{- end }}
 spec:
-  replicas: {{ default 1 .Values.fdbdoclayerReplicas }}
+  replicas: 1
   selector:
     matchLabels:
-      app: {{ template "fullname" . }}-fdbdoclayer
-      release: {{ .Release.Name }}
+      app.kubernetes.io/name: "stratos"
+      app.kubernetes.io/instance: "{{ .Release.Name }}"
+      app.kubernetes.io/component: "stratos-chartstore"
   template:
     metadata:
+{{- if .Values.console.podAnnotations }}
+      annotations:
+{{ toYaml .Values.console.podAnnotations | indent 8 }}
+{{- end }}
       labels:
-        app: {{ template "fullname" . }}-fdbdoclayer
-        release: {{ .Release.Name }}
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        app.kubernetes.io/component: "stratos-chartstore"
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        {{- if .Values.console.podExtraLabels}}
+        {{ toYaml .Values.console.podExtraLabels | nindent 8 }}
+        {{- end}}        
     spec:
 {{- with .Values.securityContext }}
       securityContext:
@@ -34,7 +53,9 @@ spec:
         imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         - name: FDB_COORDINATOR
-          value: localhost
+          value: {{ .Release.Name }}-fdbdoclayer
+        - name: FDB_LISTEN_IP
+          value: 0.0.0.0
         - name: CLUSTER_ID 
           value: chartdb:erlklkg
         - name: ENABLE_TLS
@@ -46,7 +67,7 @@ spec:
         - name: CA_CRT
           value: "/etc/secrets/ca.crt"   
         - name: FDB_NETWORKING_MODE 
-          value: container   
+          value: container
         ports:
         - containerPort: 27016
         livenessProbe:
@@ -68,23 +89,25 @@ spec:
         imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
         - name: FDB_COORDINATOR
-          value: localhost
+          value: {{ .Release.Name }}-fdbdoclayer
+        - name: FDB_LISTEN_IP
+          value: 0.0.0.0
         - name: CLUSTER_ID
           value: chartdb:erlklkg
         - name: FDB_NETWORKING_MODE 
-          value: host
+          value: container
         ports:
         - containerPort: 4500
-        # livenessProbe:
-        #   tcpSocket:
-        #     port: 4500
-        #   initialDelaySeconds: 3
-        #   periodSeconds: 20
-        # readinessProbe:
-        #   tcpSocket:
-        #     port: 4500
-        #   initialDelaySeconds: 3
-        #   periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 4500
+          initialDelaySeconds: 3
+          periodSeconds: 20
+        readinessProbe:
+          tcpSocket:
+            port: 4500
+          initialDelaySeconds: 3
+          periodSeconds: 10
       volumes:
         - name: certs
           secret:
