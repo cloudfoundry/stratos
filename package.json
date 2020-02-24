@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-backend": "./build/bk-build.sh",
+    "build-chartsync": "./build/chartsync-build.sh",
     "full-build-dev": "npm run build-dev; npm run build-backend",
     "fetch-backend-deps": "./build/bk-fetch-deps.sh",
     "bosh-build-backend": "gulp bosh-build-backend",

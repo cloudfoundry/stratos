@@ -27,3 +27,8 @@ func RegisterJetstreamConfigPlugin(plugin JetstreamConfigInit) {
 type EndpointNotificationPlugin interface {
 	OnEndpointNotification(EndpointAction, *CNSIRecord)
 }
+
+// StratosPluginCleanup is interface a plugin can implement if it wants to cleanup on exit
+type StratosPluginCleanup interface {
+	Destroy()
+}
