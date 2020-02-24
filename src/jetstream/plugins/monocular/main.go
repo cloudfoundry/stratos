@@ -225,6 +225,7 @@ func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// API for Helm Chart Repositories
 	echoGroup.GET("/chartrepos", m.ListRepos)
 	echoGroup.Any("/chartsvc/*", m.handleAPI)
+	echoGroup.POST("/chartrepos/:guid", m.SyncRepo)
 }
 
 // Forward requests to the Chart Service API

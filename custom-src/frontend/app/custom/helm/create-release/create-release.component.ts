@@ -171,6 +171,13 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     this.validate$ = this.details.statusChanges.pipe(
       map(() => this.details.valid)
     );
+
+    // Auto-select first endpoint
+    this.kubeEndpoints$.pipe(first()).subscribe(endpoints => {
+      if (endpoints.length === 1) {
+        this.details.controls.endpoint.setValue(endpoints[0].guid);
+      }
+    });
   }
 
   private filterTyped(namespaces: string[], namespace: string): string[] {
