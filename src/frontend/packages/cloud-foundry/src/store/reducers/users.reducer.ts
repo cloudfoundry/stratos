@@ -42,6 +42,9 @@ export function userReducer(state: IRequestEntityTypeState<APIResource<CfUser>>,
     case REMOVE_ROLE_SUCCESS:
       // Ensure that a user's roles collections are updated when we call add/remove
       const permAction = action.apiAction as ChangeUserRole;
+      if (permAction.username) {
+        return state;
+      }
       const { entityGuid, isSpace, permissionTypeKey, userGuid } = permAction;
       return {
         ...state,

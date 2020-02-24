@@ -142,6 +142,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 import { CloudFoundryEventsComponent } from './tabs/cloud-foundry-events/cloud-foundry-events.component';
 import { CloudFoundryOrganizationEventsComponent } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-events/cloud-foundry-organization-events.component';
 import { CloudFoundrySpaceEventsComponent } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-events/cloud-foundry-space-events.component';
+import { ManageUsersSetUsernamesComponent } from './users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
 
 
 @NgModule({
@@ -219,6 +220,7 @@ import { CloudFoundrySpaceEventsComponent } from './tabs/cloud-foundry-organizat
     CloudFoundryEventsComponent,
     CloudFoundryOrganizationEventsComponent,
     CloudFoundrySpaceEventsComponent,
+    ManageUsersSetUsernamesComponent,
   ],
   providers: [
     CFEndpointsListConfigService,

@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { RemoveUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -16,10 +15,11 @@ import {
 import { IOrganization, ISpace } from '../../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getSpaceRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
@@ -47,10 +47,10 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     );
     const isOrgLevel$: Observable<boolean> = this.config$.pipe(map(config => config.isOrgLevel));
     this.chipsConfig$ = combineLatest(
-      this.rowSubject.asObservable(),
-      this.config$.pipe(switchMap(config => config.org$)),
-      spaces$,
-      isOrgLevel$
+      this.rowSubject.asObservable().pipe(tap(a => console.log('rowSubject:', a))),
+      this.config$.pipe(switchMap(config => config.org$)).pipe(tap(a => console.log('config:', a))),
+      spaces$.pipe(tap(a => console.log('spaces:', a))),
+      isOrgLevel$.pipe(tap(a => console.log('isOrgLevel:', a))),
     ).pipe(
       switchMap(([user, org, spaces, isOrgLevel]: [APIResource<CfUser>, APIResource<IOrganization>, APIResource<ISpace>[], boolean]) => {
         const permissionList = this.createPermissions(user, isOrgLevel, spaces);

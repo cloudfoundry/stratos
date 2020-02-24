@@ -5,6 +5,7 @@ export interface UsersRolesState {
   users: CfUser[];
   newRoles: IUserPermissionInOrg;
   changedRoles: CfRoleChange[];
+  usernameOrigin?: string;
 }
 
 export interface CfUserRolesSelected {
@@ -15,6 +16,7 @@ export interface CfUserRolesSelected {
 
 export class CfRoleChange {
   userGuid: string;
+  userName: string;
   orgGuid: string;
   spaceGuid?: string;
   add: boolean;

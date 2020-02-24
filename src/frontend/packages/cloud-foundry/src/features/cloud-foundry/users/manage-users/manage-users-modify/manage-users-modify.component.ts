@@ -1,10 +1,10 @@
-/* tslint:disable:max-line-length */
 import {
   ChangeDetectorRef,
   Component,
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
+  Input,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
 import {
   catchError,
   debounceTime,
@@ -51,6 +51,7 @@ import { getRowMetadata } from '../../../cf.helpers';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
 
+/* tslint:disable:max-line-length */
 /* tslint:enable:max-line-length */
 
 interface Org { metadata: { guid: string }; }
@@ -66,6 +67,7 @@ interface CfUserWithWarning extends CfUser {
 })
 export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
+  @Input() setUsernames = false;
   orgColumns: ITableColumn<Org>[] = [
     {
       columnId: 'org',
@@ -115,7 +117,8 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
   usersNames$: Observable<string[]>;
-  blocked$: Observable<boolean>;
+  blocked = new BehaviorSubject<boolean>(true);
+  blocked$: Observable<boolean> = this.blocked.asObservable();
   valid$: Observable<boolean>;
   orgRoles = OrgUserRoleNames;
   selectedOrgGuid: string;
@@ -132,13 +135,21 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
   ) {
     this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(SpaceRolesListWrapperComponent);
-    this.blocked$ = combineLatest(this.entered.asObservable(), cfRolesService.loading$).pipe(
-      map(([entered, loading]) => loading),
-      startWith(false)
-    );
   }
 
   ngOnInit() {
+    // TODO: RC Test in invite/fix expression changed
+    if (this.setUsernames) {
+      this.blocked.next(false);
+    } else {
+      this.blocked$ = this.cfRolesService.loading$;
+    }
+    // this.blocked$ = this.setUsernames ? of(false) : combineLatest(this.entered.asObservable(), this.cfRolesService.loading$).pipe(
+    //   map(([, loading]) => loading),
+    //   startWith(false)
+    // );
+    // TODO: RC check inidivual checkboxes are ok with junk users (obs chains)
+
     const orgEntity$ = this.store.select(selectUsersRolesOrgGuid).pipe(
       startWith(''),
       distinctUntilChanged(),
@@ -280,6 +291,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   }
 
   onNext = () => {
+    // TODO: RC wire in origin
     return this.cfRolesService.createRolesDiff(this.selectedOrgGuid).pipe(
       map(() => {
         return { success: true };

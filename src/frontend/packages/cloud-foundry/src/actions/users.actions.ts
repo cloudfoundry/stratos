@@ -79,6 +79,12 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
     return !!action.isGetAllUsersAsAdmin;
   }
 }
+
+interface ChangeUserRoleByUsernameParams {
+  username: string;
+  origin?: string;
+}
+
 // FIXME: These actions are user related however return either an org or space entity. These responses can be ignored and not stored, need
 // a flag somewhere to handle that - https://jira.capbristol.com/browse/STRAT-119
 export class ChangeUserRole extends CFStartAction implements EntityRequestAction {
@@ -92,21 +98,23 @@ export class ChangeUserRole extends CFStartAction implements EntityRequestAction
     public entityGuid: string,
     public isSpace = false,
     public updateConnectedUser = false,
-    public orgGuid?: string
+    public orgGuid?: string,
+    public username = '',
+    public usernameOrigin = '',
   ) {
     super();
     this.guid = entityGuid;
     this.updatingKey = ChangeUserRole.generateUpdatingKey(permissionTypeKey, userGuid);
     this.options = new HttpRequest(
       method,
-      `${isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.updatingKey}`,
-      {}
+      this.createUrl(),
+      this.createParams()
     );
     this.entityType = isSpace ? spaceEntityType : organizationEntityType;
     this.entity = cfEntityFactory(this.entityType);
   }
 
-  guid: string; you
+  guid: string;
   entity: EntitySchema;
   entityType: string;
   options: HttpRequest<any>;
@@ -114,6 +122,29 @@ export class ChangeUserRole extends CFStartAction implements EntityRequestAction
 
   static generateUpdatingKey<T>(permissionType: OrgUserRoleNames | SpaceUserRoleNames, userGuid: string) {
     return `${permissionType}/${userGuid}`;
+  }
+
+  createUrl(): string {
+    if (this.username) {
+      // Change role via the username url
+      return `${this.isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.permissionTypeKey}`;
+    } else {
+      return `${this.isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.updatingKey}`;
+    }
+  }
+
+  createParams(): object {
+    if (this.username) {
+      const param: ChangeUserRoleByUsernameParams = {
+        username: this.username,
+      };
+      if (this.usernameOrigin) {
+        param.origin = this.usernameOrigin;
+      }
+      return param;
+    }
+
+    return null;
   }
 }
 
@@ -125,7 +156,9 @@ export class AddUserRole extends ChangeUserRole {
     permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     isSpace = false,
     updateConnectedUser = false,
-    orgGuid?: string
+    orgGuid?: string,
+    username = '',
+    usernameOrigin = '',
   ) {
     super(
       endpointGuid,
@@ -136,7 +169,9 @@ export class AddUserRole extends ChangeUserRole {
       entityGuid,
       isSpace,
       updateConnectedUser,
-      orgGuid
+      orgGuid,
+      username,
+      usernameOrigin
     );
   }
 }

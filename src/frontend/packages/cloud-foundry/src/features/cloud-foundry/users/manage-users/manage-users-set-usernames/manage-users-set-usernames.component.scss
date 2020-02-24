@@ -1,0 +1,12 @@
+:host {
+  flex: 1;
+}
+
+.usernames {
+  display: flex;
+  flex-direction: column;
+
+  &__usernames {
+    margin-bottom: 20px;
+  }
+}

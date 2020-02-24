@@ -16,7 +16,7 @@ export const UsersRolesActions = {
 
 export class UsersRolesSetUsers implements Action {
   type = UsersRolesActions.SetUsers;
-  constructor(public cfGuid: string, public users: CfUser[]) { }
+  constructor(public cfGuid: string, public users: CfUser[], public origin?: string) { }
 }
 
 export class UsersRolesSetOrgRole implements Action {
@@ -58,4 +58,5 @@ export class UsersRolesSetChanges implements Action {
 
 export class UsersRolesExecuteChanges implements Action {
   type = UsersRolesActions.ExecuteChanges;
+  constructor(public setByUsername = false) { }
 }

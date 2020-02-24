@@ -1,7 +1,7 @@
 import { CdkRow } from '@angular/cdk/table';
 import { ChangeDetectionStrategy, Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 
@@ -35,7 +35,7 @@ export class TableRowComponent extends CdkRow implements OnInit {
         map(state => state.warning)
       );
       this.errorMessage$ = this.rowState.pipe(
-        map(state => state.message)
+        map(state => state.message),
       );
       this.isBlocked$ = this.rowState.pipe(
         map(state => state.blocked || state.deleting)

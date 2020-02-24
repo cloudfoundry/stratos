@@ -22,6 +22,15 @@ export enum StackedInputActionResult {
   OTHER_VALUES_UPDATED = 'UPDATE_OTHER_VALUES'
 }
 
+export interface StackedInputActionConfig {
+  isEmailInput: boolean;
+  text: {
+    placeholder: string,
+    requiredError: string,
+    uniqueError: string,
+  };
+}
+
 export interface StackedInputActionUpdate {
   key: number;
   value: string;
@@ -42,6 +51,15 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   @Input() position: number;
   @Input() showRemove: boolean;
   @Input() key: number;
+  @Input() config: StackedInputActionConfig = {
+    isEmailInput: true,
+    text: {
+      placeholder: 'Email',
+      requiredError: 'Email is required',
+      uniqueError: 'Email is not unique'
+    }
+  };
+
 
   @Output() stateOut = new EventEmitter<StackedInputActionUpdate>();
   @Output() remove = new EventEmitter<any>();
@@ -57,6 +75,13 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   constructor() { }
 
   ngOnInit() {
+    const validators = [Validators.required, this.uniqueValidator.bind(this)];
+    if (this.config.isEmailInput) {
+      validators.push(Validators.email);
+    }
+    this.emailFormControl = new FormControl('', validators);
+
+
     // Emit any changes of form state outwards.
     this.subs.push(this.emailFormControl.valueChanges.subscribe((value) => {
       this.stateOut.emit({

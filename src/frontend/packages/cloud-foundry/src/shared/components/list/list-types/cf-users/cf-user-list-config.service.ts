@@ -10,9 +10,9 @@ import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.
 import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../../../core/src/core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
+  IGlobalListAction,
   IListAction,
   IListMultiFilterConfig,
   IMultiListAction,
@@ -20,6 +20,7 @@ import {
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
@@ -94,8 +95,9 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     filter: 'Search by username',
     noEntries: 'There are no users'
   };
-  private initialised: Observable<boolean>;
+  protected initialised: Observable<boolean>;
   private multiFilterConfigs: IListMultiFilterConfig[];
+  protected globalActions: IGlobalListAction<CfUser>[] = [];
 
   manageUserAction: IListAction<APIResource<CfUser>> = {
     action: (user: APIResource<CfUser>) => {
@@ -209,6 +211,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     userHasRoles: (user: CfUser) => boolean = defaultUserHasRoles,
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>,
+    // isInitialized: Observable<boolean> = of(true)
   ) {
     super();
 
@@ -222,9 +225,11 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
             cf.global.isAdmin,
             activeRouteCfOrgSpace.cfGuid,
             activeRouteCfOrgSpace.orgGuid,
-            activeRouteCfOrgSpace.spaceGuid)
+            activeRouteCfOrgSpace.spaceGuid),
+          // isInitialized.pipe(filter(isInit => isInit))
         )
       ),
+      // first(),
       tap(([cf, action]) => {
         this.dataSource = new CfUserDataSourceService(store, action, this, userHasRoles);
 
@@ -304,6 +309,22 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     };
   }
 
+  // private assignGlobalAction = (
+  //   cfId: string,
+  //   org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
+  //   space$?: Observable<EntityInfo<APIResource<ISpace>>>): Observable<any> => {
+
+  //   return this.userPerms.can(
+  //     new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username), cfId
+  //   ).pipe(
+  //     tap(canSetRolesByUsername => {
+  //       if (canSetRolesByUsername) {
+
+  //       }
+  //     })
+  //   );
+  // }
+
   private getSafeObservables(
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>
@@ -350,7 +371,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.activeRouteCfOrgSpace.orgGuid)
 
   getColumns = () => this.columns;
-  getGlobalActions = () => [];
+  getGlobalActions = () => this.globalActions;
   getMultiActions = () => [this.manageMultiUserAction];
   getSingleActions = () => [this.manageUserAction, ...this.removeUserActions()];
   getMultiFiltersConfigs = () => this.multiFilterConfigs;

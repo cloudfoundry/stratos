@@ -30,6 +30,7 @@ export class UsersRolesComponent implements OnDestroy {
   singleUser$: Observable<CfUser>;
   defaultCancelUrl: string;
   applyStarted = false;
+  setUsernames = false;
 
   constructor(
     private store: Store<CFAppState>,
@@ -40,31 +41,36 @@ export class UsersRolesComponent implements OnDestroy {
 
     this.defaultCancelUrl = this.createReturnUrl(activeRouteCfOrgSpace);
 
-    const userQParam = this.route.snapshot.queryParams.user;
-    if (userQParam) {
-      this.initialUsers$ = this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, userQParam).pipe(
-        map(user => [user.entity]),
-        first()
-      );
+    this.setUsernames = route.snapshot.queryParams.setByUsername;
+    if (this.setUsernames) {
+      // TODO: RC
     } else {
-      this.initialUsers$ = this.store.select(selectUsersRolesPicked).pipe(first());
-    }
-
-    this.singleUser$ = this.initialUsers$.pipe(
-      first(),
-      filter(users => users && users.length > 0),
-      map(users => users.length === 1 ? users[0] : null),
-    );
-
-    // Ensure that when we arrive here directly the store is set up with all it needs
-    this.store.select(selectUsersRoles).pipe(
-      combineLatest(this.initialUsers$),
-      first()
-    ).subscribe(([usersRoles, users]) => {
-      if (!usersRoles.cfGuid || !users) {
-        this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, users));
+      const userQParam = this.route.snapshot.queryParams.user;
+      if (userQParam) {
+        this.initialUsers$ = this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, userQParam).pipe(
+          map(user => [user.entity]),
+          first()
+        );
+      } else {
+        this.initialUsers$ = this.store.select(selectUsersRolesPicked).pipe(first());
       }
-    });
+
+      this.singleUser$ = this.initialUsers$.pipe(
+        first(),
+        filter(users => users && users.length > 0),
+        map(users => users.length === 1 ? users[0] : null),
+      );
+
+      // Ensure that when we arrive here directly the store is set up with all it needs
+      this.store.select(selectUsersRoles).pipe(
+        combineLatest(this.initialUsers$),
+        first()
+      ).subscribe(([usersRoles, users]) => {
+        if (!usersRoles.cfGuid || !users) {
+          this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, users));
+        }
+      });
+    }
 
   }
 
@@ -92,7 +98,7 @@ export class UsersRolesComponent implements OnDestroy {
       return observableOf({ success: true, redirect: true });
     }
     this.applyStarted = true;
-    this.store.dispatch(new UsersRolesExecuteChanges());
+    this.store.dispatch(new UsersRolesExecuteChanges(this.setUsernames));
     return observableOf({ success: true, ignoreSuccess: true });
   }
 }
