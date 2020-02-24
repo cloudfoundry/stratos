@@ -36,7 +36,7 @@ type installRequest struct {
 
 // Monocular is a plugin for Monocular
 type Monocular interface {
-	GetChartStore() chartsvc.ChartSvcDatastore
+	GetChartStore() *chartsvc.ChartSvcDatastore
 }
 
 // InstallRelease will install a Helm 3 release

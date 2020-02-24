@@ -32,7 +32,7 @@ const (
 type Monocular struct {
 	portalProxy     interfaces.PortalProxy
 	chartSvcRoutes  http.Handler
-	RepoQueryStore  chartsvc.ChartSvcDatastore
+	RepoQueryStore  *chartsvc.ChartSvcDatastore
 	FoundationDBURL string
 	SyncServiceURL  string
 }
@@ -42,7 +42,8 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 	return &Monocular{portalProxy: portalProxy}, nil
 }
 
-func (m *Monocular) GetChartStore() chartsvc.ChartSvcDatastore {
+// GetChartStore gets the chart store
+func (m *Monocular) GetChartStore() *chartsvc.ChartSvcDatastore {
 	return m.RepoQueryStore
 }
 
@@ -147,7 +148,8 @@ func (m *Monocular) ConfigureChartSVC(fdbURL *string, fDB *string, cACertFile st
 	if !(tlsEnabled || (cACertFile == "" && keyFile == "" && certFile == "")) {
 		return errors.New("To enable TLS, all 3 TLS cert paths must be set.")
 	}
-	chartsvc.InitFDBDocLayerConnection(fdbURL, fDB, &tlsEnabled, cACertFile, certFile, keyFile, debug)
+	m.RepoQueryStore = chartsvc.InitFDBDocLayerConnection(fdbURL, fDB, &tlsEnabled, cACertFile, certFile, keyFile, debug)
+
 	return nil
 }
 

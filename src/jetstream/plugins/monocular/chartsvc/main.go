@@ -114,7 +114,7 @@ func main() {
 	http.ListenAndServe(addr, n)
 }
 
-func InitFDBDocLayerConnection(fdbURL *string, fDB *string, tlsEnabled *bool, CAFile string, certFile string, keyFile string, debug *bool) {
+func InitFDBDocLayerConnection(fdbURL *string, fDB *string, tlsEnabled *bool, CAFile string, certFile string, keyFile string, debug *bool) *ChartSvcDatastore {
 
 	log.Debugf("Attempting to connect to FDB: %v, %v, debug: %v", *fdbURL, *fDB, *debug)
 
@@ -125,19 +125,19 @@ func InitFDBDocLayerConnection(fdbURL *string, fDB *string, tlsEnabled *bool, CA
 		CA, err := ioutil.ReadFile(CAFile) // just pass the file name
 		if err != nil {
 			log.Fatalf("Cannot load CA certificate from file: %v.", err)
-			return
+			return nil
 		}
 		CACert := x509.NewCertPool()
 		ok := CACert.AppendCertsFromPEM([]byte(CA))
 		if !ok {
 			log.Fatalf("Cannot append CA certificate to certificate pool.")
-			return
+			return nil
 		}
 		//Now load the key pair and create tls options struct
 		clientKeyPair, err := tls.LoadX509KeyPair(certFile, keyFile)
 		if err != nil {
 			log.Fatalf("Cannot load server keypair: %v", err)
-			return
+			return nil
 		}
 
 		tlsConfig = &tls.Config{RootCAs: CACert, Certificates: []tls.Certificate{clientKeyPair}}
@@ -150,10 +150,19 @@ func InitFDBDocLayerConnection(fdbURL *string, fDB *string, tlsEnabled *bool, CA
 	client, err := fdbDatastore.NewDocLayerClient(context.Background(), clientOptions)
 	if err != nil {
 		log.Fatalf("Can't create client for FoundationDB document layer: %v. URL provided was: %v.", err, *fdbURL)
-		return
+		return nil
 	}
 	log.Debugf("FDB Document Layer client created.")
 
 	fdb.InitDBConfig(client, *fDB)
 	fdb.SetPathPrefix(pathPrefix)
+
+	db, dbCloser := client.Database(*fDB)
+	datastore := &ChartSvcDatastore{
+		dbClient: client,
+		db:       db,
+		dbCloser: dbCloser,
+	}
+
+	return datastore
 }

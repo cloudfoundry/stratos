@@ -11,7 +11,7 @@ RUN zypper ref
 
 RUN zypper -n ref && \
     zypper -n up && \
-    zypper in -y which tar git gcc curl wget gzip xz && \
+    zypper in -y which tar git gcc curl wget gzip xz unzip && \
     zypper clean -a && \
     rm -f /var/log/zypper.log /var/log/zypp/history
 
