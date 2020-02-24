@@ -282,7 +282,7 @@ func main() {
 		sessionDataStore.StopCleanup(dataQuitCleanup, dataDoneCleanup)
 
 		// Plugin cleanup
-		for name, plugin := range portalProxy.Plugins {
+		for _, plugin := range portalProxy.Plugins {
 			if pCleanup, ok := plugin.(interfaces.StratosPluginCleanup); ok {
 				pCleanup.Destroy()
 			}

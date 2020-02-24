@@ -92,9 +92,9 @@ func (m *Monocular) configure() error {
 
 	if fdbPort, isLocal := m.portalProxy.Env().Lookup(localDevEnvVar); isLocal {
 		// Create a random port to use for the chart sync service
-		m.devSyncPort = chartSyncBasePort + rand.Intn(5000)
+		devSyncPort := chartSyncBasePort + rand.Intn(5000)
 		m.FoundationDBURL = fmt.Sprintf("mongodb://127.0.0.1:%s", fdbPort)
-		m.SyncServiceURL = fmt.Sprintf("http://127.0.0.1:%d", m.devSyncPort)
+		m.SyncServiceURL = fmt.Sprintf("http://127.0.0.1:%d", devSyncPort)
 
 		// Run the chartrepo tool
 		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -106,7 +106,7 @@ func (m *Monocular) configure() error {
 		cmd.Env = make([]string, 1)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		cmd.Env[0] = fmt.Sprintf("PORT=%d", m.devSyncPort)
+		cmd.Env[0] = fmt.Sprintf("PORT=%d", devSyncPort)
 		if err = cmd.Start(); err != nil {
 			log.Fatalf("Error starting chart sync tool: %+v", err)
 		} else {
