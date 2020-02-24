@@ -26,9 +26,11 @@ type SyncMetadata struct {
 }
 
 const (
-	chartRepoPathPrefix = "/v1"
-	statusPollInterval  = 30
-	statusPollTimeout   = 320
+	chartRepoPathPrefix          = "/v1"
+	statusPollInterval           = 30
+	statusPollTimeout            = 320
+	syncServiceTimeoutBoundary   = 10
+	syncServiceReadyPollInterval = 5
 )
 
 // Sync Channel
@@ -50,9 +52,45 @@ func (m *Monocular) Sync(action interfaces.EndpointAction, endpoint *interfaces.
 	syncChan <- job
 }
 
+func waitForSyncService(syncServiceURL string) error {
+	// Ensure that the chart repo sync service is responsive
+	for {
+		// establish an outer timeout boundary
+		timeout := time.Now().Add(time.Minute * syncServiceTimeoutBoundary)
+
+		// Make a dummy status request to the chart repo - if it is up we should get a 404
+		statusURL := fmt.Sprintf("%s%s/status/%s", syncServiceURL, chartRepoPathPrefix, "none")
+		resp, err := http.Get(statusURL)
+		if resp != nil {
+			defer resp.Body.Close()
+		}
+		if err == nil {
+			log.Info("Sync service is reachable and ready.")
+			break
+		} else {
+			log.Debugf("Result of chart repo request: %v", err)
+			log.Info("Sync service not yet ready. Waiting for sync service to be available...")
+		}
+
+		// If our timeout boundary has been exceeded, bail out
+		if timeout.Sub(time.Now()) < 0 {
+			return fmt.Errorf("timeout boundary of %d minutes has been exceeded", syncServiceTimeoutBoundary)
+		}
+
+		// Circle back and try again
+		time.Sleep(time.Second * syncServiceReadyPollInterval)
+	}
+	return nil
+}
+
 func (m *Monocular) processSyncRequests() {
 	log.Info("Helm Repository Sync init")
 	for job := range syncChan {
+		err := waitForSyncService(m.SyncServiceURL)
+		if err != nil {
+			log.Errorf("Unable to process sync request for %v. Chart Repo not available after %v minutes. %v", job.Endpoint.Name, syncServiceTimeoutBoundary, err)
+			continue
+		}
 		log.Debugf("Processing Helm Repository Sync Job: %s", job.Endpoint.Name)
 		var repoSyncRequestParams string = fmt.Sprintf("{\"repoURL\":%q}", job.Endpoint.APIEndpoint.String())
 		// Could be delete or sync

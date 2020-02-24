@@ -34,6 +34,7 @@ function create_cluster_file() {
 	if [[ -n "$FDB_CLUSTER_FILE_CONTENTS" ]]; then
 		echo "$FDB_CLUSTER_FILE_CONTENTS" > $FDB_CLUSTER_FILE
 	elif [[ -n $FDB_COORDINATOR ]]; then
+		#We are in k8s and must lookup the fdb service hostname, not the pod IP.
 		coordinator_ip=$(dig +short +search $FDB_COORDINATOR)
 		if [[ -z "$coordinator_ip" ]]; then
 			echo "Failed to look up coordinator address for $FDB_COORDINATOR" 1>&2

@@ -28,9 +28,11 @@ function create_server_environment() {
 
 	: > $env_file
 
+	# If using docker in host network mode, or if we are running our client in the same container, use 127.0.0.1
 	if [[ "$FDB_NETWORKING_MODE" == "host" ]]; then
 		public_ip=127.0.0.1
 	elif [[ "$FDB_NETWORKING_MODE" == "container" ]]; then
+		#We are running in k8s
 		public_ip=$(grep `hostname` /etc/hosts | sed -e "s/\s *`hostname`.*//")
 	else
 		echo "Unknown FDB Networking mode \"$FDB_NETWORKING_MODE\"" 1>&2
@@ -38,6 +40,7 @@ function create_server_environment() {
 	fi
 
 	echo "export PUBLIC_IP=$public_ip" >> $env_file
+	# If the FDB_COORDINATOR node is not set, then we are the coordinator - use our public IP
 	if [[ -z $FDB_COORDINATOR ]]; then
 		FDB_CLUSTER_FILE_CONTENTS="docker:docker@$public_ip:$FDB_PORT"
 	fi

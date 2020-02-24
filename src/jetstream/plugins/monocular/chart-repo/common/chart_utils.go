@@ -26,13 +26,14 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"github.com/helm/monocular/chartrepo/utils"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/helm/monocular/chartrepo/utils"
 
 	"github.com/ghodss/yaml"
 	"github.com/jinzhu/copier"

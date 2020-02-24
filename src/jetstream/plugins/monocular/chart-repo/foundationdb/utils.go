@@ -194,7 +194,7 @@ func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHe
 		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
 		return err
 	}
-	log.WithFields(log.Fields{"url": repoURL}).Info("Stored repository update in cache")
+	log.WithFields(log.Fields{"Repository": repoName, "URL": repoURL}).Info("Synchronized successfully: ")
 	repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusSynced})
 	return nil
 }
@@ -330,20 +330,20 @@ func importWorker(db Database, wg *sync.WaitGroup, icons <-chan common.Chart, ch
 	for c := range icons {
 		log.WithFields(log.Fields{"name": c.Name}).Debug("importing icon")
 		if err := fetchAndImportIcon(db, c); err != nil {
-			log.WithFields(log.Fields{"name": c.Name}).WithError(err).Error("failed to import icon")
+			log.WithFields(log.Fields{"name": c.Name}).WithError(err).Warn("failed to import icon")
 		}
 	}
 	for j := range chartFiles {
 		log.WithFields(log.Fields{"name": j.Name, "version": j.ChartVersion.Version}).Debug("importing readme and values")
 		if err := fetchAndImportFiles(db, j.Name, j.Repo, j.ChartVersion); err != nil {
-			log.WithFields(log.Fields{"name": j.Name, "version": j.ChartVersion.Version}).WithError(err).Error("failed to import files")
+			log.WithFields(log.Fields{"name": j.Name, "version": j.ChartVersion.Version}).WithError(err).Warn("failed to import files")
 		}
 	}
 }
 
 func fetchAndImportIcon(db Database, c common.Chart) error {
 	if c.Icon == "" {
-		log.WithFields(log.Fields{"name": c.Name}).Info("icon not found")
+		log.WithFields(log.Fields{"name": c.Name}).Debug("icon not found")
 		return nil
 	}
 
@@ -460,17 +460,17 @@ func fetchAndImportFiles(db Database, name string, r common.Repo, cv common.Char
 	if v, ok := files[readmeFileName]; ok {
 		chartFiles.Readme = v
 	} else {
-		log.WithFields(log.Fields{"name": name, "version": cv.Version}).Info("README.md not found")
+		log.WithFields(log.Fields{"name": name, "version": cv.Version}).Warn("README.md not found")
 	}
 	if v, ok := files[valuesFileName]; ok {
 		chartFiles.Values = v
 	} else {
-		log.WithFields(log.Fields{"name": name, "version": cv.Version}).Info("values.yaml not found")
+		log.WithFields(log.Fields{"name": name, "version": cv.Version}).Warn("values.yaml not found")
 	}
 	if v, ok := files[schemaFileName]; ok {
 		chartFiles.Schema = v
 	} else {
-		log.WithFields(log.Fields{"name": name, "version": cv.Version}).Info("values.schema.json not found")
+		log.WithFields(log.Fields{"name": name, "version": cv.Version}).Warn("values.schema.json not found")
 	}
 
 	// inserts the chart files if not already indexed, or updates the existing

@@ -8,20 +8,20 @@ function setup_cluster_file() {
 		echo "FDB coordinator: $FDB_COORDINATOR"
 		coordinator_ip=$(dig +short +search $FDB_COORDINATOR)
 		echo "Coordinator IP: $coordinator_ip"
-                if [[ -z "$coordinator_ip" ]]; then
-                        echo "Failed to look up coordinator address for $FDB_COORDINATOR" 1>&2
-                        exit 1
-                fi
+			if [[ -z "$coordinator_ip" ]]; then
+					echo "Failed to look up coordinator address for $FDB_COORDINATOR" 1>&2
+					exit 1
+			fi
                 coordinator_port=${FDB_COORDINATOR_PORT:-4500}
 		if [[ -z $CLUSTER_ID ]]; then
 			echo "CLUSTER_ID environment variable not defined" 1>&2
                 	exit 1
 		fi
                 echo "$CLUSTER_ID@$coordinator_ip:$coordinator_port" > $FDB_CLUSTER_FILE
-        else
-                echo "FDB_COORDINATOR environment variable not defined" 1>&2
-                exit 1
-        fi
+	else
+			echo "FDB_COORDINATOR environment variable not defined" 1>&2
+			exit 1
+	fi
 
 
     if [ ! -f ${FDB_CLUSTER_FILE} ]; then

@@ -261,9 +261,9 @@ spec:
           value: "/etc/monocular-certs/tls.key"
         - name: MONOCULAR_CA_CRT_PATH
           value: "/etc/monocular-certs/ca.crt"
-        - name: HELM_FDB_URL
+        - name: FDB_URL
           value: "mongodb://{{ .Release.Name }}-fdbdoclayer:27016"
-        - name: HELM_SYNC_SERVER_URL
+        - name: SYNC_SERVER_URL
           value: "http://{{ .Release.Name }}-chartsync:8080"
         readinessProbe:
           httpGet:
