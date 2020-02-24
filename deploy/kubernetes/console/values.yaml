@@ -148,10 +148,6 @@ uaa:
   consoleAdminIdentifier: 
   skipSSLValidation: false
 
-# Replicas for FDB - do not edit
-fdbserverReplicas: 1
-fdbdoclayerReplicas: 1
-
 # SCF values compatability 
 env:
   DOMAIN:
