@@ -139,11 +139,13 @@ func (m *Monocular) processSyncRequests() {
 					metadata.Status = "Sync Failed"
 				} else {
 					metadata.Status = "Synchronizing"
+					metadata.Busy = true
 					m.updateMetadata(job.Endpoint.GUID, metadata)
 					log.Infof("Sync in progress for repository: %s", job.Endpoint.APIEndpoint.String())
 					//Now wait for success
 					statusURL := fmt.Sprintf("%s%s/status/%s", m.SyncServiceURL, chartRepoPathPrefix, job.Endpoint.Name)
 					err := waitForSyncComplete(statusURL)
+					metadata.Busy = false
 					if err == nil {
 						metadata.Status = "Synchronized"
 					} else {
