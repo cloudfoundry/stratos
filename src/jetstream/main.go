@@ -281,6 +281,13 @@ func main() {
 		log.Info(`... Stopping sessiondata store cleanup`)
 		sessionDataStore.StopCleanup(dataQuitCleanup, dataDoneCleanup)
 
+		// Plugin cleanup
+		for _, plugin := range portalProxy.Plugins {
+			if pCleanup, ok := plugin.(interfaces.StratosPluginCleanup); ok {
+				pCleanup.Destroy()
+			}
+		}
+
 		log.Info("Graceful shut down complete")
 		os.Exit(1)
 	}()
@@ -358,7 +365,6 @@ func (portalProxy *portalProxy) GetSessionDataStore() interfaces.SessionDataStor
 
 func (portalProxy *portalProxy) GetPlugin(name string) interface{} {
 	plugin := portalProxy.Plugins[name]
-	log.Warn(portalProxy.Plugins)
 	return plugin
 }
 
