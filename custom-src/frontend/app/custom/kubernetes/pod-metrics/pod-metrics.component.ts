@@ -23,6 +23,7 @@ import { KubernetesEndpointService } from '../services/kubernetes-endpoint.servi
 import { KubernetesService } from '../services/kubernetes.service';
 import { KubernetesPod } from '../store/kube.types';
 import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kubernetes.actions';
+import { formatCPUTime, formatAxisCPUTime } from '../kubernetes-metrics.helpers';
 
 @Component({
   selector: 'app-pod-metrics',
@@ -79,8 +80,11 @@ export class PodMetricsComponent {
         'Memory Usage (MB)',
         ChartDataTypes.BYTES,
         (series: ChartSeries[]) => {
-          return series.filter(s => !s.name.endsWith('POD'));
-        }
+          // Remove the metric series for pod overhead and for the total!
+          return series.filter(s => !!s.metadata.container_name && s.metadata.container_name !== 'POD');
+        },
+        null,
+        (value: string) => value + ' MB'
       ),
       cpuChartConfigBuilder(
         new FetchKubernetesMetricsAction(
@@ -89,29 +93,12 @@ export class PodMetricsComponent {
           `container_cpu_usage_seconds_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'CPU Usage',
-        null,
+        ChartDataTypes.CPU_TIME,
         (series: ChartSeries[]) => {
-          return series.filter(s => s.name.indexOf('POD') === -1);
+          return series.filter(s => !!s.metadata.container_name && s.metadata.container_name !== 'POD');
         },
-        (tick: string) => {
-          const duration = moment.duration(parseFloat(tick) * 1000);
-          if (duration.asDays() >= 1) {
-            return `${duration.asDays().toPrecision(2)} d`;
-          }
-          if (duration.asHours() >= 1) {
-            return `${duration.asHours().toPrecision(2)} hrs`;
-          }
-          if (duration.asMinutes() >= 1) {
-            return `${duration.asMinutes().toPrecision(2)} min`;
-          }
-          if (duration.asSeconds() >= 1) {
-            return `${duration.asSeconds().toPrecision(2)} sec`;
-          }
-          if (duration.asMilliseconds() >= 1) {
-            return `${duration.asSeconds().toPrecision(2)} msec`;
-          }
-          return tick;
-        }
+        (tick: string) => formatAxisCPUTime(tick),
+        (value: string) => formatCPUTime(value),
       ),
       networkChartConfigBuilder(
         new FetchKubernetesMetricsAction(
@@ -120,7 +107,10 @@ export class PodMetricsComponent {
           `container_network_transmit_bytes_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data transmitted (MB)',
-        ChartDataTypes.BYTES
+        ChartDataTypes.BYTES,
+        null,
+        null,
+        (value: string) => value + ' MB'
       ),
       networkChartConfigBuilder(
         new FetchKubernetesMetricsAction(
@@ -129,7 +119,10 @@ export class PodMetricsComponent {
           `container_network_receive_bytes_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data received (MB)',
-        ChartDataTypes.BYTES
+        ChartDataTypes.BYTES,
+        null,
+        null,
+        (value: string) => value + ' MB'
       )
     ];
 
