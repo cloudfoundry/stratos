@@ -44,6 +44,12 @@ echo -e "${CYAN}Patching README.md${RESET}"
 # Change all references to 'Stratos' (case sensitive)
 sed -i.bak -e 's@Stratos@SUSE Stratos Console@g' ${CHART_PATH}/README.md
 
+# Change first paragraph to include Kubernetes
+console for Cloud Foundry.
+SRC="console for Cloud Foundry."
+DEST="console for Cloud Foundry and Kubernetes."
+sed -i.bak -e 's@'"${SRC}"'@'"${DEST}"'@g' ${CHART_PATH}/README.md
+
 # Change command for helm repo addition
 HELM_ADD="helm repo add stratos https://cloudfoundry.github.io/stratos"
 SUSE_HELM_ADD="helm repo add suse https://registry.suse.com"

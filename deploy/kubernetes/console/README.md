@@ -25,11 +25,13 @@ NAME               	CHART VERSION   APP VERSION	DESCRIPTION
 stratos/console    	3.0.0           3.0.0      	A Helm chart for deploying Stratos UI Console
 ```
 
+> Note: Commands shown in this document are for Helm version 3. For Helm version 2, when installing, instead of supplying the name via the `--name` flag, it is supplied as the first argument, before the chart name.
+
 To install Stratos:
 
 ```
 kubectl create namespace console
-helm install stratos/console --namespace=console --name my-console
+helm install my-console stratos/console --namespace=console
 ```
 
 > **Note**: The first `kubectl` command will create a namespace for Stratos. With Helm 3 you must create a namespace before installing.
@@ -37,7 +39,7 @@ We recommend installing Stratos into a separate namespace.
 
 > **Note**: This assumes that a storage class exists in the Kubernetes cluster that has been marked as `default`. If no such storage class exists, a specific storage class needs to be specified, please see the following section *Specifying a custom Storage Class*. 
 
-> You can change the namespace (--namespace) and the release name (--name) to values of your choice.
+> You can change the namespace (--namespace) and the release name to values of your choice.
 
 This will create a Stratos instance named `my-console` in a namespace called `console` in your Kubernetes cluster.
 
@@ -115,6 +117,7 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 ## Accessing the Console
 
 To check the status of the instance use the following command:
+
 ```
 helm status my-console
 ```
@@ -124,7 +127,7 @@ helm status my-console
 The console is exposed via an HTTPS service - `RELEASE-NAME-ui-ext` (where RELEASE-NAME is the name used for the `name` parameter when installing). You can find the details of this service with:
 
 ```
-$ kubectl get services -n NAMESPACE
+kubectl get services -n NAMESPACE
 NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE
 my-console-mariadb   ClusterIP   10.105.216.25   <none>        3306/TCP        60s
 my-console-ui-ext    NodePort    10.109.207.70   <none>        443:31067/TCP   60s
@@ -141,14 +144,16 @@ The URL you use for accessing Stratos will depend on the service configuration a
 To upgrade your instance when using the Helm repository, fetch any updates to the repository:
 
 ```
-$ helm repo update
+helm repo update
 ```
 
 To update an instance, the following assumes your instance is called `my-console`:
 
 ```
-$ helm upgrade my-console stratos/console --recreate-pods
+helm upgrade my-console stratos/console --recreate-pods
 ```
+
+> Note: You *must* use the `--recreate-pods` flag when upgrading
 
 After the upgrade, perform a `helm list` to ensure your console is the latest version.
 
@@ -157,7 +162,7 @@ After the upgrade, perform a `helm list` to ensure your console is the latest ve
 To uninstall Stratos, delete the Helm release and also delete the Kubernetes namespace:
 
 ```
-helm delete --namespace=console --name my-console --purge
+helm delete my-console --purge
 kubectl delete namespace console
 ```
 
@@ -170,8 +175,10 @@ delete the namespace to remove these secrets.
 
 If your Kubernetes deployment supports automatic configuration of a load balancer (e.g. Google Container Engine), specify the parameters `console.service.type=LoadBalancer` when installing.
 
+
 ```
-helm install stratos/console --namespace=console --name my-console --set console.service.type=LoadBalancer
+kubectl create namespace console
+helm install my-console stratos/console --namespace=console --set console.service.type=LoadBalancer
 ```
 
 ## Using an Ingress Controller
@@ -210,7 +217,8 @@ kube:
 Deploy with:
 
 ```
-helm install stratos/console -f private_overrides.yaml --namespace=metrics
+kubectl create namespace console
+helm install my-console stratos/console --namespace=console -f private_overrides.yaml
 ```
 
 ## Deploying with your own TLS certificates
@@ -228,7 +236,9 @@ kubectl create secret tls -n NAMESPACE stratos-tls-secret --cert=tls.crt --key=t
 You can now install Stratos with:
 
 ```
-helm install stratos/console --namespace console --name my-console --set console.tlsSecretName=stratos-tls-secret
+kubectl create namespace console
+helm install my-console stratos/console --namespace=console --set console.tlsSecretName=stratos-tls-secret
+
 ```
 
 ## Using an External Database
@@ -257,8 +267,10 @@ When using an external database server, Stratos expects that you have:
 ## Specifying UAA configuration
 
 When deploying with SCF, the `scf-config-values.yaml` (see [SCF Wiki link](https://github.com/SUSE/scf/wiki/How-to-Install-SCF#configuring-the-deployment)) can be supplied when installing Stratos.
+
 ```
-$ helm install stratos/console  -f scf-config-values.yaml
+kubectl create namespace console
+helm install my-console stratos/console --namespace=console -f scf-config-values.yaml
 ```
 
 UAA configuration can be specified by providing the following configuration.
@@ -276,8 +288,11 @@ uaa:
 ```
 
 To install Stratos with the above specified configuration:
+
+
 ```
-$ helm install stratos/console -f uaa-config.yaml
+kubectl create namespace console
+helm install my-console stratos/console --namespace=console -f uaa-config.yaml
 ```
 
 ## Configuring a local user account
@@ -287,19 +302,8 @@ This allows for deployment without a UAA. To enable the local user account, supp
 To deploy using our Helm repository:
 
 ```
-helm install stratos/console --namespace=console --name my-console --set console.localAdminPassword=<password>
-```
-
-To deploy using an archive file containing a given release of our Helm chart
-
-```
-helm install console --namespace=console --name my-console --set console.localAdminPassword=<password>
-```
-
-To deploy using the latest Helm chart directly from out GitHub repository
-
-```
-$ helm install console --namespace console --name my-console --set console.localAdminPassword=<password>
+kubectl create namespace console
+helm install my-console stratos/console --namespace=console --set console.localAdminPassword=<password>
 ```
 
 ## Specifying Annotations and Labels
@@ -340,6 +344,7 @@ For non-production environments, you may want to use the `hostpath` storage clas
 ```
 kubectl patch storageclass <your-class-name> -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
+
 Where `<your-class-name>` would be `hostpath` if you follow the SCF instructions.
 
 
@@ -349,7 +354,7 @@ If no default storage class has been defined in the Kubernetes cluster. The Stra
 
 #### Providing Storage Class override
 ```
-$ kubectl get storageclass
+kubectl get storageclass
 NAME                TYPE
 ssd                 kubernetes.io/host-path   
 persistent          kubernetes.io/host-path   
@@ -372,11 +377,14 @@ mariadb:
 ```
 
 Run Helm with the override:
+
 ```
-helm install -f override.yaml stratos/console
+kubectl create namespace console
+helm install my-console stratos/console --namespace=console -f override.yaml
 ```
 
 #### Create a default Storage Class
+
 Alternatively, you can configure a storage class with `storageclass.kubernetes.io/is-default-class` set to `true`. For instance the following storage class will be declared as the default. If you don't have the `hostpath` provisioner available in your local cluster, please follow the instructions on [link](https://github.com/kubernetes-incubator/external-storage/tree/master/docs/demo/hostpath-provisioner), to deploy one.
 
 If the hostpath provisioner is available, save the file to `storageclass.yaml`
@@ -393,6 +401,7 @@ provisioner: kubernetes.io/host-path # Or whatever the local hostpath provisione
 ```
 
 To create it in your kubernetes cluster, execute the following.
+
 ```
 kubectl create -f storageclass.yaml
 ```
