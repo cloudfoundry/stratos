@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"k8s.io/apimachinery/pkg/util/wait"
-
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/helm/monocular/chartrepo/common"
+	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 type SyncJob struct {
@@ -39,6 +39,24 @@ var syncChan = make(chan SyncJob, 100)
 // InitSync starts the go routine that will sync repositories in the background
 func (m *Monocular) InitSync() {
 	go m.processSyncRequests()
+}
+
+// SyncRepos is endpoint to force a re-sync of a given Helm Repository
+func (m *Monocular) SyncRepo(c echo.Context) error {
+	log.Debug("SyncRepos")
+
+	// Lookup repository by GUID
+	var p = m.portalProxy
+	guid := c.Param("guid")
+	endpoint, err := p.GetCNSIRecord(guid)
+	if err != nil {
+		return interfaces.NewJetstreamErrorf("Could not find Helm Repository: %v+", err)
+	}
+
+	m.Sync(interfaces.EndpointRegisterAction, &endpoint)
+
+	response := "OK"
+	return c.JSON(200, response)
 }
 
 // Sync schedules a sync action for the given endpoint

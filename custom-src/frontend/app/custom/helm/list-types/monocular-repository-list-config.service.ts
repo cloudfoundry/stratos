@@ -1,6 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { of as observableOf } from 'rxjs';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
@@ -15,9 +16,23 @@ import {
 import {
   TableCellEndpointStatusComponent,
 } from '../../../shared/components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
+import { IListConfig, ListViewTypes, IListAction } from '../../../shared/components/list/list.component.types';
 import { defaultHelmKubeListPageSize } from '../../kubernetes/list-types/kube-helm-list-types';
 import { MonocularRepositoryDataSource } from './monocular-repository-list-source';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { map, pairwise } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material';
+import { SendClearEventAction } from 'frontend/packages/store/src/actions/internal-events.actions';
+import { DisconnectEndpoint, UnregisterEndpoint } from 'frontend/packages/store/src/actions/endpoint.actions';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { selectDeletionInfo } from 'frontend/packages/store/src/selectors/api.selectors';
+import { STRATOS_ENDPOINT_TYPE } from '../../../base-entity-schemas';
+import { endpointSchemaKey } from 'frontend/packages/store/src/helpers/entity-factory';
+import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
+import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
+import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 
 @Injectable()
 export class MonocularRepositoryListConfig implements IListConfig<EndpointModel> {
@@ -71,13 +86,81 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
     },
   ];
 
+  private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+
+  private listActionSyncRepository: IListAction<EndpointModel> = {
+    action: (item: EndpointModel) => {
+      const requestArgs = {
+        headers: null,
+        params: null
+      };
+      const proxyAPIVersion = environment.proxyAPIVersion;
+      const url = `/pp/${proxyAPIVersion}/chartrepos/${item.guid}`;
+      const req = this.httpClient.post(url, requestArgs);
+      req.subscribe(ok => {
+        this.snackBar.open('Helm Repository synchronization started', 'Dismiss', { duration: 3000 });
+        // Refresh repository status
+        this.dataSource.refresh();
+      }, err => {
+        this.snackBar.open(`Failed to Synchronize Helm Repository '${item.name}'`, 'Dismiss', { duration: 5000 });
+      });
+      return req;
+    },
+    label: 'Synchronize',
+    description: '',
+    createVisible: () => observableOf(true),
+    createEnabled: () => observableOf(true)
+  };
+
+  private deleteRepository: IListAction<EndpointModel> = {
+    action: (item) => {
+      const confirmation = new ConfirmationDialogConfig(
+        'Delete Helm Repository',
+        `Are you sure you want to delete repository '${item.name}'?`,
+        'Delete',
+        true
+      );
+      this.confirmDialog.open(confirmation, () => {
+        this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
+        this.handleDeleteAction(item, ([oldVal, newVal]) => {
+          this.snackBar.open(`Delete Helm Repository '${item.name}'`, 'Dismiss', { duration: 3000 });
+        });
+      });
+    },
+    label: 'Delete',
+    description: 'Delete Helm Repository',
+    createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
+  };
+
+  private handleDeleteAction(item, handleChange) {
+    this.handleAction(selectDeletionInfo(
+      this.endpointEntityKey,
+      item.guid,
+    ), handleChange);
+  }
+
+  private handleAction(storeSelect, handleChange) {
+    const disSub = this.store.select(storeSelect).pipe(
+      pairwise())
+      .subscribe(([oldVal, newVal]) => {
+        if (!newVal.error && (oldVal.busy && !newVal.busy)) {
+          handleChange([oldVal, newVal]);
+          disSub.unsubscribe();
+        }
+      });
+  }
+
   constructor(
-    private store: Store<AppState>,
+    public store: Store<AppState>,
     public activatedRoute: ActivatedRoute,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
-    ngZone: NgZone
+    ngZone: NgZone,
+    public httpClient: HttpClient,
+    public snackBar: MatSnackBar,
+    public confirmDialog: ConfirmationDialogService,
+    public currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     const highlighted = activatedRoute.snapshot.params.guid;
     this.dataSource = new MonocularRepositoryDataSource(
@@ -94,7 +177,7 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
   public getColumns = () => this.columns;
   public getGlobalActions = () => [];
   public getMultiActions = () => [];
-  public getSingleActions = () => [];
+  public getSingleActions = () => [this.listActionSyncRepository, this.deleteRepository];
   public getMultiFiltersConfigs = () => [];
   public getDataSource = () => this.dataSource;
 }
