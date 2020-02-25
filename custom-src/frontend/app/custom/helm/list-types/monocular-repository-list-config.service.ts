@@ -102,7 +102,7 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
         // Refresh repository status
         this.dataSource.refresh();
       }, err => {
-        this.snackBar.open(`Failed to Sycnhronize Helm Repository '${item.name}'`, 'Dismiss', { duration: 5000 });
+        this.snackBar.open(`Failed to Synchronize Helm Repository '${item.name}'`, 'Dismiss', { duration: 5000 });
       });
       return req;
     },
