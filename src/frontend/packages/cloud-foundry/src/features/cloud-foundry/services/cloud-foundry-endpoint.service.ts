@@ -22,15 +22,14 @@ import {
 import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityService } from '../../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { QParam, QParamJoiners } from '../../../shared/q-param';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   getPaginationObservables,
   PaginationObservables,
@@ -39,11 +38,12 @@ import { APIResource, EntityInfo } from '../../../../../store/src/types/api.type
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
 import { cfEntityFactory } from '../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { CfInfoDefinitionActionBuilders } from '../../../entity-action-builders/cf-info.action-builders';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import { QParam, QParamJoiners } from '../../../shared/q-param';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
 
@@ -168,7 +168,8 @@ export class CloudFoundryEndpointService {
       action: this.getAllOrgsAction,
       paginationMonitor: this.pmf.create(
         this.getAllOrgsAction.paginationKey,
-        cfEntityFactory(organizationEntityType)
+        cfEntityFactory(organizationEntityType),
+        this.getAllOrgsAction.flattenPagination
       )
     }, true).entities$;
 
@@ -182,7 +183,11 @@ export class CloudFoundryEndpointService {
   }
 
   constructAppObs() {
-    const appPaginationMonitor = this.pmf.create(this.getAllAppsAction.paginationKey, this.getAllAppsAction);
+    const appPaginationMonitor = this.pmf.create(
+      this.getAllAppsAction.paginationKey,
+      this.getAllAppsAction,
+      this.getAllAppsAction.flattenPagination
+    );
     this.appsPagObs = getPaginationObservables<APIResource<IApp>>({
       store: this.store,
       action: this.getAllAppsAction,
@@ -243,7 +248,8 @@ export class CloudFoundryEndpointService {
         action,
         paginationMonitor: this.pmf.create(
           action.paginationKey,
-          cfEntityFactory(domainEntityType)
+          cfEntityFactory(domainEntityType),
+          action.flattenPagination
         )
       },
       true
@@ -278,7 +284,8 @@ export class CloudFoundryEndpointService {
           action,
           paginationMonitor: this.paginationMonitorFactory.create(
             action.paginationKey,
-            action
+            action,
+            false
           )
         }).entities$.pipe(
           filter(entities => !!entities && !!entities.length),

@@ -89,7 +89,7 @@ export const getServiceInstancesInCf = (cfGuid: string, store: Store<CFAppState>
   return getPaginationObservables<APIResource<IServiceInstance>>({
     store,
     action,
-    paginationMonitor: paginationMonitorFactory.create(paginationKey, action)
+    paginationMonitor: paginationMonitorFactory.create(paginationKey, action, action.flattenPagination)
   }, true).entities$;
 };
 
@@ -150,7 +150,11 @@ export const getServicePlans = (
         return getPaginationObservables<APIResource<IServicePlan>>({
           store,
           action: getServicePlansAction,
-          paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, cfEntityFactory(servicePlanEntityType))
+          paginationMonitor: paginationMonitorFactory.create(
+            getServicePlansAction.paginationKey,
+            cfEntityFactory(servicePlanEntityType),
+            getServicePlansAction.flattenPagination
+          )
         }, true)
           .entities$.pipe(share(), first());
       }

@@ -340,7 +340,8 @@ export function fetchTotalResults(
     action: newAction,
     paginationMonitor: paginationMonitorFactory.create(
       newAction.paginationKey,
-      cfEntityFactory(newAction.entityType)
+      cfEntityFactory(newAction.entityType),
+      newAction.flattenPagination
     )
   });
   // Ensure the request is made by sub'ing to the entities observable
