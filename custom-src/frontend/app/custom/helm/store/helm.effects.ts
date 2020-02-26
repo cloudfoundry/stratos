@@ -28,6 +28,7 @@ import {
 } from './helm.actions';
 import { HelmVersion } from './helm.types';
 import { GetAllEndpointsSuccess, GET_ENDPOINTS_SUCCESS } from 'frontend/packages/store/src/actions/endpoint.actions';
+import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 
 @Injectable()
 export class HelmEffects {
@@ -52,7 +53,7 @@ export class HelmEffects {
       // Look to see if we have any endpoints that are sycnhronizing
       let updated = false;
       Object.values(action.payload.entities.stratosEndpoint).forEach(endpoint => {
-        if (endpoint.cnsi_type === 'helm' && endpoint.endpoint_metadata) {
+        if (endpoint.cnsi_type === HELM_ENDPOINT_TYPE && endpoint.endpoint_metadata) {
           if (endpoint.endpoint_metadata.status === 'Synchronizing') {
             // An endpoint is busy, so add it to the list to be monitored
             if (!this.syncing[endpoint.guid]) {
