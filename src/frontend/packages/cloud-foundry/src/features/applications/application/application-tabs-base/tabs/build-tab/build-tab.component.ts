@@ -240,7 +240,6 @@ export class BuildTabComponent implements OnInit {
       const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
       const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
       const getAppStatsAction = actionBuilder(appGuid, cfGuid) as GetAppStatsAction;
-      // TODO: RC TEST
       this.store.dispatch(new ResetPagination(getAppStatsAction, getAppStatsAction.paginationKey));
     });
   }

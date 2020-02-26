@@ -41,9 +41,10 @@ export class UsersRolesComponent implements OnDestroy {
 
     this.defaultCancelUrl = this.createReturnUrl(activeRouteCfOrgSpace);
 
+    // Setup the stepper with the users that will have their roles managed
     this.setUsernames = route.snapshot.queryParams.setByUsername;
     if (this.setUsernames) {
-      // TODO: RC
+      // User has yet to supply users to manage. This will be handled by the first step
     } else {
       const userQParam = this.route.snapshot.queryParams.user;
       if (userQParam) {

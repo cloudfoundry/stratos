@@ -105,11 +105,6 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     };
   }
 
-  // public getId(row: CfRoleChangeWithNames): string {
-  //   const isSpace = !!row.spaceGuid;
-  //   return row.
-  // }
-
   constructor(private store: Store<CFAppState>, private cfUserService: CfUserService) { }
 
   ngOnInit() {
@@ -179,7 +174,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
         changes
           .map(change => ({
             ...change,
-            userName: this.fetchUserName(change.userGuid, users), // TODO: RC manage - test is this needed now?
+            userName: this.fetchUserName(change.userGuid, users),
             roleName: this.fetchRoleName(change.role, !change.spaceGuid)
           }))
           .sort((a, b) => a.userName.localeCompare(b.userName))

@@ -199,13 +199,13 @@ export class CfRolesService {
     orgGuid: string
   ): CfRoleChange[] {
     const existingUserRoles = existingRoles[user.guid] || {};
-    const newChanges = [];
+    const newChanges: CfRoleChange[] = [];
 
     // Compare org roles
     const existingOrgRoles = existingUserRoles[orgGuid] || createDefaultOrgRoles(orgGuid, newRoles.name);
     newChanges.push(...this.comparePermissions({
       userGuid: user.guid,
-      userName: user.username,
+      // userName: user.username,
       orgGuid,
       orgName: newRoles.name,
       add: false,
@@ -219,7 +219,7 @@ export class CfRolesService {
       const oldSpace = existingOrgRoles.spaces[spaceGuid] || createDefaultSpaceRoles(orgGuid, newRoles.name, spaceGuid, newSpace.name);
       newChanges.push(...this.comparePermissions({
         userGuid: user.guid,
-        userName: user.username,
+        // userName: user.username,
         orgGuid,
         orgName: newRoles.name,
         spaceGuid,

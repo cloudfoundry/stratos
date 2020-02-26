@@ -16,7 +16,7 @@ export interface CfUserRolesSelected {
 
 export class CfRoleChange {
   userGuid: string;
-  userName: string;
+  // userName?: string;
   orgGuid: string;
   spaceGuid?: string;
   add: boolean;
