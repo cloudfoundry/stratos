@@ -13,7 +13,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from 'frontend/packages/store/src/types/request.types';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
@@ -27,6 +27,8 @@ import {
   HelmInstall,
 } from './helm.actions';
 import { HelmVersion } from './helm.types';
+import { GetAllEndpointsSuccess, GET_ENDPOINTS_SUCCESS } from 'frontend/packages/store/src/actions/endpoint.actions';
+import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 
 @Injectable()
 export class HelmEffects {
@@ -37,7 +39,38 @@ export class HelmEffects {
     private store: Store<AppState>
   ) { }
 
+  // Endpoints that we know are synchronizing
+  private syncing = {};
+  private syncTimer = null;
+
   proxyAPIVersion = environment.proxyAPIVersion;
+
+  // Ensure that we refresh the charts when a repository finishes synchronizing
+  @Effect()
+  updateOnSyncFinished$ = this.actions$.pipe(
+    ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS),
+    flatMap(action => {
+      // Look to see if we have any endpoints that are sycnhronizing
+      let updated = false;
+      Object.values(action.payload.entities.stratosEndpoint).forEach(endpoint => {
+        if (endpoint.cnsi_type === HELM_ENDPOINT_TYPE && endpoint.endpoint_metadata) {
+          if (endpoint.endpoint_metadata.status === 'Synchronizing') {
+            // An endpoint is busy, so add it to the list to be monitored
+            if (!this.syncing[endpoint.guid]) {
+              this.syncing[endpoint.guid] = true;
+              updated = true;
+            }
+          }
+        }
+      });
+
+      if (updated) {
+        // Schedule check
+        this.scheduleSyncStatusCheck();
+      }
+      return [];
+    })
+  );
 
   @Effect()
   fetchCharts$ = this.actions$.pipe(
@@ -186,6 +219,44 @@ export class HelmEffects {
       status: err && err.status ? err.status + '' : '500',
       message: this.createHelmErrorMessage(err)
     };
+  }
+
+  private checkSyncStatus() {
+    // Dispatch request
+    const url = `/pp/${this.proxyAPIVersion}/chartrepos/status`;
+    const requestArgs = {
+      headers: null,
+      params: null
+    };
+    const req = this.httpClient.post(url, this.syncing, requestArgs);
+    req.subscribe(data => {
+      if (data) {
+        const existing = Object.keys(data).length;
+        const syncing = {};
+        Object.keys(data).forEach(guid => {
+          if (data[guid]) {
+            syncing[guid] = true;
+          }
+        });
+        const remaining = Object.keys(syncing).length;
+        this.syncing = syncing;
+        if (remaining !== existing) {
+          // Dispatch action to refresh charts
+          this.store.dispatch(new GetMonocularCharts());
+        }
+        if (remaining > 0) {
+          this.scheduleSyncStatusCheck();
+        }
+      }
+    });
+  }
+
+  private scheduleSyncStatusCheck() {
+    if (this.syncTimer !== null) {
+      clearTimeout(this.syncTimer);
+      this.syncTimer = null;
+    }
+    this.syncTimer = setTimeout(() => this.checkSyncStatus(), 5000);
   }
 
 }
