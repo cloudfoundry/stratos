@@ -138,17 +138,12 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // TODO: RC Test in invite/fix expression changed
+    // TODO: RC fix expression changed
     if (this.setUsernames) {
       this.blocked.next(false);
     } else {
       this.blocked$ = this.cfRolesService.loading$;
     }
-    // this.blocked$ = this.setUsernames ? of(false) : combineLatest(this.entered.asObservable(), this.cfRolesService.loading$).pipe(
-    //   map(([, loading]) => loading),
-    //   startWith(false)
-    // );
-    // TODO: RC check inidivual checkboxes are ok with junk users (obs chains)
 
     const orgEntity$ = this.store.select(selectUsersRolesOrgGuid).pipe(
       startWith(''),
@@ -291,7 +286,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   }
 
   onNext = () => {
-    // TODO: RC wire in origin
     return this.cfRolesService.createRolesDiff(this.selectedOrgGuid).pipe(
       map(() => {
         return { success: true };

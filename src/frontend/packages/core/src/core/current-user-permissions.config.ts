@@ -115,7 +115,10 @@ export const permissionConfigs: IPermissionConfigs = {
     new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
   ],
-  [CurrentUserPermissions.SPACE_CHANGE_ROLES]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
+  [CurrentUserPermissions.SPACE_CHANGE_ROLES]: [
+    new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER)
+  ],
   [CurrentUserPermissions.ROUTE_CREATE]: [
     new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.route_creation),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)

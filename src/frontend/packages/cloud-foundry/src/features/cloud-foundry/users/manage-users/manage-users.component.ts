@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
@@ -31,6 +31,7 @@ export class UsersRolesComponent implements OnDestroy {
   defaultCancelUrl: string;
   applyStarted = false;
   setUsernames = false;
+  title$: Observable<string>;
 
   constructor(
     private store: Store<CFAppState>,
@@ -45,6 +46,7 @@ export class UsersRolesComponent implements OnDestroy {
     this.setUsernames = route.snapshot.queryParams.setByUsername;
     if (this.setUsernames) {
       // User has yet to supply users to manage. This will be handled by the first step
+      this.singleUser$ = of(null);
     } else {
       const userQParam = this.route.snapshot.queryParams.user;
       if (userQParam) {
@@ -73,6 +75,15 @@ export class UsersRolesComponent implements OnDestroy {
       });
     }
 
+    this.title$ = this.singleUser$.pipe(
+      map(singleUser => {
+        if (singleUser) {
+          return this.setUsernames ? `Add Roles: ${singleUser.username}` : `Manage Roles: ${singleUser.username}`;
+        } else {
+          return this.setUsernames ? `Add User Roles` : `Manage User Roles`;
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {

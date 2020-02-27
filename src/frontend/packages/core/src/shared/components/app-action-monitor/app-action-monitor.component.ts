@@ -98,12 +98,10 @@ export class AppActionMonitorComponent<T> implements OnInit {
       isTableLoading$: observableOf(false),
       getRowState: (row) => {
         // Get the row state of the ENTITY
-        // TODO: RC test repeated uses
-
-        const cellConfig = this.getCellConfig(row);
+        const cellConfig = monitorColumn.cellConfig(row);
         const monitorState = new ActionMonitorComponentState(
           this.entityMonitorFactory,
-          cellConfig.getId(row), // TODO: RC search for usages of this component Test delete app, manage users
+          cellConfig.getId(row),
           cellConfig.schema,
           cellConfig.monitorState,
           cellConfig.updateKey,

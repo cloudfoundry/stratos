@@ -31,6 +31,7 @@ import {
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
+import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/manage-users-set-usernames.component';
 
 /* tslint:disable:max-line-length */
 
@@ -51,7 +52,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       headerCell: () => 'User',
       columnId: 'user',
       cellDefinition: {
-        valuePath: 'userName'
+        valuePath: 'username'
       },
       cellFlex: '1'
     },
@@ -132,7 +133,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     ).subscribe(usersRoles => this.store.dispatch(new UsersRolesClearUpdateState(usersRoles.changedRoles)));
   }
 
-  fetchUserName = (userGuid: string, users: APIResource<CfUser>[]): string => {
+  fetchUsername = (userGuid: string, users: APIResource<CfUser>[]): string => {
     let res = this.nameCache.user[userGuid];
     if (res) {
       return res;
@@ -160,10 +161,10 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       map(changes => changes
         .map(change => ({
           ...change,
-          // userName: change.userGuid,
+          username: ManageUsersSetUsernamesHelper.usernameFromGuid(change.userGuid),
           roleName: this.fetchRoleName(change.role, !change.spaceGuid)
         }))
-        .sort((a, b) => a.userName.localeCompare(b.userName)),
+        .sort((a, b) => a.username.localeCompare(b.username)),
       )
     );
     const changesViaUserGuid = this.updateChanges.pipe(
@@ -174,10 +175,10 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
         changes
           .map(change => ({
             ...change,
-            userName: this.fetchUserName(change.userGuid, users),
+            username: this.fetchUsername(change.userGuid, users),
             roleName: this.fetchRoleName(change.role, !change.spaceGuid)
           }))
-          .sort((a, b) => a.userName.localeCompare(b.userName))
+          .sort((a, b) => a.username.localeCompare(b.username))
       )
     );
     this.changes$ = this.setUsernames ? changesViaUsername : changesViaUserGuid;

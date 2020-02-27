@@ -128,7 +128,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         ...perm,
         name: isOrgLevel ? spacePerms.name : '',
         guid: spacePerms.spaceGuid,
-        userName: row.entity.username,
+        username: row.entity.username,
         userGuid: row.metadata.guid,
         busy: catalogEntity.getEntityMonitor(
           this.store,

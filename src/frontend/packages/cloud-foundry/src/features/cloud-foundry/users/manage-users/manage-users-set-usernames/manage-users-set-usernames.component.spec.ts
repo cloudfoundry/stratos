@@ -8,9 +8,9 @@ describe('ManageUsersSetUsernamesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ManageUsersSetUsernamesComponent ]
+      declarations: [ManageUsersSetUsernamesComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

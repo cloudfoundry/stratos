@@ -15,6 +15,17 @@ import { CFAppState } from '../../../../../cf-app-state';
 import { CfUser } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 
+export class ManageUsersSetUsernamesHelper {
+  static createGuid(username: string, cfGuid: string, orgGuid: string): string {
+    return `${username}/${cfGuid}/${orgGuid}`;
+  }
+
+  static usernameFromGuid(guid: string): string {
+    const endOfUsername = guid.lastIndexOf('/', guid.lastIndexOf('/') - 1);
+    return guid.substring(0, endOfUsername);
+  }
+}
+
 @Component({
   selector: 'app-manage-users-set-usernames',
   templateUrl: './manage-users-set-usernames.component.html',
@@ -27,7 +38,6 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   private usernames: StackedInputActionsUpdate;
   public origin: string;
 
-  // TODO: RC wire in valid username
   public stackedActionConfig: StackedInputActionConfig = {
     isEmailInput: false,
     text: {
@@ -45,8 +55,8 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    // TODO: RC validate the users via fetch user? only applicable to admin
 
-    // TODO: RC
     const processingState: StackedInputActionsState[] = [];
     // Object.keys(this.users.values).forEach(key => {
     //   processingState.push({
@@ -66,7 +76,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     const users: CfUser[] = Object.values(this.usernames.values).map(username => {
       return {
         username,
-        guid: `${this.activeRouteCfOrgSpace.cfGuid}-${this.activeRouteCfOrgSpace.orgGuid}-${username}`
+        guid: ManageUsersSetUsernamesHelper.createGuid(username, this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid)
       } as CfUser;
     });
     this.store.dispatch(new UsersRolesSetUsers(this.activeRouteCfOrgSpace.cfGuid, users, this.origin));
@@ -75,5 +85,3 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     });
   }
 }
-
-// TODO: RC after failure retry stepper and effect doesn't fire

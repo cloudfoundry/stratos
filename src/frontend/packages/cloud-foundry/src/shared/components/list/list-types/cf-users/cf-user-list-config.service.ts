@@ -68,7 +68,10 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       headerCell: () => 'Username',
       cellFlex: '1',
       cellDefinition: {
-        getValue: row => row.entity.username || row.metadata.guid
+        getValue: row => {
+          console.log(row.entity);
+          return row.entity.username || row.metadata.guid;
+        }
       },
       sort: {
         type: 'sort',

@@ -39,13 +39,10 @@ export class CloudFoundryOrganizationUsersComponent {
     userPerms: CurrentUserPermissionsService,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-
-
-    // perms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
-
+    const ffPermConfig = new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
     this.addRolesByUsernameLink$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => combineLatest([
-        userPerms.can(new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username), activeRouteCfOrgSpace.cfGuid),
+        userPerms.can(ffPermConfig, activeRouteCfOrgSpace.cfGuid),
         userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.orgGuid)
       ])),
       first(),
@@ -55,8 +52,7 @@ export class CloudFoundryOrganizationUsersComponent {
             link: createCfOrgSpaceSteppersUrl(
               activeRouteCfOrgSpace.cfGuid,
               `/users/manage`,
-              activeRouteCfOrgSpace.orgGuid,
-              activeRouteCfOrgSpace.spaceGuid
+              activeRouteCfOrgSpace.orgGuid
             ),
             params: { setByUsername: true }
           };

@@ -16,7 +16,6 @@ export interface CfUserRolesSelected {
 
 export class CfRoleChange {
   userGuid: string;
-  // userName?: string;
   orgGuid: string;
   spaceGuid?: string;
   add: boolean;
@@ -26,7 +25,7 @@ export class CfRoleChange {
 }
 
 export class CfRoleChangeWithNames extends CfRoleChange {
-  userName: string; // Why are all these names set out flat? So we can easily sort in future
+  username: string; // Why are all these names set out flat? So we can easily sort in future
   orgName: string;
   spaceName?: string;
   roleName: string;

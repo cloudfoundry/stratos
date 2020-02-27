@@ -1,6 +1,5 @@
 <app-page-header>
-  <span *ngIf="(singleUser$ | async); else multiUser">Manage Roles: {{(singleUser$ | async).username }}</span>
-  <ng-template #multiUser>Manage User Roles</ng-template>
+  {{ title$ | async}}
 </app-page-header>
 <app-steppers cancel="{{defaultCancelUrl}}" [nextButtonProgress]="false">
   <app-step *ngIf="setUsernames" title="Usernames" [onNext]="setUsers.onNext" [valid]="setUsers.valid$ | async">

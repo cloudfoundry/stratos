@@ -205,7 +205,6 @@ export class CfRolesService {
     const existingOrgRoles = existingUserRoles[orgGuid] || createDefaultOrgRoles(orgGuid, newRoles.name);
     newChanges.push(...this.comparePermissions({
       userGuid: user.guid,
-      // userName: user.username,
       orgGuid,
       orgName: newRoles.name,
       add: false,
@@ -219,7 +218,6 @@ export class CfRolesService {
       const oldSpace = existingOrgRoles.spaces[spaceGuid] || createDefaultSpaceRoles(orgGuid, newRoles.name, spaceGuid, newSpace.name);
       newChanges.push(...this.comparePermissions({
         userGuid: user.guid,
-        // userName: user.username,
         orgGuid,
         orgName: newRoles.name,
         spaceGuid,

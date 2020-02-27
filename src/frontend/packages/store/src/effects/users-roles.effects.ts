@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import {
+  ManageUsersSetUsernamesHelper,
+} from 'frontend/packages/cloud-foundry/src/features/cloud-foundry/users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
@@ -160,7 +163,13 @@ export class UsersRolesEffects {
     const observables: Observable<boolean>[] = [];
     changes.forEach(change => {
       const updateConnectedUser = !cfSession.user.admin && change.userGuid === cfSession.user.guid;
-      const action = this.createAction(cfGuid, updateConnectedUser, change, setByUsername ? change.userName : null, usernameOrigin);
+      const action = this.createAction(
+        cfGuid,
+        updateConnectedUser,
+        change,
+        setByUsername ? ManageUsersSetUsernamesHelper.usernameFromGuid(change.userGuid) : null,
+        usernameOrigin
+      );
       this.store.dispatch(action);
       observables.push(this.createActionObs(action));
     });

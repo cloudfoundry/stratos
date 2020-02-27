@@ -1,12 +1,12 @@
 <div class="usernames">
   <div class="usernames__usernames">
-    Provide the usernames of the users to add roles to
+    Provide the user names of the users to add roles to
     <app-stacked-input-actions [stackedActionConfig]="stackedActionConfig" [stateIn$]="stateIn.asObservable()"
       (stateOut)="stateOut($event)">
     </app-stacked-input-actions>
   </div>
   <div class="usernames__origin">
-    Optional - The UAA origin that the user is registered with
+    The UAA origin that the user/s are registered with (Optional)
     <form class="stepper-form">
       <mat-form-field>
         <input matInput [(ngModel)]="origin" name="origin" placeholder="Origin">
@@ -14,5 +14,3 @@
     </form>
   </div>
 </div>
-// TODO: RC validate the users via fetch user? only applicable to admin. ensure confirm table has decent feedback<br>
-// TODO: RC 'Origin'

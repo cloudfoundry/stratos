@@ -30,8 +30,7 @@ export class ActionMonitorComponentState {
     id: string,
     schema: EntitySchema,
     monitorState: AppMonitorComponentTypes,
-    private updateKey: string,
-    // currentState = false // TODO: RC delete me
+    private updateKey: string
   ) {
     const entityMonitor = this.entityMonitorFactory.create(id, schema);
     this.currentState = this.getStateObservable(entityMonitor, monitorState);

@@ -2,11 +2,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IRoute } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe } from '../../../../../../../core/src/core/utils.service';
 import {
   ListPaginationMultiFilterChange,
@@ -16,13 +14,15 @@ import {
   TableRowStateManager,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { PaginationMonitor } from '../../../../../../../store/src/monitors/pagination-monitor';
-import { CFListDataSource } from '../../../../cf-list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { getRoute, isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CFListDataSource } from '../../../../cf-list-data-source';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
 
 export interface ListCfRoute extends IRoute {
@@ -86,7 +86,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
           };
 
           if (appGuid && route.entity.apps) {
-            const apps = route.entity.apps;
+            const apps = route.entity.apps.filter(app => !app);
             const foundApp = !!apps && (apps.findIndex(a => a.metadata.guid === appGuid) >= 0);
             entity.mappedAppsCount = foundApp ? Number.MAX_SAFE_INTEGER : (route.entity.apps || []).length;
             entity.mappedAppsCountLabel = foundApp ? `Already attached` : entity.mappedAppsCount.toString();

@@ -41,7 +41,6 @@ export interface StackedInputActionsUpdate { values: { [key: string]: string }; 
 })
 export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
-  // TODO: RC email naming
   @Input() stateIn$: Observable<StackedInputActionsState[]>;
   @Input() isEmailInput = true;
   @Input() stackedActionConfig: StackedInputActionConfig;
