@@ -110,7 +110,9 @@ export class UsersRolesComponent implements OnDestroy {
       return observableOf({ success: true, redirect: true });
     }
     this.applyStarted = true;
-    this.store.dispatch(new UsersRolesExecuteChanges(this.setUsernames));
+    this.store.dispatch(
+      new UsersRolesExecuteChanges(this.setUsernames, this.activeRouteCfOrgSpace.orgGuid, this.activeRouteCfOrgSpace.spaceGuid)
+    );
     return observableOf({ success: true, ignoreSuccess: true });
   }
 }

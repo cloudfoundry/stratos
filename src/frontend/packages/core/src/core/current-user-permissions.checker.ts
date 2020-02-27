@@ -196,13 +196,12 @@ export class CurrentUserPermissionsChecker {
     const permission = config.permission as CFFeatureFlagTypes;
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
-      // tap((a) => console.log('0:', a)),
       switchMap(guids => {
         const createFFObs = guid => {
           // For admins we don't have the ff list which is usually fetched right at the start,
           // so this can't be a pagination monitor on its own (which doesn't fetch if list is missing)
           const action = createCfFeatureFlagFetchAction(guid);
-          const b = getPaginationObservables<IFeatureFlag>(
+          return getPaginationObservables<IFeatureFlag>(
             {
               store: this.store,
               action,
@@ -215,29 +214,17 @@ export class CurrentUserPermissionsChecker {
             },
             true
           ).entities$.pipe(
-            // tap(a => console.log('a: ', a)),
             publishReplay(1),
             refCount()
           );
-          // b.subscribe(c => console.log('c: ', c));
-
-          return b;
         };
 
-        const allFFobs = combineLatest(guids.map(createFFObs));
-
-        // allFFobs.subscribe(d => console.log(d));
-
-        return allFFobs;
+        return combineLatest(guids.map(createFFObs));
       }),
-      // tap((a) => console.log('1:', a)),
       map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
-      // map(endpointFeatureFlags => false),
-      // tap((a) => console.log('2:', a)),
       // startWith(false), // Don't start with anything, this ensures first value out can be trusted. Should never get to the point where
       // nothing is returned
       distinctUntilChanged(),
-      // tap((a) => console.log('res: ', a)),
     );
   }
 

@@ -58,5 +58,5 @@ export class UsersRolesSetChanges implements Action {
 
 export class UsersRolesExecuteChanges implements Action {
   type = UsersRolesActions.ExecuteChanges;
-  constructor(public setByUsername = false) { }
+  constructor(public setByUsername = false, public resetOrgUsers?: string, public resetSpaceUsers?: string) { }
 }

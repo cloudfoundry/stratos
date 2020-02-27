@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { RemoveUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
@@ -47,10 +47,10 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     );
     const isOrgLevel$: Observable<boolean> = this.config$.pipe(map(config => config.isOrgLevel));
     this.chipsConfig$ = combineLatest(
-      this.rowSubject.asObservable().pipe(tap(a => console.log('rowSubject:', a))),
-      this.config$.pipe(switchMap(config => config.org$)).pipe(tap(a => console.log('config:', a))),
-      spaces$.pipe(tap(a => console.log('spaces:', a))),
-      isOrgLevel$.pipe(tap(a => console.log('isOrgLevel:', a))),
+      this.rowSubject.asObservable(),
+      this.config$.pipe(switchMap(config => config.org$)),
+      spaces$,
+      isOrgLevel$,
     ).pipe(
       switchMap(([user, org, spaces, isOrgLevel]: [APIResource<CfUser>, APIResource<IOrganization>, APIResource<ISpace>[], boolean]) => {
         const permissionList = this.createPermissions(user, isOrgLevel, spaces);

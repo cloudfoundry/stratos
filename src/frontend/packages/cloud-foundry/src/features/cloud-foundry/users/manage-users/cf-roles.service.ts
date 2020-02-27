@@ -11,6 +11,7 @@ import {
   refCount,
   startWith,
   switchMap,
+  tap,
 } from 'rxjs/operators';
 
 import {
@@ -99,11 +100,15 @@ export class CfRolesService {
     private userPerms: CurrentUserPermissionsService,
   ) {
     this.existingRoles$ = this.store.select(selectUsersRolesPicked).pipe(
+      tap(a => console.log('.1: ', a)),
       combineLatestOperators(this.store.select(selectUsersRolesCf)),
+      tap(a => console.log('.2: ', a)),
       filter(([users, cfGuid]) => !!cfGuid),
+      tap(a => console.log('.3: ', a)),
       switchMap(([users, cfGuid]) => {
         return this.populateRoles(cfGuid, users);
       }),
+      tap(a => console.log('.4: ', a)),
       distinctUntilChanged(),
       publishReplay(1),
       refCount()
@@ -176,7 +181,11 @@ export class CfRolesService {
    */
   createRolesDiff(orgGuid: string): Observable<CfRoleChange[]> {
     return this.existingRoles$.pipe(
-      combineLatestOperators(this.newRoles$, this.store.select(selectUsersRolesPicked)),
+      tap(a => console.log('1: ', a)),
+      combineLatestOperators(
+        this.newRoles$.pipe(tap(a => console.log('a: ', a))),
+        this.store.select(selectUsersRolesPicked).pipe(tap(a => console.log('b: ', a))),
+      ),
       first(),
       map(([existingRoles, newRoles, pickedUsers]) => {
         const changes = [];

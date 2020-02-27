@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import {
   ManageUsersSetUsernamesHelper,
 } from 'frontend/packages/cloud-foundry/src/features/cloud-foundry/users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest as observableCombineLatest, combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import {
@@ -25,6 +25,7 @@ import { ActionState } from '../reducers/api-request-reducer/types';
 import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
 import { SessionDataEndpoint } from '../types/auth.types';
+import { PaginatedAction } from '../types/pagination.types';
 import { ICFAction, UpdateCfAction } from '../types/request.types';
 
 
@@ -59,15 +60,10 @@ export class UsersRolesEffects {
 
   @Effect() executeUsersRolesChange$ = this.actions$.pipe(
     ofType<UsersRolesExecuteChanges>(UsersRolesActions.ExecuteChanges),
-    // tap(a => console.log('1: ')),
     withLatestFrom(
-      this.store.select(selectUsersRoles).pipe(tap(a => console.log('ur: ', a))),
-      this.store.select(selectSessionData()).pipe(tap(a => console.log('sd: ', a))),
+      this.store.select(selectUsersRoles),
+      this.store.select(selectSessionData()),
     ),
-    // map(() => {
-    //   return [];
-    // }),
-    // tap(a => console.log('2: ')),
     mergeMap(([action, usersRoles, sessionData]) => {
       // If the user is adding the org user role then that needs to execute and succeed first, otherwise the other changes will fail
       // Conversely if the org user role is being removed all other changes need to execute first
@@ -99,18 +95,39 @@ export class UsersRolesEffects {
       ).pipe(
         switchMap(() => {
           if (action.setByUsername) {
-            return this.cfUserService.createPaginationAction(
+            // Ensure that the cfUser entries are updated with the new roles by re-fetching the org and space user lists
+            // Normally this is done automatically in the userReducer on ADD_ROLE_SUCCESS/REMOVE_ROLE_SUCCESS, however when setting roles
+            // via username the cfUser guids aren't known
+            const actions = [];
+            const orgListAction = this.cfUserService.createPaginationAction(
               cfSession.user.admin,
               cfGuid,
-              orgUserChanges[0].orgGuid
+              action.resetOrgUsers,
             );
+            const spaceListAction = this.cfUserService.createPaginationAction(
+              cfSession.user.admin,
+              cfGuid,
+              action.resetOrgUsers,
+              action.resetSpaceUsers
+            );
+            if (cfSession.user.admin) {
+              return combineLatest([orgListAction]);
+            }
+            if (action.resetOrgUsers) {
+              actions.push(orgListAction);
+            }
+            if (action.resetSpaceUsers) {
+              actions.push(spaceListAction);
+            }
+            return combineLatest(actions);
           }
-          return null;
+          return of([]);
         }),
-        map(listAction => {
-          if (listAction) {
-            return new ResetPagination(listAction, listAction.paginationKey);
+        mergeMap((listActions: PaginatedAction[]) => {
+          if (listActions && listActions.length) {
+            return listActions.map(listAction => new ResetPagination(listAction, listAction.paginationKey));
           }
+          return [];
         }),
         catchError(() => {
           // Swallow the error so it doesn't print in the console

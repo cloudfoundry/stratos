@@ -106,9 +106,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
           cellConfig.monitorState,
           cellConfig.updateKey,
         );
-        // console.log(`${cellConfig.updateKey}: creating`);
         return monitorState.currentState.pipe(
-          // tap(a => console.log(`${cellConfig.updateKey}: action mon: `, a)),
           map(state => {
             return {
               busy: state.busy,
