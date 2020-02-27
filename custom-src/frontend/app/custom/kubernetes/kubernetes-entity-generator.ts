@@ -61,7 +61,7 @@ const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig } = {
   },
   [KubeEndpointAuthTypes.CONFIG]: {
     value: KubeEndpointAuthTypes.CONFIG,
-    name: 'CAASP (OIDC)',
+    name: 'Kube Config',
     form: {
       kubeconfig: ['', Validators.required],
     },
@@ -109,7 +109,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     iconFont: 'stratos-icons',
     logoUrl: '/core/assets/custom/kubernetes.svg',
     urlValidation: undefined,
-    authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CERT_AUTH]],
+    authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CERT_AUTH], kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG]],
     renderPriority: 4,
     subTypes: [{
       type: 'caasp',

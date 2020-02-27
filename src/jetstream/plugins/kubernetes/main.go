@@ -33,6 +33,12 @@ type KubeStatus struct {
 	Code       int         `json:"code"`
 }
 
+type kubeErrorStatus struct {
+	Type    string `json:"type"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
 type KubeAPIVersions struct {
 	Kind                       string        `json:"kind"`
 	Versions                   []string      `json:"versions"`
@@ -83,8 +89,18 @@ func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interface
 		return err
 	}
 
+	log.Error("=====================================")
+
+	log.Error(err)
+	log.Error(response.StatusCode)
+
 	if response.StatusCode >= 400 {
-		return fmt.Errorf("Unable to connect to endpoint: %s", response.Error.Error())
+
+		log.Info(response.Error)
+		if response.Error != nil {
+			return fmt.Errorf("Unable to connect to endpoint: %s", response.Error.Error())
+		}
+		return fmt.Errorf("Unable to connect to endpoint: %d => %s", response.StatusCode, response.Status)
 	}
 
 	return nil
@@ -199,6 +215,16 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 		}
 		if kubeStatus.Kind != "Status" {
 			return newCNSI, nil, fmt.Errorf("Failed to parse 403 output as kube kind status: %+v", kubeStatus)
+		}
+	} else if res.StatusCode == 401 {
+		log.Debug("Kube API Versions Failed (401)")
+		kubeStatus := kubeErrorStatus{}
+		err := json.Unmarshal(body, &kubeStatus)
+		if err != nil {
+			return newCNSI, nil, fmt.Errorf("Failed to parse 401 output as kube kind status: %+v", err)
+		}
+		if kubeStatus.Type != "error" || kubeStatus.Status != "401" {
+			return newCNSI, nil, fmt.Errorf("Failed to parse 401 output as kube kind status: %+v", kubeStatus)
 		}
 	} else {
 		return newCNSI, nil, fmt.Errorf("Dissallowed response code from `/api` call: %+v", res.StatusCode)
