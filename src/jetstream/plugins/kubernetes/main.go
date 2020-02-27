@@ -89,11 +89,6 @@ func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interface
 		return err
 	}
 
-	log.Error("=====================================")
-
-	log.Error(err)
-	log.Error(response.StatusCode)
-
 	if response.StatusCode >= 400 {
 
 		log.Info(response.Error)
