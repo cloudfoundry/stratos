@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 	"time"
 
@@ -171,7 +172,8 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method 
 
 	cnsiRequest.URL = new(url.URL)
 	*cnsiRequest.URL = *cnsiRec.APIEndpoint
-	cnsiRequest.URL.Path = uri.Path
+	// The APIEndpoint might have a path already - so join the request URI to it
+	cnsiRequest.URL.Path = path.Join(cnsiRequest.URL.Path, uri.Path)
 	cnsiRequest.URL.RawQuery = uri.RawQuery
 
 	return cnsiRequest, nil
