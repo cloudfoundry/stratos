@@ -90,8 +90,6 @@ func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interface
 	}
 
 	if response.StatusCode >= 400 {
-
-		log.Info(response.Error)
 		if response.Error != nil {
 			return fmt.Errorf("Unable to connect to endpoint: %s", response.Error.Error())
 		}
