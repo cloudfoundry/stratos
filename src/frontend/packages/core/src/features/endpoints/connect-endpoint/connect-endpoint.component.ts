@@ -123,8 +123,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       }
       this.valid.next(valid);
     }));
-    
-    // Set initial valid status    
+
+    // Set initial valid status
     this.endpointForm.updateValueAndValidity();
   }
 
