@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"strings"
+
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
@@ -50,6 +52,28 @@ func (c *KubeTokenAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy)
 	// Register auth type with Jetstream
 	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
 		Handler:  c.portalProxy.DoOidcFlowRequest,
-		UserInfo: nil,
+		UserInfo: c.GetUserFromToken,
 	})
+}
+
+func (c *KubeTokenAuth) GetUserFromToken(cnsiGUID string, tokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
+	log.Debug("GetUserFromToken (KubeTokenAuth)")
+
+	// See if we can get token info - if we can, use it
+	_, err := c.portalProxy.GetUserTokenInfo(tokenRecord.AuthToken)
+	if err == nil {
+		return c.portalProxy.GetCNSIUserFromOAuthToken(cnsiGUID, tokenRecord)
+	}
+
+	parts := strings.Split(tokenRecord.AuthToken, ":")
+	if len(parts) != 2 {
+		log.Errorf("Could not get user information from token: %s", tokenRecord.TokenGUID)
+		return nil, false
+	}
+
+	return &interfaces.ConnectedUser{
+		GUID:   parts[0],
+		Name:   parts[0],
+		Scopes: make([]string, 0),
+	}, true
 }
