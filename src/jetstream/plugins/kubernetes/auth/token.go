@@ -59,9 +59,16 @@ func (c *KubeTokenAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy)
 func (c *KubeTokenAuth) GetUserFromToken(cnsiGUID string, tokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
 	log.Debug("GetUserFromToken (KubeTokenAuth)")
 
+	// See if we can get token info - if we can, use it
+	_, err := c.portalProxy.GetUserTokenInfo(tokenRecord.AuthToken)
+	if err == nil {
+		return c.portalProxy.GetCNSIUserFromOAuthToken(cnsiGUID, tokenRecord)
+	}
+
 	parts := strings.Split(tokenRecord.AuthToken, ":")
 	if len(parts) != 2 {
-		return c.portalProxy.GetCNSIUserFromOAuthToken(cnsiGUID, tokenRecord)
+		log.Errorf("Could not get user information from token: %s", tokenRecord.TokenGUID)
+		return nil, false
 	}
 
 	return &interfaces.ConnectedUser{
