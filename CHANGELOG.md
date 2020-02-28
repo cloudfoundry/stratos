@@ -25,7 +25,8 @@ Release details:
 - Ensure active dialog times out correctly [\#4026](https://github.com/cloudfoundry/stratos/pull/4026)
 - Helm: Postflight job should not be a container [\#3506](https://github.com/cloudfoundry/stratos/issues/3506)
 - Card for favourited helm endpoint shows `disconnected` [\#223](https://github.com/SUSE/stratos/issues/223)
-- Hide required markers on login page [/#329](https://github.com/SUSE/stratos/pull/329)
+- Hide required markers on login page [\#329](https://github.com/SUSE/stratos/pull/329)
+- Fix registration and connection issues when some Kubernetes favlours [\#344](https://github.com/SUSE/stratos/pull/344)
 
 **Improvements:**
 
