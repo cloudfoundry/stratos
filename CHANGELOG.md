@@ -1,5 +1,63 @@
 # Change Log
 
+## 3.0.0
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/2.7.0...3.0.0)
+
+This release sees the Helm functionality move out of technology preview and get an upgrade to Helm 3. Helm releases have been brought out to the
+top-level under a new 'Workloads' side navigation item.
+
+The Helm Chart has also been updated - the upgrade volume has been removed, custom annotations can be added to pods and other resources
+and an external database can be used in place of the integrated MariaDB.
+
+Release details:
+
+**Fixes:**
+
+- Error setting user favourites [\#4086](https://github.com/cloudfoundry/stratos/issues/4086)
+- Fix local admin profile [\#4122](https://github.com/cloudfoundry/stratos/pull/4122)
+- Multiple User Provided Service Instance Create/Update Fixes [\#4117](https://github.com/cloudfoundry/stratos/pull/4117)
+- Fix user profile when deployed with Ingress (Helm) [\#4110](https://github.com/cloudfoundry/stratos/pull/4110)
+- Fix panic on backend error logging [\#4098](https://github.com/cloudfoundry/stratos/pull/4098)
+- Fix failing VCAP_SERVICE credentials check [\#4084](https://github.com/cloudfoundry/stratos/pull/4084)
+- Edit application: fixed validation for mem and disk quota [\#4070](https://github.com/cloudfoundry/stratos/pull/4070)
+- Fix local auth session timeout [\#4028](https://github.com/cloudfoundry/stratos/pull/4028)
+- Ensure active dialog times out correctly [\#4026](https://github.com/cloudfoundry/stratos/pull/4026)
+- Helm: Postflight job should not be a container [\#3506](https://github.com/cloudfoundry/stratos/issues/3506)
+- Card for favourited helm endpoint shows `disconnected` [\#223](https://github.com/SUSE/stratos/issues/223)
+- Hide required markers on login page [\#329](https://github.com/SUSE/stratos/pull/329)
+- Fix registration and connection issues when some Kubernetes favlours [\#344](https://github.com/SUSE/stratos/pull/344)
+
+**Improvements:**
+
+- Deploy application via docker image [\#4025](https://github.com/cloudfoundry/stratos/issues/4025)
+- Favourite Card: Add icon for endpoints and improve UX [\#4095](https://github.com/cloudfoundry/stratos/pull/4095)
+- Add cf events page to cf, org and space levels [\#4066](https://github.com/cloudfoundry/stratos/pull/4066)
+- Add table view to marketplace service table [\#4064](https://github.com/cloudfoundry/stratos/pull/4064)
+- Add actions to app service table, add delete org button to org summary [\#4063](https://github.com/cloudfoundry/stratos/pull/4063)
+- Improvements to error/notification process [\#4053](https://github.com/cloudfoundry/stratos/pull/4053)
+- Add an initial loading indicator with customization support [\#4045](https://github.com/cloudfoundry/stratos/pull/4045)
+- Add support for Stratos buildpack verbose logging [\#4039](https://github.com/cloudfoundry/stratos/pull/4039)
+- Add support for setup UI for local admin account [\#4031](https://github.com/cloudfoundry/stratos/pull/4031)
+- Add a dark mode [\#4017](https://github.com/cloudfoundry/stratos/pull/4017)
+- Allow notifications to be marked as 'read' [\#4011](https://github.com/cloudfoundry/stratos/pull/4011)
+- Add endpoint error page [\#3991](https://github.com/cloudfoundry/stratos/pull/3991)
+- Helm Chart: Numerous improvements [\#4000](https://github.com/cloudfoundry/stratos/pull/4000)
+- Helm Chart: Add support for using an external database [\#3499](https://github.com/cloudfoundry/stratos/issues/3499)
+- Helm Chart: Randomize passwords [\#1416](https://github.com/cloudfoundry/stratos/issues/1416)
+- Helm Chart: Allow custom annotations on Pods [\#4109](https://github.com/cloudfoundry/stratos/issues/4109)
+- Helm Chart: Add support for default UAA zone [\#4101](https://github.com/cloudfoundry/stratos/issues/4101)
+- Base images bump [\#3990](https://github.com/cloudfoundry/stratos/pull/3990)
+- Update to Angular 8 [\#3950](https://github.com/cloudfoundry/stratos/pull/3950)
+- Reflect app title in setup screens [\#4090](https://github.com/cloudfoundry/stratos/pull/4090)
+- Add a confirmation dialogue when deleting a helm install [\#208](https://github.com/SUSE/stratos/issues/208)
+- Add support for TLS with MySQL [\#325](https://github.com/SUSE/stratos/pull/325)
+- Update SLE base images [\#316](https://github.com/SUSE/stratos/pull/316)
+- Add loading indicator for Workload resource stats [\#313](https://github.com/SUSE/stratos/pull/313)
+- Optionally create kube namespace during helm install [\#273](https://github.com/SUSE/stratos/pull/273)
+- Switch to helm 3 [\#233](https://github.com/SUSE/stratos/pull/233)
+- Add Workloads view [\#263](https://github.com/SUSE/stratos/pull/263)
+
 ## 2.7.0
 
 [Full Changelog](https://github.com/SUSE/stratos/compare/2.6.1...2.7.0)
