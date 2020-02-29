@@ -51,14 +51,13 @@
             </button>
             <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button page-header__usermenu"
               mat-icon-button [matMenuTriggerFor]="menu">
-              <div class="page-header__menu-button-icon"> {{ userNameFirstLetter$ | async }} </div>
+              <app-user-avatar [allowGravatar]="allowGravatar$ | async" fallback="initials" [user]="user$ | async"></app-user-avatar>
             </button>
             <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
               <div class="page-header__menu-inner">
                 <div class="page-header__username">
-                  <div class="page-header__username-icon"> {{ userNameFirstLetter$ | async }} </div>
+                  <app-user-avatar [allowGravatar]="allowGravatar$ | async" fallback="initials" [user]="user$ | async"></app-user-avatar>
                   <div class="page-header__username-text">
-                    <div class="page-header__username-subtext">user</div>
                     <div>{{ username$ | async }}</div>
                   </div>
                 </div>

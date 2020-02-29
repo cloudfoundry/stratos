@@ -45,6 +45,7 @@
 @import './components/mat-snack-bar.theme';
 @import './components/ngx-charts-gauge.theme';
 @import '../src/shared/components/sidepanel-preview/sidepanel-preview.component.theme';
+@import '../src/shared/components/user-avatar/user-avatar.component.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
 @import './mat-themes';
@@ -157,6 +158,7 @@ $side-nav-light-active: #484848;
   @include error-page-theme($theme, $app-theme);
   @include code-block-theme($theme, $app-theme);
   @include copy-to-clipboard-theme($theme, $app-theme);
+  @include app-user-avatar-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

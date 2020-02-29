@@ -1,0 +1,10 @@
+@mixin app-user-avatar-theme($theme, $app-theme) {
+  $primary: map-get($theme, primary);
+
+  .user-avatar {
+    &__initials {
+      background-color: mat-contrast($primary, 500);
+      color: mat-color($primary);
+    }
+  }
+}

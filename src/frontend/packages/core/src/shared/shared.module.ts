@@ -227,7 +227,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
-    TableCellSidePanelComponent
+    TableCellSidePanelComponent,
   ],
   exports: [
     ApplicationStateIconPipe,

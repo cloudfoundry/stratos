@@ -8,6 +8,17 @@
   $warning: map-get($status-colors, warning);
   $info: lighten($primmary-color, 20%);
   $subdued: map-get($app-theme, subdued-color);
+  $background: map-get($theme, background);
+  $menu-background-color: mat-color($background, card);
+  $is-dark: map-get($theme, is-dark);
+  $username-background: $menu-background-color;
+  @if $is-dark == true {
+    $username-background: lighten($menu-background-color, 5%);
+  } @else {
+    $username-background: darken($menu-background-color, 5%);
+  }
+  $username-color: mat-color($foreground, text);
+
   .page-header {
     &__warning-count {
       background-color: mat-color($primary);
@@ -19,9 +30,6 @@
     &__menu-separator {
       background-color: mat-color($foreground, divider);
     }
-    &__menu-inner {
-      color: mat-contrast($primary, 500);
-    }
     &__history {
       color: $subdued;
     }
@@ -31,16 +39,12 @@
     &__divider {
       color: mat-contrast($primary, 500);
     }
-    &__menu-button-icon {
-      background-color: mat-contrast($primary, 500);
-      color: mat-color($primary);
-    }
-    &__username-icon {
-      background-color: mat-color($primary);
-      color: mat-contrast($primary, 500);
-    }
     &__menu-icon {
       background-color: mat-contrast($primary, 500);
+    }
+    &__username {
+      background-color: $username-background;
+      color: $username-color;
     }
   }
 }

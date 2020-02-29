@@ -2,6 +2,7 @@ import { PortalModule } from '@angular/cdk/portal';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { MomentModule } from 'ngx-moment';
 
 import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
@@ -31,7 +32,8 @@ import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { APP_TITLE, appTitleFactory } from './core.types';
-import { Title } from '@angular/platform-browser';
+import { UserProfileService } from './user-profile.service';
+import { UserAvatarComponent } from './../shared/components/user-avatar/user-avatar.component';
 
 @NgModule({
   imports: [
@@ -58,10 +60,11 @@ import { Title } from '@angular/platform-browser';
     PortalModule,
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
+    UserAvatarComponent,
     DisableRouterLinkDirective,
     StatefulIconComponent,
     NoContentMessageComponent,
-    DisableRouterLinkDirective
+    DisableRouterLinkDirective,
   ],
   providers: [
     AuthGuardService,
@@ -74,6 +77,7 @@ import { Title } from '@angular/platform-browser';
     EndpointsService,
     UserService,
     EntityServiceFactory,
+    UserProfileService,
     CurrentUserPermissionsService,
     {
       provide: APP_TITLE,
@@ -96,7 +100,8 @@ import { Title } from '@angular/platform-browser';
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
     DisableRouterLinkDirective,
-    NoContentMessageComponent
+    NoContentMessageComponent,
+    UserAvatarComponent,
   ],
   entryComponents: [
     LogOutDialogComponent

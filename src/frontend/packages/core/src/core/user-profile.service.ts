@@ -7,25 +7,24 @@ import {
   FetchUserProfileAction,
   UpdateUserPasswordAction,
   UpdateUserProfileAction,
-} from '../../../../store/src/actions/user-profile.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../../../store/src/effects/user-profile.effects';
-import { userProfileSchemaKey } from '../../../../store/src/helpers/entity-factory';
+} from '../../../store/src/actions/user-profile.actions';
+import { AppState } from '../../../store/src/app-state';
+import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../../store/src/effects/user-profile.effects';
 import {
   ActionState,
   getDefaultActionState,
   rootUpdatingKey,
-} from '../../../../store/src/reducers/api-request-reducer/types';
-import { AuthState } from '../../../../store/src/reducers/auth.reducer';
-import { selectRequestInfo, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+} from '../../../store/src/reducers/api-request-reducer/types';
+import { AuthState } from '../../../store/src/reducers/auth.reducer';
+import { selectRequestInfo, selectUpdateInfo } from '../../../store/src/selectors/api.selectors';
 import {
   UserProfileInfo,
   UserProfileInfoEmail,
   UserProfileInfoUpdates,
-} from '../../../../store/src/types/user-profile.types';
-import { userProfileEntitySchema } from '../../base-entity-schemas';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityMonitor } from '../../../../store/src/monitors/entity-monitor';
+} from '../../../store/src/types/user-profile.types';
+import { userProfileEntitySchema } from '../base-entity-schemas';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityMonitor } from '../../../store/src/monitors/entity-monitor';
 
 
 @Injectable()
@@ -50,7 +49,8 @@ export class UserProfileService {
     );
     this.isFetching$ = this.entityMonitor.isFetchingEntity$;
 
-    this.isError$ = this.store.select(selectRequestInfo(userProfileSchemaKey, UserProfileEffect.guid)).pipe(
+    const stratosUserConfig = entityCatalog.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
+    this.isError$ = this.store.select(selectRequestInfo(stratosUserConfig.entityKey, UserProfileEffect.guid)).pipe(
       filter(requestInfo => !!requestInfo && !requestInfo.fetching),
       map(requestInfo => requestInfo.error)
     );
