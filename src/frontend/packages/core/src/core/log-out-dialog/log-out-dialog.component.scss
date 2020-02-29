@@ -25,15 +25,15 @@ mat-dialog-actions {
     display: flex;
     flex-direction: row;
 
-    &> mat-icon {
+    > mat-icon {
       flex: 0;
       font-size: 48px;
-      margin-right: 20px;
       height: 48px;
-      opacity: 0.7;
+      margin-right: 20px;
+      opacity: .7;
       width: 48px;
     }
-    &> div {
+    > div {
       flex: 1;
       font-size: 18px;
       font-weight: bold;
