@@ -24,7 +24,7 @@ export interface DashboardState {
   sideNavPinned: boolean;
   themeKey: string;
   headerEventMinimized: boolean;
-  gravatarEabled: boolean;
+  gravatarEnabled: boolean;
 }
 
 export const defaultDashboardState: DashboardState = {
@@ -36,7 +36,7 @@ export const defaultDashboardState: DashboardState = {
   sideNavPinned: true,
   themeKey: null,
   headerEventMinimized: false,
-  gravatarEabled: false,
+  gravatarEnabled: false,
 };
 
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action): DashboardState {
@@ -76,7 +76,7 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       const gravatarAction = action as SetGravatarEnabledAction;
       return {
         ...state,
-        gravatarEabled: gravatarAction.enableGravatar
+        gravatarEnabled: gravatarAction.enableGravatar
       };
     case HYDRATE_DASHBOARD_STATE:
       const hydrateDashboardStateAction = action as HydrateDashboardStateAction;

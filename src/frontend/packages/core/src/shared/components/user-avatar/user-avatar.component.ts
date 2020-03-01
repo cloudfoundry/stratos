@@ -16,15 +16,13 @@ export class UserAvatarComponent {
   private userInfo = null;
 
   @Input() size = 'small';
+  @Input() color = 'normal';
 
   @Input()
   set allowGravatar(allowed: boolean) {
     this.canUseGravatar = allowed;
     this.update();
   }
-
-  @Input() fallback = 'initials';
-  @Input() email: string;
 
   @Input('user')
   set user(user: UserProfileInfo) {

@@ -28,11 +28,11 @@ export class ProfileInfoComponent implements OnInit {
   );
 
   public gravatarEnabled$ = this.store.select(selectDashboardState).pipe(
-    map(dashboardState => dashboardState.gravatarEabled ? 'true' : 'false')
+    map(dashboardState => dashboardState.gravatarEnabled ? 'true' : 'false')
   );
 
   public allowGravatar$ =  this.store.select(selectDashboardState).pipe(
-    map(dashboardState => dashboardState.gravatarEabled)
+    map(dashboardState => dashboardState.gravatarEnabled)
   );
 
   isError$: Observable<boolean>;
