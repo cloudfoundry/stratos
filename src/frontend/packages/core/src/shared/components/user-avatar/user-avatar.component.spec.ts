@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { UserAvatarComponent } from './user-avatar.component';
+import { MDAppModule } from '../../../core/md.module';
 
 describe('UserAvatarComponent', () => {
   let component: UserAvatarComponent;
@@ -8,7 +9,10 @@ describe('UserAvatarComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ UserAvatarComponent ]
+      declarations: [ UserAvatarComponent ],
+      imports: [
+        MDAppModule,
+      ]
     })
     .compileComponents();
   }));
