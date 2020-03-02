@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import {
@@ -41,6 +41,11 @@ export class UserProfileService {
   private stratosUserConfig = entityCatalog.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
 
   constructor(private store: Store<AppState>) {
+    if (!this.stratosUserConfig) {
+      console.error('Can not get user profile entity');
+      this.userProfile$ = of({} as UserProfileInfo);
+      return;
+    }
 
     this.entityMonitor = this.stratosUserConfig.getEntityMonitor(this.store, UserProfileEffect.guid);
 
@@ -49,8 +54,7 @@ export class UserProfileService {
     );
     this.isFetching$ = this.entityMonitor.isFetchingEntity$;
 
-    const stratosUserConfig = entityCatalog.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
-    this.isError$ = this.store.select(selectRequestInfo(stratosUserConfig.entityKey, UserProfileEffect.guid)).pipe(
+    this.isError$ = this.store.select(selectRequestInfo(this.stratosUserConfig.entityKey, UserProfileEffect.guid)).pipe(
       filter(requestInfo => !!requestInfo && !requestInfo.fetching),
       map(requestInfo => requestInfo.error)
     );
