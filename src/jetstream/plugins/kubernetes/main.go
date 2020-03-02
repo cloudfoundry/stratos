@@ -198,26 +198,10 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 		if apiVersions.Kind != "APIVersions" {
 			return newCNSI, nil, fmt.Errorf("Failed to parse output as kube kind APIVersions: %+v", apiVersions)
 		}
-	} else if res.StatusCode == 403 {
-		// Expect an auth failed response - KubeStatus
-		log.Debug("Kube API Versions Failed (403)")
-		kubeStatus := KubeStatus{}
-		err := json.Unmarshal(body, &kubeStatus)
+	} else if res.StatusCode == 403 || res.StatusCode == 401 {
+		err := parseErrorResponse(body)
 		if err != nil {
-			return newCNSI, nil, fmt.Errorf("Failed to parse 403 output as kube kind status: %+v", err)
-		}
-		if kubeStatus.Kind != "Status" {
-			return newCNSI, nil, fmt.Errorf("Failed to parse 403 output as kube kind status: %+v", kubeStatus)
-		}
-	} else if res.StatusCode == 401 {
-		log.Debug("Kube API Versions Failed (401)")
-		kubeStatus := kubeErrorStatus{}
-		err := json.Unmarshal(body, &kubeStatus)
-		if err != nil {
-			return newCNSI, nil, fmt.Errorf("Failed to parse 401 output as kube kind status: %+v", err)
-		}
-		if kubeStatus.Type != "error" || kubeStatus.Status != "401" {
-			return newCNSI, nil, fmt.Errorf("Failed to parse 401 output as kube kind status: %+v", kubeStatus)
+			return newCNSI, nil, fmt.Errorf("Failed to parse output as kube kind status: %+v", err)
 		}
 	} else {
 		return newCNSI, nil, fmt.Errorf("Dissallowed response code from `/api` call: %+v", res.StatusCode)
@@ -228,6 +212,32 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 	newCNSI.AuthorizationEndpoint = apiEndpoint
 
 	return newCNSI, v2InfoResponse, nil
+}
+
+func parseErrorResponse(body []byte) error {
+	kubeStatus := KubeStatus{}
+	err := json.Unmarshal(body, &kubeStatus)
+	if err == nil {
+		// Expect a json message with a status
+		if kubeStatus.Kind == "Status" {
+			return nil
+		}
+	}
+
+	// Try the other format
+	errorStatus := kubeErrorStatus{}
+	err = json.Unmarshal(body, &errorStatus)
+	if err == nil {
+		// Expect the type to be error
+		if errorStatus.Type == "error" {
+			return nil
+		}
+	}
+
+	// Not one of the types we recognise
+
+	log.Debug(string(body))
+	return errors.New("Could not understand response from Kubernetes endpoint")
 }
 
 func (c *KubernetesSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
