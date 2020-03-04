@@ -14,17 +14,19 @@ import {
 import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { MetricsChartTypes, MetricsLineChartConfig } from './metrics-chart.types';
+import { MetricsChartTypes, MetricsLineChartConfig, YAxisTickFormattingFunc } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
 
+const MAX_SERIES_IN_TOOLTIP = 16;
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
   getSeriesName: (T) => string;
-  mapSeriesItemName?: (value) => string | Date;
-  mapSeriesItemValue?: (value) => any;
+  mapSeriesItemName?: (value: any) => string | Date;
+  mapSeriesItemValue?: (value: any) => any;
   filterSeries?: MetricsFilterSeries;
   sort?: (a: ChartSeries<T>, b: ChartSeries<T>) => number;
+  tooltipValueFormatter?: YAxisTickFormattingFunc;
 }
 
 @Component({
@@ -54,7 +56,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   private timeSelectorSub: Subscription;
 
-  public results$;
+  public results$: Observable<IMetrics<any> | ChartSeries<any>[]>;
 
   public metricsMonitor: EntityMonitor<IMetrics>;
 
@@ -148,7 +150,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   ngAfterContentInit() {
     if (this.timeRangeSelector) {
       this.timeRangeSelector.baseAction = this.metricsConfig.metricsAction;
-      this.timeSelectorSub = this.timeRangeSelector.metricsAction.subscribe((action) => {
+      this.timeSelectorSub = this.timeRangeSelector.metricsAction.subscribe((action: MetricsAction) => {
         this.commitAction(action);
       });
     }
@@ -180,5 +182,23 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   private commitAction(action: MetricsAction) {
     this.committedAction = action;
     this.store.dispatch(action);
+  }
+
+  public getTooltipName(model: { name: { toLocaleString: () => any; }; }) {
+    return model.name.toLocaleString();
+  }
+
+  public getTooltipValue(model: { value: string; }) {
+    return this.metricsConfig.tooltipValueFormatter ? this.metricsConfig.tooltipValueFormatter(model.value) : model.value;
+  }
+
+  public getSeriesTooltipModel(model) {
+    if (model.length <= MAX_SERIES_IN_TOOLTIP) {
+      return model;
+    }
+
+    const truncated = model.slice(0, MAX_SERIES_IN_TOOLTIP);
+    truncated.push({truncated: true});
+    return truncated;
   }
 }

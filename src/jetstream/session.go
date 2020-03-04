@@ -122,7 +122,11 @@ func (p *portalProxy) writeSessionHook(c echo.Context) func() {
 		sessionIntf := c.Get(jetStreamSessionContextKey)
 		if sessionModifed != nil && sessionIntf != nil {
 			if session, ok := sessionIntf.(*sessions.Session); ok {
-				p.SessionStore.Save(c.Request(), c.Response().Writer, session)
+				err := p.SessionStore.Save(c.Request(), c.Response().Writer, session)
+				if err != nil {
+					log.Error("Failed to save session")
+					log.Error(err)
+				}
 			}
 		}
 	}

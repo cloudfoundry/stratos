@@ -34,8 +34,8 @@
     </mat-drawer-content>
   </mat-drawer-container>
   <mat-drawer class="dashboard__side-help-outer" #sideHelp
-    [ngClass]="{'dashboard__side_preview': (sidePanelService.previewMode$ | async)}"
-    [autoFocus]="false" mode="over" position="end" [opened]="(sidePanelService.opened$ | async) > 0" (closedStart)="sideHelpClosed()">
+    [ngClass]="{'dashboard__side_preview': (sidePanelService.previewMode$ | async)}" [autoFocus]="false" mode="over"
+    position="end" [opened]="(sidePanelService.opened$ | async) > 0" (closedStart)="sideHelpClosed()">
     <div class="dashboard__side-help">
       <template #previewPanelContainer></template>
     </div>

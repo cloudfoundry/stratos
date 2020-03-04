@@ -1,15 +1,15 @@
 .entity-summary {
   margin: 10px 0;
+  &__img,
   &__logo {
     flex: 0 0 64px;
     max-height: 64px;
   }
-  &__logo-large {
-    max-height: 160px;
+  &__img {
+    align-self: center;
   }
-  &__inline-logo {
-    max-height: 160px;
-    padding-right: 20px;
+  &__logo {
+    font-size: 54px;
   }
   &__sub-header {
     font-size: 16px;
@@ -38,7 +38,6 @@
     opacity: .4;
   }
   &__header-section {
-    align-items: center;
     display: flex;
     margin: 10px;
   }

@@ -14,6 +14,16 @@ export interface JetStreamErrorResponse<T = any> {
   errorResponse: T;
 }
 
+export function isJetstreamError(err: any): JetStreamErrorResponse {
+  return !!(
+    err &&
+    err.error &&
+    err.error.status &&
+    err.error.statusCode &&
+    'errorResponse' in err
+  ) ? err as JetStreamErrorResponse : null;
+}
+
 // TODO It would be nice if the BE could return a unique para for us to check for. #3827
 // There is always a chance that this will return a false positive (more so with extensions).
 export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]): JetStreamErrorResponse {
@@ -21,13 +31,7 @@ export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]): Jet
     return null;
   }
   return pages.find(page => {
-    return !!(
-      page &&
-      page.error &&
-      page.error.status &&
-      page.error.statusCode &&
-      'errorResponse' in page
-    );
+    return isJetstreamError(page);
   }) as JetStreamErrorResponse;
 }
 

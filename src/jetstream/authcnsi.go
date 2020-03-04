@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,15 +8,13 @@ import (
 	"net/url"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/labstack/echo"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
-
 )
-
 
 // CFAdminIdentifier - The scope that Cloud Foundry uses to convey administrative level perms
 const CFAdminIdentifier = "cloud_controller.admin"
