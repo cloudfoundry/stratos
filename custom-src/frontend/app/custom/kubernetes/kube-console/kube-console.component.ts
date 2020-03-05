@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { NEVER, Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
 import { catchError, tap, switchMap } from 'rxjs/operators';
