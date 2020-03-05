@@ -2,10 +2,9 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { NEVER, Observable, Subject, Subscription } from 'rxjs';
-import websocketConnect from 'rxjs-websockets';
-import { catchError, first, map } from 'rxjs/operators';
+import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
+import { catchError, tap, switchMap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
 import { IApp } from '../../../core/cf-api.types';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { SshViewerComponent } from '../../../shared/components/ssh-viewer/ssh-viewer.component';
@@ -38,7 +37,7 @@ export class KubeConsoleComponent implements OnInit {
 
   public messages: Observable<string>;
 
-  public connectionStatus: Observable<number>;
+  public connectionStatus = new Subject<number>();
 
   public sshInput: Subject<string>;
 
@@ -56,7 +55,7 @@ export class KubeConsoleComponent implements OnInit {
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
-  @ViewChild('sshViewer') sshViewer: SshViewerComponent;
+  @ViewChild('sshViewer', { static: false }) sshViewer: SshViewerComponent;
 
   private getBreadcrumbs(
     application: IApp,
@@ -75,6 +74,7 @@ export class KubeConsoleComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.connectionStatus.next(0);
     const guid = this.kubeEndpointService.baseKube.guid;
     this.kubeSummaryLink = (
       `/kubernetes/${guid}/summary`
@@ -82,7 +82,8 @@ export class KubeConsoleComponent implements OnInit {
 
     if (!guid) {
       this.messages = NEVER;
-      this.connectionStatus = NEVER;
+      this.connectionStatus.next(0);
+      this.errorMessage = 'No Endpoint ID available';
     } else {
       const host = window.location.host;
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
@@ -91,19 +92,18 @@ export class KubeConsoleComponent implements OnInit {
       );
       this.sshInput = new Subject<string>();
       const connection = websocketConnect(
-        streamUrl,
-        this.sshInput
+        streamUrl
       );
 
-      this.messages = connection.messages.pipe(
-        catchError(e => {
-          if (e.type === 'error') {
+      this.messages = connection.pipe(
+        tap(() => this.connectionStatus.next(1)),
+        switchMap(getResponse => getResponse(this.sshInput)),
+        catchError((e: Error) => {
+          if (e.message !== normalClosureMessage) {
             this.errorMessage = 'Error connecting to web socket';
           }
           return [];
         }));
-
-      this.connectionStatus = connection.connectionStatus;
 
       // this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
       //   map(app => this.getBreadcrumbs(app.entity.entity)),
