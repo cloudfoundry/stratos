@@ -1,3 +1,5 @@
+import { KubernetesPodExpandedStatus } from '../services/kubernetes-expanded-state';
+
 export interface KubernetesInfo {
   nodes: {};
   pods: {};
@@ -10,9 +12,7 @@ export const KubernetesDefaultState = {
 };
 
 export interface BasicKubeAPIResource {
-  metadata: {
-    uid: string
-  };
+  metadata: Metadata;
   status: any;
   spec: any;
 }
@@ -43,6 +43,7 @@ export interface DeploymentSpec {
   revisionHistoryLimit: number;
   progressDeadlineSeconds: number;
   type?: string;
+  clusterIP?: string;
 }
 
 export interface KubernetesDeployment extends BasicKubeAPIResource {
@@ -98,8 +99,8 @@ export interface KubernetesApp {
 export interface NodeStatus {
   capacity?: Capacity;
   allocatable?: Allocatable;
-  conditions: Condition[];
-  addresses: Address[];
+  conditions: KubernetesCondition[];
+  addresses: KubernetesAddress[];
   daemonEndpoints?: DaemonEndpoints;
   nodeInfo?: NodeInfo;
   images: Image[];
@@ -133,8 +134,18 @@ export enum ConditionType {
   OutOfDisk = 'OutOfDisk',
   MemoryPressure = 'MemoryPressure',
   DiskPressure = 'DiskPressure',
-  Ready = 'Ready'
+  Ready = 'Ready',
+  PIDPressure = 'PIDPressure',
+  NetworkUnavailable = 'NetworkUnavailable'
 }
+export const ConditionTypeLabels = {
+  [ConditionType.Ready]: 'Ready',
+  [ConditionType.OutOfDisk]: 'Out of Disk',
+  [ConditionType.MemoryPressure]: 'Memory Pressure',
+  [ConditionType.DiskPressure]: 'Disk Pressure',
+  [ConditionType.PIDPressure]: 'PID Pressure',
+  [ConditionType.NetworkUnavailable]: 'Network Unavailable'
+};
 
 export enum ConditionStatus {
   False = 'False',
@@ -142,7 +153,7 @@ export enum ConditionStatus {
   Unknown = 'Unknown'
 }
 
-export interface Condition {
+export interface KubernetesCondition {
   type: ConditionType;
   status: ConditionStatus;
   lastHeartbeatTime: Date;
@@ -151,10 +162,13 @@ export interface Condition {
   message: string;
 }
 
-export interface Address {
+export interface KubernetesAddress {
   type: string;
   address: string;
 }
+
+export const KubernetesAddressInternal = 'InternalIP';
+export const KubernetesAddressExternal = 'ExternalIP';
 
 export interface KubeletEndpoint {
   Port: number;
@@ -187,11 +201,15 @@ export interface KubernetesPod extends BasicKubeAPIResource {
   metadata: Metadata;
   status: PodStatus;
   spec: PodSpec;
+  deletionTimestamp?: any;
+  expandedStatus: KubernetesPodExpandedStatus;
 }
 
 export enum KubernetesStatus {
   ACTIVE = 'Active',
   RUNNING = 'Running',
+  FAILED = 'Failed',
+  PENDING = 'Pending'
 }
 export interface KubernetesNamespace extends BasicKubeAPIResource {
   metadata: Metadata;
@@ -207,17 +225,21 @@ export interface BaseStatus {
 
 export interface PodStatus {
   phase: KubernetesStatus;
-  conditions?: Condition[];
+  conditions?: KubernetesCondition[];
   message?: string;
   reason?: string;
   hostIP?: string;
   podIP?: string;
+  podIPs?: {
+    ip: string
+  }[];
   startTime?: Date;
   containerStatuses?: ContainerStatus[];
   qosClass?: string;
   initContainerStatuses?: ContainerStatus[];
+  nominatedNodeName: string;
 }
-export interface Condition {
+export interface KubernetesCondition {
   type: ConditionType;
   status: ConditionStatus;
   lastProbeTime?: any;
@@ -238,6 +260,9 @@ export interface ContainerStatus {
 export interface State {
   [key: string]: {
     startedAt: Date;
+    reason: string;
+    signal: number;
+    exitCode: number
   };
 }
 
@@ -256,8 +281,10 @@ export interface PodSpec {
   tolerations?: Toleration[];
   hostNetwork?: boolean;
   initContainers: InitContainer[];
-  nodeSelector?: NodeSelector;
+  // nodeSelector?: NodeSelector;
+  readinessGates: any[];
 }
+
 export interface InitContainer {
   name: string;
   image: string;
@@ -437,9 +464,9 @@ export interface Volume {
 }
 
 
-export interface ConfigMap {
+export interface ConfigMap<T = Item> {
   name: string;
-  items: Item[];
+  items: T[];
   defaultMode: number;
 }
 

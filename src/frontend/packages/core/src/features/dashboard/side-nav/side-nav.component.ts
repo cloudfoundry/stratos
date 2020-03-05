@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, InjectionToken, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, InjectionToken, Input, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { buffer, debounceTime, filter, map } from 'rxjs/operators';
@@ -6,13 +6,12 @@ import { buffer, debounceTime, filter, map } from 'rxjs/operators';
 import { ActionHistoryDump } from '../../../../../store/src/actions/action-history.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
-import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
-
+import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
+import { TabNavItem } from '../../../../tab-nav.types';
 
 export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
-export interface SideNavItem extends ISubHeaderTabs {
+export interface SideNavItem extends TabNavItem {
   label: string;
   /**
    * deprecated
@@ -35,10 +34,14 @@ export interface SideNavItem extends ISubHeaderTabs {
 
 export class SideNavComponent implements OnInit {
 
+  public customizations: CustomizationsMetadata;
+
   constructor(
     private store: Store<AppState>,
-    @Inject(Customizations) public customizations: CustomizationsMetadata
-  ) { }
+    cs: CustomizationService
+  ) {
+    this.customizations = cs.get();
+  }
   @Input() set iconMode(isIconMode: boolean) {
     if (isIconMode !== this.isIconMode) {
       this.isIconMode = isIconMode;

@@ -1,31 +1,68 @@
-import { KubernetesStoreModule } from './kubernetes.store.module';
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { kubernetesEntities } from './store/kubernetes.entities';
-import { registerEntitiesForTesting, createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+
+import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '../../../../store/src/entity-catalog.module';
+import { entityCatalog, TestEntityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { createBasicStoreModule } from '../../../../store/testing/public-api';
+import { generateStratosEntities } from '../../base-entity-types';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
-import { HttpModule } from '@angular/http';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { HelmReleaseActivatedRouteMock, HelmReleaseGuidMock } from '../helm/helm-testing.module';
+import { generateKubernetesEntities } from './kubernetes-entity-generator';
+import { BaseKubeGuid } from './kubernetes-page.types';
+import { HelmReleaseHelperService } from './workloads/release/tabs/helm-release-helper.service';
 
 @NgModule({
-  imports: [
-    KubernetesStoreModule
-  ]
+  imports: [{
+    ngModule: EntityCatalogFeatureModule,
+    providers: [
+      {
+        provide: CATALOGUE_ENTITIES, useFactory: () => {
+          const testEntityCatalog = entityCatalog as TestEntityCatalog;
+          testEntityCatalog.clear();
+          return [
+            ...generateStratosEntities(),
+            ...generateKubernetesEntities(),
+          ];
+        }
+      }
+    ]
+  }]
 })
-export class KubernetesTestingModule {
-
-  constructor() {
-    registerEntitiesForTesting(kubernetesEntities);
-  }
-}
+export class KubernetesTestingModule { }
 
 export const KubernetesBaseTestModules = [
   KubernetesTestingModule,
   RouterTestingModule,
   CoreModule,
   createBasicStoreModule(),
+  // createBasicStoreModule({
+  //   auth: {
+  //     error: false,
+  //     errorResponse: {},
+  //     loggedIn: false,
+  //     loggingIn: false,
+  //     sessionData: {
+  //       config: {},
+  //       plugins: null,
+  //       sessionExpiresOn: 0,
+  //       valid: false,
+  //     },
+  //     user: null,
+  //     verifying: false,
+  //   },
+  // }),
   NoopAnimationsModule,
-  HttpModule,
+  HttpClientModule,
   SharedModule,
 ];
+
+export const HelmReleaseProviders = [
+  HelmReleaseHelperService,
+  HelmReleaseActivatedRouteMock,
+  HelmReleaseGuidMock,
+];
+
+export const KubeBaseGuidMock = { provide: BaseKubeGuid, useValue: { guid: 'anything' } };

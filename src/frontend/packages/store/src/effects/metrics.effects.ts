@@ -4,6 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import {
   METRIC_API_FAILED,
   METRIC_API_START,
@@ -11,9 +12,8 @@ import {
   MetricsAPIActionSuccess,
 } from '../actions/metrics-api.actions';
 import { getFullMetricQueryQuery, METRICS_START, MetricsAction } from '../actions/metrics.actions';
-import { metricSchemaKey } from '../helpers/entity-factory';
+import { DispatchOnlyAppState } from '../app-state';
 import { IMetricsResponse } from '../types/base-metric.types';
-import { AppState } from './../app-state';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class MetricsEffect {
   constructor(
     private actions$: Actions,
     private httpClient: HttpClient,
-    private store: Store<AppState>
+    private store: Store<DispatchOnlyAppState>
   ) { }
 
   @Effect() metrics$ = this.actions$.pipe(
@@ -35,6 +35,7 @@ export class MetricsEffect {
         headers: { 'x-cap-cnsi-list': action.endpointGuid }
       }).pipe(
         map(metrics => {
+          const catalogEntity = entityCatalog.getEntity(action);
           const metric = metrics[action.endpointGuid];
           const metricObject = metric ? {
             [guid]: {
@@ -46,7 +47,7 @@ export class MetricsEffect {
           return new WrapperRequestActionSuccess(
             {
               entities: {
-                [metricSchemaKey]: metricObject
+                [catalogEntity.entityKey]: metricObject
               },
               result: [guid]
             },

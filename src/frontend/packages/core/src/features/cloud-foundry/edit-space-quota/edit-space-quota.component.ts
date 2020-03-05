@@ -2,9 +2,11 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { QUOTA_FROM_LIST } from '../../../shared/components/list/list-types/cf-quotas/cf-quotas-list-config.service';
-import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
-import { QUOTA_SPACE_GUID } from '../space-quota-definition/space-quota-definition.component';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
+import { ActiveRouteCfOrgSpace } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
+import {
+  QUOTA_SPACE_GUID
+} from '../../../../../cloud-foundry/src/features/cloud-foundry/space-quota-definition/space-quota-definition.component';
 
 @Component({
   selector: 'app-edit-space-quota',

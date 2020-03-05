@@ -1,4 +1,6 @@
 <div *ngIf="appAutoscalerPolicy$ | async as policy">
+  <p>Add schedules that reoccur to overwrite the default instance limits for specific time periods. During these time
+    periods, all dynamic scaling rules are still effective.</p>
   <app-tile-grid class="app-autoscaler-tile-grid-100">
     <app-tile-group *ngFor="let rule of policy.schedules && policy.schedules.recurring_schedule; let index = index">
       <app-tile>
@@ -25,7 +27,7 @@
                 <div class="app-metadata">
                   <div class="app-metadata__two-cols">
                     <app-metadata-item label="Effective Duration">
-                      <mat-radio-group formControlName="effective_type">
+                      <mat-radio-group name="effective_type" formControlName="effective_type">
                         <mat-radio-button value="always" (click)="resetEffectiveType('always')" class="form-field-left">
                           Always
                         </mat-radio-button>
@@ -34,32 +36,34 @@
                             Custom
                           </span>
                           <mat-form-field *ngIf="editEffectiveType=='custom'" class="form-field-50">
-                            <input matInput placeholder="From" type="date" formControlName="start_date" required>
+                            <input matInput placeholder="From" type="date" name="start_date"
+                              formControlName="start_date" required>
                           </mat-form-field>
                           <mat-form-field *ngIf="editEffectiveType=='custom'" class="form-field-50">
-                            <input matInput placeholder="To" type="date" formControlName="end_date" required>
+                            <input matInput placeholder="To" type="date" name="end_date" formControlName="end_date"
+                              required>
                           </mat-form-field>
                         </mat-radio-button>
                       </mat-radio-group>
                     </app-metadata-item>
                     <app-metadata-item label="Repeat By">
-                      <mat-radio-group formControlName="repeat_type">
-                        <mat-radio-button value="week" (click)="resetRepeatType('week')" class="form-field-left">
+                      <mat-radio-group name="repeat_type" formControlName="repeat_type">
+                        <mat-radio-button value="week" class="form-field-left">
                           Week
                         </mat-radio-button>
-                        <mat-radio-button value="month" (click)="resetRepeatType('month')">
+                        <mat-radio-button value="month">
                           Month
                         </mat-radio-button>
                       </mat-radio-group>
                     </app-metadata-item>
                     <mat-form-field>
-                      <mat-select *ngIf="editRepeatType=='week'" placeholder="Repeat On" multiple
+                      <mat-select *ngIf="editRepeatType=='week'" placeholder="Repeat On" multiple name="days_of_week"
                         formControlName="days_of_week" required>
                         <mat-option *ngFor="let day of weekdayOptions; let dayIndex = index" [value]="dayIndex">
                           {{day}}
                         </mat-option>
                       </mat-select>
-                      <mat-select *ngIf="editRepeatType=='month'" placeholder="Repeat On" multiple
+                      <mat-select *ngIf="editRepeatType=='month'" placeholder="Repeat On" multiple name="days_of_month"
                         formControlName="days_of_month" required>
                         <mat-option *ngFor="let day of monthdayOptions; let dayIndex = index" [value]="dayIndex">
                           {{day}}
@@ -70,24 +74,26 @@
                   <div class="app-metadata__two-cols">
                     <app-metadata-item label="Repeat Time">
                       <mat-form-field class="form-field-left">
-                        <input matInput placeholder="Start" type="time" formControlName="start_time" required>
+                        <input matInput placeholder="Start" type="time" name="start_time" formControlName="start_time"
+                          required>
                       </mat-form-field>
                       <mat-form-field>
-                        <input matInput placeholder="End" type="time" formControlName="end_time" required>
+                        <input matInput placeholder="End" type="time" name="end_time" formControlName="end_time"
+                          required>
                       </mat-form-field>
                     </app-metadata-item>
                     <app-metadata-item label="Instance Count">
                       <mat-form-field class="form-field-left form-field-30">
-                        <input matInput placeholder="Minimum" type="number" formControlName="instance_min_count"
-                          required>
+                        <input matInput placeholder="Minimum" type="number" name="instance_min_count"
+                          formControlName="instance_min_count" required>
                       </mat-form-field>
                       <mat-form-field class="form-field-left form-field-30">
-                        <input matInput placeholder="Initial Minimum" type="number"
+                        <input matInput placeholder="Initial Minimum" type="number" name=""
                           formControlName="initial_min_instance_count">
                       </mat-form-field>
                       <mat-form-field class="form-field-30">
-                        <input matInput placeholder="Maximum" type="number" formControlName="instance_max_count"
-                          required>
+                        <input matInput placeholder="Maximum" type="number" name="instance_max_count"
+                          formControlName="instance_max_count" required>
                       </mat-form-field>
                     </app-metadata-item>
                   </div>
@@ -136,15 +142,15 @@
             </div>
           </mat-card-content>
           <mat-card-actions class="autoscaler-policy-edit__actions">
-            <button *ngIf="editIndex!=index" (click)="editRecurringSchedule(index)" [disabled]="editIndex!=-1"
-              mat-icon-button>
+            <button id="autoscaler-policy-edit-edit" *ngIf="editIndex!=index" (click)="editRecurringSchedule(index)"
+              [disabled]="editIndex!=-1" mat-icon-button>
               <mat-icon>edit</mat-icon>
             </button>
-            <button *ngIf="editIndex==index" (click)="finishRecurringSchedule()"
+            <button id="autoscaler-policy-edit-done" *ngIf="editIndex==index" (click)="finishRecurringSchedule()"
               [disabled]="editRecurringScheduleForm.invalid" mat-icon-button>
               <mat-icon>done</mat-icon>
             </button>
-            <button (click)="removeRecurringSchedule(index)" mat-icon-button>
+            <button id="autoscaler-policy-edit-delete" (click)="removeRecurringSchedule(index)" mat-icon-button>
               <mat-icon>delete</mat-icon>
             </button>
           </mat-card-actions>
@@ -152,6 +158,6 @@
       </app-tile>
     </app-tile-group>
   </app-tile-grid>
-  <button color="accent" mat-button mat-raised-button (click)="addRecurringSchedule()"
+  <button id="autoscaler-policy-edit-add" color="accent" mat-button mat-raised-button (click)="addRecurringSchedule()"
     [disabled]="editIndex!=-1">Add</button>
 </div>

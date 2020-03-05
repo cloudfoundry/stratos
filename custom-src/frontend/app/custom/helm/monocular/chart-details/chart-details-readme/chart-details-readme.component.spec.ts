@@ -1,9 +1,9 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { MockChartService } from '../../shared/services/chart.service.mock';
 import { ChartsService } from '../../shared/services/charts.service';
 import { ChartDetailsReadmeComponent } from './chart-details-readme.component';
-import { MockChartService } from '../../shared/services/chart.service.mock';
 
 describe('Component: ChartDetailsReadme', () => {
   beforeEach(() => {
@@ -11,7 +11,7 @@ describe('Component: ChartDetailsReadme', () => {
       imports: [],
       declarations: [ChartDetailsReadmeComponent],
       providers: [
-        { provide: ChartsService, useValue: new MockChartService()},
+        { provide: ChartsService, useValue: new MockChartService() },
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

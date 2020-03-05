@@ -1,0 +1,148 @@
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+  <h1>Dashboard Configuration</h1>
+</app-page-header>
+
+<p>Stratos can proxy and embed the Kubernetes Dashboard UI when configured. This requires:</p>
+<ol class="kubedash__list">
+  <li>Kubernetes Dashboard Installation - An installation of the Dashboard in the Kubernetes cluster</li>
+  <li>Service Account - A Service Account that can be used to access the Dashboard</li>
+</ol>
+
+<div *ngIf="!(kubeDashboardStatus$ | async) || isUpdatingStatus" class="kubedash__loading">
+  <mat-spinner diameter="20"></mat-spinner>
+  <div>Retrieving Dashboard configuration ...</div>
+</div>
+
+<div *ngIf="(kubeDashboardStatus$ | async) && !isUpdatingStatus">
+  <div *ngIf="kubeDashboardStatus$ | async as status">
+    <div class="kubedash__ready" *ngIf="status.service && status.serviceAccount">
+      <div class="kubedash__access">
+        <app-boolean-indicator [showText]="false" [isTrue]="true" type="yes-no"></app-boolean-indicator>
+        <div>Kubernetes Dashboard is installed and a Service Account exists - you can access the dashboard using the
+          'View Dashboard' button on the Summary view for this cluster.</div>
+      </div>
+      <button *ngIf="kubeEndpointService.kubeDashboardConfigured$ | async" [routerLink]="dashboardLink" mat-button>
+        <mat-icon>dashboard</mat-icon>
+        <span class="kube-details__button">View Dashboard</span>
+      </button>
+    </div>
+
+    <mat-card class="kubedash__card">
+      <app-card-progress-overlay [busy]="dashboardUIBusy$" [label]="dashboardUIMsg"></app-card-progress-overlay>
+      <mat-card-header>
+        <mat-card-title>Kubernetes Dashboard Installation</mat-card-title>
+        <div class="kubedash__card-icon">
+          <app-boolean-indicator *ngIf="status.service" [showText]="false" [isTrue]="true" type="yes-no">
+          </app-boolean-indicator>
+          <mat-icon *ngIf="!status.service">warning</mat-icon>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content *ngIf="!status.service">
+        <p>No installation found</p>
+        <h2 class="kubedash__option">Manually install the Kubernetes Dashboard</h2>
+        <div class="kubedash__option-block">
+          <p>Manually install the Kubernetes Dashboard into your cluster. Please refer to
+            <a class="kubedash__card-link" target="_blank"
+              href="https://github.com/kubernetes/dashboard#getting-started">https://github.com/kubernetes/dashboard#getting-started</a>.
+          </p>
+        </div>
+
+        <h2 class="kubedash__option">Install the Kubernetes Dashboard from Stratos</h2>
+        <div class="kubedash__option-block">
+          <p>Stratos will download the Dashboard yaml from the Dashboard GitHub repository and install it for you.</p>
+          <div class="kubedash__buttons">
+            <button (click)="installDashboard()" [disabled]="isBusy$ | async" mat-button color="primary">Install
+              Dashboard</button>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-content *ngIf="status.service">
+        <p>An installation of Kubernetes Dashboard was found:</p>
+        <div class="kubedash__metadata">
+          <app-metadata-item label="Version">{{ status.version }}</app-metadata-item>
+          <app-metadata-item label="Service Name">{{ status.service.name }}</app-metadata-item>
+          <app-metadata-item label="Namespace">{{ status.service.namespace }}</app-metadata-item>
+        </div>
+        <div class="kubedash__buttons" *ngIf="status.stratosInstalled">
+          <button (click)="deleteDashboard()" [disabled]="isBusy$ | async" mat-button color="primary">Delete
+            Dashboard</button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="kubedash__card">
+      <app-card-progress-overlay [busy]="serviceAccountBusy$" [label]="serviceAccountMsg"></app-card-progress-overlay>
+      <mat-card-header>
+        <mat-card-title>Service Account</mat-card-title>
+        <div class="kubedash__card-icon">
+          <app-boolean-indicator *ngIf="status.serviceAccount" [showText]="false" [isTrue]="true" type="yes-no">
+          </app-boolean-indicator>
+          <mat-icon *ngIf="!status.serviceAccount">warning</mat-icon>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content *ngIf="!status.serviceAccount">
+        <div *ngIf="(isAzure$ | async)">
+          <p class="kubedash__warn">
+            <mat-icon>warning</mat-icon>You are using the Azure deployed version of Kubernetes Dashboard.
+          </p>
+          <p>This version uses the Service Account 'kubernetes-dashboard' to access the Dashboard UI. You will need to
+            create a Cluster Role Binding as described
+            <a class="kubedash__card-link" target="_blank"
+              href="https://docs.microsoft.com/en-us/azure/aks/kubernetes-dashboard">here</a> to give this account
+            permissions.
+          </p>
+          <p>You also need to add the following label to the Service Account in order for Stratos to know the account is
+            configured:</p>
+          <div class="kubedash__label">stratos-role: kubernetes-dashboard-user</div>
+          <p>You can add this label with the following command:</p>
+          <div class="kubedash__label">kubectl label serviceaccount -n kube-system kubernetes-dashboard
+            stratos-role=kubernetes-dashboard-user</div>
+        </div>
+        <div *ngIf="!(isAzure$ | async)">
+          <p>Service Account not found - you can create one manually or Stratos can do this for you.</p>
+          <h2 class="kubedash__option">Manually create a Service Account</h2>
+          <div class="kubedash__option-block">
+            <p>Create a Service Account with the appropriate permissions that will be used by the Dashboard to
+              access your Kubernetes cluster.</p>
+            <p>Ensure that this token is labelled with the label:</p>
+            <div class="kubedash__label">stratos-role: kubernetes-dashboard-user</div>
+          </div>
+          <h2 class="kubedash__option">Create a Service Account from Stratos</h2>
+          <div class="kubedash__option-block">
+            <div *ngIf="!status.service">
+              <p>Stratos can create a service account for accessing the Kubernetes Dashboard - please install the
+                Dashboard first to enable this capability.</p>
+            </div>
+            <div *ngIf="status.service">
+              <p>Stratos will create a service account with a cluster role binding to the cluster-admin role. This user
+                will
+                have full permissions over the cluster.</p>
+              <p class="kubedash__warn">
+                <mat-icon>warning</mat-icon>Please make sure you understand the risks involved
+              </p>
+              <div class="kubedash__buttons">
+                <button (click)="createServiceAccount()" [disabled]="isBusy$ | async" mat-button color="primary">Create
+                  Service Account</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-content *ngIf="status.serviceAccount">
+        <p>A Service Account was found:</p>
+        <div class="kubedash__metadata">
+          <app-metadata-item label="Name">{{ status.serviceAccount.metadata.name }}</app-metadata-item>
+          <app-metadata-item label="Namespace">{{ status.serviceAccount.metadata.namespace }}</app-metadata-item>
+          <div class="kubedash__buttons">
+            <button (click)="deleteServiceAccount()" [disabled]="isBusy$ | async" mat-button color="primary">Delete
+              Service Account</button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

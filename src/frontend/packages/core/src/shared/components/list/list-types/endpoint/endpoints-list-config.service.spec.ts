@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { CoreTestingModule } from '../../../../../../test-framework/core-test.modules';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../shared.module';
 import { EndpointListHelper } from './endpoint-list.helpers';
@@ -15,6 +16,7 @@ describe('EndpointsListConfigService', () => {
         CommonModule,
         CoreModule,
         SharedModule,
+        CoreTestingModule,
         createBasicStoreModule()
       ],
     });

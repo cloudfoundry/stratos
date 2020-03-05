@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../../core/logger.service';
 import { RepoAttributes } from '../models/repo';
 import { ConfigService } from './config.service';
+import { HttpClient } from '@angular/common/http';
 
 
 
@@ -15,7 +15,7 @@ export class ReposService {
   hostname: string;
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     private config: ConfigService,
     private loggerService: LoggerService
   ) {
@@ -34,9 +34,8 @@ export class ReposService {
     );
   }
 
-  private extractData(res: Response) {
-    const body = res.json();
-    return body.data || {};
+  private extractData(res: { data: any }) {
+    return res.data || {};
   }
 
   private handleError(error: any) {

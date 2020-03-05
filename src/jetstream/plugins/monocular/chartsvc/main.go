@@ -17,25 +17,32 @@ limitations under the License.
 package chartsvc
 
 import (
+	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
+	"io/ioutil"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/heptiolabs/healthcheck"
-	"github.com/kubeapps/common/datastore"
+	mongoDatastore "github.com/kubeapps/common/datastore"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/negroni"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+
+	fdb "github.com/helm/monocular/chartsvc/foundationdb"
+	fdbDatastore "github.com/helm/monocular/chartsvc/foundationdb/datastore"
 )
 
 const pathPrefix = "/v1"
 
-var dbSession datastore.Session
+var client *mongo.Client
+var dbSession mongoDatastore.Session
 
-// Data store to use (abstratcs from MongoDB)
-var dataStore ChartSvcDatastore
-
-func setupRoutes() http.Handler {
+func SetupRoutes() http.Handler {
 	r := mux.NewRouter()
 
 	// Healthcheck
@@ -45,15 +52,24 @@ func setupRoutes() http.Handler {
 
 	// Routes
 	apiv1 := r.PathPrefix(pathPrefix).Subrouter()
-	apiv1.Methods("GET").Path("/charts").Queries("name", "{chartName}", "version", "{version}", "appversion", "{appversion}").Handler(WithParams(listChartsWithFilters))
-	apiv1.Methods("GET").Path("/charts").HandlerFunc(ListCharts)
-	apiv1.Methods("GET").Path("/charts/{repo}").Handler(WithParams(listRepoCharts))
-	apiv1.Methods("GET").Path("/charts/{repo}/{chartName}").Handler(WithParams(getChart))
-	apiv1.Methods("GET").Path("/charts/{repo}/{chartName}/versions").Handler(WithParams(listChartVersions))
-	apiv1.Methods("GET").Path("/charts/{repo}/{chartName}/versions/{version}").Handler(WithParams(getChartVersion))
-	apiv1.Methods("GET").Path("/assets/{repo}/{chartName}/logo-160x160-fit.png").Handler(WithParams(getChartIcon))
-	apiv1.Methods("GET").Path("/assets/{repo}/{chartName}/versions/{version}/README.md").Handler(WithParams(getChartVersionReadme))
-	apiv1.Methods("GET").Path("/assets/{repo}/{chartName}/versions/{version}/values.yaml").Handler(WithParams(getChartVersionValues))
+	apiv1.Methods("GET").Path("/charts").Queries("name", "{chartName}", "version", "{version}", "appversion", "{appversion}").Handler(fdb.WithParams(fdb.ListChartsWithFilters))
+	apiv1.Methods("GET").Path("/charts").Queries("name", "{chartName}", "version", "{version}", "appversion", "{appversion}", "showDuplicates", "{showDuplicates}").Handler(fdb.WithParams(fdb.ListChartsWithFilters))
+	apiv1.Methods("GET").Path("/charts").HandlerFunc(fdb.ListCharts)
+	apiv1.Methods("GET").Path("/charts").Queries("showDuplicates", "{showDuplicates}").HandlerFunc(fdb.ListCharts)
+	apiv1.Methods("GET").Path("/charts/search").Queries("q", "{query}").Handler(fdb.WithParams(fdb.SearchCharts))
+	apiv1.Methods("GET").Path("/charts/search").Queries("q", "{query}", "showDuplicates", "{showDuplicates}").Handler(fdb.WithParams(fdb.SearchCharts))
+	apiv1.Methods("GET").Path("/charts/{repo}").Handler(fdb.WithParams(fdb.ListRepoCharts))
+	apiv1.Methods("GET").Path("/charts/{repo}/search").Queries("q", "{query}").Handler(fdb.WithParams(fdb.SearchCharts))
+	apiv1.Methods("GET").Path("/charts/{repo}/search").Queries("q", "{query}", "showDuplicates", "{showDuplicates}").Handler(fdb.WithParams(fdb.SearchCharts))
+	apiv1.Methods("GET").Path("/charts/{repo}/{chartName}").Handler(fdb.WithParams(fdb.GetChart))
+	apiv1.Methods("GET").Path("/charts/{repo}/{chartName}/versions").Handler(fdb.WithParams(fdb.ListChartVersions))
+	apiv1.Methods("GET").Path("/charts/{repo}/{chartName}/versions/{version}").Handler(fdb.WithParams(fdb.GetChartVersion))
+	apiv1.Methods("GET").Path("/assets/{repo}/{chartName}/logo").Handler(fdb.WithParams(fdb.GetChartIcon))
+	// Maintain the logo-160x160-fit.png endpoint for backward compatibility /assets/{repo}/{chartName}/logo should be used instead
+	apiv1.Methods("GET").Path("/assets/{repo}/{chartName}/logo-160x160-fit.png").Handler(fdb.WithParams(fdb.GetChartIcon))
+	apiv1.Methods("GET").Path("/assets/{repo}/{chartName}/versions/{version}/README.md").Handler(fdb.WithParams(fdb.GetChartVersionReadme))
+	apiv1.Methods("GET").Path("/assets/{repo}/{chartName}/versions/{version}/values.yaml").Handler(fdb.WithParams(fdb.GetChartVersionValues))
+	apiv1.Methods("GET").Path("/assets/{repo}/{chartName}/versions/{version}/values.schema.json").Handler(fdb.WithParams(fdb.GetChartVersionSchema))
 
 	n := negroni.Classic()
 	n.UseHandler(r)
@@ -61,20 +77,33 @@ func setupRoutes() http.Handler {
 }
 
 func main() {
-	dbURL := flag.String("mongo-url", "localhost", "MongoDB URL (see https://godoc.org/github.com/globalsign/mgo#Dial for format)")
-	dbName := flag.String("mongo-database", "charts", "MongoDB database")
-	dbUsername := flag.String("mongo-user", "", "MongoDB user")
-	dbPassword := os.Getenv("MONGO_PASSWORD")
-	flag.Parse()
 
-	mongoConfig := datastore.Config{URL: *dbURL, Database: *dbName, Username: *dbUsername, Password: dbPassword}
-	var err error
-	dbSession, err = datastore.NewSession(mongoConfig)
-	if err != nil {
-		log.WithFields(log.Fields{"host": *dbURL}).Fatal(err)
+	debug := flag.Bool("debug", false, "Debug Logging")
+
+	//Flags for optional FoundationDB + Document Layer backend
+	fdbURL := flag.String("doclayer-url", "mongodb://fdb-service/27016", "FoundationDB Document Layer URL")
+	fDB := flag.String("doclayer-database", "monocular-plugin", "FoundationDB Document-Layer database")
+
+	//Flags for Serve-Mode TLS
+	cACertFile := flag.String("cafile", "", "Path to CA certificate to use for client verification.")
+	certFile := flag.String("certfile", "", "Path to TLS certificate.")
+	keyFile := flag.String("keyfile", "", "Path to TLS key.")
+
+	//TLS options must either be all set to enabled TLS, or none set to disable TLS
+	var tlsEnabled = *cACertFile != "" && *keyFile != "" && *certFile != ""
+	if !(tlsEnabled || (*cACertFile == "" && *keyFile == "" && *certFile == "")) {
+		log.Fatal("To enable TLS, all 3 TLS cert paths must be set.")
 	}
 
-	n := setupRoutes()
+	flag.Parse()
+
+	if *debug {
+		log.SetLevel(log.DebugLevel)
+	}
+
+	InitFDBDocLayerConnection(fdbURL, fDB, &tlsEnabled, *cACertFile, *certFile, *keyFile, debug)
+
+	n := SetupRoutes()
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -85,21 +114,55 @@ func main() {
 	http.ListenAndServe(addr, n)
 }
 
-// Stratos addition to chartsvc main.go
+func InitFDBDocLayerConnection(fdbURL *string, fDB *string, tlsEnabled *bool, CAFile string, certFile string, keyFile string, debug *bool) *ChartSvcDatastore {
 
-// SetMongoConfig allosws Stratos plugin to configure MongoDB
-func SetMongoConfig(dbURL, dbName, dbUsername *string, dbPassword string) (datastore.Session, error) {
-	var err error
-	mongoConfig := datastore.Config{URL: *dbURL, Database: *dbName, Username: *dbUsername, Password: dbPassword}
-	dbSession, err = datastore.NewSession(mongoConfig)
-	return dbSession, err
-}
+	log.Debugf("Attempting to connect to FDB: %v, %v, debug: %v", *fdbURL, *fDB, *debug)
 
-// GetRoutes exposes the HTTP routes for the Chart Service API
-func GetRoutes() http.Handler {
-	return setupRoutes()
-}
+	var tlsConfig *tls.Config
 
-func SetStore(store ChartSvcDatastore) {
-	dataStore = store
+	if *tlsEnabled {
+		//Load CA Cert from file here
+		CA, err := ioutil.ReadFile(CAFile) // just pass the file name
+		if err != nil {
+			log.Fatalf("Cannot load CA certificate from file: %v.", err)
+			return nil
+		}
+		CACert := x509.NewCertPool()
+		ok := CACert.AppendCertsFromPEM([]byte(CA))
+		if !ok {
+			log.Fatalf("Cannot append CA certificate to certificate pool.")
+			return nil
+		}
+		//Now load the key pair and create tls options struct
+		clientKeyPair, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			log.Fatalf("Cannot load server keypair: %v", err)
+			return nil
+		}
+
+		tlsConfig = &tls.Config{RootCAs: CACert, Certificates: []tls.Certificate{clientKeyPair}}
+	}
+
+	clientOptions := options.Client().ApplyURI(*fdbURL)
+	if *tlsEnabled {
+		clientOptions.SetTLSConfig(tlsConfig)
+	}
+	client, err := fdbDatastore.NewDocLayerClient(context.Background(), clientOptions)
+	if err != nil {
+		log.Fatalf("Can't create client for FoundationDB document layer: %v. URL provided was: %v.", err, *fdbURL)
+		return nil
+	}
+	log.Debugf("FDB Document Layer client created.")
+
+	fdb.InitDBConfig(client, *fDB)
+	fdb.SetPathPrefix(pathPrefix)
+
+	db, dbCloser := client.Database(*fDB)
+	datastore := &ChartSvcDatastore{
+		dbClient: client,
+		db:       db,
+		dbCloser: dbCloser,
+	}
+
+	return datastore
 }

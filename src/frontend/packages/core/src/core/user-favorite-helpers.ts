@@ -1,29 +1,25 @@
-import { CfAPIResource } from '../../../store/src/types/api.types';
+import { CfAPIResource } from '../../../cloud-foundry/src/store/types/cf-api.types';
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
-import { IFavoriteMetadata, UserFavorite, UserFavoriteEndpoint } from '../../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
+import { FavoritesConfigMapper } from '../shared/components/favorites-meta-card/favorite-config-mapper';
+import { IEntityMetadata } from '../../../store/src/entity-catalog/entity-catalog.types';
 
 export function isEndpointTypeFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
   return !favorite.entityId;
 }
 
-
-export function getFavoriteFromCfEntity<T extends IFavoriteMetadata>(entity, entityKey: string) {
+// TODO: Move cf specific code to cf package - #3769
+export function getFavoriteFromCfEntity<T extends IEntityMetadata = IEntityMetadata>(
+  entity,
+  entityKey: string,
+  favoritesConfigMapper: FavoritesConfigMapper
+) {
   if (isCfEntity(entity as CfAPIResource)) {
-    return new UserFavorite<T>(
-      entity.entity.cfGuid,
-      'cf',
+    return favoritesConfigMapper.getFavoriteFromEntity<T>(
       entityKey,
-      entity.metadata.guid,
+      'cf',
+      entity.entity.cfGuid,
       entity
-    );
-  }
-  return null;
-}
-
-export function getFavoriteFromEndpointEntity(endpoint: EndpointModel) {
-  if (isEndpointEntity(endpoint)) {
-    return new UserFavoriteEndpoint(
-      endpoint
     );
   }
   return null;

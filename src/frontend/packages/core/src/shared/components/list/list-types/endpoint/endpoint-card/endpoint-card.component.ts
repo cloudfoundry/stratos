@@ -9,28 +9,26 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, ReplaySubject, Subscription } from 'rxjs';
-import { filter, first, map, pairwise, startWith } from 'rxjs/operators';
+import { AppState } from 'frontend/packages/store/src/app-state';
+import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
-import { SetHeaderEvent } from '../../../../../../../../store/src/actions/dashboard-actions';
-import { AppState } from '../../../../../../../../store/src/app-state';
+import { StratosCatalogEndpointEntity } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
-import { EndpointsService } from '../../../../../../core/endpoints.service';
-import { EndpointTypeConfig } from '../../../../../../core/extension/extension-types';
-import { getFavoriteFromEndpointEntity } from '../../../../../../core/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import {
   coreEndpointListDetailsComponents,
-  getEndpointType,
   getFullEndpointApiUrl,
 } from '../../../../../../features/endpoints/endpoint-helpers';
 import { StratosStatus } from '../../../../../shared.types';
-import { favoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
+import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
+import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -44,7 +42,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public favorite: UserFavoriteEndpoint;
   public address: string;
   public cardMenu: MetaCardMenuItem[];
-  public endpointConfig: EndpointTypeConfig;
+  public endpointCatalogEntity: StratosCatalogEndpointEntity;
   public hasDetails = true;
   public endpointLink: string = null;
   public endpointParentType: string;
@@ -58,10 +56,12 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @Input() component: EndpointListDetailsComponent;
   private endpointDetails: ViewContainerRef;
-  @ViewChild('endpointDetails', { read: ViewContainerRef }) set content(content: ViewContainerRef) {
+  @ViewChild('endpointDetails', { read: ViewContainerRef, static: false }) set content(content: ViewContainerRef) {
     this.endpointDetails = content;
     this.updateInnerComponent();
   }
+
+  @ViewChild('copyToClipboard', { static: false }) copyToClipboard: CopyToClipboardComponent;
 
   private pRow: EndpointModel;
   @Input('row')
@@ -70,14 +70,18 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       return;
     }
     this.pRow = row;
-    this.endpointConfig = getEndpointType(row.cnsi_type, row.sub_type);
-    this.endpointParentType = row.sub_type ? getEndpointType(row.cnsi_type, null).label : null;
+
+    this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
-    this.endpointLink = row.connectionStatus === 'connected' || this.endpointConfig.doesNotSupportConnect ?
-      EndpointsService.getLinkForEndpoint(row) : null;
+    if (this.endpointCatalogEntity) {
+      const metadata = this.endpointCatalogEntity.builders.entityBuilder.getMetadata(row);
+      this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogEntity.definition.unConnectable ?
+        this.endpointCatalogEntity.builders.entityBuilder.getLink(metadata) : null;
+      this.connectionStatus = this.endpointCatalogEntity.definition.unConnectable ? 'connected' : row.connectionStatus;
+    }
     this.updateInnerComponent();
-    this.connectionStatus = this.endpointConfig.doesNotSupportConnect ? 'connected' : row.connectionStatus;
+
   }
   get row(): EndpointModel {
     return this.pRow;
@@ -88,12 +92,19 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   set dataSource(ds: BaseEndpointsDataSource) {
     this.pDs = ds;
     // Don't show card menu if the ds only provides a single endpoint type (for instance the cf endpoint page)
-    if (ds && !ds.endpointType && !this.cardMenu) {
+    if (ds && !ds.dsEndpointType && !this.cardMenu) {
       this.cardMenu = this.endpointListHelper.endpointActions().map(endpointAction => ({
         label: endpointAction.label,
         action: () => endpointAction.action(this.pRow),
         can: endpointAction.createVisible(this.rowObs)
       }));
+
+      // Add a copy address to clipboard
+      this.cardMenu.push({
+        label: 'Copy address to Clipboard',
+        action: () => this.copyToClipboard.copyToClipboard(),
+        can: of(true)
+      });
     }
 
     this.updateCardStatus();
@@ -105,18 +116,20 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   constructor(
     private store: Store<AppState>,
     private endpointListHelper: EndpointListHelper,
-    private componentFactoryResolver: ComponentFactoryResolver
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private favoritesConfigMapper: FavoritesConfigMapper,
+
   ) {
     super();
     this.endpointIds$ = this.endpointIds.asObservable();
   }
 
   ngOnInit() {
-    const favorite = getFavoriteFromEndpointEntity(this.row);
+    const favorite = this.favoritesConfigMapper.getFavoriteEndpointFromEntity(this.row);
     if (favorite) {
-      this.favorite = favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
+      this.favorite = this.favoritesConfigMapper.hasFavoriteConfigForType(favorite) ? favorite : null;
     }
-    const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
+    const e = this.endpointCatalogEntity.definition;
     this.hasDetails = !!e && !!e.listDetailsComponent;
   }
 
@@ -133,7 +146,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (!this.endpointDetails || !this.pRow) {
       return;
     }
-    const e = getEndpointType(this.pRow.cnsi_type, this.pRow.sub_type);
+    const e = this.endpointCatalogEntity.definition;
     if (!e || !e.listDetailsComponent) {
       return;
     }
@@ -150,6 +163,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       this.component.isTable = false;
     }
     this.component.row = this.pRow;
+    this.componentRef.changeDetectorRef.detectChanges();
+
 
     this.updateCardStatus();
   }
@@ -160,12 +175,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         map(rowState => rowState.error ? StratosStatus.ERROR : null),
         startWith(null)
       );
-
-      this.subs.push(this.cardStatus$.pipe(
-        pairwise(),
-        filter(([oldV, newV]) => !oldV && !!newV),
-        first()
-      ).subscribe(() => this.store.dispatch(new SetHeaderEvent(true))));
     }
   }
 

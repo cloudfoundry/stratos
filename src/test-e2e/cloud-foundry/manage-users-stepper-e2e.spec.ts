@@ -11,6 +11,8 @@ import { CfTopLevelPage } from './cf-level/cf-top-level-page.po';
 import { ManagerUsersPage } from './manage-users-page.po';
 import { setUpTestOrgSpaceE2eTest } from './users-list-e2e.helper';
 
+const until = protractor.ExpectedConditions;
+
 describe('Manage Users Stepper', () => {
 
   const customOrgSpacesLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER) + '-manage-users';
@@ -33,13 +35,7 @@ describe('Manage Users Stepper', () => {
         userGuid = user.metadata.guid;
       });
     });
-
-    protractor.promise.controlFlow().execute(() => {
-      manageUsersPage = new ManagerUsersPage(cfGuid);
-      manageUsersPage.navigateTo();
-      return manageUsersPage.waitForPage();
-    });
-  });
+  }, 75000);
 
   const timeout = 100000;
   extendE2ETestTime(timeout);
@@ -64,68 +60,73 @@ describe('Manage Users Stepper', () => {
     const usersTable = new CFUsersListComponent();
     usersTable.header.setSearchText(userName);
     let usersRow = -1;
-    usersTable.table.findRow('username', userName).then(row => {
-      usersRow = row;
-      expect(usersRow).toBeGreaterThanOrEqual(0);
-      expect(usersTable.table.getCell(usersRow, 1).getText()).toBe(userName);
+    usersTable.table.findRow('username', userName)
+      .then(row => {
+        usersRow = row;
+        expect(usersRow).toBeGreaterThanOrEqual(0);
+        expect(usersTable.table.getCell(usersRow, 1).getText()).toBe(userName);
 
-      const selectUser = new CheckboxComponent(usersTable.table.getCell(usersRow, 0));
-      selectUser.getComponent().click();
-      const usersButton = usersTable.header.getIconButton('people');
-      expect(usersButton.isDisplayed()).toBeTruthy();
-      usersButton.click();
+        const selectUser = new CheckboxComponent(usersTable.table.getCell(usersRow, 0));
+        selectUser.scrollIntoView();
+        selectUser.waitUntilShown();
+        selectUser.getComponent().click();
 
-      manageUsersPage = new ManagerUsersPage(cfGuid, null, null, userGuid);
-      manageUsersPage.waitForPage();
-      expect(manageUsersPage.stepper.getActiveStepName()).toBe('Select Roles');
+        const usersButton = usersTable.header.getIconButton('people');
+        browser.wait(until.visibilityOf(usersButton));
+        usersButton.click();
 
-    // Select Roles Step
-      const modifyStep = manageUsersPage.modifyUsersStep;
-      const orgsList = modifyStep.orgsList;
-      const spacesList = modifyStep.spacesList;
-      managerUsersStepper = manageUsersPage.stepper;
+        manageUsersPage = new ManagerUsersPage(cfGuid, null, null, userGuid);
+        manageUsersPage.waitForPage();
+        expect(manageUsersPage.stepper.getActiveStepName()).toBe('Select Roles');
 
-      orgsList.waitUntilShown();
-      modifyStep.setOrg(orgName);
-    // ... check button state
-      expect(managerUsersStepper.canPrevious()).toBeFalsy();
-      expect(managerUsersStepper.canCancel()).toBeTruthy();
-      expect(managerUsersStepper.canNext()).toBeFalsy();
+        // Select Roles Step
+        const modifyStep = manageUsersPage.modifyUsersStep;
+        const orgsList = modifyStep.orgsList;
+        const spacesList = modifyStep.spacesList;
+        managerUsersStepper = manageUsersPage.stepper;
 
-    // ... check org state
-      orgManagerCheckbox = modifyStep.getOrgManagerCheckbox();
-      orgAuditorCheckbox = modifyStep.getOrgAuditorCheckbox();
-      orgBillingManagerCheckbox = modifyStep.getOrgBillingManagerCheckbox();
-      orgUserCheckbox = modifyStep.getOrgUserCheckbox();
+        orgsList.waitUntilShown();
+        modifyStep.setOrg(orgName);
+        // ... check button state
+        expect(managerUsersStepper.canPrevious()).toBeFalsy();
+        expect(managerUsersStepper.canCancel()).toBeTruthy();
+        expect(managerUsersStepper.canNext()).toBeFalsy();
 
-      expect(orgManagerCheckbox.isDisabled()).toBeFalsy();
-      expect(orgManagerCheckbox.isChecked()).toBeTruthy();
-      expect(orgAuditorCheckbox.isDisabled()).toBeFalsy();
-      expect(orgAuditorCheckbox.isChecked()).toBeTruthy();
-      expect(orgBillingManagerCheckbox.isDisabled()).toBeFalsy();
-      expect(orgBillingManagerCheckbox.isChecked()).toBeFalsy();
-      expect(orgUserCheckbox.isDisabled()).toBeTruthy();
-      expect(orgUserCheckbox.isChecked()).toBeTruthy();
+        // ... check org state
+        orgManagerCheckbox = modifyStep.getOrgManagerCheckbox();
+        orgAuditorCheckbox = modifyStep.getOrgAuditorCheckbox();
+        orgBillingManagerCheckbox = modifyStep.getOrgBillingManagerCheckbox();
+        orgUserCheckbox = modifyStep.getOrgUserCheckbox();
 
-    // ... check space state
-      expect(spacesList.getTotalResults()).toBe(1);
-      expect(spacesList.table.getCell(0, 0).getText()).toBe(spaceName);
-      spaceManagerCheckbox = modifyStep.getSpaceManagerCheckbox(0);
-      spaceAuditorCheckbox = modifyStep.getSpaceAuditorCheckbox(0);
-      spaceDeveloperCheckbox = modifyStep.getSpaceDeveloperCheckbox(0);
-      expect(spaceManagerCheckbox.isDisabled()).toBeFalsy();
-      expect(spaceManagerCheckbox.isChecked()).toBeTruthy();
-      expect(spaceAuditorCheckbox.isDisabled()).toBeFalsy();
-      expect(spaceAuditorCheckbox.isChecked()).toBeTruthy();
-      expect(spaceDeveloperCheckbox.isDisabled()).toBeFalsy();
-      expect(spaceDeveloperCheckbox.isChecked()).toBeTruthy();
+        expect(orgManagerCheckbox.isDisabled()).toBeFalsy();
+        expect(orgManagerCheckbox.isChecked()).toBeTruthy();
+        expect(orgAuditorCheckbox.isDisabled()).toBeFalsy();
+        expect(orgAuditorCheckbox.isChecked()).toBeTruthy();
+        expect(orgBillingManagerCheckbox.isDisabled()).toBeFalsy();
+        expect(orgBillingManagerCheckbox.isChecked()).toBeFalsy();
+        expect(orgUserCheckbox.isDisabled()).toBeTruthy();
+        expect(orgUserCheckbox.isChecked()).toBeTruthy();
 
-    // ... check button state on toggle changes
-      orgManagerCheckbox.getComponent().click();
-      expect(managerUsersStepper.canNext()).toBeTruthy();
-      orgManagerCheckbox.getComponent().click();
-      expect(managerUsersStepper.canNext()).toBeFalsy();
-    });
+        // ... check space state
+        expect(spacesList.getTotalResults()).toBe(1);
+        expect(spacesList.table.getCell(0, 0).getText()).toBe(spaceName);
+        spaceManagerCheckbox = modifyStep.getSpaceManagerCheckbox(0);
+        spaceAuditorCheckbox = modifyStep.getSpaceAuditorCheckbox(0);
+        spaceDeveloperCheckbox = modifyStep.getSpaceDeveloperCheckbox(0);
+        expect(spaceManagerCheckbox.isDisabled()).toBeFalsy();
+        expect(spaceManagerCheckbox.isChecked()).toBeTruthy();
+        expect(spaceAuditorCheckbox.isDisabled()).toBeFalsy();
+        expect(spaceAuditorCheckbox.isChecked()).toBeTruthy();
+        expect(spaceDeveloperCheckbox.isDisabled()).toBeFalsy();
+        expect(spaceDeveloperCheckbox.isChecked()).toBeTruthy();
+
+        // ... check button state on toggle changes
+        orgManagerCheckbox.getComponent().click();
+        expect(managerUsersStepper.canNext()).toBeTruthy();
+        orgManagerCheckbox.getComponent().click();
+        expect(managerUsersStepper.canNext()).toBeFalsy();
+      })
+      .catch(err => fail(err));
 
   });
 

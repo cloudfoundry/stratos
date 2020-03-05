@@ -1,23 +1,25 @@
 import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
+import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames } from '../../../../../../../store/src/types/endpoint.types';
+import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { LoggerService } from '../../../../../core/logger.service';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { getEndpointType } from '../../../../../features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { IListAction } from '../../list.component.types';
@@ -40,15 +42,14 @@ function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent 
 
 @Injectable()
 export class EndpointListHelper {
-
+  private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private dialog: MatDialog,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
-    private log: LoggerService) {
-
-  }
+    private log: LoggerService,
+  ) { }
 
   endpointActions(): IListAction<EndpointModel>[] {
     return [
@@ -96,8 +97,8 @@ export class EndpointListHelper {
         label: 'Connect',
         description: '',
         createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => {
-          const ep = getEndpointType(row.cnsi_type, row.sub_type);
-          return !ep.doesNotSupportConnect && row.connectionStatus === 'disconnected';
+          const ep = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type).definition;
+          return !ep.unConnectable && row.connectionStatus === 'disconnected';
         }))
       },
       {
@@ -124,7 +125,7 @@ export class EndpointListHelper {
 
   private handleUpdateAction(item, effectKey, handleChange) {
     this.handleAction(selectUpdateInfo(
-      endpointStoreNames.type,
+      this.endpointEntityKey,
       item.guid,
       effectKey,
     ), handleChange);
@@ -132,7 +133,7 @@ export class EndpointListHelper {
 
   private handleDeleteAction(item, handleChange) {
     this.handleAction(selectDeletionInfo(
-      endpointStoreNames.type,
+      this.endpointEntityKey,
       item.guid,
     ), handleChange);
   }
@@ -153,7 +154,6 @@ export class EndpointListHelper {
     EndpointDetailsContainerRefs {
     const componentFactory = componentFactoryResolver.resolveComponentFactory<EndpointListDetailsComponent>(listDetailsComponent);
     const componentRef = container.createComponent<EndpointListDetailsComponent>(componentFactory);
-    componentRef.changeDetectorRef.detectChanges();
     const component = isEndpointListDetailsComponent(componentRef.instance);
     const refs = {
       componentRef,

@@ -7,22 +7,21 @@ import { MomentModule } from 'ngx-moment';
 import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
 import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
 import { AuthGuardService } from './auth-guard.service';
-import { NotSetupGuardService } from './not-setup-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
 import { ClickStopPropagationDirective } from './click-stop-propagation.directive';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
-import { Customizations } from './customizations.types';
 import { DisableRouterLinkDirective } from './disable-router-link.directive';
 import { DotContentComponent } from './dot-content/dot-content.component';
 import { EndpointsService } from './endpoints.service';
 import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
-import { EntityServiceFactory } from './entity-service-factory.service';
+import { EntityServiceFactory } from '../../../store/src/entity-service-factory.service';
 import { EventWatcherService } from './event-watcher/event-watcher.service';
 import { InfinityPipe } from './infinity.pipe';
 import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component';
 import { LoggerService } from './logger.service';
 import { MDAppModule } from './md.module';
+import { NotSetupGuardService } from './not-setup-guard.service';
 import { PageHeaderService } from './page-header-service/page-header.service';
 import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
 import { SafeImgPipe } from './safe-img.pipe';
@@ -31,6 +30,8 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
+import { APP_TITLE, appTitleFactory } from './core.types';
+import { Title } from '@angular/platform-browser';
 
 @NgModule({
   imports: [
@@ -73,8 +74,12 @@ import { WindowRef } from './window-ref/window-ref.service';
     EndpointsService,
     UserService,
     EntityServiceFactory,
-    { provide: Customizations, useValue: {} },
-    CurrentUserPermissionsService
+    CurrentUserPermissionsService,
+    {
+      provide: APP_TITLE,
+      useFactory: appTitleFactory,
+      deps: [Title]
+    }
   ],
   declarations: [
     StatefulIconComponent,
@@ -97,5 +102,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     LogOutDialogComponent
   ],
 })
-export class CoreModule { }
+export class CoreModule {
+  constructor() { }
+
+}
 

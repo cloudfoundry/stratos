@@ -2,8 +2,7 @@ package kubernetes
 
 import (
 	"fmt"
-
-	//	"k8s.io/client-go/rest"
+	"sync"
 
 	// Import the OIDC auth plugin
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
@@ -39,11 +38,14 @@ func (c *KubernetesSpecification) ProxyKubernetesAPI(userID string, f KubeProxyF
 		return nil, fmt.Errorf("Could not get endpints Client for endpoint: %v+", err)
 	}
 
+	// Get all connected k8s endpoints for the user
 	for _, endpoint := range eps {
 		if endpoint.CNSIType == "k8s" {
 			k8sList = append(k8sList, endpoint)
 		}
 	}
+
+	mapMutex := sync.RWMutex{}
 
 	// Check that we actually have some
 	// TODO
@@ -55,11 +57,13 @@ func (c *KubernetesSpecification) ProxyKubernetesAPI(userID string, f KubeProxyF
 	responses := make(KubeProxyResponses)
 	for range k8sList {
 		res := <-done
+		mapMutex.RLock()
 		if res.Error == nil {
 			responses[res.Endpoint] = res.Result
 		} else {
 			responses[res.Endpoint] = res.Error
 		}
+		mapMutex.RUnlock()
 	}
 
 	return responses, nil

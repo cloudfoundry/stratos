@@ -1,7 +1,24 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 
-const kubernetes: Routes = [
+import { HELM_ENDPOINT_TYPE } from './helm/helm-entity-factory';
+import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes/kubernetes-entity-factory';
+
+const customRoutes: Routes = [
+  {
+    path: 'workloads',
+    loadChildren: () => import('./kubernetes/workloads/workloads.module').then(m => m.WorkloadsModule),
+    data: {
+      reuseRoute: true,
+      stratosNavigation: {
+        text: 'Workloads',
+        matIcon: 'workloads',
+        matIconFont: 'stratos-icons',
+        position: 60,
+        requiresEndpointType: KUBERNETES_ENDPOINT_TYPE
+      }
+    }
+  },
   {
     path: 'kubernetes',
     loadChildren: './kubernetes/kubernetes.module#KubernetesModule',
@@ -9,9 +26,9 @@ const kubernetes: Routes = [
       stratosNavigation: {
         text: 'Kubernetes',
         matIcon: 'kubernetes',
-        matIconFont: 'stratos-icons',
-        position: 60,
-        requiresEndpointType: 'k8s'
+        matIconFont: 'stratos-icons', // TODO: get these from entity config?
+        position: 64,
+        requiresEndpointType: KUBERNETES_ENDPOINT_TYPE
       }
     }
   },
@@ -19,20 +36,21 @@ const kubernetes: Routes = [
     path: 'monocular',
     loadChildren: './helm/helm.module#HelmModule',
     data: {
+      reuseRoute: true,
       stratosNavigation: {
         text: 'Helm',
         matIcon: 'helm',
         matIconFont: 'stratos-icons',
         position: 65,
-        requiresEndpointType: 'helm'
+        requiresEndpointType: HELM_ENDPOINT_TYPE
       }
     }
-  }
+  },
 ];
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(kubernetes),
+    RouterModule.forRoot(customRoutes),
   ],
   declarations: []
 })

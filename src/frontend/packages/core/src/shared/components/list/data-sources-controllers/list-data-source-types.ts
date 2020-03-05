@@ -6,11 +6,13 @@ import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.a
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
 import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
+import { EntityCatalogEntityConfig } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
+import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 
 export interface IEntitySelectItem {
   page: number;
   label: string;
-  schemaKey: string;
+  entityKey: string;
 }
 
 /**
@@ -67,7 +69,7 @@ export interface ITableListDataSource<T> extends ICoreListDataSource<T> {
   isTableLoading$: Observable<boolean>;
 }
 
-export interface IListDataSource<T> extends ICoreListDataSource<T> {
+export interface IListDataSource<T> extends ICoreListDataSource<T>, EntityCatalogEntityConfig {
   pagination$: Observable<PaginationEntityState>;
   isLocal?: boolean;
   localDataFunctions?: ((
@@ -76,8 +78,8 @@ export interface IListDataSource<T> extends ICoreListDataSource<T> {
   ) => T[])[];
   action: PaginatedAction | PaginatedAction[];
   entityKey: string;
+  sourceScheme: EntitySchema;
   paginationKey: string;
-
 
   page$: Observable<T[]>;
 

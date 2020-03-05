@@ -1,6 +1,6 @@
 import { FocusDirective } from './focus.directive';
 import { inject, TestBed, ComponentFixture } from '@angular/core/testing';
-import { Component, DebugElement, ElementRef, Renderer } from '@angular/core';
+import { Component, DebugElement, ElementRef, Renderer2 } from '@angular/core';
 import { By, BrowserModule } from '@angular/platform-browser';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../shared.module';
@@ -27,7 +27,7 @@ describe('FocusDirective', () => {
       providers: [
         FocusDirective,
         { provide: ElementRef, useClass: MockElementRef },
-        { provide: Renderer, useClass: MockRenderer }
+        { provide: Renderer2, useClass: MockRenderer }
       ],
       declarations: [
         TestAutoFocusComponent,

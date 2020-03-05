@@ -6,5 +6,10 @@
     </button>
   </div>
 </app-page-header>
-<app-endpoints-missing></app-endpoints-missing>
-<app-list *ngIf="(endpointsService.haveRegistered$ | async)"></app-list>
+
+<app-list *ngIf="(endpointsService.haveRegistered$ | async); else noEndpointsContainer"></app-list>
+<ng-template #noEndpointsContainer>
+  <app-endpoints-missing *ngIf="!customizations.noEndpointsComponent; else customNoEndpoints"
+    [showDirectToEndpointMessage]="false"></app-endpoints-missing>
+</ng-template>
+<ng-template #customNoEndpoints></ng-template>

@@ -13,12 +13,13 @@ import {
   tap,
 } from 'rxjs/operators';
 
+import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
 import { sortStringify } from '../../../../core/src/core/utils.service';
-import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
-import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
+import { SetInitialParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
-import { AppState } from '../../app-state';
-import { populatePaginationFromParent } from '../../helpers/entity-relations/entity-relations';
+import { AppState, GeneralEntityAppState } from '../../app-state';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import {
@@ -26,7 +27,6 @@ import {
   PaginationClientPagination,
   PaginationEntityState,
   PaginationParam,
-  QParam,
 } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
 
@@ -47,49 +47,6 @@ export interface PaginationObservables<T> {
   fetchingEntities$: Observable<boolean>;
 }
 
-export function qParamsToString(params: QParam[]): string[] {
-  return params.map(qParamToString);
-}
-
-export function qParamToString(q: QParam): string {
-  return `${q.key}${q.joiner}${(q.value as string[]).join ? (q.value as string[]).join(',') : q.value}`;
-}
-
-export function qParamKeyFromString(qParamString: string): string {
-  const match = qParamString.match(/(>=|<=|<|>| IN |,|:|=)/);
-  return match.index >= 0 ? qParamString.substring(0, match.index) : null;
-}
-
-export function getUniqueQParams(action: AddParams | SetParams, state) {
-  let qStatePrams: QParam[] = [].concat(state.params.q || []);
-  const qActionPrams: QParam[] = [].concat(action.params.q || []);
-
-  // Update existing q params
-  for (const actionParam of qActionPrams) {
-    const existingParamIndex = qStatePrams.findIndex((stateParam: QParam) => stateParam.key === actionParam.key);
-    if (existingParamIndex >= 0) {
-      qStatePrams[existingParamIndex] = { ...actionParam };
-    } else {
-      qStatePrams.push(actionParam);
-    }
-  }
-
-  //  Ensure q params are unique
-  if (action.params.q) {
-    qStatePrams = qStatePrams.concat(qActionPrams)
-      .filter((q, index, self) => self.findIndex(
-        (qs) => {
-          return qs.key === q.key;
-        }
-      ) === index)
-      .filter((q: QParam) => {
-        // Filter out empties
-        return !!q.value;
-      });
-  }
-  return qStatePrams;
-}
-
 export function removeEmptyParams(params: PaginationParam) {
   const newObject = {};
   Object.keys(params).forEach(key => {
@@ -103,7 +60,7 @@ export function removeEmptyParams(params: PaginationParam) {
 export function getActionType(action) {
   return action.type;
 }
-
+// FIXME: Add typings, shouldbe done with #1477
 export function getAction(action): PaginatedAction {
   if (!action) {
     return null;
@@ -111,9 +68,19 @@ export function getAction(action): PaginatedAction {
   return action.apiAction ? action.apiAction : action;
 }
 
-export function getActionPaginationEntityKey(action) {
+// FIXME: Add typings, shouldbe done with #1477
+function getEntityConfigFromAction(action): PaginatedAction {
+  if (action && action.entityConfig) {
+    return action.entityConfig;
+  }
+  return getAction(action);
+}
+
+// FIXME: Add typings, shouldbe done with #1477
+export function getActionPaginationEntityKey(action): string {
   const apiAction = getAction(action);
-  return apiAction.proxyPaginationEntityKey || apiAction.entityKey || null;
+  const entityConfig = apiAction.proxyPaginationEntityConfig || getEntityConfigFromAction(action);
+  return entityCatalog.getEntityKey(entityConfig);
 }
 
 export function getPaginationKeyFromAction(action: PaginatedAction) {
@@ -121,9 +88,10 @@ export function getPaginationKeyFromAction(action: PaginatedAction) {
   return apiAction.paginationKey;
 }
 
-export const getPaginationObservables = <T = any>(
+// TODO: This needs to be a service not just a function! - #3802
+export const getPaginationObservables = <T = any, Y extends AppState = AppState>(
   { store, action, paginationMonitor }: {
-    store: Store<AppState>,
+    store: Store<Y>,
     action: PaginatedAction | PaginatedAction[],
     paginationMonitor: PaginationMonitor
   },
@@ -132,11 +100,15 @@ export const getPaginationObservables = <T = any>(
   const baseAction = Array.isArray(action) ? action[0] : action;
   const paginationKey = paginationMonitor.paginationKey;
   const entityKey = paginationMonitor.schema.key;
-
   // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
   // section)
   if (baseAction.initialParams) {
-    store.dispatch(new SetInitialParams(entityKey, paginationKey, baseAction.initialParams, isLocal));
+    store.dispatch(new SetInitialParams(
+      paginationMonitor.entityConfig,
+      paginationKey,
+      baseAction.initialParams,
+      isLocal
+    ));
   }
 
   const obs = getObservables<T>(
@@ -190,26 +162,21 @@ function paginationParamsString(params: PaginationParam): string {
   const clone = {
     ...params,
   };
-  delete clone.q;
-  const res1 = sortStringify(clone) + params.q ? sortStringify(params.q.reduce((res, q) => {
-    res[q.key] = q.value + q.joiner;
-    return res;
-  }, {})) : '';
-  return res1;
+  return sortStringify(clone);
 }
 
 function shouldFetchNonLocalList(pagination: PaginationEntityState): boolean {
   return !hasError(pagination) && !hasValidOrGettingPage(pagination);
 }
 
-function safePopulatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
+function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
   return populatePaginationFromParent(store, action).pipe(
     map(newAction => newAction || action)
   );
 }
 
 function getObservables<T = any>(
-  store: Store<AppState>,
+  store: Store<GeneralEntityAppState>,
   entityKey: string,
   paginationKey: string,
   paginationAction: PaginatedAction | PaginatedAction[],
@@ -234,22 +201,22 @@ function getObservables<T = any>(
         ).subscribe(actions => actions.forEach(action => store.dispatch(action)));
       }
     }),
-    map(([prevPag, newPag]) => newPag)
+    map(([, newPag]) => newPag)
   );
 
   let lastValidationFootprint: string;
   const entities$: Observable<T[]> =
     combineLatest(
       store.select(selectEntities(entityKey)),
-      fetchPagination$
+      fetchPagination$,
     )
       .pipe(
-        filter(([ent, pagination]) => {
+        filter(([, pagination]) => {
           return !!pagination && isPageReady(pagination, isLocal);
         }),
         publishReplay(1),
         refCount(),
-        tap(([ent, pagination]) => {
+        tap(([, pagination]) => {
           const newValidationFootprint = getPaginationCompareString(pagination);
           if (lastValidationFootprint !== newValidationFootprint) {
             lastValidationFootprint = newValidationFootprint;
@@ -275,8 +242,8 @@ function getObservables<T = any>(
       // Entities will never fire in the event of a maxed list, so ensure we start with something
       startWith(false)
     ),
-    totalEntities$: combineLatest(pagination$, entities$).pipe(
-      map(([pag]) => pag.totalResults),
+    totalEntities$: pagination$.pipe(
+      map(pag => pag.totalResults),
       distinctUntilChanged()
     ),
     fetchingEntities$: paginationMonitor.fetchingCurrentPage$
@@ -348,15 +315,5 @@ export function spreadClientPagination(pag: PaginationClientPagination): Paginat
         ...pag.filter.items
       }
     }
-  };
-}
-
-export function spreadPaginationParams(params: PaginationParam): PaginationParam {
-  return {
-    ...params,
-    q: params.q ? params.q.reduce((newQ, qP) => {
-      newQ.push({ ...qP });
-      return newQ;
-    }, []) : null
   };
 }

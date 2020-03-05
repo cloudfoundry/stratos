@@ -1,0 +1,31 @@
+<app-stratos-title title="SUSE Stratos Console"></app-stratos-title>
+
+<div class="no-endpoints-message app-no-content-container">
+  <mat-icon class="no-endpoints-message__icon">settings_ethernet</mat-icon>
+  <div class="no-endpoints-message__text first-line">There are no registered endpoints</div>
+</div>
+
+<app-tile-grid>
+  <app-tile-group>
+    <app-tile>
+      <mat-card class="full-card">
+        <h2 class="messages__title">Getting Started</h2>
+        <ul>
+          <li><div class="messages__item">Start by registering endpoints, such as a Kubernetes Cluster or a Cloud Foundry. Use the <mat-icon>add</mat-icon> icon in the top-right</div></li>
+          <li><div class="messages__item">Once you have registered one or more endpoints, connect to them with your credentials</div></li>
+          <li><div class="messages__item">As you register and connect endpoints the side navigation bar will update to show the features appropriate to your endpoints</div></li>
+          <li><div class="messages__item">You can register and connect to multiple endpoints of any type</div></li>
+        </ul>
+      </mat-card>
+    </app-tile>
+    <app-tile>
+      <mat-card class="full-card">
+        <h2 class="messages__title">Tips</h2>
+        <ul>
+          <li><div class="messages__item">You can collapse and expand the side navigation bar using the <mat-icon>menu</mat-icon> icon in the top-left. This setting is stored in your browser and will persist across application reloads</div></li>
+          <li><div class="messages__item">You can favorite endpoints and entities within an endpoint using the <mat-icon>star_border</mat-icon> icon. These will appear for quick access on the Home page</div></li>
+        </ul>
+      </mat-card>
+    </app-tile>
+  </app-tile-group>
+</app-tile-grid>

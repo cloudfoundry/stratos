@@ -1,0 +1,17 @@
+<app-page-header [endpointIds$]="helmIds$">
+  <h1>Workloads</h1>
+</app-page-header>
+
+<ng-template #noEntriesForCurrentFilter>
+  <app-no-content-message [icon]="'apps'" [firstLine]="'There are no workloads for the current filter'" [secondLine]="{
+  text: ''
+}"></app-no-content-message>
+</ng-template>
+
+<ng-template #noEntries>
+  <app-no-content-message [icon]="'apps'" [firstLine]="'There are no workloads'" [secondLine]="{
+  text: ''
+}"></app-no-content-message>
+</ng-template>
+
+<app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"></app-list>

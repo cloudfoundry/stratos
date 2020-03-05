@@ -6,12 +6,11 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../store/src/types/metric.types';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
+import { getIdFromRoute } from '../../../core/utils.service';
 import { MetricsConfig } from '../../../shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../shared/components/metrics-chart/metrics-chart.types';
 import {
@@ -20,12 +19,11 @@ import {
 } from '../../../shared/components/metrics-chart/metrics.component.helpers';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
-import { HelmReleaseService } from '../services/helm-release.service';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
 import { KubernetesPod } from '../store/kube.types';
 import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kubernetes.actions';
-import { kubernetesPodsSchemaKey } from '../store/kubernetes.entities';
+import { formatCPUTime, formatAxisCPUTime } from '../kubernetes-metrics.helpers';
 
 @Component({
   selector: 'app-pod-metrics',
@@ -44,7 +42,6 @@ import { kubernetesPodsSchemaKey } from '../store/kubernetes.entities';
       ]
     },
     KubernetesService,
-    HelmReleaseService,
     KubernetesEndpointService
   ]
 })
@@ -60,7 +57,6 @@ export class PodMetricsComponent {
   ][];
 
   constructor(
-    public helmReleaseService: HelmReleaseService,
     public activatedRoute: ActivatedRoute,
     public store: Store<AppState>,
     public entityServiceFactory: EntityServiceFactory,
@@ -78,63 +74,55 @@ export class PodMetricsComponent {
       chartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          helmReleaseService.kubeGuid,
+          kubeEndpointService.kubeGuid,
           `container_memory_usage_bytes{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Memory Usage (MB)',
         ChartDataTypes.BYTES,
         (series: ChartSeries[]) => {
-          return series.filter(s => !s.name.endsWith('POD'));
-        }
+          // Remove the metric series for pod overhead and for the total!
+          return series.filter(s => !!s.metadata.container_name && s.metadata.container_name !== 'POD');
+        },
+        null,
+        (value: string) => value + ' MB'
       ),
       cpuChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          helmReleaseService.kubeGuid,
+          kubeEndpointService.kubeGuid,
           `container_cpu_usage_seconds_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'CPU Usage',
-        null,
+        ChartDataTypes.CPU_TIME,
         (series: ChartSeries[]) => {
-          return series.filter(s => s.name.indexOf('POD') === -1);
+          return series.filter(s => !!s.metadata.container_name && s.metadata.container_name !== 'POD');
         },
-        (tick: string) => {
-          const duration = moment.duration(parseFloat(tick) * 1000);
-          if (duration.asDays() >= 1) {
-            return `${duration.asDays().toPrecision(2)} d`;
-          }
-          if (duration.asHours() >= 1) {
-            return `${duration.asHours().toPrecision(2)} hrs`;
-          }
-          if (duration.asMinutes() >= 1) {
-            return `${duration.asMinutes().toPrecision(2)} min`;
-          }
-          if (duration.asSeconds() >= 1) {
-            return `${duration.asSeconds().toPrecision(2)} sec`;
-          }
-          if (duration.asMilliseconds() >= 1) {
-            return `${duration.asSeconds().toPrecision(2)} msec`;
-          }
-          return tick;
-        }
+        (tick: string) => formatAxisCPUTime(tick),
+        (value: string) => formatCPUTime(value),
       ),
       networkChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          helmReleaseService.kubeGuid,
+          kubeEndpointService.kubeGuid,
           `container_network_transmit_bytes_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data transmitted (MB)',
-        ChartDataTypes.BYTES
+        ChartDataTypes.BYTES,
+        null,
+        null,
+        (value: string) => value + ' MB'
       ),
       networkChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          helmReleaseService.kubeGuid,
+          kubeEndpointService.kubeGuid,
           `container_network_receive_bytes_total{pod_name="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data received (MB)',
-        ChartDataTypes.BYTES
+        ChartDataTypes.BYTES,
+        null,
+        null,
+        (value: string) => value + ' MB'
       )
     ];
 
@@ -179,11 +167,8 @@ export class PodMetricsComponent {
       })
     );
     this.podEntity$ = this.entityServiceFactory.create<KubernetesPod>(
-      kubernetesPodsSchemaKey,
-      entityFactory(kubernetesPodsSchemaKey),
       this.podName,
-      new GetKubernetesPod(this.podName, this.namespaceName, this.helmReleaseService.kubeGuid),
-      false
+      new GetKubernetesPod(this.podName, this.namespaceName, this.kubeEndpointService.kubeGuid),
     ).entityObs$;
   }
 }

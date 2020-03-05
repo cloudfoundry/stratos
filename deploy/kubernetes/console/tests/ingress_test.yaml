@@ -1,0 +1,255 @@
+suite: test ingress
+templates:
+  - ingress.yaml
+
+tests:
+  - it: should not have ingress when not configured
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: should not have ingress when not configured (.ingress)
+    set:
+      console.service.ingress: {}
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: should not have ingress when configured false
+    set:
+      console.service.ingress.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: should have ingress when configured true
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.host: "hostname"
+    asserts:
+      - hasDocuments:
+          count: 2
+  - it: should allow existing tls secret to be used
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.secretName: "existingTestSecret"
+      console.service.ingress.host: "hostname"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.tls[0].secretName
+          value: "existingTestSecret"
+  - it: should create empty secret by default
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.host: "hostname"
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: kind
+          value: "Secret"
+      - isNotEmpty:
+          path: data.tls\.crt
+      - isNotEmpty:
+          path: data.tls\.key
+          value: ""
+  - it: should create secret with specified values
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.tls.crt: "CRT_TEST"
+      console.service.ingress.tls.key: "KEY_TEST"
+      console.service.ingress.host: "hostname"
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: kind
+          value: "Secret"
+      - equal:
+          path: data.tls\.crt
+          value: "Q1JUX1RFU1Q="
+      - equal:
+          path: data.tls\.key
+          value: "S0VZX1RFU1Q="
+  - it: should have correct metadata
+    release:
+      name: test-release
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.secretName: "existingTestSecret"
+      console.service.ingress.host: "hostname"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: "Ingress"
+      - equal:
+          path: metadata.name
+          value: "test-release-ingress"
+      - equal:
+          path: metadata.labels.app\.kubernetes\.io\/instance
+          value: "test-release"
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.serviceName
+          value: "test-release-ui-ext"
+  - it: should use host name provided
+    release:
+      name: test-release
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.secretName: "existingTestSecret"
+      console.service.ingress.host: "hostname"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: "Ingress"
+      - equal:
+          path: spec.rules[0].host
+          value: "hostname"
+      - equal:
+          path: spec.tls[0].hosts[0]
+          value: "hostname"
+  - it: should use console.DOMAIN if configured
+    release:
+      name: test-release
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.secretName: "existingTestSecret"
+      env.DOMAIN: "domain.com"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: "Ingress"
+      - equal:
+          path: spec.rules[0].host
+          value: "console.domain.com"
+      - equal:
+          path: spec.tls[0].hosts[0]
+          value: "console.domain.com"
+  - it: should apply default annotation if not overriden
+    release:
+      name: test-release
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.secretName: "existingTestSecret"
+      env.DOMAIN: "domain.com"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: "Ingress"
+      - equal:
+          path: metadata.annotations
+          value:
+            kubernetes.io/ingress.allow-http: "false"
+            kubernetes.io/ingress.class: "nginx"
+            nginx.ingress.kubernetes.io/secure-backends: "true"
+            nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+            nginx.ingress.kubernetes.io/ssl-redirect: "false"
+            nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+            nginx.org/websocket-services: "test-release-ui-ext"
+  - it: should overide default annotation when provided
+    release:
+      name: test-release
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.secretName: "existingTestSecret"
+      env.DOMAIN: "domain.com"
+      console.service.ingress.annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: "Ingress"
+      - equal:
+          path: metadata.annotations
+          value:
+            kubernetes.io/ingress.allow-http: "false"
+            kubernetes.io/ingress.class: "nginx"
+            nginx.ingress.kubernetes.io/secure-backends: "true"
+            nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+            nginx.ingress.kubernetes.io/ssl-redirect: "false"
+            nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+            nginx.org/websocket-services: "test-release-ui-ext"
+  - it: should allow additional annotations to be specified
+    release:
+      name: test-release
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.secretName: "existingTestSecret"
+      env.DOMAIN: "domain.com"
+      console.service.ingress.annotations:
+        test-annotation: "test"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: "Ingress"
+      - equal:
+          path: metadata.annotations
+          value:
+            test-annotation: "test"
+            kubernetes.io/ingress.allow-http: "false"
+            kubernetes.io/ingress.class: "nginx"
+            nginx.ingress.kubernetes.io/secure-backends: "true"
+            nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+            nginx.ingress.kubernetes.io/ssl-redirect: "false"
+            nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+            nginx.org/websocket-services: "test-release-ui-ext"
+  - it: should have default labels
+    release:
+      name: test-release
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.secretName: "existingTestSecret"
+      env.DOMAIN: "domain.com"
+      console.service.ingress.annotations:
+        test-annotation: "test"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: "Ingress"
+      - equal:
+          path: metadata.labels
+          value:
+            app.kubernetes.io/name: "stratos"
+            app.kubernetes.io/component: "console-ingress"
+            app.kubernetes.io/instance: "test-release"
+            app.kubernetes.io/version: "0.1.0"
+            helm.sh/chart: "console-0.1.0"
+  - it: should allow extra labels to be set
+    release:
+      name: test-release
+    set:
+      console.service.ingress.enabled: true
+      console.service.ingress.secretName: "existingTestSecret"
+      console.service.ingress.extraLabels:
+        label1: "testLabel"
+        label2: "testLabel2"
+      env.DOMAIN: "domain.com"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: "Ingress"
+      - equal:
+          path: metadata.labels
+          value:
+            app.kubernetes.io/name: "stratos"
+            app.kubernetes.io/component: "console-ingress"
+            app.kubernetes.io/instance: "test-release"
+            app.kubernetes.io/version: "0.1.0"
+            helm.sh/chart: "console-0.1.0"
+            label1: "testLabel"
+            label2: "testLabel2"

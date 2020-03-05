@@ -1,11 +1,11 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
-import { schema } from 'normalizr';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
 
-import { EntityMonitor } from '../../monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
+import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
+import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 
 
 @Component({
@@ -40,10 +40,10 @@ export class LoadingPageComponent implements OnInit {
   alert = '';
 
   @Input()
-  private entityId: string;
+  entityId: string;
 
   @Input()
-  private entitySchema: schema.Entity;
+  entitySchema: EntitySchema;
 
   public isDeleting: Observable<boolean>;
 
@@ -58,10 +58,11 @@ export class LoadingPageComponent implements OnInit {
         );
       this.isDeleting = observableOf(false);
     } else if (this.entityId && this.entitySchema) {
-      this.buildFromMonitor(this.entityMonitorFactory.create(this.entityId, this.entitySchema.key, this.entitySchema));
+      this.buildFromMonitor(this.entityMonitorFactory.create(this.entityId, this.entitySchema));
     } else {
       this.isLoading = this.isDeleting = observableOf(false);
     }
+
     this.text$ = combineLatest(
       this.isLoading.pipe(startWith(false)),
       this.isDeleting.pipe(startWith(false))

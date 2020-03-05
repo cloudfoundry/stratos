@@ -2,23 +2,22 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
 
-import { DeleteQuotaDefinition } from '../../../../../../../store/src/actions/quota-definitions.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, ListViewTypes } from '../../list.component.types';
-import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfQuotasDataSourceService } from './cf-quotas-data-source.service';
 import { TableCellQuotaComponent } from './table-cell-quota/table-cell-quota.component';
+import { BaseCfListConfig } from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/base-cf/base-cf-list-config';
+import { ActiveRouteCfOrgSpace } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
+import { DeleteQuotaDefinition } from '../../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 
 export const QUOTA_FROM_LIST = 'list';
 
@@ -30,7 +29,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
   canDelete: Observable<boolean>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private datePipe: DatePipe,
     private confirmDialog: ConfirmationDialogService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

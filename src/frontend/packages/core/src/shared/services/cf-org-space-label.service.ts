@@ -2,13 +2,17 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { AppState } from '../../../../store/src/app-state';
-import { endpointSchemaKey, organizationSchemaKey, spaceSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
+import { haveMultiConnectedCfs } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
+import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
+import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
-import { haveMultiConnectedCfs } from '../../features/cloud-foundry/cf.helpers';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 
 export class CfOrgSpaceLabelService {
 
@@ -23,14 +27,18 @@ export class CfOrgSpaceLabelService {
    * @param spaceGuid Only important if using getValue
    */
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private cfGuid?: string,
     private orgGuid?: string,
     private spaceGuid?: string) {
     this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
-    this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointSchemaKey, this.cfGuid));
-    this.org$ = this.store.select<APIResource<IOrganization>>(selectEntity(organizationSchemaKey, this.orgGuid));
-    this.space$ = this.store.select<APIResource<ISpace>>(selectEntity(spaceSchemaKey, this.spaceGuid));
+    // FIXME: hide STRATOS_ENDPOINT_TYPE from extensions - STRAT-154
+    const endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+
+    this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointEntityKey, this.cfGuid));
+
+    this.org$ = this.store.select<APIResource<IOrganization>>(selectCfEntity(organizationEntityType, this.orgGuid));
+    this.space$ = this.store.select<APIResource<ISpace>>(selectCfEntity(spaceEntityType, this.spaceGuid));
   }
 
   getLabel(): Observable<string> {
@@ -46,7 +54,7 @@ export class CfOrgSpaceLabelService {
       this.space$,
       this.multipleConnectedEndpoints$
     ).pipe(
-      filter(([cf, org, space, multipleConnectedEndpoints]) => !!cf && !!org && !!space),
+      filter(([cf, org, space]) => !!cf && !!org && !!space),
       first(),
       map(([cf, org, space, multipleConnectedEndpoints]) =>
         multipleConnectedEndpoints ? `${cf.name}/${org.entity.name}/${space.entity.name}` : `${org.entity.name}/${space.entity.name}`

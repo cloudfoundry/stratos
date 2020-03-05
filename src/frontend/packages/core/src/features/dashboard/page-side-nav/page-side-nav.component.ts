@@ -6,7 +6,7 @@ import { Observable, of } from 'rxjs';
 import { AppState } from '../../../../../store/src/app-state';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { TabNavService } from '../../../../tab-nav.service';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 
@@ -41,10 +41,10 @@ export class PageSideNavComponent implements OnInit {
   public breadcrumbs$: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;
   constructor(
+    public tabNavService: TabNavService,
     private store: Store<AppState>,
     private esf: EntityServiceFactory,
     private activatedRoute: ActivatedRoute,
-    public tabNavService: TabNavService
   ) {
     this.isMobile$ = this.store.select(selectIsMobile);
   }

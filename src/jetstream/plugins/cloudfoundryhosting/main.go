@@ -74,22 +74,19 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *interfaces.PortalConfig)
 		}
 	}
 
+	// Update Database migration status depending on app instance index and SQLite
+	if !isSQLite && envLookup.IsSet("CF_INSTANCE_INDEX") {
+		if appInstanceIndex, ok := envLookup.Lookup("CF_INSTANCE_INDEX"); ok {
+			if index, err := strconv.Atoi(appInstanceIndex); err == nil {
+				jetstreamConfig.CanMigrateDatabaseSchema = (index == 0)
+				log.Infof("Skipping DB migration => not index 0 (%d)", index)
+			}
+		}
+	}
 }
 
 // Init creates a new CFHosting plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
-
-	// Update Database migration status depending on app instance index and SQLite
-	if portalProxy.Env().IsSet(VCapApplication) {
-		isSQLite := portalProxy.GetConfig().DatabaseProviderName == SQLiteProviderName
-		if !isSQLite && portalProxy.Env().IsSet("CF_INSTANCE_INDEX") {
-			if appInstanceIndex, ok := portalProxy.Env().Lookup("CF_INSTANCE_INDEX"); ok {
-				if index, err := strconv.Atoi(appInstanceIndex); err == nil {
-					portalProxy.SetCanPerformMigrations(index == 0)
-				}
-			}
-		}
-	}
 
 	return &CFHosting{portalProxy: portalProxy}, nil
 }
@@ -124,12 +121,12 @@ func (ch *CFHosting) Init() error {
 
 		ch.portalProxy.GetConfig().ConsoleConfig = new(interfaces.ConsoleConfig)
 
-		//Force auth endpoint type to remote (CF UAA)
-		ch.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType = "remote"
-
 		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClient = ch.portalProxy.GetConfig().CFClient
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClientSecret = ch.portalProxy.GetConfig().CFClientSecret
+
+		//Set the auth endpoint type for the console
+		ch.portalProxy.GetConfig().ConsoleConfig.AuthEndpointType = ch.portalProxy.GetConfig().AuthEndpointType
 
 		// Ensure that the identifier for an admin is the standard Cloud Foundry one
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = ch.portalProxy.GetConfig().CFAdminIdentifier

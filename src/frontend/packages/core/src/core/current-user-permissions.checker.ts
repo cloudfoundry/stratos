@@ -1,24 +1,29 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs/operators';
 
-import { AppState } from '../../../store/src/app-state';
-import { entityFactory, featureFlagSchemaKey } from '../../../store/src/helpers/entity-factory';
+import {
+  createCfFeatureFlagFetchAction,
+} from '../../../cloud-foundry/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import {
   getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
   getCurrentUserCFGlobalState,
+} from '../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
+import {
+  IOrgRoleState,
+  ISpaceRoleState,
+  ISpacesRoleState,
+} from '../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
+import { GeneralEntityAppState } from '../../../store/src/app-state';
+import { PaginationMonitor } from '../../../store/src/monitors/pagination-monitor';
+import { getPaginationObservables } from '../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import {
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
-} from '../../../store/src/selectors/current-user-roles-permissions-selectors/role.selectors';
-import { endpointsRegisteredEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
-import { APIResource } from '../../../store/src/types/api.types';
-import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../../../store/src/types/current-user-roles.types';
+} from '../../../store/src/selectors/current-user-role.selectors';
+import { connectedEndpointsSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
-import {
-  createCFFeatureFlagPaginationKey,
-} from '../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
-import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { IFeatureFlag } from './cf-api.types';
 import {
   PermissionConfig,
@@ -27,6 +32,7 @@ import {
   PermissionValues,
   ScopeStrings,
 } from './current-user-permissions.config';
+
 
 export interface IConfigGroups {
   [permissionType: string]: IConfigGroup;
@@ -38,7 +44,7 @@ export enum CHECKER_GROUPS {
 export type IConfigGroup = PermissionConfig[];
 export class CurrentUserPermissionsChecker {
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<GeneralEntityAppState>, ) { }
   public check(
     type: PermissionTypes,
     permission: PermissionValues,
@@ -182,7 +188,6 @@ export class CurrentUserPermissionsChecker {
 
   public getFeatureFlagChecks(configs: PermissionConfig[], endpointGuid?: string): Observable<boolean>[] {
     return configs.map(config => {
-      const { type } = config;
       return this.getFeatureFlagCheck(config, endpointGuid);
     });
   }
@@ -192,23 +197,39 @@ export class CurrentUserPermissionsChecker {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
       switchMap(guids => {
-        const paginationKeys = guids.map(guid => createCFFeatureFlagPaginationKey(guid));
-        return combineLatest(
-          paginationKeys.map(
-            key => new PaginationMonitor<APIResource<IFeatureFlag>>(this.store, key, entityFactory(featureFlagSchemaKey)).currentPage$
-          ));
+        return combineLatest(guids.map(
+          guid => {
+            // For admins we don't have the ff list which is usually fetched right at the start,
+            // so this can't be a pagination monitor on its own (which doesn't fetch if list is missing)
+            const action = createCfFeatureFlagFetchAction(guid);
+            return getPaginationObservables<IFeatureFlag>(
+              {
+                store: this.store,
+                action,
+                paginationMonitor: new PaginationMonitor<IFeatureFlag>(
+                  this.store,
+                  action.paginationKey,
+                  action,
+                  true
+                )
+              },
+              true
+            ).entities$;
+          }
+        ));
       }),
       map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
+      startWith(false),
       distinctUntilChanged()
     );
   }
 
-  public checkFeatureFlag(featureFlags: APIResource<IFeatureFlag>[], permission: CFFeatureFlagTypes) {
-    const flag = featureFlags.find(ff => ff.entity.name === permission.toString());
+  public checkFeatureFlag(featureFlags: IFeatureFlag[], permission: CFFeatureFlagTypes) {
+    const flag = featureFlags.find(ff => ff.name === permission.toString());
     if (!flag) {
       return false;
     }
-    return flag.entity.enabled;
+    return flag.enabled;
   }
 
   public getAdminCheck(endpointGuid: string) {
@@ -299,7 +320,7 @@ export class CurrentUserPermissionsChecker {
   }
 
   private getAllEndpointGuids() {
-    return this.store.select(endpointsRegisteredEntitiesSelector).pipe(
+    return this.store.select(connectedEndpointsSelector).pipe(
       map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf').map(endpoint => endpoint.guid))
     );
   }

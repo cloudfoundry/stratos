@@ -1,0 +1,26 @@
+<app-page-sub-nav>
+
+  <mat-button-toggle-group class="toolbar" [value]="viewType$ | async"
+    (change)="viewTypeChange($event.value)" name="view" aria-label="View">
+    <mat-button-toggle value="user">User</mat-button-toggle>
+    <mat-button-toggle value="chart">Chart</mat-button-toggle>
+    <mat-button-toggle value="combined">Combined</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <button mat-button name="expand_all" (click)="viewer.expand()" matTooltip="Expand all">
+    <mat-icon>expand_more</mat-icon>
+    <span>Expand all</span>
+  </button>
+  <button mat-button name="collapse_all" (click)="viewer.collapse()" matTooltip="Collapse all">
+    <mat-icon>expand_less</mat-icon>
+    <span>Collapse all</span>
+  </button>
+</app-page-sub-nav>
+
+<app-json-viewer #viewer [json]="values$ | async"></app-json-viewer>
+<!-- <div *ngIf="values$ | async as values; else noValues">
+  <app-json-viewer #viewer [json]="values"></app-json-viewer>
+</div> -->
+<ng-template #noValues>
+  <app-no-content-message [icon]="'list'" [firstLine]="'There are no release values'"></app-no-content-message>
+</ng-template>

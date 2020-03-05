@@ -1,8 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
+import { appReducers } from 'frontend/packages/store/src/reducers.module';
 
 import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';
@@ -27,8 +28,8 @@ describe('ConsoleUaaWizardComponent', () => {
         PageHeaderModule,
         ReactiveFormsModule,
         MDAppModule,
-        StoreModule.forRoot({}),
-        BrowserAnimationsModule,
+        StoreModule.forRoot(appReducers),
+        NoopAnimationsModule,
       ],
       providers: [TabNavService]
     })

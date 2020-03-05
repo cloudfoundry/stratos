@@ -1,38 +1,37 @@
-
-import { Observable } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
+import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-
-import { IListAction } from '../../list.component.types';
-import { GithubCommitsDataSource } from './github-commits-data-source';
-import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/src/cf-types';
 import {
-  StoreCFSettings,
   CheckProjectExists,
   SetAppSourceDetails,
   SetDeployBranch,
   SetDeployCommit,
-  FetchBranchesForProject
-} from '../../../../../../../store/src/actions/deploy-applications.actions';
+  StoreCFSettings,
+} from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { gitBranchesEntityType, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
+import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
+import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
+import { GitBranch, GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { entityFactory, gitBranchesSchemaKey, gitCommitSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { selectEntity } from '../../../../../../../store/src/selectors/api.selectors';
-import { GitCommit } from '../../../../../../../store/src/types/git.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
+import { IListAction } from '../../list.component.types';
+import { GithubCommitsDataSource } from './github-commits-data-source';
+import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
+
 
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
 
-  private listActionRedeploy: IListAction<APIResource<GitCommit>> = {
+  private listActionRedeploy: IListAction<GitCommit> = {
     action: (commitEntity) => {
       // set CF data
       this.store.dispatch(
@@ -57,7 +56,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       // Set branch
       this.store.dispatch(new SetDeployBranch(this.branchName));
       // Set Commit
-      this.store.dispatch(new SetDeployCommit(commitEntity.entity.sha));
+      this.store.dispatch(new SetDeployCommit(commitEntity.sha));
 
       this.store.dispatch(
         new RouterNav({
@@ -70,20 +69,20 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
     description: ``,
   };
 
-  private listActionCompare: IListAction<APIResource<GitCommit>> = {
+  private listActionCompare: IListAction<GitCommit> = {
     action: (compareToCommit) => {
-      window.open(this.getCompareURL(compareToCommit.entity.sha), '_blank');
+      window.open(this.getCompareURL(compareToCommit.sha), '_blank');
     },
     label: 'Compare',
     description: '',
-    createEnabled: (commit$: Observable<APIResource<GitCommit>>) => {
+    createEnabled: (commit$: Observable<GitCommit>) => {
       return commit$.pipe(map(commit => {
-        const isDeployedCommit = commit.entity.sha === this.deployedCommitSha;
+        const isDeployedCommit = commit.sha === this.deployedCommitSha;
         if (!isDeployedCommit) {
           // The github url will show 'no change' if the compare to commit is earlier in the tree than the deployed commit. We could swap
           // these around for those cases... however the diff +/- is then incorrect. So until we have a better way of doing this disable
           // the button instead
-          return this.deployedTime < moment(commit.entity.commit.author.date).unix();
+          return this.deployedTime < moment(commit.commit.author.date).unix();
         }
         return false;
       }));
@@ -100,7 +99,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   private scm: GitSCM;
 
   constructor(
-    store: Store<AppState>,
+    store: Store<CFAppState>,
     datePipe: DatePipe,
     private scmService: GitSCMService,
     private applicationService: ApplicationService,
@@ -133,17 +132,20 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.scm = this.scmService.getSCM(scmType as GitSCMType);
 
       const branchKey = `${scmType}-${this.projectName}-${stratosProject.deploySource.branch}`;
-      const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
-        gitBranchesSchemaKey,
-        entityFactory(gitBranchesSchemaKey),
+      const gitBranchesEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, gitBranchesEntityType);
+      const fetchBranchesActionBuilder = gitBranchesEntity.actionOrchestrator.getActionBuilder('get');
+      const fetchBranchesAction = fetchBranchesActionBuilder(this.projectName, this.cfGuid, {
+        scm: this.scm,
+        projectName: this.projectName
+      });
+      const gitBranchEntityService = this.entityServiceFactory.create<GitBranch>(
         branchKey,
-        new FetchBranchesForProject(this.scm, this.projectName),
-        false
+        fetchBranchesAction
       );
       gitBranchEntityService.waitForEntity$.pipe(
         first(),
       ).subscribe(branch => {
-        this.branchName = branch.entity.entity.name;
+        this.branchName = branch.entity.name;
         this.dataSource = new GithubCommitsDataSource(
           this.store, this, this.scm, this.projectName, this.branchName, this.deployedCommitSha);
         this.initialised.next(true);
@@ -160,11 +162,10 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   private setDeployedCommitDetails() {
     const scmType = this.scm.getType();
     this.store.select(
-      selectEntity<APIResource<GitCommit>>(gitCommitSchemaKey, scmType + '-' + this.projectName + '-' + this.deployedCommitSha))
+      selectCfEntity<GitCommit>(gitCommitEntityType, scmType + '-' + this.projectName + '-' + this.deployedCommitSha))
       .pipe(
         filter(deployedCommit => !!deployedCommit),
         first(),
-        map(deployedCommit => deployedCommit.entity)
       ).subscribe(deployedCommit => {
         this.deployedCommit = deployedCommit;
         this.deployedTime = moment(this.deployedCommit.commit.author.date).unix();

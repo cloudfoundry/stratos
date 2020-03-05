@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { formatCPUTime } from '../../../kubernetes-metrics.helpers';
 
 @Component({
   selector: 'app-kubernetes-node-simple-metric',
@@ -15,4 +16,14 @@ export class KubernetesNodeSimpleMetricComponent {
 
   @Input()
   unit: string;
+
+  public formatValue() {
+    switch (this.unit) {
+      case 'secs':
+        return formatCPUTime(this.value);
+      default:
+        const unit = this.unit || '';
+        return `${this.value} ${unit}`;
+    }
+  }
 }

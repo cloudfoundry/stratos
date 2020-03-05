@@ -7,6 +7,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -47,7 +48,7 @@ func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 	
 	//Generate a user GUID and hash the password
 	userGUID := uuid.NewV4().String()
-	passwordHash, err := HashPassword(password)
+	passwordHash, err := crypto.HashPassword(password)
 	if err != nil {
 		log.Errorf("Error hashing user password: %v", err)
 		return "", err

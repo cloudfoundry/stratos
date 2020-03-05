@@ -1,0 +1,17 @@
+@import '~@angular/material/theming';
+@mixin app-deploy-app-theme($theme, $app-theme) {
+  $is-dark: map-get($theme, is-dark);
+
+  $ansi-colors: map-get($app-theme, ansi-colors);
+  $background-color: map-get(map-get($ansi-colors, 'white'), intense);
+
+  @if $is-dark == true {
+    $background-colors: map-get($theme, background);
+    $foreground-colors: map-get($theme, foreground);
+    $background-color: lighten(mat-color($background-colors, background), 5%);
+  }
+
+  .deploy-app {
+    background-color: $background-color;
+  }
+}

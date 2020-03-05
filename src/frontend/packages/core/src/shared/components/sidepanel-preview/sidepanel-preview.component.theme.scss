@@ -1,0 +1,29 @@
+@mixin app-sidepanel-preview-theme($theme, $app-theme) {
+  $primary: map-get($theme, primary);
+  $background-color: map-get($app-theme, app-background-color);
+  $darker-background-color: darken($background-color, 4%);
+  $foreground: map-get($theme, foreground);
+
+  .sidepanel-preview__header {
+    background-color: $darker-background-color;
+    border-top: 1px solid mat-color($foreground, divider);
+  }
+
+  .sidepanel-preview__content {
+    background-color: map-get($app-theme, app-background-color);
+
+    > h1:first-child {
+      height: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+    blockquote {
+      border-left: 4px solid mat-color($primary);
+      margin: 0;
+      padding-left: 12px;
+    }
+    ol > li {
+      margin-bottom: 4px;
+    }
+  }
+}

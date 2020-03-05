@@ -1,18 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
 import { mergeMap } from 'rxjs/operators';
 
-import { UPDATE_SUCCESS, UpdateExistingApplication } from '../actions/application.actions';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
+import { AppMetadataTypes } from '../../../cloud-foundry/src/actions/app-metadata.actions';
+import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
+import { appEnvVarsEntityType, appStatsEntityType, appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-types';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { WrapperRequestActionSuccess } from '../types/request.types';
-import {
-  AppMetadataTypes,
-  GetAppEnvVarsAction,
-  GetAppStatsAction,
-  GetAppSummaryAction,
-} from './../actions/app-metadata.actions';
-import { AppState } from './../app-state';
 
 
 
@@ -20,9 +15,7 @@ import { AppState } from './../app-state';
 export class UpdateAppEffects {
 
   constructor(
-    private http: Http,
-    private actions$: Actions,
-    private store: Store<AppState>
+    private actions$: Actions
   ) {
   }
 
@@ -36,10 +29,15 @@ export class UpdateAppEffects {
         switch (updateEntity) {
           case AppMetadataTypes.ENV_VARS:
             // This is done so the app metadata env vars environment_json matches that of the app
-            actions.push(new GetAppEnvVarsAction(action.apiAction.guid, action.apiAction.endpointGuid));
+            const appEnvVarsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+            const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
+            const getAppEnvVarsAction = actionBuilder(action.apiAction.guid, action.apiAction.endpointGuid as string);
+            actions.push(getAppEnvVarsAction);
             break;
           case AppMetadataTypes.STATS:
-            const statsAction = new GetAppStatsAction(action.apiAction.guid, action.apiAction.endpointGuid);
+            const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+            const appStatsActionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
+            const statsAction = appStatsActionBuilder(action.apiAction.guid, action.apiAction.endpointGuid as string);
             // Application has changed and the associated app stats need to also be updated.
             // Apps that are started can just make the stats call to update cached stats, however this call will fail for stopped apps.
             // For those cases create a fake stats request response that should result in the same thing
@@ -50,13 +48,13 @@ export class UpdateAppEffects {
             }
             break;
           case AppMetadataTypes.SUMMARY:
-            actions.push(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.endpointGuid));
+            const appSummaryEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
+            const appSummaryActionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
+            const getAppSummaryAction = appSummaryActionBuilder(action.apiAction.guid, action.apiAction.endpointGuid as string);
+            actions.push(getAppSummaryAction);
             break;
         }
       });
-
-
       return actions;
     }));
-
 }

@@ -1,22 +1,22 @@
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 
-import { AppState } from '../../store/src/app-state';
-import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { AppStat } from '../../store/src/types/app-metadata.types';
-import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
-import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
-import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
+import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
+import { ApplicationData, ApplicationService } from '../../cloud-foundry/src/features/applications/application.service';
 import {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,
-} from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+} from '../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
+import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
+import { APIResource, EntityInfo } from '../../store/src/types/api.types';
+import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
+import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../src/shared/components/application-state/application-state.service';
-import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -31,8 +31,10 @@ function createEntity<T>(entity: T): APIResource<T> {
 }
 
 export class ApplicationServiceMock {
-  cfGuid = 'mockCfGuid';
-  appGuid = 'mockAppGuid';
+  static cfGuid = 'mockCfGuid';
+  static appGuid = 'mockAppGuid';
+  cfGuid = ApplicationServiceMock.cfGuid;
+  appGuid = ApplicationServiceMock.appGuid;
   application$: Observable<ApplicationData> = observableOf(({
     cf: {
       guid: 'mockCfGuid'
@@ -52,12 +54,12 @@ export class ApplicationServiceMock {
   app$: Observable<EntityInfo<APIResource<IApp>>> = observableOf({
     entity: { entity: {} }
   } as EntityInfo<APIResource<IApp>>);
-  appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>> = observableOf({
+  appSummary$: Observable<EntityInfo<IAppSummary>> = observableOf({
     entityRequestInfo: { fetching: false }
-  } as EntityInfo<APIResource<IAppSummary>>);
-  appStats$: Observable<APIResource<AppStat>[]> = observableOf(new Array<APIResource<AppStat>>());
+  } as EntityInfo<IAppSummary>);
+  appStats$: Observable<AppStat[]> = observableOf(new Array<AppStat>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
-    observableOf({ deploySource: { type: '', timestamp: 0, commit: '' }, deployOverrides: null });
+    observableOf({ deploySource: { type: 'github', timestamp: 0, commit: '' }, deployOverrides: null });
   isFetchingApp$: Observable<boolean> = observableOf(false);
   isFetchingEnvVars$: Observable<boolean> = observableOf(false);
   isUpdatingEnvVars$: Observable<boolean> = observableOf(false);
@@ -84,15 +86,15 @@ export class ApplicationServiceMock {
   orgDomains$: Observable<APIResource<IDomain>[]> = observableOf([]);
 }
 
-export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
+export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: string) {
   return {
     provide: ApplicationService,
     useFactory: (
-      store: Store<AppState>,
+      store: Store<CFAppState>,
       entityServiceFactory: EntityServiceFactory,
       applicationStateService: ApplicationStateService,
       applicationEnvVarsService: ApplicationEnvVarsHelper,
-      paginationMonitorFactory: PaginationMonitorFactory
+      paginationMonitorFactory: PaginationMonitorFactory,
     ) => {
       const appService = new ApplicationService(
         cfGuid,

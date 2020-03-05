@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
+
 import { TableCellCustom } from '../../../../../shared/components/list/list.types';
+import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesNode } from '../../../store/kube.types';
 
 @Component({
@@ -8,7 +9,7 @@ import { KubernetesNode } from '../../../store/kube.types';
   templateUrl: './kubernetes-node-link.component.html',
   styleUrls: ['./kubernetes-node-link.component.scss']
 })
-export class KubernetesNodeLinkComponent<T> extends TableCellCustom<KubernetesNode> implements OnInit {
+export class KubernetesNodeLinkComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 
   public nodeLink;
   constructor(

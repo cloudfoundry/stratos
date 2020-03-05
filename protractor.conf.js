@@ -78,7 +78,7 @@ const longSuite = globby.sync([
   './src/test-e2e/cloud-foundry/space-level/space-users-list-e2e.spec.ts'
 ])
 
-const longSuite2 = globby.sync([
+const manageUsersSuite = globby.sync([
   './src/test-e2e/cloud-foundry/manage-users-stepper-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/cf-level/cf-users-removal-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/org-level/org-users-removal-e2e.spec.ts',
@@ -88,13 +88,31 @@ const longSuite2 = globby.sync([
   './src/test-e2e/cloud-foundry/space-level/space-invite-user-e2e.spec.ts'
 ])
 
-const fullMinusLongSuites = globby.sync([
-  ...fullSuite,
-  ...longSuite.map(file => '!' + file),
-  ...longSuite2.map(file => '!' + file),
+const coreSuite = globby.sync([
+  './src/test-e2e/check/check-login-e2e.spec.ts',
+  './src/test-e2e/endpoints/endpoints-connect-e2e.spec.ts',
+  './src/test-e2e/endpoints/endpoints-e2e.spec.ts',
+  './src/test-e2e/endpoints/endpoints-register-e2e.spec.ts',
+  './src/test-e2e/endpoints/endpoints-unregister-e2e.spec.ts',
+  './src/test-e2e/home/home-e2e.spec.ts',
+  './src/test-e2e/login/login-e2e.spec.ts',
+  './src/test-e2e/login/login-sso-e2e.spec.ts',
+  './src/test-e2e/metrics/metrics-registration-e2e.spec.ts',
 ])
 
-exports.config = {
+const autoscalerSuite = globby.sync([
+  './src/test-e2e/application/application-autoscaler-e2e.spec.ts',
+])
+
+const fullMinusOtherSuites = globby.sync([
+  ...fullSuite,
+  ...longSuite.map(file => '!' + file),
+  ...manageUsersSuite.map(file => '!' + file),
+  ...coreSuite.map(file => '!' + file),
+  ...autoscalerSuite.map(file => '!' + file),
+])
+
+const config = {
   allScriptsTimeout: timeout,
   // Exclude the dashboard tests from all suites for now
   exclude: [
@@ -110,12 +128,20 @@ exports.config = {
       ...longSuite,
       ...excludeTests
     ]),
-    longSuite2: globby.sync([
-      ...longSuite2,
+    manageUsers: globby.sync([
+      ...manageUsersSuite,
       ...excludeTests
     ]),
-    fullMinusLongSuite: globby.sync([
-      ...fullMinusLongSuites,
+    core: globby.sync([
+      ...coreSuite,
+      ...excludeTests
+    ]),
+    autoscaler: globby.sync([
+      ...autoscalerSuite,
+      ...excludeTests
+    ]),
+    fullMinusOtherSuites: globby.sync([
+      ...fullMinusOtherSuites,
       ...excludeTests
     ]),
     sso: globby.sync([
@@ -144,6 +170,14 @@ exports.config = {
   },
   params: secrets,
   onPrepare() {
+    // https://webdriver.io/docs/api/chromium.html#setnetworkconditions
+    // browser.driver.setNetworkConditions({
+    //   offline: false,
+    //   latency: 2000, // Additional latency (ms).
+    //   download_throughput: 500 * 1024 * 1024, // Maximal aggregated download throughput.
+    //   upload_throughput: 500 * 1024 * 1024 // Maximal aggregated upload throughput.
+    // });
+
     skipPlugin.install(jasmine);
     require('ts-node').register({
       project: 'src/test-e2e/tsconfig.e2e.json'
@@ -206,10 +240,15 @@ exports.config = {
       .on("error", (err) => {
         defer.reject('Failed to validate Github API Url: ' + err.message);
       });
-    return defer.promise;
+
+    // Print out success, errors fall through
+    return defer.promise.then(res => console.log(res));
   }
 };
-
+if (process.env['STRATOS_E2E_BASE_URL']) {
+  config.baseUrl = process.env['STRATOS_E2E_BASE_URL'];
+}
+exports.config = config
 // Should we run e2e tests in headless Chrome?
 const headless = secrets.headless || process.env['STRATOS_E2E_HEADLESS'];
 if (headless) {

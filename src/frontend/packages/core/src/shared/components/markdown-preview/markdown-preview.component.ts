@@ -4,13 +4,14 @@ import { DomSanitizer } from '@angular/platform-browser';
 import * as markdown from 'marked';
 
 import { LoggerService } from '../../../core/logger.service';
+import { PreviewableComponent } from '../../previewable-component';
 
 @Component({
   selector: 'app-markdown-preview',
   templateUrl: './markdown-preview.component.html',
   styleUrls: ['./markdown-preview.component.scss']
 })
-export class MarkdownPreviewComponent {
+export class MarkdownPreviewComponent implements PreviewableComponent {
 
   markdownHtml: string;
   documentUrl: string;
@@ -25,9 +26,17 @@ export class MarkdownPreviewComponent {
     }
   }
 
-  @ViewChild('markdown') public markdown: ElementRef;
+  @ViewChild('markdown', { static: true }) public markdown: ElementRef;
 
-  constructor(private httpClient: HttpClient, private logger: LoggerService, private domSanitizer: DomSanitizer) { }
+  constructor(
+    private httpClient: HttpClient,
+    private logger: LoggerService,
+    private domSanitizer: DomSanitizer
+  ) { }
+
+  setProps(props: { [key: string]: any }) {
+    this.setDocumentUrl = props.documentUrl;
+  }
 
   private loadDocument() {
     this.httpClient.get(this.documentUrl, { responseType: 'text' }).subscribe(
@@ -55,12 +64,10 @@ export class MarkdownPreviewComponent {
     const h1 = this.markdown.nativeElement.getElementsByTagName('h1');
     if (this.title === null) {
       if (h1.length > 0) {
-        // this.title = titleElement.innerText;
         window.setTimeout(() => {
           const titleElement = h1[0];
           const titleText = titleElement.innerText;
           this.title = titleText;
-          // console.log('Got title: ' + titleText);
         }, 100);
       } else {
         this.title = 'Help';

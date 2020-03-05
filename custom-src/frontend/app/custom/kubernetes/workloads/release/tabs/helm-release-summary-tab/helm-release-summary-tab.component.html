@@ -1,0 +1,87 @@
+<app-page-sub-nav *ngIf="!(isBusy$ | async)">
+  <button mat-button name="delete" (click)="deleteRelease()" matTooltip="Delete">
+    <mat-icon>delete</mat-icon>
+    <span>Delete</span>
+  </button>
+</app-page-sub-nav>
+
+<app-loading-page [isLoading]="isBusy$" [text]="loadingMessage">
+  <ng-container *ngIf="helmReleaseHelper.release$ | async as release">
+    <app-entity-summary-title [imagePath]="release.chart.metadata.icon" [title]="release.name"
+      [subText]="release.chart.metadata.description" [subTitle]="release.chart.metadata.name"
+      [fallBackIcon]="'workloads'" [fallBackIconFont]="'stratos-icons'">
+      <div class="summary">
+        <div class="chart-details">
+          <app-metadata-item class="chart-details__item" label="Chart Version">{{ release.chart.metadata.version }}
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Application Version">
+            {{ release.chart.metadata.appVersion || '-' }}
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Cluster">
+            <a [routerLink]="createClusterLink()">{{ getClusterName() | async }}</a>
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Namespace">
+            <a [routerLink]="createNamespaceLink(release.namespace)">{{ release.namespace }}</a>
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Release Version">{{ release.version }}
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Status">{{ release.status | titlecase }}
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="First Deployed">
+            {{ release.info.first_deployed | date:'medium' }}
+          </app-metadata-item>
+          <app-metadata-item class="chart-details__item" label="Last Deployed">
+            {{ release.info.last_deployed | date:'medium' }}
+          </app-metadata-item>
+        </div>
+      </div>
+    </app-entity-summary-title>
+    <div *ngIf="hasResources$ | async; else loadingResources" class="resources">
+      <app-metadata-item class="chart-details__item" label="Pods and Containers"></app-metadata-item>
+      <app-tile-grid>
+        <app-tile-group *ngIf="chartData$ | async as chartData">
+          <app-tile>
+            <mat-card class="full-card">
+              <app-ring-chart [customColors]="podChartColors" [data]="chartData.podsChartData" label="Pods">
+              </app-ring-chart>
+            </mat-card>
+          </app-tile>
+          <app-tile>
+            <mat-card class="full-card">
+              <app-ring-chart [customColors]="containersChartColors" [data]="chartData.containersChartData"
+                label="Containers"></app-ring-chart>
+            </mat-card>
+          </app-tile>
+        </app-tile-group>
+      </app-tile-grid>
+
+      <app-metadata-item class="chart-details__item" label="All Resources"></app-metadata-item>
+      <div *ngIf="hasAllResources$ | async; else stillLoadingResources">
+        <div *ngIf="resources$ | async as resources" class="grid">
+          <app-card-number-metric *ngFor="let res of resources" label="{{ res.label }}" icon="{{ res.icon.name }}"
+            iconFont="{{ res.icon.font }}" value="{{ res.count }}">
+          </app-card-number-metric>
+        </div>
+      </div>
+      <ng-template #stillLoadingResources>
+        <div class="resources__loading">
+          <div class="resources__loading__content">
+            Updating Resource Information
+            <mat-progress-bar class="" [color]="'primary'" mode="indeterminate">
+            </mat-progress-bar>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+    <ng-template #loadingResources>
+      <div class="resources__loading">
+        <div class="resources__loading__content">
+          Loading Resources
+          <mat-progress-bar class="" [color]="'primary'" mode="indeterminate">
+          </mat-progress-bar>
+        </div>
+      </div>
+
+    </ng-template>
+  </ng-container>
+</app-loading-page>

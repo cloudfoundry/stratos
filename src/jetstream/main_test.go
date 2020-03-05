@@ -63,17 +63,18 @@ func TestLoadPortalConfig(t *testing.T) {
 	var pc interfaces.PortalConfig
 
 	result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
-		"HTTP_CLIENT_TIMEOUT_IN_SECS":          "10",
-		"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS": "35",
-		"SKIP_SSL_VALIDATION":                  "true",
-		"CONSOLE_PROXY_TLS_ADDRESS":            ":8080",
-		"CONSOLE_CLIENT":                       "portal-proxy",
-		"CONSOLE_CLIENT_SECRET":                "ohsosecret!",
-		"CF_CLIENT":                            "portal-proxy",
-		"CF_CLIENT_SECRET":                     "ohsosecret!",
-		"UAA_ENDPOINT":                         "https://login.cf.org.com:443",
-		"ALLOWED_ORIGINS":                      "https://localhost,https://127.0.0.1",
-		"SESSION_STORE_SECRET":                 "cookiesecret",
+		"HTTP_CLIENT_TIMEOUT_IN_SECS":             "10",
+		"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS":    "35",
+		"HTTP_CLIENT_TIMEOUT_LONGRUNNING_IN_SECS": "123",
+		"SKIP_SSL_VALIDATION":                     "true",
+		"CONSOLE_PROXY_TLS_ADDRESS":               ":8080",
+		"CONSOLE_CLIENT":                          "portal-proxy",
+		"CONSOLE_CLIENT_SECRET":                   "ohsosecret!",
+		"CF_CLIENT":                               "portal-proxy",
+		"CF_CLIENT_SECRET":                        "ohsosecret!",
+		"UAA_ENDPOINT":                            "https://login.cf.org.com:443",
+		"ALLOWED_ORIGINS":                         "https://localhost,https://127.0.0.1",
+		"SESSION_STORE_SECRET":                    "cookiesecret",
 	})))
 
 	if err != nil {
@@ -129,7 +130,7 @@ func TestLoadDatabaseConfig(t *testing.T) {
 		"DB_HOST":                    "localhost",
 		"DB_PORT":                    "5432",
 		"DB_CONNECT_TIMEOUT_IN_SECS": "5",
-		"DB_SSL_MODE":                "disable",
+		"DB_SSL_MODE":                "false",
 	})))
 
 	if err != nil {

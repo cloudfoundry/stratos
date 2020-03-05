@@ -30,23 +30,19 @@ type Repo struct {
 
 // Chart is a higher-level representation of a chart package
 type Chart struct {
-	ID            string             `json:"" bson:"_id"`
-	Name          string             `json:"name"`
-	Repo          Repo               `json:"repo"`
-	Description   string             `json:"description"`
-	Home          string             `json:"home"`
-	Keywords      []string           `json:"keywords"`
-	Maintainers   []chart.Maintainer `json:"maintainers"`
-	Sources       []string           `json:"sources"`
-	Icon          string             `json:"icon"`
-	RawIcon       []byte             `json:"-" bson:"raw_icon"`
-	ChartVersions []ChartVersion     `json:"chart_versions,omitempty"`
+	ID              string             `json:"-" bson:"_id"`
+	Name            string             `json:"name"`
+	Repo            Repo               `json:"repo"`
+	Description     string             `json:"description"`
+	Home            string             `json:"home"`
+	Keywords        []string           `json:"keywords"`
+	Maintainers     []chart.Maintainer `json:"maintainers"`
+	Sources         []string           `json:"sources"`
+	Icon            string             `json:"icon"`
+	RawIcon         []byte             `json:"-" bson:"raw_icon"`
+	IconContentType string             `json:"-" bson:"icon_content_type,omitempty"`
+	ChartVersions   []ChartVersion     `json:"-"`
 }
-
-// type ChartWithVersions struct {
-// 	Chart
-// 	Versions []ChartVersion `json:"versions"`
-// }
 
 // ChartVersion is a representation of a specific version of a chart
 type ChartVersion struct {
@@ -57,6 +53,7 @@ type ChartVersion struct {
 	URLs       []string  `json:"urls"`
 	Readme     string    `json:"readme" bson:"-"`
 	Values     string    `json:"values" bson:"-"`
+	Schema     string    `json:"schema" bson:"-"`
 }
 
 // ChartFiles holds the README and values for a given chart version
@@ -64,4 +61,13 @@ type ChartFiles struct {
 	ID     string `bson:"_id"`
 	Readme string
 	Values string
+	Schema string
+}
+
+//RepoCheck describes the state of a repository in terms its current checksum and last update time.
+//It is used to determine whether or not to re-sync a respository.
+type RepoCheck struct {
+	ID         string    `bson:"_id"`
+	LastUpdate time.Time `bson:"last_update"`
+	Checksum   string    `bson:"checksum"`
 }

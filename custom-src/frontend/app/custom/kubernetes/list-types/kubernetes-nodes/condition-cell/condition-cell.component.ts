@@ -35,20 +35,3 @@ export class ConditionCellComponent extends TableCellCustom<KubernetesNode> impl
   }
 
 }
-
-export class SubtleConditionCellComponent extends ConditionCellComponent {
-
-  constructor() {
-    super();
-    this.subtle = true;
-  }
-}
-
-
-export class InverseConditionCellComponent extends ConditionCellComponent {
-
-  constructor() {
-    super();
-    this.inverse = true;
-  }
-}

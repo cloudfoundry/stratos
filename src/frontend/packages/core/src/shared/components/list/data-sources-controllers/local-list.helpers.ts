@@ -1,4 +1,5 @@
 import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 
 export class LocalPaginationHelpers {
 
@@ -17,7 +18,10 @@ export class LocalPaginationHelpers {
    */
   static getEntityPageRequest(pagination: PaginationEntityState, entityKey: string) {
     const { pageRequests } = pagination;
-    const pageNumber = Object.keys(pagination.pageRequests).find(key => pageRequests[key].entityKey === entityKey) || null;
+    const pageNumber = Object.keys(pagination.pageRequests).find(key => {
+      const baseEntityKey = entityCatalog.getEntityKey(pageRequests[key].baseEntityConfig);
+      return baseEntityKey === entityKey;
+    }) || null;
     if (pageNumber) {
       return {
         pageNumber,

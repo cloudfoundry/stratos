@@ -1,11 +1,13 @@
 {
   "extends": "../../../tsconfig.app.json",
   "compilerOptions": {
-    "outDir": "../../../../out-tsc/app",
+    "outDir": "../../../../out-tsc"
   },
   "exclude": [
     "./src/test.ts",
     "**/*.spec.ts",
-    "**/node_modules/**"
+    "**/*.spec.helpers.ts",
+    "**/node_modules/**",
+    "./test-framework/**"
   ]
 }

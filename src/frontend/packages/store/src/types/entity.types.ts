@@ -1,144 +1,30 @@
-import {
-  IService,
-  IServiceBinding,
-  IServiceBroker,
-  IServiceInstance,
-  IServicePlan,
-  IServicePlanVisibility,
-} from '../../../core/src/core/cf-api-svc.types';
-import {
-  IApp,
-  IDomain,
-  IFeatureFlag,
-  IOrganization,
-  IRoute,
-  ISecurityGroup,
-  ISpace,
-  IStack,
-} from '../../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
-import {
-  appEnvVarsSchemaKey,
-  appEventSchemaKey,
-  applicationSchemaKey,
-  appStatsSchemaKey,
-  appSummarySchemaKey,
-  buildpackSchemaKey,
-  cfUserSchemaKey,
-  domainSchemaKey,
-  endpointSchemaKey,
-  featureFlagSchemaKey,
-  gitBranchesSchemaKey,
-  gitCommitSchemaKey,
-  metricSchemaKey,
-  organizationSchemaKey,
-  privateDomainsSchemaKey,
-  routeSchemaKey,
-  securityGroupSchemaKey,
-  serviceBindingSchemaKey,
-  serviceBrokerSchemaKey,
-  serviceInstancesSchemaKey,
-  servicePlanSchemaKey,
-  servicePlanVisibilitySchemaKey,
-  serviceSchemaKey,
-  spaceQuotaSchemaKey,
-  spaceSchemaKey,
-  stackSchemaKey,
-  userFavoritesSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-  quotaDefinitionSchemaKey,
-} from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
-import { APIResource } from './api.types';
 import { IMetrics } from './base-metric.types';
 import { EndpointModel } from './endpoint.types';
-import { GitBranch, GitCommit } from './git.types';
 import { SystemInfo } from './system.types';
 import { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
-import { CfUser } from './user.types';
+import { UserProfileInfo } from './user-profile.types';
 
-export interface IRequestDataState extends IRequestTypeState {
-  endpoint: IRequestEntityTypeState<EndpointModel>;
+export interface BaseEntityValues {
+  // FIXME: Should come from catalog and start with stratos - STRAT-151
+  stratosEndpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
-  featureFlag: IRequestEntityTypeState<IFeatureFlag>;
-  application: IRequestEntityTypeState<APIResource<IApp>>;
-  stack: IRequestEntityTypeState<APIResource<IStack>>;
-  space: IRequestEntityTypeState<APIResource<ISpace>>;
-  organization: IRequestEntityTypeState<APIResource<IOrganization>>;
-  route: IRequestEntityTypeState<APIResource<IRoute>>;
-  event: IRequestEntityTypeState<APIResource>;
-  gitBranches: IRequestEntityTypeState<APIResource<GitBranch>>;
-  gitCommits: IRequestEntityTypeState<APIResource<GitCommit>>;
-  domain: IRequestEntityTypeState<APIResource<IDomain>>;
-  user: IRequestEntityTypeState<APIResource<CfUser>>;
-  serviceInstance: IRequestEntityTypeState<APIResource<IServiceInstance>>;
-  servicePlan: IRequestEntityTypeState<APIResource<IServicePlan>>;
-  service: IRequestEntityTypeState<APIResource<IService>>;
-  serviceBinding: IRequestEntityTypeState<APIResource<IServiceBinding>>;
-  securityGroup: IRequestEntityTypeState<APIResource<ISecurityGroup>>;
-  servicePlanVisibility: IRequestEntityTypeState<APIResource<IServicePlanVisibility>>;
-  serviceBroker: IRequestEntityTypeState<APIResource<IServiceBroker>>;
+  stratosUserProfile: UserProfileInfo;
   metrics: IRequestEntityTypeState<IMetrics>;
-  userFavorites: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>;
-  // Extensibility
-  [name: string]: IRequestEntityTypeState<any>;
+  stratosUserFavorites: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>;
 }
 
-export interface IRequestState extends IRequestTypeState {
-  application: IRequestEntityTypeState<RequestInfoState>;
-  endpoint: IRequestEntityTypeState<RequestInfoState>;
-  system: IRequestEntityTypeState<RequestInfoState>;
-  featureFlag: IRequestEntityTypeState<RequestInfoState>;
-  stack: IRequestEntityTypeState<RequestInfoState>;
-  space: IRequestEntityTypeState<RequestInfoState>;
-  organization: IRequestEntityTypeState<RequestInfoState>;
-  route: IRequestEntityTypeState<RequestInfoState>;
-  event: IRequestEntityTypeState<RequestInfoState>;
-  gitBranches: IRequestEntityTypeState<RequestInfoState>;
-  gitCommits: IRequestEntityTypeState<RequestInfoState>;
-  domain: IRequestEntityTypeState<RequestInfoState>;
-  user: IRequestEntityTypeState<RequestInfoState>;
-  serviceInstance: IRequestEntityTypeState<RequestInfoState>;
-  servicePlan: IRequestEntityTypeState<RequestInfoState>;
-  service: IRequestEntityTypeState<RequestInfoState>;
-  serviceBinding: IRequestEntityTypeState<RequestInfoState>;
-  securityGroup: IRequestEntityTypeState<RequestInfoState>;
-  servicePlanVisibility: IRequestEntityTypeState<RequestInfoState>;
-  serviceBroker: IRequestEntityTypeState<RequestInfoState>;
-  userFavorites: IRequestEntityTypeState<RequestInfoState>;
-  // Extensibility
-  [name: string]: IRequestEntityTypeState<RequestInfoState>;
-}
+export type ExtendedRequestState<T extends string | number | symbol, Y> = Record<T, Y>;
 
-
-export const defaultCfEntitiesState = {
-  [applicationSchemaKey]: {},
-  [stackSchemaKey]: {},
-  [spaceSchemaKey]: {},
-  [organizationSchemaKey]: {},
-  [routeSchemaKey]: {},
-  [appEventSchemaKey]: {},
-  [endpointSchemaKey]: {},
-  [gitBranchesSchemaKey]: {},
-  [gitCommitSchemaKey]: {},
-  [cfUserSchemaKey]: {},
-  [domainSchemaKey]: {},
-  [appEnvVarsSchemaKey]: {},
-  [appStatsSchemaKey]: {},
-  [appSummarySchemaKey]: {},
-  [serviceInstancesSchemaKey]: {},
-  [servicePlanSchemaKey]: {},
-  [serviceSchemaKey]: {},
-  [serviceBindingSchemaKey]: {},
-  [buildpackSchemaKey]: {},
-  [securityGroupSchemaKey]: {},
-  [featureFlagSchemaKey]: {},
-  [privateDomainsSchemaKey]: {},
-  [quotaDefinitionSchemaKey]: {},
-  [spaceQuotaSchemaKey]: {},
-  [metricSchemaKey]: {},
-  [servicePlanVisibilitySchemaKey]: {},
-  [serviceBrokerSchemaKey]: {},
-  [userFavoritesSchemaKey]: {},
-  [userProvidedServiceInstanceSchemaKey]: []
+export type ExtendedRequestDataState<E extends Record<keyof E, any>> = {
+  [P in keyof E]: IRequestEntityTypeState<E[keyof E]>
 };
+
+
+// FIXME: These should also come from catalog? - STRAT-151
+export interface IRequestState extends IRequestTypeState {
+  endpoint: IRequestEntityTypeState<RequestInfoState>;
+  userFavorites: IRequestEntityTypeState<RequestInfoState>;
+}
+

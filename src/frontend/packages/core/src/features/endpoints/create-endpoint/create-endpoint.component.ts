@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
-import { getEndpointType } from '../endpoint-helpers';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { getIdFromRoute } from '../../../core/utils.service';
+
 
 @Component({
   selector: 'app-create-endpoint',
@@ -16,7 +17,9 @@ export class CreateEndpointComponent {
   constructor(activatedRoute: ActivatedRoute) {
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
-    const endpoint = getEndpointType(epType, epSubType);
-    this.showConnectStep = !endpoint.doesNotSupportConnect ? endpoint.authTypes && !!endpoint.authTypes.length : false;
+    const endpoint = entityCatalog.getEndpoint(epType, epSubType);
+    this.showConnectStep = !endpoint.definition.unConnectable ?
+      endpoint.definition.authTypes && !!endpoint.definition.authTypes.length :
+      false;
   }
 }

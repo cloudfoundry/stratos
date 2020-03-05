@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-
-import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
+import { ActiveRouteCfOrgSpace } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 
 @Component({
   selector: 'app-add-space-quota',

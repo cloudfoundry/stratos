@@ -1,0 +1,6 @@
+@mixin ngx-charts-gauge($theme, $app-theme) {
+  $foreground-colors: map-get($theme, foreground);
+  ngx-charts-chart text:not(.no-style) {
+    fill: mat-color($foreground-colors, text);
+  }
+}

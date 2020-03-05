@@ -1,6 +1,9 @@
 package kubernetes
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/url"
 	"strconv"
 
@@ -17,6 +20,29 @@ import (
 type KubernetesSpecification struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
+}
+
+type KubeStatus struct {
+	Kind       string      `json:"kind"`
+	ApiVersion string      `json:"apiVersion"`
+	Metadata   interface{} `json:"metadata"`
+	Status     string      `json:"status"`
+	Message    string      `json:"message"`
+	Reason     string      `json:"reason"`
+	Details    interface{} `json:"details"`
+	Code       int         `json:"code"`
+}
+
+type kubeErrorStatus struct {
+	Type    string `json:"type"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
+type KubeAPIVersions struct {
+	Kind                       string        `json:"kind"`
+	Versions                   []string      `json:"versions"`
+	ServerAddressByClientCIDRs []interface{} `json:"serverAddressByClientCIDRs"`
 }
 
 const (
@@ -57,13 +83,17 @@ func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
 }
 
 func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
+	log.Debugf("Validating Kubernetes endpoint connection for user: %s", userGUID)
 	response, err := c.portalProxy.DoProxySingleRequest(cnsiRecord.GUID, userGUID, "GET", "api/v1/pods?limit=1", nil, nil)
 	if err != nil {
 		return err
 	}
 
 	if response.StatusCode >= 400 {
-		return errors.New("Unable to connect to endpoint")
+		if response.Error != nil {
+			return fmt.Errorf("Unable to connect to endpoint: %s", response.Error.Error())
+		}
+		return fmt.Errorf("Unable to connect to endpoint: %d => %s", response.StatusCode, response.Status)
 	}
 
 	return nil
@@ -90,11 +120,13 @@ func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces
 // Init the Kubernetes Jetstream plugin
 func (c *KubernetesSpecification) Init() error {
 
+	c.AddAuthProvider(auth.InitGKEKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitAWSKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitCertKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitAzureKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitOIDCKubeAuth(c.portalProxy))
 	c.AddAuthProvider(auth.InitKubeConfigAuth(c.portalProxy))
+	c.AddAuthProvider(auth.InitKubeTokenAuth(c.portalProxy))
 
 	// Kube dashboard is enabled by Tech Preview mode
 	c.portalProxy.GetConfig().PluginConfig[kubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
@@ -109,21 +141,31 @@ func (c *KubernetesSpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
 func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 
 	// Kubernetes Dashboard Proxy
-	echoGroup.GET("/kubedash/ui/:guid/*", c.kubeDashboardProxy)
+	echoGroup.Any("/apps/kubedash/ui/:guid/*", c.kubeDashboardProxy)
+
+	echoGroup.GET("/kubedash/:guid/login", c.kubeDashboardLogin)
 	echoGroup.GET("/kubedash/:guid/status", c.kubeDashboardStatus)
 
-	// Kube Console
-	echoGroup.GET("/kubeconsole/:guid", c.KubeConsole)
+	echoGroup.POST("/kubedash/:guid/serviceAccount", c.kubeDashboardCreateServiceAccount)
+	echoGroup.DELETE("/kubedash/:guid/serviceAccount", c.kubeDashboardDeleteServiceAccount)
+
+	echoGroup.POST("/kubedash/:guid/installation", c.kubeDashboardInstallDashboard)
+	echoGroup.DELETE("/kubedash/:guid/installation", c.kubeDashboardDeleteDashboard)
 
 	// Helm Routes
 	echoGroup.GET("/helm/releases", c.ListReleases)
 	echoGroup.POST("/helm/install", c.InstallRelease)
-	echoGroup.GET("/helm/versions", c.GetHelmVersions)
-	echoGroup.DELETE("/helm/releases/:endpoint/:name", c.DeleteRelease)
-	echoGroup.GET("/helm/releases/:endpoint/:name", c.GetRelease)
+	echoGroup.DELETE("/helm/releases/:endpoint/:namespace/:name", c.DeleteRelease)
+	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name/status", c.GetReleaseStatus)
+	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name", c.GetRelease)
+
+	// Kube Terminal
+	echoGroup.GET("/kubeconsole/:guid", c.KubeConsole)
+
 }
 
 func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+
 	log.Debug("Kubernetes Info")
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
@@ -135,10 +177,70 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 		return newCNSI, nil, err
 	}
 
+	log.Debug("Request Kube API Versions")
+	var httpClient = c.portalProxy.GetHttpClient(skipSSLValidation)
+	res, err := httpClient.Get(apiEndpoint + "/api")
+	if err != nil {
+		// This should ultimately catch 503 cert errors
+		return newCNSI, nil, err
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return newCNSI, nil, err
+	}
+
+	if res.StatusCode < 400 {
+		// No auth on kube set up, expect a successful APIVersions response - KubeAPIVersions
+		log.Debug("Kube API Versions Succeeded")
+		apiVersions := KubeAPIVersions{}
+		err := json.Unmarshal(body, &apiVersions)
+		if err != nil {
+			return newCNSI, nil, fmt.Errorf("Failed to parse output as kube kind APIVersions: %+v", err)
+		}
+		if apiVersions.Kind != "APIVersions" {
+			return newCNSI, nil, fmt.Errorf("Failed to parse output as kube kind APIVersions: %+v", apiVersions)
+		}
+	} else if res.StatusCode == 403 || res.StatusCode == 401 {
+		err := parseErrorResponse(body)
+		if err != nil {
+			return newCNSI, nil, fmt.Errorf("Failed to parse output as kube kind status: %+v", err)
+		}
+	} else {
+		return newCNSI, nil, fmt.Errorf("Dissallowed response code from `/api` call: %+v", res.StatusCode)
+	}
+
+	log.Debug("Kube API Versions Acceptable Response")
 	newCNSI.TokenEndpoint = apiEndpoint
 	newCNSI.AuthorizationEndpoint = apiEndpoint
 
 	return newCNSI, v2InfoResponse, nil
+}
+
+func parseErrorResponse(body []byte) error {
+	kubeStatus := KubeStatus{}
+	err := json.Unmarshal(body, &kubeStatus)
+	if err == nil {
+		// Expect a json message with a status
+		if kubeStatus.Kind == "Status" {
+			return nil
+		}
+	}
+
+	// Try the other format
+	errorStatus := kubeErrorStatus{}
+	err = json.Unmarshal(body, &errorStatus)
+	if err == nil {
+		// Expect the type to be error
+		if errorStatus.Type == "error" {
+			return nil
+		}
+	}
+
+	// Not one of the types we recognise
+
+	log.Debug(string(body))
+	return errors.New("Could not understand response from Kubernetes endpoint")
 }
 
 func (c *KubernetesSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {

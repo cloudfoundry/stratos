@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
 import { ConditionCellComponent } from './condition-cell.component';
-import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('ConditionCellComponent', () => {
   let component: ConditionCellComponent;
@@ -33,7 +33,8 @@ describe('ConditionCellComponent', () => {
         containers: [],
         nodeName: 'test',
         schedulerName: 'test',
-        initContainers: []
+        initContainers: [],
+        readinessGates: []
       }
     };
     fixture.detectChanges();

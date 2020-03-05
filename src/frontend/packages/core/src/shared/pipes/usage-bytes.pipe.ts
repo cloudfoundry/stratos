@@ -7,8 +7,6 @@ import { UtilsService } from '../../core/utils.service';
 })
 export class UsageBytesPipe implements PipeTransform {
 
-  private units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
-
   constructor(private utils: UtilsService) {}
 
   transform(mb): string {

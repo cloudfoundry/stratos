@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 
-import { ApplicationService } from '../../../../core/src/features/applications/application.service';
+import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
 @Component({
@@ -19,9 +20,11 @@ export class EditAutoscalerPolicyComponent implements OnInit {
 
   parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
   applicationName$: Observable<string>;
+  isCreate = false;
 
   constructor(
     public applicationService: ApplicationService,
+    private route: ActivatedRoute
   ) {
   }
 
@@ -31,6 +34,7 @@ export class EditAutoscalerPolicyComponent implements OnInit {
       publishReplay(1),
       refCount()
     );
+    this.isCreate = this.route.snapshot.queryParams.create;
   }
 
 }

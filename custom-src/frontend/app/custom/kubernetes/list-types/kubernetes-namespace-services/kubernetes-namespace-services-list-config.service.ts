@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/src/app-state';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
-import { BaseKubernetesServicesListConfig } from '../kubernetes-service-list-config.service';
+import { BaseKubernetesServicesListConfig } from '../kubernetes-services/kubernetes-service-list-config.service';
 import { KubernetesNamespaceServicesDataSource } from './kubernetes-namespace-services-data-source';
 
 @Injectable()

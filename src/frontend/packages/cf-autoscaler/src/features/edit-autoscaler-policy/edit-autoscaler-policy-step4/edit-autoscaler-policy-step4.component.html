@@ -1,4 +1,6 @@
 <div *ngIf="appAutoscalerPolicy$ | async as policy">
+  <p>Add schedules for specific dates and times that overwrite the default instance limits. Like reoccuring schedules,
+    during these time periods all dynamic scaling rules are still effective.</p>
   <app-tile-grid class="app-autoscaler-tile-grid-100">
     <app-tile-group *ngFor="let rule of policy.schedules && policy.schedules.specific_date; let index = index">
       <app-tile>
@@ -22,28 +24,28 @@
                   <div class="app-metadata__two-cols autoscaler-policy-edit-specific-left">
                     <app-metadata-item label="Effective Date Time">
                       <mat-form-field class="form-field-left">
-                        <input matInput placeholder="Start" type="datetime-local" formControlName="start_date_time"
-                          required>
+                        <input matInput placeholder="Start" type="datetime-local" name="start_date_time"
+                          formControlName="start_date_time" required>
                       </mat-form-field>
                       <mat-form-field>
-                        <input matInput placeholder="End" type="datetime-local" formControlName="end_date_time"
-                          required>
+                        <input matInput placeholder="End" type="datetime-local" name="end_date_time"
+                          formControlName="end_date_time" required>
                       </mat-form-field>
                     </app-metadata-item>
                   </div>
                   <div class="app-metadata__two-cols">
                     <app-metadata-item label="Instance Count">
                       <mat-form-field class="form-field-left form-field-30">
-                        <input matInput placeholder="Minimum" type="number" formControlName="instance_min_count"
-                          required>
+                        <input matInput placeholder="Minimum" type="number" name="instance_min_count"
+                          formControlName="instance_min_count" required>
                       </mat-form-field>
                       <mat-form-field class="form-field-left form-field-30">
-                        <input matInput placeholder="Initial Minimum" type="number"
+                        <input matInput placeholder="Initial Minimum" type="number" name="initial_min_instance_count"
                           formControlName="initial_min_instance_count">
                       </mat-form-field>
                       <mat-form-field class="form-field-30">
-                        <input matInput placeholder="Maximum" type="number" formControlName="instance_max_count"
-                          required>
+                        <input matInput placeholder="Maximum" type="number" name="instance_max_count"
+                          formControlName="instance_max_count" required>
                       </mat-form-field>
                     </app-metadata-item>
                   </div>
@@ -80,15 +82,15 @@
             </div>
           </mat-card-content>
           <mat-card-actions class="autoscaler-policy-edit__actions">
-            <button *ngIf="editIndex!=index" (click)="editSpecificDate(index)" [disabled]="editIndex!=-1"
-              mat-icon-button>
+            <button id="autoscaler-policy-edit-edit" *ngIf="editIndex!=index" (click)="editSpecificDate(index)"
+              [disabled]="editIndex!=-1" mat-icon-button>
               <mat-icon>edit</mat-icon>
             </button>
-            <button *ngIf="editIndex==index" (click)="finishSpecificDate()" [disabled]="editSpecificDateForm.invalid"
-              mat-icon-button>
+            <button id="autoscaler-policy-edit-done" *ngIf="editIndex==index" (click)="finishSpecificDate()"
+              [disabled]="editSpecificDateForm.invalid" mat-icon-button>
               <mat-icon>done</mat-icon>
             </button>
-            <button (click)="removeSpecificDate(index)" mat-icon-button>
+            <button id="autoscaler-policy-edit-delete" (click)="removeSpecificDate(index)" mat-icon-button>
               <mat-icon>delete</mat-icon>
             </button>
           </mat-card-actions>
@@ -96,6 +98,6 @@
       </app-tile>
     </app-tile-group>
   </app-tile-grid>
-  <button color="accent" mat-button mat-raised-button (click)="addSpecificDate()"
+  <button id="autoscaler-policy-edit-add" color="accent" mat-button mat-raised-button (click)="addSpecificDate()"
     [disabled]="editIndex!=-1">Add</button>
 </div>

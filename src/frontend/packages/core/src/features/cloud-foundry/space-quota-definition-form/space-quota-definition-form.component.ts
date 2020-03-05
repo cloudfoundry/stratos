@@ -5,15 +5,17 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { GetOrganizationSpaceQuotaDefinitions } from '../../../../../store/src/actions/quota-definitions.actions';
+import { GetOrganizationSpaceQuotaDefinitions } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
+import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
+import { spaceQuotaEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
+import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { AppState } from '../../../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory, spaceQuotaSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../store/src/helpers/entity-relations/entity-relations.types';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 
 
 @Component({
@@ -60,17 +62,6 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
       totalServiceKeys: new FormControl(quota.total_service_keys),
       appTasksLimit: new FormControl(quota.app_task_limit),
     });
-
-    // this.formGroup = new FormGroup({
-    //   name: new FormControl('', [Validators.required as any, this.nameTakenValidator()]),
-    //   totalServices: new FormControl(),
-    //   totalRoutes: new FormControl(),
-    //   memoryLimit: new FormControl(),
-    //   instanceMemoryLimit: new FormControl(),
-    //   nonBasicServicesAllowed: new FormControl(false),
-    //   totalReservedRoutePorts: new FormControl(),
-    //   appInstanceLimit: new FormControl(),
-    // });
   }
 
   fetchQuotasDefinitions() {
@@ -81,7 +72,7 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
         action: new GetOrganizationSpaceQuotaDefinitions(spaceQuotaPaginationKey, this.orgGuid, this.cfGuid),
         paginationMonitor: this.paginationMonitorFactory.create(
           spaceQuotaPaginationKey,
-          entityFactory(spaceQuotaSchemaKey)
+          cfEntityFactory(spaceQuotaEntityType)
         )
       },
       true

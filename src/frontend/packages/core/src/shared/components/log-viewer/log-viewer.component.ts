@@ -45,9 +45,9 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   @Input() logStream: Observable<any>;
 
-  @ViewChild('container') container: ElementRef;
+  @ViewChild('container', { static: true }) container: ElementRef;
 
-  @ViewChild('content') content: ElementRef;
+  @ViewChild('content', { static: true }) content: ElementRef;
 
   private logLinesCount = 0;
   private countAttribute = 'batchLength';
@@ -79,6 +79,21 @@ export class LogViewerComponent implements OnInit, OnDestroy {
       ),
       share()
     );
+
+    if (this.status) {
+      this.statusSub = this.status.subscribe({
+        next: wsStatus => {
+          switch (wsStatus) {
+            case 0:
+              this.statusMessage$.next({ message: 'Connecting....' });
+              break;
+            default:
+              this.statusMessage$.next({ message: '' });
+              break;
+          }
+        }
+      });
+    }
 
     // Locked indicates auto-scroll - scroll position is "locked" to the bottom
     // If the user scrolls off the bottom then disable auto-scroll
@@ -163,21 +178,6 @@ export class LogViewerComponent implements OnInit, OnDestroy {
           });
         }
       });
-
-    if (this.status) {
-      this.statusSub = this.status.subscribe({
-        next: wsStatus => {
-          switch (wsStatus) {
-            case 0:
-              this.statusMessage$.next({ message: 'Connecting....' });
-              break;
-            default:
-              this.statusMessage$.next({ message: '' });
-              break;
-          }
-        }
-      });
-    }
   }
 
   public ngOnDestroy(): void {

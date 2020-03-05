@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KubernetesNodeTagsCardComponent } from './kubernetes-node-tags-card.component';
 import { BaseKubeGuid } from '../../../../kubernetes-page.types';
+import { KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
-import { KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
+import { KubernetesNodeTagsCardComponent } from './kubernetes-node-tags-card.component';
 
 describe('KubernetesNodeTagsCardComponent', () => {
   let component: KubernetesNodeTagsCardComponent;

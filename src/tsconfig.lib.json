@@ -1,9 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./out-tsc/lib",
+    "outDir": "./out-tsc",
     "target": "es2015",
-    "module": "es2015",
+    "module": "esnext",
     "moduleResolution": "node",
     "declaration": true,
     "sourceMap": true,
@@ -12,10 +12,7 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "types": [],
-    "lib": [
-      "dom",
-      "es2015"
-    ]
+    "lib": ["dom", "es2018"]
   },
   "angularCompilerOptions": {
     "annotateForClosureCompiler": true,
@@ -23,6 +20,7 @@
     "strictMetadataEmit": true,
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true,
-    "enableResourceInlining": true
+    "enableResourceInlining": true,
+    "preserveSymlinks": true,
   }
 }

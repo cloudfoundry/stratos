@@ -1,9 +1,8 @@
 import { inject, TestBed } from '@angular/core/testing';
 
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
-import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
-import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
+import { ApplicationsModule } from '../../../../cloud-foundry/src/features/applications/applications.module';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
+import { createEmptyStoreModule } from '@stratos/store/testing';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
 describe('EditAutoscalerPolicyService', () => {
@@ -14,9 +13,8 @@ describe('EditAutoscalerPolicyService', () => {
         EntityServiceFactory,
       ],
       imports: [
-        SharedModule,
-        createBasicStoreModule(),
-        CfAutoscalerTestingModule
+        ApplicationsModule,
+        createEmptyStoreModule(),
       ]
     });
   });
@@ -24,4 +22,6 @@ describe('EditAutoscalerPolicyService', () => {
   it('should be created', inject([EditAutoscalerPolicyService], (service: EditAutoscalerPolicyService) => {
     expect(service).toBeTruthy();
   }));
+
+  afterAll(() => { });
 });

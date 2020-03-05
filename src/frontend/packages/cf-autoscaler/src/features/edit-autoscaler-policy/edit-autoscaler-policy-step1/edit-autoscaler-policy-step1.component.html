@@ -1,19 +1,23 @@
 <div *ngIf="appAutoscalerPolicy$ | async as policy">
+  Use minimum and maximum instance counts to provide default values for your policy.
+  <!-- Instance counts are used to define the default minimal and maximal instance number of your application. -->
   <form [formGroup]="editLimitForm" validate class="stepper-form">
     <mat-form-field>
-      <input matInput placeholder="Minimum Instance Count" formControlName="instance_min_count" type="number" required>
+      <input matInput placeholder="Minimum Instance Count" name="instance_min_count"
+        formControlName="instance_min_count" type="number" required>
       <mat-error *ngIf="editLimitForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')">
         {{policyAlert.alertInvalidPolicyMinimumRange}}
       </mat-error>
     </mat-form-field>
     <mat-form-field class="autoscaler-policy-edit-limit-max">
-      <input matInput placeholder="Maximum Instance Count" formControlName="instance_max_count" type="number" required>
+      <input matInput placeholder="Maximum Instance Count" name="instance_max_count"
+        formControlName="instance_max_count" type="number" required>
       <mat-error *ngIf="editLimitForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')">
         {{policyAlert.alertInvalidPolicyMaximumRange}}
       </mat-error>
     </mat-form-field>
     <mat-form-field>
-      <mat-select class="reset-margin" placeholder="Timezone" formControlName="timezone" required>
+      <mat-select class="reset-margin" placeholder="Timezone" name="timezone" formControlName="timezone" required>
         <mat-option *ngFor="let timezone of timezoneOptions" [value]="timezone">
           {{ timezone }}
         </mat-option>

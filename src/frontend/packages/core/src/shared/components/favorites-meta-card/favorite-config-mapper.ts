@@ -1,9 +1,19 @@
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { IRequestAction } from '../../../../../store/src/types/request.types';
-import { IFavoriteMetadata, IFavoriteTypeInfo, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import {
+  IFavoriteMetadata,
+  IFavoriteTypeInfo,
+  UserFavorite,
+  UserFavoriteEndpoint,
+} from '../../../../../store/src/types/user-favorites.types';
+import { StratosBaseCatalogEntity } from '../../../../../store/src/entity-catalog/entity-catalog-entity';
+import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata, IStratosEntityDefinition } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { EntityRequestAction } from '../../../../../store/src/types/request.types';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 
 
 export interface IFavoriteTypes {
@@ -42,55 +52,52 @@ export class FavoriteConfig<T, Q extends IFavoriteMetadata> implements IFavorite
 
 export type TFavoriteMapperFunction<T extends IFavoriteMetadata> = (entity: T) => IFavoritesMetaCardConfig;
 
-interface IFavoriteMappers {
-  [key: string]: {
-    mapper: TFavoriteMapperFunction<IFavoriteMetadata>,
-    prettyName: string,
-    entityToMetadata: TEntityToMetadata<any, any>,
-    favoriteInfo: IFavoriteTypeInfo
-  };
-}
-
-export type TFavoriteActionGenerator<T extends IFavoriteMetadata> = (favorite: UserFavorite<T>) => IRequestAction;
+export type TFavoriteActionGenerator<T extends IFavoriteMetadata> = (favorite: UserFavorite<T>) => EntityRequestAction;
 
 export type TEntityToMetadata<T, Q extends IFavoriteMetadata> = (entity: T) => Q;
 export interface IFavoriteActionGenerators {
   [key: string]: TFavoriteActionGenerator<IFavoriteMetadata>;
 }
+
 /**
  * Stores the config used to hydrator and render favorites.
  */
-class FavoritesConfigMapper {
+@Injectable({
+  providedIn: 'root'
+})
+export class FavoritesConfigMapper {
   private mapperKeySeparator = '-';
-  private mappers: IFavoriteMappers = {};
+  // private mappers: IFavoriteMappers = {};
+  constructor() { }
   public getMapperKeyFromFavoriteInfo(favoriteInfo: IFavoriteTypeInfo) {
     const { endpointType, entityType } = favoriteInfo;
     return [endpointType, entityType].join(this.mapperKeySeparator);
   }
 
   /**
-   * Register config used to manage a given favorite type
-   * @param favoriteInfo Base id information about the favorite this mapper will match
-   * @param prettyName The human readable name for the entity type
-   * @param mapper Takes an entity and maps it to favorite meta card config
-   * @param actionGenerator Takes a favorite and returns an action that can be used to hydrate the favorite
-   */
-  public registerFavoriteConfig<T, Q extends IFavoriteMetadata>(config: IFavoriteConfig<T, Q>) {
-    const { mapper, prettyName, entityToMetadata, favoriteInfo } = config;
-    const mapperKey = this.getMapperKeyFromFavoriteInfo(favoriteInfo);
-    this.mappers[mapperKey] = {
-      mapper,
-      prettyName,
-      entityToMetadata,
-      favoriteInfo
-    };
-  }
-  /**
    * For a given favorite, return the corresponding favorite meta card mapper
    */
-  public getMapperFunction(favorite: IFavoriteTypeInfo) {
-    const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
-    return this.mappers[mapperKey] ? this.mappers[mapperKey].mapper : null;
+  public getMapperFunction<T extends IEntityMetadata = IEntityMetadata>(favorite: IFavoriteTypeInfo) {
+    const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
+    return (entity: T) => {
+      if (!entity) {
+        return {
+          lines: null,
+          type: null,
+          routerLink: null,
+          name: null,
+          menuItems: null
+        };
+      }
+      const linesBuilders = catalogEntity.builders.entityBuilder.getLines ? catalogEntity.builders.entityBuilder.getLines() : [];
+      return {
+        lines: linesBuilders.map(builder => ([builder[0], builder[1](entity)])) as [string, string | Observable<string>][],
+        type: catalogEntity.definition.type,
+        routerLink: catalogEntity.builders.entityBuilder.getLink(entity),
+        name: entity.name,
+        menuItems: catalogEntity.builders.entityBuilder.getActions ? catalogEntity.builders.entityBuilder.getActions(entity) : null
+      };
+    };
   }
 
   /**
@@ -104,33 +111,67 @@ class FavoritesConfigMapper {
    * For a given favorite, return the corresponding human readable type name
    */
   public getPrettyTypeName(favorite: IFavoriteTypeInfo) {
-    const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
-    return this.mappers[mapperKey] ? this.mappers[mapperKey].prettyName : null;
+    const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
+    return catalogEntity ? catalogEntity.definition.label : null;
   }
 
   /**
    * For a given favorite, return the corresponding hydration action
    */
-  public getEntityMetadata<T = any>(favorite: IFavoriteTypeInfo, entity: T) {
-    const mapperKey = this.getMapperKeyFromFavoriteInfo(favorite);
-    return this.mappers[mapperKey] && this.mappers[mapperKey].entityToMetadata ? this.mappers[mapperKey].entityToMetadata(entity) : null;
+  public getEntityMetadata(favorite: IFavoriteTypeInfo, entity: any) {
+    const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
+    return catalogEntity ? catalogEntity.builders.entityBuilder.getMetadata(entity) : null;
   }
 
   /**
    * For a given endpoint type, return the list of possible favorite types
    */
   public getAllTypesForEndpoint(endpointType: string): IFavoriteTypes[] {
-    return Object.values(this.mappers).reduce((types: IFavoriteTypes[], mapper) => {
-      if (mapper.favoriteInfo.endpointType === endpointType && mapper.favoriteInfo.entityType !== endpointSchemaKey) {
-        types.push({
-          type: mapper.favoriteInfo.entityType,
-          prettyName: mapper.prettyName
-        });
-      }
-      return types;
-    }, []);
+    return entityCatalog.getAllEntitiesForEndpointType(endpointType).map(catalogEntity => ({
+      type: catalogEntity.definition.type,
+      prettyName: catalogEntity.definition.label
+    }));
+  }
+
+  private buildFavoriteFromCatalogEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    catalogEntity: StratosBaseCatalogEntity<T, Y>,
+    entity: any,
+    endpointId: string
+  ) {
+    const isEndpoint = catalogEntity.isEndpoint;
+    const entityDefinition = catalogEntity.definition as IStratosEntityDefinition;
+    const endpointType = isEndpoint ? catalogEntity.getTypeAndSubtype().type : entityDefinition.endpoint.type;
+    const entityType = isEndpoint ? EntityCatalogHelpers.endpointType : entityDefinition.type;
+    const metadata = catalogEntity.builders.entityBuilder.getMetadata(entity);
+    const guid = isEndpoint ? null : catalogEntity.builders.entityBuilder.getGuid(metadata);
+    return new UserFavorite<T>(
+      endpointId,
+      endpointType,
+      entityType,
+      guid,
+      metadata
+    );
+  }
+
+  public getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    entityType: string,
+    endpointType: string,
+    endpointId: string,
+    entity: Y
+  ) {
+    const catalogEntity = entityCatalog.getEntity<T, Y>(endpointType, entityType) as StratosBaseCatalogEntity<T, Y>;
+    return this.buildFavoriteFromCatalogEntity<T, Y>(catalogEntity, entity, endpointId);
+  }
+
+  public getFavoriteEndpointFromEntity(
+    endpoint: EndpointModel
+  ) {
+    return this.getFavoriteFromEntity(
+      EntityCatalogHelpers.endpointType,
+      endpoint.cnsi_type,
+      endpoint.guid,
+      endpoint
+    ) as UserFavoriteEndpoint;
   }
 
 }
-
-export const favoritesConfigMapper = new FavoritesConfigMapper();

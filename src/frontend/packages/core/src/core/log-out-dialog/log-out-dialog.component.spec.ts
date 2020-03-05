@@ -1,15 +1,19 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { LogOutDialogComponent } from './log-out-dialog.component';
-import { CoreModule } from '../core.module';
-import { SharedModule } from '../../shared/shared.module';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material';
+import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { Store } from '@ngrx/store';
+
+import { CoreTestingModule } from '../../../test-framework/core-test.modules';
+import { createBasicStoreModule } from '@stratos/store/testing';
+import { SharedModule } from '../../shared/shared.module';
+import { CoreModule } from '../core.module';
+import { LogOutDialogComponent } from './log-out-dialog.component';
 
 describe('LogOutDialogComponent', () => {
   let component: LogOutDialogComponent;
   let fixture: ComponentFixture<LogOutDialogComponent>;
+  let element: HTMLElement;
+  let store: any;
 
   class MatDialogRefMock {
   }
@@ -29,6 +33,7 @@ describe('LogOutDialogComponent', () => {
         SharedModule,
         MatDialogModule,
         NoopAnimationsModule,
+        CoreTestingModule,
         createBasicStoreModule(),
       ]
     })
@@ -37,11 +42,32 @@ describe('LogOutDialogComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LogOutDialogComponent);
+    store = TestBed.get(Store);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    element = fixture.nativeElement;
   });
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should dispatch logout action after countdown', fakeAsync(() => {
+    const spy = spyOn(store, 'dispatch');
+
+    component.data = {
+      expiryDate: Date.now() + 1000,
+    };
+    fixture.detectChanges();
+    component.ngOnDestroy();
+    component.ngOnInit();
+
+    expect(spy).not.toHaveBeenCalled();
+    tick(1500);
+    expect(spy).toHaveBeenCalled();
+  }));
+
+  afterEach(() => {
+    fixture.destroy();
   });
 });

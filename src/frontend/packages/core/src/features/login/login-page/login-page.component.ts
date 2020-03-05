@@ -6,7 +6,7 @@ import { map, startWith, takeWhile, tap } from 'rxjs/operators';
 
 import { Login, VerifySession } from '../../../../../store/src/actions/auth.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { InternalAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { RouterRedirect } from '../../../../../store/src/reducers/routing.reducer';
 import { queryParamMap } from '../../../core/auth-guard.service';
@@ -19,7 +19,7 @@ import { queryParamMap } from '../../../core/auth-guard.service';
 export class LoginPageComponent implements OnInit, OnDestroy {
 
   constructor(
-    private store: Store<AppState>
+    private store: Store<Pick<InternalAppState, 'endpoints' | 'auth'>>
   ) { }
 
   loginForm: NgForm;
@@ -124,7 +124,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     // Setup mode
     if (auth.sessionData && auth.sessionData.uaaError) {
       this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
-      this.store.dispatch(new RouterNav({ path: ['/uaa'] }));
+      this.store.dispatch(new RouterNav({ path: ['/setup'] }));
       return false;
     }
 

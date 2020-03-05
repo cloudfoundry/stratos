@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { KubernetesNodeService } from '../../../../../services/kubernetes-node.service';
-import { Condition, ConditionType } from '../../../../../store/kube.types';
+import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../../../../store/kube.types';
 
 @Component({
   selector: 'app-kubernetes-node-condition',
@@ -23,18 +23,15 @@ export class KubernetesNodeConditionComponent implements OnInit {
   @Input()
   subtle = false;
 
-  public titles = {
-    Ready: 'Ready',
-    OutOfDisk: 'Out of Disk',
-    MemoryPressure: 'Memory Pressure',
-    DiskPressure: 'Disk Pressure'
-  };
+  public titles = ConditionTypeLabels;
 
   public icons = {
     Ready: ['done_outline', 'material-icons'],
     OutOfDisk: ['storage', 'material-icons'],
     MemoryPressure: ['memory', 'material-icons'],
     DiskPressure: ['storage', 'material-icons'],
+    PIDPressure: ['vertical_align_center', 'material-icons'],
+    NetworkUnavailable: ['settings_ethernet', 'material-icons']
   };
 
   constructor(
@@ -51,7 +48,7 @@ export class KubernetesNodeConditionComponent implements OnInit {
     );
   }
 
-  shouldBeGreen(condition: Condition) {
+  shouldBeGreen(condition: KubernetesCondition) {
     if (condition.status === 'True') {
       if (condition.type === ConditionType.Ready) {
         return true;
