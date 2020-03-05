@@ -72,19 +72,10 @@ export class KubeConsoleComponent implements OnInit {
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
-    // private activatedRoute: ActivatedRoute,
-    // private store: Store<AppState>,
   ) { }
 
   ngOnInit() {
-
     const guid = this.kubeEndpointService.baseKube.guid;
-
-    console.log('HERE');
-    console.log(guid);
-    // const routeParams = this.activatedRoute.snapshot.params;
-    // this.instanceId = routeParams.index;
-
     this.kubeSummaryLink = (
       `/kubernetes/${guid}/summary`
     );
@@ -103,8 +94,6 @@ export class KubeConsoleComponent implements OnInit {
         streamUrl,
         this.sshInput
       );
-
-      console.log(streamUrl);
 
       this.messages = connection.messages.pipe(
         catchError(e => {
