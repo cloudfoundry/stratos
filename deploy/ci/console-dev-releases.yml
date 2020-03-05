@@ -130,6 +130,7 @@ jobs:
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
+      do:
       - put: mariadb-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb

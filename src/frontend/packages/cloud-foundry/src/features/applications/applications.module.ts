@@ -43,7 +43,7 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
     CoreModule,
     SharedModule,
     ApplicationsRoutingModule,
-    CloudFoundryComponentsModule,
+    CloudFoundryComponentsModule
   ],
   declarations: [
     ApplicationWallComponent,

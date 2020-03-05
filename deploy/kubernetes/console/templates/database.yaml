@@ -8,12 +8,19 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: stratos-db
+{{- if .Values.console.deploymentAnnotations }}
+  annotations:
+{{ toYaml .Values.console.deploymentAnnotations | indent 4 }}
+{{- end }}
   labels:
     app.kubernetes.io/name: "stratos"
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
     app.kubernetes.io/component: "stratos-db"
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- if .Values.console.deploymentExtraLabels }}
+{{ toYaml .Values.console.deploymentExtraLabels | indent 4 }}
+{{- end }}
 spec:
   replicas: 1
   strategy:

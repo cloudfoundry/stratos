@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { getIdFromRoute } from '../../../core/utils.service';
 
+
 @Component({
   selector: 'app-create-endpoint',
   templateUrl: './create-endpoint.component.html',

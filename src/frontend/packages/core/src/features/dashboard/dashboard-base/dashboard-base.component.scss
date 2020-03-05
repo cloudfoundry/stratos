@@ -25,7 +25,7 @@ $app-header-height: 56px;
 
   &__side_preview {
     top: $app-header-height;
-    height: calc(100vw - #{$app-header-height});
+    height: calc(100vw - #{$app-header-height} - 1px);
   }
 
   &__page-tabs {
@@ -86,7 +86,6 @@ $app-header-height: 56px;
   height: $app-sub-header-height;
   margin-left: 200px;
   padding: 0;
-  // width: 100%;
   @include breakpoint(tablet) {
     margin: 0;
     padding: 0 20px;

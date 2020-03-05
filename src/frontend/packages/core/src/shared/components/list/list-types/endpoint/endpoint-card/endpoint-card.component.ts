@@ -50,6 +50,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public endpointIds$: Observable<string[]>;
   public cardStatus$: Observable<StratosStatus>;
   private subs: Subscription[] = [];
+  public connectionStatus: string;
 
   private componentRef: ComponentRef<EndpointListDetailsComponent>;
 
@@ -77,6 +78,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       const metadata = this.endpointCatalogEntity.builders.entityBuilder.getMetadata(row);
       this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogEntity.definition.unConnectable ?
         this.endpointCatalogEntity.builders.entityBuilder.getLink(metadata) : null;
+      this.connectionStatus = this.endpointCatalogEntity.definition.unConnectable ? 'connected' : row.connectionStatus;
     }
     this.updateInnerComponent();
 
