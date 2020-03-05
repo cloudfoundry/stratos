@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+
 import { SidePanelService } from '../../services/side-panel.service';
 
 @Component({

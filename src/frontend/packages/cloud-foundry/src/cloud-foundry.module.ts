@@ -79,7 +79,6 @@ function infoValidator(action: ICFAction, dispatcher) {
     //   PermissionEffects
     // ])
   ],
-
   providers: [
     { provide: ENTITY_INFO_HANDLER, useFactory: () => infoValidator },
     CfUserService,

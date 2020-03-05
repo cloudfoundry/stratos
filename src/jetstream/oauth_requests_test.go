@@ -113,7 +113,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
 
-		res, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		res, err := pp.DoOAuthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -255,7 +255,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		//
-		res, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		res, err := pp.DoOAuthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -386,7 +386,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 			WillReturnError(errors.New("Unknown Database Error"))
 
 		//
-		_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		_, err := pp.DoOAuthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -430,7 +430,7 @@ func TestDoOauthFlowRequestWithMissingCNSITokenRecord(t *testing.T) {
 	}
 	pp.setCNSITokenRecord("not-the-right-guid", mockUserGUID, mockTokenRecord)
 
-	_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+	_, err := pp.DoOAuthFlowRequest(&interfaces.CNSIRequest{
 		GUID:     mockCNSIGUID,
 		UserGUID: mockUserGUID,
 	}, req)
@@ -476,7 +476,7 @@ func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
 			UserGUID: "",
 		}
 
-		_, err := pp.doOauthFlowRequest(invalidCNSIRequest, req)
+		_, err := pp.DoOAuthFlowRequest(invalidCNSIRequest, req)
 
 		Convey("Oauth flow request erroneously succeeded", func() {
 			So(err, ShouldNotBeNil)
@@ -642,7 +642,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 		mock.ExpectExec(updateTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
 		//
-		_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		_, err := pp.DoOAuthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)

@@ -96,6 +96,8 @@ spec:
           value: {{ default "3306" .Values.mariadb.port | quote }}
         - name: DATABASE_PROVIDER
           value: {{ default "mysql" .Values.mariadb.type | quote }}
+        - name: DB_SSL_MODE
+          value: {{ default "false" .Values.mariadb.tls | quote }}
         - name: HTTP_CONNECTION_TIMEOUT_IN_SECS
           value: "10"
         - name: HTTP_CLIENT_TIMEOUT_IN_SECS

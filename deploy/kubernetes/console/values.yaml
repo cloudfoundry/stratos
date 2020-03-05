@@ -118,13 +118,12 @@ mariadb:
   userPassword:
   # Leave password blank to auto-generate (not needed for external database)
   rootPassword:
-
   # DB Host (when using an external database)
   host:
-
   # Override port (default 3306) (when using an external database)
   port:
-
+  # TLS Mode - can be true, false, skip-verify or preferred
+  tls:
   # Override DB type - default is mysql
   type:
 

@@ -171,6 +171,10 @@ func copyHeaderIfSet(src *http.Request, dest *http.Request, name string) {
 func fwdResponseHeaders(src *http.Header, dest http.Header) {
 	log.Debug("fwdResponseHeaders")
 
+	if src == nil {
+		return
+	}
+
 	for k, headers := range *src {
 		switch {
 		// Skip these

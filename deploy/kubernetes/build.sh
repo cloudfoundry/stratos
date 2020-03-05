@@ -28,6 +28,7 @@ NO_PUSH="true"
 DOCKER_REG_DEFAULTS="true"
 CHART_ONLY="false"
 ADD_GITHASH_TO_TAG="true"
+HAS_CUSTOM_BUILD="false"
 
 while getopts ":ho:r:t:Tclb:Opcn" opt; do
   case $opt in
@@ -132,6 +133,11 @@ __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 STRATOS_PATH=${__DIRNAME}/../../
 source ${STRATOS_PATH}/deploy/common-build.sh
 
+if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/custom-build.sh" ]; then
+  source "${STRATOS_PATH}/custom-src/deploy/kubernetes/custom-build.sh"
+  HAS_CUSTOM_BUILD="true"
+fi
+
 function patchAndPushImage {
   NAME=${1}
   DOCKER_FILE=${2}
@@ -185,7 +191,6 @@ if [ "${ADD_GITHASH_TO_TAG}" == "true" ]; then
   updateTagForRelease
 fi
 
-
 if [ "${CHART_ONLY}" == "false" ]; then
 
   # Build all of the components that make up the Console
@@ -203,6 +208,11 @@ if [ "${CHART_ONLY}" == "false" ]; then
   # Build and push an image based on the nginx container (Front-end)
   log "-- Building/publishing the runtime container image for the Console web server (frontend)"
   patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
+
+  # Build any custom images added by a fork
+  if [ "${HAS_CUSTOM_BUILD}" == "true" ]; then
+    custom_image_build
+  fi
 fi
 
 log "-- Building Helm Chart"
@@ -214,7 +224,7 @@ DEST_HELM_CHART_PATH="${STRATOS_PATH}/deploy/kubernetes/helm-chart"
 
 rm -rf ${DEST_HELM_CHART_PATH}
 mkdir -p ${DEST_HELM_CHART_PATH}
-cp -R ${SRC_HELM_CHART_PATH}/ ${DEST_HELM_CHART_PATH}/
+cp -R ${SRC_HELM_CHART_PATH}/. ${DEST_HELM_CHART_PATH}/
 
 pushd ${DEST_HELM_CHART_PATH} > /dev/null
 
@@ -224,12 +234,13 @@ rm -rf ${DEST_HELM_CHART_PATH}/**/*.orig
 # Run customization script if there is one
 if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" ]; then
   printf "${YELLOW}${BOLD}Applying Helm Chart customizations${RESET}\n"
-  ${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh "${STRATOS_PATH}"
+  ${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh "${DEST_HELM_CHART_PATH}"
 fi
 
 # Fetch subcharts
 helm dependency update
 
+# Commands:
 sed -i.bak -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' values.yaml
 sed -i.bak -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' values.yaml
 sed -i.bak -e 's/hostname: docker.io/hostname: '"${DOCKER_REGISTRY}"'/g' values.yaml
@@ -240,7 +251,6 @@ rm -rf *.bak
 
 # Generate image list
 echo ${STRATOS_PATH}
-echo
 ${STRATOS_PATH}/deploy/kubernetes/imagelist-gen.sh .
 
 popd > /dev/null
