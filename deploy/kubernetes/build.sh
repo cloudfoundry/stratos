@@ -29,8 +29,9 @@ DOCKER_REG_DEFAULTS="true"
 CHART_ONLY="false"
 ADD_GITHASH_TO_TAG="true"
 HAS_CUSTOM_BUILD="false"
+PACKAGE_CHART="false"
 
-while getopts ":ho:r:t:Tclb:Opcn" opt; do
+while getopts ":ho:r:t:Tclb:Opcnz" opt; do
   case $opt in
     h)
       echo
@@ -72,6 +73,9 @@ while getopts ":ho:r:t:Tclb:Opcn" opt; do
       ;;     
     n)
       ADD_GITHASH_TO_TAG="false"
+      ;;
+    z)
+      PACKAGE_CHART="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -247,6 +251,14 @@ sed -i.bak -e 's/hostname: docker.io/hostname: '"${DOCKER_REGISTRY}"'/g' values.
 
 sed -i.bak -e 's/version: 0.1.0/version: '"${TAG}"'/g' Chart.yaml
 sed -i.bak -e 's/appVersion: 0.1.0/appVersion: '"${TAG}"'/g' Chart.yaml
+
+# Patch the console image tag in place - otherwise --reuse-values won't work with helm upgrade
+# Make sure we patch all files that have this reference
+cd templates
+find . -type f -name '*.yaml' | xargs sed -i.bak -e 's/{{.Values.consoleVersion}}/'"${TAG}"'/g'
+find . -type f -name "*.bak" -delete
+cd ..
+
 rm -rf *.bak
 
 # Generate image list
@@ -254,6 +266,18 @@ echo ${STRATOS_PATH}
 ${STRATOS_PATH}/deploy/kubernetes/imagelist-gen.sh .
 
 popd > /dev/null
+
+if [ "${PACKAGE_CHART}" ==  "true" ]; then
+  echo "Packaging Helm Chart"
+  pushd ${STRATOS_PATH}/deploy/kubernetes > /dev/null
+  PKG_DIST_FOLDER="dist/${TAG}/console"
+  rm -rf ${PKG_DIST_FOLDER}
+  mkdir -p ${PKG_DIST_FOLDER}
+  cp -R ${DEST_HELM_CHART_PATH}/* ${PKG_DIST_FOLDER}
+  helm package ${PKG_DIST_FOLDER}
+  rm -rf ${PKG_DIST_FOLDER}
+  popd > /dev/null
+fi
 
 set +e
 
