@@ -24,6 +24,8 @@ import {
   ISpaceQuotaDefinition,
   IStack,
 } from '../../core/src/core/cf-api.types';
+import { urlValidationExpression } from '../../core/src/core/utils.service';
+import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -34,8 +36,6 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../store/src/entity-catalog/entity-catalog.types';
-import { urlValidationExpression } from '../../core/src/core/utils.service';
-import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import {
   JetstreamError,
 } from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
@@ -44,7 +44,6 @@ import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
-import { CF_ENDPOINT_TYPE } from './cf-types';
 import { cfEntityFactory } from './cf-entity-factory';
 import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
 import {
@@ -84,6 +83,7 @@ import {
 } from './cf-entity-types';
 import { CfErrorResponse, getCfError } from './cf-error-helpers';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
+import { CF_ENDPOINT_TYPE } from './cf-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { appStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
 import { appSummaryActionBuilders } from './entity-action-builders/application-summary.action-builders';
@@ -861,7 +861,7 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
 function generateCfEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   return new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/cloud-foundry/${metadata.guid}`,
+    metadata => `/cloud-foundry/${metadata.guid}`
   );
 }
 

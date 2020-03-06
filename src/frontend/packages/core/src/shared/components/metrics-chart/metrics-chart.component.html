@@ -15,6 +15,25 @@
             [showXAxisLabel]="true" [showYAxisLabel]="true" [xAxis]="true" [yAxis]="true"
             [autoScale]="chartConfig.autoScale" [yAxisTicks]="chartConfig.yAxisTicks"
             [yAxisTickFormatting]="chartConfig.yAxisTickFormatting">
+            <ng-template #tooltipTemplate let-model="model">
+              <div class="metrics-chart__tooltip">
+                <div>{{ model.series }} : {{ getTooltipName(model) }}</div>
+                <div class="metrics-chart__tooltip-value">{{ getTooltipValue(model) }}</div>
+              </div>
+            </ng-template>            
+            <ng-template #seriesTooltipTemplate let-model="model">
+              <div class="area-tooltip-container">
+                <div *ngFor="let tooltipItem of getSeriesTooltipModel(model)" class="tooltip-item">
+                  <div *ngIf="!tooltipItem.truncated">
+                  <span class="tooltip-item-color" [style.background-color]="tooltipItem.color"></span>
+                  {{ tooltipItem.series }} : {{ getTooltipValue(tooltipItem) }}
+                </div>
+                <div *ngIf="tooltipItem.truncated" class="metrics-chart__tooltip-truncated">
+                  ...
+                </div>
+              </div>
+            </div>
+            </ng-template>            
           </ngx-charts-line-chart>
           <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>
         </div>

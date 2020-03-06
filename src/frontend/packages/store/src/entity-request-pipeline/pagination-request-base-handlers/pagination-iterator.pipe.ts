@@ -84,7 +84,8 @@ export class PaginationPageIterator<R = any, E = any> {
     }, {} as PagedJetstreamResponse);
   }
 
-  private handleRequests(initialResponse: JetstreamResponse<R>, action: PaginatedAction, totalPages: number, totalResults: number) {
+  private handleRequests(initialResponse: JetstreamResponse<R>, action: PaginatedAction, totalPages: number, totalResults: number):
+    Observable<[JetstreamResponse<R>, JetstreamResponse<R>[]]> {
     if (totalResults > 0) {
       const maxCount = action.flattenPaginationMax;
       // We're maxed so only respond with the first page of results.
@@ -94,7 +95,7 @@ export class PaginationPageIterator<R = any, E = any> {
         this.actionDispatcher(
           new UpdatePaginationMaxedState(maxCount, totalResults, entityType, endpointType, paginationKey, forcedEntityKey)
         );
-        of([initialResponse]);
+        return of([initialResponse, []]);
       }
     }
     return combineLatest(of(initialResponse), this.getAllOtherPageRequests(totalPages));

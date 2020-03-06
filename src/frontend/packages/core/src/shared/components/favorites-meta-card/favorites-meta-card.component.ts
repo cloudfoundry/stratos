@@ -112,7 +112,10 @@ export class FavoritesMetaCardComponent {
     }
   }
 
-  constructor(private store: Store<CFAppState>, private confirmDialog: ConfirmationDialogService) { }
+  constructor(
+    private store: Store<CFAppState>,
+    private confirmDialog: ConfirmationDialogService
+  ) { }
 
   public setConfirmation(prettyName: string, favorite: UserFavorite<IFavoriteMetadata>) {
     this.confirmation = new ConfirmationDialogConfig(

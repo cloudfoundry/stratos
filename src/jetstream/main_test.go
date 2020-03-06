@@ -130,7 +130,7 @@ func TestLoadDatabaseConfig(t *testing.T) {
 		"DB_HOST":                    "localhost",
 		"DB_PORT":                    "5432",
 		"DB_CONNECT_TIMEOUT_IN_SECS": "5",
-		"DB_SSL_MODE":                "disable",
+		"DB_SSL_MODE":                "false",
 	})))
 
 	if err != nil {

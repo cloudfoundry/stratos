@@ -158,7 +158,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CloudFoundryRoutingModule,
     RouterModule,
     NgxChartsModule,
-    CloudFoundryComponentsModule,
+    CloudFoundryComponentsModule
   ],
   declarations: [
     CloudFoundryBaseComponent,
@@ -238,6 +238,8 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
       provide: ActiveRouteCfCell,
       useValue: {}
     },
+    // ApplicationService,
+    // CloudFoundrySpaceService,
     CloudFoundryOrganizationService,
     CloudFoundryEndpointService,
     // CfRolesService,

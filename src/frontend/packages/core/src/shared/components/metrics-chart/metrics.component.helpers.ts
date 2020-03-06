@@ -31,6 +31,7 @@ export class MetricsChartHelpers {
 export enum ChartDataTypes {
   BYTES = 'bytes',
   CPU_PERCENT = 'cpu_percent',
+  CPU_TIME = 'cpu_time',
 }
 export function getMetricsChartConfigBuilder<T = any>(getSeriesName: (result) => string) {
   return (
@@ -38,8 +39,10 @@ export function getMetricsChartConfigBuilder<T = any>(getSeriesName: (result) =>
     yAxisLabel: string,
     dataType: ChartDataTypes = null,
     filterSeries?: MetricsFilterSeries,
-    yAxisTickFormatter?: YAxisTickFormattingFunc
-  ) => buildMetricsChartConfig<T>(metricsAction, yAxisLabel, getSeriesName, dataType, filterSeries, yAxisTickFormatter);
+    yAxisTickFormatter?: YAxisTickFormattingFunc,
+    tooltipValueFormatter?: YAxisTickFormattingFunc
+  ) => buildMetricsChartConfig<T>(metricsAction, yAxisLabel, getSeriesName, dataType, filterSeries, yAxisTickFormatter,
+    tooltipValueFormatter);
 }
 
 export function buildMetricsChartConfig<T = any>(
@@ -48,7 +51,8 @@ export function buildMetricsChartConfig<T = any>(
   getSeriesName: (result) => string,
   dataType: ChartDataTypes = null,
   filterSeries?: MetricsFilterSeries,
-  yAxisTickFormatter?: YAxisTickFormattingFunc
+  yAxisTickFormatter?: YAxisTickFormattingFunc,
+  tooltipValueFormatter?: YAxisTickFormattingFunc
 ): [
     MetricsConfig<IMetricMatrixResult<T>>,
     MetricsLineChartConfig
@@ -61,6 +65,7 @@ export function buildMetricsChartConfig<T = any>(
       mapSeriesItemValue: getServiceItemValueMapper(dataType),
       metricsAction,
       filterSeries,
+      tooltipValueFormatter,
     },
     MetricsChartHelpers.buildChartConfig(yAxisLabel, yAxisTickFormatter)
   ];
@@ -69,9 +74,12 @@ export function buildMetricsChartConfig<T = any>(
 function getServiceItemValueMapper(chartDataType: ChartDataTypes) {
   switch (chartDataType) {
     case ChartDataTypes.BYTES:
-      return (bytes) => (bytes / 1000000).toFixed(2);
+      // Megabytes - this should really be dynamic based on the value
+      return (bytes) => (bytes / 1024 / 1024).toFixed(2);
     case ChartDataTypes.CPU_PERCENT:
       return (percent) => parseFloat(percent).toFixed(2);
+    case ChartDataTypes.CPU_TIME:
+      return (time) => parseFloat(time).toFixed(2);
     default:
       return null;
   }
