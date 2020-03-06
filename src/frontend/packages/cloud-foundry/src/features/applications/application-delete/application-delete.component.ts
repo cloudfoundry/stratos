@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { DeleteUserProvidedInstance } from '../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import {
   applicationEntityType,
@@ -14,7 +13,6 @@ import {
 } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { IServiceBinding } from '../../../../../core/src/core/cf-api-svc.types';
 import { IApp, IRoute } from '../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -22,14 +20,16 @@ import {
   DataFunctionDefinition,
 } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { GeneralEntityAppState } from '../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import {
   CfAppRoutesListConfigService,
 } from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
@@ -249,9 +249,14 @@ export class ApplicationDeleteComponent<T> {
 
     const instanceMonitor = this.paginationMonitorFactory.create<APIResource<IServiceBinding>>(
       instancePaginationKey,
-      instanceAction.entity[0]
+      instanceAction.entity[0],
+      instanceAction.flattenPagination
     );
-    const routeMonitor = this.paginationMonitorFactory.create<APIResource<IRoute>>(routesPaginationKey, routesAction.entity[0]);
+    const routeMonitor = this.paginationMonitorFactory.create<APIResource<IRoute>>(
+      routesPaginationKey,
+      routesAction.entity[0],
+      routesAction.flattenPagination
+    );
     return {
       fetch: () => {
         this.store.dispatch(instanceAction);

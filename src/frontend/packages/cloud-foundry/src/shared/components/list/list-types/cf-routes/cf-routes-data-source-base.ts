@@ -57,7 +57,12 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
     appGuid?: string,
     genericRouteState = true
   ) {
-    const { rowsState, sub } = CfRoutesDataSourceBase.createRowState(store, action.paginationKey, genericRouteState);
+    const { rowsState, sub } = CfRoutesDataSourceBase.createRowState(
+      store,
+      action.paginationKey,
+      genericRouteState,
+      action.flattenPagination
+    );
 
     super({
       store,
@@ -111,9 +116,13 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
   /**
    * Create a row state manager that will set the route row state to busy/blocked/deleting etc
    */
-  private static createRowState(store, paginationKey, genericRouteState: boolean): { rowsState: Observable<RowsState>, sub: Subscription } {
+  private static createRowState(
+    store,
+    paginationKey,
+    genericRouteState: boolean,
+    isLocal: boolean): { rowsState: Observable<RowsState>, sub: Subscription } {
     if (genericRouteState) {
-      const { rowStateManager, sub } = CfRoutesDataSourceBase.getRowStateManager(store, paginationKey);
+      const { rowStateManager, sub } = CfRoutesDataSourceBase.getRowStateManager(store, paginationKey, isLocal);
       return {
         rowsState: rowStateManager.observable,
         sub
@@ -126,7 +135,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
     }
   }
 
-  private static getRowStateManager(store: Store<CFAppState>, paginationKey: string): {
+  private static getRowStateManager(store: Store<CFAppState>, paginationKey: string, isLocal: boolean): {
     rowStateManager: TableRowStateManager,
     sub: Subscription
   } {
@@ -137,7 +146,8 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
       {
         entityType: routeEntityType,
         endpointType: CF_ENDPOINT_TYPE
-      }
+      },
+      isLocal
     );
 
     const sub = this.setUpManager(

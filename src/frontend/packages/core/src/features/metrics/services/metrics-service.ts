@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { endpointListKey, EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
+import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { endpointListKey, EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { endpointEntitySchema } from '../../../base-entity-schemas';
+import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
 
 export interface MetricsEndpointProvider {
   provider: EndpointModel;
@@ -27,7 +27,8 @@ export class MetricsService {
   ) {
     this.endpointsMonitor = this.paginationMonitorFactory.create(
       endpointListKey,
-      endpointEntitySchema
+      endpointEntitySchema,
+      true
     );
 
     this.setupObservables();

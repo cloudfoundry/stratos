@@ -108,7 +108,8 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       this.entityMonitorFactory,
       action.paginationKey,
       action,
-      this.cfUserRowStateSetUpManager.bind(this)
+      this.cfUserRowStateSetUpManager.bind(this),
+      action.flattenPagination
     );
     this.dataSource = new CfSelectUsersDataSourceService(this.cfGuid, this.store, action, this, rowStateManager, () => {
       sub.unsubscribe();

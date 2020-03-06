@@ -276,7 +276,8 @@ export class CfRolesService {
         action: getAllOrganizationsAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          cfEntityFactory(organizationEntityType)
+          cfEntityFactory(organizationEntityType),
+          getAllOrganizationsAction.flattenPagination
         ),
       },
         true
