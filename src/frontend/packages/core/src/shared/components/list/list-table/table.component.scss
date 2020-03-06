@@ -1,5 +1,3 @@
-$row-height: 62px;
-
 .table-column-select {
   overflow: initial;
 }
@@ -34,8 +32,10 @@ mat-header-cell {
       display: none;
     }
 
-    &--fixed-row-height {
-      height: $row-height;
+    &--has-expanded-columns {
+      & > mat-header-cell:first-of-type {
+        padding-left: 63px;
+      }
     }
   }
 
@@ -84,13 +84,10 @@ mat-header-cell {
   }
 
   &__row {
-    min-height: $row-height;
 
     .mat-cell {
-      // Ensure the cell consumes at least height of the row. This ensure the animation on select is correct and edit row doesn't wiggle
       align-items: center;
       display: flex;
-      min-height: $row-height;
     }
 
     &:hover {

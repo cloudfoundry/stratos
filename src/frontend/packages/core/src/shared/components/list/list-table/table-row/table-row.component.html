@@ -1,4 +1,5 @@
-<div class="table-row-wrapper" [ngClass]="{'table-row-wrapper__blocked': isBlocked$ | async, 'table-row-wrapper__warning': inWarningState$ | async,'table-row-wrapper__errored': inErrorState$ | async,'table-row-wrapper__highlighted': isHighlighted$ | async }">
+<div class="table-row-wrapper"
+  [ngClass]="{'table-row-wrapper__blocked': isBlocked$ | async, 'table-row-wrapper__warning': inWarningState$ | async,'table-row-wrapper__errored': inErrorState$ | async,'table-row-wrapper__highlighted': isHighlighted$ | async }">
   <div *ngIf="isDeleting$ | async" class="table-row__deletion-bar-wrapper">
     <div class="table-row__deletion-bar-inner">
       <div class="table-row__deletion-bar-text">Deleting</div>
@@ -7,7 +8,16 @@
   </div>
   <div role="row" class="table-row">
     <div class="mat-row table-row__inner">
-      <ng-container cdkCellOutlet></ng-container>
+      <mat-expansion-panel class="table-row__inner__expansion" [togglePosition]="'before'" [disabled]="!expandComponent"
+        (opened)="createExpandedComponent()">
+        <mat-expansion-panel-header class="table-row__inner__expansion--header"
+          [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent}"
+          [collapsedHeight]="'auto'" [expandedHeight]="'auto'"
+          [ngStyle]="{'min-height': minRowHeight || defaultMinRowHeight }">
+          <ng-container cdkCellOutlet></ng-container>
+        </mat-expansion-panel-header>
+        <div #expandedComponent></div>
+      </mat-expansion-panel>
     </div>
   </div>
   <div class="table-row__error mat-row" *ngIf="errorMessage$ | async">

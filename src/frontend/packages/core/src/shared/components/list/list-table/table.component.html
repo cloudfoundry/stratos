@@ -28,10 +28,12 @@
               [config]="column.cellConfig" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
           </mat-cell>
         </ng-container>
-        <mat-header-row [hidden]="hideTable" class="app-table__header-row" *matHeaderRowDef="columnNames">
+        <mat-header-row [hidden]="hideTable" class="app-table__header-row" *matHeaderRowDef="columnNames"
+          [ngClass]="{'app-table__inner--has-expanded-columns': !!expandComponent}">
         </mat-header-row>
-        <app-table-row [ngClass]="{'app-table__inner--fixed-row-height': fixedRowHeight}" class="app-table__row"
-          *matRowDef="let row; columns: columnNames;" [rowState]="getRowState(row)"></app-table-row>
+        <app-table-row class="app-table__row" *matRowDef="let row; columns: columnNames;" [rowState]="getRowState(row)"
+          [row]="row" [expandComponent]="expandComponent" [inExpandedRow]="inExpandedRow" [minRowHeight]="minRowHeight">
+        </app-table-row>
       </mat-table>
     </mat-card-content>
   </mat-card>
