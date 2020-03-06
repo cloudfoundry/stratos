@@ -139,7 +139,7 @@ set -e
 # Copy values template
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 STRATOS_PATH=${__DIRNAME}/../../
-source ${STRATOS_PATH}/deploy/common-build.sh
+source "${STRATOS_PATH}/deploy/common-build.sh"
 
 if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/custom-build.sh" ]; then
   source "${STRATOS_PATH}/custom-src/deploy/kubernetes/custom-build.sh"
@@ -229,19 +229,19 @@ log "-- Building Helm Chart"
 SRC_HELM_CHART_PATH="${STRATOS_PATH}/deploy/kubernetes/console"
 DEST_HELM_CHART_PATH="${STRATOS_PATH}/deploy/kubernetes/helm-chart"
 
-rm -rf ${DEST_HELM_CHART_PATH}
-mkdir -p ${DEST_HELM_CHART_PATH}
-cp -R ${SRC_HELM_CHART_PATH}/. ${DEST_HELM_CHART_PATH}/
+rm -rf "${DEST_HELM_CHART_PATH}"
+mkdir -p "${DEST_HELM_CHART_PATH}"
+cp -R "${SRC_HELM_CHART_PATH}/." "${DEST_HELM_CHART_PATH}/"
 
-pushd ${DEST_HELM_CHART_PATH} > /dev/null
+pushd "${DEST_HELM_CHART_PATH}" > /dev/null
 
 # Remove any .orig files
-rm -rf ${DEST_HELM_CHART_PATH}/**/*.orig
+rm -rf "${DEST_HELM_CHART_PATH}/**/*.orig"
 
 # Run customization script if there is one
 if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" ]; then
   printf "${YELLOW}${BOLD}Applying Helm Chart customizations${RESET}\n"
-  ${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh "${DEST_HELM_CHART_PATH}"
+  "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" "${DEST_HELM_CHART_PATH}"
 fi
 
 # Fetch subcharts
@@ -266,19 +266,19 @@ rm -rf *.bak
 
 # Generate image list
 echo ${STRATOS_PATH}
-${STRATOS_PATH}/deploy/kubernetes/imagelist-gen.sh .
+"${STRATOS_PATH}/deploy/kubernetes/imagelist-gen.sh" .
 
 popd > /dev/null
 
 if [ "${PACKAGE_CHART}" ==  "true" ]; then
   echo "Packaging Helm Chart"
-  pushd ${STRATOS_PATH}/deploy/kubernetes > /dev/null
+  pushd "${STRATOS_PATH}/deploy/kubernetes >" /dev/null
   PKG_DIST_FOLDER="dist/${TAG}/console"
-  rm -rf ${PKG_DIST_FOLDER}
-  mkdir -p ${PKG_DIST_FOLDER}
-  cp -R ${DEST_HELM_CHART_PATH}/* ${PKG_DIST_FOLDER}
-  helm package ${PKG_DIST_FOLDER}
-  rm -rf ${PKG_DIST_FOLDER}
+  rm -rf "${PKG_DIST_FOLDER}"
+  mkdir -p "${PKG_DIST_FOLDER}"
+  cp -R "${DEST_HELM_CHART_PATH}/*" "${PKG_DIST_FOLDER}"
+  helm package "${PKG_DIST_FOLDER}"
+  rm -rf "${PKG_DIST_FOLDER}"
   popd > /dev/null
 fi
 
