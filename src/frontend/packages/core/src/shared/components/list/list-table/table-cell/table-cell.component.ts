@@ -30,6 +30,7 @@ import { TableCellActionsComponent } from '../table-cell-actions/table-cell-acti
 import { TableCellBooleanIndicatorComponent } from '../table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
 import { TableCellFavoriteComponent } from '../table-cell-favorite/table-cell-favorite.component';
+import { TableCellIconComponent } from '../table-cell-icon/table-cell-icon.component';
 import { TableCellRadioComponent } from '../table-cell-radio/table-cell-radio.component';
 import {
   TableCellRequestMonitorIconComponent,
@@ -55,6 +56,7 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellFavoriteComponent,
   TableCellEndpointDetailsComponent,
   TableCellSidePanelComponent,
+  TableCellIconComponent,
   ...coreEndpointListDetailsComponents
 ];
 

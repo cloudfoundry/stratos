@@ -9,7 +9,9 @@ describe('KubernetesPodStatusComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesPodStatusComponent]
+      declarations: [
+        KubernetesPodStatusComponent
+      ]
     })
       .compileComponents();
   }));
