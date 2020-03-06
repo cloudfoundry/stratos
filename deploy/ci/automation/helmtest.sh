@@ -1,9 +1,5 @@
 #!/bin/bash
 
-echo "================="
-echo "Stratos Helm Test"
-echo "================="
-
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STRATOS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../.. && pwd)"
 
@@ -11,6 +7,12 @@ CYAN="\033[96m"
 YELLOW="\033[93m"
 RESET="\033[0m"
 BOLD="\033[1m"
+
+echo -e "${YELLOW}${BOLD}"
+echo "================="
+echo "Stratos Helm Test"
+echo "================="
+echo -e "${RESET}"
 
 set -e
 
@@ -55,9 +57,10 @@ function waitForHelmRelease {
       TOTAL=$(($READY + $COMPLETED))
       EXPECTED=$(($COUNT - 1))
       if [ $TOTAL -eq $EXPECTED ]; then
-        READY1=$(kubectl get po --namespace=${NAMESPACE} | grep "3/3" | wc -l)
-        READY2=$(kubectl get po --namespace=${NAMESPACE} | grep "1/1" | wc -l)
-        READY=$(($READY1 + $READY2))
+        READY3=$(kubectl get po --namespace=${NAMESPACE} | grep "3/3" | wc -l)
+        READY2=$(kubectl get po --namespace=${NAMESPACE} | grep "2/2" | wc -l)
+        READY1=$(kubectl get po --namespace=${NAMESPACE} | grep "1/1" | wc -l)
+        READY=$(($READY1 + $READY2 + $READY3))
         if [ $READY -eq 2 ]; then
           DONE="true"
         fi
@@ -65,7 +68,7 @@ function waitForHelmRelease {
     fi
     if [ "$DONE" != "true" ]; then
       echo "Waiting for Stratos Helm release to be ready..."
-      sleep 5
+      sleep 10
       TIMEOUT=$((TIMEOUT+1))
       if [ ${TIMEOUT} -gt 60 ]; then
         echo "Timed out waiting for Helm release to be ready"
