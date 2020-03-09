@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import {
   ChangeDetectorRef,
   Component,
@@ -16,6 +17,7 @@ import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription 
 import {
   catchError,
   debounceTime,
+  delay,
   distinctUntilChanged,
   filter,
   first,
@@ -51,7 +53,8 @@ import { getRowMetadata } from '../../../cf.helpers';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
 
-/* tslint:disable:max-line-length */
+
+
 /* tslint:enable:max-line-length */
 
 interface Org { metadata: { guid: string }; }
@@ -66,6 +69,7 @@ interface CfUserWithWarning extends CfUser {
   entryComponents: [SpaceRolesListWrapperComponent]
 })
 export class UsersRolesModifyComponent implements OnInit, OnDestroy {
+
 
   @Input() setUsernames = false;
   orgColumns: ITableColumn<Org>[] = [
@@ -118,7 +122,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   usersNames$: Observable<string[]>;
   blocked = new BehaviorSubject<boolean>(true);
-  blocked$: Observable<boolean> = this.blocked.asObservable();
+  blocked$: Observable<boolean> = this.blocked.asObservable().pipe(delay(0));
   valid$: Observable<boolean>;
   orgRoles = OrgUserRoleNames;
   selectedOrgGuid: string;
@@ -138,11 +142,10 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // TODO: RC fix expression changed
     if (this.setUsernames) {
       this.blocked.next(false);
     } else {
-      this.blocked$ = this.cfRolesService.loading$;
+      this.cfRolesService.loading$.subscribe(loading => this.blocked.next(loading));
     }
 
     const orgEntity$ = this.store.select(selectUsersRolesOrgGuid).pipe(

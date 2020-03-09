@@ -55,9 +55,10 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    // TODO: RC validate the users via fetch user? only applicable to admin
 
+    // TODO: RC Block until whatever powers validation in select roles step loads
     const processingState: StackedInputActionsState[] = [];
+    // When we add user validation processing state should be used to show progress and result of validation
     // Object.keys(this.users.values).forEach(key => {
     //   processingState.push({
     //     key,

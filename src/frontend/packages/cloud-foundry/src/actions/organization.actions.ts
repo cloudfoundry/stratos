@@ -4,7 +4,6 @@ import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CFEntityConfig } from '../cf-types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   cfUserEntityType,
@@ -13,6 +12,7 @@ import {
   spaceEntityType,
   spaceWithOrgEntityType,
 } from '../cf-entity-types';
+import { CFEntityConfig } from '../cf-types';
 import {
   createEntityRelationPaginationKey,
   EntityInlineChildAction,

@@ -47,11 +47,7 @@ export interface StackedInputActionUpdate {
 })
 export class StackedInputActionComponent implements OnInit, OnDestroy, AfterContentInit {
 
-  @Input() stateIn$: Observable<StackedInputActionsState>;
-  @Input() position: number;
-  @Input() showRemove: boolean;
-  @Input() key: number;
-  @Input() config: StackedInputActionConfig = {
+  static defaultConfig = {
     isEmailInput: true,
     text: {
       placeholder: 'Email',
@@ -59,8 +55,18 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
       uniqueError: 'Email is not unique'
     }
   };
-
-  // TODO: RC Test Invite User, validation
+  @Input() stateIn$: Observable<StackedInputActionsState>;
+  @Input() position: number;
+  @Input() showRemove: boolean;
+  @Input() key: number;
+  private pConfig: StackedInputActionConfig;
+  @Input()
+  set config(config: StackedInputActionConfig) {
+    this.pConfig = config;
+  }
+  get config(): StackedInputActionConfig {
+    return this.pConfig || StackedInputActionComponent.defaultConfig;
+  }
 
   @Output() stateOut = new EventEmitter<StackedInputActionUpdate>();
   @Output() remove = new EventEmitter<any>();

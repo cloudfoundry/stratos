@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, ReplaySubject } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, ReplaySubject } from 'rxjs';
 import { filter, first, map, multicast, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
@@ -18,6 +18,7 @@ import {
 } from '../../../../cloud-foundry/src/store/types/user.types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import {
@@ -28,6 +29,7 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { UserActionBuilders } from '../../entity-action-builders/user.action-builders';
 import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
 import {
   fetchTotalResults,
@@ -46,7 +48,7 @@ import {
 export class CfUserService {
   private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
 
-  private userCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
+  private userCatalogEntity = entityCatalog.getEntity<IEntityMetadata, any, UserActionBuilders>(CF_ENDPOINT_TYPE, cfUserEntityType);
 
   users: { [guid: string]: Observable<APIResource<CfUser>> } = {};
 
@@ -57,28 +59,30 @@ export class CfUserService {
     private entityServiceFactory: EntityServiceFactory,
   ) { }
 
-  getUsers = (endpointGuid: string, filterEmpty = true): Observable<APIResource<CfUser>[]> => {
-    console.log(endpointGuid, filterEmpty);
+  getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> => {
     return this.getAllUsers(endpointGuid).pipe(
-      switchMap(paginationObservables => paginationObservables.entities$),
+      switchMap(paginationObservables => combineLatest(paginationObservables.entities$, paginationObservables.pagination$)),
       publishReplay(1),
       refCount(),
-      filter(p => {
-        return filterEmpty ? !!p : true;
+      filter(([users, pagination]) => {
+        // Filter until we have a result
+        const currentPage = pagination.pageRequests[pagination.currentPage];
+        if (!currentPage) {
+          return false;
+        }
+        return !currentPage.busy && (!!users || currentPage.error);
       }),
-      map(users => {
-        return filterEmpty ? users.filter(p => p.entity.cfGuid === endpointGuid) : null;
-      }),
-      filter(p => {
-        return filterEmpty ? p.length > 0 : true;
-      }),
+      map(([users, pagination]) => {
+        // Include only the users from the required endpoint
+        // (Think this is now a no-op as the actions have since been fixed to return only users from a single cf but keeping for the moment)
+        return !!users ? users.filter(p => p.entity.cfGuid === endpointGuid) : null;
+      })
     );
   }
 
-
   getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
     // Attempt to get user from all users first, this better covers the case when a non-admin can't hit /users
-    return this.getUsers(endpointGuid, false).pipe(
+    return this.getUsers(endpointGuid).pipe(
       switchMap(users => {
         // `users` will be null if we can't handle the fetch (connected as non-admin with lots of orgs). For those case fall back on the
         // user entity. Why not just use the user entity? There's a lot of these requests.. in parallel if we're fetching a list of users
@@ -384,7 +388,7 @@ export class CfUserService {
       cfGuid,
       createEntityRelationPaginationKey(organizationEntityType, orgGuid),
       isAdmin
-    ) as PaginatedAction;
+    );
   }
 
   private createSpaceGetUsersAction = (isAdmin: boolean, cfGuid: string, spaceGuid: string, ): PaginatedAction => {
@@ -393,7 +397,7 @@ export class CfUserService {
       cfGuid,
       createEntityRelationPaginationKey(spaceEntityType, spaceGuid),
       isAdmin
-    ) as PaginatedAction;
+    );
   }
 
   public isConnectedUserAdmin = (cfGuid: string): Observable<boolean> =>

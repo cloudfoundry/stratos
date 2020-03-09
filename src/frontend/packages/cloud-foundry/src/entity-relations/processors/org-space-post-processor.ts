@@ -70,7 +70,7 @@ export function orgSpacePostProcess(
   const userCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
   const { entityKey: cfUserEntityKey } = userCatalogEntity;
   const users = entities[cfUserEntityKey];
-  const existingUsers = allEntities[cfOrgOrSpaceEntityKey];
+  const existingUsers = allEntities[cfUserEntityKey];
 
   const newUsers = {};
   if (cfOrgOrSpaceEntityKey === getCFEntityKey(organizationEntityType)) {
