@@ -20,7 +20,7 @@ resources:
   type: stratos-git-resource
   source:
     uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
-    branch: "canary"
+    branch: ((stratos-repository-branch))
     private_key: ((github-private-key))
 
 # Artifacts
@@ -41,7 +41,7 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-organization))/((aio-docker-image-name))
-    tag: "canary"
+    tag: "nightly"
 
 jobs:
 - name: generate-tag-files
@@ -72,7 +72,7 @@ jobs:
     params:
       build: stratos
       dockerfile: stratos/deploy/Dockerfile.all-in-one
-      tag: stratos/deploy/ci/tasks/build-images/canary-tag
+      tag: stratos/deploy/ci/tasks/build-images/nightly-tag
       tag_as_latest: false
       labels_file: image-tag/image-labels
       build_args_file: image-tag/ui-build-args
