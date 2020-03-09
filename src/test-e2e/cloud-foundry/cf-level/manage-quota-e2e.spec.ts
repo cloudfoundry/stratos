@@ -8,7 +8,7 @@ import { TableComponent } from '../../po/table.po';
 import { CfTopLevelPage } from './cf-top-level-page.po';
 import { QuotaFormPage } from './quota-form-page.po';
 
-fdescribe('Manage Quota', () => {
+describe('Manage Quota', () => {
   let e2eSetup;
   let quotaFormPage: QuotaFormPage;
   let cfTopLevelPage: CfTopLevelPage = new CfTopLevelPage();
