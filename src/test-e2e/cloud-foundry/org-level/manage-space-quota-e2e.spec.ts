@@ -7,7 +7,7 @@ import { extendE2ETestTime } from '../../helpers/extend-test-helpers';
 import { CfOrgLevelPage } from '../org-level/cf-org-level-page.po';
 import { SpaceQuotaFormPage } from './space-quota-form-page.po';
 
-describe('Manage Space Quota', () => {
+fdescribe('Manage Space Quota', () => {
   let e2eSetup;
   let quotaFormPage: SpaceQuotaFormPage;
   let cfOrgLevelPage: CfOrgLevelPage = new CfOrgLevelPage();
