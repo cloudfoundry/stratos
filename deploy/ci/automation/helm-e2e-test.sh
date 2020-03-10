@@ -53,13 +53,26 @@ log "Performing checks ..."
 
 # Check secrets file
 
+echo "TEST_CONFIG_URL: ${TEST_CONFIG_URL}"
+
 if [ -z "${TEST_CONFIG_URL}" ]; then
   TEST_CONFIG_URL="${STRATOS}/secrets.yaml"
+  echo "Updated TEST_CONFIG_URL: ${TEST_CONFIG_URL}"
 fi
 
 if [ ! -f "${TEST_CONFIG_URL}" ]; then
   echo "No secrets.yaml file"
   exit 1
+fi
+
+# Is the test config file a local file? (must be absolute path)
+if [[ "${TEST_CONFIG_URL}" == /* ]]; then
+  rm -f secrets.yaml
+  cp "${TEST_CONFIG_URL}" secrets.yaml
+else
+  # Get the E2E config
+  rm -f secrets.yaml
+  curl -k ${TEST_CONFIG_URL} --output secrets.yaml
 fi
 
 # Use correct sed command for Mac
