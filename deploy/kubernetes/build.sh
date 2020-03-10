@@ -30,8 +30,9 @@ CHART_ONLY="false"
 ADD_GITHASH_TO_TAG="true"
 HAS_CUSTOM_BUILD="false"
 PACKAGE_CHART="false"
+DOCKER_SQUASH="true"
 
-while getopts ":ho:r:t:Tclb:Opcnz" opt; do
+while getopts ":ho:r:t:Tclb:Opcnzs" opt; do
   case $opt in
     h)
       echo
@@ -76,6 +77,9 @@ while getopts ":ho:r:t:Tclb:Opcnz" opt; do
       ;;
     z)
       PACKAGE_CHART="true"
+      ;;
+    s)
+      DOCKER_SQUASH="false"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -172,7 +176,6 @@ function patchDockerfile {
   sed -i.bak "s/opensuse/${BASE_IMAGE_TAG}/g" ${FOLDER}/${PATCHED_DOCKER_FILE}
   popd > /dev/null 2>&1
 }
-
 
 #
 # MAIN -------------------------------------------------------------------------------------------
