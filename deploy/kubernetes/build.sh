@@ -162,8 +162,8 @@ function patchAndPushImage {
 }
 
 function patchDockerfile {
-  DOCKER_FILE=${1}
-  FOLDER=${2}
+  DOCKER_FILE="${1}"
+  FOLDER="${2}"
   PATCHED_DOCKER_FILE="${DOCKER_FILE}.patched"
 
   # Replace registry/organization
