@@ -167,7 +167,7 @@ function patchDockerfile {
   PATCHED_DOCKER_FILE=${DOCKER_FILE}.patched
 
   # Replace registry/organization
-  pushd ${FOLDER} > /dev/null 2>&1
+  pushd "${FOLDER}" > /dev/null 2>&1
   ls
   rm -rf ${PATCHED_DOCKER_FILE}
   cp ${DOCKER_FILE} ${PATCHED_DOCKER_FILE}
