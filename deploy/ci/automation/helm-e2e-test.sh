@@ -54,7 +54,11 @@ log "Performing checks ..."
 
 # Check secrets file
 
-if [ ! -f "${STRATOS}/secrets.yaml" ]; then
+if [ -n "${TEST_CONFIG_URL}" ]; then
+  TEST_CONFIG_URL="${STRATOS}/secrets.yaml"
+fi
+
+if [ ! -f "${TEST_CONFIG_URL}" ]; then
   echo "No secrets.yaml file"
   exit 1
 fi
@@ -67,7 +71,7 @@ if [[ "$unamestr" == 'Darwin' ]]; then
 fi   
 
 # Parse out the UAA endpoint from the secrets file
-UAA=$(cat ${STRATOS}/secrets.yaml | grep tokenEndpoint)
+UAA=$(cat ${TEST_CONFIG_URL} | grep tokenEndpoint)
 UAA="$(echo -e "${UAA}" | $SED -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
 UAA=${UAA/tokenEndpoint: /}
 REGEX="^https://([a-z\.\-]*):([0-9]*)"
