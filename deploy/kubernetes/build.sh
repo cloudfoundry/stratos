@@ -9,6 +9,7 @@
 #####
 
 set -u
+set -x
 
 CYAN="\033[96m"
 YELLOW="\033[93m"
