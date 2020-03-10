@@ -5,7 +5,6 @@ import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators
 
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import { validateEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { UtilsService } from '../../../core/src/core/utils.service';
 import { ClearPaginationOfEntity, ClearPaginationOfType, SET_PAGE_BUSY } from '../actions/pagination.actions';
@@ -15,6 +14,7 @@ import {
   EntitiesPipelineCompleted,
   ValidateEntitiesStart,
 } from '../actions/request.actions';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import {
   completeApiRequest,
   getFailApiRequestActions,

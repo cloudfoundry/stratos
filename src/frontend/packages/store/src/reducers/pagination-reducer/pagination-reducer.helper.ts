@@ -28,7 +28,7 @@ import {
   PaginationEntityState,
   PaginationParam,
 } from '../../types/pagination.types';
-import { ActionState } from '../api-request-reducer/types';
+import { ListActionState } from '../api-request-reducer/types';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -298,12 +298,12 @@ export function hasError(pagination: PaginationEntityState): boolean {
   return pagination && getCurrentPageRequestInfo(pagination).error;
 }
 
-export function getCurrentPageRequestInfo(pagination: PaginationEntityState): ActionState {
-  return pagination.pageRequests[pagination.currentPage] || {
-    busy: false,
-    error: false,
-    message: ''
-  };
+export function getCurrentPageRequestInfo(pagination: PaginationEntityState, valueIfMissing = {
+  busy: false,
+  error: false,
+  message: ''
+}): ListActionState {
+  return pagination.pageRequests[pagination.currentPage] || valueIfMissing;
 }
 
 export function spreadClientPagination(pag: PaginationClientPagination): PaginationClientPagination {

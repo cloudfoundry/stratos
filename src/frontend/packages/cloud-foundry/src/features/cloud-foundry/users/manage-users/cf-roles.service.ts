@@ -20,9 +20,10 @@ import {
 import { IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../../core/src/core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   selectUsersRolesCf,
@@ -30,17 +31,16 @@ import {
   selectUsersRolesRoles,
 } from '../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
+import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../cf-entity-factory';
 import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
 
 @Injectable()
 export class CfRolesService {
@@ -132,6 +132,7 @@ export class CfRolesService {
 
     const userGuids = selectedUsers.map(user => user.guid);
     return this.cfUserService.getUsers(cfGuid).pipe(
+      filter(users => !!users),
       map(users => {
         const roles = {};
         // For each user (excluding those that are not selected)....
