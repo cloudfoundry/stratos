@@ -97,6 +97,7 @@ fi
 if [ "${BUILD}" == "true" ]; then
   eval $(minikube docker-env)
   log "Building images and Helm Chart ..."
+  set -x
   "${STRATOS}/deploy/kubernetes/build.sh" -s -o ${ORG}
 fi
 
