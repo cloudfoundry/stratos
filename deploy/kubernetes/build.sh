@@ -154,8 +154,8 @@ function patchAndPushImage {
   TARGET=${4:-none}
   PATCHED_DOCKER_FILE="${DOCKER_FILE}.patched"
 
-  patchDockerfile ${DOCKER_FILE} ${FOLDER}
-  buildAndPublishImage ${NAME} "${PATCHED_DOCKER_FILE}" ${FOLDER} ${TARGET}
+  patchDockerfile "${DOCKER_FILE}" "${FOLDER}"
+  buildAndPublishImage ${NAME} "${PATCHED_DOCKER_FILE}" "${FOLDER}" ${TARGET}
 
   rm -rf ${FOLDER}/${PATCHED_DOCKER_FILE}
   rm -rf ${FOLDER}/${PATCHED_DOCKER_FILE}.bak
@@ -164,17 +164,17 @@ function patchAndPushImage {
 function patchDockerfile {
   DOCKER_FILE=${1}
   FOLDER=${2}
-  PATCHED_DOCKER_FILE=${DOCKER_FILE}.patched
+  PATCHED_DOCKER_FILE="${DOCKER_FILE}.patched"
 
   # Replace registry/organization
   pushd "${FOLDER}" > /dev/null 2>&1
   ls
-  rm -rf ${PATCHED_DOCKER_FILE}
-  cp ${DOCKER_FILE} ${PATCHED_DOCKER_FILE}
+  rm -rf "{PATCHED_DOCKER_FILE}"
+  cp "${DOCKER_FILE}" "${PATCHED_DOCKER_FILE}"
   if [ "${DOCKER_REG_DEFAULTS}" == "false" ]; then
-    sed -i.bak "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" ${FOLDER}/${PATCHED_DOCKER_FILE}
+    sed -i.bak "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   fi
-  sed -i.bak "s/opensuse/${BASE_IMAGE_TAG}/g" ${FOLDER}/${PATCHED_DOCKER_FILE}
+  sed -i.bak "s/opensuse/${BASE_IMAGE_TAG}/g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   popd > /dev/null 2>&1
 }
 
