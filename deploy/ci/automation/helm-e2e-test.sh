@@ -49,7 +49,6 @@ NAME=stratos-test
 NAMESPACE=stratos-ns
 HELM_REPO=https://cloudfoundry.github.io/stratos
 NODE_PORT=32123
-ORG=localbuild
 log "Performing checks ..."
 
 # Check secrets file
@@ -98,7 +97,7 @@ if [ "${BUILD}" == "true" ]; then
   eval $(minikube docker-env)
   log "Building images and Helm Chart ..."
   set -x
-  "${STRATOS}/deploy/kubernetes/build.sh" -s -o ${ORG}
+  "${STRATOS}/deploy/kubernetes/build.sh" -s
 fi
 
 #HELM_ARGS can be used to supply additional args
