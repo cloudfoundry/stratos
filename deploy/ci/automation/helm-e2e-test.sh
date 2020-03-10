@@ -75,6 +75,8 @@ else
   curl -k ${TEST_CONFIG_URL} --output secrets.yaml
 fi
 
+SECRETS_FILE="${STRATOS}/secrets.yaml"
+
 # Use correct sed command for Mac
 SED="sed -r"
 unamestr=`uname`
@@ -83,7 +85,7 @@ if [[ "$unamestr" == 'Darwin' ]]; then
 fi   
 
 # Parse out the UAA endpoint from the secrets file
-UAA=$(cat ${TEST_CONFIG_URL} | grep tokenEndpoint)
+UAA=$(cat "${SECRETS_FILE}" | grep tokenEndpoint)
 UAA="$(echo -e "${UAA}" | $SED -e 's@^[[:space:]]*@@' -e 's@[[:space:]]*$@@')"
 UAA=${UAA/tokenEndpoint: /}
 REGEX="^https://([a-z\.\-]*):([0-9]*)"
