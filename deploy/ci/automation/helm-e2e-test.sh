@@ -54,7 +54,7 @@ log "Performing checks ..."
 
 # Check secrets file
 
-if [ -n "${TEST_CONFIG_URL}" ]; then
+if [ -z "${TEST_CONFIG_URL}" ]; then
   TEST_CONFIG_URL="${STRATOS}/secrets.yaml"
 fi
 
