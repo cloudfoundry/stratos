@@ -169,8 +169,6 @@ helm upgrade ${NAME} "${CHART_FILE}" --recreate-pods --debug --set consoleVersio
 checkVersion console-${DEV_IMAGE_VERSION}
 waitForHelmRelease
 
-log "Debug ...."
-set +x
 ls -al "${HELM_TMP}"
 
 # Change just the chart version and try to upgrade
