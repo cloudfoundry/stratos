@@ -169,6 +169,10 @@ helm upgrade ${NAME} "${CHART_FILE}" --recreate-pods --debug --set consoleVersio
 checkVersion console-${DEV_IMAGE_VERSION}
 waitForHelmRelease
 
+log "Debug ...."
+set +x
+ls -al "${HELM_TMP}"
+
 # Change just the chart version and try to upgrade
 sed -i.bak -e 's/version: '"${DEV_IMAGE_VERSION}"'/version: 0.2.0/g' "${HELM_TMP}/Chart.yaml"
 sed -i.bak -e 's/appVersion: '"${DEV_IMAGE_VERSION}"'/appVersion: 0.2.0/g' "${HELM_TMP}/Chart.yaml"
