@@ -160,15 +160,11 @@ rm -rf "${KUBE_FOLDER}/*.tgz"
 # Build the chart with the specific version for images
 "${STRATOS}/deploy/kubernetes/build.sh" -z -c -n -t ${DEV_IMAGE_VERSION}
 
-KUBE_FOLDER=$(printf %q ${KUBE_FOLDER})
-echo ${KUBE_FOLDER}
-
-CHART_FILE=$(ls ${KUBE_FOLDER}/*.tgz)
-CHART_FILE=$(printf %q ${CHART_FILE})
+CHART_FILE="${KUBE_FOLDER}/console-${DEV_IMAGE_VERSION}.tgz"
 echo "Chart file path: ${CHART_FILE}"
 
 log "Upgrading using latest Helm Chart"
-helm upgrade ${NAME} ${CHART_FILE} --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
+helm upgrade ${NAME} "${CHART_FILE}" --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
 
 checkVersion console-${DEV_IMAGE_VERSION}
 waitForHelmRelease
@@ -188,7 +184,7 @@ checkVersion console-0.2.0
 deleteRelease
 
 log "Installing using latest Helm Chart"
-helm install ${CHART_FILE} --name ${NAME} --namespace ${NAMESPACE} --set imagePullPolicy=Always
+helm install "${CHART_FILE}" --name ${NAME} --namespace ${NAMESPACE} --set imagePullPolicy=Always
 
 waitForHelmRelease
 checkVersion console-${DEV_IMAGE_VERSION}
