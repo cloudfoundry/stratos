@@ -18,15 +18,12 @@ export function successEntityHandler(
     !action.updatingKey &&
     (requestType === 'create' || requestType === 'delete')
   ) {
+    const proxySafeEntityConfig = action.proxyPaginationEntityConfig ? action.proxyPaginationEntityConfig : action;
     // FIXME: Look at using entity config instead of actions in these actions ctors #3975
     if (action.removeEntityOnDelete) {
-      actionDispatcher(new ClearPaginationOfEntity(action, action.guid));
+      actionDispatcher(new ClearPaginationOfEntity(proxySafeEntityConfig, action.guid));
     } else {
-      if (action.proxyPaginationEntityConfig) {
-        actionDispatcher(new ClearPaginationOfType(action.proxyPaginationEntityConfig));
-      } else {
-        actionDispatcher(new ClearPaginationOfType(action));
-      }
+      actionDispatcher(new ClearPaginationOfType(proxySafeEntityConfig));
     }
 
     if (Array.isArray(action.clearPaginationEntityKeys)) {
