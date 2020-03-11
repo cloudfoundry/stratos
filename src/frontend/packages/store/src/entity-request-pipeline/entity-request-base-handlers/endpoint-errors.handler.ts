@@ -1,5 +1,5 @@
-import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
 import { SendEventAction } from '../../actions/internal-events.actions';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
 import { endpointSchemaKey } from '../../helpers/entity-factory';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { InternalEventSeverity, InternalEventStateMetadata } from '../../types/internal-events.types';
@@ -35,7 +35,9 @@ export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher)
         metadata: {
           url: error.url,
           httpMethod: action.options ? action.options.method as string : '',
-          errorResponse: error.jetstreamErrorResponse,
+          errorResponse: {
+            errorResponse: error.jetstreamErrorResponse
+          },
         },
       }),
     );
