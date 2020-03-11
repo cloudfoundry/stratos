@@ -1,6 +1,8 @@
-import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
+import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/src/cf-types';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../../actions/pagination.actions';
 import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import { WrapperRequestActionSuccess } from '../../types/request.types';
 
 export function successEntityHandler(
@@ -29,7 +31,10 @@ export function successEntityHandler(
 
     if (Array.isArray(action.clearPaginationEntityKeys)) {
       // If clearPaginationEntityKeys is an array then clear the pagination sections regardless of removeEntityOnDelete
-      action.clearPaginationEntityKeys.map(key => actionDispatcher(new ClearPaginationOfType(action)));
+      action.clearPaginationEntityKeys.forEach(key => {
+        const entityConfig = entityCatalog.getEntity(CF_ENDPOINT_TYPE, key);
+        actionDispatcher(new ClearPaginationOfType(entityConfig.getSchema()));
+      });
     }
   }
   actionDispatcher(entityAction);

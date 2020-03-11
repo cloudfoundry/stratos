@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 import { validateEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { UtilsService } from '../../../core/src/core/utils.service';
@@ -160,7 +161,10 @@ export class RequestEffect {
 
           if (Array.isArray(apiAction.clearPaginationEntityKeys)) {
             // If clearPaginationEntityKeys is an array then clear the pagination sections regardless of removeEntityOnDelete
-            actions.push(...apiAction.clearPaginationEntityKeys.map(key => new ClearPaginationOfType(apiAction)));
+            actions.push(...apiAction.clearPaginationEntityKeys.map(key => {
+              const entityConfig = entityCatalog.getEntity(CF_ENDPOINT_TYPE, key);
+              return new ClearPaginationOfType(entityConfig.getSchema());
+            }));
           }
         }
       }
