@@ -6,13 +6,13 @@ import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { entityCatalog } from '../../../../../../../store/src//entity-catalog/entity-catalog.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { entityCatalog } from '../../../../../../../store/src//entity-catalog/entity-catalog.service';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { selectDeletionInfo } from '../../../../../../../store/src/selectors/api.selectors';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { organizationEntityType } from '../../../../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { goToAppWall } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';

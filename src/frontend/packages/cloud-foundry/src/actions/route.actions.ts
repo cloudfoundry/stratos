@@ -1,5 +1,7 @@
+import { HttpParams, HttpRequest } from '@angular/common/http';
+
 import { getActions } from '../../../store/src/actions/action.helper';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { applicationEntityType, domainEntityType, routeEntityType, spaceEntityType } from '../cf-entity-types';
@@ -9,7 +11,6 @@ import {
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
-import { HttpRequest, HttpParams } from '@angular/common/http';
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';
@@ -123,10 +124,11 @@ export class UnmapRoute extends BaseRouteAction {
 }
 
 export class GetAllRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, ICFAction {
-  paginationKey: string;
   endpointType = 'cf';
+  paginationKey: string;
   constructor(
     public endpointGuid: string,
+    pKey?: string,
     public includeRelations = [
       createEntityRelationKey(routeEntityType, applicationEntityType),
       createEntityRelationKey(routeEntityType, domainEntityType),
@@ -139,13 +141,13 @@ export class GetAllRoutes extends CFStartAction implements PaginatedAction, Enti
       'GET',
       'routes'
     );
-    this.paginationKey = createEntityRelationPaginationKey('cf', this.endpointGuid);
+    this.paginationKey = pKey || createEntityRelationPaginationKey('cf', this.endpointGuid);
   }
   entity = [cfEntityFactory(routeEntityType)];
   entityType = routeEntityType;
   options: HttpRequest<any>;
   actions = getActions('Routes', 'Fetch all');
-  initialParams = {
+  initialParams: PaginationParam = {
     'results-per-page': 100,
     page: 1,
     'order-direction': 'desc',
