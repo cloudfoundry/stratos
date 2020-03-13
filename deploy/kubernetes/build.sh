@@ -270,17 +270,10 @@ popd > /dev/null
 if [ "${PACKAGE_CHART}" ==  "true" ]; then
   echo "Packaging Helm Chart"
   pushd "${STRATOS_PATH}/deploy/kubernetes" > /dev/null
-  ls -al
   PKG_DIST_BASE_FOLDER=./dist/${TAG}
   PKG_DIST_FOLDER=./dist/${TAG}/console
-
   rm -rf ${PKG_DIST_BASE_FOLDER}
   mkdir -p ${PKG_DIST_BASE_FOLDER}
-
-  echo "HERE"
-  echo "${DEST_HELM_CHART_PATH}"
-  echo ${PKG_DIST_BASE_FOLDER}
-
   mv ./helm-chart/ ${PKG_DIST_BASE_FOLDER}/console
   helm package ${PKG_DIST_FOLDER}
   rm -rf ${PKG_DIST_BASE_FOLDER}
