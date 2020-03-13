@@ -132,7 +132,6 @@ export class CfRolesService {
 
     const userGuids = selectedUsers.map(user => user.guid);
     return this.cfUserService.getUsers(cfGuid).pipe(
-      filter(users => !!users),
       map(users => {
         const roles = {};
         // For each user (excluding those that are not selected)....

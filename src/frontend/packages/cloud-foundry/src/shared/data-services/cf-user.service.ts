@@ -64,7 +64,7 @@ export class CfUserService {
         // Entities should be subbed to so the api request is made
         paginationObservables.entities$.pipe(
           // In the event of maxed lists though entities never fires... so start with something
-          startWith([]),
+          startWith(null),
         ),
         paginationObservables.pagination$
       )),
@@ -88,7 +88,8 @@ export class CfUserService {
         // Include only the users from the required endpoint
         // (Think this is now a no-op as the actions have since been fixed to return only users from a single cf but keeping for the moment)
         return !!users ? users.filter(p => p.entity.cfGuid === endpointGuid) : null;
-      })
+      }),
+      filter(users => filterEmpty ? !!users : true)
     )
 
   getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
