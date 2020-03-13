@@ -6,12 +6,12 @@ import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { endpointEntitySchema } from '../../../../../base-entity-schemas';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
+import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { endpointEntitySchema } from '../../../../../base-entity-schemas';
 import { DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { RowsState } from '../../data-sources-controllers/list-data-source-types';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
@@ -57,7 +57,8 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       entityMonitorFactory,
       GetAllEndpoints.storeKey,
       action,
-      EndpointRowStateSetUpManager
+      EndpointRowStateSetUpManager,
+      false
     );
     const eventSub = BaseEndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager, store);
     const config = BaseEndpointsDataSource.getEndpointConfig(

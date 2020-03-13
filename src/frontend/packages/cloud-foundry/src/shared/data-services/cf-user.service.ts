@@ -319,7 +319,8 @@ export class CfUserService {
                 action: allUsersAction,
                 paginationMonitor: this.paginationMonitorFactory.create(
                   allUsersAction.paginationKey,
-                  cfEntityFactory(cfUserEntityType)
+                  cfEntityFactory(cfUserEntityType),
+                  allUsersAction.flattenPagination
                 )
               }))
             );
