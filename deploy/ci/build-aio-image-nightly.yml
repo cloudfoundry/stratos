@@ -1,4 +1,4 @@
-# Canary image build pipeline
+# Nightly AIO image build pipeline
 # This pipeline builds the canary Docker image for the AIO when the canary branch is updated
 ---
 resource_types:
