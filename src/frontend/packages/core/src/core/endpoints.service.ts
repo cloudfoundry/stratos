@@ -46,7 +46,7 @@ export class EndpointsService implements CanActivate {
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => {
         const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-        if (!epType.definition) {
+        if (!epType || !epType.definition) {
           return false;
         }
         const epEntity = epType.definition;
