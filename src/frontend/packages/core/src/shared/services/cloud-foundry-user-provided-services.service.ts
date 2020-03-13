@@ -71,7 +71,8 @@ export class CloudFoundryUserProvidedServicesService {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        action
+        action,
+        action.flattenPagination
       )
     });
     return combineLatest([

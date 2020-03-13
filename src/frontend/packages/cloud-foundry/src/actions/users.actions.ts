@@ -106,7 +106,7 @@ export class ChangeUserRole extends CFStartAction implements EntityRequestAction
     this.entity = cfEntityFactory(this.entityType);
   }
 
-  guid: string; you
+  guid: string;
   entity: EntitySchema;
   entityType: string;
   options: HttpRequest<any>;

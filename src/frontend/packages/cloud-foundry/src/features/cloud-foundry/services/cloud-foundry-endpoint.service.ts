@@ -194,7 +194,8 @@ export class CloudFoundryEndpointService {
       action: this.getAllOrgsAction,
       paginationMonitor: this.pmf.create(
         this.getAllOrgsAction.paginationKey,
-        cfEntityFactory(organizationEntityType)
+        cfEntityFactory(organizationEntityType),
+        this.getAllOrgsAction.flattenPagination
       )
     }, true).entities$;
 
@@ -208,7 +209,11 @@ export class CloudFoundryEndpointService {
   }
 
   constructAppObs() {
-    const appPaginationMonitor = this.pmf.create(this.getAllAppsAction.paginationKey, this.getAllAppsAction);
+    const appPaginationMonitor = this.pmf.create(
+      this.getAllAppsAction.paginationKey,
+      this.getAllAppsAction,
+      this.getAllAppsAction.flattenPagination
+    );
     this.appsPagObs = getPaginationObservables<APIResource<IApp>>({
       store: this.store,
       action: this.getAllAppsAction,
@@ -269,7 +274,8 @@ export class CloudFoundryEndpointService {
         action,
         paginationMonitor: this.pmf.create(
           action.paginationKey,
-          cfEntityFactory(domainEntityType)
+          cfEntityFactory(domainEntityType),
+          action.flattenPagination
         )
       },
       true
@@ -304,7 +310,8 @@ export class CloudFoundryEndpointService {
           action,
           paginationMonitor: this.paginationMonitorFactory.create(
             action.paginationKey,
-            action
+            action,
+            false
           )
         }).entities$.pipe(
           filter(entities => !!entities && !!entities.length),

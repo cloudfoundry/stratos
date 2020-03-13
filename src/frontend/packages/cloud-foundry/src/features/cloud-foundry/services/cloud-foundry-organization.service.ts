@@ -135,9 +135,7 @@ export class CloudFoundryOrganizationService {
         const orgEntity = entityCatalog
           .getEntity<IEntityMetadata, any, OrganizationActionBuilders>(CF_ENDPOINT_TYPE, organizationEntityType);
         const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
-        // Fixing getOrgActionBuilder args will break other things. For fix see https://github.com/cloudfoundry/stratos/pull/4127
-        // const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid, { includeRelations: relations });
-        const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid);
+        const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid, { includeRelations: relations });
         const orgEntityService = this.entityServiceFactory.create<APIResource<IOrganization>>(
           this.orgGuid,
           getOrgAction

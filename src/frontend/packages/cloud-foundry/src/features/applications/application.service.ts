@@ -154,7 +154,8 @@ export class ApplicationService {
     const paginationMonitor = new PaginationMonitor(
       store,
       dummyAction.paginationKey,
-      dummyAction
+      dummyAction,
+      dummyAction.flattenPagination
     );
     return paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
@@ -229,7 +230,8 @@ export class ApplicationService {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        new CFEntityConfig(appStatsEntityType)
+        new CFEntityConfig(appStatsEntityType),
+        action.flattenPagination
       )
     }, true);
     // This will fail to fetch the app stats if the current app is not running but we're
@@ -273,7 +275,8 @@ export class ApplicationService {
         const domainsAction = new GetAllOrganizationDomains(org.metadata.guid, this.cfGuid);
         const paginationMonitor = this.paginationMonitorFactory.create(
           domainsAction.paginationKey,
-          domainsAction
+          domainsAction,
+          domainsAction.flattenPagination
         );
         return getPaginationObservables<APIResource<IDomain>>(
           {

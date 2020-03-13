@@ -247,9 +247,14 @@ export class ApplicationDeleteComponent<T> {
 
     const instanceMonitor = this.paginationMonitorFactory.create<APIResource<IServiceBinding>>(
       instancePaginationKey,
-      instanceAction.entity[0]
+      instanceAction.entity[0],
+      instanceAction.flattenPagination
     );
-    const routeMonitor = this.paginationMonitorFactory.create<APIResource<IRoute>>(routesPaginationKey, routesAction.entity[0]);
+    const routeMonitor = this.paginationMonitorFactory.create<APIResource<IRoute>>(
+      routesPaginationKey,
+      routesAction.entity[0],
+      routesAction.flattenPagination
+    );
     return {
       fetch: () => {
         this.store.dispatch(instanceAction);
