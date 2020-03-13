@@ -145,6 +145,10 @@ export class EndpointsPage extends Page {
     return snackBar.hasMessage(NONE_CONNECTED_MSG);
   }
 
+  waitForNoneConnectedSnackBar(snackBar: SnackBarPo) {
+    return snackBar.waitForMessage(NONE_CONNECTED_MSG);
+  }
+
   private checkWelcomeMessageText(msg: string) {
     return this.checkWelcomeText('.first-line', msg);
   }
