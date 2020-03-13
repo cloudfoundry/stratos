@@ -8,9 +8,9 @@ import { filter } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
+import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { SpaceActionBuilders } from '../../../../entity-action-builders/space.action-builders';
@@ -66,8 +66,9 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     }));
   }
 
-  validateNameTaken = (spaceName: string = null) =>
-    this.allSpacesInOrg ? this.allSpacesInOrg.indexOf(spaceName || this.spaceName.value) === -1 : true
+  validateNameTaken = (spaceName: string = null) => {
+    return this.allSpacesInOrg ? this.allSpacesInOrg.indexOf(spaceName || this.spaceName.value) === -1 : true;
+  }
 
   validate = () => !!this.createSpaceForm && this.createSpaceForm.valid;
 

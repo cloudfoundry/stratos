@@ -126,11 +126,10 @@ jobs:
         params:
           dockerfile: stratos/deploy/Dockerfile.init
           build: stratos/
-          target_name:  postflight-job
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      do:
+    - do:
       - put: mariadb-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
