@@ -25,7 +25,8 @@ export class RunningInstancesComponent implements OnInit {
     const dummyAction = new GetAppStatsAction(this.appGuid, this.cfGuid);
     const paginationMonitor = this.paginationMonitorFactory.create<AppStat>(
       dummyAction.paginationKey,
-      dummyAction
+      dummyAction,
+      dummyAction.flattenPagination
     );
     this.runningInstances$ = paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
