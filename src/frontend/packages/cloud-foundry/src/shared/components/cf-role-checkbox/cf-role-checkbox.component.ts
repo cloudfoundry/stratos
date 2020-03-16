@@ -15,7 +15,7 @@ import {
 import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
-import { selectUsersRolesPicked } from '../../../../../store/src/selectors/users-roles.selector';
+import { selectUsersIsRemove, selectUsersRolesPicked } from '../../../../../store/src/selectors/users-roles.selector';
 import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 
@@ -208,8 +208,13 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     existingRoles: CfUserRolesSelected,
     newRoles: IUserPermissionInOrg,
     orgGuid: string,
-    checked: boolean): boolean {
+    checked: boolean,
+    isRemove: boolean): boolean {
     if (isOrgRole && role === OrgUserRoleNames.USER) {
+      // If this is in remove mode never disable the user checkbox
+      if (isRemove) {
+        return false;
+      }
       // Never disable the org user checkbox if it's not enabled/semi enabled (covers odd cases when cf creates orgs/spaces without the
       // permissions)
       const isChecked = checked === true || checked === null;
@@ -240,18 +245,19 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
         this.cfGuid,
         this.orgGuid,
         this.spaceGuid);
+    const isRemove$ = this.store.select(selectUsersIsRemove);
 
     this.sub = this.cfRolesService.existingRoles$.pipe(
-      combineLatest(this.cfRolesService.newRoles$, users$, canEditRole$),
-      filter(([existingRoles, newRoles, users, canEditRole]) => !!users.length && !!newRoles.orgGuid)
-    ).subscribe(([existingRoles, newRoles, users, canEditRole]) => {
+      combineLatest(this.cfRolesService.newRoles$, users$, canEditRole$, isRemove$),
+      filter(([existingRoles, newRoles, users, canEditRole, isRemove]) => !!users.length && !!newRoles.orgGuid)
+    ).subscribe(([existingRoles, newRoles, users, canEditRole, isRemove]) => {
       this.orgGuid = newRoles.orgGuid;
       const { checked, tooltip } = CfRoleCheckboxComponent.getCheckedState(
         this.role, users, existingRoles, newRoles, this.orgGuid, this.spaceGuid);
       this.checked = checked;
       this.tooltip = tooltip;
       this.disabled = !canEditRole ||
-        CfRoleCheckboxComponent.isDisabled(this.isOrgRole, this.role, users, existingRoles, newRoles, this.orgGuid, checked);
+        CfRoleCheckboxComponent.isDisabled(this.isOrgRole, this.role, users, existingRoles, newRoles, this.orgGuid, checked, isRemove);
     });
   }
 

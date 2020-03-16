@@ -10,6 +10,8 @@ export const UsersRolesActions = {
   SetOrg: '[Users Roles] Set org',
   SetOrgRole: '[Users Roles] Set org role',
   SetSpaceRole: '[Users Roles] Set space role',
+  FlipSetRoles: '[Users Roles] Flip Set Roles',
+  SetIsRemove: '[Users Roles] Set Is Remove',
   SetChanges: '[Users Roles] Set role changes',
   ExecuteChanges: '[Users Roles] Execute changes',
 };
@@ -17,6 +19,17 @@ export const UsersRolesActions = {
 export class UsersRolesSetUsers implements Action {
   type = UsersRolesActions.SetUsers;
   constructor(public cfGuid: string, public users: CfUser[], public origin?: string) { }
+}
+
+// TODO: RC do on enter/leave of last step
+export class UsersRolesFlipSetRoles implements Action {
+  type = UsersRolesActions.FlipSetRoles;
+  constructor() { }
+}
+
+export class UsersRolesSetIsRemove implements Action {
+  type = UsersRolesActions.SetIsRemove;
+  constructor(public isRemove: boolean) { }
 }
 
 export class UsersRolesSetOrgRole implements Action {

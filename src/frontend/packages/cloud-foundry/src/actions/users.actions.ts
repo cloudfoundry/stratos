@@ -1,4 +1,4 @@
-import { HttpRequest } from '@angular/common/http';
+import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
@@ -80,7 +80,10 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
   }
 }
 
-interface ChangeUserRoleByUsernameParams {
+interface HttpParamsPayload {
+  [param: string]: string;
+}
+interface ChangeUserRoleByUsernameParams extends HttpParamsPayload {
   username: string;
   origin?: string;
 }
@@ -108,7 +111,7 @@ export class ChangeUserRole extends CFStartAction implements EntityRequestAction
     this.options = new HttpRequest(
       method,
       this.createUrl(),
-      this.createParams()
+      this.createParams(method === 'DELETE')
     );
     this.entityType = isSpace ? spaceEntityType : organizationEntityType;
     this.entity = cfEntityFactory(this.entityType);
@@ -133,15 +136,23 @@ export class ChangeUserRole extends CFStartAction implements EntityRequestAction
     }
   }
 
-  createParams(): object {
+  createParams(isDelete: boolean): object {
     if (this.username) {
-      const param: ChangeUserRoleByUsernameParams = {
+      const payload: ChangeUserRoleByUsernameParams = {
         username: this.username,
       };
       if (this.usernameOrigin) {
-        param.origin = this.usernameOrigin;
+        payload.origin = this.usernameOrigin;
       }
-      return param;
+
+      if (isDelete) {
+        return {
+          params: new HttpParams({
+            fromObject: payload
+          })
+        };
+      }
+      return payload;
     }
 
     return null;
@@ -184,7 +195,9 @@ export class RemoveUserRole extends ChangeUserRole {
     permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     isSpace = false,
     updateConnectedUser = false,
-    orgGuid?: string
+    orgGuid?: string,
+    username = '',
+    usernameOrigin = '',
   ) {
     super(
       endpointGuid,
@@ -195,7 +208,9 @@ export class RemoveUserRole extends ChangeUserRole {
       entityGuid,
       isSpace,
       updateConnectedUser,
-      orgGuid
+      orgGuid,
+      username,
+      usernameOrigin
     );
   }
 }

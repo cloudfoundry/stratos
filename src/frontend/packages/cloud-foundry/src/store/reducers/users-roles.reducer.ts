@@ -3,6 +3,7 @@ import { Action } from '@ngrx/store';
 import {
   UsersRolesActions,
   UsersRolesSetChanges,
+  UsersRolesSetIsRemove,
   UsersRolesSetOrg,
   UsersRolesSetOrgRole,
   UsersRolesSetSpaceRole,
@@ -82,7 +83,8 @@ export function UsersRolesReducer(state: UsersRolesState = defaultState, action:
         null,
         null,
         setOrgRoleAction.role,
-        setOrgRoleAction.setRole
+        setOrgRoleAction.setRole,
+        state.isRemove
       );
     case UsersRolesActions.SetSpaceRole:
       const setSpaceRoleAction = action as UsersRolesSetSpaceRole;
@@ -93,13 +95,30 @@ export function UsersRolesReducer(state: UsersRolesState = defaultState, action:
         setSpaceRoleAction.spaceGuid,
         setSpaceRoleAction.spaceName,
         setSpaceRoleAction.role,
-        setSpaceRoleAction.setRole
+        setSpaceRoleAction.setRole,
+        state.isRemove
       );
     case UsersRolesActions.SetChanges:
       const setChangesAction = action as UsersRolesSetChanges;
       return {
         ...state,
         changedRoles: setChangesAction.changes
+      };
+    case UsersRolesActions.FlipSetRoles:
+      return {
+        ...state,
+        changedRoles: state.changedRoles.map(change => {
+          return {
+            ...change,
+            add: !change.add
+          };
+        })
+      };
+    case UsersRolesActions.SetIsRemove:
+      const isRemoveAction = action as UsersRolesSetIsRemove;
+      return {
+        ...state,
+        isRemove: isRemoveAction.isRemove
       };
   }
   return state;
@@ -123,7 +142,8 @@ function setRole(
   spaceGuid: string,
   spaceName: string,
   role: string,
-  applyRole: boolean): UsersRolesState {
+  applyRole: boolean,
+  isRemove: boolean = false): UsersRolesState {
   // Create a fresh instance of the org roles
   let newOrgRoles = cloneOrgRoles(existingState.newRoles, orgGuid, orgName);
 
@@ -132,7 +152,7 @@ function setRole(
     setSpaceRole(newOrgRoles, orgGuid, orgName, spaceGuid, spaceName, role, applyRole);
   } else {
     // Org role change
-    newOrgRoles = setOrgRole(newOrgRoles, role, applyRole);
+    newOrgRoles = setOrgRole(newOrgRoles, role, applyRole, isRemove);
   }
 
   // There's been no change to the existing state, just return the existing state;
@@ -181,10 +201,10 @@ function setSpaceRole(
   }
 }
 
-function setOrgRole(orgRoles: IUserPermissionInOrg, role: string, applyRole: boolean): IUserPermissionInOrg {
+function setOrgRole(orgRoles: IUserPermissionInOrg, role: string, applyRole: boolean, isRemove: boolean): IUserPermissionInOrg {
   orgRoles = setPermission(orgRoles, role, applyRole) ? orgRoles : null;
   // If the user has applied the org manager, auditor or billing manager role they must also have the org user role applied too.
-  if (orgRoles && role !== 'user' && applyRole) {
+  if (orgRoles && role !== 'user' && applyRole && !isRemove) {
     orgRoles.permissions = {
       ...orgRoles.permissions,
       [OrgUserRoleNames.USER]: true

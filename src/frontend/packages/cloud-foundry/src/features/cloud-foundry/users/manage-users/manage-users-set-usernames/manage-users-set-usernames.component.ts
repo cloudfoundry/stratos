@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { MatRadioChange } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 
@@ -10,7 +11,7 @@ import {
   StackedInputActionsUpdate,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-actions.component';
 import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
-import { UsersRolesSetUsers } from '../../../../../actions/users-roles.actions';
+import { UsersRolesSetIsRemove, UsersRolesSetUsers } from '../../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { CfUser } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -71,6 +72,10 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   stateOut(usernames: StackedInputActionsUpdate) {
     this.usernames = usernames;
     this.stepValid.next(usernames.valid);
+  }
+
+  setIsRemove(event: MatRadioChange) {
+    this.store.dispatch(new UsersRolesSetIsRemove(!event.value));
   }
 
   onNext: StepOnNextFunction = () => {

@@ -1,6 +1,12 @@
 <div class="usernames">
+  <div class="usernames__addRemove">
+    <mat-radio-group value="true" (change)="setIsRemove($event)">
+      <mat-radio-button value="true">Add Roles</mat-radio-button>
+      <mat-radio-button value="">Remove Roles</mat-radio-button>
+    </mat-radio-group>
+  </div>
   <div class="usernames__usernames">
-    Provide the user names of the users to add roles to
+    Provide the user names of the users to update
     <app-stacked-input-actions [stackedActionConfig]="stackedActionConfig" [stateIn$]="stateIn.asObservable()"
       (stateOut)="stateOut($event)">
     </app-stacked-input-actions>

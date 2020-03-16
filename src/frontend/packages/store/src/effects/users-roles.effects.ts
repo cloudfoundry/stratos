@@ -217,7 +217,17 @@ export class UsersRolesEffects {
         username,
         usernameOrigin
       ) :
-      new RemoveUserRole(cfGuid, change.userGuid, entityGuid, change.role, isSpace, updateConnectedUser, change.orgGuid);
+      new RemoveUserRole(
+        cfGuid,
+        change.userGuid,
+        entityGuid,
+        change.role,
+        isSpace,
+        updateConnectedUser,
+        change.orgGuid,
+        username,
+        usernameOrigin
+      );
   }
 
   private createActionObs(action: ChangeUserRole): Observable<any> {

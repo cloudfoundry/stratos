@@ -36,3 +36,9 @@ export const selectUsersRolesOrgGuid = compose(
   selectNewRoles,
   selectUsersRoles
 );
+
+const isRemove = (usersRoles: UsersRolesState) => usersRoles.isRemove;
+export const selectUsersIsRemove = compose(
+  isRemove,
+  selectUsersRoles
+);

@@ -76,13 +76,7 @@ export class UsersRolesComponent implements OnDestroy {
     }
 
     this.title$ = this.singleUser$.pipe(
-      map(singleUser => {
-        if (singleUser) {
-          return this.setUsernames ? `Add Roles: ${singleUser.username}` : `Manage Roles: ${singleUser.username}`;
-        } else {
-          return this.setUsernames ? `Add User Roles` : `Manage User Roles`;
-        }
-      })
+      map(singleUser => singleUser ? `Manage Roles: ${singleUser.username}` : `Manage User Roles`)
     );
   }
 
