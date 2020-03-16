@@ -3,7 +3,6 @@ import { by, element } from 'protractor';
 import { Component } from '../po/component.po';
 import { FormComponent } from '../po/form.po';
 import { MenuComponent } from '../po/menu.po';
-import { SnackBarPo } from '../po/snackbar.po';
 
 /**
  * Connect Dialog Page Object
@@ -13,8 +12,6 @@ export class ConnectDialogComponent extends Component {
   public form: FormComponent;
 
   public buttons: MenuComponent;
-
-  public snackBar = new SnackBarPo();
 
   constructor() {
     super(element(by.tagName('app-connect-endpoint-dialog')));
