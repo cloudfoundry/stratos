@@ -56,7 +56,7 @@ export class CfCellHelper {
     }).entities$.pipe(
       filter(entities => !!entities && !!entities.length),
       first(),
-      map(entities => !!entities.find(entity => !!entity.data.result.length) ? action : null),
+      map(entities => !!entities.find(entity => !!entity.data && !!entity.data.result.length) ? action : null),
       publishReplay(1),
       refCount()
     );
