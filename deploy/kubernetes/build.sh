@@ -135,7 +135,7 @@ set -e
 # Copy values template
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 STRATOS_PATH=${__DIRNAME}/../../
-source ${STRATOS_PATH}/deploy/common-build.sh
+source "${STRATOS_PATH}/deploy/common-build.sh"
 
 if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/custom-build.sh" ]; then
   source "${STRATOS_PATH}/custom-src/deploy/kubernetes/custom-build.sh"
@@ -144,32 +144,32 @@ fi
 
 function patchAndPushImage {
   NAME=${1}
-  DOCKER_FILE=${2}
-  FOLDER=${3}
+  DOCKER_FILE="${2}"
+  FOLDER="${3}"
   TARGET=${4:-none}
   PATCHED_DOCKER_FILE="${DOCKER_FILE}.patched"
 
-  patchDockerfile ${DOCKER_FILE} ${FOLDER}
-  buildAndPublishImage ${NAME} "${PATCHED_DOCKER_FILE}" ${FOLDER} ${TARGET}
+  patchDockerfile "${DOCKER_FILE}" "${FOLDER}"
+  buildAndPublishImage ${NAME} "${PATCHED_DOCKER_FILE}" "${FOLDER}" ${TARGET}
 
-  rm -rf ${FOLDER}/${PATCHED_DOCKER_FILE}
-  rm -rf ${FOLDER}/${PATCHED_DOCKER_FILE}.bak
+  rm -rf "${FOLDER}/${PATCHED_DOCKER_FILE}"
+  rm -rf "${FOLDER}/${PATCHED_DOCKER_FILE}.bak"
 }
 
 function patchDockerfile {
-  DOCKER_FILE=${1}
-  FOLDER=${2}
-  PATCHED_DOCKER_FILE=${DOCKER_FILE}.patched
+  DOCKER_FILE="${1}"
+  FOLDER="${2}"
+  PATCHED_DOCKER_FILE="${DOCKER_FILE}.patched"
 
   # Replace registry/organization
-  pushd ${FOLDER} > /dev/null 2>&1
+  pushd "${FOLDER}" > /dev/null 2>&1
   ls
-  rm -rf ${PATCHED_DOCKER_FILE}
-  cp ${DOCKER_FILE} ${PATCHED_DOCKER_FILE}
+  rm -rf "${PATCHED_DOCKER_FILE}"
+  cp "${DOCKER_FILE}" "${PATCHED_DOCKER_FILE}"
   if [ "${DOCKER_REG_DEFAULTS}" == "false" ]; then
-    sed -i.bak "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" ${FOLDER}/${PATCHED_DOCKER_FILE}
+    sed -i.bak "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   fi
-  sed -i.bak "s/opensuse/${BASE_IMAGE_TAG}/g" ${FOLDER}/${PATCHED_DOCKER_FILE}
+  sed -i.bak "s/opensuse/${BASE_IMAGE_TAG}/g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   popd > /dev/null 2>&1
 }
 
@@ -226,19 +226,19 @@ log "-- Building Helm Chart"
 SRC_HELM_CHART_PATH="${STRATOS_PATH}/deploy/kubernetes/console"
 DEST_HELM_CHART_PATH="${STRATOS_PATH}/deploy/kubernetes/helm-chart"
 
-rm -rf ${DEST_HELM_CHART_PATH}
-mkdir -p ${DEST_HELM_CHART_PATH}
-cp -R ${SRC_HELM_CHART_PATH}/. ${DEST_HELM_CHART_PATH}/
+rm -rf "${DEST_HELM_CHART_PATH}"
+mkdir -p "${DEST_HELM_CHART_PATH}"
+cp -R "${SRC_HELM_CHART_PATH}/." "${DEST_HELM_CHART_PATH}/"
 
-pushd ${DEST_HELM_CHART_PATH} > /dev/null
+pushd "${DEST_HELM_CHART_PATH}" > /dev/null
 
 # Remove any .orig files
-rm -rf ${DEST_HELM_CHART_PATH}/**/*.orig
+rm -rf "${DEST_HELM_CHART_PATH}/**/*.orig"
 
 # Run customization script if there is one
 if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" ]; then
   printf "${YELLOW}${BOLD}Applying Helm Chart customizations${RESET}\n"
-  ${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh "${DEST_HELM_CHART_PATH}"
+  "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" "${DEST_HELM_CHART_PATH}"
 fi
 
 # Fetch subcharts
@@ -263,19 +263,20 @@ rm -rf *.bak
 
 # Generate image list
 echo ${STRATOS_PATH}
-${STRATOS_PATH}/deploy/kubernetes/imagelist-gen.sh .
+"${STRATOS_PATH}/deploy/kubernetes/imagelist-gen.sh" .
 
 popd > /dev/null
 
 if [ "${PACKAGE_CHART}" ==  "true" ]; then
   echo "Packaging Helm Chart"
-  pushd ${STRATOS_PATH}/deploy/kubernetes > /dev/null
-  PKG_DIST_FOLDER="dist/${TAG}/console"
-  rm -rf ${PKG_DIST_FOLDER}
-  mkdir -p ${PKG_DIST_FOLDER}
-  cp -R ${DEST_HELM_CHART_PATH}/* ${PKG_DIST_FOLDER}
+  pushd "${STRATOS_PATH}/deploy/kubernetes" > /dev/null
+  PKG_DIST_BASE_FOLDER=./dist/${TAG}
+  PKG_DIST_FOLDER=./dist/${TAG}/console
+  rm -rf ${PKG_DIST_BASE_FOLDER}
+  mkdir -p ${PKG_DIST_BASE_FOLDER}
+  mv ./helm-chart/ ${PKG_DIST_BASE_FOLDER}/console
   helm package ${PKG_DIST_FOLDER}
-  rm -rf ${PKG_DIST_FOLDER}
+  rm -rf ${PKG_DIST_BASE_FOLDER}
   popd > /dev/null
 fi
 
