@@ -57,7 +57,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     this.isFetching$ = cfSpaceGuid$.pipe(
       switchMap(([cfGuid, spaceGuid]) => {
         const paginationKey = this.servicesWallService.getSpaceServicePagKey(cfGuid, spaceGuid);
-        const paginationMonitor = this.paginationMonitorFactory.create(paginationKey, schema);
+        const paginationMonitor = this.paginationMonitorFactory.create(paginationKey, schema, false);
         return paginationMonitor.fetchingCurrentPage$;
       }),
       tap(fetching => {

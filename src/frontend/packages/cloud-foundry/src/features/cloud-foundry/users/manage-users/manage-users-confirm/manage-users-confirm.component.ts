@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -12,17 +11,18 @@ import {
   ITableCellRequestMonitorIconConfig,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   selectUsersRoles,
   selectUsersRolesChangedRoles,
 } from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.actions';
 import { ChangeUserRole } from '../../../../../actions/users.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import {
   TableCellConfirmOrgSpaceComponent,
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
@@ -32,6 +32,7 @@ import {
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
+
 
 
 
@@ -155,7 +156,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   private createChangesObs() {
     this.changes$ = this.updateChanges.pipe(
       withLatestFrom(this.cfGuid$),
-      mergeMap(([changed, cfGuid]) => this.cfUserService.getUsers(cfGuid)),
+      mergeMap(([, cfGuid]) => this.cfUserService.getUsers(cfGuid)),
       withLatestFrom(this.store.select(selectUsersRolesChangedRoles)),
       map(([users, changes]) => {
         return changes
