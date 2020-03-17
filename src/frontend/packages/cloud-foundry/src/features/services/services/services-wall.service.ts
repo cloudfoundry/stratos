@@ -11,8 +11,8 @@ import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagi
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { cfEntityFactory } from '../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 
 @Injectable()
@@ -37,7 +37,8 @@ export class ServicesWallService {
         action: getServicesAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          cfEntityFactory(serviceEntityType)
+          cfEntityFactory(serviceEntityType),
+          getServicesAction.flattenPagination
         )
       },
       true
@@ -67,7 +68,8 @@ export class ServicesWallService {
         action: getAllServicesForSpaceAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          cfEntityFactory(serviceEntityType)
+          cfEntityFactory(serviceEntityType),
+          getAllServicesForSpaceAction.flattenPagination
         )
       },
       true
