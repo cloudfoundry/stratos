@@ -97,7 +97,9 @@ export class UserProfileService {
   * Update profile
   */
   updateProfile(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<[ActionState, ActionState]> {
-    const didChangeProfile = !!(profileChanges.givenName || profileChanges.familyName || profileChanges.emailAddress);
+    const didChangeProfile = (profileChanges.givenName !== undefined ||
+      profileChanges.familyName !== undefined ||
+      profileChanges.emailAddress !== undefined );
     const didChangePassword = !!(profileChanges.newPassword && profileChanges.currentPassword);
     const profileObs$ = didChangeProfile ? this.updateProfileInfo(profile, profileChanges) : observableOf(getDefaultActionState());
     const passwordObs$ = didChangePassword ? this.updatePassword(profile, profileChanges) : observableOf(getDefaultActionState());
@@ -112,8 +114,12 @@ export class UserProfileService {
       ...profile,
       name: { ...profile.name },
     };
-    updatedProfile.name.givenName = profileChanges.givenName || updatedProfile.name.givenName;
-    updatedProfile.name.familyName = profileChanges.familyName || updatedProfile.name.familyName;
+    if (profileChanges.givenName !== undefined) {
+      updatedProfile.name.givenName = profileChanges.givenName;
+    }
+    if (profileChanges.familyName !== undefined) {
+      updatedProfile.name.familyName = profileChanges.familyName;
+    }
     if (profileChanges.emailAddress) {
       this.setPrimaryEmailAddress(updatedProfile, profileChanges.emailAddress);
     }

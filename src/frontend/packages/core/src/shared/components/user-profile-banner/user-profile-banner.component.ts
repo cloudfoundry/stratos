@@ -28,7 +28,7 @@ export class UserProfileBannerComponent {
       this.name = this.name.trim();
 
       if (user.emails.length > 0) {
-        this.email = user.emails[0].value;
+        this.email = user.emails[0].value.trim();
       }
     }
   }
