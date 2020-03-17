@@ -1,8 +1,8 @@
 import { browser, by, element, ElementFinder, promise, protractor } from 'protractor';
 
+import { e2e } from './../e2e';
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
-import { e2e } from 'test-e2e/e2e';
 
 const until = protractor.ExpectedConditions;
 
