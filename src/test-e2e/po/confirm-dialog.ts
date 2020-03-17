@@ -2,6 +2,7 @@ import { browser, by, element, ElementFinder, promise, protractor } from 'protra
 
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
+import { e2e } from 'test-e2e/e2e';
 
 const until = protractor.ExpectedConditions;
 
@@ -50,12 +51,12 @@ export class ConfirmDialogComponent extends Component {
 
   // Cancel
   cancel(): promise.Promise<void> {
-    return this.getButtons().then(btns => btns[0].click());
+    return this.getButtons().then(btns => btns[0].click()).then(() => e2e.sleep(50));
   }
 
   // Confirm
   confirm(): promise.Promise<void> {
-    return this.getButtons().then(btns => btns[1].click());
+    return this.getButtons().then(btns => btns[1].click()).then(() => e2e.sleep(50));
   }
 
   confirmEnabled(): promise.Promise<boolean> {

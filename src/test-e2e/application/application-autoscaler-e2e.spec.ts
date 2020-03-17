@@ -548,8 +548,6 @@ describe('Autoscaler -', () => {
 
     it('Cancel detach action', () => {
       appAutoscaler.bannerAutoscalerTab.clickDeletePolicy();
-      // TODO: Check if this helps with reliability
-      e2e.sleep(100);
       const confirm = new ConfirmDialogComponent();
       confirm.waitUntilShown();
       confirm.getMessage().then(message => {
@@ -557,8 +555,6 @@ describe('Autoscaler -', () => {
         expect(message).toBe('Are you sure you want to delete the policy?');
       });
       confirm.cancel();
-      // TODO: Check if this helps with reliability
-      e2e.sleep(100);
       confirm.waitUntilNotShown();
       expect(appAutoscaler.bannerAutoscalerTab.getButtonsCount()).toBe(2);
       expect(appAutoscaler.bannerAutoscalerTab.getEditButtonExistence()).toBe(true);
@@ -567,8 +563,6 @@ describe('Autoscaler -', () => {
 
     it('Confirm detach action', () => {
       appAutoscaler.bannerAutoscalerTab.clickDeletePolicy();
-      // TODO: Check if this helps with reliability
-      e2e.sleep(100);
       const confirm = new ConfirmDialogComponent();
       confirm.waitUntilShown();
       confirm.getMessage().then(message => {
