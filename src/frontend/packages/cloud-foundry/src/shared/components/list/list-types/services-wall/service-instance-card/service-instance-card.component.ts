@@ -148,6 +148,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
   getServiceUrl = () => {
-    return getServiceSummaryUrl(this.serviceInstanceEntity.entity.cfGuid, this.serviceInstanceEntity.entity.service.entity.guid);
+    return getServiceSummaryUrl(this.serviceInstanceEntity.entity.cfGuid, this.serviceInstanceEntity.entity.service.metadata.guid);
   }
 }

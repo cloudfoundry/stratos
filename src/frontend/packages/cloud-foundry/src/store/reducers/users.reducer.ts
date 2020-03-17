@@ -178,7 +178,7 @@ function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUse
 
   // Create a delta of the changes, this will ensure we only return an updated state if there are updates
   const haveUpdatedUsers: boolean = Object.values(usersInResponse).reduce((changes, user) => {
-    const oldMissingRoles = (users[user.entity.guid] ? users[user.entity.guid].entity.missingRoles : null)
+    const oldMissingRoles = (users[user.metadata.guid] ? users[user.metadata.guid].entity.missingRoles : null)
       || getDefaultCfUserMissingRoles();
     const newMissingRoles = getDefaultCfUserMissingRoles();
     Object.values(CfUserRoleParams).forEach((roleParam) => {

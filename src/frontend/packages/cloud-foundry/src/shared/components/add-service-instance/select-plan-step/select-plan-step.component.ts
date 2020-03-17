@@ -143,7 +143,7 @@ export class SelectPlanStepComponent implements OnDestroy {
         if (this.modeService.isEditServiceInstanceMode()) {
           this.stepperForm.controls.servicePlans.setValue(createServiceInstanceState.servicePlanGuid);
         } else {
-          this.stepperForm.controls.servicePlans.setValue(servicePlans[0].entity.guid);
+          this.stepperForm.controls.servicePlans.setValue(servicePlans[0].metadata.guid);
         }
         this.stepperForm.updateValueAndValidity();
         this.validate.next(this.stepperForm.valid);

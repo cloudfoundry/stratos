@@ -95,7 +95,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       switchMap(entities => entities
         .map(entity => {
           const hasMissingRoles = this.hasMissingRoles(entity.entity.missingRoles);
-          rowStateManager.updateRowState(entity.entity.guid, { warning: hasMissingRoles });
+          rowStateManager.updateRowState(entity.metadata.guid, { warning: hasMissingRoles });
         })
       ),
     ).subscribe();

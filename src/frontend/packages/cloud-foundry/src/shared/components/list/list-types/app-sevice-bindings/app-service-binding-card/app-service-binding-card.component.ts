@@ -174,7 +174,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     );
 
     this.serviceUrl$ = this.service$.pipe(
-      map(service => getServiceSummaryUrl(service.entity.entity.cfGuid, service.entity.entity.guid))
+      map(service => getServiceSummaryUrl(service.entity.entity.cfGuid, service.entity.metadata.guid))
     );
 
     this.serviceName$ = this.service$.pipe(

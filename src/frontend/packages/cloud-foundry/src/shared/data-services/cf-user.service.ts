@@ -128,7 +128,7 @@ export class CfUserService {
     orgsToProcess: APIResource<IOrganization>[],
     result: IUserPermissionInOrg[]) {
     orgsToProcess.forEach(org => {
-      const orgGuid = org.entity.guid;
+      const orgGuid = org.metadata.guid;
       if (processedOrgs.has(orgGuid)) {
         return;
       }
@@ -168,7 +168,7 @@ export class CfUserService {
     spacesToProcess: APIResource<ISpace>[],
     result: IUserPermissionInSpace[]) {
     spacesToProcess.forEach(space => {
-      const spaceGuid = space.entity.guid;
+      const spaceGuid = space.metadata.guid;
       if (processedSpaces.has(spaceGuid)) {
         return;
       }

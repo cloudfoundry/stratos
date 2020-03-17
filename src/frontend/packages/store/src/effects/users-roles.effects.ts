@@ -138,8 +138,6 @@ export class UsersRolesEffects {
     }),
   );
 
-  // TODO: RC create seperate github issues for fixes things
-
   private createAllChanges(
     orgUserChanges: CfRoleChange[],
     cfGuid: string,

@@ -139,7 +139,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     if (res) {
       return res;
     }
-    res = users.find(user => user.entity.guid === userGuid).entity.username;
+    res = users.find(user => user.metadata.guid === userGuid).entity.username;
     this.nameCache.user[userGuid] = res;
     return res;
   }
