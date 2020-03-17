@@ -56,10 +56,8 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-
-    // TODO: RC Block until whatever powers validation in select roles step loads
+    // When we add username validation the processing state should be used to show validation progress and result
     const processingState: StackedInputActionsState[] = [];
-    // When we add user validation processing state should be used to show progress and result of validation
     // Object.keys(this.users.values).forEach(key => {
     //   processingState.push({
     //     key,

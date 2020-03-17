@@ -129,7 +129,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   selectedOrgGuid: string;
   orgGuidChangedSub: Subscription;
   usersWithWarning$: Observable<string[]>;
-  // entered = new Subject<boolean>();
 
   constructor(
     private store: Store<CFAppState>,
@@ -271,7 +270,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   }
 
   onEnter = () => {
-    // this.entered.next(true);
     if (!this.snackBarRef) {
       this.usersWithWarning$.pipe(first()).subscribe((usersWithWarning => {
         if (usersWithWarning && usersWithWarning.length) {
@@ -281,6 +279,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       }));
     }
 
+    // In order to show the removed roles correctly (as ticks) flip them from remove to add
     this.store.select(selectUsersIsRemove).pipe(first()).subscribe(isRemove => {
       if (isRemove) {
         this.store.dispatch(new UsersRolesFlipSetRoles());
@@ -302,6 +301,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     ]).pipe(
       map(([isRemove, ]) => {
         if (isRemove) {
+          // If we're going to eventually remove the roles flip the add to remove
           this.store.dispatch(new UsersRolesFlipSetRoles());
         }
         return { success: true };

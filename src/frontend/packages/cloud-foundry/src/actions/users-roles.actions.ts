@@ -21,7 +21,6 @@ export class UsersRolesSetUsers implements Action {
   constructor(public cfGuid: string, public users: CfUser[], public origin?: string) { }
 }
 
-// TODO: RC do on enter/leave of last step
 export class UsersRolesFlipSetRoles implements Action {
   type = UsersRolesActions.FlipSetRoles;
   constructor() { }

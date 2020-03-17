@@ -149,7 +149,7 @@ function setRole(
 
   if (spaceGuid) {
     // Space role change
-    setSpaceRole(newOrgRoles, orgGuid, orgName, spaceGuid, spaceName, role, applyRole);
+    setSpaceRole(newOrgRoles, orgGuid, orgName, spaceGuid, spaceName, role, applyRole, isRemove);
   } else {
     // Org role change
     newOrgRoles = setOrgRole(newOrgRoles, role, applyRole, isRemove);
@@ -184,7 +184,8 @@ function setSpaceRole(
   spaceGuid: string,
   spaceName: string,
   role: string,
-  applyRole: boolean) {
+  applyRole: boolean,
+  isRemove: boolean) {
   if (!orgRoles.spaces[spaceGuid]) {
     orgRoles.spaces[spaceGuid] = createDefaultSpaceRoles(orgGuid, orgName, spaceGuid, spaceName);
   }
@@ -193,7 +194,7 @@ function setSpaceRole(
   };
   orgRoles = setPermission(spaceRoles, role, applyRole) ? orgRoles : null;
   // If the user has applied any space role they must also have the org user role applied too.
-  if (orgRoles && applyRole) {
+  if (orgRoles && applyRole && !isRemove) {
     orgRoles.permissions = {
       ...orgRoles.permissions,
       [OrgUserRoleNames.USER]: true
