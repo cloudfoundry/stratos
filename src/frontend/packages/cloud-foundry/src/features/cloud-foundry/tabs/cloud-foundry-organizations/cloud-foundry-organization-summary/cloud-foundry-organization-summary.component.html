@@ -42,7 +42,7 @@
         </app-tile>
         <app-tile>
           <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Routes"
-            value="{{ (cfOrgService.routes$ | async)?.length }}"
+            value="{{ (cfOrgService.routesCount$ | async) }}"
             limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
         </app-tile>
       </app-tile-group>

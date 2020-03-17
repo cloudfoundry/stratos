@@ -12,7 +12,6 @@ import {
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
-  routeEntityType,
   spaceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-types';
 import {
@@ -24,6 +23,7 @@ import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityService } from '../../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
@@ -35,9 +35,12 @@ import {
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import { GetAllRoutes } from '../../../actions/route.actions';
+import { GetSpaceRoutes } from '../../../actions/space.actions';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { CfInfoDefinitionActionBuilders } from '../../../entity-action-builders/cf-info.action-builders';
+import { OrganizationActionBuilders } from '../../../entity-action-builders/organization.action-builders';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { QParam, QParamJoiners } from '../../../shared/q-param';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -81,7 +84,8 @@ export class CloudFoundryEndpointService {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
       : createEntityRelationPaginationKey(endpointSchemaKey);
-    const organizationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const organizationEntity = entityCatalog
+      .getEntity<IEntityMetadata, any, OrganizationActionBuilders>(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getAllOrganizationsAction = actionBuilder(cfGuid, paginationKey,
       {
@@ -90,10 +94,8 @@ export class CloudFoundryEndpointService {
           createEntityRelationKey(organizationEntityType, domainEntityType),
           createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
           createEntityRelationKey(organizationEntityType, privateDomainsEntityType),
-          createEntityRelationKey(spaceEntityType, routeEntityType), // Not really needed at top level, but if we drop down into an org with
-          // lots of spaces it saves spaces x routes requests
         ], populateMissing: false
-      }) as PaginatedAction;
+      });
     return getAllOrganizationsAction;
   }
   static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
@@ -123,6 +125,30 @@ export class CloudFoundryEndpointService {
     }
     if (spaceGuid) {
       action.initialParams.q.push(new QParam('space_guid', spaceGuid, QParamJoiners.in).toString());
+    }
+    return fetchTotalResults(action, store, pmf);
+  }
+
+  public static fetchRouteCount(
+    store: Store<CFAppState>,
+    pmf: PaginationMonitorFactory,
+    cfGuid: string,
+    orgGuid?: string,
+    spaceGuid?: string)
+    : Observable<number> {
+    if (spaceGuid) {
+      const spaceAction =
+        new GetSpaceRoutes(spaceGuid, cfGuid, createEntityRelationPaginationKey(spaceEntityType, spaceGuid), [], false, false);
+      return fetchTotalResults(spaceAction, store, pmf);
+    }
+
+    const parentSchemaKey = orgGuid ? organizationEntityType : 'cf';
+    const uniqueKey = orgGuid || cfGuid;
+    const action = new GetAllRoutes(cfGuid, createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), [], false);
+    action.initialParams = {};
+    action.initialParams.q = [];
+    if (orgGuid) {
+      action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
     }
     return fetchTotalResults(action, store, pmf);
   }
