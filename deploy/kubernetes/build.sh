@@ -270,7 +270,6 @@ popd > /dev/null
 if [ "${PACKAGE_CHART}" ==  "true" ]; then
   log "Packaging Helm Chart"
   pushd "${STRATOS_PATH}/deploy/kubernetes" > /dev/null
-  ls -al
   PKG_DIST_BASE_FOLDER=./dist
   PKG_DIST_FOLDER=./dist/${TAG}/console
   rm -rf ${PKG_DIST_BASE_FOLDER}
