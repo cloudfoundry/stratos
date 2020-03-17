@@ -42,3 +42,9 @@ export const selectUsersIsRemove = compose(
   isRemove,
   selectUsersRoles
 );
+
+const isSetByUsername = (usersRoles: UsersRolesState) => usersRoles.isSetByUsername;
+export const selectUsersIsSetByUsername = compose(
+  isSetByUsername,
+  selectUsersRoles
+);

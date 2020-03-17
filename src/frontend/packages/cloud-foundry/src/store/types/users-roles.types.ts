@@ -7,6 +7,7 @@ export interface UsersRolesState {
   changedRoles: CfRoleChange[];
   usernameOrigin?: string;
   isRemove?: boolean;
+  isSetByUsername?: boolean;
 }
 
 export interface CfUserRolesSelected {

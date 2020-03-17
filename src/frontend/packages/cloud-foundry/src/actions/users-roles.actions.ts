@@ -12,6 +12,7 @@ export const UsersRolesActions = {
   SetSpaceRole: '[Users Roles] Set space role',
   FlipSetRoles: '[Users Roles] Flip Set Roles',
   SetIsRemove: '[Users Roles] Set Is Remove',
+  SetIsSetByUsername: '[Users Roles] Set Is Set By Username',
   SetChanges: '[Users Roles] Set role changes',
   ExecuteChanges: '[Users Roles] Execute changes',
 };
@@ -29,6 +30,11 @@ export class UsersRolesFlipSetRoles implements Action {
 export class UsersRolesSetIsRemove implements Action {
   type = UsersRolesActions.SetIsRemove;
   constructor(public isRemove: boolean) { }
+}
+
+export class UsersRolesSetIsSetByUsername implements Action {
+  type = UsersRolesActions.SetIsSetByUsername;
+  constructor(public isSetByUsername: boolean) { }
 }
 
 export class UsersRolesSetOrgRole implements Action {

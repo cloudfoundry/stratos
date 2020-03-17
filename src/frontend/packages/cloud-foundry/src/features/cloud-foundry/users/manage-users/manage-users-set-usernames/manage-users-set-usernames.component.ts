@@ -11,7 +11,11 @@ import {
   StackedInputActionsUpdate,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-actions.component';
 import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
-import { UsersRolesSetIsRemove, UsersRolesSetUsers } from '../../../../../actions/users-roles.actions';
+import {
+  UsersRolesSetIsRemove,
+  UsersRolesSetIsSetByUsername,
+  UsersRolesSetUsers,
+} from '../../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { CfUser } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -56,6 +60,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.store.dispatch(new UsersRolesSetIsSetByUsername(true));
     // When we add username validation the processing state should be used to show validation progress and result
     const processingState: StackedInputActionsState[] = [];
     // Object.keys(this.users.values).forEach(key => {
