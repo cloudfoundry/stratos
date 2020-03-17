@@ -69,7 +69,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-
   @Input() showUnderFlow = false;
 
   private pShowHistory = true;

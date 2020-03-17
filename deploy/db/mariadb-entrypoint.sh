@@ -96,9 +96,8 @@ reset_passwords() {
 	"${mysql[@]}"  <<-EOSQL
 	FLUSH PRIVILEGES;
 	ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
-	ALTER USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
 	ALTER USER '$MYSQL_USER'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-	FLUSH PRIVILEGES ;
+	FLUSH PRIVILEGES;
 EOSQL
 
 	if ! kill -s TERM "$pid" || ! wait "$pid"; then
@@ -108,6 +107,40 @@ EOSQL
 	fi
 
 	echo "[Password Change] Passwords updated okay"
+}
+
+upgrade_database() {
+	mysqld --skip-grant-tables --skip-networking --socket="${SOCKET}" &
+	pid="$!"
+
+	mysql=( mysql --protocol=socket -uroot -hlocalhost --socket="${SOCKET}" )
+	for i in {30..0}; do
+		if echo 'SELECT 1' | "${mysql[@]}" &> /dev/null; then
+			break
+		fi
+		echo '[Upgrade] MySQL startup in progress...'
+		sleep 1
+	done
+	if [ "$i" = 0 ]; then
+		echo >&2 '[Upgrade] MySQL startup failed.'
+		exit 1
+	fi
+
+	echo '[Upgrade] MySQL ready for upgrade ...'
+
+	# Change the root password so that we can log in afetr the upgrade
+	#echo "UPDATE mysql.user SET Password=PASSWORD('root') WHERE USER='root';" | "${mysql[@]}"
+	echo "UPDATE mysql.user SET host='localhost' WHERE USER='root';" | "${mysql[@]}"
+
+	mysql_upgrade "${@:2}"
+
+	if ! kill -s TERM "$pid" || ! wait "$pid"; then
+		echo >&2 '[Upgrade ] MySQL => DB upgrade failed.'
+		echo "[Upgrade] Failed"
+		exit 1
+	fi
+
+	echo "[Upgrade] DB upgraded OK"
 }
 
 # allow the container to be started with `--user`
@@ -188,7 +221,8 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 
 		rootCreate=
 		# default root to listen for connections from anywhere
-		file_env 'MYSQL_ROOT_HOST' '%'
+		#file_env 'MYSQL_ROOT_HOST' '%'
+		file_env 'MYSQL_ROOT_HOST' 'localhost'
 		if [ ! -z "$MYSQL_ROOT_HOST" -a "$MYSQL_ROOT_HOST" != 'localhost' ]; then
 			# no, we don't care if read finds a terminating character in this heredoc
 			# https://unix.stackexchange.com/questions/265149/why-is-set-o-errexit-breaking-this-read-heredoc-expression/265151#265151
@@ -250,8 +284,20 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		echo
 		echo 'MySQL init process done. Ready for start up.'
 		echo
+	else
+		echo "Data directory already exists..."
+		# Data folder already exists, so check for marker file		
+		if [ ! -f "$DATADIR/.stratos_10.2" ]; then
+			echo "Upgrading database to 10.2 ...."
+			upgrade_database
+		else
+			echo "No need to upgrade - upgrade has already been applied"
+		fi
 	fi
 fi
+
+# Touch marker file to record that we have upgraded to 10.2
+touch "$DATADIR/.stratos_10.2"
 
 if [ "${RESET_PASSWORDS}" == "true" ]; then
 	echo "Resetting passwords ..."

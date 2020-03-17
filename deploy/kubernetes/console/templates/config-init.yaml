@@ -62,6 +62,10 @@ roleRef:
 apiVersion: "batch/v1"
 kind: "Job"
 metadata:
+{{- if .Values.console.jobAnnotations }}
+  annotations:
+{{ toYaml .Values.console.jobAnnotations | indent 4 }}
+{{- end }}
   name: "stratos-config-init-{{ .Release.Revision }}"
   labels:
     app.kubernetes.io/component: "stratos-config-init-{{ .Release.Revision }}"
@@ -69,16 +73,26 @@ metadata:
     app.kubernetes.io/name: "stratos"
     app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
     helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- if .Values.console.jobExtraLabels }}
+{{ toYaml .Values.console.jobExtraLabels | indent 4 }}
+{{- end }}
 spec:
   template:
     metadata:
       name: "stratos-config-init"
+{{- if .Values.console.podAnnotations }}
+      annotations:
+{{ toYaml .Values.console.podAnnotations | indent 8 }}
+{{- end }}
       labels:
         app.kubernetes.io/component: "stratos-config-init"
         app.kubernetes.io/instance: "{{ .Release.Name }}"
         app.kubernetes.io/name: "stratos"
         app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
         helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- if .Values.console.podExtraLabels}}
+{{ toYaml .Values.console.podExtraLabels | nindent 8 }}
+{{- end }}
     spec:
       containers:
       - env:

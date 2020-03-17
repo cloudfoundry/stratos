@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { ColorHelper } from '@swimlane/ngx-charts';
 
 @Component({
@@ -17,9 +17,9 @@ export class RingChartComponent implements OnInit {
   @Input() scheme: any = 'cool';
   @Input() customColors: any[];
 
-  @Input() onClick: ($event: Event) => void;
-  @Input() onActivate: ($event: Event) => void;
-  @Input() onDeactivate: ($event: Event) => void;
+  @Input() onClick: ($event: Event) => void = () => { };
+  @Input() onActivate: ($event: Event) => void = () => { };
+  @Input() onDeactivate: ($event: Event) => void = () => { };
   @Input() valueFormatting: (value: number) => any = value => value;
   @Input() nameFormatting: (value: string) => any = label => label;
   @Input() percentageFormatting: (value: number) => any = percentage => percentage;

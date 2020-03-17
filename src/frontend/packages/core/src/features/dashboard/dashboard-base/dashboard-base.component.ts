@@ -4,12 +4,14 @@ import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewCon
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/src/cf-types';
 import { GetCurrentUsersRelations } from '../../../../../cloud-foundry/src/actions/permissions.actions';
 import { cfInfoEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/src/cf-types';
 import {
   CfInfoDefinitionActionBuilders,
 } from '../../../../../cloud-foundry/src/entity-action-builders/cf-info.action-builders';
@@ -22,8 +24,6 @@ import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
@@ -142,8 +142,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       ),
       this.tabNavService.tabSubNav$
     );
+    // TODO: Move cf code out to cf module #3849
     this.endpointsService.registerHealthCheck(
-      new EndpointHealthCheck('cf', (endpoint) => {
+      new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => {
         entityCatalog.getEntity<IEntityMetadata, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType)
           .actionDispatchManager.dispatchGet(endpoint.guid);
       })

@@ -41,6 +41,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/sessiondata"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
 
@@ -52,6 +53,7 @@ const (
 	UpgradeVolume        = "UPGRADE_VOLUME"
 	UpgradeLockFileName  = "UPGRADE_LOCK_FILENAME"
 	LogToJSON            = "LOG_TO_JSON"
+	LogAPIRequests       = "LOG_API_REQUESTS" // Defaults to true
 	VCapApplication      = "VCAP_APPLICATION"
 	defaultSessionSecret = "wheeee!"
 )
@@ -66,19 +68,6 @@ var (
 	httpClientMutating        = http.Client{}
 	httpClientMutatingSkipSSL = http.Client{}
 )
-
-func cleanup(dbc *sql.DB, ss HttpSessionStore) {
-	// Print a newline - if you pressed CTRL+C, the alighment will be slightly out, so start a new line first
-	fmt.Println()
-	log.Info("Attempting to shut down gracefully...")
-	log.Info(`... Closing databaseConnectionPool`)
-	dbc.Close()
-	log.Info(`... Closing sessionStore`)
-	ss.Close()
-	log.Info(`.. Stopping sessionStore cleanup`)
-	ss.StopCleanup(ss.Cleanup(time.Minute * 5))
-	log.Info("Graceful shut down complete")
-}
 
 // getEnvironmentLookup return a search path for configuration settings
 func getEnvironmentLookup() *env.VarSet {
@@ -154,7 +143,7 @@ func main() {
 
 	if isUpgrading {
 		log.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
-		start(portalConfig, &portalProxy{env: envLookup}, false, true)
+		start(portalConfig, &portalProxy{env: envLookup}, false, true, envLookup)
 	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
@@ -188,6 +177,7 @@ func main() {
 	tokens.InitRepositoryProvider(dc.DatabaseProvider)
 	console_config.InitRepositoryProvider(dc.DatabaseProvider)
 	localusers.InitRepositoryProvider(dc.DatabaseProvider)
+	sessiondata.InitRepositoryProvider(dc.DatabaseProvider)
 
 	// Establish a Postgresql connection pool
 	databaseConnectionPool, migratorConf, err := initConnPool(dc, envLookup)
@@ -251,15 +241,55 @@ func main() {
 	}()
 	log.Info("Session store initialized.")
 
+	// Create session data store
+	sessionDataStore, err := sessiondata.NewPostgresSessionDataRepository(databaseConnectionPool)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Session Data Store: Ensure the cleanup tick starts now (this will delete expired session data from the DB)
+	dataQuitCleanup, dataDoneCleanup := sessionDataStore.Cleanup(time.Minute * 3)
+	defer func() {
+		log.Info(`... Cleaning up session data store`)
+		sessionDataStore.StopCleanup(dataQuitCleanup, dataDoneCleanup)
+	}()
+	log.Info("Session data store initialized.")
+
 	// Setup the global interface for the proxy
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore, sessionStoreOptions, envLookup)
+	portalProxy.SessionDataStore = sessionDataStore
 	log.Info("Initialization complete.")
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		cleanup(databaseConnectionPool, sessionStore)
+		// Print a newline - if you pressed CTRL+C, the alighment will be slightly out, so start a new line first
+		fmt.Println()
+		log.Info("Attempting to shut down gracefully...")
+
+		// Database connection pool
+		log.Info(`... Closing database connection pool`)
+		databaseConnectionPool.Close()
+
+		// Session store
+		log.Info(`... Closing session store`)
+		sessionStore.Close()
+		log.Info(`... Stopping sessionStore cleanup`)
+		sessionStore.StopCleanup(quitCleanup, doneCleanup)
+
+		// Session Data Store
+		log.Info(`... Stopping sessiondata store cleanup`)
+		sessionDataStore.StopCleanup(dataQuitCleanup, dataDoneCleanup)
+
+		// Plugin cleanup
+		for _, plugin := range portalProxy.Plugins {
+			if pCleanup, ok := plugin.(interfaces.StratosPluginCleanup); ok {
+				pCleanup.Destroy()
+			}
+		}
+
+		log.Info("Graceful shut down complete")
 		os.Exit(1)
 	}()
 
@@ -317,7 +347,7 @@ func main() {
 	portalProxy.StoreDiagnostics()
 
 	// Start the back-end
-	if err := start(portalProxy.Config, portalProxy, needSetupMiddleware, false); err != nil {
+	if err := start(portalProxy.Config, portalProxy, needSetupMiddleware, false, envLookup); err != nil {
 		log.Fatalf("Unable to start: %v", err)
 	}
 	log.Info("Unable to start Stratos JetStream backend")
@@ -329,9 +359,13 @@ func (portalProxy *portalProxy) GetDatabaseConnection() *sql.DB {
 	return portalProxy.DatabaseConnectionPool
 }
 
+// GetSessionDataStore returns the store that can be used for extra session data
+func (portalProxy *portalProxy) GetSessionDataStore() interfaces.SessionDataStore {
+	return portalProxy.SessionDataStore
+}
+
 func (portalProxy *portalProxy) GetPlugin(name string) interface{} {
 	plugin := portalProxy.Plugins[name]
-	log.Warn(portalProxy.Plugins)
 	return plugin
 }
 
@@ -644,7 +678,7 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 
 	// OIDC
 	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
-		Handler: pp.doOidcFlowRequest,
+		Handler: pp.DoOidcFlowRequest,
 	})
 
 	return pp
@@ -695,7 +729,7 @@ func echoShouldNotLog(ec echo.Context) bool {
 	return false
 }
 
-func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool) error {
+func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool, envLookup *env.VarSet) error {
 	log.Debug("start")
 	e := echo.New()
 	e.HideBanner = true
@@ -705,14 +739,24 @@ func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware b
 	if !isUpgrade {
 		e.Use(sessionCleanupMiddleware)
 	}
-	customLoggerConfig := middleware.LoggerConfig{
-		Format: `Request: [${time_rfc3339}] Remote-IP:"${remote_ip}" ` +
-			`Method:"${method}" Path:"${path}" Status:${status} Latency:${latency_human} ` +
-			`Bytes-In:${bytes_in} Bytes-Out:${bytes_out}` + "\n",
-	}
-	customLoggerConfig.Skipper = echoShouldNotLog
 
-	e.Use(middleware.LoggerWithConfig(customLoggerConfig))
+	logAPIRequests := "true"
+	if envLogAPIRequests, ok := envLookup.Lookup(LogAPIRequests); ok {
+		logAPIRequests = envLogAPIRequests
+	}
+	if logAPIRequests == "true" {
+		customLoggerConfig := middleware.LoggerConfig{
+			Format: `Request: [${time_rfc3339}] Remote-IP:"${remote_ip}" ` +
+				`Method:"${method}" Path:"${path}" Status:${status} Latency:${latency_human} ` +
+				`Bytes-In:${bytes_in} Bytes-Out:${bytes_out}` + "\n",
+		}
+		customLoggerConfig.Skipper = echoShouldNotLog
+
+		e.Use(middleware.LoggerWithConfig(customLoggerConfig))
+	} else {
+		log.Warn("Disabled logging of API requests received by Jetstream")
+	}
+
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     config.AllowedOrigins,

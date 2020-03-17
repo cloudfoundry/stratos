@@ -172,7 +172,8 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
           action: getAllAppsInSpaceAction,
           paginationMonitor: this.paginationMonitorFactory.create(
             paginationKey,
-            cfEntityFactory(applicationEntityType)
+            cfEntityFactory(applicationEntityType),
+            getAllAppsInSpaceAction.flattenPagination
           )
         }, true).entities$;
       }),

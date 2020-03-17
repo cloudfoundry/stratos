@@ -49,6 +49,7 @@ import { FileInputComponent } from './components/file-input/file-input.component
 import { FocusDirective } from './components/focus.directive';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
+import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
@@ -58,15 +59,15 @@ import { MetaCardValueComponent } from './components/list/list-cards/meta-card/m
 import {
   TableCellRequestMonitorIconComponent,
 } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
-import {
-  TableCellSidePanelComponent,
-} from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
 import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
+import {
+  TableCellEndpointNameComponent,
+} from './components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { ListHostDirective } from './components/list/simple-list/list-host.directive';
@@ -123,6 +124,8 @@ import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundr
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { TableCellSidePanelComponent } from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
+import { CardProgressOverlayComponent } from './components/card-progress-overlay/card-progress-overlay.component';
 
 
 @NgModule({
@@ -222,12 +225,15 @@ import { UserPermissionDirective } from './user-permission.directive';
     SnackBarReturnComponent,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
+    JsonViewerComponent,
     SimpleListComponent,
     ListHostDirective,
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
+    SidepanelPreviewComponent,
     TableCellSidePanelComponent,
+    CardProgressOverlayComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -315,11 +321,15 @@ import { UserPermissionDirective } from './user-permission.directive';
     AppNameUniqueDirective,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
+    JsonViewerComponent,
     SimpleListComponent,
     ListHostDirective,
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
+    SidepanelPreviewComponent,
+    TableCellEndpointNameComponent,
+    CardProgressOverlayComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,
