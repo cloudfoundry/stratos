@@ -104,7 +104,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
   private showSnackBar(show: boolean) {
     if (!this.snackBarRef && show) {
-      this.snackBarRef = this.snackBar.open(this.snackBarText.message, this.snackBarText.action, {});
+      this.snackBarRef = this.snackBar.open(this.snackBarText.message, this.snackBarText.action, { duration: 20000 });
     } else if (this.snackBarRef && !show) {
       this.snackBarRef.dismiss();
     }
