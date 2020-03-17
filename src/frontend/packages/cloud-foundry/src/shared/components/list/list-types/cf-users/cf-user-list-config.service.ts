@@ -12,7 +12,6 @@ import { CurrentUserPermissionsChecker } from '../../../../../../../core/src/cor
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
-  IGlobalListAction,
   IListAction,
   IListMultiFilterConfig,
   IMultiListAction,
@@ -95,9 +94,8 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     filter: 'Search by username',
     noEntries: 'There are no users'
   };
-  protected initialised: Observable<boolean>;
+  private initialised: Observable<boolean>;
   private multiFilterConfigs: IListMultiFilterConfig[];
-  protected globalActions: IGlobalListAction<CfUser>[] = [];
 
   manageUserAction: IListAction<APIResource<CfUser>> = {
     action: (user: APIResource<CfUser>) => {
@@ -211,7 +209,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     userHasRoles: (user: CfUser) => boolean = defaultUserHasRoles,
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>,
-    // isInitialized: Observable<boolean> = of(true)
   ) {
     super();
 
@@ -226,10 +223,8 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
             activeRouteCfOrgSpace.cfGuid,
             activeRouteCfOrgSpace.orgGuid,
             activeRouteCfOrgSpace.spaceGuid),
-          // isInitialized.pipe(filter(isInit => isInit))
         )
       ),
-      // first(),
       tap(([cf, action]) => {
         this.dataSource = new CfUserDataSourceService(store, action, this, userHasRoles);
 
@@ -309,22 +304,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     };
   }
 
-  // private assignGlobalAction = (
-  //   cfId: string,
-  //   org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
-  //   space$?: Observable<EntityInfo<APIResource<ISpace>>>): Observable<any> => {
-
-  //   return this.userPerms.can(
-  //     new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username), cfId
-  //   ).pipe(
-  //     tap(canSetRolesByUsername => {
-  //       if (canSetRolesByUsername) {
-
-  //       }
-  //     })
-  //   );
-  // }
-
   private getSafeObservables(
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>
@@ -371,7 +350,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.activeRouteCfOrgSpace.orgGuid)
 
   getColumns = () => this.columns;
-  getGlobalActions = () => this.globalActions;
   getMultiActions = () => [this.manageMultiUserAction];
   getSingleActions = () => [this.manageUserAction, ...this.removeUserActions()];
   getMultiFiltersConfigs = () => this.multiFilterConfigs;

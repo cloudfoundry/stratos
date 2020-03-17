@@ -58,9 +58,6 @@ export class AppActionMonitorComponent<T> implements OnInit {
   @Input()
   public columns: ITableColumn<T>[] = [];
 
-  // @Output()
-  // public currentState: EventEmitter<IApplicationMonitorComponentState>;
-
   public dataSource: DataSource<T>;
 
   public allColumns: ITableColumn<T>[] = [];
@@ -86,14 +83,9 @@ export class AppActionMonitorComponent<T> implements OnInit {
     };
 
     this.allColumns = [...this.columns, monitorColumn];
-    // const trackBy = this.getId ? (index, item) => this.getId(item) : this.trackBy;
     this.dataSource = {
       connect: () => this.data$,
       disconnect: () => { },
-      // trackBy: (index, item) => {
-      //   const cellConfig = this.getCellConfig(item);
-      //   return cellConfig.getId(item);
-      // },
       trackBy: this.trackBy,
       isTableLoading$: observableOf(false),
       getRowState: (row) => {
