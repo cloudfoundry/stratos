@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, ReplaySubject } from 'rxjs';
-import { filter, first, map, multicast, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { filter, first, map, multicast, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
@@ -22,6 +22,7 @@ import { IEntityMetadata } from '../../../../store/src/entity-catalog/entity-cat
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import {
+  getCurrentPageRequestInfo,
   getPaginationObservables,
   PaginationObservables,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -59,26 +60,39 @@ export class CfUserService {
     private entityServiceFactory: EntityServiceFactory,
   ) { }
 
-  getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> => {
-    return this.getAllUsers(endpointGuid).pipe(
-      switchMap(paginationObservables => combineLatest(paginationObservables.entities$, paginationObservables.pagination$)),
+  getUsers = (endpointGuid: string, filterEmpty = true): Observable<APIResource<CfUser>[]> =>
+    this.getAllUsers(endpointGuid).pipe(
+      switchMap(paginationObservables => combineLatest(
+        // Entities should be subbed to so the api request is made
+        paginationObservables.entities$.pipe(
+          // In the event of maxed lists though entities never fires... so start with something
+          startWith(null),
+        ),
+        paginationObservables.pagination$
+      )),
       publishReplay(1),
       refCount(),
       filter(([users, pagination]) => {
         // Filter until we have a result
-        const currentPage = pagination.pageRequests[pagination.currentPage];
+        const currentPage = getCurrentPageRequestInfo(pagination, null);
         if (!currentPage) {
           return false;
         }
-        return !currentPage.busy && (!!users || currentPage.error);
+        return !currentPage.busy && (!!users || currentPage.error || currentPage.maxed);
       }),
       map(([users, pagination]) => {
+        const currentPage = getCurrentPageRequestInfo(pagination, null);
+        const hasFailed = currentPage.error || currentPage.maxed;
+        if (!currentPage || hasFailed) {
+          return null;
+        }
+
         // Include only the users from the required endpoint
         // (Think this is now a no-op as the actions have since been fixed to return only users from a single cf but keeping for the moment)
         return !!users ? users.filter(p => p.entity.cfGuid === endpointGuid) : null;
-      })
-    );
-  }
+      }),
+      filter(users => filterEmpty ? !!users : true)
+    )
 
   getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
     // Attempt to get user from all users first, this better covers the case when a non-admin can't hit /users
@@ -102,7 +116,10 @@ export class CfUserService {
           );
         }
         return this.users[userGuid];
-      }));
+      }),
+      publishReplay(1),
+      refCount()
+    );
   }
 
   private parseOrgRole(
@@ -273,7 +290,9 @@ export class CfUserService {
           this.store,
           this.paginationMonitorFactory
         ) : observableOf(null);
-      })
+      }),
+      publishReplay(1),
+      refCount()
     );
   }
 

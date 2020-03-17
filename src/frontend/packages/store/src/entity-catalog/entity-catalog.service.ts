@@ -120,7 +120,7 @@ class EntityCatalog {
     /* tslint:enable:max-line-length */
     const config = this.getConfig(endpointTypeOrConfig, entityType, subType);
     const entityOfType = this.getEntityOfType(config.entityType, config.endpointType);
-    if (subType) {
+    if (entityOfType && subType) {
       return this.getEntitySubType(entityOfType, subType) as StratosBaseCatalogEntity<T, Y, AB>;
     }
     if (!entityOfType) {

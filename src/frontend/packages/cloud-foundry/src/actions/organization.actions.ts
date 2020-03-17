@@ -1,4 +1,4 @@
-import { HttpHeaders, HttpRequest } from '@angular/common/http';
+import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
@@ -173,9 +173,11 @@ export class DeleteOrganization extends CFStartAction implements ICFAction {
       'DELETE',
       `organizations/${guid}`,
       {
-        params: new HttpHeaders({
-          recursive: 'true',
-          async: 'false'
+        params: new HttpParams({
+          fromObject: {
+            recursive: 'true',
+            async: 'false'
+          }
         })
       }
     );

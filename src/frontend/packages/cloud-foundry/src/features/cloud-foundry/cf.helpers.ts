@@ -344,15 +344,15 @@ export function fetchTotalResults(
       newAction.flattenPagination
     )
   });
-  // Ensure the request is made by sub'ing to the entities observable
-  pagObs.entities$.pipe(
-    first(),
-  ).subscribe();
 
-  return pagObs.pagination$.pipe(
+  return combineLatest(
+    pagObs.entities$, // Ensure the request is made by sub'ing to the entities observable
+    pagObs.pagination$
+  ).pipe(
+    map(([, pagination]) => pagination),
     filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
     first(),
-    map(pag => pag.totalResults)
+    map(pagination => pagination.totalResults)
   );
 }
 
