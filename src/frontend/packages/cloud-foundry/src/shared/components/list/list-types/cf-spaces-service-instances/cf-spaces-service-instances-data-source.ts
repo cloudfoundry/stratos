@@ -1,6 +1,5 @@
 import { Store } from '@ngrx/store';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
@@ -19,28 +18,30 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { ServiceInstanceActionBuilders } from '../../../../../entity-action-builders/service-instance.action.builders';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 
 export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(spaceEntityType, spaceGuid);
-    const serviceInstanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const serviceInstanceEntity =
+      entityCatalog.getEntity<IEntityMetadata, null, ServiceInstanceActionBuilders>(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
     const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
     const action = actionBuilder(spaceGuid, cfGuid, paginationKey, null, {
       includeRelations: [
         createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
-        createEntityRelationKey(serviceInstancesEntityType, serviceEntityType),
         createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
+        createEntityRelationKey(servicePlanEntityType, serviceEntityType),
         createEntityRelationKey(serviceInstancesEntityType, spaceEntityType),
         createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
       ],
       populateMissing: true
-    }) as PaginatedAction;
+    });
     super({
       store,
       action,

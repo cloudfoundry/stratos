@@ -5,7 +5,6 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { GITHUB_API_URL } from '../../../../../../../../core/src/core/github.helpers';
 import {
   ApplicationStateService,
@@ -14,11 +13,12 @@ import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../../../../core/
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../../../../core/test-framework/application-service-helper';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryComponentsModule } from '../../../../../../shared/components/components.module';
 import { ApplicationService } from '../../../../application.service';
-import { entityServiceFactory } from '../../../application-base.component';
+import { cfApplicationEntityServiceFactory } from '../../../application-base.component';
 import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
 import { ApplicationPollingService } from '../../application-polling.service';
 import { ApplicationEnvVarsHelper } from './application-env-vars.service';
@@ -57,7 +57,7 @@ describe('BuildTabComponent', () => {
         { provide: APP_GUID, useValue: '' },
         {
           provide: ENTITY_SERVICE,
-          useFactory: entityServiceFactory,
+          useFactory: cfApplicationEntityServiceFactory,
           deps: [CF_GUID, APP_GUID, EntityServiceFactory]
         },
         ApplicationPollingService
