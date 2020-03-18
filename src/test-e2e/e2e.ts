@@ -24,10 +24,14 @@ export class E2E {
   // Access to the secrets configuration
   public secrets = new SecretsHelpers();
 
-  static debugLog(log) {
+  static debugLog(log, ...optionalParams: any[]) {
     if (E2E.DEBUG_LOGGING) {
       /* tslint:disable:no-console*/
-      console.log(log);
+      if (optionalParams && optionalParams.length) {
+        console.log(log, optionalParams);
+      } else {
+        console.log(log);
+      }
       /* tslint:disable */
     }
   }
@@ -63,8 +67,8 @@ export class E2E {
   /**
    * Log message in the control flow if debug logging is set
    */
-  debugLog(log: string) {
-    protractor.promise.controlFlow().execute(() => E2E.debugLog(log));
+  debugLog(log: string, ...optionalParams: any[]) {
+    protractor.promise.controlFlow().execute(() => E2E.debugLog(log, optionalParams));
   }
 }
 
