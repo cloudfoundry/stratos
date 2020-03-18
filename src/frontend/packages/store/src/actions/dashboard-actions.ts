@@ -13,6 +13,7 @@ export const DISABLE_SIDE_NAV_MOBILE_MODE = '[Dashboard] Disable mobile nav';
 export const TIMEOUT_SESSION = '[Dashboard] Timeout Session';
 export const ENABLE_POLLING = '[Dashboard] Enable Polling';
 export const SET_STRATOS_THEME = '[Dashboard] Set Theme';
+export const GRAVATAR_ENABLED = '[Dashboard] Gravatar ENabled';
 
 export const HYDRATE_DASHBOARD_STATE = '[Dashboard] Hydrate dashboard state';
 
@@ -51,6 +52,10 @@ export class SetPollingEnabledAction implements Action {
   type = ENABLE_POLLING;
 }
 
+export class SetGravatarEnabledAction implements Action {
+  constructor(public enableGravatar = true) { }
+  type = GRAVATAR_ENABLED;
+}
 export class HydrateDashboardStateAction implements Action {
   constructor(public dashboardState: DashboardState) { }
   type = HYDRATE_DASHBOARD_STATE;
