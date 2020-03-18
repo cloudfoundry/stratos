@@ -178,7 +178,8 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   private getPaginationObservable(action: PaginatedAction) {
     const paginationMonitor = this.paginationMonitorFactory.create(
       action.paginationKey,
-      action
+      action,
+      true
     );
 
     this.ngZone.runOutsideAngular(() => {

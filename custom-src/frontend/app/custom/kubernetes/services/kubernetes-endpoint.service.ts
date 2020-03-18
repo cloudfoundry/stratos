@@ -230,7 +230,7 @@ export class KubernetesEndpointService {
     return getPaginationObservables<T>({
       store: this.store,
       action: paginationAction,
-      paginationMonitor: this.paginationMonitorFactory.create(paginationAction.paginationKey, paginationAction)
+      paginationMonitor: this.paginationMonitorFactory.create(paginationAction.paginationKey, paginationAction, true)
     }, true).entities$.pipe(filter(p => !!p), first());
   }
 }
