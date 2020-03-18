@@ -3,11 +3,11 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import {
   ApplicationStateService,
 } from '../../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../core/src/shared/entity.tokens';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -32,7 +32,7 @@ export function applicationServiceFactory(
   );
 }
 
-export function entityServiceFactory(
+export function cfApplicationEntityServiceFactory(
   cfId: string,
   id: string,
   esf: EntityServiceFactory
@@ -84,7 +84,7 @@ export function getGuids(type?: string) {
     },
     {
       provide: ENTITY_SERVICE,
-      useFactory: entityServiceFactory,
+      useFactory: cfApplicationEntityServiceFactory,
       deps: [CF_GUID, APP_GUID, EntityServiceFactory]
     },
 
