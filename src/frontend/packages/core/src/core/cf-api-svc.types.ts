@@ -48,7 +48,6 @@ export interface IServiceInstance {
   service_keys_url: string;
   routes_url: string;
   service_url: string;
-  service?: APIResource<IService>;
 }
 
 export interface IServicePlan {
