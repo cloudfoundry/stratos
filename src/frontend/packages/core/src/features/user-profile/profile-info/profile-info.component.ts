@@ -1,3 +1,4 @@
+import { SetGravatarEnabledAction } from './../../../../../store/src/actions/dashboard-actions';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -9,9 +10,7 @@ import { selectDashboardState } from '../../../../../store/src/selectors/dashboa
 import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
 import { ThemeService } from '../../../core/theme.service';
 import { UserService } from '../../../core/user.service';
-import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
-import { UserProfileService } from '../user-profile.service';
+import { UserProfileService } from '../../../core/user-profile.service';
 
 @Component({
   selector: 'app-profile-info',
@@ -25,30 +24,38 @@ export class ProfileInfoComponent implements OnInit {
   );
 
   public pollingEnabled$ = this.store.select(selectDashboardState).pipe(
-    map(dashboardState => dashboardState.pollingEnabled ? 'true' : 'false'),
+    map(dashboardState => dashboardState.pollingEnabled ? 'true' : 'false')
+  );
+
+  public gravatarEnabled$ = this.store.select(selectDashboardState).pipe(
+    map(dashboardState => dashboardState.gravatarEnabled ? 'true' : 'false')
+  );
+
+  public allowGravatar$ =  this.store.select(selectDashboardState).pipe(
+    map(dashboardState => dashboardState.gravatarEnabled)
   );
 
   isError$: Observable<boolean>;
+  canEdit$: Observable<boolean>;
   userProfile$: Observable<UserProfileInfo>;
 
   primaryEmailAddress$: Observable<string>;
   hasMultipleThemes: boolean;
 
-  private sessionDialogConfig = new ConfirmationDialogConfig(
-    'Disable session timeout',
-    'We recommend keeping automatic session timeout enabled to improve the security of your data.',
-    'Disable',
-    true
-  );
-
-  public updateSessionKeepAlive(timeoutSession: boolean) {
-    if (!timeoutSession) {
-      this.confirmDialog.open(this.sessionDialogConfig, () => this.setSessionTimeout(timeoutSession));
-    } else {
-      this.setSessionTimeout(timeoutSession);
-    }
+  public updateSessionKeepAlive(timeoutSession: string) {
+    const newVal = !(timeoutSession === 'true');
+    this.setSessionTimeout(newVal);
   }
 
+  public updatePolling(pollingEnabled: string) {
+    const newVal = !(pollingEnabled === 'true');
+    this.setPollingEnabled(newVal);
+  }
+
+  public updateGravatarEnabled(gravatarEnabled: string) {
+    const newVal = !(gravatarEnabled === 'true');
+    this.setGravatarEnabled(newVal);
+  }
   private setSessionTimeout(timeoutSession: boolean) {
     this.store.dispatch(new SetSessionTimeoutAction(timeoutSession));
   }
@@ -57,15 +64,19 @@ export class ProfileInfoComponent implements OnInit {
     this.store.dispatch(new SetPollingEnabledAction(pollingEnabled));
   }
 
+  public setGravatarEnabled(gravatarEnabled: boolean) {
+    this.store.dispatch(new SetGravatarEnabledAction(gravatarEnabled));
+  }
+
   constructor(
     private userProfileService: UserProfileService,
     private store: Store<DashboardOnlyAppState>,
-    private confirmDialog: ConfirmationDialogService,
     public userService: UserService,
     public themeService: ThemeService
   ) {
     this.isError$ = userProfileService.isError$;
     this.userProfile$ = userProfileService.userProfile$;
+    this.canEdit$ = this.isError$.pipe(map(e => !e));
 
     this.primaryEmailAddress$ = this.userProfile$.pipe(
       map((profile: UserProfileInfo) => userProfileService.getPrimaryEmailAddress(profile))

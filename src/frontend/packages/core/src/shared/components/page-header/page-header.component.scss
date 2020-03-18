@@ -86,37 +86,18 @@ $bottom-index: $top-index - 1;
     opacity: .3;
     padding: 0 10px 0 5px;
   }
-  &__menu-button-icon {
-    $menu-button-height: 30px;
-    border-radius: 50%;
-    height: $menu-button-height;
-    line-height: $menu-button-height;
-    width: $menu-button-height;
-  }
-  &__username-icon {
-    $menu-button-height: 50px;
-    border-radius: 50%;
-    font-size: 24px;
-    height: $menu-button-height;
-    line-height: $menu-button-height;
-    text-align: center;
-    width: $menu-button-height;
-  }
-  &__username-subtext {
-    font-size: 12px;
-    opacity: .6;
-  }
   &__menu-button {
     display: flex;
     justify-content: center;
   }
   &__usermenu {
-    padding: 5px 0;
+    margin-left: 8px;
   }
   &__username {
     align-items: center;
     display: flex;
-    padding: 5px 15px 15px 12px;
+    margin-top: -8px;
+    padding: 15px;
   }
   &__username-text {
     margin-left: 10px;
