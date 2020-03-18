@@ -165,6 +165,7 @@ function getDefaultInitialTestStratosStoreState() {
       pollingEnabled: true,
       themeKey: null,
       headerEventMinimized: true,
+      gravatarEnabled: false,
     },
     actionHistory: [],
     lists: {},

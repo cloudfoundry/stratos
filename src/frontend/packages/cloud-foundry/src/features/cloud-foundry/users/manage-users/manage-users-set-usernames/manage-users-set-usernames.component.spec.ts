@@ -1,5 +1,13 @@
+import { HttpClientModule } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
+import { CoreModule } from '../../../../../../../core/src/core/core.module';
+import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
+import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
+import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
+import { CfRolesService } from '../cf-roles.service';
 import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames.component';
 
 describe('ManageUsersSetUsernamesComponent', () => {
@@ -8,7 +16,21 @@ describe('ManageUsersSetUsernamesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ManageUsersSetUsernamesComponent]
+      imports: [
+        ...generateCfStoreModules(),
+        CoreModule,
+        SharedModule,
+        NoopAnimationsModule,
+        HttpClientModule
+      ],
+      providers: [
+        ActiveRouteCfOrgSpace,
+        CfRolesService,
+        CfUserService
+      ],
+      declarations: [
+        ManageUsersSetUsernamesComponent
+      ]
     })
       .compileComponents();
   }));

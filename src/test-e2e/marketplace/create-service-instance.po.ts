@@ -15,6 +15,10 @@ export class CreateServiceInstance extends Page {
     return this.baseStepper.selectServiceType(SERVICE_INSTANCE_TYPES.SERVICE);
   }
 
+  public selectUserProvidedService() {
+    return this.baseStepper.selectServiceType(SERVICE_INSTANCE_TYPES.USER_SERVICE);
+  }
+
   constructor(url = '/services/new') {
     super(url);
   }
