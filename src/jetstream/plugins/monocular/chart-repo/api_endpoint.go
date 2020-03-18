@@ -204,7 +204,10 @@ func RepoSyncStatus(w http.ResponseWriter, req *http.Request, params Params) {
 		return
 	}
 
-	response := common.SyncJobStatusResponse{requestUUID.String(), status.Status}
+	response := common.SyncJobStatusResponse{
+		UUID:   requestUUID.String(),
+		Status: status.Status,
+	}
 	js, err := json.Marshal(response)
 	if err != nil {
 		log.Errorf("Request: requestUUID, %v, %v", requestUUID, err.Error())

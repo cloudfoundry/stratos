@@ -60,6 +60,14 @@ func init() {
 	}
 }
 
+func createStatus(repoName, repoUrl, status string) common.RepoSyncStatus {
+	syncStatus := common.RepoSyncStatus{}
+	syncStatus.Repo = repoName
+	syncStatus.URL = repoUrl
+	syncStatus.Status = status
+	return syncStatus
+}
+
 // SyncRepo Syncing is performed in the following steps:
 // 1. Update database to match chart metadata from index
 // 2. Concurrently process icons for charts (concurrently)
@@ -71,7 +79,7 @@ func init() {
 // charts before fetching readmes for each chart and version pair.
 func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHeader string, clientKeepAlive bool) error {
 
-	repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusInProgress})
+	repoSyncStatus.Set(repoName, createStatus(repoName, repoURL, common.SyncStatusInProgress))
 
 	db, closer := dbClient.Database(dbName)
 
@@ -94,7 +102,7 @@ func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHe
 	if err != nil {
 		log.Errorf("Database readiness/connection test failed: %v", err)
 		cancel()
-		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
+		repoSyncStatus.Set(repoName, createStatus(repoName, repoURL, common.SyncStatusFailed))
 		return err
 	}
 	id := res.InsertedID
@@ -107,42 +115,43 @@ func SyncRepo(dbClient Client, dbName, repoName, repoURL string, authorizationHe
 	repoBytes, err := common.FetchRepoIndex(r, netClient)
 	if err != nil {
 		log.Errorf("Failed to fetch repo index: %v", err)
-		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
+
+		repoSyncStatus.Set(repoName, createStatus(repoName, repoURL, common.SyncStatusFailed))
 		return err
 	}
 
 	repoChecksum, err := common.GetSha256(repoBytes)
 	if err != nil {
 		log.Errorf("Failed to generate repo checksum: %v", err)
-		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
+		repoSyncStatus.Set(repoName, createStatus(repoName, repoURL, common.SyncStatusFailed))
 		return err
 	}
 
 	// Check if the repo has been already processed
 	if repoAlreadyProcessed(db, repoName, repoChecksum) {
 		log.WithFields(log.Fields{"url": repoURL}).Info("Skipping repository since there are no updates")
-		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusSynced})
+		repoSyncStatus.Set(repoName, createStatus(repoName, repoURL, common.SyncStatusSynced))
 		return nil
 	}
 
 	index, err := common.ParseRepoIndex(repoBytes)
 	if err != nil {
 		log.Errorf("Error parsing repo index: %v", err)
-		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
+		repoSyncStatus.Set(repoName, createStatus(repoName, repoURL, common.SyncStatusFailed))
 		return err
 	}
 
 	charts := common.ChartsFromIndex(index, r)
 	log.Debugf("%v Charts in index of repo: %v", len(charts), repoURL)
 	if len(charts) == 0 {
-		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, "Synchronized"})
+		repoSyncStatus.Set(repoName, createStatus(repoName, repoURL, common.SyncStatusSynced))
 		return errors.New("no charts in repository index")
 	}
 
 	err = importCharts(db, dbName, charts)
 	if err != nil {
 		log.Errorf("Error importing charts: %v", err)
-		repoSyncStatus.Set(repoName, common.RepoSyncStatus{"repoName", repoURL, common.SyncStatusFailed})
+		repoSyncStatus.Set(repoName, createStatus(repoName, repoURL, common.SyncStatusFailed))
 		return err
 	}
 
