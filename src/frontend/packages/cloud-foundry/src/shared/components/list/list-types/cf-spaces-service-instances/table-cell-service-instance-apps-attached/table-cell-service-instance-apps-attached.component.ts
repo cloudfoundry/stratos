@@ -73,7 +73,7 @@ export class TableCellServiceInstanceAppsAttachedComponent extends TableCellCust
               value: binding.entity.app.entity.name,
               url: {
                 link: `/applications/${binding.entity.cfGuid}/${binding.entity.app.metadata.guid}`,
-                queryParams: {
+                params: {
                   breadcrumbs: config.breadcrumbs
                 },
               }
