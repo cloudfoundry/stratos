@@ -147,7 +147,13 @@ func (m *Monocular) processSyncRequests() {
 					err := waitForSyncComplete(statusURL)
 					metadata.Busy = false
 					if err == nil {
-						metadata.Status = "Synchronized"
+						// Need to get the actual status
+						status, err := getSyncStatus(statusURL)
+						if err == nil {
+							metadata.Status = status.Status
+						} else {
+							metadata.Status = "Sync Failed"
+						}
 					} else {
 						metadata.Status = "Sync Failed"
 						log.Errorf("Failed to fetch sync status for repo: %v, %v", job.Endpoint.Name, err)
@@ -182,19 +188,26 @@ func (m *Monocular) processSyncRequests() {
 func waitForSyncComplete(url string) error {
 	return wait.Poll(statusPollInterval*time.Second, time.Duration(statusPollTimeout)*time.Second, func() (bool, error) {
 		var complete = false
-		log.Infof("Making GET request to: %v", url)
-		resp, err := http.Get(url)
-		defer resp.Body.Close()
-		if err == nil {
-			statusResponse := common.SyncJobStatusResponse{}
-			err := json.NewDecoder(resp.Body).Decode(&statusResponse)
-			log.Infof("%v", statusResponse)
-			if err == nil && statusResponse.Status == common.SyncStatusSynced {
-				complete = true
-			}
+		statusResponse, err := getSyncStatus(url)
+		if err == nil && statusResponse.Status == common.SyncStatusSynced || statusResponse.Status == common.SyncStatusFailed {
+			// Note: complete can mean synced okay or sync failed
+			complete = true
 		}
 		return complete, err
 	})
+}
+
+func getSyncStatus(url string) (*common.SyncJobStatusResponse, error) {
+	resp, err := http.Get(url)
+	if err == nil {
+		defer resp.Body.Close()
+		statusResponse := common.SyncJobStatusResponse{}
+		err = json.NewDecoder(resp.Body).Decode(&statusResponse)
+		if err == nil {
+			return &statusResponse, nil
+		}
+	}
+	return nil, err
 }
 
 func marshalSyncMetadata(metadata SyncMetadata) string {
