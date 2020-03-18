@@ -548,11 +548,30 @@ func getCommit(cloneDetails CloneDetails, clientWebSocket *websocket.Conn, tempD
 
 }
 
+// Check if file exists
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
 // This assumes manifest lives in the root of the app
 func fetchManifest(repoPath string, stratosProject StratosProject, clientWebSocket *websocket.Conn) (Applications, error) {
 
 	var manifest Applications
-	manifestPath := fmt.Sprintf("%s/manifest.yml", repoPath)
+
+	// Can be either manifest.yml or manifest.yaml
+	manifestPath := filepath.Join(repoPath, "manifest.yml")
+	if !fileExists(manifestPath) {
+		manifestPath = filepath.Join(repoPath, "manifest.yaml")
+		if !fileExists(manifestPath) {
+			return manifest, fmt.Errorf("Can not find manifest file")
+		}
+	}
+
+	// Read the manifest
 	data, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
 		log.Warnf("Failed to read manifest in path %s", manifestPath)
