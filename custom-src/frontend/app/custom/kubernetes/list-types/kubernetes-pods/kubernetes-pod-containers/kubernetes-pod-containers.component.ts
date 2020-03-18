@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -49,6 +49,7 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
     this.containerDataSource = {
       isTableLoading$: of(false),
       connect: () => this.store.select<KubernetesPod>(selectEntity(this.entityConfig.entityKey, row.metadata.uid)).pipe(
+        filter(pod => !!pod),
         map(pod => this.map(pod)),
       ),
       disconnect: () => { },
