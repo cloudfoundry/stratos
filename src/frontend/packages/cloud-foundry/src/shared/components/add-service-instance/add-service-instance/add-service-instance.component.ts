@@ -175,7 +175,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
             cfEntityFactory(applicationEntityType),
             getAllAppsInSpaceAction.flattenPagination
           )
-        }, true).entities$;
+        }, getAllAppsInSpaceAction.flattenPagination).entities$;
       }),
       tap(() => this.appsEmitted.next(true)),
       publishReplay(1),

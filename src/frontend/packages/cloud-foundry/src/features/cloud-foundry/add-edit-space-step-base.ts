@@ -57,7 +57,7 @@ export class AddEditSpaceStepBase {
           action.flattenPagination
         )
       },
-      true
+      action.flattenPagination
     ).entities$.pipe(
       filter(spaces => !!spaces),
       map(spaces => spaces.map(space => space.entity.name)),
@@ -84,7 +84,7 @@ export class AddEditSpaceStepBase {
           getAllInOrganization.flattenPagination
         )
       },
-      true
+      getAllInOrganization.flattenPagination
     ).entities$.pipe(
       filter(o => !!o),
       first()

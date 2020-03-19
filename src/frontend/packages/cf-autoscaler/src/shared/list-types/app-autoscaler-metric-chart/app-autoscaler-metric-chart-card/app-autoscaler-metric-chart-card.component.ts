@@ -112,9 +112,9 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
         autoscalerEntityFactory(appAutoscalerAppMetricEntityType),
-        false
+        true
       )
-    }, false).entities$.pipe(
+    }, true).entities$.pipe(
       filter(entities => !!entities)
     );
   }
