@@ -62,6 +62,15 @@ func (m *Monocular) SyncRepo(c echo.Context) error {
 // Sync schedules a sync action for the given endpoint
 func (m *Monocular) Sync(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
 
+	// If the sync job is busy, it won't update the status of this new job until it completes the previou sone
+	// Set the status to indicate it is pending
+	metadata := SyncMetadata{
+		Status: "Pending",
+		Busy:   true,
+	}
+	m.portalProxy.UpdateEndointMetadata(endpoint.GUID, marshalSyncMetadata(metadata))
+
+	// Add the job to the queue to be processed
 	job := SyncJob{
 		Action:   action,
 		Endpoint: endpoint,
