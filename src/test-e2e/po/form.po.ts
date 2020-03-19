@@ -154,8 +154,23 @@ export class FormComponent extends Component {
     const isInputOrTextAreaP = field.getTagName().then(tagName => tagName === 'input' || tagName === 'textarea');
     const isMatInputFieldP = field.getAttribute('class').then(css => css.indexOf('mat-input-element') >= 0);
 
-    return promise.all([isInputOrTextAreaP, isMatInputFieldP]).then(([isInputOrTextArea, isMatInputField]) =>
-      isInputOrTextArea && isMatInputField ? field.getAttribute('value') : field.getText());
+    return promise.all([isInputOrTextAreaP, isMatInputFieldP]).then(([isInputOrTextArea, isMatInputField]) => {
+
+      if (isInputOrTextArea && isMatInputField) {
+        return field.getAttribute('value').then(a => {
+          console.log(ctrlName + ' 1: ', a);
+          return a;
+        });
+      } else {
+        return field.getText().then(a => {
+          console.log(ctrlName + ' 2: ', a);
+          return a;
+        });
+      }
+      // console.log(ctrlName);
+      // return isInputOrTextArea && isMatInputField ? field.getAttribute('value') : field.getText();
+    }
+    );
   }
 
   // Focus the specified field by clicking it
