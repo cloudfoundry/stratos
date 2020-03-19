@@ -26,7 +26,6 @@ import {
   valueOrCommonFalsy,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../store/src/app-state';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import {
@@ -105,7 +104,7 @@ export const initCfOrgSpaceService = (
 };
 
 export const createCfOrSpaceMultipleFilterFn = (
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   action: PaginatedAction,
   setQParam: (setQ: QParam, qs: QParam[]) => boolean
 ) => {
@@ -213,7 +212,8 @@ export class CfOrgSpaceDataService implements OnDestroy {
       action: this.paginationAction,
       paginationMonitor: this.paginationMonitorFactory.create(
         this.paginationAction.paginationKey,
-        cfEntityFactory(this.paginationAction.entityType)
+        cfEntityFactory(this.paginationAction.entityType),
+        this.paginationAction.flattenPagination
       )
     }, true);
   }

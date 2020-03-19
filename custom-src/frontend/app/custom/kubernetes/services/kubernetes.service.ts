@@ -19,7 +19,8 @@ export class KubernetesService {
   ) {
     this.kubeEndpointsMonitor = this.paginationMonitorFactory.create(
       endpointListKey,
-      endpointEntitySchema
+      endpointEntitySchema,
+      true
     );
 
     this.kubeEndpoints$ = this.kubeEndpointsMonitor.currentPage$.pipe(

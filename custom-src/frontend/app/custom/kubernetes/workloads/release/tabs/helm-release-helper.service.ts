@@ -91,7 +91,8 @@ export class HelmReleaseHelperService {
     const action = new GetHelmReleasePods(this.endpointGuid, this.releaseTitle);
     return this.paginationMonitorFactory.create(
       action.paginationKey,
-      action.entity[0]
+      action.entity[0],
+      true
     ).currentPage$.pipe(
       filter(pods => !!pods),
       map(this.mapPods)

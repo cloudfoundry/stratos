@@ -1,5 +1,5 @@
 #!/bin/bash
-CREATE=true
+CREATE="true"
 ORG=many-apps
 SPACE=many-apps
 SERVICE_PREFIX=many-services-
@@ -26,12 +26,12 @@ echo $SERVICE_PLAN
 
 echo "Creating $COUNT service instances in org '$ORG' space '$SPACE'"
 
-if [ "$CREATE" = true ]; then
+if [ "$CREATE" = "true" ]; then
     cf create-org $ORG
 fi
 cf target -o $ORG
 
-if [ "$CREATE" = true ]; then
+if [ "$CREATE" = "true" ]; then
     cf create-space $SPACE
 fi
 cf target -s $SPACE
@@ -43,4 +43,4 @@ do
     cf create-service "$SERVICE" "$SERVICE_PLAN" "$SERVICE_PREFIX-$counter"
     ((counter++))
 done
-echo "Created $COUNT service instances in org '$ORG' space '$SPACE'"
+echo "Created $counter service instances in org '$ORG' space '$SPACE'"

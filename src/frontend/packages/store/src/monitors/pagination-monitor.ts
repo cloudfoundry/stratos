@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
 import { denormalize, schema as normalizrSchema } from 'normalizr';
-import { asapScheduler, combineLatest, Observable } from 'rxjs';
+import { asapScheduler, combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import {
   combineLatest as combineLatestOperator,
   distinctUntilChanged,
   filter,
   map,
+  multicast,
   observeOn,
-  publishReplay,
   refCount,
   switchMap,
   withLatestFrom,
@@ -83,11 +83,12 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
     return new PaginationMonitor(store, paginationKey, schema, isLocal);
   }
 
+
   constructor(
     private store: Store<Y>,
     public paginationKey: string,
     public entityConfig: EntityCatalogEntityConfig,
-    public isLocal = false
+    public isLocal: boolean = false
   ) {
     const { endpointType, entityType, schemaKey } = entityConfig;
     const catalogEntity = entityCatalog.getEntity(endpointType, entityType);
@@ -199,7 +200,8 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
         return this.denormalizePage(page, pageSchema, allEntities);
       }),
       tag('de-norming ' + schema.key),
-      publishReplay(1),
+      // See comment in createLocalPageObservable
+      multicast(() => new ReplaySubject<any>(1)),
       refCount(),
     );
   }
@@ -229,6 +231,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       pagination$,
       schema
     );
+
 
     const allEntitiesObservable$ = this.store.select(getAPIRequestDataState);
 
@@ -264,7 +267,15 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       entities$: fetching$.pipe(
         filter(busy => !busy),
         switchMap(() => entities$),
-        publishReplay(1),
+        // Use this instead of publishReplay(1).
+        // These are cached in the pagination monitor factory, so at times there are no subscribers. During this time changes in data occur.
+        // With publishReplay(1) these changes are ignored and new subscribers will get the last entities emitted whilst there were
+        // subscribers. The replacement line allows the obs to go `cold` when there are no subscribers but return to `hot` with the latest
+        // data on new subscribers. For more info see
+        // https://stackoverflow.com/questions/53798142/rxjs-unexpected-publishreplay-refcount-behaviour-after-refcount-goes-to-0
+        // and https://stackoverflow.com/questions/42370097/how-to-force-publishreplay-to-resubscribe
+        multicast(() => new ReplaySubject<any>(1)),
+        // publishReplay(1),
         refCount(),
       ),
       isMultiAction$

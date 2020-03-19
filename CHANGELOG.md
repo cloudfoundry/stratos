@@ -2,7 +2,7 @@
 
 ## 3.0.0
 
-[Full Changelog](https://github.com/cloudfoundry/stratos/compare/2.7.0...3.0.0)
+[Full Changelog](https://github.com/SUSE/stratos/compare/2.7.0...3.0.0)
 
 This release sees the Helm functionality move out of technology preview and get an upgrade to Helm 3. Helm releases have been brought out to the
 top-level under a new 'Workloads' side navigation item.

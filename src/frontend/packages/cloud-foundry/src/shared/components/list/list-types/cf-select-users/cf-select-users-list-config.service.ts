@@ -17,10 +17,10 @@ import {
   ListRowSateHelper,
   ListRowStateSetUpManager,
 } from '../../../../../../../core/src/shared/components/list/list.helper';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
@@ -108,7 +108,8 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       this.entityMonitorFactory,
       action.paginationKey,
       action,
-      this.cfUserRowStateSetUpManager.bind(this)
+      this.cfUserRowStateSetUpManager.bind(this),
+      action.flattenPagination
     );
     this.dataSource = new CfSelectUsersDataSourceService(this.cfGuid, this.store, action, this, rowStateManager, () => {
       sub.unsubscribe();
