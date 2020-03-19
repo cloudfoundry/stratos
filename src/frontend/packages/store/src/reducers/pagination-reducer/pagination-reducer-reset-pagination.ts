@@ -1,5 +1,5 @@
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import { ResetPagination } from '../../actions/pagination.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import { PaginationEntityState, PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 
 export const defaultClientPaginationPageSize = 9;
@@ -21,6 +21,9 @@ const defaultPaginationEntityState: PaginationEntityState = {
       items: {}
     },
     totalResults: 0
+  },
+  maxedState: {
+    isMaxedMode: false
   }
 };
 

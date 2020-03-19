@@ -3,10 +3,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
@@ -18,7 +16,9 @@ import {
   IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import {
   TableCellRouteAppsAttachedComponent,
 } from '../cf-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
@@ -79,6 +79,10 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
     title: null,
     noEntries: 'There are no routes',
     filter: 'Search by Route',
+    maxedResults: {
+      icon: 'people',
+      firstLine: 'There are too many routes to show'
+    }
   };
   enableTextFilter = true;
 

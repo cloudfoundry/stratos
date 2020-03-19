@@ -26,7 +26,7 @@ import {
 
 import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
-import { SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
+import { IgnorePaginationMaxedState, SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
@@ -225,7 +225,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.entityKey = this.sourceScheme.key;
     this.entityType = this.action.entityType;
     this.endpointType = this.action.endpointType;
-    this.masterAction = this.action as PaginatedAction;
+    this.masterAction = this.action;
     this.setupAction(config);
     if (!this.isLocal && this.config.listConfig) {
       // This is a non-local data source so the results-per-page should match the initial page size. This will avoid making two calls
@@ -237,7 +237,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private setupAction(config: IListDataSourceConfig<A, T>) {
     if (config.schema instanceof MultiActionConfig) {
       if (!config.isLocal) {
-        // We cannot do multi action lists for none local lists
+        // We cannot do multi action lists for non-local lists
         this.action = config.schema[0].paginationAction;
         this.masterAction = this.action as PaginatedAction;
       } else {
@@ -438,6 +438,14 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     } else {
       this.store.dispatch(newAction);
     }
+  }
+
+  public showAllAfterMax() {
+    this.store.dispatch(new IgnorePaginationMaxedState(
+      this.masterAction.entityType,
+      this.masterAction.endpointType,
+      this.masterAction.paginationKey
+    ));
   }
 
   private createSortObservable(): Observable<ListSort> {

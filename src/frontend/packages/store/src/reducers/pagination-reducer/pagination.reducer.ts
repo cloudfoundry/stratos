@@ -1,6 +1,3 @@
-import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
-import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import {
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,
@@ -13,6 +10,8 @@ import {
   CLEAR_PAGINATION_OF_TYPE,
   ClearPaginationOfType,
   CREATE_PAGINATION,
+  IGNORE_MAXED_STATE,
+  IgnorePaginationMaxedState,
   REMOVE_PARAMS,
   RESET_PAGINATION,
   SET_CLIENT_FILTER,
@@ -27,6 +26,9 @@ import {
   UPDATE_MAXED_STATE,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
+import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import { mergeState } from '../../helpers/reducer.helper';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { UpdatePaginationMaxedState } from './../../actions/pagination.actions';
@@ -35,7 +37,7 @@ import { paginationClearPages } from './pagination-reducer-clear-pages';
 import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-of-entity';
 import { clearEndpointEntities, paginationClearAllTypes } from './pagination-reducer-clear-pagination-type';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
-import { paginationMaxReached } from './pagination-reducer-max-reached';
+import { paginationIgnoreMaxed, paginationMaxReached } from './pagination-reducer-max-reached';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { getDefaultPaginationEntityState, paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
@@ -135,6 +137,10 @@ function paginate(action, state = {}, updatePagination) {
 
   if (action.type === UPDATE_MAXED_STATE) {
     return paginationMaxReached(state, action as UpdatePaginationMaxedState);
+  }
+
+  if (action.type === IGNORE_MAXED_STATE) {
+    return paginationIgnoreMaxed(state, action as IgnorePaginationMaxedState);
   }
 
   return enterPaginationReducer(state, action, updatePagination);

@@ -5,9 +5,9 @@ import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
 import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
 import { EntityCatalogEntityConfig } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
 
 export interface IEntitySelectItem {
   page: number;
@@ -124,7 +124,10 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, EntityCatalo
   refresh();
 
   updateMetricsAction(newAction: MetricsAction);
-
+  /**
+   * Ensure that list maxed status is ignored. This will result in all results being shown when previously ignored
+   */
+  showAllAfterMax();
 }
 
 export type getRowUniqueId<T> = (T) => string;

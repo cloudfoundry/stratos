@@ -17,6 +17,9 @@ import {
   UserRoleInSpace,
 } from '../../../../cloud-foundry/src/store/types/user.types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
+import {
+  LocalPaginationHelpers,
+} from '../../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
@@ -76,11 +79,13 @@ export class CfUserService {
         if (!currentPage) {
           return false;
         }
-        return !currentPage.busy && (!!users || currentPage.error || currentPage.maxed);
+        const isMaxed = LocalPaginationHelpers.isPaginationMaxed(pagination);
+        return !currentPage.busy && (!!users || currentPage.error || isMaxed);
       }),
       map(([users, pagination]) => {
         const currentPage = getCurrentPageRequestInfo(pagination, null);
-        const hasFailed = currentPage.error || currentPage.maxed;
+        const isMaxed = LocalPaginationHelpers.isPaginationMaxed(pagination);
+        const hasFailed = currentPage.error || isMaxed;
         if (!currentPage || hasFailed) {
           return null;
         }

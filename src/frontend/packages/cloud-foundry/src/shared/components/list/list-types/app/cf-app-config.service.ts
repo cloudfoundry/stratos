@@ -11,7 +11,7 @@ import { UtilsService } from '../../../../../../../core/src/core/utils.service';
 import {
   createTableColumnFavorite,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-favorite/table-cell-favorite.component';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   IListConfig,
   IListMultiFilterConfig,
@@ -136,10 +136,15 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     }),
   ];
   viewType = ListViewTypes.BOTH;
-  text = {
+  text: ITableText = {
     title: '',
     filter: 'Search by name',
-    noEntries: 'There are no applications'
+    noEntries: 'There are no applications',
+    maxedResults: {
+      icon: 'apps',
+      firstLine: 'There are a lot of applications',
+      filterLine: 'Please use the Cloud Foundry, Organization or Space filters'
+    }
   };
   enableTextFilter = true;
   cardComponent = CardAppComponent;

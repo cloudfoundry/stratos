@@ -358,7 +358,7 @@ export function fetchTotalResults(
 
 export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
   // Filtering is done remotely when maxedResults are hit (see `setMultiFilter`)
-  if (!!paginationState.maxedMode) {
+  if (!!paginationState.maxedState.isMaxedMode) {
     return entities;
   }
 

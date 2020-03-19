@@ -54,6 +54,9 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
     super(store, confirmDialog, cfService.cfGuid, datePipe, true, true, canEditRoute, observableOf(false));
 
     this.setupList(store, cfService, cfOrgSpaceService);
+
+    this.text.maxedResults.firstLine = 'There are a lot of routes';
+    this.text.maxedResults.filterLine = 'Please use the Organization filter';
   }
 
   private setupList(
@@ -70,7 +73,6 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
     // Show drop down filters for org and space
     const multiFilterConfigs = [
       createCfOrgSpaceFilterConfig('org', 'Organization', cfOrgSpaceService.org),
-      createCfOrgSpaceFilterConfig('space', 'Space', cfOrgSpaceService.space),
     ];
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
     initCfOrgSpaceService(store, cfOrgSpaceService,

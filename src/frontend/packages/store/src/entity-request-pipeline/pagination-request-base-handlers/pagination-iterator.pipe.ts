@@ -5,12 +5,7 @@ import { map, mergeMap, reduce } from 'rxjs/operators';
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import { PaginatedAction } from '../../types/pagination.types';
-import {
-  ActionDispatcher,
-  JetstreamResponse,
-  PagedJetstreamResponse,
-  SuccessfulApiResponseDataMapper,
-} from '../entity-request-pipeline.types';
+import { ActionDispatcher, JetstreamResponse, PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PipelineHttpClient } from '../pipline-http-client.service';
 
 
@@ -29,7 +24,7 @@ export class PaginationPageIterator<R = any, E = any> {
     public action: PaginatedAction,
     public actionDispatcher: ActionDispatcher,
     public config: PaginationPageIteratorConfig<R, E>,
-    public postSuccessDataMapper?: SuccessfulApiResponseDataMapper<E>
+    private ignorePaginationMaxed?: boolean
   ) { }
 
   private makeRequest(httpRequest: HttpRequest<JetstreamResponse<R>>) {
@@ -88,8 +83,8 @@ export class PaginationPageIterator<R = any, E = any> {
     Observable<[JetstreamResponse<R>, JetstreamResponse<R>[]]> {
     if (totalResults > 0) {
       const maxCount = action.flattenPaginationMax;
-      // We're maxed so only respond with the first page of results.
-      if (maxCount < totalResults) {
+      if (!this.ignorePaginationMaxed && maxCount < totalResults) {
+        // We're maxed so only respond with the first page of results.
         const { entityType, endpointType, paginationKey, __forcedPageEntityConfig__ } = action;
         const forcedEntityKey = entityCatalog.getEntityKey(__forcedPageEntityConfig__);
         this.actionDispatcher(

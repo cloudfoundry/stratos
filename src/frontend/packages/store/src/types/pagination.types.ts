@@ -26,6 +26,22 @@ export interface PaginationClientPagination {
   totalResults: number;
 }
 
+export interface PaginationMaxedState {
+  /**
+   * Is the pagination in maxed mode?
+   * - flattenPagination is true. flattenPaginationMax has been set
+   * - Initial fetch of entities brought back a total above the allowed flattenPaginationMax
+   * - Pagination notionally now changes from local (has all entities & filtering locally) to non-local (has a single page &
+   * filtering remotely)
+   */
+  isMaxedMode: boolean;
+  /**
+   * Disregard flattenPaginationMax and never reach isMaxedMode true
+   */
+  ignoreMaxed?: boolean;
+}
+
+
 export class PaginationEntityState {
   /**
    * For multi action lists, this is used to force a particular entity type.
@@ -44,11 +60,7 @@ export class PaginationEntityState {
    * The pagination key from where we share our values.
    */
   seed?: string;
-  /**
-   * Is the pagination state in maxed mode. This means the initial collection contained too many entities too handle, see PaginatedAction
-   * flattenPagination & flattenPaginationMax
-   */
-  maxedMode?: boolean;
+  maxedState: PaginationMaxedState;
 }
 
 export function isPaginatedAction(obj: any): PaginatedAction {
