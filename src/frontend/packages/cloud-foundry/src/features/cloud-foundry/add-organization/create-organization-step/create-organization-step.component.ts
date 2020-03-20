@@ -70,7 +70,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
           action.flattenPagination
         )
       },
-      true
+      action.flattenPagination
     ).entities$.pipe(
       filter(o => !!o),
       map(o => o.map(org => org.entity.name)),
@@ -94,7 +94,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
           action.flattenPagination
         )
       },
-      true
+      action.flattenPagination
     ).entities$.pipe(
       filter(o => !!o),
       tap(quotas => {

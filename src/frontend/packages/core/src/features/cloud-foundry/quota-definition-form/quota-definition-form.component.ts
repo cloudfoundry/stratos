@@ -97,7 +97,7 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
           getQuotaDefinitionsAction.flattenPagination
         )
       },
-      true
+      getQuotaDefinitionsAction.flattenPagination
     ).entities$.pipe(
       filter(o => !!o),
       map(o => o.map(org => org.entity.name)),
