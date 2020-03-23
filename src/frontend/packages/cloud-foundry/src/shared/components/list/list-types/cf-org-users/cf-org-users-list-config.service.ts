@@ -30,8 +30,7 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
       activeRouteCfOrgSpace,
       userPerms,
       (user: CfUser): boolean => cfUserService.hasRolesInOrg(user, activeRouteCfOrgSpace.orgGuid, false),
-      cfOrgService.org$,
-      null
+      cfOrgService.org$
     );
   }
 }

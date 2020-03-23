@@ -15,7 +15,7 @@ import {
 import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
-import { selectUsersIsRemove, selectUsersRolesPicked } from '../../../../../store/src/selectors/users-roles.selector';
+import { selectUsersIsSetByUsername, selectUsersRolesPicked } from '../../../../../store/src/selectors/users-roles.selector';
 import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 
@@ -211,7 +211,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     checked: boolean,
     isSetByUsername: boolean): boolean {
     if (isOrgRole && role === OrgUserRoleNames.USER) {
-      // If this is in remove mode never disable the user checkbox
+      // If this is in username mode never disable the user checkbox
       if (isSetByUsername) {
         return false;
       }
@@ -237,7 +237,8 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.isOrgRole = !this.spaceGuid;
     const users$ = this.store.select(selectUsersRolesPicked);
-    // Org? Org manager. Space? Org manager or space manager
+    // If setting an org role user must be admin or org manager.
+    // If setting a space role user must be admin, org manager or space manager
     const canEditRole$ = this.isOrgRole ?
       this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, this.orgGuid) :
       canUpdateOrgSpaceRoles(
@@ -245,7 +246,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
         this.cfGuid,
         this.orgGuid,
         this.spaceGuid);
-    const selectUsersIsSetByUsername$ = this.store.select(selectUsersIsRemove);
+    const selectUsersIsSetByUsername$ = this.store.select(selectUsersIsSetByUsername);
 
     this.sub = this.cfRolesService.existingRoles$.pipe(
       combineLatest(this.cfRolesService.newRoles$, users$, canEditRole$, selectUsersIsSetByUsername$),

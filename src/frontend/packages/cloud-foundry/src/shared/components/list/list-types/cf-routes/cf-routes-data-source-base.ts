@@ -91,7 +91,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
           };
 
           if (appGuid && route.entity.apps) {
-            const apps = route.entity.apps.filter(app => !app);
+            const apps = route.entity.apps.filter(app => !!app);
             const foundApp = !!apps && (apps.findIndex(a => a.metadata.guid === appGuid) >= 0);
             entity.mappedAppsCount = foundApp ? Number.MAX_SAFE_INTEGER : (route.entity.apps || []).length;
             entity.mappedAppsCountLabel = foundApp ? `Already attached` : entity.mappedAppsCount.toString();

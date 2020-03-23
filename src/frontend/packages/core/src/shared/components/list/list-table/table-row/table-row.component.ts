@@ -35,7 +35,7 @@ export class TableRowComponent extends CdkRow implements OnInit {
         map(state => state.warning)
       );
       this.errorMessage$ = this.rowState.pipe(
-        map(state => state.message),
+        map(state => state.message)
       );
       this.isBlocked$ = this.rowState.pipe(
         map(state => state.blocked || state.deleting)

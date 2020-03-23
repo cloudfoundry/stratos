@@ -96,7 +96,7 @@ export class CfUserService {
 
   getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
     // Attempt to get user from all users first, this better covers the case when a non-admin can't hit /users
-    return this.getUsers(endpointGuid).pipe(
+    return this.getUsers(endpointGuid, false).pipe(
       switchMap(users => {
         // `users` will be null if we can't handle the fetch (connected as non-admin with lots of orgs). For those case fall back on the
         // user entity. Why not just use the user entity? There's a lot of these requests.. in parallel if we're fetching a list of users

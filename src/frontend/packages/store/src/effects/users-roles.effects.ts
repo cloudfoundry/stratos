@@ -62,7 +62,7 @@ export class UsersRolesEffects {
     ofType<UsersRolesExecuteChanges>(UsersRolesActions.ExecuteChanges),
     withLatestFrom(
       this.store.select(selectUsersRoles),
-      this.store.select(selectSessionData()),
+      this.store.select(selectSessionData())
     ),
     mergeMap(([action, usersRoles, sessionData]) => {
       // If the user is adding the org user role then that needs to execute and succeed first, otherwise the other changes will fail

@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import {
   createCfFeatureFlagFetchAction,
@@ -214,8 +214,9 @@ export class CurrentUserPermissionsChecker {
             },
             true
           ).entities$.pipe(
-            publishReplay(1),
-            refCount()
+            // TODO: RC check
+            // publishReplay(1),
+            // refCount()
           );
         };
 

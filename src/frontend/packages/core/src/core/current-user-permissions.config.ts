@@ -116,6 +116,7 @@ export const permissionConfigs: IPermissionConfigs = {
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
   ],
   [CurrentUserPermissions.SPACE_CHANGE_ROLES]: [
+    // TODO: RC check OR/AND
     new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER)
   ],

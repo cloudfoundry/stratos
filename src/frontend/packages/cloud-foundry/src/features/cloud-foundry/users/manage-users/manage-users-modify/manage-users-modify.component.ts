@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import {
   ChangeDetectorRef,
   Component,
@@ -52,8 +53,6 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { getRowMetadata } from '../../../cf.helpers';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
-
-/* tslint:disable:max-line-length */
 
 
 /* tslint:enable:max-line-length */
