@@ -60,7 +60,8 @@ export class DeployApplicationDeployer {
   // Status of file transfers
   fileTransferStatus$ = new BehaviorSubject<FileTransferStatus>(undefined);
 
-  public messages: Observable<string>;
+  //public messages: Observable<string>;
+  public messages = new BehaviorSubject<string>('');
 
   // Are we deploying?
   deploying = false;
@@ -140,7 +141,7 @@ export class DeployApplicationDeployer {
         );
 
         this.inputStream = new Subject<string>();
-        this.messages = websocketConnect(streamUrl)
+        const buffer = websocketConnect(streamUrl)
           .pipe(
             switchMap((get) => get(this.inputStream)),
             catchError(e => {
@@ -158,7 +159,16 @@ export class DeployApplicationDeployer {
             map((log) => log.message),
             share(),
           );
-        this.msgSub = this.messages.subscribe();
+
+        // Buffer messges until each newline character
+        let b = '';
+        this.msgSub = buffer.subscribe(m => {
+          b = b + m;
+          if (b.endsWith('\n')) {
+            this.messages.next(b);
+            b = '';
+          }
+        });
       })
     ).subscribe();
 

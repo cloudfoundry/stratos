@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush/pushapp"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
@@ -71,11 +70,6 @@ const (
 const (
 	stratosProjectKey = "STRATOS_PROJECT"
 )
-
-// DeployAppMessageSender is the interface for sending a message over a web socket
-type DeployAppMessageSender interface {
-	SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string)
-}
 
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
@@ -155,7 +149,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	}
 
 	log.Debugf("Overrides: %v+", msgOverrides)
-	overrides := pushapp.CFPushAppOverrides{}
+	overrides := CFPushAppOverrides{}
 	if err = json.Unmarshal([]byte(msgOverrides.Message), &overrides); err != nil {
 		log.Errorf("Error marshalling json: %v+", err)
 		return err
@@ -192,13 +186,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	pushConfig.DialTimeout = dialTimeout
 
 	// Initialise Push Command
-	cfAppPush.cfPush = pushapp.Constructor(pushConfig)
-
-	// Patch in app repo watcher
-	// Wrap an interceptor around the application repository so we can get the app details when created/updated
-	deps := cfAppPush.cfPush.GetDeps()
-	var repo = deps.RepoLocator.GetApplicationRepository()
-	cfAppPush.cfPush.PatchApplicationRepository(NewRepositoryIntercept(repo, cfAppPush, clientWebSocket))
+	cfAppPush.cfPush = Constructor(pushConfig, cfAppPush.portalProxy)
 
 	err = cfAppPush.cfPush.Init(appDir, appDir+"/manifest.yml", overrides)
 	if err != nil {
@@ -208,7 +196,8 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	}
 
 	sendEvent(clientWebSocket, EVENT_PUSH_STARTED)
-	err = cfAppPush.cfPush.Push()
+
+	err = cfAppPush.cfPush.Run(cfAppPush, clientWebSocket)
 	if err != nil {
 		log.Warnf("Failed to execute due to: %+v", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_PUSH_ERROR)
@@ -463,7 +452,7 @@ func getMarshalledSocketMessage(data string, messageType MessageType) ([]byte, e
 	return marshalledJSON, err
 }
 
-func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID string, orgGUID string, spaceGUID string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (*pushapp.CFPushAppConfig, error) {
+func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID string, orgGUID string, spaceGUID string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (*CFPushAppConfig, error) {
 
 	cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(cnsiGUID)
 	if err != nil {
@@ -486,7 +475,7 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID str
 		return nil, errors.New("Failed to find token record")
 	}
 
-	config := &pushapp.CFPushAppConfig{
+	config := &CFPushAppConfig{
 		AuthorizationEndpoint:  cnsiRecord.AuthorizationEndpoint,
 		CFClient:               cnsiRecord.ClientId,
 		CFClientSecret:         cnsiRecord.ClientSecret,
@@ -574,7 +563,7 @@ func fetchManifest(repoPath string, stratosProject StratosProject, clientWebSock
 	if len(envVarMetaData) > 0 {
 		for i, app := range manifest.Applications {
 			if len(app.EnvironmentVariables) == 0 {
-				app.EnvironmentVariables = make(map[string]interface{})
+				app.EnvironmentVariables = make(map[string]string)
 			}
 			app.EnvironmentVariables[stratosProjectKey] = envVarMetaData
 			manifest.Applications[i] = app
