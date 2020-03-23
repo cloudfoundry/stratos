@@ -60,7 +60,6 @@ export class DeployApplicationDeployer {
   // Status of file transfers
   fileTransferStatus$ = new BehaviorSubject<FileTransferStatus>(undefined);
 
-  //public messages: Observable<string>;
   public messages = new BehaviorSubject<string>('');
 
   // Are we deploying?
