@@ -1,13 +1,13 @@
 :host {
-  position: relative;
   height: 100%;
+  position: relative;
   width: 100%;
 }
 
 .deploy-app {
   display: flex;
   height: 43px;
-  opacity: 0.9;
+  opacity: .9;
   padding: 12px;
   position: absolute;
   width: 100%;
