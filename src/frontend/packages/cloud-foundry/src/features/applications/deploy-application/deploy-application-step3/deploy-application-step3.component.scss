@@ -1,4 +1,5 @@
 :host {
+  position: relative;
   height: 100%;
   width: 100%;
 }
@@ -6,8 +7,11 @@
 .deploy-app {
   display: flex;
   height: 43px;
+  opacity: 0.9;
   padding: 12px;
+  position: absolute;
   width: 100%;
+  z-index: 1;
   &__title {
     flex: 1;
     font-weight: 600;
@@ -17,7 +21,7 @@
   }
   &__log {
     display: flex;
-    height: calc(100% - 43px);
+    height: 100%;
   }
 }
 
