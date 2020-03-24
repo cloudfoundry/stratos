@@ -5,7 +5,6 @@ import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/src/cf-types';
 import {
   CheckProjectExists,
   SetAppSourceDetails,
@@ -15,6 +14,7 @@ import {
 } from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { gitBranchesEntityType, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/src/cf-types';
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { GitBranch, GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
