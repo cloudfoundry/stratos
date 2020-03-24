@@ -34,6 +34,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
   // Validation observable
   valid$: Observable<boolean>;
 
+  showOverlay$: Observable<boolean>;
+
   error$ = new BehaviorSubject<boolean>(false);
   // Observable for when the deploy modal can be closed
   closeable$: Observable<boolean>;
@@ -43,9 +45,12 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private deploySub: Subscription;
   private errorSub: Subscription;
   private validSub: Subscription;
+  private busySub: Subscription;
 
   private appEnvVarCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
   private appCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+
+  public busy = false;
 
   constructor(
     private store: Store<CFAppState>,
@@ -97,10 +102,18 @@ export class DeployApplicationStep3Component implements OnDestroy {
           return validated || status.error;
         })
       );
+
+    this.busySub = this.deployer.status$.subscribe(status => this.busy = status.deploying);
+
+    this.showOverlay$ = this.deployer.status$.pipe(
+      map(status => {
+        return !status.deploying || status.deploying && !this.deployer.streamTitle;
+      })
+    );
   }
 
   private destroyDeployer() {
-    safeUnsubscribe(this.deploySub, this.errorSub, this.validSub);
+    safeUnsubscribe(this.deploySub, this.errorSub, this.validSub, this.busySub);
   }
 
   ngOnDestroy() {
@@ -145,6 +158,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
       // Ask the existing deployer to continue deploying
       this.deployer.deploy();
     }
+    this.busy = true;
   }
 
   onNext: StepOnNextFunction = () => {
