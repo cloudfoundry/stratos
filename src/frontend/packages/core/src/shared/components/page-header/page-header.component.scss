@@ -9,6 +9,20 @@ $bottom-index: $top-index - 1;
   &__toolbar {
     padding: 0 20px;
   }
+  &__left {
+    align-items: center;
+    display: flex;    
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+  &__filler {
+    flex: 1 1 auto;
+  }
+  &__right {
+    align-items: center;
+    display: flex;
+    flex: 0;
+  }
   &__notification-button {
     margin-right: 5px;
   }
@@ -47,9 +61,6 @@ $bottom-index: $top-index - 1;
   &__nav-toggle,
   &__logout {
     cursor: pointer;
-  }
-  &__filler {
-    flex: 1 1 auto;
   }
   &__breadcrumb,
   &__breadcrumb-separator {

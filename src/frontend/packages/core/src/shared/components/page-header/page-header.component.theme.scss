@@ -46,5 +46,11 @@
       background-color: $username-background;
       color: $username-color;
     }
+
+    // Ensure any content in the header with H1 overflows nicely
+    &__left > H1 {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 }
