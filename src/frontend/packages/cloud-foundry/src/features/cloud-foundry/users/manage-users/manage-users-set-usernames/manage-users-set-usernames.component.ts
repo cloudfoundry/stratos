@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { MatRadioChange } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { first, map, publishReplay, refCount, startWith, switchMap, tap } from 'rxjs/operators';
 
+import { PermissionConfig, PermissionTypes } from '../../../../../../../core/src/core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import { CFFeatureFlagTypes } from '../../../../../../../core/src/shared/components/cf-auth/cf-auth.types';
 import {
   StackedInputActionConfig,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
@@ -19,6 +23,7 @@ import {
 import { CFAppState } from '../../../../../cf-app-state';
 import { CfUser } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
+import { waitForCFPermissions } from '../../../cf.helpers';
 
 export class ManageUsersSetUsernamesHelper {
   static createGuid(username: string, cfGuid: string, orgGuid: string): string {
@@ -42,6 +47,9 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   public valid$: Observable<boolean> = this.stepValid.asObservable();
   private usernames: StackedInputActionsUpdate;
   public origin: string;
+  public canAdd$: Observable<boolean>;
+  public canRemove$: Observable<boolean>;
+  public blocked$: Observable<boolean>;
 
   public stackedActionConfig: StackedInputActionConfig = {
     isEmailInput: false,
@@ -57,7 +65,39 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   constructor(
     private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-  ) { }
+    userPerms: CurrentUserPermissionsService,
+  ) {
+    const ffSetPermConfig = new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
+    const ffRemovePermConfig = new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
+    this.canAdd$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
+      switchMap(() => userPerms.can(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid)),
+      tap(canAdd => {
+        if (!canAdd) {
+          this.setIsRemove({ source: null, value: false });
+        }
+      }),
+      first(),
+      publishReplay(1),
+      refCount()
+    );
+    this.canRemove$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
+      switchMap(() => userPerms.can(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid)),
+      tap(canRemove => {
+        if (!canRemove) {
+          this.setIsRemove({ source: null, value: true });
+        }
+      }),
+      first(),
+      publishReplay(1),
+      refCount()
+    );
+
+    this.blocked$ = combineLatest([this.canAdd$, this.canRemove$]).pipe(
+      map(() => false),
+      startWith(true)
+    );
+
+  }
 
   ngOnInit() {
     this.store.dispatch(new UsersRolesSetIsSetByUsername(true));

@@ -2,7 +2,8 @@
   {{ title$ | async}}
 </app-page-header>
 <app-steppers cancel="{{defaultCancelUrl}}" [nextButtonProgress]="false">
-  <app-step *ngIf="setUsernames" title="Usernames" [onNext]="setUsers.onNext" [valid]="setUsers.valid$ | async">
+  <app-step *ngIf="setUsernames" title="Usernames" [onNext]="setUsers.onNext" [valid]="setUsers.valid$ | async"
+    [blocked]="setUsers.blocked$ | async">
     <app-manage-users-set-usernames #setUsers></app-manage-users-set-usernames>
   </app-step>
   <app-step title="Select Roles" [blocked]="modify.blocked$ | async" [onLeave]="modify.onLeave"

@@ -3,11 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
-import {
-  CurrentUserPermissions,
-  PermissionConfig,
-  PermissionTypes,
-} from '../../../../../../../core/src/core/current-user-permissions.config';
+import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import { CFFeatureFlagTypes } from '../../../../../../../core/src/shared/components/cf-auth/cf-auth.types';
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
@@ -16,7 +12,7 @@ import {
   CfOrgUsersListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-org-users/cf-org-users-list-config.service';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
-import { createCfOrgSpaceSteppersUrl, waitForCFPermissions } from '../../../cf.helpers';
+import { createCfOrgSpaceSteppersUrl, someFeatureFlags, waitForCFPermissions } from '../../../cf.helpers';
 
 @Component({
   selector: 'app-cloud-foundry-organization-users',
@@ -39,10 +35,13 @@ export class CloudFoundryOrganizationUsersComponent {
     userPerms: CurrentUserPermissionsService,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    const ffPermConfig = new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
+    const requiredFeatureFlags = [
+      CFFeatureFlagTypes.set_roles_by_username,
+      CFFeatureFlagTypes.unset_roles_by_username
+    ];
     this.addRolesByUsernameLink$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => combineLatest([
-        userPerms.can(ffPermConfig, activeRouteCfOrgSpace.cfGuid),
+        someFeatureFlags(requiredFeatureFlags, activeRouteCfOrgSpace.cfGuid, store, userPerms),
         userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.orgGuid)
       ])),
       first(),

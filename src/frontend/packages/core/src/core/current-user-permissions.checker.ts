@@ -162,10 +162,7 @@ export class CurrentUserPermissionsChecker {
     orgOrSpaceGuid?: string,
     spaceGuid?: string
   ): Observable<boolean>[] {
-    return configs.map(config => {
-      const { type } = config;
-      return this.getCfCheck(config, endpointGuid, orgOrSpaceGuid, spaceGuid);
-    });
+    return configs.map(config => this.getCfCheck(config, endpointGuid, orgOrSpaceGuid, spaceGuid));
   }
 
   public getCfCheck(config: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string): Observable<boolean> {
@@ -213,11 +210,7 @@ export class CurrentUserPermissionsChecker {
               )
             },
             true
-          ).entities$.pipe(
-            // TODO: RC check
-            // publishReplay(1),
-            // refCount()
-          );
+          ).entities$;
         };
 
         return combineLatest(guids.map(createFFObs));
