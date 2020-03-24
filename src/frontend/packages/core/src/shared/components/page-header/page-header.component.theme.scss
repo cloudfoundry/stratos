@@ -48,9 +48,11 @@
     }
 
     // Ensure any content in the header with H1 overflows nicely
-    &__left > H1 {
-      overflow: hidden;
-      text-overflow: ellipsis;
+    &__left {
+      h1 {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
   }
 }
