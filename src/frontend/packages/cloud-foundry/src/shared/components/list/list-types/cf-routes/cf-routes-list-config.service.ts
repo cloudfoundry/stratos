@@ -55,7 +55,7 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
 
     this.setupList(store, cfService, cfOrgSpaceService);
 
-    this.text.maxedResults.firstLine = 'There are a lot of routes';
+    this.text.maxedResults.firstLine = 'There are a lot of routes to fetch';
     this.text.maxedResults.filterLine = 'Please use the Organization filter';
   }
 

@@ -12,7 +12,7 @@ export class MaxListMessageComponent {
 
   private pConfig: ITableTextMaxed = {
     icon: 'apps',
-    firstLine: 'There are a lot of results'
+    firstLine: 'There are a lot of entities to fetch'
   };
 
   @Input()
@@ -22,8 +22,9 @@ export class MaxListMessageComponent {
     }
     this.pConfig = {
       icon: config.icon || this.pConfig.icon,
+      iconFont: config.iconFont || this.pConfig.iconFont,
       firstLine: config.firstLine || this.pConfig.firstLine,
-      filterLine: config.filterLine
+      filterLine: config.filterLine,
     };
     this.otherLines = [];
     if (this.config.filterLine) {

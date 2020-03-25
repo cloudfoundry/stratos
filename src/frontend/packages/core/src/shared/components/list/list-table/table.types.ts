@@ -47,6 +47,7 @@ export interface ITableColumn<T> {
 
 export interface ITableTextMaxed {
   icon: string;
+  iconFont?: string;
   firstLine: string;
   filterLine?: string;
 }

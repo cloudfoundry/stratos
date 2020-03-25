@@ -142,7 +142,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     noEntries: 'There are no applications',
     maxedResults: {
       icon: 'apps',
-      firstLine: 'There are a lot of applications',
+      firstLine: 'There are a lot of applications to fetch',
       filterLine: 'Please use the Cloud Foundry, Organization or Space filters'
     }
   };

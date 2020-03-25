@@ -95,7 +95,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     noEntries: 'There are no users',
     maxedResults: {
       icon: 'people',
-      firstLine: 'There are a lot of users',
+      firstLine: 'There are a lot of users to fetch',
       filterLine: 'Please navigate to an Organization or Space users list'
     }
   };
