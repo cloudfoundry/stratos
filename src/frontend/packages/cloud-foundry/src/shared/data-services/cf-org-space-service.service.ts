@@ -215,7 +215,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         cfEntityFactory(this.paginationAction.entityType),
         this.paginationAction.flattenPagination
       )
-    }, true);
+    }, this.paginationAction.flattenPagination);
   }
 
   private createCf() {

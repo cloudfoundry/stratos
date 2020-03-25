@@ -50,4 +50,18 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
     // need to make font size bigger so that it is scaled back down to reasonable size by the exiting css transform
     font-size: 16px;
   }
+
+  // Drop down options
+  .mat-option {
+    font-size: $desktop-font-size;
+    height: $desktop-menu-item-height;
+    line-height: $desktop-menu-item-height;
+  }
+
+  // Stepper control
+  .steppers__headers {
+    flex: 0 0 56px;
+    font-size: $desktop-font-size;
+    height: 56px;
+  }
 }

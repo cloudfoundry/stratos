@@ -549,6 +549,7 @@ describe('Autoscaler -', () => {
     it('Cancel detach action', () => {
       appAutoscaler.bannerAutoscalerTab.clickDeletePolicy();
       const confirm = new ConfirmDialogComponent();
+      confirm.waitUntilShown();
       confirm.getMessage().then(message => {
         expect(message).toBeTruthy();
         expect(message).toBe('Are you sure you want to delete the policy?');
@@ -563,6 +564,7 @@ describe('Autoscaler -', () => {
     it('Confirm detach action', () => {
       appAutoscaler.bannerAutoscalerTab.clickDeletePolicy();
       const confirm = new ConfirmDialogComponent();
+      confirm.waitUntilShown();
       confirm.getMessage().then(message => {
         expect(message).toBeTruthy();
         expect(message).toBe('Are you sure you want to delete the policy?');

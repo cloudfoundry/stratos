@@ -92,7 +92,7 @@ export const getServiceInstancesInCf = (cfGuid: string, store: Store<CFAppState>
     store,
     action,
     paginationMonitor: paginationMonitorFactory.create(paginationKey, action, action.flattenPagination)
-  }, true).entities$;
+  }, action.flattenPagination).entities$;
 };
 
 export const fetchServiceInstancesCount = (
@@ -157,7 +157,7 @@ export const getServicePlans = (
             cfEntityFactory(servicePlanEntityType),
             getServicePlansAction.flattenPagination
           )
-        }, true)
+        }, getServicePlansAction.flattenPagination)
           .entities$.pipe(share(), first());
       }
     }));

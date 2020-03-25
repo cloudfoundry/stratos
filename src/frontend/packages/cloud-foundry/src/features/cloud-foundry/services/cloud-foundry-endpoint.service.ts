@@ -193,7 +193,7 @@ export class CloudFoundryEndpointService {
         cfEntityFactory(organizationEntityType),
         this.getAllOrgsAction.flattenPagination
       )
-    }, true).entities$;
+    }, this.getAllOrgsAction.flattenPagination).entities$;
 
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
@@ -214,7 +214,7 @@ export class CloudFoundryEndpointService {
       store: this.store,
       action: this.getAllAppsAction,
       paginationMonitor: appPaginationMonitor
-    });
+    }, this.getAllAppsAction.flattenPagination);
   }
 
   private constructSecondaryObservable() {
@@ -274,7 +274,7 @@ export class CloudFoundryEndpointService {
           action.flattenPagination
         )
       },
-      true
+      action.flattenPagination
     ).entities$.pipe(first()).subscribe();
   }
 

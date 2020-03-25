@@ -41,7 +41,7 @@ export class ServicesWallService {
           getServicesAction.flattenPagination
         )
       },
-      true
+      getServicesAction.flattenPagination
     ).entities$;
   }
 
@@ -72,7 +72,7 @@ export class ServicesWallService {
           getAllServicesForSpaceAction.flattenPagination
         )
       },
-      true
+      getAllServicesForSpaceAction.flattenPagination
     ).entities$;
   }
 }

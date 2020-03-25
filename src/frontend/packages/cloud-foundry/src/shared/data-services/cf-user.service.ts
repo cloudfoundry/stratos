@@ -328,7 +328,7 @@ export class CfUserService {
                   cfEntityFactory(cfUserEntityType),
                   allUsersAction.flattenPagination
                 )
-              }))
+              }, allUsersAction.flattenPagination))
             );
 
           } else {
