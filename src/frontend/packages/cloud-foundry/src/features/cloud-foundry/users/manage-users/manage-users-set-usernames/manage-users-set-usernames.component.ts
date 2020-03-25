@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatRadioChange } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { first, map, publishReplay, refCount, startWith, switchMap, tap } from 'rxjs/operators';
+import { first, map, publishReplay, refCount, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 import { PermissionConfig, PermissionTypes } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
@@ -93,8 +93,15 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     );
 
     this.blocked$ = combineLatest([this.canAdd$, this.canRemove$]).pipe(
-      map(() => false),
-      startWith(true)
+      map(([canAdd, canRemove]) => {
+        if (canAdd && canRemove) {
+          // Set initial value to be add
+          this.setIsRemove({ source: null, value: true });
+        }
+        return false;
+      }),
+      startWith(true),
+      take(2)
     );
 
   }
@@ -118,6 +125,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   }
 
   setIsRemove(event: MatRadioChange) {
+    // Note - event.value is flipped
     this.store.dispatch(new UsersRolesSetIsRemove(!event.value));
   }
 
