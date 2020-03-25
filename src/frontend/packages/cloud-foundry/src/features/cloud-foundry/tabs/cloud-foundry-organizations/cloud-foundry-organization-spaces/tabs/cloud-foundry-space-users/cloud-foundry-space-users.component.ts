@@ -4,7 +4,7 @@ import { CFAppState } from 'frontend/packages/cloud-foundry/src/cf-app-state';
 import { CurrentUserPermissions } from 'frontend/packages/core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/current-user-permissions.service';
 import { combineLatest, Observable } from 'rxjs';
-import { first, map, switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 
 import { CFFeatureFlagTypes } from '../../../../../../../../../core/src/shared/components/cf-auth/cf-auth.types';
 import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
@@ -48,7 +48,6 @@ export class CloudFoundrySpaceUsersComponent {
           activeRouteCfOrgSpace.spaceGuid
         )
       ])),
-      first(),
       map(([canSetRolesByUsername, canChangeOrgRole]) => {
         if (canSetRolesByUsername && canChangeOrgRole) {
           return {
