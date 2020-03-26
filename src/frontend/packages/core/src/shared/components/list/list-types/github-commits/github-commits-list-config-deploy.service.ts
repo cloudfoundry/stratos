@@ -25,7 +25,7 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
       headerCell: () => '',
       cellComponent: TableCellRadioComponent,
       class: 'table-column-select',
-      cellFlex: '1'
+      cellFlex: '0 0 60px'
     });
 
     this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
@@ -44,6 +44,15 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
       this.dataSource = new GithubCommitsDataSource(this.store,
         this, scm, fetchDetails.projectName, fetchDetails.sha, fetchDetails.commitSha);
       this.initialised.next(true);
+
+      // Auto-select first commit - wait for page to load, select first item if present
+      this.dataSource.page$.pipe(
+        first()
+      ).subscribe(rs => {
+        if (rs && rs.length > 0) {
+          this.dataSource.selectedRowToggle(rs[0], false);
+        }
+      });
     });
   }
 }

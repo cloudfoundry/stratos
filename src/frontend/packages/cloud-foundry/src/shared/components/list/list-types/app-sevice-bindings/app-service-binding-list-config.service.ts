@@ -7,9 +7,15 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import { IServiceBinding } from '../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { DataFunctionDefinition } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
+import {
+  DataFunctionDefinition,
+} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IGlobalListAction, IListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import {
+  IGlobalListAction,
+  IListAction,
+  ListViewTypes,
+} from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
@@ -107,7 +113,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         cellDefinition: {
           getValue: (row) => {
             const si = isServiceInstance(row.entity.service_instance.entity);
-            return si ? si.service.entity.label : 'User Service';
+            return si ? si.service_plan.entity.service.entity.label : 'User Service';
           },
         },
         cellFlex: '1'

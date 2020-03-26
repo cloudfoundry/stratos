@@ -95,7 +95,7 @@ export class ServicesService {
           getServicePlanVisibilitiesAction.flattenPagination
         )
       },
-      true
+      getServicePlanVisibilitiesAction.flattenPagination
     ).entities$;
   }
   private getServiceInstances = () => {
@@ -117,7 +117,7 @@ export class ServicesService {
           getServiceBrokersAction.flattenPagination
         )
       },
-      true
+      getServiceBrokersAction.flattenPagination
     ).entities$;
   }
 

@@ -110,6 +110,10 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		// Invalid SSL mode
 		return dc, fmt.Errorf("Invalid SSL mode: %s", dc.SSLMode)
 	} else if dc.DatabaseProvider == MYSQL {
+		// Map default of disabled to false for MySQL
+		if dc.SSLMode == "disable" {
+			dc.SSLMode = "false"
+		}
 		if dc.SSLMode == "true" || dc.SSLMode == "false" || dc.SSLMode == "skip-verify" || dc.SSLMode == "preferred" {
 			return dc, nil
 		}

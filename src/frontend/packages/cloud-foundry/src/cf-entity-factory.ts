@@ -128,10 +128,9 @@ const ServiceBindingsSchema = new CFServiceBindingEntitySchema({
           app: new CFApplicationEntitySchema(),
         }, { idAttribute: getAPIResourceGuid })],
         service: new CFEntitySchema(serviceEntityType, {}, { idAttribute: getAPIResourceGuid }),
-        service_plan: new CFEntitySchema(servicePlanEntityType, {}, { idAttribute: getAPIResourceGuid }),
+        service_plan: ServicePlanSchema,
       },
-    }),
-    service: ServiceNoPlansSchema
+    })
   }
 });
 entityCache[serviceBindingEntityType] = ServiceBindingsSchema;
@@ -154,7 +153,6 @@ const ServiceInstancesSchema = new CFServiceInstanceEntitySchema({
   entity: {
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema],
-    service: ServiceSchema
   }
 });
 entityCache[serviceInstancesEntityType] = ServiceInstancesSchema;
@@ -253,7 +251,6 @@ const ServiceInstancesWithSpaceSchema = new CFServiceInstanceEntitySchema({
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema],
     space: SpaceSchema.withEmptyDefinition(),
-    service: ServiceSchema
   }
 });
 entityCache[serviceInstancesWithSpaceEntityType] = ServiceInstancesWithSpaceSchema;
@@ -328,24 +325,24 @@ const CFUserSchema = new CFUserEntitySchema({
     audited_spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.AUDITED_SPACES)],
   }
 }, {
-  idAttribute: getAPIResourceGuid,
-  processStrategy: (user: APIResource<CfUser>) => {
-    if (user.entity.username) {
-      return user;
-    }
-    const entity = {
-      ...user.entity,
-      username: user.metadata.guid
-    };
-
-    return user.metadata ? {
-      entity,
-      metadata: user.metadata
-    } : {
-        entity
+    idAttribute: getAPIResourceGuid,
+    processStrategy: (user: APIResource<CfUser>) => {
+      if (user.entity.username) {
+        return user;
+      }
+      const entity = {
+        ...user.entity,
+        username: user.metadata.guid
       };
-  }
-});
+
+      return user.metadata ? {
+        entity,
+        metadata: user.metadata
+      } : {
+          entity
+        };
+    }
+  });
 entityCache[cfUserEntityType] = CFUserSchema;
 
 

@@ -266,7 +266,7 @@ export class DeployApplicationStep2Component
               paginationMonitor: this.paginationMonitorFactory.create(
                 fetchBranchesAction.paginationKey,
                 new CFEntityConfig(gitBranchesEntityType),
-                false
+                true
               )
             },
             true

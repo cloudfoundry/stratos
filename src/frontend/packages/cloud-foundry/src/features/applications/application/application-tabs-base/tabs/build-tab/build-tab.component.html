@@ -59,6 +59,14 @@
         <app-card-app-uptime></app-card-app-uptime>
       </app-tile>
     </app-tile-group>
+    <app-tile-group *ngIf="appSvc.app.entity.staging_failed_description as errorMsg">
+      <app-tile>
+        <mat-card class="summary__staging-error">
+          <mat-icon class="text-warning">warning</mat-icon>
+          <div>{{ errorMsg }}</div>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
     <app-tile-group>
       <app-tile>
         <mat-card>
