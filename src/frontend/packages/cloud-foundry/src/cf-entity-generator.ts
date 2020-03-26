@@ -1,4 +1,7 @@
+import { Store } from '@ngrx/store';
 import * as moment from 'moment';
+import { combineLatest, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import {
   IService,
@@ -26,6 +29,7 @@ import {
 } from '../../core/src/core/cf-api.types';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
+import { AppState } from '../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -41,8 +45,10 @@ import {
 } from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
+import { selectSessionData } from '../../store/src/reducers/auth.reducer';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
+import { PaginatedAction } from '../../store/src/types/pagination.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
 import { cfEntityFactory } from './cf-entity-factory';
 import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
@@ -199,7 +205,42 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
         Object.values(responseWithPages).reduce((all, response: CFResponse | CFResponse[]) => {
           return all + (response[0] || response).total_results;
         }, 0),
-      getPaginationParameters: (page: number) => ({ page: page + '' })
+      getPaginationParameters: (page: number) => ({ page: page + '' }),
+      canIgnoreMaxedState: (store: Store<AppState>) => {
+        // Does entity type support? Yes
+        // Does BE support ignore?
+        return store.select(selectSessionData()).pipe(
+          map(sessionData => !!sessionData.config.listAllowLoadMaxed)
+        );
+      },
+      getMaxedStateCount: (store: Store<AppState>, action: PaginatedAction) => {
+        if (!action.flattenPaginationMax) {
+          // TODO: RC REVIEW - All CF lists or just one's we currently supported
+          // If all - some lists might not ever return content (fetch routes when checking one is created, create space & name etc)
+          return of(null);
+        }
+        // Maxed Count from Backend?
+        const beValue$ = store.select(selectSessionData()).pipe(
+          map(sessionData => sessionData.config.listMaxSize)
+        );
+
+        // Maxed count as per user config
+        const userOverride$ = store.select(selectSessionData()).pipe(
+          // TODO: RC REVIEW - split out or do in this one? CI?
+          map(sessionData => !!sessionData.config.listAllowLoadMaxed ? null : null)
+        );
+
+        // Maxed count from entity type
+        const entityTypeDefault = 600;
+
+        // Choose in order of priority
+        return combineLatest([
+          beValue$,
+          userOverride$
+        ]).pipe(
+          map(([beValue, userOverride]) => beValue || userOverride || entityTypeDefault)
+        );
+      },
     }
   };
   return [
@@ -259,7 +300,9 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
       getEntitiesFromResponse: (response) => response,
       getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).length,
       getTotalEntities: (responses: JetstreamResponse<CFResponse>) => 1,
-      getPaginationParameters: (page: number) => ({ page: '1' })
+      getPaginationParameters: (page: number) => ({ page: '1' }),
+      canIgnoreMaxedState: () => of(false),
+      getMaxedStateCount: () => of(null),
     },
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       return {
@@ -409,7 +452,9 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
       getTotalEntities: (responses: JetstreamResponse) => Object.values(responses).reduce((count, response) => {
         return count + Object.keys(response).length;
       }, 0),
-      getPaginationParameters: (page: number) => ({ page: page + '' })
+      getPaginationParameters: (page: number) => ({ page: page + '' }),
+      canIgnoreMaxedState: () => of(false),
+      getMaxedStateCount: () => of(null),
     },
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       if (data) {
@@ -837,7 +882,9 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
       },
       getTotalPages: (responses: JetstreamResponse) => 1,
       getTotalEntities: (responses: JetstreamResponse) => responses.length,
-      getPaginationParameters: (page: number) => ({ page: page + '' })
+      getPaginationParameters: (page: number) => ({ page: page + '' }),
+      canIgnoreMaxedState: () => of(false),
+      getMaxedStateCount: () => of(null),
     }
   };
   return new StratosCatalogEntity<IBasicCFMetaData, IFeatureFlag>(

@@ -197,7 +197,7 @@
       class="list-component__no-entries">
       <ng-container *ngIf="dataSource.maxedResults$ | async">
         <app-max-list-message (showAllAfterMax)="showAllAfterMax()" [count]="paginatorSettings.length"
-          [config]="config.text?.maxedResults">
+          [config]="config.text?.maxedResults" [catalogueEntity]="config.getDataSource().masterAction">
         </app-max-list-message>
       </ng-container>
       <ng-container *ngIf="(noRowsNotFiltering$ | async)">

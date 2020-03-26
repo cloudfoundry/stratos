@@ -200,11 +200,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     this.filter$ = this.createFilterObservable();
 
-    this.maxedResults$ = !!this.masterAction.flattenPaginationMax ?
-      this.pagination$.pipe(
-        map(LocalPaginationHelpers.isPaginationMaxed),
-        distinctUntilChanged(),
-      ) : observableOf(false);
+    this.maxedResults$ = this.pagination$.pipe(
+      map(LocalPaginationHelpers.isPaginationMaxed),
+      distinctUntilChanged(),
+    );
   }
 
   init(config: IListDataSourceConfig<A, T>) {
@@ -402,7 +401,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   trackBy = (index: number, item: T) => this.getRowUniqueId(item) || item;
 
-  attachTransformEntity<Y = T>(entities$, entityLettable): Observable<Y[]> {
+  private attachTransformEntity<Y = T>(entities$, entityLettable): Observable<Y[]> {
     if (entityLettable) {
       return entities$.pipe(
         this.transformEntity

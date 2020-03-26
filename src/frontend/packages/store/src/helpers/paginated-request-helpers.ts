@@ -121,7 +121,7 @@ export function flattenPagination<T, C>(
   return firstRequest.pipe(
     first(),
     mergeMap(firstResData => {
-      // TODO: RC Test what happens when maxed
+      // TODO: RC TEST what happens when maxed
       const allResults = flattener.getTotalResults(firstResData);
       if (maxCount) {
         actionDispatcher(

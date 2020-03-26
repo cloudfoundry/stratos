@@ -28,6 +28,7 @@ import {
   getPaginationObservables,
   PaginationObservables,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
@@ -356,17 +357,23 @@ export class CfUserService {
    */
   public createPaginationAction(isAdmin: boolean, cfGuid: string, orgGuid?: string, spaceGuid?: string): Observable<PaginatedAction> {
     if (isAdmin) {
+      // TODO: RC TEST
+      const allCfUsersAction = this.createCfGetUsersAction(cfGuid);
 
-      const action = this.createCfGetUsersAction(cfGuid);
       if (!orgGuid) {
-        return observableOf(action);
+        return observableOf(allCfUsersAction);
       }
       return this.fetchTotalUsers(cfGuid).pipe(
         first(),
-        map(count => {
-          if (count < action.flattenPaginationMax) {
+        switchMap(() => {
+          const cfUserEntityConfig = entityCatalog.getEntity(allCfUsersAction);
+          return this.store.select(selectPaginationState(cfUserEntityConfig.entityKey, allCfUsersAction.paginationKey));
+        }),
+        map(paginationState => {
+          const isPagMaxed = LocalPaginationHelpers.isPaginationMaxed(paginationState);
+          if (isPagMaxed) {
             // We can safely show all users regardless of what cf/org/level list we're showing
-            return action;
+            return allCfUsersAction;
           }
           // We can't fetch all users, fall back on org or space lists
           return !spaceGuid ?

@@ -76,9 +76,7 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   const prePaginatedRequestFunction = getPrePaginatedRequestFunction(catalogEntity);
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const entity = catalogEntity as StratosCatalogEntity;
-  const flattenerConfig = entity.definition.paginationConfig ?
-    entity.definition.paginationConfig :
-    entity.definition.endpoint ? entity.definition.endpoint.paginationConfig : null;
+  const flattenerConfig = entity.getPaginationConfig();
 
   // Get pagination state from the store
   const paginationState = selectPaginationState(
@@ -115,12 +113,15 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
     switchMap(requestObject => {
       const pageIterator = flattenerConfig ?
         new PaginationPageIterator(
+          store,
           httpClient,
           requestObject,
           completePaginationAction,
           actionDispatcher,
           flattenerConfig,
-          paginationState ? paginationState.maxedState.ignoreMaxed : false) :
+          // paginationState ? paginationState.maxedState.ignoreMaxed : false,
+          paginationState ? paginationState.maxedState : null
+        ) :
         null;
       return getRequestObservable(
         httpClient,

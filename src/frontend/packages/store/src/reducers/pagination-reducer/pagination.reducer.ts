@@ -143,6 +143,28 @@ function paginate(action, state = {}, updatePagination) {
     return paginationIgnoreMaxed(state, action as IgnorePaginationMaxedState);
   }
 
+  // TODO: RC REMOVE
+  // if (action.type === SET_MAXED) {
+  //   const maxedAction = action as SetPaginationMax;
+  //   const entityKey = entityCatalog.getEntityKey(maxedAction);
+  //   const paginationEntityState = state[entityKey][maxedAction.paginationKey] || getDefaultPaginationEntityState();
+  //   const entityState: PaginationEntityTypeState = {
+  //     ...state[entityKey],
+  //     [maxedAction.paginationKey]: {
+  //       ...paginationEntityState,
+  //       maxedState: {
+  //         // Retain the original maxed state. This will be true, but is ignored anyway
+  //         ...paginationEntityState.maxedState,
+  //         max: maxedAction.max,
+  //       }
+  //     }
+  //   };
+  //   return {
+  //     ...state,
+  //     [entityKey]: entityState
+  //   };
+  // }
+
   return enterPaginationReducer(state, action, updatePagination);
 }
 
