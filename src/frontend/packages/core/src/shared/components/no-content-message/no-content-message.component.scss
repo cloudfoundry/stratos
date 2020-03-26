@@ -40,4 +40,23 @@
       margin-top: 26px;
     }
   }
+  &__menu {
+    margin-top: 0;
+    // When in a menu, we don't want the menu to be too wide
+    max-width: 200px;
+    padding: 10px;
+
+    > mat-icon {
+      font-size: 72px;
+      height: 72px;
+      width: 72px;
+    }
+
+    .first-line {
+      font-size: 22px;
+    }
+    .second-line {
+      font-size: 16px;
+    }
+  }
 }

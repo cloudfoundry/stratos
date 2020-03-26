@@ -53,7 +53,12 @@ $bottom-index: $top-index - 1;
     justify-content: space-between;
   }
   &__history {
-    padding: 0 20px 20px;
+    min-width: 200px;
+  }
+  &__history-title {
+    font-size: 14px;
+    margin: 0 0 10px 0;
+    padding: 2px 10px 10px 10px;
   }
   &__nav-toggle-wrapper {
     margin-right: 20px;
