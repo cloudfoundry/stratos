@@ -166,6 +166,8 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	// Source fetched - read manifest
 	manifest, manifestFile, err := fetchManifest(appDir, stratosProject, clientWebSocket)
 	if err != nil {
+		log.Warnf("Failed to find manifest file: %s", err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
 
@@ -184,6 +186,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	pushConfig, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGUID, spaceGUID, spaceName, orgName, clientWebSocket)
 	if err != nil {
 		log.Warnf("Failed to initialise config due to error %+v", err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
 
