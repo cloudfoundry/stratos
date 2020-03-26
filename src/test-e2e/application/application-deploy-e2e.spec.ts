@@ -211,12 +211,15 @@ describe('Application Deploy -', () => {
       // Create
       expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\ncreate');
       expect(appEvents.list.table.getCell(0, 0).getText()).toBe(`person\n${currentUser}`);
-      // Map Route
-      expect(appEvents.list.table.getCell(1, 1).getText()).toBe('audit\napp\nmap-route');
+      // Lifecycle - buildpack(s)
+      expect(appEvents.list.table.getCell(1, 1).getText()).toBe('audit\napp\nupdate');
       expect(appEvents.list.table.getCell(1, 0).getText()).toBe(`person\n${currentUser}`);
-      // Update (route)
-      expect(appEvents.list.table.getCell(2, 1).getText()).toBe('audit\napp\nupdate');
+      // Map Route
+      expect(appEvents.list.table.getCell(2, 1).getText()).toBe('audit\napp\nmap-route');
       expect(appEvents.list.table.getCell(2, 0).getText()).toBe(`person\n${currentUser}`);
+      // Update (route)
+      expect(appEvents.list.table.getCell(3, 1).getText()).toBe('audit\napp\nupload-bits');
+      expect(appEvents.list.table.getCell(3, 0).getText()).toBe(`person\n${currentUser}`);
     });
 
   });
