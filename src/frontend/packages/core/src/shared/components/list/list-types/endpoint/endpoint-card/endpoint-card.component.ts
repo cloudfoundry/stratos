@@ -24,11 +24,12 @@ import {
 } from '../../../../../../features/endpoints/endpoint-helpers';
 import { StratosStatus } from '../../../../../shared.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
-import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardMenuItem, createMetaCardMenuItemSeparator } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
+import { RouterNav } from './../../../../../../../../store/src/actions/router.actions';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -98,6 +99,15 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         action: () => endpointAction.action(this.pRow),
         can: endpointAction.createVisible(this.rowObs)
       }));
+
+      // Add edit
+      this.cardMenu.push(createMetaCardMenuItemSeparator());
+      this.cardMenu.push({
+        label: 'Edit endpoint',
+        action: () => this.editEndpoint(),
+        can: of(true)
+      });
+      this.cardMenu.push(createMetaCardMenuItemSeparator());
 
       // Add a copy address to clipboard
       this.cardMenu.push({
@@ -176,6 +186,11 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         startWith(null)
       );
     }
+  }
+
+  editEndpoint() {
+    const routerLink = `/endpoints/edit/${this.row.guid}`;
+    this.store.dispatch(new RouterNav({ path: routerLink }));
   }
 
 }
