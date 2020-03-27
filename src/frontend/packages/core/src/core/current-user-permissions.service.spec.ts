@@ -519,6 +519,9 @@ describe('CurrentUserPermissionsService', () => {
             },
             totalResults: 2
           },
+          maxedState: {
+            isMaxedMode: false
+          }
         }
       },
       cfFeatureFlag: {
@@ -545,6 +548,9 @@ describe('CurrentUserPermissionsService', () => {
               items: {}
             },
             totalResults: 13
+          },
+          maxedState: {
+            isMaxedMode: false
           }
         },
         'endpoint-c80420ca-204b-4879-bf69-b6b7a202ad87': {
@@ -570,6 +576,9 @@ describe('CurrentUserPermissionsService', () => {
               items: {}
             },
             totalResults: 13
+          },
+          maxedState: {
+            isMaxedMode: false
           }
         }
       },
