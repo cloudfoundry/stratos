@@ -216,6 +216,7 @@ describe('Application Deploy -', () => {
         expect(item.Actor).toBe(`person\n${currentUser}`);
       }
 
+      // Don't worry about order of events
       appEvents.list.table.getTableData().then(data => {
         // Create
         checkEventTableItem(data, 'audit\napp\ncreate');
