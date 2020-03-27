@@ -343,7 +343,7 @@ export function fetchTotalResults(
       cfEntityFactory(newAction.entityType),
       newAction.flattenPagination
     )
-  });
+  }, newAction.flattenPagination);
 
   return combineLatest(
     pagObs.entities$, // Ensure the request is made by sub'ing to the entities observable

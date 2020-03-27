@@ -51,7 +51,7 @@ export class CfCellHelper {
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
         new CFEntityConfig(action.entityType),
-        false
+        true
       )
     }).entities$.pipe(
       filter(entities => !!entities && !!entities.length),

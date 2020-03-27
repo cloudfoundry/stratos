@@ -142,7 +142,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
               action.flattenPagination
             )
           },
-          true
+          action.flattenPagination
         ).entities$;
       }),
       // cf push overrides do not support tcp routes (no way to specify port)
@@ -165,7 +165,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
               action.flattenPagination
             )
           },
-          true
+          action.flattenPagination
         ).entities$;
       }),
       share()

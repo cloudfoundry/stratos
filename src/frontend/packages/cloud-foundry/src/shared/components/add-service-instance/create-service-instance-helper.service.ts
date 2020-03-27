@@ -81,7 +81,7 @@ export class CreateServiceInstanceHelper {
           getServicePlanVisibilitiesAction.flattenPagination
         )
       },
-      true
+      getServicePlanVisibilitiesAction.flattenPagination
     ).entities$;
 
   }
@@ -208,7 +208,7 @@ export class CreateServiceInstanceHelper {
         cfEntityFactory(serviceInstancesEntityType),
         action.flattenPagination
       )
-    }, true)
+    }, action.flattenPagination)
       .entities$.pipe(
         publishReplay(1),
         refCount()
