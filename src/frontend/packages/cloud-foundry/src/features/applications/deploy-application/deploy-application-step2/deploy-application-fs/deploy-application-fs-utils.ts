@@ -4,7 +4,8 @@ import { DeployApplicationFSScanner, FileScannerInfo } from './deploy-applicatio
 
 export const CF_IGNORE_FILE = '.cfignore';
 export const CF_DEFAULT_IGNORES = '.cfignore\n_darcs\n.DS_Store\n.git\n.gitignore\n.hg\n.svn\n';
-export const CF_MANIFEST_FILE = 'manifest.yml';
+export const CF_MANIFEST_FILE_YML = 'manifest.yml';
+export const CF_MANIFEST_FILE_YAML = 'manifest.yaml';
 
 export class DeployApplicationFsUtils {
 
@@ -37,7 +38,8 @@ export class DeployApplicationFsUtils {
           cfIgnoreFile = item;
         }
 
-        if (filePath.length === 2 && filePath[1] === CF_MANIFEST_FILE) {
+        // Support either manifest.yml or manifest.yaml
+        if (filePath.length === 2 && (filePath[1] === CF_MANIFEST_FILE_YML || filePath[1] === CF_MANIFEST_FILE_YAML)) {
           manifestFile = item;
         }
       }
