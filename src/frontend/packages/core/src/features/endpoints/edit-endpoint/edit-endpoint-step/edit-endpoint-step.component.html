@@ -28,14 +28,12 @@
     <div *ngIf="endpointTypeSupportsSSO" class="edit-endpoint__sso">
       <mat-checkbox matInput formControlName="allowSSO" name="ssoAllowed">Allow SSO login to this endpoint
       </mat-checkbox>
-      <!--
-      <div *ngIf="!!ssoAllowedField.value">
+      <div *ngIf="editEndpoint.value.allowSSO">
         <p>
           Please ensure that you have added the Stratos SSO Callback URL shown below to the client's 'redirect_uri'.
         </p>
         <pre>{{clientRedirectURI}}</pre>
       </div>
-    -->
     </div>
   </form>
 </div>

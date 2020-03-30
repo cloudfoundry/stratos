@@ -13,7 +13,7 @@ import { filter, map, tap, first } from 'rxjs/operators';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { safeUnsubscribe, getIdFromRoute } from './../../../../core/utils.service';
-import { getFullEndpointApiUrl } from '../../endpoint-helpers';
+import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
 import { CFAppState } from 'frontend/packages/cloud-foundry/src/cf-app-state';
 
@@ -55,6 +55,8 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
       clientSecret: new FormControl(''),
       allowSSO: new FormControl(false),
     });
+
+    this.clientRedirectURI = getSSOClientRedirectURI();
 
     this.validate = this.editEndpoint.statusChanges.pipe(map(() => this.editEndpoint.valid));
 
