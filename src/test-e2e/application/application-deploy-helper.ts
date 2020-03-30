@@ -182,7 +182,8 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
       const commits = deployApp.getCommitList();
       expect(commits.getHeaderText()).toBe('Select a commit');
 
-      expect(deployApp.stepper.canNext()).toBeFalsy();
+      // The first commit should be auto-selected
+      expect(deployApp.stepper.canNext()).toBeTruthy();
 
       commits.getTableData().then(data => {
         expect(data.length).toBeGreaterThan(0);

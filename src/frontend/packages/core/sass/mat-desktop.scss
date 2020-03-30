@@ -59,4 +59,18 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
   .mat-snack-bar-container {
     max-width: 40vw;
   }
+  
+  // Drop down options
+  .mat-option {
+    font-size: $desktop-font-size;
+    height: $desktop-menu-item-height;
+    line-height: $desktop-menu-item-height;
+  }
+
+  // Stepper control
+  .steppers__headers {
+    flex: 0 0 56px;
+    font-size: $desktop-font-size;
+    height: 56px;
+  }
 }

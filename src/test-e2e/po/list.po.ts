@@ -497,5 +497,17 @@ export class ListComponent extends Component {
     });
   }
 
+  /**
+   *
+   * @param count Wait until the list has the specified total number of results
+   */
+  waitForTotalResultsToBe(count: number, timeout = 5000, timeoutMsg = 'Timed out waiting for total results') {
+    const totalResultsIs = async (): Promise<boolean> => {
+      const actual = await this.getTotalResults();
+      return actual === count;
+    };
+
+    browser.wait(totalResultsIs, 10000, timeoutMsg);
+  }
 }
 

@@ -2,6 +2,7 @@
   $size: 15px;
   &__busy-spinner,
   &__close {
+    flex: 0;
     margin-left: 5px;
   }
   &__close {
@@ -9,6 +10,16 @@
     font-size: $size;
     height: $size;
     width: $size;
+  }
+  &__container {
+    align-items: center;
+    display: flex;
+  }
+  &__label {
+    flex: 1;
+    height: 18px; // height = 32px - 2 * 7px padding
+    line-height: 18px;
+    word-break: break-all;
   }
 }
 
