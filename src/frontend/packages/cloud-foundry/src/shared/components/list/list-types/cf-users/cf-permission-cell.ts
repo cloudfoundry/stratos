@@ -21,7 +21,7 @@ export interface ICellPermissionList<T> extends IUserRole<T> {
   name: string;
   guid: string;
   userGuid: string;
-  userName?: string;
+  username?: string;
   cfGuid: string;
   orgGuid: string;
   spaceGuid?: string;
@@ -92,7 +92,7 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
     const confirmation = new ConfirmationDialogConfig(
       'Remove Permission',
       `Are you sure you want to remove permission '${this.permissionString(cellPermission)}'` +
-      ` from user '${cellPermission.userName}'?`,
+      ` from user '${cellPermission.username}'?`,
       'Delete',
       true
     );

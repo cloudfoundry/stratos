@@ -52,7 +52,7 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
     );
 
     this.serviceUrl$ = service$.pipe(
-      map(service => `/marketplace/${service.entity.entity.cfGuid}/${service.entity.entity.guid}/summary`)
+      map(service => `/marketplace/${service.entity.entity.cfGuid}/${service.entity.metadata.guid}/summary`)
     );
 
     this.serviceBrokerName$ = service$.pipe(

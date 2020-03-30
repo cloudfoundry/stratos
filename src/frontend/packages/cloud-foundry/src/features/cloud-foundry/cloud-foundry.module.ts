@@ -143,6 +143,9 @@ import {
   SpaceRolesListWrapperComponent,
 } from './users/manage-users/manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
 import { UsersRolesSelectComponent } from './users/manage-users/manage-users-select/manage-users-select.component';
+import {
+  ManageUsersSetUsernamesComponent,
+} from './users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 
@@ -223,6 +226,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CloudFoundryEventsComponent,
     CloudFoundryOrganizationEventsComponent,
     CloudFoundrySpaceEventsComponent,
+    ManageUsersSetUsernamesComponent,
   ],
   providers: [
     CFEndpointsListConfigService,
