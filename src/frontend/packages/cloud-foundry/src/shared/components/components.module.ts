@@ -175,6 +175,7 @@ import { SelectServiceComponent } from './select-service/select-service.componen
 import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
+import { TableCellFeatureFlagDescriptionComponent } from './list/list-types/cf-feature-flags/table-cell-feature-flag-description/table-cell-feature-flag-description.component';
 
 // tslint:disable:max-line-length
 // tslint:enable:max-line-length
@@ -187,6 +188,7 @@ const cfListTableCells: Type<TableCellCustom<any>>[] = [
   CfOrgPermissionCellComponent,
   CfSpacePermissionCellComponent,
   TableCellFeatureFlagStateComponent,
+  TableCellFeatureFlagDescriptionComponent,
   TableCellConfirmOrgSpaceComponent,
   TableCellSelectOrgComponent,
   TableCellAppStatusComponent,
@@ -283,7 +285,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     EventMetadataComponent,
     ...cfListTableCells,
     ...cfListCards,
-    ServiceInstanceLastOpComponent
+    ServiceInstanceLastOpComponent,
+    TableCellFeatureFlagDescriptionComponent
   ],
   exports: [
     ServiceIconComponent,
