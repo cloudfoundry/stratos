@@ -1,11 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
-import { EditOrganizationStepComponent } from './edit-endpoint-step.component';
+import { EditOrganizationStepComponent } from './../../../../../../cloud-foundry/src/features/cloud-foundry/edit-organization/edit-organization-step/edit-organization-step.component';
+import { ActiveRouteCfOrgSpace } from './../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
+import { generateCfBaseTestModules, generateTestCfEndpointServiceProvider } from '../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('EditOrganizationStepComponent', () => {
   let component: EditOrganizationStepComponent;
