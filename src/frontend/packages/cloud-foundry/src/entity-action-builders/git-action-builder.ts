@@ -5,7 +5,7 @@ import {
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
 } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { FetchBranchesForProject, FetchCommit, FetchCommits } from '../actions/deploy-applications.actions';
+import { FetchBranchesForProject, FetchCommits } from '../actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../actions/github.actions';
 import {
   EnvVarStratosProject,
@@ -34,13 +34,8 @@ export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilder
   getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
 }
 
-
-// export interface GitCommitActionBuilders extends OrchestratedActionBuilders {
-//   get: KnownEntityActionBuilder<GitMeta>;
-//   getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
-// }
 export interface GitCommitActionBuilders extends OrchestratedActionBuilders {
-  get: (guid: string, endpointGuid: string, gitMetadata: GitMeta) => FetchCommit;
+  get: KnownEntityActionBuilder<GitMeta>;
   getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
 }
 

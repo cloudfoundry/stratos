@@ -75,7 +75,7 @@ export class DeployApplicationStep2Component
   sourceTypes: SourceType[];
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
   sourceType$: Observable<SourceType>;
-  INITIAL_SOURCE_TYPE = 0; // GitHub by default
+  INITIAL_SOURCE_TYPE = 0; // Fall back to GitHub, for cases where there's no type in store (refresh) or url (removed & nav)
   validate: Observable<boolean>;
 
   stepperText$: Observable<string>;
