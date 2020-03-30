@@ -222,6 +222,9 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 		c.pushCommand.DockerImage = flag.DockerImage{
 			Path: overrides.DockerImage,
 		}
+	} else {
+		// App path can't be set with Docker Image
+		c.pushCommand.AppPath = flag.PathWithExistenceCheck(appDir)
 	}
 
 	// Docker username
@@ -229,8 +232,7 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 		c.pushCommand.DockerUsername = overrides.DockerUsername
 	}
 
-	// Path and Manifest path
-	c.pushCommand.AppPath = flag.PathWithExistenceCheck(appDir)
+	// Manifest path
 	c.pushCommand.PathToManifest = flag.PathWithExistenceCheck(manifestPath)
 
 	return nil
