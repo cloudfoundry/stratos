@@ -211,10 +211,10 @@ describe('Application Deploy -', () => {
       const currentUser = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
 
       const checkEventTableItem = (data: { [columnHeader: string]: string }[], text) => {
-        const item = data.find(i => i.Type === text);
+        const item = data.find(i => i.type === text);
         expect(item).toBeDefined();
-        expect(item.Actor).toBe(`person\n${currentUser}`);
-      }
+        expect(item.actor).toBe(`person\n${currentUser}`);
+      };
 
       // Don't worry about order of events
       appEvents.list.table.getTableData().then(data => {
