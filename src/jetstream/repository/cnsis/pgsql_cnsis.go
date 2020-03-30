@@ -282,7 +282,7 @@ func (p *PostgresCNSIRepository) Update(endpoint interfaces.CNSIRecord) error {
 
 	var err error
 
-	result, err := p.db.Exec(updateCNSI, endpoint.Name, endpoint.SkipSSLValidation, endpoint.SSOAllowed, endpoint.ClientId, endpont.ClientSecret, .GUID)
+	result, err := p.db.Exec(updateCNSI, endpoint.Name, endpoint.SkipSSLValidation, endpoint.SSOAllowed, endpoint.ClientId, endpoint.ClientSecret, endpoint.GUID)
 	if err != nil {
 		msg := "Unable to UPDATE endpoint: %v"
 		log.Debugf(msg, err)
