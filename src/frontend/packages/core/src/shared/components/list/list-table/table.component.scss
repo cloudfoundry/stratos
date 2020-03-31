@@ -34,7 +34,7 @@ mat-header-cell {
 
     &--has-expanded-columns {
       & > mat-header-cell:first-of-type {
-        padding-left: 63px;
+        // padding-left: 63px; // TODO: RC 
       }
     }
   }

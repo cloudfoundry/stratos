@@ -8,6 +8,7 @@ import { IListPaginationController } from '../data-sources-controllers/list-pagi
 import { ListExpandedComponentType } from '../list.component.types';
 import { ListSort } from './../../../../../../store/src/actions/list.actions';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
+import { TableCellExpanderComponent, TableCellExpanderConfig } from './table-cell-expander/table-cell-expander.component';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
 import { ITableColumn } from './table.types';
@@ -19,6 +20,13 @@ const tableColumnSelect: ITableColumn<any> = {
   cellComponent: TableCellSelectComponent,
   class: 'table-column-select',
   cellFlex: '0 0 60px'
+};
+
+const tableColumnExpander: ITableColumn<any> = {
+  columnId: 'expander',
+  headerCellComponent: TableCellExpanderComponent,
+  cellComponent: TableCellExpanderComponent,
+  cellFlex: '0 0 47px',
 };
 
 const tableColumnAction: ITableColumn<any> = {
@@ -54,10 +62,21 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input() minRowHeight: string;
 
   ngOnInit() {
-    if (this.addSelect || this.addActions) {
+    if (this.addSelect || this.expandComponent || this.addActions) {
       const newColumns = [...this.columns];
       if (this.addSelect) {
         newColumns.splice(0, 0, tableColumnSelect);
+      }
+      if (this.expandComponent) {
+        newColumns.splice(0, 0, {
+          ...tableColumnExpander,
+          cellConfig: (row: T) => {
+            const res: TableCellExpanderConfig = {
+              rowId: this.dataSource.trackBy(null, row)
+            };
+            return res;
+          }
+        });
       }
       if (this.addActions) {
         newColumns.push(tableColumnAction);

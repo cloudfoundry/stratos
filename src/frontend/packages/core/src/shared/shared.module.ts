@@ -235,7 +235,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorTileComponent,
     SidepanelPreviewComponent,
     TableCellSidePanelComponent,
-    CardProgressOverlayComponent,
+    CardProgressOverlayComponent
   ],
   exports: [
     ApplicationStateIconPipe,

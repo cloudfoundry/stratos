@@ -101,7 +101,7 @@
         padding-right: 0;
 
         &.has-expanded-row {
-          padding-left: 27px;
+          // padding-left: 27px; // TODO: RC
         }
 
         &.in-expanded-row {
@@ -109,7 +109,7 @@
         }
 
         .mat-expansion-indicator {
-          margin: 0 4px 0 0;
+          // margin: 0 4px 0 0; // TODO: RC
         }
 
       }

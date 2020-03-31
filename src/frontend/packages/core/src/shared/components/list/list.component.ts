@@ -51,10 +51,10 @@ import {
 } from '../../../../../store/src/actions/list.actions';
 import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pagination.actions';
 import { GeneralAppState } from '../../../../../store/src/app-state';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
+import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
   EntitySelectConfig,
@@ -63,6 +63,7 @@ import {
   RowState,
 } from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
+import { TableRowExpandedService } from './list-table/table-row/table-row-expaned-service';
 import { ITableColumn } from './list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsCards,
@@ -96,6 +97,9 @@ import {
         animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
       ])
     ])
+  ],
+  providers: [
+    TableRowExpandedService
   ]
 })
 export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
