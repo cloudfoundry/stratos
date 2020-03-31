@@ -9,7 +9,13 @@ import { FeatureFlagDescriptions } from '../cf-feature-flags-data-source';
   styleUrls: ['./table-cell-feature-flag-description.component.scss']
 })
 export class TableCellFeatureFlagDescriptionComponent extends TableCellCustom<IFeatureFlag> {
-  @Input() row: IFeatureFlag;
 
-  FeatureFlagDescriptions = FeatureFlagDescriptions;
+  description: string;
+
+  @Input()
+  set row(row: IFeatureFlag) {
+    this.description = row ? FeatureFlagDescriptions[row.name] : null;
+  }
+
 }
+
