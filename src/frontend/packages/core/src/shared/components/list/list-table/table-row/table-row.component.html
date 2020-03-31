@@ -6,7 +6,8 @@
       <mat-progress-bar class="table-row__deletion-bar" mode="indeterminate"></mat-progress-bar>
     </div>
   </div>
-  <div role="row" class="table-row">
+  <div role="row" class="table-row"
+    [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent}">
     <div class="mat-row table-row__inner">
       <mat-expansion-panel class="table-row__inner__expansion" [togglePosition]="'before'" [disabled]="!expandComponent"
         (opened)="panelOpened()" (closed)="expandedService.collapse(rowId)" [expanded]="expandedService.expanded[rowId]"

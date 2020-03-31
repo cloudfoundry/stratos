@@ -109,6 +109,9 @@ export class TableRowComponent<T = any> extends CdkRow implements OnInit {
       return;
     }
     this.expandedComponentRef = this.createComponent();
+    if (!this.expandedComponentRef) {
+      return;
+    }
     const instance: CardCell<any> = this.expandedComponentRef.instance;
     instance.row = this.row; // This could be set again when `row` changes above
   }

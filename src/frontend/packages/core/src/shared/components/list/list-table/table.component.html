@@ -3,7 +3,8 @@
     <mat-progress-bar color="primary" *ngIf="dataSource.isTableLoading$ | async" mode="indeterminate">
     </mat-progress-bar>
   </div>
-  <mat-card class="app-table__card">
+  <mat-card class="app-table__card"
+    [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent}">
     <mat-card-content class="app-table__content">
       <mat-table class="app-table__inner" #table [hidden]="hideTable" [dataSource]="dataSource"
         [trackBy]="dataSource.trackBy" matSort>
@@ -30,8 +31,9 @@
               [config]="column.cellConfig" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
           </mat-cell>
         </ng-container>
-        <mat-header-row [hidden]="hideTable" class="app-table__header-row" *matHeaderRowDef="columnNames"
-          [ngClass]="{'app-table__inner--has-expanded-columns': !!expandComponent}">
+        <mat-header-row [hidden]="hideTable" class="app-table__header-row"
+          [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent}"
+          *matHeaderRowDef="columnNames" [ngClass]="{'app-table__inner--has-expanded-columns': !!expandComponent}">
         </mat-header-row>
         <app-table-row class="app-table__row" *matRowDef="let row; columns: columnNames;" [rowState]="getRowState(row)"
           [row]="row" [expandComponent]="expandComponent" [inExpandedRow]="inExpandedRow" [minRowHeight]="minRowHeight"

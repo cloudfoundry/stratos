@@ -25,17 +25,14 @@ mat-header-cell {
 
   &__card {
     padding: 0;
+    &.in-expanded-row {
+      box-shadow: none;
+    }
   }
 
   &__inner {
     &[hidden] * {
       display: none;
-    }
-
-    &--has-expanded-columns {
-      & > mat-header-cell:first-of-type {
-        // padding-left: 63px; // TODO: RC 
-      }
     }
   }
 
@@ -47,6 +44,15 @@ mat-header-cell {
       &.mat-header-row {
         display: none;
       }
+    }
+  }
+
+  &__header-row {
+    &.in-expanded-row {
+      border-left-color: rgba(0, 0, 0, .12);
+      border-left-width: 1px;
+      border-top-color: rgba(0, 0, 0, .12);
+      border-top-width: 1px;
     }
   }
 
