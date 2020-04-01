@@ -1,5 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { endpointsCfEntitiesConnectedSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -17,7 +18,6 @@ import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import {
   ListPaginationMultiFilterChange,
@@ -25,20 +25,20 @@ import {
 import {
   valueOrCommonFalsy,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { QParam, QParamJoiners } from '../../../../store/src/q-param';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { endpointsRegisteredEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { cfEntityFactory } from '../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { QParam, QParamJoiners } from '../q-param';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {
   return {
@@ -212,13 +212,14 @@ export class CfOrgSpaceDataService implements OnDestroy {
       action: this.paginationAction,
       paginationMonitor: this.paginationMonitorFactory.create(
         this.paginationAction.paginationKey,
-        cfEntityFactory(this.paginationAction.entityType)
+        cfEntityFactory(this.paginationAction.entityType),
+        this.paginationAction.flattenPagination
       )
-    }, true);
+    }, this.paginationAction.flattenPagination);
   }
 
   private createCf() {
-    const list$ = this.store.select(endpointsRegisteredEntitiesSelector).pipe(
+    const list$ = this.store.select(endpointsCfEntitiesConnectedSelector).pipe(
       // Ensure we have endpoints
       filter(endpoints => endpoints && !!Object.keys(endpoints).length),
       publishReplay(1),
@@ -298,7 +299,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createPaginationAction() {
-    const organizationEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const organizationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getAllOrganizationsAction = actionBuilder(null, CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, {
       includeRelations: [

@@ -1,10 +1,47 @@
-import { OrchestratedActionBuilders } from '../../../core/src/core/entity-catalogue/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAppRoutes } from '../actions/application-service-routes.actions';
 import { CreateRoute, DeleteRoute, GetAllRoutes, NewRoute, UnmapRoute } from '../actions/route.actions';
 import { GetSpaceRoutes } from '../actions/space.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
-export const routesActionBuilders = {
+export interface RoutesActionBuilders extends OrchestratedActionBuilders {
+  create: (id, endpointGuid, route: NewRoute) => CreateRoute;
+  delete: (
+    guid,
+    endpointGuid,
+    appGuid?: string,
+    appGuids?: string[],
+    async?: boolean,
+    recursive?: boolean
+  ) => DeleteRoute;
+  getMultiple: (
+    endpointGuid,
+    paginationKey: string,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+  ) => GetAllRoutes;
+  unmap: (
+    guid: string,
+    appGuid: string,
+    endpointGuid: string,
+    clearPaginationKey?: string
+  ) => UnmapRoute;
+  getAllForApplication: (
+    applicationGuid: string,
+    endpointGuid: string,
+    paginationKey?: string,
+    includeRelations?: string[]
+  ) => GetAppRoutes;
+  getAllInSpace: (
+    spaceGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    includeRelations?: string[],
+    populateMissing?: boolean,
+    flattenPagination?: boolean
+  ) => GetSpaceRoutes;
+}
+
+export const routesActionBuilders: RoutesActionBuilders = {
   create: (id, endpointGuid, route: NewRoute) => new CreateRoute(
     id,
     endpointGuid,
@@ -29,7 +66,7 @@ export const routesActionBuilders = {
     endpointGuid,
     paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
-  ) => new GetAllRoutes(endpointGuid, includeRelations, populateMissing),
+  ) => new GetAllRoutes(endpointGuid, paginationKey, includeRelations, populateMissing),
   unmap: (
     guid: string,
     appGuid: string,
@@ -59,7 +96,6 @@ export const routesActionBuilders = {
     includeRelations?: string[],
     populateMissing?: boolean,
     flattenPagination?: boolean
-
   ) => new GetSpaceRoutes(
     spaceGuid,
     endpointGuid,
@@ -68,4 +104,4 @@ export const routesActionBuilders = {
     populateMissing,
     flattenPagination
   )
-} as OrchestratedActionBuilders;
+};

@@ -1,4 +1,4 @@
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
 import { SendEventAction } from '../../actions/internal-events.actions';
 import { RecursiveDeleteFailed } from '../../effects/recursive-entity-delete.effect';
 import { endpointSchemaKey } from '../../helpers/entity-factory';
@@ -12,7 +12,7 @@ import { PipelineHttpClient } from '../pipline-http-client.service';
 export function jetstreamErrorHandler(
   error: any,
   action: EntityRequestAction,
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes,
   actionDispatcher: ActionDispatcher,
   recursivelyDeleting: boolean
@@ -41,7 +41,7 @@ export function jetstreamErrorHandler(
   } else {
     // See #4054, in theory we should never hit this as we always know the endpoint id's
     actionDispatcher(
-      new SendEventAction<InternalEventStateMetadata>(GLOBAL_EVENT, catalogueEntity.entityKey, {
+      new SendEventAction<InternalEventStateMetadata>(GLOBAL_EVENT, catalogEntity.entityKey, {
         eventCode: error.status ? error.status + '' : '500',
         severity: InternalEventSeverity.ERROR,
         message: 'Jetstream API request error',
@@ -54,7 +54,7 @@ export function jetstreamErrorHandler(
     );
   }
 
-  const errorActions = getFailApiRequestActions(action, error, requestType, catalogueEntity, {
+  const errorActions = getFailApiRequestActions(action, error, requestType, catalogEntity, {
     endpointIds,
     url: error.url || action.options.url,
     eventCode: error.status ? error.status + '' : '500',
@@ -65,7 +65,7 @@ export function jetstreamErrorHandler(
     actionDispatcher(new RecursiveDeleteFailed(
       action.guid,
       action.endpointGuid,
-      catalogueEntity.getSchema(action.schemaKey),
+      catalogEntity.getSchema(action.schemaKey),
     ));
   }
   return errorActions;

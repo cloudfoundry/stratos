@@ -14,10 +14,10 @@ import {
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
-import { QParam, QParamJoiners } from '../../../../../../../store/src/q-param';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { CFAppState } from '../../../../../cf-app-state';
+import { QParam, QParamJoiners } from '../../../../q-param';
 import { CfEventsDataSource } from './cf-events-data-source';
 import { TableCellEventActeeComponent } from './table-cell-event-actee/table-cell-event-actee.component';
 import { TableCellEventActionComponent } from './table-cell-event-action/table-cell-event-action.component';

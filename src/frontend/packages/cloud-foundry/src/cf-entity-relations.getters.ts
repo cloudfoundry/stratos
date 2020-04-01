@@ -1,13 +1,13 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
-import { StratosBaseCatalogueEntity } from '../../core/src/core/entity-catalogue/entity-catalogue-entity';
-import { entityCatalogue } from '../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityCatalogueEntityConfig } from '../../core/src/core/entity-catalogue/entity-catalogue.types';
+import { StratosBaseCatalogEntity } from '../../store/src/entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig } from '../../store/src/entity-catalog/entity-catalog.types';
 import { InternalAppState } from '../../store/src/app-state';
 import {
   getPaginationParams,
 } from '../../store/src/entity-request-pipeline/pagination-request-base-handlers/get-params.pipe';
-import { QParam } from '../../store/src/q-param';
+import { QParam } from './shared/q-param';
 import { selectPaginationState } from '../../store/src/selectors/pagination.selectors';
 import { isPaginatedAction, PaginatedAction, PaginationParam } from '../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../store/src/types/request.types';
@@ -22,9 +22,9 @@ export function getEntityRelationsForEntityRequest(action: EntityInlineParentAct
 
 export function getEntityRelationsForPaginationRequest(action: EntityInlineParentAction & PaginatedAction) {
   if (action.__forcedPageEntityConfig__) {
-    const entityConfig = action.__forcedPageEntityConfig__ as EntityCatalogueEntityConfig;
-    const catalogueEntity = entityCatalogue.getEntity(entityConfig.endpointType, entityConfig.entityType);
-    const forcedSchema = catalogueEntity.getSchema(entityConfig.schemaKey);
+    const entityConfig = action.__forcedPageEntityConfig__ as EntityCatalogEntityConfig;
+    const catalogEntity = entityCatalog.getEntity(entityConfig.endpointType, entityConfig.entityType);
+    const forcedSchema = catalogEntity.getSchema(entityConfig.schemaKey);
     const newAction = {
       ...action,
       entity: [forcedSchema],
@@ -93,7 +93,7 @@ function setQParams(requestParams: HttpParams, params: PaginationParam): HttpPar
 export function addCfQParams(
   request: HttpRequest<any>,
   action: PaginatedAction,
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   appState: InternalAppState): HttpRequest<any> {
   // Clear any existing
   const newParams = request.params.delete('q');
@@ -102,7 +102,7 @@ export function addCfQParams(
   const newParamsFromAction = setQParams(newParams, action.initialParams);
 
   // Overwrite initial params with params from store
-  const paginationState = selectPaginationState(catalogueEntity.entityKey, action.paginationKey)(appState);
+  const paginationState = selectPaginationState(catalogEntity.entityKey, action.paginationKey)(appState);
   const paginationParams = getPaginationParams(paginationState);
   const paramsFromPagination = setQParams(newParamsFromAction, paginationParams);
 

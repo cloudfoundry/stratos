@@ -25,7 +25,7 @@ describe('Create Service Instance with binding', () => {
 
   });
 
-  beforeEach(() => {
+  beforeAll(() => {
     createServiceInstance.navigateTo();
     createServiceInstance.waitForPage();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();

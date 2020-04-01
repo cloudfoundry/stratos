@@ -14,10 +14,10 @@ import {
   ApplicationStateService,
 } from '../../../../../../core/src/shared/components/application-state/application-state.service';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { generateTestApplicationServiceProvider } from '../../../../../../core/test-framework/application-service-helper';
-import { createEmptyStoreModule } from '../../../../../../core/test-framework/store-test-helper';
+import { createEmptyStoreModule } from '@stratos/store/testing';
 import { CfAutoscalerTestingModule } from '../../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card.component';
 import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';

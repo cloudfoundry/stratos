@@ -35,15 +35,17 @@ export class EndpointCards extends ListCardComponent {
       const cleanDetails = safeDetails.split('\n');
       const user = cleanDetails[1] ? cleanDetails[1].replace(' (Administrator)', '') : '';
       const isAdmin = safeDetails.endsWith(' (Administrator)');
+      const urlField = m.find(item => item.key === 'Address').value;
+      const url = urlField.replace('content_copy', '').trim();
       return {
         name: t.substring(0, t.indexOf('\n')),
         connected: m.find(item => item.key === 'Status').value === 'Connected\ncloud_done',
         type: t.substring(t.indexOf('\n') + 1, t.length),
         user,
         isAdmin,
-        url: m.find(item => item.key === 'Address').value,
+        url
         // favorite: data[6]
-      } as EndpointMetadata;
+      };
     });
   }
 }
@@ -141,6 +143,10 @@ export class EndpointsPage extends Page {
 
   isNoneConnectedSnackBar(snackBar: SnackBarPo) {
     return snackBar.hasMessage(NONE_CONNECTED_MSG);
+  }
+
+  waitForNoneConnectedSnackBar(snackBar: SnackBarPo) {
+    return snackBar.waitForMessage(NONE_CONNECTED_MSG);
   }
 
   private checkWelcomeMessageText(msg: string) {

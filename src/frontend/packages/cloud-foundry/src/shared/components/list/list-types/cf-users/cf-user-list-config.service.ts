@@ -10,7 +10,6 @@ import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.
 import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../../../core/src/core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   IListAction,
@@ -20,6 +19,7 @@ import {
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
@@ -100,7 +100,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   manageUserAction: IListAction<APIResource<CfUser>> = {
     action: (user: APIResource<CfUser>) => {
       this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, [user.entity]));
-      this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: user.entity.guid } });
+      this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: user.metadata.guid } });
     },
     label: 'Manage Roles',
     createVisible: (row$: Observable<APIResource>) => this.createCanUpdateOrgSpaceRoles()
@@ -110,7 +110,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     action: (users: APIResource<CfUser>[]) => {
       this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, users.map(user => user.entity)));
       if (users.length === 1) {
-        this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: users[0].entity.guid } });
+        this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: users[0].metadata.guid } });
       } else {
         this.router.navigate([this.createManagerUsersUrl()]);
       }
@@ -129,7 +129,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
 
     const action = (withSpaces?: boolean) => {
       return (user: APIResource<CfUser>) => {
-        const queryParams = { queryParams: { user: user.entity.guid, spaces: withSpaces } };
+        const queryParams = { queryParams: { user: user.metadata.guid, spaces: withSpaces } };
 
         this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, [user.entity]));
         this.router.navigate([this.createRemoveUserUrl()], queryParams);
@@ -222,7 +222,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
             cf.global.isAdmin,
             activeRouteCfOrgSpace.cfGuid,
             activeRouteCfOrgSpace.orgGuid,
-            activeRouteCfOrgSpace.spaceGuid)
+            activeRouteCfOrgSpace.spaceGuid),
         )
       ),
       tap(([cf, action]) => {
@@ -243,7 +243,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   }
 
   private initialiseMultiFilter(action: PaginatedAction) {
-    const entityKey = entityCatalogue.getEntityKey(action);
+    const entityKey = entityCatalog.getEntityKey(action);
     this.store.select(selectPaginationState(entityKey, action.paginationKey)).pipe(
       filter((pag) => !!pag),
       first(),
@@ -350,7 +350,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.activeRouteCfOrgSpace.orgGuid)
 
   getColumns = () => this.columns;
-  getGlobalActions = () => [];
   getMultiActions = () => [this.manageMultiUserAction];
   getSingleActions = () => [this.manageUserAction, ...this.removeUserActions()];
   getMultiFiltersConfigs = () => this.multiFilterConfigs;

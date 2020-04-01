@@ -1,0 +1,9 @@
+@import '~@angular/material/theming';
+@mixin app-card-progerss-overlay-theme($theme, $app-theme) {
+  $background: map-get($theme, background);
+
+  .mat-card__progress-overlay {
+    background: mat-color($background, card);
+    z-index: 100;
+  }
+}

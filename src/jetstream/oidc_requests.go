@@ -9,15 +9,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (p *portalProxy) doOidcFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doOidcFlowRequest")
+func (p *portalProxy) DoOidcFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
+	log.Debug("DoOidcFlowRequest")
 
 	authHandler := p.OAuthHandlerFunc(cnsiRequest, req, p.RefreshOidcToken)
 	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
 
 func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
-	log.Debug("refreshToken")
+	log.Debug("RefreshOidcToken")
 	userToken, ok := p.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
 	if !ok {
 		return t, fmt.Errorf("Info could not be found for user with GUID %s", userGUID)

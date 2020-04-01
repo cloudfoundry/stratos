@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export interface IAppChip<T = string> {
@@ -18,7 +18,7 @@ export class AppChip<T = string> implements IAppChip<T> {
   color?: string;
   url?: {
     link: string,
-    queryParams: { [paramName: string]: string }
+    params: { [paramName: string]: string }
   };
 }
 

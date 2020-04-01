@@ -10,6 +10,20 @@ export class EntitySummaryTitleComponent {
   @Input() subTitle: string;
   @Input() info: string;
   @Input() subText: string;
-  @Input() imagePath: string;
-  @Input() inlineImagePath: string;
+  @Input()
+  get imagePath(): string {
+    return this.image;
+  }
+  set imagePath(image: string) {
+    this.image = image;
+  }
+  @Input() fallBackIcon: string;
+  @Input() fallBackIconFont: string;
+  public image: string;
+
+  public failedImageLoad() {
+    if (this.fallBackIcon) {
+      this.image = null;
+    }
+  }
 }

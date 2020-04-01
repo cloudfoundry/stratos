@@ -8,7 +8,8 @@
 @import '../src/shared/components/display-value/display-value.component.theme';
 @import '../src/shared/components/stepper/steppers/steppers.component.theme';
 @import '../src/shared/components/list/list.component.theme';
-@import '../src//shared/components/code-block/code-block.component.theme';
+@import '../src/shared/components/code-block/code-block.component.theme';
+@import '../src/shared/components/copy-to-clipboard/copy-to-clipboard.component.theme';
 @import '../src/shared/components/list/list-cards/cards.components.theme';
 @import '../src/shared/components/dialog-error/dialog-error.component.theme';
 @import '../src/shared/components/cards/card-status/card-status.component.theme';
@@ -39,14 +40,17 @@
 @import '../src/shared/components/multiline-title/multiline-title.component.theme';
 @import '../src/features/user-profile/profile-info/profile-info.component.theme';
 @import '../src/core/stateful-icon/stateful-icon.component.theme';
-@import '../src/shared/components/markdown-preview/markdown-preview.component.theme';
 @import './components/mat-snack-bar.theme';
 @import './components/ngx-charts-gauge.theme';
+@import '../src/shared/components/sidepanel-preview/sidepanel-preview.component.theme';
+@import '../src/shared/components/user-avatar/user-avatar.component.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
+@import './mat-desktop';
 @import './fonts';
 @import './ansi-colors';
 @import '../src/shared/components/favorites-global-list/favorites-global-list.component.theme';
+@import '../src/shared/components/favorites-meta-card/favorites-meta-card.component.theme';
 
 @import '../../cloud-foundry/src/shared/components/schema-form/schema-form.component.theme';
 @import '../../cloud-foundry/src/features/services/services-wall/services-wall.component.theme';
@@ -115,18 +119,20 @@
   @include metrics-chart-theme($theme, $app-theme);
   @include metrics-range-selector-theme($theme, $app-theme);
   @include app-multiline-title-theme($theme, $app-theme);
-  @include app-markdown-preview-theme($theme, $app-theme);
+  @include app-sidepanel-preview-theme($theme, $app-theme);
   @include tile-selector-theme($theme, $app-theme);
   @include profile-page-theme($theme, $app-theme);
   @include stateful-icon($theme, $app-theme);
-  @include app-markdown-preview-theme($theme, $app-theme);
   @include app-simple-usage-chart($theme, $app-theme);
   @include home-page-theme($theme, $app-theme);
   @include favorites-global-list-theme($theme, $app-theme);
+  @include favorites-meta-card-theme($theme, $app-theme);
   @include page-side-nav-theme($theme, $app-theme);
   @include cf-admin-add-user-warning($theme, $app-theme);
   @include entity-summary-title-theme($theme, $app-theme);
   @include app-meta-card-item-theme($theme, $app-theme);
   @include error-page-theme($theme, $app-theme);
   @include code-block-theme($theme, $app-theme);
+  @include copy-to-clipboard-theme($theme, $app-theme);
+  @include app-user-avatar-theme($theme, $app-theme);
 }

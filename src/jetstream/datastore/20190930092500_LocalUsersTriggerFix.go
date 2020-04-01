@@ -14,14 +14,17 @@ func init() {
 
 		if strings.Contains(conf.Driver.Name, "sqlite") {
 			//SQLITE
-			dropTrigger = "DROP TRIGGER update_last_updated;"
+			dropTrigger = "DROP TRIGGER IF EXISTS update_last_updated;"
 		}
 		if strings.Contains(conf.Driver.Name, "postgres") {
 			// POSTGRESQL
-			dropTrigger = "DROP TRIGGER update_trigger ON local_users;"
+			dropTrigger = "DROP TRIGGER IF EXISTS update_trigger ON local_users;"
 		} else if strings.Contains(conf.Driver.Name, "mysql") {
 			// MYSQL
-			dropTrigger = "DROP TRIGGER update_last_updated;"
+			dropTrigger = "DROP TRIGGER IF EXISTS update_last_updated;"
+			// Ignore error - most likely permission bug issue on Mysql
+			txn.Exec(dropTrigger)
+			return nil
 		}
 
 		if len(dropTrigger) > 0 {

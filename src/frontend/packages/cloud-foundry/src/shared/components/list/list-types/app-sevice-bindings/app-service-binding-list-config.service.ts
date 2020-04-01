@@ -113,7 +113,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         cellDefinition: {
           getValue: (row) => {
             const si = isServiceInstance(row.entity.service_instance.entity);
-            return si ? si.service.entity.label : 'User Service';
+            return si ? si.service_plan.entity.service.entity.label : 'User Service';
           },
         },
         cellFlex: '1'

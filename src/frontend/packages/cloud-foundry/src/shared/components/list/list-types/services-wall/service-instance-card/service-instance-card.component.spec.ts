@@ -1,11 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
 import {
   ServiceInstanceLastOpComponent,
 } from '../../../../../../../../core/src/shared/components/service-instance-last-op/service-instance-last-op.component';
-import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
@@ -89,23 +89,6 @@ describe('ServiceInstanceCardComponent', () => {
           updated_at: '',
           created_at: ''
         },
-        service: {
-          entity: {
-            label: '',
-            description: '',
-            active: 1,
-            bindable: 1,
-            unique_id: '',
-            extra: '',
-            tags: [''],
-            requires: [''],
-            service_broker_guid: '',
-            plan_updateable: 1,
-            service_plans_url: '',
-            service_plans: [],
-          },
-          metadata: null
-        },
         service_plan: {
           entity: {
             name: '',
@@ -133,7 +116,12 @@ describe('ServiceInstanceCardComponent', () => {
                 service_plans_url: '',
                 service_plans: [],
               },
-              metadata: null
+              metadata: {
+                guid: '',
+                created_at: '',
+                updated_at: '',
+                url: ''
+              }
             },
             service_instances_url: '',
           },

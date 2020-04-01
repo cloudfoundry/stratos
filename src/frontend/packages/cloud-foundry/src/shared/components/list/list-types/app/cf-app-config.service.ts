@@ -131,7 +131,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
         row.entity.cfGuid,
         'cf',
         applicationEntityType,
-        row.entity.guid,
+        row.metadata.guid,
       );
     }),
   ];
@@ -152,5 +152,4 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   getDataSource = () => this.appsDataSource;
   getMultiFiltersConfigs = () => this.multiFilterConfigs;
   getInitialised = () => this.initialised$;
-
 }

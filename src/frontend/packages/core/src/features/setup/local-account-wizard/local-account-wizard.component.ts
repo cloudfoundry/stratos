@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormControl, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { Observable, BehaviorSubject, of as obsof } from 'rxjs';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
@@ -9,6 +9,7 @@ import { UAASetupState, LocalAdminSetupData } from '../../../../../store/src/typ
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { VerifySession } from '../../../../../store/src/actions/auth.actions';
 import { SetupSaveConfig } from '../../../../../store/src/actions/setup.actions';
+import { APP_TITLE } from '../../../core/core.types';
 
 @Component({
   selector: 'app-local-account-wizard',
@@ -21,7 +22,7 @@ export class LocalAccountWizardComponent implements OnInit {
   validateLocalAuthForm: Observable<boolean>;
   applyingSetup$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>) { }
+  constructor(private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>, @Inject(APP_TITLE) public title: string) { }
 
   ngOnInit() {
     this.passwordForm = new FormGroup({

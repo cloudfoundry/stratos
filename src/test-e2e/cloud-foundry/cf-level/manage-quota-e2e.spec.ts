@@ -59,13 +59,18 @@ describe('Manage Quota', () => {
       expect(quotaFormPage.stepper.canNext()).toBeFalsy();
 
       quotaFormPage.stepper.setName(secondQuotaName);
+      // Change form constrols to ensure the validation happens
+      quotaFormPage.stepper.setTotalServices('10');
       expect(element(by.css('.add-quota-stepper')).getText()).not.toContain('quota with this name already exists.');
 
       quotaFormPage.stepper.setName(quotaName);
+      quotaFormPage.stepper.setTotalServices('10');
       expect(element(by.css('.add-quota-stepper')).getText()).toContain('A quota with this name already exists.');
 
       // should go to quotas when cancelled
       quotaFormPage.stepper.cancel();
+      quotaFormPage.stepper.waitUntilNotShown();
+
       expect(cfTopLevelPage.subHeader.getTitleText()).toBe('Organization Quotas');
     });
 
@@ -84,7 +89,7 @@ describe('Manage Quota', () => {
   });
 
   describe('#destroy', () => {
-    beforeEach(() => {
+    beforeAll(() => {
       cfTopLevelPage = CfTopLevelPage.forEndpoint(cfGuid);
       cfTopLevelPage.navigateTo();
       cfTopLevelPage.goToQuotasTab();
@@ -92,6 +97,8 @@ describe('Manage Quota', () => {
 
     it('- should delete quota', () => {
       cfTopLevelPage.deleteQuota(secondQuotaName);
+      const table = new TableComponent();
+      table.waitUntilNotBusy();
     });
 
     it('- should not delete quota if attached to org', () => {

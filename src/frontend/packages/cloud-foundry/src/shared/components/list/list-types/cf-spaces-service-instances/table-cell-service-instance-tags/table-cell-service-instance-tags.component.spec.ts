@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { EntityMonitorFactory } from '../../../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import {
   generateCfBaseTestModulesNoShared,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';

@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/cf-types';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { entityCatalogue } from '../../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { PaginationMonitorFactory } from '../../../../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   getPaginationObservables,
   PaginationObservables,
 } from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 
 
 export interface EnvVarStratosProject {
@@ -41,17 +41,18 @@ export class ApplicationEnvVarsHelper {
   ) { }
 
   createEnvVarsObs(appGuid: string, cfGuid: string): PaginationObservables<APIResource> {
-    const catalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-    const actionBuilder = catalogueEntity.actionOrchestrator.getActionBuilder('get');
+    const catalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+    const actionBuilder = catalogEntity.actionOrchestrator.getActionBuilder('get');
     const action = actionBuilder(appGuid, cfGuid) as PaginatedAction;
     return getPaginationObservables<APIResource>({
       store: this.store,
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        catalogueEntity.getSchema()
+        catalogEntity.getSchema(),
+        action.flattenPagination
       )
-    }, true);
+    }, action.flattenPagination);
   }
 
   FetchStratosProject(appEnvVars): EnvVarStratosProject {

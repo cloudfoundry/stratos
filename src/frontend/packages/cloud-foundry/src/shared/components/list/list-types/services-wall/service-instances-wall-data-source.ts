@@ -6,7 +6,6 @@ import { serviceInstancesEntityType } from '../../../../../../../cloud-foundry/s
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { entityCatalogue } from '../../../../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -15,15 +14,18 @@ import {
   MultiActionConfig,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-config';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { ServiceInstanceActionBuilders } from '../../../../../entity-action-builders/service-instance.action.builders';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class ServiceInstancesWallDataSource extends ListDataSource<APIResource> {
-
   constructor(store: Store<CFAppState>, transformEntities: any[], listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType);
-    const serviceInstanceEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+    const serviceInstanceEntity = entityCatalog
+      .getEntity<IEntityMetadata, any, ServiceInstanceActionBuilders>(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
     const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const marketplaceAction = actionBuilder(null, paginationKey);
     const userProvidedAction = new GetAllUserProvidedServices();

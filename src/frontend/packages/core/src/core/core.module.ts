@@ -2,6 +2,7 @@ import { PortalModule } from '@angular/cdk/portal';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { MomentModule } from 'ngx-moment';
 
 import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
@@ -15,7 +16,7 @@ import { DisableRouterLinkDirective } from './disable-router-link.directive';
 import { DotContentComponent } from './dot-content/dot-content.component';
 import { EndpointsService } from './endpoints.service';
 import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
-import { EntityServiceFactory } from './entity-service-factory.service';
+import { EntityServiceFactory } from '../../../store/src/entity-service-factory.service';
 import { EventWatcherService } from './event-watcher/event-watcher.service';
 import { InfinityPipe } from './infinity.pipe';
 import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component';
@@ -30,6 +31,9 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
+import { APP_TITLE, appTitleFactory } from './core.types';
+import { UserProfileService } from './user-profile.service';
+import { UserAvatarComponent } from './../shared/components/user-avatar/user-avatar.component';
 
 @NgModule({
   imports: [
@@ -56,10 +60,11 @@ import { WindowRef } from './window-ref/window-ref.service';
     PortalModule,
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
+    UserAvatarComponent,
     DisableRouterLinkDirective,
     StatefulIconComponent,
     NoContentMessageComponent,
-    DisableRouterLinkDirective
+    DisableRouterLinkDirective,
   ],
   providers: [
     AuthGuardService,
@@ -72,7 +77,13 @@ import { WindowRef } from './window-ref/window-ref.service';
     EndpointsService,
     UserService,
     EntityServiceFactory,
-    CurrentUserPermissionsService
+    UserProfileService,
+    CurrentUserPermissionsService,
+    {
+      provide: APP_TITLE,
+      useFactory: appTitleFactory,
+      deps: [Title]
+    }
   ],
   declarations: [
     StatefulIconComponent,
@@ -89,7 +100,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     EntityFavoriteStarComponent,
     RecentEntitiesComponent,
     DisableRouterLinkDirective,
-    NoContentMessageComponent
+    NoContentMessageComponent,
+    UserAvatarComponent,
   ],
   entryComponents: [
     LogOutDialogComponent

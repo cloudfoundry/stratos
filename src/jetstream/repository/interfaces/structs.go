@@ -67,12 +67,10 @@ type ConnectedEndpoint struct {
 const (
 	// AuthTypeOAuth2 means OAuth2
 	AuthTypeOAuth2 = "OAuth2"
-	// AuthTypeOIDC means no OIDC
+	// AuthTypeOIDC means OIDC
 	AuthTypeOIDC = "OIDC"
 	// AuthTypeHttpBasic means HTTP Basic auth
 	AuthTypeHttpBasic = "HttpBasic"
-	// AuthTypeAKS means AKS
-	AuthTypeAKS = "AKS"
 )
 
 const (
@@ -353,4 +351,14 @@ type PortalConfig struct {
 	PluginConfig                       map[string]string
 	DatabaseProviderName               string
 	EnableTechPreview                  bool `configName:"ENABLE_TECH_PREVIEW"`
+	CanMigrateDatabaseSchema           bool
+	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
+	// This depends on the deployment mechanism and the database config
+	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance
+	// can perform migrations
+}
+
+// SetCanPerformMigrations updates the state that records if we can perform Database migrations
+func (c *PortalConfig) SetCanPerformMigrations(value bool) {
+	c.CanMigrateDatabaseSchema = c.CanMigrateDatabaseSchema && value
 }

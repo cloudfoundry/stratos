@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { SendEventAction } from '../../actions/internal-events.actions';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { InternalEventSeverity } from '../../types/internal-events.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
@@ -13,7 +13,7 @@ describe('endpoint-error-handler', () => {
   it('correct actions are fired', (done) => {
     const entityType = 'key';
 
-    const entity = new StratosBaseCatalogueEntity({
+    const entity = new StratosBaseCatalogEntity({
       type: entityType,
       schema: new EntitySchema(
         entityType,
@@ -53,9 +53,9 @@ describe('endpoint-error-handler', () => {
           expect(eventAction instanceof SendEventAction).toBe(true);
           expect(eventAction.eventState.eventCode).toBe(error.errorCode);
           expect(eventAction.eventState.severity).toBe(InternalEventSeverity.ERROR);
-          expect(eventAction.eventState.message).toBe('API request error');
+          expect(eventAction.eventState.message).toBe('test');
           expect(eventAction.eventState.metadata.url).toBe(error.url);
-          expect(eventAction.eventState.metadata.errorResponse).toBe(error.jetstreamErrorResponse);
+          expect(eventAction.eventState.metadata.errorResponse.errorResponse).toEqual(error.jetstreamErrorResponse);
           done();
         }
       };

@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/cf-types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 import { AppMetadataTypes } from '../../../cloud-foundry/src/actions/app-metadata.actions';
 import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { appEnvVarsEntityType, appStatsEntityType, appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-types';
-import { entityCatalogue } from '../../../core/src/core/entity-catalogue/entity-catalogue.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { WrapperRequestActionSuccess } from '../types/request.types';
 
 
@@ -29,13 +29,13 @@ export class UpdateAppEffects {
         switch (updateEntity) {
           case AppMetadataTypes.ENV_VARS:
             // This is done so the app metadata env vars environment_json matches that of the app
-            const appEnvVarsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
+            const appEnvVarsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
             const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
             const getAppEnvVarsAction = actionBuilder(action.apiAction.guid, action.apiAction.endpointGuid as string);
             actions.push(getAppEnvVarsAction);
             break;
           case AppMetadataTypes.STATS:
-            const appStatsEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
+            const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
             const appStatsActionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
             const statsAction = appStatsActionBuilder(action.apiAction.guid, action.apiAction.endpointGuid as string);
             // Application has changed and the associated app stats need to also be updated.
@@ -48,7 +48,7 @@ export class UpdateAppEffects {
             }
             break;
           case AppMetadataTypes.SUMMARY:
-            const appSummaryEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
+            const appSummaryEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appSummaryEntityType);
             const appSummaryActionBuilder = appSummaryEntity.actionOrchestrator.getActionBuilder('get');
             const getAppSummaryAction = appSummaryActionBuilder(action.apiAction.guid, action.apiAction.endpointGuid as string);
             actions.push(getAppSummaryAction);

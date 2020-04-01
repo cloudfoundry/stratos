@@ -1,29 +1,25 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
-import { GetOrganization } from '../../actions/organization.actions';
-import { GetSpace } from '../../actions/space.actions';
-import {
-  cfUserEntityType,
-  organizationEntityType,
-  spaceEntityType,
-} from '../../cf-entity-types';
-import { getCFEntityKey } from '../../cf-entity-helpers';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { APIResponse } from '../../../../store/src/actions/request.actions';
 import { GeneralEntityAppState, GeneralRequestDataState, IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { deepMergeState, mergeEntity } from '../../../../store/src/helpers/reducer.helper';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
-import { deepMergeState, mergeEntity } from '../../../../store/src/helpers/reducer.helper';
+import { GetOrganization } from '../../actions/organization.actions';
+import { GetSpace } from '../../actions/space.actions';
+import { getCFEntityKey } from '../../cf-entity-helpers';
+import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../store/types/user.types';
 import {
   createEntityRelationPaginationKey,
   ValidateEntityResult,
   ValidateResultFetchingState,
 } from '../entity-relations.types';
-import { CfUser, OrgUserRoleNames, CfUserRoleParams, SpaceUserRoleNames } from '../../store/types/user.types';
 
 /**
  * Add roles from (org|space)\[role\]\[user\] into user\[role\]
@@ -69,12 +65,12 @@ export function orgSpacePostProcess(
   apiResponse: APIResponse,
   allEntities: GeneralRequestDataState): ValidateEntityResult {
   const entities = apiResponse ? apiResponse.response.entities : allEntities;
-  const { entityKey: cfOrgOrSpaceEntityKey } = entityCatalogue.getEntity(action.endpointType, action.entityType);
+  const { entityKey: cfOrgOrSpaceEntityKey } = entityCatalog.getEntity(action.endpointType, action.entityType);
   const orgOrSpace = entities[cfOrgOrSpaceEntityKey][action.guid];
-  const userCatalogueEntity = entityCatalogue.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
-  const { entityKey: cfUserEntityKey } = userCatalogueEntity;
+  const userCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
+  const { entityKey: cfUserEntityKey } = userCatalogEntity;
   const users = entities[cfUserEntityKey];
-  const existingUsers = allEntities[cfOrgOrSpaceEntityKey];
+  const existingUsers = allEntities[cfUserEntityKey];
 
   const newUsers = {};
   if (cfOrgOrSpaceEntityKey === getCFEntityKey(organizationEntityType)) {
@@ -108,9 +104,9 @@ export function orgSpacePostProcess(
     const paginatedAction: PaginatedAction = {
       actions: [],
       endpointGuid: action.endpointGuid,
-      entity: userCatalogueEntity.getSchema(),
+      entity: userCatalogEntity.getSchema(),
       entityLocation: RequestEntityLocation.ARRAY,
-      entityType: userCatalogueEntity.definition.type,
+      entityType: userCatalogEntity.definition.type,
       endpointType: CF_ENDPOINT_TYPE,
       type: '[Entity] Post-process Org/Space Users',
       paginationKey: createEntityRelationPaginationKey(action.entityType, action.guid)

@@ -1,7 +1,7 @@
 @mixin entity-summary-title-theme($theme, $app-theme) {
   $background-colors: map-get($theme, background);
   $background: mat-color($background-colors, background);
-  .entity-summary__content {
-    background: linear-gradient(to bottom, transparent 0%, $background 10%);
-  }
+  //.entity-summary__content {
+  // background: linear-gradient(to bottom, transparent 0%, $background 10%);
+  //}
 }

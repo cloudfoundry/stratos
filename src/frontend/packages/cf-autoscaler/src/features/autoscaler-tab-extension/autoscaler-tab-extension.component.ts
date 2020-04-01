@@ -10,16 +10,16 @@ import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src
 import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
-import { EntityService } from '../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
-import { PaginationMonitorFactory } from '../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/app-state';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
@@ -195,9 +195,10 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        autoscalerEntityFactory(appAutoscalerAppMetricEntityType)
+        autoscalerEntityFactory(appAutoscalerAppMetricEntityType),
+        true
       )
-    }, false).entities$;
+    }, true).entities$;
   }
 
   loadLatestMetricsUponPolicy() {
@@ -268,7 +269,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   detachPolicy(): Observable<ActionState> {
     const action = new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid);
     this.store.dispatch(action);
-    const entityKey = entityCatalogue.getEntityKey(action);
+    const entityKey = entityCatalog.getEntityKey(action);
 
     return this.store.select(selectDeletionInfo(entityKey, this.applicationService.appGuid)).pipe(
       pairwise(),

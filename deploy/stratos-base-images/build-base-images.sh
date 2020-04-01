@@ -81,10 +81,10 @@ fi
 
 if [ -n "${IS_SLE}" ]; then
   # Check env vars
-  : "${SMT_INTERNAL?Environment variable must be set when building SLE images}"
-  : "${SMT_INTERNAL_UPDATE?Environment variable must be set when building SLE images}"
-  : "${SMT_INTERNAL_SDK?Environment variable must be set when building SLE images}"
-  : "${SMT_INTERNAL_SERVER?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_BASE_GA?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_BASE_UPDATE?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_SP_GA?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_SP_UPDATE?Environment variable must be set when building SLE images}"
 fi
 
 set -x
@@ -170,6 +170,9 @@ build_and_push_image stratos-bk-build-base Dockerfile.stratos-bk-build-base
 
 # Used for building the DB image
 build_and_push_image stratos-db-base Dockerfile.stratos-mariadb-base
+
+# Used for building the init image
+build_and_push_image stratos-bk-init-base Dockerfile.stratos-bk-init-base
 
 # Used for building the AIO image
 tag_and_push_image stratos-bk-build-base stratos-aio-base

@@ -14,12 +14,12 @@ import {
 } from 'rxjs/operators';
 
 import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { sortStringify } from '../../../../core/src/core/utils.service';
-import { PaginationMonitor } from '../../../../core/src/shared/monitors/pagination-monitor';
 import { SetInitialParams } from '../../actions/pagination.actions';
-import { ValidateEntitiesStart } from '../../actions/request.actions';
+import { CfValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';
+import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import {
@@ -28,7 +28,7 @@ import {
   PaginationEntityState,
   PaginationParam,
 } from '../../types/pagination.types';
-import { ActionState } from '../api-request-reducer/types';
+import { ListActionState } from '../api-request-reducer/types';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -80,7 +80,7 @@ function getEntityConfigFromAction(action): PaginatedAction {
 export function getActionPaginationEntityKey(action): string {
   const apiAction = getAction(action);
   const entityConfig = apiAction.proxyPaginationEntityConfig || getEntityConfigFromAction(action);
-  return entityCatalogue.getEntityKey(entityConfig);
+  return entityCatalog.getEntityKey(entityConfig);
 }
 
 export function getPaginationKeyFromAction(action: PaginatedAction) {
@@ -201,7 +201,7 @@ function getObservables<T = any>(
         ).subscribe(actions => actions.forEach(action => store.dispatch(action)));
       }
     }),
-    map(([prevPag, newPag]) => newPag)
+    map(([, newPag]) => newPag)
   );
 
   let lastValidationFootprint: string;
@@ -211,19 +211,20 @@ function getObservables<T = any>(
       fetchPagination$,
     )
       .pipe(
-        filter(([ent, pagination]) => {
+        filter(([, pagination]) => {
           return !!pagination && isPageReady(pagination, isLocal);
         }),
         publishReplay(1),
         refCount(),
-        tap(([ent, pagination]) => {
+        tap(([, pagination]) => {
           const newValidationFootprint = getPaginationCompareString(pagination);
           if (lastValidationFootprint !== newValidationFootprint) {
             lastValidationFootprint = newValidationFootprint;
-            arrayAction.forEach(action => store.dispatch(new ValidateEntitiesStart(
+            // FIXME: Move cf - #3675
+            // This should use something similar to ENTITY_INFO_HANDLER or come from entity itself
+            arrayAction.forEach(action => store.dispatch(new CfValidateEntitiesStart(
               action,
-              pagination.ids[action.__forcedPageNumber__ || pagination.currentPage],
-              false
+              pagination.ids[action.__forcedPageNumber__ || pagination.currentPage]
             )));
           }
         }),
@@ -298,12 +299,12 @@ export function hasError(pagination: PaginationEntityState): boolean {
   return pagination && getCurrentPageRequestInfo(pagination).error;
 }
 
-export function getCurrentPageRequestInfo(pagination: PaginationEntityState): ActionState {
-  return pagination.pageRequests[pagination.currentPage] || {
-    busy: false,
-    error: false,
-    message: ''
-  };
+export function getCurrentPageRequestInfo(pagination: PaginationEntityState, valueIfMissing = {
+  busy: false,
+  error: false,
+  message: ''
+}): ListActionState {
+  return pagination.pageRequests[pagination.currentPage] || valueIfMissing;
 }
 
 export function spreadClientPagination(pag: PaginationClientPagination): PaginationClientPagination {

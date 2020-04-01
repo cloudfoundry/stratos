@@ -1,6 +1,9 @@
 {
   "compileOnSave": false,
   "preserveWhitespaces": "off",
+  "angularCompilerOptions": {
+    "preserveSymlinks": true
+  },
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
@@ -30,7 +33,10 @@
     "paths": {
       "@acme/extensions": ["frontend/packages/acme_extensions/src/public-api.ts"],
       "@stratos/core": ["frontend/packages/core/src/public-api.ts"],
-      "@stratos/shared": ["frontend/packages/shared/src/public-api.ts"]
+      "@stratos/shared": ["frontend/packages/shared/src/public-api.ts"],
+      "@stratos/store": ["frontend/packages/store/src/public-api.ts"],
+      "@stratos/store/testing": ["frontend/packages/store/testing/public-api.ts"]
+    }    
     }
   }
 }

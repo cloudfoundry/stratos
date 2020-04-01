@@ -1,5 +1,5 @@
-import { StratosBaseCatalogueEntity } from '../../../../core/src/core/entity-catalogue/entity-catalogue-entity';
 import { SendEventAction } from '../../actions/internal-events.actions';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
 import { endpointSchemaKey } from '../../helpers/entity-factory';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { InternalEventSeverity, InternalEventStateMetadata } from '../../types/internal-events.types';
@@ -9,17 +9,17 @@ import { JetstreamError } from './handle-multi-endpoints.pipe';
 
 export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher) => (
   action: EntityRequestAction,
-  catalogueEntity: StratosBaseCatalogueEntity,
+  catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes,
   errors: JetstreamError[]
 ) => {
   errors.forEach(error => {
-    const entityErrorAction = catalogueEntity.getRequestAction('failure', action, requestType);
+    const entityErrorAction = catalogEntity.getRequestAction('failure', action, requestType);
     // Dispatch a error action for the specific endpoint that's failed
     const fakedAction = { ...action, endpointGuid: error.guid };
     const errorMessage = error.jetstreamErrorResponse
-      ? error.jetstreamErrorResponse.error.status || error.errorCode
-      : error.errorCode;
+      ? error.jetstreamErrorResponse.error.status || 'API request error'
+      : 'API request error';
     actionDispatcher(
       new APISuccessOrFailedAction(
         entityErrorAction.type,
@@ -31,11 +31,13 @@ export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher)
       new SendEventAction<InternalEventStateMetadata>(endpointSchemaKey, error.guid, {
         eventCode: error.errorCode,
         severity: InternalEventSeverity.ERROR,
-        message: 'API request error',
+        message: errorMessage,
         metadata: {
           url: error.url,
           httpMethod: action.options ? action.options.method as string : '',
-          errorResponse: error.jetstreamErrorResponse,
+          errorResponse: {
+            errorResponse: error.jetstreamErrorResponse
+          },
         },
       }),
     );

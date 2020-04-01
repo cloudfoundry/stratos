@@ -1,4 +1,4 @@
 <div class='service-icon' [ngClass]="{'service-icon__padding': addMenuPadding}">
   <mat-icon *ngIf="!image" fontSet="stratos-icons">service</mat-icon>
-  <img [src]="image | safeImg" *ngIf="image" (error)="imageLoadError()">
+  <img [src]="image" *ngIf="image" (error)="imageLoadError()">
 </div>

@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { EntityService } from '../../../../../../../../core/src/core/entity-service';
+import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../../store/src/types/metric.types';

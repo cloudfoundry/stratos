@@ -1,11 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewInit, Renderer2 } from '@angular/core';
 
 @Component({
   selector: 'app-no-content-message',
   templateUrl: './no-content-message.component.html',
   styleUrls: ['./no-content-message.component.scss']
 })
-export class NoContentMessageComponent implements OnInit {
+export class NoContentMessageComponent implements AfterViewInit {
 
   @Input() icon: string;
   @Input() iconFont: string;
@@ -18,10 +18,22 @@ export class NoContentMessageComponent implements OnInit {
   @Input() toolbarLink: {
     text: string;
   };
+  @Input() toolbarAlign: string;
 
-  constructor() { }
+  @Input() mode: string;
 
-  ngOnInit() {
+  @ViewChild('toolBarLinkElement', {static: false}) toolBarLinkElement: ElementRef;
+
+  constructor(private renderer: Renderer2) { }
+
+  ngAfterViewInit() {
+    // Align the prompt with the toolbar item
+    if (this.toolBarLinkElement) {
+      const elem = document.getElementById(this.toolbarAlign);
+      if (elem) {
+        const right = document.body.clientWidth - elem.getBoundingClientRect().right;
+        this.renderer.setStyle(this.toolBarLinkElement.nativeElement, 'right', right + 'px');
+      }
+    }
   }
-
 }

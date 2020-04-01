@@ -6,7 +6,7 @@ import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { IService } from '../../../../../core/src/core/cf-api-svc.types';
 import { StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../core/src/shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { SetCreateServiceInstanceServiceGuid } from '../../../actions/create-service-instance.actions';
 import { CFAppState } from '../../../cf-app-state';
@@ -57,7 +57,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     this.isFetching$ = cfSpaceGuid$.pipe(
       switchMap(([cfGuid, spaceGuid]) => {
         const paginationKey = this.servicesWallService.getSpaceServicePagKey(cfGuid, spaceGuid);
-        const paginationMonitor = this.paginationMonitorFactory.create(paginationKey, schema);
+        const paginationMonitor = this.paginationMonitorFactory.create(paginationKey, schema, false);
         return paginationMonitor.fetchingCurrentPage$;
       }),
       tap(fetching => {
@@ -78,7 +78,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     );
 
     this.selectedService$ = combineLatest(this.services$, this.stepperForm.controls.service.statusChanges).pipe(
-      map(([services, change]) => services.filter(a => a.entity.guid === this.stepperForm.controls.service.value)[0]),
+      map(([services, change]) => services.filter(a => a.metadata.guid === this.stepperForm.controls.service.value)[0]),
       filter(p => !!p)
     );
   }

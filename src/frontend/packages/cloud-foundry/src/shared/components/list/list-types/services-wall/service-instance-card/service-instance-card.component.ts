@@ -7,7 +7,6 @@ import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundr
 import { IServiceInstance } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { EntityServiceFactory } from '../../../../../../../../core/src/core/entity-service-factory.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
   MetaCardMenuItem,
@@ -15,6 +14,7 @@ import {
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/services/cf-org-space-label.service';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import {
@@ -84,7 +84,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
       if (!this.serviceBrokerName$) {
         this.serviceBrokerName$ = getServiceBrokerName(
-          this.serviceInstanceEntity.entity.service.entity.service_broker_guid,
+          this.serviceInstanceEntity.entity.service_plan.entity.service.entity.service_broker_guid,
           this.serviceInstanceEntity.entity.cfGuid,
           this.entityServiceFactory
         );
@@ -135,7 +135,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   )
 
   getServiceName = () => {
-    return getServiceName(this.serviceInstanceEntity.entity.service);
+    return getServiceName(this.serviceInstanceEntity.entity.service_plan.entity.service);
   }
 
   getServicePlanName = () => {
@@ -148,6 +148,9 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
   getServiceUrl = () => {
-    return getServiceSummaryUrl(this.serviceInstanceEntity.entity.cfGuid, this.serviceInstanceEntity.entity.service.entity.guid);
+    return getServiceSummaryUrl(
+      this.serviceInstanceEntity.entity.cfGuid,
+      this.serviceInstanceEntity.entity.service_plan.entity.service.metadata.guid
+    );
   }
 }

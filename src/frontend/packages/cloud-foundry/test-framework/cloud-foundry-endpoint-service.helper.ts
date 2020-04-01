@@ -1,15 +1,16 @@
 import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store, StoreModule } from '@ngrx/store';
+import { testSCFEndpointGuid } from '@stratos/store/testing';
 
 import { CoreModule } from '../../core/src/core/core.module';
-import { EntityServiceFactory } from '../../core/src/core/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../core/src/shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../../core/src/shared/shared.module';
-import { testSCFEndpointGuid } from '../../core/test-framework/store-test-helper';
 import { CfUserServiceTestProvider } from '../../core/test-framework/user-service-helper';
+import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
+import { EntityMonitorFactory } from '../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 import { appReducers } from '../../store/src/reducers.module';
 import { CFAppState } from '../src/cf-app-state';
 import { CloudFoundryTestingModule } from '../src/cloud-foundry-test.module';
@@ -20,7 +21,6 @@ import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-
 import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
 import { createUserRoleInOrg } from '../src/store/types/user.types';
-
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -43,12 +43,34 @@ export class BaseCfOrgSpaceRouteMock {
     this.orgGuid = guid;
   }
 }
+
+export function generateCfActiveRouteMock(guid = testSCFEndpointGuid) {
+  return {
+    provide: ActivatedRoute,
+    useValue: {
+      snapshot: {
+        params: {
+          endpointId: guid,
+          orgId: guid,
+          spaceId: guid,
+        },
+        queryParams: {}
+      }
+    }
+  };
+}
+
+export function generateActiveRouteCfOrgSpaceMock(guid = testSCFEndpointGuid) {
+  return {
+    provide: ActiveRouteCfOrgSpace,
+    useFactory: () => new BaseCfOrgSpaceRouteMock(guid)
+  };
+}
+
 export function generateTestCfEndpointServiceProvider(guid = testSCFEndpointGuid) {
   return [
-    {
-      provide: ActiveRouteCfOrgSpace,
-      useFactory: () => new BaseCfOrgSpaceRouteMock(guid)
-    },
+    generateActiveRouteCfOrgSpaceMock(guid),
+    generateCfActiveRouteMock(guid),
     CfUserServiceTestProvider,
     CloudFoundryEndpointService,
     UserInviteService,

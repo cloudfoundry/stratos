@@ -18,7 +18,7 @@ import {
 import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 
-export const DELETE_SERVICE_INSTANCE_ACTIONS = getActions('Service Instances', 'Get particular instance');
+export const DELETE_SERVICE_INSTANCE_ACTIONS = getActions('Service Instances', 'Delete Service Instance');
 export const getServiceInstanceRelations = [
   createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
   createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
@@ -33,7 +33,12 @@ export class GetServiceInstances
   constructor(
     public endpointGuid: string,
     public paginationKey: string,
-    public includeRelations: string[] = getServiceInstanceRelations,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
+      createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
+      createEntityRelationKey(servicePlanEntityType, serviceEntityType),
+      createEntityRelationKey(serviceInstancesEntityType, spaceEntityType),
+    ],
     public populateMissing = true
   ) {
     super();
@@ -71,7 +76,7 @@ export class GetServiceInstance
       `service_instances/${guid}`
     );
   }
-  actions = DELETE_SERVICE_INSTANCE_ACTIONS;
+  actions = getActions('Service Instances', 'Get particular instance');
   entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
   schemaKey = serviceInstancesWithSpaceEntityType;
   entityType = serviceInstancesEntityType;
@@ -99,7 +104,7 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
       }
     );
   }
-  actions = getActions('Service Instances', 'Delete Service Instance');
+  actions = DELETE_SERVICE_INSTANCE_ACTIONS;
   entity = [cfEntityFactory(serviceInstancesEntityType)];
   entityType = serviceInstancesEntityType;
   options: HttpRequest<any>;

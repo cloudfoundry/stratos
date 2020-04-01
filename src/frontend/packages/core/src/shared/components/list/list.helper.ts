@@ -1,10 +1,10 @@
 import { Subscription } from 'rxjs';
 
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { PaginationMonitor } from '../../monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { TableRowStateManager } from './list-table/table-row/table-row-state-manager';
-import { EntityCatalogueEntityConfig } from '../../../core/entity-catalogue/entity-catalogue.types';
 
 export type ListRowStateSetUpManager = (
   paginationMonitor: PaginationMonitor<any>,
@@ -17,13 +17,15 @@ export class ListRowSateHelper<T extends { guid: string }> {
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     paginationKey: string,
-    entityConfig: EntityCatalogueEntityConfig,
-    setup: ListRowStateSetUpManager
+    entityConfig: EntityCatalogEntityConfig,
+    setup: ListRowStateSetUpManager,
+    isLocal: boolean
   ) {
     const rowStateManager = new TableRowStateManager();
     const paginationMonitor = paginationMonitorFactory.create<T>(
       paginationKey,
-      entityConfig
+      entityConfig,
+      isLocal
     );
 
     const sub = setup(

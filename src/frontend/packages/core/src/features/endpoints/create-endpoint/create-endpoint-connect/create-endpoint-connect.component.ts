@@ -3,10 +3,11 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ShowSideHelp } from '../../../../../../store/src/actions/dashboard-actions';
 import { EndpointOnlyAppState } from '../../../../../../store/src/app-state';
 import { EndpointsService } from '../../../../core/endpoints.service';
+import { MarkdownPreviewComponent } from '../../../../shared/components/markdown-preview/markdown-preview.component';
 import { IStepperStep, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { SidePanelService } from '../../../../shared/services/side-panel.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../../connect.service';
 
 
@@ -26,12 +27,13 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
 
   constructor(
     private store: Store<EndpointOnlyAppState>,
-    private endpointsService: EndpointsService
+    private endpointsService: EndpointsService,
+    private sidePanelService: SidePanelService,
   ) {
   }
 
   showHelp() {
-    this.store.dispatch(new ShowSideHelp(this.helpDocumentUrl));
+    this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
   }
 
   onEnter = (data: ConnectEndpointConfig) => {
