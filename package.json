@@ -51,7 +51,7 @@
     "@angular/common": "^8.2.9",
     "@angular/compiler": "^8.2.9",
     "@angular/core": "^8.2.9",
-    "@angular/flex-layout": "^8.0.0-beta.27",
+    "@angular/flex-layout": "^9.0.0-beta.29",
     "@angular/forms": "^8.2.9",
     "@angular/material": "^8.2.2",
     "@angular/material-moment-adapter": "^8.2.2",
@@ -144,7 +144,7 @@
     "ts-node": "~8.4.1",
     "tsickle": "^0.37.0",
     "tslib": "^1.9.0",
-    "tslint": "~5.20.0",
+    "tslint": "~6.1.0",
     "typescript": "<3.6.0"
   }
 }
