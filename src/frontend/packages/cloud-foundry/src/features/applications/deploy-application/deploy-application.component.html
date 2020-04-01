@@ -25,7 +25,7 @@
     <app-deploy-application-options-step #step4></app-deploy-application-options-step>
   </app-step>
   <app-step [title]="deployButtonText" [valid]="step3.valid$ | async" [canClose]="step3.closeable$ | async"
-    disablePrevious=true cancelButtonText="Close" [onEnter]="step3.onEnter" [onNext]="step3.onNext" [blocked]="step3.busy"
+    disablePrevious=true cancelButtonText="Close" [onEnter]="step3.onEnter" [onNext]="step3.onNext" [showBusy]="step3.busy"
     finishButtonText="Go to App Summary">
     <app-deploy-application-step3 [appGuid]="appGuid" #step3></app-deploy-application-step3>
   </app-step>

@@ -105,7 +105,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   manageUserAction: IListAction<APIResource<CfUser>> = {
     action: (user: APIResource<CfUser>) => {
       this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, [user.entity]));
-      this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: user.entity.guid } });
+      this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: user.metadata.guid } });
     },
     label: 'Manage Roles',
     createVisible: (row$: Observable<APIResource>) => this.createCanUpdateOrgSpaceRoles()
@@ -115,7 +115,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     action: (users: APIResource<CfUser>[]) => {
       this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, users.map(user => user.entity)));
       if (users.length === 1) {
-        this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: users[0].entity.guid } });
+        this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: users[0].metadata.guid } });
       } else {
         this.router.navigate([this.createManagerUsersUrl()]);
       }
@@ -134,7 +134,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
 
     const action = (withSpaces?: boolean) => {
       return (user: APIResource<CfUser>) => {
-        const queryParams = { queryParams: { user: user.entity.guid, spaces: withSpaces } };
+        const queryParams = { queryParams: { user: user.metadata.guid, spaces: withSpaces } };
 
         this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, [user.entity]));
         this.router.navigate([this.createRemoveUserUrl()], queryParams);
@@ -227,7 +227,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
             cf.global.isAdmin,
             activeRouteCfOrgSpace.cfGuid,
             activeRouteCfOrgSpace.orgGuid,
-            activeRouteCfOrgSpace.spaceGuid)
+            activeRouteCfOrgSpace.spaceGuid),
         )
       ),
       tap(([cf, action]) => {
@@ -355,7 +355,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.activeRouteCfOrgSpace.orgGuid)
 
   getColumns = () => this.columns;
-  getGlobalActions = () => [];
   getMultiActions = () => [this.manageMultiUserAction];
   getSingleActions = () => [this.manageUserAction, ...this.removeUserActions()];
   getMultiFiltersConfigs = () => this.multiFilterConfigs;

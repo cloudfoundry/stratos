@@ -3,6 +3,8 @@ import { Action } from '@ngrx/store';
 import {
   UsersRolesActions,
   UsersRolesSetChanges,
+  UsersRolesSetIsRemove,
+  UsersRolesSetIsSetByUsername,
   UsersRolesSetOrg,
   UsersRolesSetOrgRole,
   UsersRolesSetSpaceRole,
@@ -62,7 +64,8 @@ export function UsersRolesReducer(state: UsersRolesState = defaultState, action:
         cfGuid: setUsersAction.cfGuid,
         users: setUsersAction.users,
         // Clear all roles but retain the selected org
-        newRoles: createDefaultOrgRoles(orgGuid, orgName)
+        newRoles: createDefaultOrgRoles(orgGuid, orgName),
+        usernameOrigin: setUsersAction.origin
       };
     case UsersRolesActions.Clear:
       return defaultState;
@@ -81,7 +84,8 @@ export function UsersRolesReducer(state: UsersRolesState = defaultState, action:
         null,
         null,
         setOrgRoleAction.role,
-        setOrgRoleAction.setRole
+        setOrgRoleAction.setRole,
+        state.isSetByUsername
       );
     case UsersRolesActions.SetSpaceRole:
       const setSpaceRoleAction = action as UsersRolesSetSpaceRole;
@@ -92,13 +96,36 @@ export function UsersRolesReducer(state: UsersRolesState = defaultState, action:
         setSpaceRoleAction.spaceGuid,
         setSpaceRoleAction.spaceName,
         setSpaceRoleAction.role,
-        setSpaceRoleAction.setRole
+        setSpaceRoleAction.setRole,
+        state.isSetByUsername
       );
     case UsersRolesActions.SetChanges:
       const setChangesAction = action as UsersRolesSetChanges;
       return {
         ...state,
         changedRoles: setChangesAction.changes
+      };
+    case UsersRolesActions.FlipSetRoles:
+      return {
+        ...state,
+        changedRoles: state.changedRoles.map(change => {
+          return {
+            ...change,
+            add: !change.add
+          };
+        })
+      };
+    case UsersRolesActions.SetIsRemove:
+      const isRemoveAction = action as UsersRolesSetIsRemove;
+      return {
+        ...state,
+        isRemove: isRemoveAction.isRemove
+      };
+    case UsersRolesActions.SetIsSetByUsername:
+      const isSetByUsernameAction = action as UsersRolesSetIsSetByUsername;
+      return {
+        ...state,
+        isSetByUsername: isSetByUsernameAction.isSetByUsername
       };
   }
   return state;
@@ -122,16 +149,17 @@ function setRole(
   spaceGuid: string,
   spaceName: string,
   role: string,
-  applyRole: boolean): UsersRolesState {
+  applyRole: boolean,
+  isSetByUsername: boolean = false): UsersRolesState {
   // Create a fresh instance of the org roles
   let newOrgRoles = cloneOrgRoles(existingState.newRoles, orgGuid, orgName);
 
   if (spaceGuid) {
     // Space role change
-    setSpaceRole(newOrgRoles, orgGuid, orgName, spaceGuid, spaceName, role, applyRole);
+    setSpaceRole(newOrgRoles, orgGuid, orgName, spaceGuid, spaceName, role, applyRole, isSetByUsername);
   } else {
     // Org role change
-    newOrgRoles = setOrgRole(newOrgRoles, role, applyRole);
+    newOrgRoles = setOrgRole(newOrgRoles, role, applyRole, isSetByUsername);
   }
 
   // There's been no change to the existing state, just return the existing state;
@@ -163,7 +191,8 @@ function setSpaceRole(
   spaceGuid: string,
   spaceName: string,
   role: string,
-  applyRole: boolean) {
+  applyRole: boolean,
+  isSetByUsername: boolean) {
   if (!orgRoles.spaces[spaceGuid]) {
     orgRoles.spaces[spaceGuid] = createDefaultSpaceRoles(orgGuid, orgName, spaceGuid, spaceName);
   }
@@ -172,7 +201,7 @@ function setSpaceRole(
   };
   orgRoles = setPermission(spaceRoles, role, applyRole) ? orgRoles : null;
   // If the user has applied any space role they must also have the org user role applied too.
-  if (orgRoles && applyRole) {
+  if (orgRoles && applyRole && !isSetByUsername) {
     orgRoles.permissions = {
       ...orgRoles.permissions,
       [OrgUserRoleNames.USER]: true
@@ -180,10 +209,10 @@ function setSpaceRole(
   }
 }
 
-function setOrgRole(orgRoles: IUserPermissionInOrg, role: string, applyRole: boolean): IUserPermissionInOrg {
+function setOrgRole(orgRoles: IUserPermissionInOrg, role: string, applyRole: boolean, isSetByUsername: boolean): IUserPermissionInOrg {
   orgRoles = setPermission(orgRoles, role, applyRole) ? orgRoles : null;
   // If the user has applied the org manager, auditor or billing manager role they must also have the org user role applied too.
-  if (orgRoles && role !== 'user' && applyRole) {
+  if (orgRoles && role !== 'user' && applyRole && !isSetByUsername) {
     orgRoles.permissions = {
       ...orgRoles.permissions,
       [OrgUserRoleNames.USER]: true

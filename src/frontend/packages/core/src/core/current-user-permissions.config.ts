@@ -30,7 +30,7 @@ export enum CurrentUserPermissions {
   FIREHOSE_VIEW = 'view-firehose',
   ENDPOINT_REGISTER = 'register.endpoint',
   PASSWORD_CHANGE = 'change-password',
-  SERVICE_INSTANCE_EDIT = 'edit.service-instance',
+  SERVICE_INSTANCE_EDIT = 'edit.service-instance'
 }
 export type PermissionConfigType = PermissionConfig[] | PermissionConfig | PermissionConfigLink;
 export interface IPermissionConfigs {
@@ -86,6 +86,9 @@ export class PermissionConfigLink {
   ) { }
 }
 
+// For each set permissions are checked by permission types of ENDPOINT, ENDPOINT_SCOPE, STRATOS_SCOPE, FEATURE_FLAG or a random bag.
+// Every group result must be true in order for the permission to be true. A group result is true if all or some of it's permissions are
+// true (see `getCheckFromConfig`).
 export const permissionConfigs: IPermissionConfigs = {
   [CurrentUserPermissions.APPLICATION_VIEW]: [
     // See #2186
@@ -115,7 +118,11 @@ export const permissionConfigs: IPermissionConfigs = {
     new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
   ],
-  [CurrentUserPermissions.SPACE_CHANGE_ROLES]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
+  [CurrentUserPermissions.SPACE_CHANGE_ROLES]: [
+    new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER)
+  ],
+  // TODO: See #4189. Wire in. Can be org manager?
   [CurrentUserPermissions.ROUTE_CREATE]: [
     new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.route_creation),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)

@@ -41,8 +41,8 @@
             </button>
             <mat-menu #history="matMenu" [overlapTrigger]="false" class="page-header__menu">
               <div class="page-header__history">
-                <h3>Recent</h3>
-                <app-recent-entities class="page-header__history-list" history="true"></app-recent-entities>
+                <h3 class="page-header__history-title">Recent Activity</h3>
+                <app-recent-entities mode="menu" class="page-header__history-list" history="true"></app-recent-entities>
               </div>
             </mat-menu>
             <button *ngIf="(events$ | async).length > 0" routerLink="/events" mat-icon-button

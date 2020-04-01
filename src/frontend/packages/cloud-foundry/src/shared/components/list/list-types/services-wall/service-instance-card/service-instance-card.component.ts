@@ -150,7 +150,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   getServiceUrl = () => {
     return getServiceSummaryUrl(
       this.serviceInstanceEntity.entity.cfGuid,
-      this.serviceInstanceEntity.entity.service_plan.entity.service.entity.guid
+      this.serviceInstanceEntity.entity.service_plan.entity.service.metadata.guid
     );
   }
 }

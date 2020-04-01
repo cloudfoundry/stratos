@@ -42,6 +42,9 @@ export function userReducer(state: IRequestEntityTypeState<APIResource<CfUser>>,
     case REMOVE_ROLE_SUCCESS:
       // Ensure that a user's roles collections are updated when we call add/remove
       const permAction = action.apiAction as ChangeUserRole;
+      if (permAction.username) {
+        return state;
+      }
       const { entityGuid, isSpace, permissionTypeKey, userGuid } = permAction;
       return {
         ...state,
@@ -175,7 +178,7 @@ function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUse
 
   // Create a delta of the changes, this will ensure we only return an updated state if there are updates
   const haveUpdatedUsers: boolean = Object.values(usersInResponse).reduce((changes, user) => {
-    const oldMissingRoles = (users[user.entity.guid] ? users[user.entity.guid].entity.missingRoles : null)
+    const oldMissingRoles = (users[user.metadata.guid] ? users[user.metadata.guid].entity.missingRoles : null)
       || getDefaultCfUserMissingRoles();
     const newMissingRoles = getDefaultCfUserMissingRoles();
     Object.values(CfUserRoleParams).forEach((roleParam) => {

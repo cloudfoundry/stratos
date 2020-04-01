@@ -116,7 +116,12 @@ describe('ServiceInstanceCardComponent', () => {
                 service_plans_url: '',
                 service_plans: [],
               },
-              metadata: null
+              metadata: {
+                guid: '',
+                created_at: '',
+                updated_at: '',
+                url: ''
+              }
             },
             service_instances_url: '',
           },

@@ -559,7 +559,7 @@ function generateCFServiceBindingEntity(endpointDefinition: StratosEndpointExten
       actionBuilders: serviceBindingActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
-          name: ent.entity.guid
+          name: ent.metadata.guid
         }),
         getGuid: metadata => metadata.guid,
       }
@@ -662,7 +662,7 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
       dataReducers: [userReducer, endpointDisconnectUserReducer],
       entityBuilder: {
         getMetadata: ent => ({
-          name: ent.entity.username || ent.entity.guid
+          name: ent.entity.username || ent.entity.guid || ent.metadata.guid
         }),
         getGuid: metadata => metadata.guid,
       }
