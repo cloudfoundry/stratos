@@ -103,10 +103,9 @@ export function setupCfUserRemovalTests(
   }, 75000);
 
   it('Clicks on remove menu option', () => {
-
     const usersTable = new CFUsersListComponent();
     usersTable.header.setSearchText(userName);
-    expect(usersTable.getTotalResults()).toBe(1, `Failed to find user in table: ${userName}`);
+    usersTable.waitForTotalResultsToBe(1, 10000, `Failed to find user in table: ${userName}`);
 
     if (removalLevel === CfRolesRemovalLevel.OrgsSpaces) {
       usersTable.table.openRowActionMenuByIndex(0).clickItem('Remove from org');
@@ -115,6 +114,7 @@ export function setupCfUserRemovalTests(
     }
 
     removeUsersStepper = removeUsersPage.stepper;
+    removeUsersStepper.waitUntilShown('Remove Users Stepper');
 
     // ... check button state
     expect(removeUsersStepper.canPrevious()).toBeFalsy();

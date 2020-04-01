@@ -60,13 +60,13 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
     guid,
     endpointGuid, [
-    createEntityRelationKey(applicationEntityType, routeEntityType),
-    createEntityRelationKey(applicationEntityType, spaceEntityType),
-    createEntityRelationKey(applicationEntityType, stackEntityType),
-    createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
-    createEntityRelationKey(routeEntityType, domainEntityType),
-    createEntityRelationKey(spaceEntityType, organizationEntityType),
-  ]
+      createEntityRelationKey(applicationEntityType, routeEntityType),
+      createEntityRelationKey(applicationEntityType, spaceEntityType),
+      createEntityRelationKey(applicationEntityType, stackEntityType),
+      createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
+      createEntityRelationKey(routeEntityType, domainEntityType),
+      createEntityRelationKey(spaceEntityType, organizationEntityType),
+    ]
   );
 }
 

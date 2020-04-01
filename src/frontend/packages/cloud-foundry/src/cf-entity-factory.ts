@@ -128,10 +128,9 @@ const ServiceBindingsSchema = new CFServiceBindingEntitySchema({
           app: new CFApplicationEntitySchema(),
         }, { idAttribute: getAPIResourceGuid })],
         service: new CFEntitySchema(serviceEntityType, {}, { idAttribute: getAPIResourceGuid }),
-        service_plan: new CFEntitySchema(servicePlanEntityType, {}, { idAttribute: getAPIResourceGuid }),
+        service_plan: ServicePlanSchema,
       },
-    }),
-    service: ServiceNoPlansSchema
+    })
   }
 });
 entityCache[serviceBindingEntityType] = ServiceBindingsSchema;
@@ -154,7 +153,6 @@ const ServiceInstancesSchema = new CFServiceInstanceEntitySchema({
   entity: {
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema],
-    service: ServiceSchema
   }
 });
 entityCache[serviceInstancesEntityType] = ServiceInstancesSchema;
@@ -190,16 +188,45 @@ const ApplicationWithoutSpaceEntitySchema = new CFApplicationEntitySchema(
   }
 );
 
+const CFUserSchema = new CFUserEntitySchema({
+  entity: {
+    organizations: [createUserOrgSpaceSchema(organizationEntityType, {}, CfUserRoleParams.ORGANIZATIONS)],
+    audited_organizations: [createUserOrgSpaceSchema(organizationEntityType, {}, CfUserRoleParams.AUDITED_ORGS)],
+    managed_organizations: [createUserOrgSpaceSchema(organizationEntityType, {}, CfUserRoleParams.MANAGED_ORGS)],
+    billing_managed_organizations: [createUserOrgSpaceSchema(organizationEntityType, {}, CfUserRoleParams.BILLING_MANAGER_ORGS)],
+    spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.SPACES)],
+    managed_spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.MANAGED_SPACES)],
+    audited_spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.AUDITED_SPACES)],
+  }
+}, {
+    idAttribute: getAPIResourceGuid,
+    processStrategy: (user: APIResource<CfUser>) => {
+      if (user.entity.username) {
+        return user;
+      }
+      const entity = {
+        ...user.entity,
+        username: user.metadata.guid
+      };
+
+      return user.metadata ? {
+        entity,
+        metadata: user.metadata
+      } : {
+          entity
+        };
+    }
+  });
+entityCache[cfUserEntityType] = CFUserSchema;
+
 const coreSpaceSchemaParams = {
   routes: [RouteSchema],
   domains: [DomainSchema],
   space_quota_definition: SpaceQuotaSchema,
   service_instances: [ServiceInstancesSchema],
-  [SpaceUserRoleNames.DEVELOPER]: [
-    new CFEntitySchema(cfUserEntityType, {}, { idAttribute: getAPIResourceGuid }, SpaceUserRoleNames.DEVELOPER)
-  ],
-  [SpaceUserRoleNames.MANAGER]: [new CFUserEntitySchema(undefined, undefined, SpaceUserRoleNames.MANAGER)],
-  [SpaceUserRoleNames.AUDITOR]: [new CFUserEntitySchema(undefined, undefined, SpaceUserRoleNames.AUDITOR)]
+  [SpaceUserRoleNames.DEVELOPER]: [CFUserSchema],
+  [SpaceUserRoleNames.MANAGER]: [CFUserSchema],
+  [SpaceUserRoleNames.AUDITOR]: [CFUserSchema]
 };
 const SpaceSchema = new CFSpaceEntitySchema({
   entity: {
@@ -228,12 +255,10 @@ const OrganizationSchema = new CFOrgEntitySchema({
   entity: {
     ...coreOrgSchemaParams,
     spaces: [SpaceSchema],
-    [OrgUserRoleNames.USER]: [new CFUserEntitySchema(undefined, undefined, OrgUserRoleNames.USER)],
-    [OrgUserRoleNames.MANAGER]: [new CFUserEntitySchema(undefined, undefined, OrgUserRoleNames.MANAGER)],
-    [OrgUserRoleNames.BILLING_MANAGERS]: [
-      new CFUserEntitySchema(undefined, undefined, OrgUserRoleNames.BILLING_MANAGERS)
-    ],
-    [OrgUserRoleNames.AUDITOR]: [new CFUserEntitySchema(undefined, undefined, OrgUserRoleNames.AUDITOR)]
+    [OrgUserRoleNames.USER]: [CFUserSchema],
+    [OrgUserRoleNames.MANAGER]: [CFUserSchema],
+    [OrgUserRoleNames.BILLING_MANAGERS]: [CFUserSchema],
+    [OrgUserRoleNames.AUDITOR]: [CFUserSchema]
   }
 });
 entityCache[organizationEntityType] = OrganizationSchema;
@@ -253,7 +278,6 @@ const ServiceInstancesWithSpaceSchema = new CFServiceInstanceEntitySchema({
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema],
     space: SpaceSchema.withEmptyDefinition(),
-    service: ServiceSchema
   }
 });
 entityCache[serviceInstancesWithSpaceEntityType] = ServiceInstancesWithSpaceSchema;
@@ -303,50 +327,12 @@ entityCache[securityGroupEntityType] = SecurityGroupSchema;
 const FeatureFlagSchema = new CFEntitySchema(featureFlagEntityType, {}, { idAttribute: 'name' });
 entityCache[featureFlagEntityType] = FeatureFlagSchema;
 
-const SpaceEmptySchema = SpaceSchema.withEmptyDefinition();
-const orgUserEntity = {
-  entity: {
-    spaces: [SpaceEmptySchema]
-  }
-};
-
 const ServiceBrokerSchema = new CFEntitySchema(serviceBrokerEntityType, {}, { idAttribute: getAPIResourceGuid });
 entityCache[serviceBrokerEntityType] = ServiceBrokerSchema;
 
 function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema {
   return new CFEntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
 }
-
-const CFUserSchema = new CFUserEntitySchema({
-  entity: {
-    organizations: [createUserOrgSpaceSchema(organizationEntityType, orgUserEntity, CfUserRoleParams.ORGANIZATIONS)],
-    audited_organizations: [createUserOrgSpaceSchema(organizationEntityType, orgUserEntity, CfUserRoleParams.AUDITED_ORGS)],
-    managed_organizations: [createUserOrgSpaceSchema(organizationEntityType, orgUserEntity, CfUserRoleParams.MANAGED_ORGS)],
-    billing_managed_organizations: [createUserOrgSpaceSchema(organizationEntityType, orgUserEntity, CfUserRoleParams.BILLING_MANAGER_ORGS)],
-    spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.SPACES)],
-    managed_spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.MANAGED_SPACES)],
-    audited_spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.AUDITED_SPACES)],
-  }
-}, {
-  idAttribute: getAPIResourceGuid,
-  processStrategy: (user: APIResource<CfUser>) => {
-    if (user.entity.username) {
-      return user;
-    }
-    const entity = {
-      ...user.entity,
-      username: user.metadata.guid
-    };
-
-    return user.metadata ? {
-      entity,
-      metadata: user.metadata
-    } : {
-        entity
-      };
-  }
-});
-entityCache[cfUserEntityType] = CFUserSchema;
 
 
 const UserProvidedServiceInstanceSchema = new CFEntitySchema(userProvidedServiceInstanceEntityType, {

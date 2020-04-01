@@ -158,10 +158,14 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
             return null;
           }
           const serviceInstance: IServiceInstance = si.entity.entity as IServiceInstance;
-          return getServiceBrokerName(
-            serviceInstance.service.entity.service_broker_guid,
-            serviceInstance.cfGuid,
-            this.entityServiceFactory
+          return this.service$.pipe(
+            switchMap(service => {
+              return getServiceBrokerName(
+                service.entity.entity.service_broker_guid,
+                serviceInstance.cfGuid,
+                this.entityServiceFactory
+              );
+            })
           );
         })
       )
@@ -174,7 +178,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     );
 
     this.serviceUrl$ = this.service$.pipe(
-      map(service => getServiceSummaryUrl(service.entity.entity.cfGuid, service.entity.entity.guid))
+      map(service => getServiceSummaryUrl(service.entity.entity.cfGuid, service.entity.metadata.guid))
     );
 
     this.serviceName$ = this.service$.pipe(

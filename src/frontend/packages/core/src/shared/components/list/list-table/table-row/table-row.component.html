@@ -1,4 +1,5 @@
-<div class="table-row-wrapper" [ngClass]="{'table-row-wrapper__blocked': isBlocked$ | async, 'table-row-wrapper__warning': inWarningState$ | async,'table-row-wrapper__errored': inErrorState$ | async,'table-row-wrapper__highlighted': isHighlighted$ | async }">
+<div class="table-row-wrapper"
+  [ngClass]="{'table-row-wrapper__blocked': isBlocked$ | async, 'table-row-wrapper__warning': inWarningState$ | async,'table-row-wrapper__errored': inErrorState$ | async,'table-row-wrapper__highlighted': isHighlighted$ | async }">
   <div *ngIf="isDeleting$ | async" class="table-row__deletion-bar-wrapper">
     <div class="table-row__deletion-bar-inner">
       <div class="table-row__deletion-bar-text">Deleting</div>

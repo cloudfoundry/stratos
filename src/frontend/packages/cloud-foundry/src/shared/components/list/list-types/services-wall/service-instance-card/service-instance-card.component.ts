@@ -84,7 +84,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
       if (!this.serviceBrokerName$) {
         this.serviceBrokerName$ = getServiceBrokerName(
-          this.serviceInstanceEntity.entity.service.entity.service_broker_guid,
+          this.serviceInstanceEntity.entity.service_plan.entity.service.entity.service_broker_guid,
           this.serviceInstanceEntity.entity.cfGuid,
           this.entityServiceFactory
         );
@@ -135,7 +135,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   )
 
   getServiceName = () => {
-    return getServiceName(this.serviceInstanceEntity.entity.service);
+    return getServiceName(this.serviceInstanceEntity.entity.service_plan.entity.service);
   }
 
   getServicePlanName = () => {
@@ -148,6 +148,9 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
   getServiceUrl = () => {
-    return getServiceSummaryUrl(this.serviceInstanceEntity.entity.cfGuid, this.serviceInstanceEntity.entity.service.entity.guid);
+    return getServiceSummaryUrl(
+      this.serviceInstanceEntity.entity.cfGuid,
+      this.serviceInstanceEntity.entity.service_plan.entity.service.metadata.guid
+    );
   }
 }

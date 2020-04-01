@@ -1,3 +1,4 @@
+import { selectDashboardState } from './../../../../../store/src/selectors/dashboard.selectors';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -20,6 +21,8 @@ import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { StratosStatus } from '../../shared.types';
 import { FavoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { UserProfileService } from '../../../core/user-profile.service';
+import { UserProfileInfo } from './../../../../../store/src/types/user-profile.types';
 
 @Component({
   selector: 'app-page-header',
@@ -107,8 +110,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  public userNameFirstLetter$: Observable<string>;
   public username$: Observable<string>;
+  public user$: Observable<UserProfileInfo>;
+  public allowGravatar$: Observable<boolean>;
+
   public actionsKey: string;
 
   @Input()
@@ -149,7 +154,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private tabNavService: TabNavService,
     private router: Router,
     eventService: GlobalEventService,
-    private favoritesConfigMapper: FavoritesConfigMapper
+    private favoritesConfigMapper: FavoritesConfigMapper,
+    private userProfileService: UserProfileService,
   ) {
     this.events$ = eventService.events$.pipe(
       startWith([])
@@ -162,11 +168,23 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
-    this.username$ = store.select(s => s.auth).pipe(
-      map((auth: AuthState) => auth && auth.sessionData && auth.sessionData.user ? auth.sessionData.user.name : 'Unknown')
+
+    this.user$ = this.userProfileService.userProfile$;
+    this.userProfileService.fetchUserProfile();
+
+    this.username$ = this.user$.pipe(
+      map(profile => {
+        let name = profile.userName;
+        if (profile.name) {
+          name = profile.name.givenName + ' ' + profile.name.familyName;
+          name = name.trim();
+        }
+        return name ? name : profile.userName;
+      })
     );
-    this.userNameFirstLetter$ = this.username$.pipe(
-      map(name => name[0].toLocaleUpperCase())
+
+    this.allowGravatar$ = this.store.select(selectDashboardState).pipe(
+      map(dashboardState => dashboardState.gravatarEnabled)
     );
   }
 

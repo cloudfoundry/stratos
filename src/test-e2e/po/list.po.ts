@@ -69,13 +69,20 @@ export class ListTableComponent extends Component {
     });
   }
 
-  findRow(columnHeader: string, value: string): promise.Promise<number> {
+  findRow(columnHeader: string, value: string, expected = true): promise.Promise<number> {
     return this.getTableData().then(data => {
       const rowIndex = data.findIndex(row => row[columnHeader] === value);
       if (rowIndex >= 0) {
-        return rowIndex;
+        if (expected) {
+          return rowIndex;
+        }
+        throw new Error(`Found row with header '${columnHeader}' and value '${value}' when not expecting one`);
+      } else {
+        if (expected) {
+          throw new Error(`Could not find row with header '${columnHeader}' and value '${value}'`);
+        }
+        return -1;
       }
-      throw new Error(`Could not find row with header ${columnHeader} and value ${value}`);
     });
   }
 
@@ -497,5 +504,17 @@ export class ListComponent extends Component {
     });
   }
 
+  /**
+   *
+   * @param count Wait until the list has the specified total number of results
+   */
+  waitForTotalResultsToBe(count: number, timeout = 5000, timeoutMsg = 'Timed out waiting for total results') {
+    const totalResultsIs = async (): Promise<boolean> => {
+      const actual = await this.getTotalResults();
+      return actual === count;
+    };
+
+    browser.wait(totalResultsIs, 10000, timeoutMsg);
+  }
 }
 

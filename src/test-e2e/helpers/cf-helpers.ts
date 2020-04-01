@@ -413,10 +413,10 @@ export class CFHelpers {
     return this.cfRequestHelper.sendCfGet(cfGuid, `organizations/${orgGuid}/users`).then(res => res.resources);
   }
 
-  deleteUsers(cfGuid: string, orgName: string, usernames: string[]): promise.Promise<any> {
+  deleteUsers(cfGuid: string, orgName: string, userNames: string[]): promise.Promise<any> {
     return this.fetchOrg(cfGuid, orgName)
       .then(org => this.fetchOrgUsers(cfGuid, org.metadata.guid))
-      .then(orgUsers => promise.all(usernames.map(username => {
+      .then(orgUsers => promise.all(userNames.map(username => {
         const foundUser = orgUsers.find(user => user.entity.username === username);
         if (!foundUser) {
           throw new Error(`Failed to find user ${username}. Aborting deletion of users`);
