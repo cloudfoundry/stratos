@@ -63,7 +63,6 @@ import {
   RowState,
 } from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
-import { TableRowExpandedService } from './list-table/table-row/table-row-expaned-service';
 import { ITableColumn } from './list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsCards,
@@ -97,9 +96,6 @@ import {
         animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
       ])
     ])
-  ],
-  providers: [
-    TableRowExpandedService
   ]
 })
 export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
