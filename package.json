@@ -41,9 +41,7 @@
     "customize-default": "gulp customize-default",
     "customize-reset": "gulp customize-reset",
     "store-git-metadata": "gulp store-git-metadata",
-    "postinstall": "npm run customize && gulp dev-setup",
-    "update": "ng update @nrwl/workspace",
-    "nx": "nx"
+    "postinstall": "npm run customize && gulp dev-setup"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -90,8 +88,7 @@
     "web-animations-js": "^2.3.2",
     "xterm": "^4.0.2",
     "xterm-addon-fit": "^0.3.0",
-    "zone.js": "~0.10.2",
-    "@nrwl/angular": "8.5.2"
+    "zone.js": "~0.10.2"
   },
   "engines": {
     "node": "12.13.0"
@@ -148,7 +145,6 @@
     "tsickle": "^0.37.0",
     "tslib": "^1.9.0",
     "tslint": "~5.20.0",
-    "typescript": "<3.6.0",
-    "@nrwl/workspace": "8.5.2"
+    "typescript": "<3.6.0"
   }
 }
