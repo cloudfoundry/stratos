@@ -44,7 +44,6 @@ export class MaxListMessageComponent implements OnDestroy {
       return;
     }
 
-    // TODO: RC find all where set to catalogue something rather than catalogueEntity
     const catalogueEntity = entityCatalog.getEntity(entityConfig);
     const paginationConfig: PaginationPageIteratorConfig = catalogueEntity.getPaginationConfig();
     if (paginationConfig) {

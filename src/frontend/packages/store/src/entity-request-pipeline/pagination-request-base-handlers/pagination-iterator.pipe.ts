@@ -22,9 +22,9 @@ export interface PaginationPageIteratorConfig<R = any, E = any> {
    * If so do not fetch other pages and enter 'maxed' error mode
    * Only applicable to 'local' collections (everything is fetch up front and paginated locally)
    */
-  getMaxedStateCount: (store: Store<AppState>, action: PaginatedAction) => Observable<number>;
+  maxedStateStartAt: (store: Store<AppState>, action: PaginatedAction) => Observable<number>;
   /**
-   * If the collection has entered 'maxed' error mode, can the user ignore and fetch all results regardless (see `getMaxedStateCount`)?
+   * If the collection has entered 'maxed' error mode, can the user ignore and fetch all results regardless (see `maxedStateStartAt`)?
    */
   canIgnoreMaxedState: (store: Store<AppState>) => Observable<boolean>;
 }
@@ -102,9 +102,9 @@ export class PaginationPageIterator<R = any, E = any> {
       return allResults;
     }
 
-    return this.config.getMaxedStateCount(this.store, action).pipe(
+    return this.config.maxedStateStartAt(this.store, action).pipe(
       switchMap(maxEntities => {
-        if (maxEntities && maxEntities < totalResults) {
+        if (maxEntities && maxEntities <= totalResults) {
           // We've entered 'maxed' mode. Only respond with the first page of results.
           const { entityType, endpointType, paginationKey, __forcedPageEntityConfig__ } = action;
           const forcedEntityKey = entityCatalog.getEntityKey(__forcedPageEntityConfig__);

@@ -213,9 +213,9 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
           map(sessionData => !!sessionData.config.listAllowLoadMaxed)
         );
       },
-      getMaxedStateCount: (store: Store<AppState>, action: PaginatedAction) => {
+      maxedStateStartAt: (store: Store<AppState>, action: PaginatedAction) => {
         if (!action.flattenPaginationMax) {
-          // TODO: RC REVIEW - All CF lists or just one's we currently supported
+          // TODO: RC REVIEW - All CF lists or just one's that currently support maxed?
           // If all - some lists might not ever return content (fetch routes when checking one is created, create space & name etc)
           return of(null);
         }
@@ -224,9 +224,10 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
           map(sessionData => sessionData.config.listMaxSize)
         );
 
+        // TODO: RC REVIEW - Add this feature in this PR? Need another flag to say whether user is allowed to
         // Maxed count as per user config
         const userOverride$ = store.select(selectSessionData()).pipe(
-          // TODO: RC REVIEW - split out or do in this one? CI?
+          // Check that the user is allowed to load all, if so they can set their own max number
           map(sessionData => !!sessionData.config.listAllowLoadMaxed ? null : null)
         );
 
@@ -302,7 +303,7 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
       getTotalEntities: (responses: JetstreamResponse<CFResponse>) => 1,
       getPaginationParameters: (page: number) => ({ page: '1' }),
       canIgnoreMaxedState: () => of(false),
-      getMaxedStateCount: () => of(null),
+      maxedStateStartAt: () => of(null),
     },
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       return {
@@ -454,7 +455,7 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
       }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' }),
       canIgnoreMaxedState: () => of(false),
-      getMaxedStateCount: () => of(null),
+      maxedStateStartAt: () => of(null),
     },
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       if (data) {
@@ -884,7 +885,7 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
       getTotalEntities: (responses: JetstreamResponse) => responses.length,
       getPaginationParameters: (page: number) => ({ page: page + '' }),
       canIgnoreMaxedState: () => of(false),
-      getMaxedStateCount: () => of(null),
+      maxedStateStartAt: () => of(null),
     }
   };
   return new StratosCatalogEntity<IBasicCFMetaData, IFeatureFlag>(

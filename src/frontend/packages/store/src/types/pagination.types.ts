@@ -29,7 +29,8 @@ export interface PaginationClientPagination {
 export interface PaginationMaxedState {
   /**
    * Is the pagination in maxed mode?
-   * - flattenPagination is true. flattenPaginationMax has been set //TODO: RC Update comment before pushing
+   * // TODO: RC Update comment following review
+   * - flattenPagination is true. flattenPaginationMax has been set
    * - Initial fetch of entities brought back a total above the allowed flattenPaginationMax
    * - Pagination notionally now changes from local (has all entities & filtering locally) to non-local (has a single page &
    * filtering remotely)
