@@ -12,8 +12,6 @@
         {{ session.user.name }} (You have administrative privileges)</app-metadata-item>
       <app-metadata-item *ngIf="session.config.enableTechPreview" class="about-page__mat-warning-icon" icon="whatshot"
         label="Tech Preview">Tech Preview features are enabled</app-metadata-item>
-      <!-- // TODO: RC REVIEW Should this config only relate to cfs. Should it relate to a specific cf? Should it only relate to lists -->
-      <!-- // TODO: RC REVIEW Terminology 'maxed'. count restricted lists -->
       <app-metadata-item *ngIf="session.config.listMaxSize" class="about-page__mat-warning-icon diagnostics-page__maxed"
         icon="list" label="Count Restricted Lists">
         <div class="diagnostics-page__maxed__content">

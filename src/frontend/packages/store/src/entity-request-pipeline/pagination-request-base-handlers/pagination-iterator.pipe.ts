@@ -57,7 +57,7 @@ export class PaginationPageIterator<R = any, E = any> {
       return of([]);
     }
     return range(2, count + 1).pipe(
-      mergeMap(currentPage => this.makeRequest(this.addPageToRequest(currentPage)), 5), // TODO: RC REVIEW why only 5 concurrent?
+      mergeMap(currentPage => this.makeRequest(this.addPageToRequest(currentPage)), 10),
       reduce((acc, res: JetstreamResponse<R>) => {
         acc.push(res);
         return acc;

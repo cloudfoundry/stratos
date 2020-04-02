@@ -341,8 +341,8 @@ type PortalConfig struct {
 	AuthEndpointType                   string   `configName:"AUTH_ENDPOINT_TYPE"`
 	CookieDomain                       string   `configName:"COOKIE_DOMAIN"`
 	LogLevel                           string   `configName:"LOG_LEVEL"`
-	FEListMaxSize                      int64    `configName:"FE_LIST_MAX_SIZE"`
-	FEListAllowLoadMaxed               bool     `configName:"FE_LIST_ALLOW_LOAD_MAXED"`
+	FEListMaxSize                      int64    `configName:"UI_LIST_MAX_SIZE"`
+	FEListAllowLoadMaxed               bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
 	CFAdminIdentifier                  string
 	CloudFoundryInfo                   *CFInfo
 	HTTPS                              bool

@@ -68,7 +68,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
     'results-per-page': 100,
   };
   flattenPagination = true;
-  flattenPaginationMax = 600;
+  flattenPaginationMax = true;
 }
 
 export class GetApplication extends CFStartAction implements ICFAction, EntityInlineParentAction {

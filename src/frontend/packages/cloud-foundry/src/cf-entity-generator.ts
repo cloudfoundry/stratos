@@ -214,22 +214,24 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
         );
       },
       maxedStateStartAt: (store: Store<AppState>, action: PaginatedAction) => {
+        // Disable via the action?
+        // Only allowed maxed process if enabled by action. This will be removed via #4204
         if (!action.flattenPaginationMax) {
-          // TODO: RC REVIEW - All CF lists or just one's that currently support maxed?
-          // If all - some lists might not ever return content (fetch routes when checking one is created, create space & name etc)
           return of(null);
         }
+
         // Maxed Count from Backend?
         const beValue$ = store.select(selectSessionData()).pipe(
           map(sessionData => sessionData.config.listMaxSize)
         );
 
-        // TODO: RC REVIEW - Add this feature in this PR? Need another flag to say whether user is allowed to
+        // TODO: See #4205
         // Maxed count as per user config
-        const userOverride$ = store.select(selectSessionData()).pipe(
-          // Check that the user is allowed to load all, if so they can set their own max number
-          map(sessionData => !!sessionData.config.listAllowLoadMaxed ? null : null)
-        );
+        const userOverride$ = of(null);
+        // const userOverride$ = store.select(selectSessionData()).pipe(
+        //   // Check that the user is allowed to load all, if so they can set their own max number
+        //   map(sessionData => !!sessionData.config.listAllowLoadMaxed ? null : null)
+        // );
 
         // Maxed count from entity type
         const entityTypeDefault = 600;
@@ -239,7 +241,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
           beValue$,
           userOverride$
         ]).pipe(
-          map(([beValue, userOverride]) => beValue || userOverride || entityTypeDefault)
+          map(([beValue, userOverride]) => userOverride || beValue || entityTypeDefault)
         );
       },
     }

@@ -219,15 +219,3 @@ export class IgnorePaginationMaxedState implements Action, EntityCatalogEntityCo
     public forcedEntityKey?: string
   ) { }
 }
-
-// TODO: REMOVE
-// export class SetPaginationMax implements Action, EntityCatalogEntityConfig {
-//   type = SET_MAXED;
-//   constructor(
-//     public max: number,
-//     public entityType: string,
-//     public endpointType: string,
-//     public paginationKey: string,
-//     public forcedEntityKey?: string
-//   ) { }
-// }

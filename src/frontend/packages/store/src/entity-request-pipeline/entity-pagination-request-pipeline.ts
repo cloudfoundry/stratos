@@ -119,7 +119,6 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
           completePaginationAction,
           actionDispatcher,
           flattenerConfig,
-          // paginationState ? paginationState.maxedState.ignoreMaxed : false,
           paginationState ? paginationState.maxedState : null
         ) :
         null;

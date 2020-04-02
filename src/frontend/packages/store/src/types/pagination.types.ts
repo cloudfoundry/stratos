@@ -29,11 +29,11 @@ export interface PaginationClientPagination {
 export interface PaginationMaxedState {
   /**
    * Is the pagination in maxed mode?
-   * // TODO: RC Update comment following review
-   * - flattenPagination is true. flattenPaginationMax has been set
-   * - Initial fetch of entities brought back a total above the allowed flattenPaginationMax
+   * - flattenPagination and flattenPaginationMax is true
+   * - Initial fetch of entities brought back a total above the allowed IStratosBaseEntityDefinition paginationConfig maxedStateStartAt
+   *   value
    * - Pagination notionally now changes from local (has all entities & filtering locally) to non-local (has a single page &
-   * filtering remotely)
+   *   filtering remotely)
    */
   isMaxedMode?: boolean;
   /**
@@ -79,9 +79,9 @@ export interface PaginatedAction extends BasePaginatedAction, EntityRequestActio
    */
   flattenPagination?: boolean;
   /*
-   * The maximum number of entities to fetch. Note - Should be equal or higher than the page size
+   * When fetching all pages, abort if they exceed the maximum allowed. See IStratosBaseEntityDefinition paginationConfig maxedStateStartAt
    */
-  flattenPaginationMax?: number;
+  flattenPaginationMax?: boolean;
   initialParams?: PaginationParam;
   pageNumber?: number;
   options?: HttpRequest<any>;
