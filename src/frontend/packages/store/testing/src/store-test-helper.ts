@@ -234,7 +234,8 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
               string: '',
               items: {}
             },
-          }
+          },
+          maxedState: {}
         }
       },
       metrics: {},
