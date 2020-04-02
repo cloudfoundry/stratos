@@ -372,10 +372,11 @@ export class CfUserService {
       // Do we have the list already and it's not maxed (user has previously loaded all users, possibly forcing this load)?
       const hasAllUsers$ = this.store.select(selectCfPaginationState(cfUserEntityConfig.type, allCfUsersAction.paginationKey)).pipe(
         filter(paginationState =>
-          !paginationState ||
+          !paginationState || // No pagination state... list has never loaded
           (paginationState.pageRequests &&
             paginationState.pageRequests[paginationState.currentPage] &&
-            !paginationState.pageRequests[paginationState.currentPage].busy)
+            !paginationState.pageRequests[paginationState.currentPage].busy) || // Have list, not loading
+          !paginationState.pageRequests[paginationState.currentPage] // Had list, not loading
         ),
         map(paginationState => paginationState ? !LocalPaginationHelpers.isPaginationMaxed(paginationState) : false),
         first()
