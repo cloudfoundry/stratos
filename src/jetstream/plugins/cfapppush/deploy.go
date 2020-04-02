@@ -158,8 +158,10 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	stratosProject.DeployOverrides = overrides
 
 	// Source fetched - read manifest
-	manifest, err := fetchManifest(appDir, stratosProject, clientWebSocket)
+	manifest, manifestFile, err := fetchManifest(appDir, stratosProject, clientWebSocket)
 	if err != nil {
+		log.Warnf("Failed to find manifest file: %s", err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
 
@@ -178,6 +180,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	pushConfig, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGUID, spaceGUID, spaceName, orgName, clientWebSocket)
 	if err != nil {
 		log.Warnf("Failed to initialise config due to error %+v", err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
 
@@ -188,7 +191,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	// Initialise Push Command
 	cfAppPush.cfPush = Constructor(pushConfig, cfAppPush.portalProxy)
 
-	err = cfAppPush.cfPush.Init(appDir, appDir+"/manifest.yml", overrides)
+	err = cfAppPush.cfPush.Init(appDir, manifestFile, overrides)
 	if err != nil {
 		log.Warnf("Failed to parse due to: %+v", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
@@ -537,23 +540,42 @@ func getCommit(cloneDetails CloneDetails, clientWebSocket *websocket.Conn, tempD
 
 }
 
+// Check if file exists
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
 // This assumes manifest lives in the root of the app
-func fetchManifest(repoPath string, stratosProject StratosProject, clientWebSocket *websocket.Conn) (Applications, error) {
+func fetchManifest(repoPath string, stratosProject StratosProject, clientWebSocket *websocket.Conn) (Applications, string, error) {
 
 	var manifest Applications
-	manifestPath := fmt.Sprintf("%s/manifest.yml", repoPath)
+
+	// Can be either manifest.yml or manifest.yaml
+	manifestPath := filepath.Join(repoPath, "manifest.yml")
+	if !fileExists(manifestPath) {
+		manifestPath = filepath.Join(repoPath, "manifest.yaml")
+		if !fileExists(manifestPath) {
+			return manifest, manifestPath, fmt.Errorf("Can not find manifest file")
+		}
+	}
+
+	// Read the manifest
 	data, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
 		log.Warnf("Failed to read manifest in path %s", manifestPath)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_MANIFEST)
-		return manifest, err
+		return manifest, manifestPath, err
 	}
 
 	err = yaml.Unmarshal(data, &manifest)
 	if err != nil {
 		log.Warnf("Failed to unmarshall manifest in path %s", manifestPath)
 		sendErrorMessage(clientWebSocket, err, CLOSE_INVALID_MANIFEST)
-		return manifest, err
+		return manifest, manifestPath, err
 	}
 
 	marshalledJSON, _ := json.Marshal(stratosProject)
@@ -573,12 +595,12 @@ func fetchManifest(repoPath string, stratosProject StratosProject, clientWebSock
 		if err != nil {
 			log.Warnf("Failed to marshall manifest in path %v", manifest)
 			sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
-			return manifest, err
+			return manifest, manifestPath, err
 		}
 		ioutil.WriteFile(manifestPath, marshalledYaml, 0600)
 	}
 
-	return manifest, nil
+	return manifest, manifestPath, nil
 }
 
 func (sw *SocketWriter) Write(data []byte) (int, error) {

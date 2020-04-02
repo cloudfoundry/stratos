@@ -69,13 +69,20 @@ export class ListTableComponent extends Component {
     });
   }
 
-  findRow(columnHeader: string, value: string): promise.Promise<number> {
+  findRow(columnHeader: string, value: string, expected = true): promise.Promise<number> {
     return this.getTableData().then(data => {
       const rowIndex = data.findIndex(row => row[columnHeader] === value);
       if (rowIndex >= 0) {
-        return rowIndex;
+        if (expected) {
+          return rowIndex;
+        }
+        throw new Error(`Found row with header '${columnHeader}' and value '${value}' when not expecting one`);
+      } else {
+        if (expected) {
+          throw new Error(`Could not find row with header '${columnHeader}' and value '${value}'`);
+        }
+        return -1;
       }
-      throw new Error(`Could not find row with header ${columnHeader} and value ${value}`);
     });
   }
 

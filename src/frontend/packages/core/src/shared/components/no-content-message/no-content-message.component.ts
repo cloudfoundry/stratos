@@ -20,6 +20,8 @@ export class NoContentMessageComponent implements AfterViewInit {
   };
   @Input() toolbarAlign: string;
 
+  @Input() mode: string;
+
   @ViewChild('toolBarLinkElement', {static: false}) toolBarLinkElement: ElementRef;
 
   constructor(private renderer: Renderer2) { }

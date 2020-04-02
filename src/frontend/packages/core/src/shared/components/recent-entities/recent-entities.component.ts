@@ -157,6 +157,8 @@ export class RecentEntitiesComponent {
   @Input()
   public history = false;
 
+  @Input() mode: string;
+
   public recentEntities$: Observable<RenderableRecent[]>;
   public frecentEntities$: Observable<RenderableRecent[]>;
   public hasHits$: Observable<boolean>;
