@@ -248,7 +248,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 			repo, dbErr := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 			if dbErr == nil {
 				theCNSIrecord.SSOAllowed = true
-				repo.Update(theCNSIrecord)
+				repo.Update(theCNSIrecord, p.Config.EncryptionKeyInBytes)
 			}
 			// Return error from the login
 			return err

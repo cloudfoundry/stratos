@@ -271,7 +271,7 @@ func (p *PostgresCNSIRepository) Delete(guid string) error {
 }
 
 // Update - Update an endpoint's data
-func (p *PostgresCNSIRepository) Update(endpoint interfaces.CNSIRecord) error {
+func (p *PostgresCNSIRepository) Update(endpoint interfaces.CNSIRecord, encryptionKey []byte)) error {
 	log.Debug("Update endpoint")
 
 	if endpoint.GUID == "" {
@@ -282,7 +282,14 @@ func (p *PostgresCNSIRepository) Update(endpoint interfaces.CNSIRecord) error {
 
 	var err error
 
-	result, err := p.db.Exec(updateCNSI, endpoint.Name, endpoint.SkipSSLValidation, endpoint.SSOAllowed, endpoint.ClientId, endpoint.ClientSecret, endpoint.GUID)
+	// Encrypt the client secret
+	cipherTextClientSecret, err := crypto.EncryptToken(encryptionKey, endpoint.ClientSecret)
+	if err != nil {
+		return err
+	}
+
+
+	result, err := p.db.Exec(updateCNSI, endpoint.Name, endpoint.SkipSSLValidation, endpoint.SSOAllowed, endpoint.ClientId, cipherTextClientSecret, endpoint.GUID)
 	if err != nil {
 		msg := "Unable to UPDATE endpoint: %v"
 		log.Debugf(msg, err)

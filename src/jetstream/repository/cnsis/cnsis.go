@@ -12,7 +12,7 @@ type Repository interface {
 	FindByAPIEndpoint(endpoint string, encryptionKey []byte) (interfaces.CNSIRecord, error)
 	Delete(guid string) error
 	Save(guid string, cnsiRecord interfaces.CNSIRecord, encryptionKey []byte) error
-	Update(endpoint interfaces.CNSIRecord) error
+	Update(endpoint interfaces.CNSIRecord, encryptionKey []byte) error
 	UpdateMetadata(guid string, metadata string) error
 }
 

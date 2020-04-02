@@ -627,7 +627,7 @@ func (p *portalProxy) updateEndpoint(c echo.Context) error {
 
 	// Apply updates
 	if updates {
-		err := cnsiRepo.Update(endpoint)
+		err := cnsiRepo.Update(endpoint, p.Config.EncryptionKeyInBytes)
 		if err != nil {
 			return fmt.Errorf("Could not update the endpoint %s: '%v'", endpointID, err)
 		}
