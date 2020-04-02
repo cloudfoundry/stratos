@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { TableRowExpandedService } from '../table-row/table-row-expaned-service';
+import { TableRowExpandedService } from '../table-row/table-row-expanded-service';
 import { TableCellExpanderComponent } from './table-cell-expander.component';
 
 describe('TableCellExpanderComponent', () => {

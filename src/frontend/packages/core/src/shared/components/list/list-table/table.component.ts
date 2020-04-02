@@ -11,7 +11,7 @@ import { TableCellActionsComponent } from './table-cell-actions/table-cell-actio
 import { TableCellExpanderComponent, TableCellExpanderConfig } from './table-cell-expander/table-cell-expander.component';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
-import { TableRowExpandedService } from './table-row/table-row-expaned-service';
+import { TableRowExpandedService } from './table-row/table-row-expanded-service';
 import { ITableColumn } from './table.types';
 
 

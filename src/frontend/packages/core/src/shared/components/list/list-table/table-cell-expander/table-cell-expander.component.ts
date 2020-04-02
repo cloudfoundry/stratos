@@ -2,7 +2,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { Component, Input, OnInit } from '@angular/core';
 
 import { TableCellCustom } from '../../list.types';
-import { TableRowExpandedService } from '../table-row/table-row-expaned-service';
+import { TableRowExpandedService } from '../table-row/table-row-expanded-service';
 import { CellConfigFunction } from '../table.types';
 
 export interface TableCellExpanderConfig {

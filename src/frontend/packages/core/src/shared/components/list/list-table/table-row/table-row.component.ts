@@ -16,7 +16,7 @@ import { map } from 'rxjs/operators';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { ListExpandedComponentType } from '../../list.component.types';
 import { CardCell } from '../../list.types';
-import { TableRowExpandedService } from './table-row-expaned-service';
+import { TableRowExpandedService } from './table-row-expanded-service';
 
 
 @Component({
