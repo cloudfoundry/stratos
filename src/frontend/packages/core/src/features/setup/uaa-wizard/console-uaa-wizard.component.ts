@@ -11,6 +11,7 @@ import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { SetupConsoleGetScopes, SetupSaveConfig } from '../../../../../store/src/actions/setup.actions';
 import { APP_TITLE } from '../../../core/core.types';
+import { getSSOClientRedirectURI } from '../../endpoints/endpoint-helpers';
 
 @Component({
   selector: 'app-console-uaa-wizard',
@@ -25,8 +26,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
   constructor(
     private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>, @Inject(APP_TITLE) public title: string) {
     // Client Redirect URI for SSO
-    this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
-      (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
+    this.clientRedirectURI = getSSOClientRedirectURI();
   }
 
   uaaForm: FormGroup;

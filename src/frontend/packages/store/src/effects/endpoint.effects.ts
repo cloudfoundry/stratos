@@ -358,7 +358,6 @@ export class EndpointsEffect {
       }
       ),
       catchError(e => {
-        console.log(e);
         const actions = [];
         if (actionStrings[1]) {
           actions.push({ type: actionStrings[1], guid: apiAction.guid });

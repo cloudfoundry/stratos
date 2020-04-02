@@ -30,6 +30,8 @@ import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 import { RouterNav } from './../../../../../../../../store/src/actions/router.actions';
+import { CurrentUserPermissions } from 'frontend/packages/core/src/core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/current-user-permissions.service';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -101,11 +103,10 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       }));
 
       // Add edit
-      this.cardMenu.push(createMetaCardMenuItemSeparator());
       this.cardMenu.push({
         label: 'Edit endpoint',
         action: () => this.editEndpoint(),
-        can: of(true)
+        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
       });
       this.cardMenu.push(createMetaCardMenuItemSeparator());
 
@@ -128,7 +129,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     private endpointListHelper: EndpointListHelper,
     private componentFactoryResolver: ComponentFactoryResolver,
     private favoritesConfigMapper: FavoritesConfigMapper,
-
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     super();
     this.endpointIds$ = this.endpointIds.asObservable();

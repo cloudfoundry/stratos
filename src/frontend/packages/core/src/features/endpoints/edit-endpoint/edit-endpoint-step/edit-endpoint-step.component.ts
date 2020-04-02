@@ -1,17 +1,16 @@
-import { EndpointModel } from './../../../../../../store/src/types/endpoint.types';
 import { ActivatedRoute } from '@angular/router';
-import { UpdateEndpoint } from './../../../../../../store/src/actions/endpoint.actions';
-import { IStratosEndpointDefinition, EntityCatalogSchemas } from './../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { entityCatalog } from './../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { endpointEntitiesSelector } from './../../../../../../store/src/selectors/endpoint.selectors';
 import { Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, tap, first } from 'rxjs/operators';
-
+import { filter, map, first, pairwise, startWith } from 'rxjs/operators';
+import { EndpointModel } from './../../../../../../store/src/types/endpoint.types';
+import { UpdateEndpoint } from './../../../../../../store/src/actions/endpoint.actions';
+import { IStratosEndpointDefinition, EntityCatalogSchemas } from './../../../../../../store/src/entity-catalog/entity-catalog.types';
+import { entityCatalog } from './../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { endpointEntitiesSelector } from './../../../../../../store/src/selectors/endpoint.selectors';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { safeUnsubscribe, getIdFromRoute } from './../../../../core/utils.service';
 import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
@@ -65,7 +64,8 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     this.existingEndpoints = this.store.select(endpointEntitiesSelector);
 
     this.existingEndpoinNames$ = this.existingEndpoints.pipe(
-      map(endpoints => Object.values(endpoints).map(ep => ep.name))
+      map(endpoints => Object.values(endpoints).filter((ep: EndpointModel) => ep.guid !== this.endpointID)),
+      map((endpoints: EndpointModel[]) => endpoints.map(ep => ep.name))
     );
 
     this.endpoint$ = this.existingEndpoints.pipe(
@@ -128,13 +128,15 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     );
 
     this.store.dispatch(action);
-    return this.store.select(selectRequestInfo('stratosEndpoint', this.endpointID)).pipe(
-      filter(o => !o.updating.updating.busy),
+    return this.store.select(selectUpdateInfo('stratosEndpoint', this.endpointID, 'updating')).pipe(
+      pairwise(),
+      filter(([oldV, newV]) => oldV.busy && !newV.busy),
+      map(([, newV]) => newV),
       map(o => {
         return {
-          success: !o.updating.updating.error,
-          message: o.updating.updating.message,
-          redirect: !o.updating.updating.error
+          success: !o.error,
+          message: o.message,
+          redirect: !o.error
         };
       })
     );
