@@ -10,9 +10,16 @@ import (
 	"io"
 	"strings"
 
+	"code.cloudfoundry.org/cli/actor/pushaction"
+	"code.cloudfoundry.org/cli/actor/sharedaction"
+	"code.cloudfoundry.org/cli/actor/v2action"
+	"code.cloudfoundry.org/cli/actor/v2v3action"
+	"code.cloudfoundry.org/cli/actor/v3action"
 	"code.cloudfoundry.org/cli/cf/commandregistry"
+	"code.cloudfoundry.org/cli/command"
 
 	"code.cloudfoundry.org/cli/util/configv3"
+	"code.cloudfoundry.org/cli/util/progressbar"
 	"code.cloudfoundry.org/cli/util/ui"
 	"github.com/gorilla/websocket"
 
@@ -21,6 +28,8 @@ import (
 	"code.cloudfoundry.org/cli/command/flag"
 	"code.cloudfoundry.org/cli/command/translatableerror"
 	v6 "code.cloudfoundry.org/cli/command/v6"
+	"code.cloudfoundry.org/cli/command/v6/shared"
+	sharedV3 "code.cloudfoundry.org/cli/command/v6/shared"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -274,7 +283,8 @@ func (c *CFPushApp) Run(msgSender DeployAppMessageSender, clientWebsocket *webso
 
 	defer commandUI.FlushDeferred()
 
-	err = c.pushCommand.Setup(config, commandUI)
+	err = c.setup(config, commandUI, msgSender, clientWebsocket)
+	//err = c.pushCommand.Setup(config, commandUI)
 	if err != nil {
 		return handleError(err, *commandUI)
 	}
@@ -288,13 +298,6 @@ func (c *CFPushApp) Run(msgSender DeployAppMessageSender, clientWebsocket *webso
 	// Set to a null progress bar
 	c.pushCommand.ProgressBar = &cfPushProgressBar{}
 
-	rActor := &cfPushRestartActor{
-		wrapped:         c.pushCommand.RestartActor,
-		msgSender:       msgSender,
-		clientWebsocket: clientWebsocket,
-	}
-	c.pushCommand.RestartActor = rActor
-
 	// Perform the push
 	args := make([]string, 0)
 	err = c.pushCommand.Execute(args)
@@ -302,6 +305,43 @@ func (c *CFPushApp) Run(msgSender DeployAppMessageSender, clientWebsocket *webso
 		return handleError(err, *commandUI)
 	}
 
+	return nil
+}
+
+func (push *CFPushApp) setup(config command.Config, ui command.UI, msgSender DeployAppMessageSender, clientWebsocket *websocket.Conn) error {
+	cmd := push.pushCommand
+	cmd.UI = ui
+	cmd.Config = config
+	sharedActor := sharedaction.NewActor(config)
+	cmd.SharedActor = sharedActor
+
+	ccClient, uaaClient, err := shared.GetNewClientsAndConnectToCF(config, ui)
+	if err != nil {
+		return err
+	}
+
+	ccClientV3, _, err := sharedV3.NewV3BasedClients(config, ui, true)
+	if err != nil {
+		return err
+	}
+
+	v2Actor := v2action.NewActor(ccClient, uaaClient, config)
+	v3Actor := v3action.NewActor(ccClientV3, config, sharedActor, nil)
+
+	stratosV2Actor := cfV2Actor{
+		wrapped:         v2Actor,
+		msgSender:       msgSender,
+		clientWebsocket: clientWebsocket,
+	}
+
+	cmd.RestartActor = v2Actor
+	cmd.Actor = pushaction.NewActor(stratosV2Actor, v3Actor, sharedActor)
+
+	cmd.ApplicationSummaryActor = v2v3action.NewActor(v2Actor, v3Actor)
+
+	cmd.NOAAClient = shared.NewNOAAClient(ccClient.DopplerEndpoint(), config, uaaClient, ui)
+
+	cmd.ProgressBar = progressbar.NewProgressBar()
 	return nil
 }
 

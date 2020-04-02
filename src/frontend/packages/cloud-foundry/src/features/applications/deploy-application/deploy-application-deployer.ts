@@ -134,9 +134,10 @@ export class DeployApplicationDeployer {
         this.applicationSource = appDetail.applicationSource;
         this.applicationOverrides = appDetail.applicationOverrides;
         const host = window.location.host;
+        const appId = this.isRedeploy ? `&app=${this.isRedeploy}` : '';
         const streamUrl = (
           `wss://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
-          `?org=${org.entity.name}&space=${space.entity.name}`
+          `?org=${org.entity.name}&space=${space.entity.name}${appId}`
         );
 
         this.inputStream = new Subject<string>();
@@ -271,6 +272,8 @@ export class DeployApplicationDeployer {
       case SocketEventTypes.APP_GUID_NOTIFY:
         // Notification of the application GUID for the application
         this.applicationGuid$.next(log.message);
+
+        console.log('GOT APP GUID');
         break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';

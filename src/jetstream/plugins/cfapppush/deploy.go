@@ -79,6 +79,9 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	spaceName := echoContext.QueryParam("space")
 	orgName := echoContext.QueryParam("org")
 
+	// App ID is this is a redeploy
+	appID := echoContext.QueryParam("app")
+
 	clientWebSocket, pingTicker, err := interfaces.UpgradeToWebSocket(echoContext)
 	if err != nil {
 		log.Errorf("Upgrade to websocket failed due to: %+v", err)
@@ -182,6 +185,11 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		log.Warnf("Failed to initialise config due to error %+v", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
+	}
+
+	// Send App ID now if we have it (redeploy)
+	if len(appID) > 0 {
+		cfAppPush.SendEvent(clientWebSocket, APP_GUID_NOTIFY, appID)
 	}
 
 	dialTimeout := cfAppPush.portalProxy.Env().String("CF_DIAL_TIMEOUT", "")
