@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { combineLatest, filter, first } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest as combineLatestOp, filter, first, map } from 'rxjs/operators';
 
 import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
@@ -15,9 +15,20 @@ import {
 import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
-import { selectUsersIsSetByUsername, selectUsersRolesPicked } from '../../../../../store/src/selectors/users-roles.selector';
+import {
+  selectUsersIsRemove,
+  selectUsersIsSetByUsername,
+  selectUsersRolesPicked,
+} from '../../../../../store/src/selectors/users-roles.selector';
 import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+
+
+enum CfRoleCheckboxMode {
+  DEFAULT,
+  ADD,
+  REMOVE
+}
 
 /**
  * Component to manage the display and change of a specific org or space role. Will be checked if all users have role or user has selected
@@ -40,6 +51,9 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   @Input() spaceName: string;
   @Input() role: string;
   @Output() changed = new BehaviorSubject(false);
+
+  mode$: Observable<CfRoleCheckboxMode>;
+  modes = CfRoleCheckboxMode;
 
   checked = false;
   tooltip = '';
@@ -249,7 +263,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     const selectUsersIsSetByUsername$ = this.store.select(selectUsersIsSetByUsername);
 
     this.sub = this.cfRolesService.existingRoles$.pipe(
-      combineLatest(this.cfRolesService.newRoles$, users$, canEditRole$, selectUsersIsSetByUsername$),
+      combineLatestOp(this.cfRolesService.newRoles$, users$, canEditRole$, selectUsersIsSetByUsername$),
       filter(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => !!users.length && !!newRoles.orgGuid)
     ).subscribe(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => {
       this.orgGuid = newRoles.orgGuid;
@@ -269,6 +283,18 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
           isSetByUsername
         );
     });
+
+    this.mode$ = combineLatest([
+      this.store.select(selectUsersIsSetByUsername),
+      this.store.select(selectUsersIsRemove)
+    ]).pipe(
+      map(([isSetByUsername, isRemove]) => {
+        if (!isSetByUsername) {
+          return CfRoleCheckboxMode.DEFAULT;
+        }
+        return isRemove ? CfRoleCheckboxMode.REMOVE : CfRoleCheckboxMode.ADD;
+      })
+    );
   }
 
   ngOnDestroy() {
