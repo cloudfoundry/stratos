@@ -1,5 +1,10 @@
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { EndpointAuthTypeConfig } from '../../../core/src/core/extension/extension-types';
+import { Omit } from '../../../core/src/core/utils.service';
+import { StratosStatus } from '../../../core/src/shared/shared.types';
+import { GeneralEntityAppState } from '../app-state';
 import {
   ApiErrorMessageHandler,
   PreApiRequest,
@@ -10,11 +15,6 @@ import {
   PaginationPageIteratorConfig,
 } from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntitySchema } from '../helpers/entity-schema';
-import { StratosStatus } from '../../../core/src/shared/shared.types';
-import { EndpointAuthTypeConfig } from '../../../core/src/core/extension/extension-types';
-import { Omit } from '../../../core/src/core/utils.service';
-import { GeneralEntityAppState } from '../app-state';
-import { Store } from '@ngrx/store';
 
 export interface EntityCatalogEntityConfig {
   entityType: string;

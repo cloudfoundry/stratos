@@ -46,6 +46,9 @@
       background-color: $username-background;
       color: $username-color;
     }
+    &__history-title {
+      border-bottom: 1px solid mat-color($foreground, divider);
+    }
 
     // Ensure any content in the header with H1 overflows nicely
     &__left {

@@ -1,3 +1,4 @@
 <mat-card *ngIf="show$ | async" class="user-warning">
-  <mat-icon class="user-warning__icon">warning</mat-icon>There are too many users to show those without roles. To add a user to this {{isOrg ? 'organization' : 'space'}} please use another tool such as the Cloud Foundry CLI
+  <mat-icon class="user-warning__icon">warning</mat-icon>There are too many users to show those without roles. To add a
+  user to this {{isOrg ? 'organization' : 'space'}} please use the `Manage Roles By Username` button above
 </mat-card>

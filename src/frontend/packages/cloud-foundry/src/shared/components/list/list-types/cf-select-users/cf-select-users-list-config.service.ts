@@ -95,7 +95,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       switchMap(entities => entities
         .map(entity => {
           const hasMissingRoles = this.hasMissingRoles(entity.entity.missingRoles);
-          rowStateManager.updateRowState(entity.entity.guid, { warning: hasMissingRoles });
+          rowStateManager.updateRowState(entity.metadata.guid, { warning: hasMissingRoles });
         })
       ),
     ).subscribe();
@@ -117,8 +117,8 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   }
 
   private getUsername = (user: CfUser): string => {
-    const userName = user.username || user.guid;
-    return this.hasMissingRoles(user.missingRoles) ? `${userName} - Not all roles for this user are known` : userName;
+    const username = user.username || user.guid;
+    return this.hasMissingRoles(user.missingRoles) ? `${username} - Not all roles for this user are known` : username;
   }
 
   private hasMissingRoles(missingRoles: CfUserMissingRoles): boolean {

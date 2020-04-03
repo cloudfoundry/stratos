@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import {
   createCfFeatureFlagFetchAction,
@@ -162,10 +162,7 @@ export class CurrentUserPermissionsChecker {
     orgOrSpaceGuid?: string,
     spaceGuid?: string
   ): Observable<boolean>[] {
-    return configs.map(config => {
-      const { type } = config;
-      return this.getCfCheck(config, endpointGuid, orgOrSpaceGuid, spaceGuid);
-    });
+    return configs.map(config => this.getCfCheck(config, endpointGuid, orgOrSpaceGuid, spaceGuid));
   }
 
   public getCfCheck(config: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string): Observable<boolean> {
@@ -197,30 +194,31 @@ export class CurrentUserPermissionsChecker {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
       switchMap(guids => {
-        return combineLatest(guids.map(
-          guid => {
-            // For admins we don't have the ff list which is usually fetched right at the start,
-            // so this can't be a pagination monitor on its own (which doesn't fetch if list is missing)
-            const action = createCfFeatureFlagFetchAction(guid);
-            return getPaginationObservables<IFeatureFlag>(
-              {
-                store: this.store,
+        const createFFObs = guid => {
+          // For admins we don't have the ff list which is usually fetched right at the start,
+          // so this can't be a pagination monitor on its own (which doesn't fetch if list is missing)
+          const action = createCfFeatureFlagFetchAction(guid);
+          return getPaginationObservables<IFeatureFlag>(
+            {
+              store: this.store,
+              action,
+              paginationMonitor: new PaginationMonitor<IFeatureFlag>(
+                this.store,
+                action.paginationKey,
                 action,
-                paginationMonitor: new PaginationMonitor<IFeatureFlag>(
-                  this.store,
-                  action.paginationKey,
-                  action,
-                  true
-                )
-              },
-              true
-            ).entities$;
-          }
-        ));
+                true
+              )
+            },
+            true
+          ).entities$;
+        };
+
+        return combineLatest(guids.map(createFFObs));
       }),
       map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
-      startWith(false),
-      distinctUntilChanged()
+      // startWith(false), // Don't start with anything, this ensures first value out can be trusted. Should never get to the point where
+      // nothing is returned
+      distinctUntilChanged(),
     );
   }
 

@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
-import { ENTITY_INFO_HANDLER } from '../../store/src/entity-service';
 import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
-import { ValidateEntitiesStart } from '../../store/src/actions/request.actions';
+import { CfValidateEntitiesStart } from '../../store/src/actions/request.actions';
+import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
+import { ENTITY_INFO_HANDLER } from '../../store/src/entity-service';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { EntityInfo } from '../../store/src/types/api.types';
 import { ICFAction } from '../../store/src/types/request.types';
@@ -51,10 +51,9 @@ function infoValidator(action: ICFAction, dispatcher) {
     if (!entityInfo || entityInfo.entity) {
       if (shouldValidate(action, validated, entityInfo.entityRequestInfo)) {
         validated = true;
-        dispatcher(new ValidateEntitiesStart(
+        dispatcher(new CfValidateEntitiesStart(
           action,
-          [action.guid],
-          false
+          [action.guid]
         ));
       }
     }

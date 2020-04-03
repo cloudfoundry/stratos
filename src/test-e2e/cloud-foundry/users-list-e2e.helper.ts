@@ -64,7 +64,7 @@ export function setUpTestOrgSpaceUserRoles(
     // space
     .then(() => browser.sleep(500))
     .then(() => cfHelper.addOrgUserRole(cfGuid, orgGuid, userName))
-    // Allow time for user to be added to org before applying other roles that are depending. Again should be syncrhonous but have seen
+    // Allow time for user to be added to org before applying other roles that are depending. Again should be synchronous but have seen
     // failures
     .then(() => browser.sleep(500))
     .then(() => promise.all([
