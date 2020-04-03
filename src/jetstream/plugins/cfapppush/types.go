@@ -50,10 +50,10 @@ type GitSCMSourceInfo struct {
 // Structure used to provide metadata about the Git Url source
 type GitUrlSourceInfo struct {
 	DeploySource
-	Project    string `json:"project"`
+	Project    string `json:"project"` // Not sent from client
 	Branch     string `json:"branch"`
 	Url        string `json:"url"`
-	CommitHash string `json:"commit"`
+	CommitHash string `json:"commit"` // Not sent from client
 }
 
 // DockerImageSourceInfo - Structure used to provide metadata about the docker source
