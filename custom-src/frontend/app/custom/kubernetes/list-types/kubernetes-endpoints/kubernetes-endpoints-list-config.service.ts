@@ -30,7 +30,6 @@ export class KubernetesEndpointsListConfigService implements IListConfig<Endpoin
     noEntries: 'There are no endpoints'
   };
   enableTextFilter = true;
-  tableFixedRowHeight = true;
 
 
   constructor(

@@ -11,7 +11,7 @@ const until = protractor.ExpectedConditions;
 export interface CardMetadata {
   index: number;
   title: string;
-  click: Function;
+  click: () => void;
 }
 
 // Page Object for the List Table View
@@ -31,6 +31,11 @@ export class ListTableComponent extends Component {
 
   getCell(row, column): ElementFinder {
     return this.getRows().get(row).all(by.css('.app-table__cell')).get(column);
+  }
+
+  waitForCellText(row: number, column: number, text: string) {
+    const component = new Component(this.getCell(row, column));
+    return component.waitForText(text);
   }
 
   findRowByCellContent(content) {

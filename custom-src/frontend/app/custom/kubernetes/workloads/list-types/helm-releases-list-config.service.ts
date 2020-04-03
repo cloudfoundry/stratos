@@ -34,7 +34,6 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
   };
   pageSizeOptions = defaultHelmKubeListPageSize;
   enableTextFilter = true;
-  tableFixedRowHeight = true;
   cardComponent = HelmReleaseCardComponent;
   columns: ITableColumn<HelmRelease>[] = [
     {
