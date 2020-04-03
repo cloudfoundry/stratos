@@ -1,8 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
-import { publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
@@ -30,6 +30,7 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
 
   getDataSource: () => CfRoutesDataSource;
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
+  getInitialised: () => Observable<boolean>;
 
   constructor(
     store: Store<CFAppState>,
@@ -76,5 +77,14 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
       this.dataSource.masterAction.entityType,
       this.dataSource.masterAction.paginationKey).subscribe();
     cfOrgSpaceService.cf.select.next(cfService.cfGuid);
+
+    this.getInitialised = () => combineLatest(
+      cfOrgSpaceService.cf.list$,
+      cfOrgSpaceService.org.list$,
+      cfOrgSpaceService.space.list$,
+    ).pipe(
+      map(loading => !loading),
+      startWith(true)
+    );
   }
 }

@@ -16,7 +16,7 @@ patchHelmChart () {
 
   # Patch the console image tag in place - otherwise --reuse-values won't work with helm upgrade
   # Make sure we patch this in all files in templates where it occurs
-  pushd ${CHART_PATH}/templates > dev/null
+  pushd ${CHART_PATH}/templates > /dev/null
   find . -type f -name '*.yaml' | xargs sed -i -e 's/{{.Values.consoleVersion}}/'"${TAG}"'/g'
   popd > /dev/null
 }

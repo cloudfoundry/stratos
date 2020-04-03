@@ -89,23 +89,6 @@ describe('ServiceInstanceCardComponent', () => {
           updated_at: '',
           created_at: ''
         },
-        service: {
-          entity: {
-            label: '',
-            description: '',
-            active: 1,
-            bindable: 1,
-            unique_id: '',
-            extra: '',
-            tags: [''],
-            requires: [''],
-            service_broker_guid: '',
-            plan_updateable: 1,
-            service_plans_url: '',
-            service_plans: [],
-          },
-          metadata: null
-        },
         service_plan: {
           entity: {
             name: '',
@@ -133,7 +116,12 @@ describe('ServiceInstanceCardComponent', () => {
                 service_plans_url: '',
                 service_plans: [],
               },
-              metadata: null
+              metadata: {
+                guid: '',
+                created_at: '',
+                updated_at: '',
+                url: ''
+              }
             },
             service_instances_url: '',
           },

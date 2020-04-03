@@ -91,10 +91,11 @@ export class ServicesService {
         action: getServicePlanVisibilitiesAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          cfEntityFactory(servicePlanVisibilityEntityType)
+          cfEntityFactory(servicePlanVisibilityEntityType),
+          getServicePlanVisibilitiesAction.flattenPagination
         )
       },
-      true
+      getServicePlanVisibilitiesAction.flattenPagination
     ).entities$;
   }
   private getServiceInstances = () => {
@@ -112,10 +113,11 @@ export class ServicesService {
         action: getServiceBrokersAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          cfEntityFactory(serviceBrokerEntityType)
+          cfEntityFactory(serviceBrokerEntityType),
+          getServiceBrokersAction.flattenPagination
         )
       },
-      true
+      getServiceBrokersAction.flattenPagination
     ).entities$;
   }
 

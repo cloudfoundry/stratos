@@ -34,6 +34,37 @@ export interface FileTransferStatus {
   fileName: string;
 }
 
+interface DeploySource {
+  type: string;
+}
+
+interface GitSCMSourceInfo extends DeploySource {
+  project: string;
+  branch: string;
+  url: string;
+  commit: string;
+  scm: string;
+}
+
+// Structure used to provide metadata about the Git Url source
+interface GitUrlSourceInfo extends DeploySource {
+  branch: string;
+  url: string;
+}
+
+// DockerImageSourceInfo - Structure used to provide metadata about the docker source
+interface DockerImageSourceInfo extends DeploySource {
+  applicationName: string;
+  dockerImage: string;
+  dockerUsername: string;
+}
+
+interface FolderSourceInfo extends DeploySource {
+  wait: boolean;
+  files: number;
+  folders: string[];
+}
+
 export class DeployApplicationDeployer {
 
   isRedeploy: string;
@@ -204,7 +235,7 @@ export class DeployApplicationDeployer {
   }
 
   sendGitSCMSourceMetadata = (appSource: DeployApplicationSource) => {
-    const gitscm = {
+    const gitscm: GitSCMSourceInfo = {
       project: appSource.gitDetails.projectName,
       branch: appSource.gitDetails.branch.name,
       type: appSource.type.group,
@@ -222,7 +253,7 @@ export class DeployApplicationDeployer {
   }
 
   sendGitUrlSourceMetadata = (appSource: DeployApplicationSource) => {
-    const gitUrl = {
+    const gitUrl: GitUrlSourceInfo = {
       url: appSource.gitDetails.projectName,
       branch: appSource.gitDetails.branch.name,
       type: appSource.type.id
@@ -237,7 +268,7 @@ export class DeployApplicationDeployer {
   }
 
   sendDockerImageMetadata = (appSource: DeployApplicationSource) => {
-    const dockerInfo = {
+    const dockerInfo: DockerImageSourceInfo = {
       applicationName: appSource.dockerDetails.applicationName,
       dockerImage: appSource.dockerDetails.dockerImage,
       dockerUsername: appSource.dockerDetails.dockerUsername,
@@ -392,7 +423,7 @@ export class DeployApplicationDeployer {
 
     this.fileTransferStatus$.next(this.fileTransferStatus);
 
-    const transferMetadata = {
+    const transferMetadata: FolderSourceInfo = {
       files: metadata.files.length,
       folders: metadata.folders,
       type: 'filefolder',

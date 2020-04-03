@@ -5,20 +5,22 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/src/cf-types';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { quotaDefinitionEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/src/cf-types';
+import {
+  QuotaDefinitionActionBuilder,
+} from '../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { QuotaDefinitionActionBuilder } from '../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 
 export interface QuotaFormValues {
   name: string;
@@ -91,10 +93,11 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
         action: getQuotaDefinitionsAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           quotaPaginationKey,
-          cfEntityFactory(quotaDefinitionEntityType)
+          cfEntityFactory(quotaDefinitionEntityType),
+          getQuotaDefinitionsAction.flattenPagination
         )
       },
-      true
+      getQuotaDefinitionsAction.flattenPagination
     ).entities$.pipe(
       filter(o => !!o),
       map(o => o.map(org => org.entity.name)),

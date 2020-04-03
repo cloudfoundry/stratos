@@ -28,7 +28,7 @@ describe('TableCellConfirmRoleAddRemComponent', () => {
     fixture = TestBed.createComponent(TableCellConfirmRoleAddRemComponent);
     component = fixture.componentInstance;
     component.row = {
-      userName: '',
+      username: '',
       userGuid: '',
       orgName: '',
       orgGuid: '',

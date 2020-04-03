@@ -4,7 +4,10 @@ import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { serviceInstancesEntityType, servicePlanVisibilityEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
+import {
+  serviceInstancesEntityType,
+  servicePlanVisibilityEntityType,
+} from '../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   IService,
@@ -21,7 +24,12 @@ import { getPaginationObservables } from '../../../../../store/src/reducers/pagi
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
-import { getCfService, getServiceBroker, getServiceName, getServicePlans } from '../../../features/service-catalog/services-helper';
+import {
+  getCfService,
+  getServiceBroker,
+  getServiceName,
+  getServicePlans,
+} from '../../../features/service-catalog/services-helper';
 import { QParam, QParamJoiners } from '../../q-param';
 
 export class CreateServiceInstanceHelper {
@@ -69,10 +77,11 @@ export class CreateServiceInstanceHelper {
         action: getServicePlanVisibilitiesAction,
         paginationMonitor: this.paginationMonitorFactory.create(
           paginationKey,
-          cfEntityFactory(servicePlanVisibilityEntityType)
+          cfEntityFactory(servicePlanVisibilityEntityType),
+          getServicePlanVisibilitiesAction.flattenPagination
         )
       },
-      true
+      getServicePlanVisibilitiesAction.flattenPagination
     ).entities$;
 
   }
@@ -196,9 +205,10 @@ export class CreateServiceInstanceHelper {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         paginationKey,
-        cfEntityFactory(serviceInstancesEntityType)
+        cfEntityFactory(serviceInstancesEntityType),
+        action.flattenPagination
       )
-    }, true)
+    }, action.flattenPagination)
       .entities$.pipe(
         publishReplay(1),
         refCount()

@@ -85,7 +85,8 @@ const manageUsersSuite = globby.sync([
   './src/test-e2e/cloud-foundry/space-level/space-users-removal-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/cf-level/cf-invite-config-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/org-level/org-invite-user-e2e.spec.ts',
-  './src/test-e2e/cloud-foundry/space-level/space-invite-user-e2e.spec.ts'
+  './src/test-e2e/cloud-foundry/space-level/space-invite-user-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/manage-users-by-username-stepper-e2e.spec.ts'
 ])
 
 const coreSuite = globby.sync([

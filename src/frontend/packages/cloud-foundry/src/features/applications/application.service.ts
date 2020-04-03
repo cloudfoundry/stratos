@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../cf-types';
 import { AppMetadataTypes } from '../../../../cloud-foundry/src/actions/app-metadata.actions';
 import {
   GetApplication,
@@ -26,14 +25,14 @@ import {
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-types';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityService } from '../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID } from '../../../../core/src/shared/entity.tokens';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../../store/src/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
@@ -48,6 +47,7 @@ import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoi
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../cf-types';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
 import { AppStat } from '../../store/types/app-metadata.types';
 import {
@@ -60,13 +60,13 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
     guid,
     endpointGuid, [
-    createEntityRelationKey(applicationEntityType, routeEntityType),
-    createEntityRelationKey(applicationEntityType, spaceEntityType),
-    createEntityRelationKey(applicationEntityType, stackEntityType),
-    createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
-    createEntityRelationKey(routeEntityType, domainEntityType),
-    createEntityRelationKey(spaceEntityType, organizationEntityType),
-  ]
+      createEntityRelationKey(applicationEntityType, routeEntityType),
+      createEntityRelationKey(applicationEntityType, spaceEntityType),
+      createEntityRelationKey(applicationEntityType, stackEntityType),
+      createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
+      createEntityRelationKey(routeEntityType, domainEntityType),
+      createEntityRelationKey(spaceEntityType, organizationEntityType),
+    ]
   );
 }
 
@@ -153,7 +153,8 @@ export class ApplicationService {
     const paginationMonitor = new PaginationMonitor(
       store,
       dummyAction.paginationKey,
-      dummyAction
+      dummyAction,
+      dummyAction.flattenPagination
     );
     return paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
@@ -228,7 +229,8 @@ export class ApplicationService {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        new CFEntityConfig(appStatsEntityType)
+        new CFEntityConfig(appStatsEntityType),
+        action.flattenPagination
       )
     }, true);
     // This will fail to fetch the app stats if the current app is not running but we're
@@ -272,7 +274,8 @@ export class ApplicationService {
         const domainsAction = new GetAllOrganizationDomains(org.metadata.guid, this.cfGuid);
         const paginationMonitor = this.paginationMonitorFactory.create(
           domainsAction.paginationKey,
-          domainsAction
+          domainsAction,
+          domainsAction.flattenPagination
         );
         return getPaginationObservables<APIResource<IDomain>>(
           {

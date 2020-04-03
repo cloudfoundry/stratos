@@ -1,6 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { combineLatest, Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { getCFEntityKey } from '../../../../../../../cloud-foundry/src/cf-entity-helpers';
@@ -49,6 +51,7 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   });
   viewType = ListViewTypes.BOTH;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
+  getInitialised: () => Observable<boolean>;
 
   constructor(
     store: Store<CFAppState>,
@@ -71,6 +74,15 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
     this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {
       breadcrumbs: 'service-wall'
     };
+
+    this.getInitialised = () => combineLatest(
+      cfOrgSpaceService.cf.list$,
+      cfOrgSpaceService.org.list$,
+      cfOrgSpaceService.space.list$,
+    ).pipe(
+      map(loading => !loading),
+      startWith(true)
+    );
   }
 
   getDataSource = () => this.dataSource;

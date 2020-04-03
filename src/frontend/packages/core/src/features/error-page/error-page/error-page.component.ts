@@ -8,13 +8,14 @@ import { first, map, withLatestFrom } from 'rxjs/operators';
 import { SendClearEndpointEventsAction } from '../../../../../store/src/actions/internal-events.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
+import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { InternalEventState } from '../../../../../store/src/types/internal-events.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
 import { endpointEntitySchema } from '../../../base-entity-schemas';
-import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
-import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
 import { StratosStatus } from '../../../shared/shared.types';
+import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 
 @Component({
   selector: 'app-error-page',
@@ -23,6 +24,7 @@ import { StratosStatus } from '../../../shared/shared.types';
 })
 export class ErrorPageComponent implements OnInit {
   public back$: Observable<string>;
+  public backParams$: Observable<object>;
   public errorDetails$: Observable<{ endpoint: EndpointModel; errors: InternalEventState[]; }>;
   public icon = StratosStatus.ERROR;
   public jsonDownloadHref$: Observable<SafeUrl>;
@@ -67,6 +69,17 @@ export class ErrorPageComponent implements OnInit {
   ) {
     this.back$ = store.select(getPreviousRoutingState).pipe(first()).pipe(
       map(previousState => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
+    );
+
+    this.backParams$ = this.back$.pipe(
+      map(urlBack => {
+        // If we've come from the events page ensure we pass it back it's param
+        const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
+        return urlBack && urlBack.startsWith('/events') ? {
+          [eventReturnUrlParam]: overrideReturnUrl || null
+        } : {};
+      }),
+      first()
     );
   }
 }

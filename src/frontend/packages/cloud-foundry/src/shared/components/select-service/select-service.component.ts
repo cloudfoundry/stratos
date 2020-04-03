@@ -57,7 +57,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     this.isFetching$ = cfSpaceGuid$.pipe(
       switchMap(([cfGuid, spaceGuid]) => {
         const paginationKey = this.servicesWallService.getSpaceServicePagKey(cfGuid, spaceGuid);
-        const paginationMonitor = this.paginationMonitorFactory.create(paginationKey, schema);
+        const paginationMonitor = this.paginationMonitorFactory.create(paginationKey, schema, false);
         return paginationMonitor.fetchingCurrentPage$;
       }),
       tap(fetching => {
@@ -78,7 +78,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     );
 
     this.selectedService$ = combineLatest(this.services$, this.stepperForm.controls.service.statusChanges).pipe(
-      map(([services, change]) => services.filter(a => a.entity.guid === this.stepperForm.controls.service.value)[0]),
+      map(([services, change]) => services.filter(a => a.metadata.guid === this.stepperForm.controls.service.value)[0]),
       filter(p => !!p)
     );
   }

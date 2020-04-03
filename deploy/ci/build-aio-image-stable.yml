@@ -44,7 +44,7 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-organization))/stratos
+    repository: ((docker-organization))/((aio-docker-image-name))
     tag: stable
 
 jobs:
