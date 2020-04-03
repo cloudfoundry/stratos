@@ -248,8 +248,8 @@ export interface KubernetesCondition {
 
 export interface ContainerStatus {
   name: string;
-  state: State;
-  lastState: State;
+  state: ContainerStateCollection;
+  lastState: ContainerStateCollection;
   ready: boolean;
   restartCount: number;
   image: string;
@@ -257,13 +257,15 @@ export interface ContainerStatus {
   containerID: string;
 }
 
-export interface State {
-  [key: string]: {
-    startedAt: Date;
-    reason: string;
-    signal: number;
-    exitCode: number
-  };
+export interface ContainerStateCollection {
+  [key: string]: ContainerState;
+}
+
+export interface ContainerState {
+  startedAt: Date;
+  reason: string;
+  signal: number;
+  exitCode: number;
 }
 
 export interface PodSpec {

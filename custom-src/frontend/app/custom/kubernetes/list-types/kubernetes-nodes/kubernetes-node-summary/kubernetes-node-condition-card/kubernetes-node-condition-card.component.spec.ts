@@ -7,7 +7,6 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
 import { KubernetesNodeConditionCardComponent } from './kubernetes-node-condition-card.component';
 import { KubernetesNodeConditionComponent } from './kubernetes-node-condition/kubernetes-node-condition.component';
 
-// TODO: RC xdescribed
 describe('KubernetesNodeConditionCardComponent', () => {
   let component: KubernetesNodeConditionCardComponent;
   let fixture: ComponentFixture<KubernetesNodeConditionCardComponent>;
