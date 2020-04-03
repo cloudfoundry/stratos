@@ -20,6 +20,7 @@ type AuthProvider struct {
 	UserInfo GetUserInfoFromToken
 }
 
+// V2Info is the response for the Cloud Foundry /v2/info API
 type V2Info struct {
 	AuthorizationEndpoint    string `json:"authorization_endpoint"`
 	TokenEndpoint            string `json:"token_endpoint"`
@@ -27,6 +28,10 @@ type V2Info struct {
 	AppSSHEndpoint           string `json:"app_ssh_endpoint"`
 	AppSSHHostKeyFingerprint string `json:"app_ssh_host_key_fingerprint"`
 	AppSSHOauthCLient        string `json:"app_ssh_oauth_client"`
+	APIVersion               string `json:"api_version"`
+	RoutingEndpoint          string `json:"routing_endpoint"`
+	MinCLIVersion            string `json:"min_cli_version"`
+	MinRecommendedCLIVersion string `json:"min_recommended_cli_version"`
 }
 
 type InfoFunc func(apiEndpoint string, skipSSLValidation bool) (CNSIRecord, interface{}, error)

@@ -22,7 +22,7 @@ const spaceName = e2e.secrets.getDefaultCFEndpoint().testSpace;
 
 let applicationZipFile;
 
-describe('Application Deploy - ', function () {
+describe('Application Deploy - ', () => {
   const testAppName = ApplicationE2eHelper.createApplicationName();
   const appDetails = {
     cfGuid: '',
@@ -51,12 +51,12 @@ describe('Application Deploy - ', function () {
   beforeAll(() => nav.goto(SideNavMenuItem.Applications));
 
   // Might take a bit longer to deploy the app than the global default timeout allows
-  beforeEach(function () {
+  beforeEach(() => {
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
     jasmine.DEFAULT_TIMEOUT_INTERVAL = newTimeout;
   });
 
-  afterEach(function () {
+  afterEach(() => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 

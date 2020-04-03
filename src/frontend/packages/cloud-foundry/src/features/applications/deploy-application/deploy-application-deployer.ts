@@ -191,7 +191,7 @@ export class DeployApplicationDeployer {
             share(),
           );
 
-        // Buffer messges until each newline character
+        // Buffer messages until each newline character
         let b = '';
         this.msgSub = buffer.subscribe(m => {
           b = b + m;

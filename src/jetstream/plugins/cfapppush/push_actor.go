@@ -36,7 +36,7 @@ func (r cfV2Actor) CloudControllerAPIVersion() string {
 
 func (r cfV2Actor) CreateApplication(application v2action.Application) (v2action.Application, v2action.Warnings, error) {
 	app, warnings, err := r.wrapped.CreateApplication(application)
-	if err != nil {
+	if err == nil {
 		r.sendAppID(app)
 	}
 	return app, warnings, err
@@ -52,7 +52,7 @@ func (r cfV2Actor) FindRouteBoundToSpaceWithSettings(route v2action.Route) (v2ac
 
 func (r cfV2Actor) GetApplicationByNameAndSpace(name string, spaceGUID string) (v2action.Application, v2action.Warnings, error) {
 	app, warnings, err := r.wrapped.GetApplicationByNameAndSpace(name, spaceGUID)
-	if err != nil {
+	if err == nil {
 		r.sendAppID(app)
 	}
 	return app, warnings, err
