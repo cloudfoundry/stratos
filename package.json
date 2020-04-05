@@ -83,7 +83,7 @@
     "rxjs": "^6.2.0",
     "rxjs-spy": "^7.0.2",
     "rxjs-websockets": "~8.0.0",
-    "stratos-angular6-json-schema-form": "^7.0.6",
+    "stratos-angular6-json-schema-form": "nwmac/ajsf",
     "ts-md5": "^1.2.4",
     "web-animations-js": "^2.3.2",
     "xterm": "^4.0.2",
