@@ -1,3 +1,4 @@
+import { UPDATE_ENDPOINT_SUCCESS } from './../actions/endpoint.actions';
 import { Action } from '@ngrx/store';
 
 import { SendClearEndpointEventsAction, SendClearEventAction, SendEventAction } from '../actions/internal-events.actions';
@@ -43,6 +44,7 @@ export function internalEventReducer(state: InternalEventsState = defaultState, 
     }
     case DISCONNECT_ENDPOINTS_SUCCESS:
     case UNREGISTER_ENDPOINTS_SUCCESS:
+    case UPDATE_ENDPOINT_SUCCESS:
     case CONNECT_ENDPOINTS_SUCCESS: {
       const clearEndpointAction = action as DisconnectEndpoint;
       return clearEndpointEvents(state, clearEndpointAction.guid);
