@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, of as observableOf, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { catchError, combineLatest, filter, first, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
 
@@ -303,8 +303,6 @@ export class DeployApplicationDeployer {
       case SocketEventTypes.APP_GUID_NOTIFY:
         // Notification of the application GUID for the application
         this.applicationGuid$.next(log.message);
-
-        console.log('GOT APP GUID');
         break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
