@@ -1,0 +1,27 @@
+<app-page-header>
+  <h1>Restore Endpoints</h1>
+</app-page-header>
+
+<app-steppers cancel="/endpoints" [basePreviousRedirect]="{ path: '/endpoints/backup-restore' }">
+  <app-step title="File" [valid]="fileValid$ | async">
+    <div class="file-step">
+      <p>Provide the backup file to restore from.</p>
+      <div class="file-step__input">
+        <input #localPathSelectFile fileread="localPathFile" type="file" class="file-step__input--input"
+          name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" />Choose
+        <button (click)="localPathSelectFile.click()" color="primary" mat-button mat-raised-button>File</button>
+        {{service.fileName}}
+      </div>
+    </div>
+  </app-step>
+  <app-step title="Password" finishButtonText="Restore" [onNext]="restore" [valid]="passwordValid$ | async">
+    <div class="password-step">
+      <p>Provide the password that was given at the time the backup was created</p>
+      <form [formGroup]="passwordForm" class="stepper-form">
+        <mat-form-field>
+          <input matInput formControlName="password" placeholder="Password" required type="password">
+        </mat-form-field>
+      </form>
+    </div>
+  </app-step>
+</app-steppers>

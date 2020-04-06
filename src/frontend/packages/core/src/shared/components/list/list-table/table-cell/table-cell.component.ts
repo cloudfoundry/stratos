@@ -55,6 +55,7 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellFavoriteComponent,
   TableCellEndpointDetailsComponent,
   TableCellSidePanelComponent,
+  // BackupRestoreCellComponent,
   ...coreEndpointListDetailsComponents
 ];
 

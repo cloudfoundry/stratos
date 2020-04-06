@@ -1,0 +1,18 @@
+:host {
+  flex: 1;
+}
+.file-step {
+  display: flex;
+  flex-direction: column;
+  &__input {
+    &--input {
+      height: 0;
+      visibility: hidden;
+      width: 0;
+    }
+    button {
+      margin-right: 5px;
+    }
+  }
+
+}

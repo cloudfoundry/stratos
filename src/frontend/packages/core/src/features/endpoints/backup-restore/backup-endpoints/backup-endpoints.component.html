@@ -1,0 +1,32 @@
+<app-page-header>
+  <h1>Backup Endpoints</h1>
+</app-page-header>
+
+<app-steppers cancel="/endpoints" [basePreviousRedirect]="{
+  path: '/endpoints/backup-restore'
+  }">
+  <app-step title="Select" [valid]="selectValid$ | async">
+    <div class="select-step">
+      <p>Select the endpoints and connection details that you would like to backup</p>
+      <div class="select-step__buttons">
+        <button mat-raised-button color="primary" [disabled]="disableSelectAll$ | async"
+          (click)="service.selectAll()">Select All</button>
+        <button mat-raised-button color="primary" [disabled]="disableSelectNone$ | async"
+          (click)="service.selectNone()">Select None</button>
+      </div>
+      <app-table [dataSource]="endpointDataSource" [columns]="columns"></app-table>
+    </div>
+  </app-step>
+  <app-step title="Password" finishButtonText="Download" [onNext]="onNext" [valid]="passwordValid$ | async">
+    <div class="password-step">
+      <p>Protect the backup by providing as password. You will need this password when restoring from this backup</p>
+      <form [formGroup]="passwordForm" class="stepper-form">
+        <mat-form-field>
+          <input matInput formControlName="password" placeholder="Password" required type="password">
+        </mat-form-field>
+      </form>
+    </div>
+  </app-step>
+</app-steppers>
+
+<!-- // TODO: RC test - no tokens in db -->

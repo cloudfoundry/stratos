@@ -1,18 +1,22 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { of } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { AuthState } from '../../../../../../../store/src/reducers/auth.reducer';
+import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
 import { FavoritesConfigMapper } from '../../../favorites-meta-card/favorite-config-mapper';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
+import { IGlobalListAction, IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { EndpointCardComponent } from './endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './endpoint-list.helpers';
 import { EndpointsDataSource } from './endpoints-data-source';
@@ -28,7 +32,18 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private singleActions: IListAction<EndpointModel>[];
 
-  private globalActions = [];
+  private globalActions: IGlobalListAction<EndpointModel>[] = [{
+    action: () => this.router.navigate(['endpoints/backup-restore']),
+    icon: 'settings_backup_restore',
+    label: 'Backup/Restore Endpoints',
+    description: 'Backup or Restore Endpoints',
+    visible$: this.store.select(s => s.auth).pipe(
+      filter(auth => !!auth && !!auth.sessionData),
+      map((auth: AuthState) => auth.sessionData),
+      map(session => session.user && session.user.admin)
+    ),
+    enabled$: of(true), // Table is not shown when there's no endpoints, so this should always be true
+  }];
 
   public readonly columns: ITableColumn<EndpointModel>[] = [
     {
@@ -109,7 +124,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     internalEventMonitorFactory: InternalEventMonitorFactory,
     endpointListHelper: EndpointListHelper,
     favoritesConfigMapper: FavoritesConfigMapper,
-
+    private router: Router
   ) {
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(

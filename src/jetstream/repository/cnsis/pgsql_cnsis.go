@@ -38,6 +38,8 @@ var updateCNSI = `UPDATE cnsis SET name = $1, skip_ssl_validation = $2, sso_allo
 // Update the metadata
 var updateCNSIMetadata = `UPDATE cnsis SET meta_data = $1 WHERE guid = $2`
 
+var countCNSI = `SELECT COUNT(*) FROM cnsis WHERE guid=$1`
+
 // PostgresCNSIRepository is a PostgreSQL-backed CNSI repository
 type PostgresCNSIRepository struct {
 	db *sql.DB
@@ -348,4 +350,34 @@ func (p *PostgresCNSIRepository) UpdateMetadata(guid string, metadata string) er
 	log.Debug("Endpoint UPDATE complete")
 
 	return nil
+}
+
+// Overwrite - Creates or Updates CNSI Record
+func (p *PostgresCNSIRepository) Overwrite(endpoint interfaces.CNSIRecord, encryptionKey []byte) error {
+	log.Debug("Overwrite CNSI")
+
+	// Is there an existing token?
+	var count int
+	err := p.db.QueryRow(countCNSI, endpoint.GUID).Scan(&count)
+	if err != nil {
+		log.Errorf("Unknown error attempting to find CNSI: %v", err)
+	}
+
+	// if _, err := p.Find(endpoint.GUID, encryptionKey); err != nil {
+	// 	// Found, so update endpoint
+	// 	// TODO: RC ALL STRINGS?
+	// 	return p.Update(endpoint, encryptionKey)
+	// } else {
+	// 	// Not Found, create endpoint
+	// 	return p.Save(endpoint.GUID, endpoint, encryptionKey)
+	// 	// TODO: RC Q could actually be error
+	// }
+
+	switch count {
+	case 0:
+		return p.Save(endpoint.GUID, endpoint, encryptionKey)
+	default:
+
+		return p.Update(endpoint, encryptionKey)
+	}
 }

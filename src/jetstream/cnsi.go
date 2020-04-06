@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -278,8 +279,8 @@ func marshalClusterList(clusterList []*interfaces.ConnectedEndpoint) ([]byte, er
 	return jsonString, nil
 }
 
-func (p *portalProxy) UpdateEndointMetadata(guid string, metadata string) error {
-	log.Debug("UpdateEndointMetadata")
+func (p *portalProxy) UpdateEndpointMetadata(guid string, metadata string) error {
+	log.Debug("UpdateEndpointMetadata")
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -635,3 +636,255 @@ func (p *portalProxy) updateEndpoint(c echo.Context) error {
 
 	return nil
 }
+
+// TODO: RC position
+type BackupDataRequest struct {
+	State    map[string]BackupEndpointsState `json:"state"`
+	UserID   string                          `json:"userId"`
+	Password string                          `json:"password"`
+}
+
+type BackupEndpointsState struct {
+	Endpoint   bool `json:"endpoint"`
+	Connect    bool `json:"connect"`
+	AllConnect bool `json:"all_connect"`
+}
+
+type BackupRestoreState struct {
+	Endpoints []*interfaces.CNSIRecord
+	Tokens    []interfaces.BackupTokenRecord
+}
+
+type RestoreDataRequest struct {
+	Data     string `json:"data"`
+	Password string `json:"password"`
+}
+
+// TODO: RC split out to new file?
+func (p *portalProxy) backupEndpoints(c echo.Context) error {
+	log.Debug("backupEndpoints")
+
+	// Check we can unmarshall the request
+	body, err := ioutil.ReadAll(c.Request().Body)
+	if err != nil {
+		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	data := &BackupDataRequest{}
+	if err = json.Unmarshal(body, data); err != nil {
+		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - could not parse JSON")
+	}
+	// log.Infof("BODY: %+v", data)
+
+	if data.State == nil || len(data.State) == 0 {
+		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - no endpoints to backup")
+	}
+
+	response, err := p.createBackup(data)
+	if err != nil {
+		return err
+	}
+
+	// Send back the response to the client
+	// TODO: RC Missing client_secret when serialised, `-` in definition
+	jsonString, err := json.Marshal(response)
+	if err != nil {
+		return interfaces.NewHTTPError(http.StatusInternalServerError, "Failed to serialize response")
+	}
+
+	// Encrypt data (see above) // TODO: RC leave until last
+	encryptedResponse := jsonString
+
+	// Return data
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(encryptedResponse)
+	return nil
+}
+
+func (p *portalProxy) createBackup(data *BackupDataRequest) (*BackupRestoreState, error) {
+	log.Debug("createBackup")
+	allEndpoints, err := p.ListEndpoints()
+	if err != nil {
+		return nil, interfaces.NewHTTPError(http.StatusBadGateway, "Failed to fetch endpoints")
+	}
+
+	// Fetch/Format required data
+	endpoints := make([]*interfaces.CNSIRecord, 0)
+	// allTokensFrom := make([]string, 0)
+	// userTokenFrom := make([]string, 0)
+	tokens := make([]interfaces.BackupTokenRecord, 0)
+
+	for endpointID, endpoint := range data.State {
+
+		if !endpoint.Endpoint {
+			continue
+		}
+
+		for _, e := range allEndpoints {
+			if endpointID == e.GUID {
+				endpoints = append(endpoints, e)
+				break
+			}
+		}
+
+		if endpoint.AllConnect {
+			// allTokensFrom = append(allTokensFrom, endpointID)
+			if tokenRecords, ok := p.getCNSITokenRecordsBackup(endpointID); ok {
+				log.Warn("tokens for AllConnect")
+				tokens = append(tokens, tokenRecords...)
+			} else {
+				log.Warn("No tokens for AllConnect")
+				// TODO: RC
+			}
+		} else if endpoint.Connect {
+			// userTokenFrom = append(userTokenFrom, endpointID)
+			if tokenRecord, ok := p.GetCNSITokenRecordWithDisconnected(endpointID, data.UserID); ok {
+				log.Warn("tokens for Connect")
+				// var btr BackupTokenRecord
+				// TODO: RC Q This will be the linked token as if it were the users token
+				var btr = interfaces.BackupTokenRecord{
+					// tokenRecord: tokenRecord,
+					TokenRecord:  tokenRecord,
+					EndpointGUID: endpointID,
+					TokenType:    "CNSI",
+					UserGUID:     data.UserID,
+				}
+
+				tokens = append(tokens, btr)
+			} else {
+				log.Warnf("No tokens for Connect: %+v,%+v", endpointID, data.UserID)
+				// TODO: RC
+				// msg := "Unable to retrieve CNSI token record."
+				// log.Debug(msg)
+				// return nil, nil, false
+			}
+		}
+	}
+
+	log.Infof("endpoints: %+v", endpoints)
+	// log.Infof("allTokensFrom: %+v", allTokensFrom)
+	// log.Infof("userTokenFrom: %+v", userTokenFrom)
+	log.Infof("tokens: %+v", tokens)
+
+	response := &BackupRestoreState{
+		Endpoints: endpoints,
+		Tokens:    tokens,
+	}
+
+	return response, nil
+}
+
+// func (p *portalProxy) GetCNSITokens(cnsiGUID string) ([]interfaces.TokenRecord, bool) {
+// 	log.Debug("GetCNSITokens")
+// 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+// 	if err != nil {
+// 		return make([]interfaces.TokenRecord, 0), false
+// 	}
+
+// 	trs, err := tokenRepo.FindAllCNSITokenIncludeDisconnected(cnsiGUID, p.Config.EncryptionKeyInBytes)
+// 	if err != nil {
+// 		return make([]interfaces.TokenRecord, 0), false
+// 	}
+
+// 	return trs, true
+// }
+
+func (p *portalProxy) getCNSITokenRecordsBackup(endpointID string) ([]interfaces.BackupTokenRecord, bool) {
+	log.Debug("getCNSITokenRecordsBackup")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return make([]interfaces.BackupTokenRecord, 0), false
+	}
+
+	trs, err := tokenRepo.FindAllCNSITokenBackup(endpointID, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		return make([]interfaces.BackupTokenRecord, 0), false
+	}
+
+	return trs, true
+}
+
+func (p *portalProxy) restoreEndpoints(c echo.Context) error {
+	log.Debug("restoreEndpoints")
+
+	// Check we can unmarshall the request
+	body, err := ioutil.ReadAll(c.Request().Body)
+	if err != nil {
+		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	data := &RestoreDataRequest{}
+	if err = json.Unmarshal(body, data); err != nil {
+		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - could not parse JSON")
+	}
+
+	backup := &BackupRestoreState{}
+	if err = json.Unmarshal([]byte(data.Data), backup); err != nil {
+		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid backup - could not parse JSON")
+	}
+
+	err = p.restoreBackup(backup)
+	if err != nil {
+		return err
+	}
+
+	// log.Warnf("BACKUP DATA: %+v", backup)
+	c.Response().WriteHeader(http.StatusOK)
+	return nil
+
+}
+
+func (p *portalProxy) restoreBackup(backup *BackupRestoreState) error {
+	log.Debug("restoreBackup")
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to connect to db", "Failed to connect to db: %+v", err)
+	}
+
+	for _, endpoint := range backup.Endpoints {
+		if err := cnsiRepo.Overwrite(*endpoint, p.Config.EncryptionKeyInBytes); err != nil {
+			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to overwrite endpoints", "Failed to overwrite endpoint: %+v", endpoint.Name)
+		}
+	}
+
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to connect to db", "Failed to connect to db: %+v", err)
+	}
+
+	for _, tr := range backup.Tokens {
+		if err := tokenRepo.SaveCNSIToken(tr.EndpointGUID, tr.UserGUID, tr.TokenRecord, p.Config.EncryptionKeyInBytes); err != nil {
+			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to overwrite token", "Failed to overwrite token: %+v", tr.TokenRecord.TokenGUID)
+		}
+	}
+
+	return nil
+}
+
+// find := func(a interfaces.CNSIRecord) bool {
+// 	return endpointID == a.GUID
+// }
+
+// endpointPos := sliceContainsFn(find, allEndpoints)
+// if endpointPos >= 0 {
+// 	endpoints = append(endpoints, endpoints[endpointPos])
+// }
+
+// // TODO:RC pos
+// func sliceContains(what interface{}, where []interface{}) (idx int) {
+// 	for i, v := range where {
+// 		if v == what {
+// 			return i
+// 		}
+// 	}
+// 	return -1
+// }
+
+// func sliceContainsFn(is func(a interface{}) bool, where []interface{}) (idx int) {
+// 	for i, v := range where {
+// 		if is(v) {
+// 			return i
+// 		}
+// 	}
+// 	return -1
+// }
