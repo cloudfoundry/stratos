@@ -1,8 +1,8 @@
-import { NgModule } from '@angular/core';
+import { NgModule, Injectable } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
-import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
+import { RouterStateSerializer, StoreRouterConnectingModule, DefaultRouterStateSerializer } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
@@ -59,6 +59,7 @@ export interface RouterStateUrl {
   params: Params;
   queryParams: Params;
 }
+@Injectable()
 export class CustomRouterStateSerializer
   implements RouterStateSerializer<RouterStateUrl> {
   serialize(routerState: RouterStateSnapshot): RouterStateUrl {
@@ -99,7 +100,7 @@ export class CustomRouterStateSerializer
     LoginModule,
     HomeModule,
     DashboardModule,
-    StoreRouterConnectingModule.forRoot(), // Create action for router navigation
+    StoreRouterConnectingModule.forRoot({ serializer: DefaultRouterStateSerializer }), // Create action for router navigation
     AboutModule,
     CustomImportModule,
     XSRFModule,

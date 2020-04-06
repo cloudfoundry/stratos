@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ApplicationModule, NgModule, Type } from '@angular/core';
-import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
+import { MaterialDesignFrameworkModule } from '@nwmac/ajsf-material';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
 import {

@@ -123,7 +123,7 @@ export class DeployApplicationStep2Component
   @ViewChild('sourceSelectionForm', { static: true }) sourceSelectionForm: NgForm;
   subscriptions: Array<Subscription> = [];
 
-  @ViewChild('fsChooser', { static: false }) fsChooser;
+  @ViewChild('fsChooser') fsChooser;
 
   public selectedSourceType: SourceType = null;
 

@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
+import { MaterialDesignFrameworkModule } from '@nwmac/ajsf-material';
 
 import {
   AppNameUniqueDirective,

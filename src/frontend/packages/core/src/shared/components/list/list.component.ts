@@ -118,7 +118,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   pPaginator: MatPaginator;
   private filterString: string;
 
-  @ViewChild(MatPaginator, { static: false }) set setPaginator(paginator: MatPaginator) {
+  @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator || this.paginationWidgetToStore) {
       return;
     }
@@ -145,7 +145,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     });
   }
 
-  @ViewChild('filter', { static: false }) set setFilter(filterValue: NgModel) {
+  @ViewChild('filter') set setFilter(filterValue: NgModel) {
     if (!filterValue || this.filterWidgetToStore) {
       return;
     }
