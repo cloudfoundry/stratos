@@ -60,6 +60,7 @@ export class GetServiceInstances
     q: []
   };
   flattenPagination = true;
+  flattenPaginationMax = true;
 }
 
 export class GetServiceInstance

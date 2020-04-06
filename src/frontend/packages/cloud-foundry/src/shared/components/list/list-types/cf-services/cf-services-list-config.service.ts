@@ -5,7 +5,7 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   IListConfig,
   IListMultiFilterConfig,
@@ -70,10 +70,14 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   cardComponent = CfServiceCardComponent;
   defaultView = 'cards' as ListView;
   multiFilterConfigs: IListMultiFilterConfig[] = [];
-  text = {
+  text: ITableText = {
     title: null,
     filter: 'Search by name',
-    noEntries: 'There are no services'
+    noEntries: 'There are no services',
+    maxedResults: {
+      icon: 'store',
+      firstLine: 'There are a lot of services to fetch',
+    }
   };
 
   columns: ITableColumn<APIResource>[] = [{

@@ -27,9 +27,13 @@ const defaultPaginationEntityState: PaginationEntityState = {
   }
 };
 
-export function getDefaultPaginationEntityState(): PaginationEntityState {
+export function getDefaultPaginationEntityState(ignoreMaxed?: boolean): PaginationEntityState {
   return {
-    ...defaultPaginationEntityState
+    ...defaultPaginationEntityState,
+    maxedState: {
+      ...defaultPaginationEntityState.maxedState,
+      ignoreMaxed
+    }
   };
 }
 

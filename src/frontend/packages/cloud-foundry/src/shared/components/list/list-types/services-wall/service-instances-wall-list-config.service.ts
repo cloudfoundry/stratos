@@ -14,6 +14,7 @@ import { CurrentUserPermissionsService } from '../../../../../../../core/src/cor
 import {
   CardMultiActionComponents,
 } from '../../../../../../../core/src/shared/components/list/list-cards/card.component.types';
+import { ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsCards,
   ListViewTypes,
@@ -38,10 +39,15 @@ import {
 @Injectable()
 export class ServiceInstancesWallListConfigService extends CfServiceInstancesListConfigBase {
   endpointType = 'cf';
-  text = {
+  text: ITableText = {
     title: null,
     filter: 'Search by name',
-    noEntries: 'There are no service instances'
+    noEntries: 'There are no service instances',
+    maxedResults: {
+      icon: 'service',
+      iconFont: 'stratos-icons',
+      firstLine: 'There are a lot of service instances to fetch',
+    }
   };
   enableTextFilter = true;
   defaultView = 'cards' as ListView;

@@ -91,6 +91,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, EntityCatalo
   isLoadingPage$: Observable<boolean>;
 
   maxedResults$: Observable<boolean>;
+  maxedStateStartAt$: Observable<number>;
   filter$: Observable<ListFilter>;
   sort$: Observable<ListSort>;
 

@@ -98,7 +98,7 @@ export class PaginationPageIterator<R = any, E = any> {
 
     const allResults = combineLatest(of(initialResponse), this.getAllOtherPageRequests(totalPages));
 
-    if (totalResults === 0 || this.paginationMaxedState.ignoreMaxed) {
+    if (totalResults === 0 || (this.paginationMaxedState && this.paginationMaxedState.ignoreMaxed)) {
       return allResults;
     }
 

@@ -2,11 +2,11 @@ import { Action, Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, InternalAppState } from '../app-state';
 import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
+import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
+import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { ApiRequestTypes, getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { PaginatedAction } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';
@@ -63,7 +63,7 @@ export const apiRequestPipelineFactory = (
 
   startEntityHandler(actionDispatcher, catalogEntity, requestType, action);
   return pipeline(store, httpClient, {
-    action,
+    action: patchedAction, // Note - If this is just `action` it breaks maxed lists
     requestType,
     catalogEntity,
     appState

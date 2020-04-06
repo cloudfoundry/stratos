@@ -6,6 +6,7 @@ import {
   combineLatest,
   Observable,
   of as observableOf,
+  of,
   OperatorFunction,
   ReplaySubject,
   Subscription,
@@ -100,7 +101,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // Misc
   public isLoadingPage$: Observable<boolean> = observableOf(false);
   public rowsState: Observable<RowsState>;
+
+  // Maxed Collection
   public maxedResults$: Observable<boolean> = observableOf(false);
+  public maxedStateStartAt$: Observable<number> = observableOf(null);
 
   public filter$: Observable<ListFilter>;
   public sort$: Observable<ListSort>;
@@ -204,6 +208,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       map(LocalPaginationHelpers.isPaginationMaxed),
       distinctUntilChanged(),
     );
+
+    const catalogEntity = entityCatalog.getEntity(
+      this.masterAction.endpointType,
+      this.masterAction.entityType
+    );
+    const paginationConfig = catalogEntity.getPaginationConfig();
+    this.maxedStateStartAt$ = paginationConfig ?
+      paginationConfig.maxedStateStartAt(this.store, this.masterAction) :
+      of(null);
   }
 
   init(config: IListDataSourceConfig<A, T>) {

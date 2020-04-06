@@ -124,7 +124,7 @@ function paginate(action, state = {}, updatePagination) {
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
     const clearAction = action as ClearPaginationOfType;
     const clearEntityType = entityCatalog.getEntityKey(clearAction.entityConfig.endpointType, clearAction.entityConfig.entityType);
-    return paginationClearAllTypes(state, [clearEntityType], getDefaultPaginationEntityState());
+    return paginationClearAllTypes(state, [clearEntityType]);
   }
 
   if (action.type === CLEAR_PAGINATION_OF_ENTITY) {
@@ -132,7 +132,7 @@ function paginate(action, state = {}, updatePagination) {
   }
 
   if (isEndpointAction(action)) {
-    return clearEndpointEntities(state, action, getDefaultPaginationEntityState());
+    return clearEndpointEntities(state, action);
   }
 
   if (action.type === UPDATE_MAXED_STATE) {

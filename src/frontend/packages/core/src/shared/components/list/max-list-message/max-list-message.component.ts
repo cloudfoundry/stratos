@@ -23,14 +23,15 @@ export class MaxListMessageComponent implements OnDestroy {
 
   @Input()
   set config(config: ITableTextMaxed) {
-    if (!config) {
-      return;
-    }
+    const safeConfig: ITableTextMaxed = config || {
+      icon: '',
+      firstLine: '',
+    };
     this.configSubject.next({
-      icon: config.icon || MaxListMessageComponent.defaultConfig.icon,
-      iconFont: config.iconFont || MaxListMessageComponent.defaultConfig.iconFont,
-      firstLine: config.firstLine || MaxListMessageComponent.defaultConfig.firstLine,
-      filterLine: config.filterLine,
+      icon: safeConfig.icon || MaxListMessageComponent.defaultConfig.icon,
+      iconFont: safeConfig.iconFont || MaxListMessageComponent.defaultConfig.iconFont,
+      firstLine: safeConfig.firstLine || MaxListMessageComponent.defaultConfig.firstLine,
+      filterLine: safeConfig.filterLine,
     });
   }
 
@@ -86,12 +87,11 @@ export class MaxListMessageComponent implements OnDestroy {
         );
       }
 
-      if (canIgnoreMaxedState) {
+      if (canIgnoreMaxedState && config.filterLine) {
         otherLines.push(
           { text: 'or' }
         );
       }
-      console.log(canIgnoreMaxedState);
       return {
         basicText: config,
         otherLines,
@@ -101,6 +101,7 @@ export class MaxListMessageComponent implements OnDestroy {
   );
 
   @Input() count = 0;
+  @Input() maxCount = 0;
 
   @Output() showAllAfterMax = new EventEmitter();
 

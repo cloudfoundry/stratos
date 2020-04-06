@@ -196,8 +196,10 @@
     <div [hidden]="(showProgressBar$ | async) || (hasRows$ | async) || (dataSource.isLoadingPage$ | async)"
       class="list-component__no-entries">
       <ng-container *ngIf="dataSource.maxedResults$ | async">
-        <app-max-list-message (showAllAfterMax)="showAllAfterMax()" [count]="paginatorSettings.length"
-          [config]="config.text?.maxedResults" [catalogueEntity]="config.getDataSource().masterAction">
+        <app-max-list-message (showAllAfterMax)="showAllAfterMax()"
+          [count]="entitySelectConfig ? null : paginatorSettings.length"
+          [maxCount]="dataSource.maxedStateStartAt$ | async" [config]="config.text?.maxedResults"
+          [catalogueEntity]="config.getDataSource().masterAction">
         </app-max-list-message>
       </ng-container>
       <ng-container *ngIf="(noRowsNotFiltering$ | async)">

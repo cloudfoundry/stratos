@@ -37,7 +37,7 @@ export interface PaginationMaxedState {
    */
   isMaxedMode?: boolean;
   /**
-   * Disregard flattenPaginationMax and never reach isMaxedMode true
+   * Disregard flattenPaginationMax and ignore isMaxedMode true
    */
   ignoreMaxed?: boolean;
 }
@@ -45,7 +45,8 @@ export interface PaginationMaxedState {
 
 export class PaginationEntityState {
   /**
-   * For multi action lists, this is used to force a particular entity type.
+   * For multi action lists, this is used to force a particular entity type. For instance in the service instance wall selecting the option
+   * to only show user provided service instances
    */
   forcedLocalPage?: number;
   currentPage = 0;
