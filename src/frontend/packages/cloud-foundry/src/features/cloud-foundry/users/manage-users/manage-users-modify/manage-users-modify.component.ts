@@ -35,6 +35,7 @@ import {
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   selectUsersIsRemove,
+  selectUsersIsSetByUsername,
   selectUsersRolesOrgGuid,
   selectUsersRolesPicked,
   selectUsersRolesRoles,
@@ -128,6 +129,8 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   selectedOrgGuid: string;
   orgGuidChangedSub: Subscription;
   usersWithWarning$: Observable<string[]>;
+  isSetByUsername$: Observable<boolean>;
+  isRemove$: Observable<boolean>;
 
   constructor(
     private store: Store<CFAppState>,
@@ -209,6 +212,9 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       switchMap(newRoles => this.cfRolesService.createRolesDiff(newRoles.orgGuid)),
       map(changes => !!changes.length)
     );
+
+    this.isSetByUsername$ = this.store.select(selectUsersIsSetByUsername);
+    this.isRemove$ = this.store.select(selectUsersIsRemove);
   }
 
   private mapUser(user: CfUser): CfUserWithWarning {
@@ -246,7 +252,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateOrg(orgGuid) {
+  updateOrg(orgGuid: string) {
     this.selectedOrgGuid = orgGuid;
     if (!this.selectedOrgGuid) {
       return;

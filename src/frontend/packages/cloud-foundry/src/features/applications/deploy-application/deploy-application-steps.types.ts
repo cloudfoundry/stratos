@@ -95,7 +95,7 @@ export class ApplicationDeploySourceTypes {
 
   getAutoSelectedType(activatedRoute: ActivatedRoute): SourceType {
     const typeId = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
-    return this.getTypes().find(source => source.id === typeId);
+    return typeId ? this.getTypes().find(source => source.id === typeId) : null;
   }
 
   canDeployType(cfId: string, sourceId: string): Observable<boolean> {

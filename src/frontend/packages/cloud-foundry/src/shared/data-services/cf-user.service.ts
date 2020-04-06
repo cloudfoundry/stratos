@@ -25,6 +25,9 @@ import { IEntityMetadata } from '../../../../store/src/entity-catalog/entity-cat
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import {
+  getDefaultPaginationEntityState,
+} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
+import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
   PaginationObservables,
@@ -69,7 +72,7 @@ export class CfUserService {
       switchMap(paginationObservables => combineLatest(
         // Entities should be subbed to so the api request is made
         paginationObservables.entities$.pipe(
-          // In the event of maxed lists though entities never fires... so start with something
+          // In the event of maxed lists entities never fires... so start with something
           startWith(null),
         ),
         paginationObservables.pagination$
@@ -335,8 +338,21 @@ export class CfUserService {
             );
 
           } else {
+            const defaultPag = getDefaultPaginationEntityState();
+            const erroredPag = {
+              ...defaultPag,
+              currentPage: 1,
+              pageRequests: {
+                ...defaultPag.pageRequests,
+                [1]: {
+                  busy: false,
+                  error: true,
+                  message: 'Fetching users at this level is not permitted'
+                }
+              }
+            };
             return observableOf<PaginationObservables<APIResource<CfUser>>>({
-              pagination$: observableOf(null),
+              pagination$: observableOf(erroredPag),
               entities$: observableOf(null),
               hasEntities$: observableOf(false),
               totalEntities$: observableOf(0),
