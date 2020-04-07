@@ -54,9 +54,18 @@ else
 	LISTEN_IP=${PUBLIC_IP}
 fi
 
+echo "===================================================================================="
+echo "FDB Document Layer starting"
+echo "===================================================================================="
+echo ""
+
 echo "Connecting to FDB server at: $CLUSTER_ID@$coordinator_ip:$coordinator_port"
 echo "Cluster file contents: "
 cat $FDB_CLUSTER_FILE
+
+echo "Listen IP is ${LISTEN_IP}"
+echo "Public IP is ${PUBLIC_IP}"
+
 if [[ "$ENABLE_TLS" == "true" ]]; then
 	echo "Starting FDB Document Layer on $LISTEN_IP:$FDB_DOC_PORT:tls. TLS enabled."
 	fdbdoc -V --listen_address $LISTEN_IP:$FDB_DOC_PORT:tls --tls_certificate_file $SERVER_CRT --tls_ca_file $CA_CRT --tls_key_file $SERVER_KEY --logdir /var/fdb/logs

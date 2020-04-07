@@ -34,5 +34,13 @@ else
 	LISTEN_IP=${PUBLIC_IP}
 fi
 
+echo "===================================================================================="
+echo "FDB Server starting"
+echo "===================================================================================="
+echo ""
+
+echo "Listen IP is ${LISTEN_IP}"
+echo "Public IP is ${PUBLIC_IP}"
+
 fdbserver --listen_address $LISTEN_IP:$FDB_PORT --public_address $PUBLIC_IP:$FDB_PORT \
 	--datadir /var/fdb/data --logdir /var/fdb/logs
