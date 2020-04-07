@@ -52,7 +52,7 @@ export class ApplicationEnvVarsHelper {
         catalogEntity.getSchema(),
         action.flattenPagination
       )
-    }, true);
+    }, action.flattenPagination);
   }
 
   FetchStratosProject(appEnvVars): EnvVarStratosProject {

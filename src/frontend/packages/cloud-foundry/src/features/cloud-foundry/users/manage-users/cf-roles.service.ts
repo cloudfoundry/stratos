@@ -101,9 +101,7 @@ export class CfRolesService {
     this.existingRoles$ = this.store.select(selectUsersRolesPicked).pipe(
       combineLatestOperators(this.store.select(selectUsersRolesCf)),
       filter(([users, cfGuid]) => !!cfGuid),
-      switchMap(([users, cfGuid]) => {
-        return this.populateRoles(cfGuid, users);
-      }),
+      switchMap(([users, cfGuid]) => this.populateRoles(cfGuid, users)),
       distinctUntilChanged(),
       publishReplay(1),
       refCount()
@@ -117,7 +115,7 @@ export class CfRolesService {
     this.loading$ = this.existingRoles$.pipe(
       combineLatestOperators(this.newRoles$),
       map(([existingRoles, newRoles]) => !existingRoles || !newRoles),
-      startWith(true)
+      startWith(true),
     );
   }
 
@@ -176,7 +174,10 @@ export class CfRolesService {
    */
   createRolesDiff(orgGuid: string): Observable<CfRoleChange[]> {
     return this.existingRoles$.pipe(
-      combineLatestOperators(this.newRoles$, this.store.select(selectUsersRolesPicked)),
+      combineLatestOperators(
+        this.newRoles$,
+        this.store.select(selectUsersRolesPicked),
+      ),
       first(),
       map(([existingRoles, newRoles, pickedUsers]) => {
         const changes = [];
@@ -199,7 +200,7 @@ export class CfRolesService {
     orgGuid: string
   ): CfRoleChange[] {
     const existingUserRoles = existingRoles[user.guid] || {};
-    const newChanges = [];
+    const newChanges: CfRoleChange[] = [];
 
     // Compare org roles
     const existingOrgRoles = existingUserRoles[orgGuid] || createDefaultOrgRoles(orgGuid, newRoles.name);
@@ -271,7 +272,7 @@ export class CfRolesService {
           getAllOrganizationsAction.flattenPagination
         ),
       },
-        true
+        getAllOrganizationsAction.flattenPagination
       ).entities$;
       this.cfOrgs[cfGuid] = CfRolesService.filterEditableOrgOrSpace<IOrganization>(this.userPerms, true, orgs$).pipe(
         map(orgs => orgs.sort((a, b) => a.entity.name.localeCompare(b.entity.name))),

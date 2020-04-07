@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
 import { distinctUntilChanged, map, scan, startWith } from 'rxjs/operators';
 

@@ -1,12 +1,17 @@
 <app-page-header>
-  <span *ngIf="(singleUser$ | async); else multiUser">Manage Roles: {{(singleUser$ | async).username }}</span>
-  <ng-template #multiUser>Manage User Roles</ng-template>
+  {{ title$ | async}}
 </app-page-header>
 <app-steppers cancel="{{defaultCancelUrl}}" [nextButtonProgress]="false">
-  <app-step title="Select Roles" [blocked]="modify.cfRolesService.loading$ | async" [onLeave]="modify.onLeave" [onEnter]="modify.onEnter" [onNext]="modify.onNext" [valid]="modify.valid$ | async">
-    <app-manage-users-modify #modify></app-manage-users-modify>
+  <app-step *ngIf="setUsernames" title="Usernames" [onNext]="setUsers.onNext" [valid]="setUsers.valid$ | async"
+    [blocked]="setUsers.blocked$ | async">
+    <app-manage-users-set-usernames #setUsers></app-manage-users-set-usernames>
   </app-step>
-  <app-step title="Confirm" [onEnter]="confirm.onEnter" [canClose]="!applyStarted" [disablePrevious]="applyStarted" [destructiveStep]="!applyStarted" [onNext]="startApply" [finishButtonText]="applyStarted ? 'Close' : 'Apply'">
-    <app-manage-users-confirm #confirm></app-manage-users-confirm>
+  <app-step title="Select Roles" [blocked]="modify.blocked$ | async" [onLeave]="modify.onLeave"
+    [onEnter]="modify.onEnter" [onNext]="modify.onNext" [valid]="modify.valid$ | async">
+    <app-manage-users-modify #modify [setUsernames]="setUsernames"></app-manage-users-modify>
+  </app-step>
+  <app-step title="Confirm" [onEnter]="confirm.onEnter" [canClose]="!applyStarted" [disablePrevious]="applyStarted"
+    [destructiveStep]="!applyStarted" [onNext]="startApply" [finishButtonText]="applyStarted ? 'Close' : 'Apply'">
+    <app-manage-users-confirm #confirm [setUsernames]="setUsernames"></app-manage-users-confirm>
   </app-step>
 </app-steppers>

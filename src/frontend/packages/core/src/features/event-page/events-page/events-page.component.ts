@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { first, map, switchMap, tap, distinctUntilChanged, share } from 'rxjs/operators';
+import { distinctUntilChanged, first, map, share, switchMap, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
 import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
-import { ActivatedRoute, UrlSegment } from '@angular/router';
+
+export const eventReturnUrlParam = 'returnFromEvents';
 
 export enum EventFilterValues {
   ALL = 'all',
@@ -77,11 +79,30 @@ export class EventsPageComponent implements OnInit {
       share()
     );
     this.back$ = this.store.select(getPreviousRoutingState).pipe(first()).pipe(
-      map(previousState => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
+      map(previousState => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home'),
+      map(returnUrl => {
+        // Override return url if we've come from the error page
+        const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
+        return overrideReturnUrl || returnUrl;
+      }),
+      first(),
     );
   }
   updateReadState(event: IGlobalEvent, read: boolean) {
     this.eventService.updateEventReadState(event, read);
   }
 
+  createQueryParams(urlForward: string): Observable<object> {
+    // Ensure we break the looping 'back' we get from Page --> Events --> Errors --> Events --> Errors etc
+    return this.back$.pipe(
+      map(urlBack => {
+        // Pass a url through to the errors page containing the url to return after returning to this page
+        const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
+        return urlForward && urlForward.startsWith('/errors') ? {
+          [eventReturnUrlParam]: overrideReturnUrl || urlBack
+        } : {};
+      }),
+      first(),
+    );
+  }
 }

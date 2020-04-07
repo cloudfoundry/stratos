@@ -196,9 +196,9 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
         autoscalerEntityFactory(appAutoscalerAppMetricEntityType),
-        false
+        true
       )
-    }, false).entities$;
+    }, true).entities$;
   }
 
   loadLatestMetricsUponPolicy() {

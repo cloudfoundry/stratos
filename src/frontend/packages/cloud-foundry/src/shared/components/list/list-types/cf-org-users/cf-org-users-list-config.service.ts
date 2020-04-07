@@ -22,6 +22,7 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
     router: Router,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     userPerms: CurrentUserPermissionsService) {
+
     super(
       store,
       cfUserService,

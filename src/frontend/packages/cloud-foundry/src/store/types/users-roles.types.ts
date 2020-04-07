@@ -5,6 +5,9 @@ export interface UsersRolesState {
   users: CfUser[];
   newRoles: IUserPermissionInOrg;
   changedRoles: CfRoleChange[];
+  usernameOrigin?: string;
+  isRemove?: boolean;
+  isSetByUsername?: boolean;
 }
 
 export interface CfUserRolesSelected {
@@ -24,7 +27,7 @@ export class CfRoleChange {
 }
 
 export class CfRoleChangeWithNames extends CfRoleChange {
-  userName: string; // Why are all these names set out flat? So we can easily sort in future
+  username: string; // Why are all these names set out flat? So we can easily sort in future
   orgName: string;
   spaceName?: string;
   roleName: string;

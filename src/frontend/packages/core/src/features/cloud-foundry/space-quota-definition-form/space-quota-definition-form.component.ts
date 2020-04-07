@@ -77,7 +77,7 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
           action.flattenPagination
         )
       },
-      true
+      action.flattenPagination
     ).entities$.pipe(
       filter(o => !!o),
       map(o => o.map(org => org.entity.name)),

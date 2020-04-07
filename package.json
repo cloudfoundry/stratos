@@ -132,6 +132,7 @@
     "karma-jasmine": "~2.0.1",
     "karma-jasmine-html-reporter": "^1.4.0",
     "karma-spec-reporter": "0.0.32",
+    "kind-of": "^6.0.3",
     "lodash": "^4.17.13",
     "mem": "5.1.1",
     "mktemp": "^1.0.0",

@@ -77,9 +77,6 @@ export class TableRowComponent<T = any> extends CdkRow implements OnInit {
         map(state => state.deleting)
       );
     }
-    if (this.expandComponent) {
-      this.defaultMinRowHeight = '64px';
-    }
 
     // Ensure we 'register' with the expander service. This also helps with page changes
     this.expandedService.collapse(this.rowId);
