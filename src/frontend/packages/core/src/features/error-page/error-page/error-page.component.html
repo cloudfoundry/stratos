@@ -3,7 +3,7 @@
     <h1>Recent Endpoint Errors</h1>
     <div class="page-header-right">
       <span>
-        <button mat-icon-button matTooltip="Close" [routerLink]="back$ | async">
+        <button mat-icon-button matTooltip="Close" [routerLink]="back$ | async" [queryParams]="backParams$ | async">
           <mat-icon>close</mat-icon>
         </button>
       </span>

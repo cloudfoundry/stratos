@@ -1,3 +1,4 @@
+import { EditEndpointStepComponent } from './edit-endpoint/edit-endpoint-step/edit-endpoint-step.component';
 import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../core/core.module';
@@ -9,6 +10,7 @@ import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connec
 import { CreateEndpointModule } from './create-endpoint/create-endpoint.module';
 import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
 import { EndpointsRoutingModule } from './endpoints.routing';
+import { EditEndpointComponent } from './edit-endpoint/edit-endpoint.component';
 
 @NgModule({
   imports: [
@@ -23,6 +25,8 @@ import { EndpointsRoutingModule } from './endpoints.routing';
     CredentialsAuthFormComponent,
     SSOAuthFormComponent,
     NoneAuthFormComponent,
+    EditEndpointComponent,
+    EditEndpointStepComponent,
   ],
   entryComponents: [
     ConnectEndpointDialogComponent,

@@ -86,5 +86,27 @@
     display: flex;
     flex: 1;
     width: 100%;
+
+    .mat-expansion-panel-body {
+      padding: 0;
+    }
+
+    .table-row__inner__expansion.mat-expansion-panel {
+      box-shadow: none;
+      box-sizing: inherit;
+      width: 100%;
+
+      .table-row__inner__expansion--header {
+        padding-left: 0;
+        padding-right: 0;
+
+        &.in-expanded-row {
+          padding: 0;
+        }
+      }
+    }
+  }
+  &.in-expanded-row {
+    border-left-width: 1px;
   }
 }

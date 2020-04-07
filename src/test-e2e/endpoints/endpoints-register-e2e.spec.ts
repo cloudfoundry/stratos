@@ -49,7 +49,8 @@ describe('Endpoints', () => {
 
       describe('Form -', () => {
 
-        let name, address;
+        let name;
+        let address;
         beforeEach(() => {
           name = register.getName();
           address = register.getAddress();
@@ -167,7 +168,7 @@ describe('Endpoints', () => {
           // so check for correct message at the start and the helpful message for the user to correct the problem
           expect(snackBar.hasMessage('SSL error - x509: certificate')).toBeTruthy();
           /* tslint:disable-line:max-line-length*/
-          expect(snackBar.messageContains('Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted"'))
+          expect(snackBar.messageContains('Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted'))
             .toBeTruthy();
         });
 

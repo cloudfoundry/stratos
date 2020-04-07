@@ -24,11 +24,14 @@ import {
 } from '../../../../../../features/endpoints/endpoint-helpers';
 import { StratosStatus } from '../../../../../shared.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
-import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardMenuItem, createMetaCardMenuItemSeparator } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
+import { RouterNav } from './../../../../../../../../store/src/actions/router.actions';
+import { CurrentUserPermissions } from 'frontend/packages/core/src/core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/current-user-permissions.service';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -99,6 +102,14 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         can: endpointAction.createVisible(this.rowObs)
       }));
 
+      // Add edit
+      this.cardMenu.push({
+        label: 'Edit endpoint',
+        action: () => this.editEndpoint(),
+        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
+      });
+      this.cardMenu.push(createMetaCardMenuItemSeparator());
+
       // Add a copy address to clipboard
       this.cardMenu.push({
         label: 'Copy address to Clipboard',
@@ -118,7 +129,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     private endpointListHelper: EndpointListHelper,
     private componentFactoryResolver: ComponentFactoryResolver,
     private favoritesConfigMapper: FavoritesConfigMapper,
-
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     super();
     this.endpointIds$ = this.endpointIds.asObservable();
@@ -176,6 +187,11 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         startWith(null)
       );
     }
+  }
+
+  editEndpoint() {
+    const routerLink = `/endpoints/edit/${this.row.guid}`;
+    this.store.dispatch(new RouterNav({ path: routerLink }));
   }
 
 }

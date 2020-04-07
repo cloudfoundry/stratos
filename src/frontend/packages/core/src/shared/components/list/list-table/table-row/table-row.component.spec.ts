@@ -5,6 +5,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of as observableOf } from 'rxjs';
 
 import { CoreModule } from '../../../../../core/core.module';
+import { TableRowExpandedService } from './table-row-expanded-service';
 import { TableRowComponent } from './table-row.component';
 
 
@@ -46,6 +47,9 @@ describe('TableRowComponent', () => {
         CoreModule,
         CdkTableModule,
         NoopAnimationsModule,
+      ],
+      providers: [
+        TableRowExpandedService
       ]
     })
       .compileComponents();
