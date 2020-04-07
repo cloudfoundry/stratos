@@ -44,13 +44,15 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
       this.initialised.next(true);
 
       // Auto-select first commit - wait for page to load, select first item if present
-      this.dataSource.page$.pipe(
-        first()
-      ).subscribe(rs => {
-        if (rs && rs.length > 0) {
-          this.dataSource.selectedRowToggle(rs[0], false);
-        }
-      });
+      setTimeout(() => {
+        this.dataSource.page$.pipe(
+          first()
+        ).subscribe(rs => {
+          if (rs && rs.length > 0) {
+            this.dataSource.selectedRowToggle(rs[0], false);
+          }
+        });
+      }, 0);
     });
   }
 }

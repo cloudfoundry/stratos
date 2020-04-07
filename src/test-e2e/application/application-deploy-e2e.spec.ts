@@ -209,17 +209,27 @@ fdescribe('Application Deploy -', () => {
       appEvents.list.table.toggleSort('Timestamp');
 
       const currentUser = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
-      // Create
-      expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\ncreate');
-      expect(appEvents.list.table.getCell(0, 0).getText()).toBe(`person\n${currentUser}`);
-      // Map Route
-      expect(appEvents.list.table.getCell(1, 1).getText()).toBe('audit\napp\nmap-route');
-      expect(appEvents.list.table.getCell(1, 0).getText()).toBe(`person\n${currentUser}`);
-      // Update (route)
-      expect(appEvents.list.table.getCell(2, 1).getText()).toBe('audit\napp\nupdate');
-      expect(appEvents.list.table.getCell(2, 0).getText()).toBe(`person\n${currentUser}`);
-    });
 
+      const checkEventTableItem = (data: { [columnHeader: string]: string }[], text) => {
+        const item = data.find(i => i.type === text);
+        expect(item).toBeDefined();
+        expect(item.actor).toBe(`person\n${currentUser}`);
+      };
+
+      // Don't worry about order of events
+      appEvents.list.table.getTableData().then(data => {
+        // Create
+        checkEventTableItem(data, 'audit\napp\ncreate');
+        // Lifecycle - buildpack(s)
+        checkEventTableItem(data, 'audit\napp\nupdate');
+        // Map Route
+        checkEventTableItem(data, 'audit\napp\nmap-route');
+        // Upload bits
+        checkEventTableItem(data, 'audit\napp\nupload-bits');
+        // Build Create
+        checkEventTableItem(data, 'audit\napp\nbuild\ncreate');
+      });
+    });
   });
 
   describe('Instance scaling', () => {

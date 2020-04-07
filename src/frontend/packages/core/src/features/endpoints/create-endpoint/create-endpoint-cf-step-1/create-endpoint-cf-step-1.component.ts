@@ -19,7 +19,7 @@ import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../base-en
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { ConnectEndpointConfig } from '../../connect.service';
-import { getFullEndpointApiUrl } from '../../endpoint-helpers';
+import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
@@ -80,8 +80,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     this.setUrlValidation(this.endpoint);
 
     // Client Redirect URI for SSO
-    this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
-      (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
+    this.clientRedirectURI = getSSOClientRedirectURI();
   }
 
   onNext: StepOnNextFunction = () => {

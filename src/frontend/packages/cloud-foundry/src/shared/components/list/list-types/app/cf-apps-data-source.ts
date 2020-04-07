@@ -22,6 +22,7 @@ import {
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
@@ -45,7 +46,7 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
 
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<AppState>,
     listConfig?: IListConfig<APIResource>,
     transformEntities?: any[],
     paginationKey = CfAppsDataSource.paginationKey,
