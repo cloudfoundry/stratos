@@ -68,7 +68,9 @@ export class MetaCardComponent implements OnDestroy {
       if (!this.favorite) {
         this.entityMonitorSub = entityMonitor.entity$.pipe(
           first(),
-          tap(entity => this.favorite = getFavoriteFromCfEntity(entity, entityConfig.schema.key, this.favoritesConfigMapper))
+          tap(entity => {
+            this.favorite = getFavoriteFromCfEntity(entity, entityConfig.schema.entityType, this.favoritesConfigMapper)
+          })
         ).subscribe();
       }
     }
