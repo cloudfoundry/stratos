@@ -8,6 +8,9 @@
   $foreground: map-get($theme, foreground);
   .table-row {
     border-bottom-color: mat-color($foreground, divider);
+    &.in-expanded-row {
+      border-left-color: mat-color($foreground, divider);
+    }
   }
   .table-row-wrapper {
     &__errored {
