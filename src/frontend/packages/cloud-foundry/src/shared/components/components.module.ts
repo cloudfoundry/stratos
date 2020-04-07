@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ApplicationModule, NgModule, Type } from '@angular/core';
-import { MaterialDesignFrameworkModule } from '@nwmac/ajsf-material';
+import { MaterialDesignFrameworkModule } from '@cfstratos/ajsf-material';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
 import {

@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from '@nwmac/ajsf-material';
+import { MaterialDesignFrameworkModule } from '@cfstratos/ajsf-material';
 
 import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { SchemaFormComponent } from './schema-form.component';

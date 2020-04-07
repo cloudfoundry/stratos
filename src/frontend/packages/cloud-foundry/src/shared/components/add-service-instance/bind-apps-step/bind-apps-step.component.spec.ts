@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from '@nwmac/ajsf-material';
+import { MaterialDesignFrameworkModule } from '@cfstratos/ajsf-material';
 
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
