@@ -18,7 +18,7 @@ import { DeployApplication } from './po/deploy-app.po';
 let applicationE2eHelper: ApplicationE2eHelper;
 let cfHelper: CFHelpers;
 
-fdescribe('Application Deploy -', () => {
+describe('Application Deploy -', () => {
 
   const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack;
   let defaultStack = '';
