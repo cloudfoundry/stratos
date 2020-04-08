@@ -176,8 +176,8 @@
           [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
         <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="hasSingleActions"
           [addSelect]="config.allowSelection || (haveMultiActions | async)"
-          [paginationController]="paginationController" [columns]="columns"
-          [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
+          [paginationController]="paginationController" [columns]="columns" [minRowHeight]="config.minRowHeight"
+          [hidden]="!(hasRows$ | async)" [expandComponent]="config.expandComponent">
         </app-table>
       </div>
       <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">

@@ -1,3 +1,4 @@
+import { UpdateEndpoint, UPDATE_ENDPOINT, UPDATE_ENDPOINT_SUCCESS, UPDATE_ENDPOINT_FAILED } from './../actions/endpoint.actions';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
@@ -54,6 +55,7 @@ export class EndpointsEffect {
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
   static registeringKey = 'registering';
+  static updatingKey = 'updating';
 
   constructor(
     private http: HttpClient,
@@ -234,12 +236,53 @@ export class EndpointsEffect {
       );
     }));
 
+    @Effect() updateEndpoint$ = this.actions$.pipe(
+      ofType<UpdateEndpoint>(UPDATE_ENDPOINT),
+      mergeMap(action => {
+        const apiAction = this.getEndpointUpdateAction(action.id, action.type, EndpointsEffect.updatingKey);
+        const paramsObj = {
+          name: action.name,
+          skipSSL: action.skipSSL,
+          setClientInfo: action.setClientInfo,
+          clientID: action.clientID,
+          clientSecret: action.clientSecret,
+          allowSSO: action.allowSSO,
+        };
+
+        // Encode auth values in the body, not the query string
+        const body: any = new FormData();
+        Object.keys(paramsObj).forEach(key => {
+          body.set(key, paramsObj[key]);
+        });
+
+        return this.doEndpointAction(
+          apiAction,
+          '/pp/v1/endpoint/' + action.id,
+          new HttpParams({}),
+          'update',
+          [UPDATE_ENDPOINT_SUCCESS, UPDATE_ENDPOINT_FAILED],
+          action.endpointType,
+          body,
+          this.processUpdateError
+        );
+      }));
+
+  private processUpdateError(e: HttpErrorResponse): string {
+    const err = e.error ? e.error.error : {};
+    let message = 'There was a problem updating the endpoint' +
+      `${err.error ? ' (' + err.error + ').' : ''}`;
+    if (e.status === 403) {
+      message = `${message}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted`;
+    }
+    return message;
+  }
+
   private processRegisterError(e: HttpErrorResponse): string {
     let message = 'There was a problem creating the endpoint. ' +
       `Please ensure the endpoint address is correct and try again` +
-      `${e.error.error ? ' (' + e.error.error + ').' : '.'}`;
+      `${e.error.error ? ' (' + e.error.error + ').' : ''}`;
     if (e.status === 403) {
-      message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted"`;
+      message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted`;
     }
     return message;
   }
@@ -301,7 +344,12 @@ export class EndpointsEffect {
           };
         }
 
-        if (apiAction.updatingKey === EndpointsEffect.disconnectingKey || apiActionType === 'create' || apiActionType === 'delete') {
+        if (apiActionType === 'update') {
+          actions.push(new GetSystemInfo());
+        }
+
+        if (apiAction.updatingKey === EndpointsEffect.disconnectingKey || apiActionType === 'create' || apiActionType === 'delete'
+          || apiActionType === 'update') {
           actions.push(this.clearEndpointInternalEvents(apiAction.guid, endpointEntityKey));
         }
 

@@ -39,7 +39,18 @@ export interface ITableColumn<T> {
   cellConfig?: object | CellConfigFunction<T>;   // Config for a custom cell component
   headerCell?: () => string; // Either headerCell OR headerCellComponent should be defined
   headerCellComponent?: any;
+  /**
+   * Has to be a known class in table.component.scss
+   */
   class?: string;
+  /**
+   * Has to be a known class in table.component.scss
+   */
+  headerClass?: string;
+  /**
+   * Has to be a known class in table.component.scss
+   */
+  cellClass?: string;
   sort?: boolean | DataFunctionDefinition | DataFunction<T>;
   cellFlex?: string;
   cellAlignSelf?: string;

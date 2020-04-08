@@ -60,7 +60,6 @@ export class ListActionConfig<T> {
 
 interface ICoreListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
-
   getRowState?(row: T, schemaKey?: string): Observable<RowState>;
   trackBy(index: number, item: T);
 }

@@ -33,26 +33,26 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
         return (appSource.type.id === 'github' || appSource.type.id === 'gitlab') ? {
           scm: appSource.type.id as GitSCMType,
           projectName: appSource.gitDetails.projectName,
-          sha: appSource.gitDetails.branch.name,
-          commitSha: appSource.gitDetails.commit ? appSource.gitDetails.commit.sha : null
+          sha: appSource.gitDetails.branch.name
         } : null;
       }),
       filter(fetchDetails => !!fetchDetails && !!fetchDetails.projectName && !!fetchDetails.sha),
       first()
     ).subscribe(fetchDetails => {
       const scm = scmService.getSCM(fetchDetails.scm);
-      this.dataSource = new GithubCommitsDataSource(this.store,
-        this, scm, fetchDetails.projectName, fetchDetails.sha, fetchDetails.commitSha);
+      this.dataSource = new GithubCommitsDataSource(this.store, this, scm, fetchDetails.projectName, fetchDetails.sha);
       this.initialised.next(true);
 
       // Auto-select first commit - wait for page to load, select first item if present
-      this.dataSource.page$.pipe(
-        first()
-      ).subscribe(rs => {
-        if (rs && rs.length > 0) {
-          this.dataSource.selectedRowToggle(rs[0], false);
-        }
-      });
+      setTimeout(() => {
+        this.dataSource.page$.pipe(
+          first()
+        ).subscribe(rs => {
+          if (rs && rs.length > 0) {
+            this.dataSource.selectedRowToggle(rs[0], false);
+          }
+        });
+      }, 0);
     });
   }
 }
