@@ -62,6 +62,8 @@ export function paginationIgnoreMaxed(state: PaginationState, ignoreAction: Igno
   // Reset the pagination back to default and set the ignoreMaxed flag
   const entityKey = entityCatalog.getEntityKey(ignoreAction);
   const defaultPaginationEntityState = getDefaultPaginationEntityState();
+  // Retain the page size, order, etc. We may need to look at this again when applying max to other entity types
+  const { q, ...params } = state[entityKey][ignoreAction.paginationKey].params;
   const entityState: PaginationEntityTypeState = {
     ...state[entityKey],
     [ignoreAction.paginationKey]: {
@@ -73,6 +75,7 @@ export function paginationIgnoreMaxed(state: PaginationState, ignoreAction: Igno
           ...state[entityKey][ignoreAction.paginationKey].clientPagination.filter
         }
       },
+      params,
       maxedState: {
         // Retain the original maxed state. This will be true, but is ignored anyway
         ...state[entityKey][ignoreAction.paginationKey].maxedState,

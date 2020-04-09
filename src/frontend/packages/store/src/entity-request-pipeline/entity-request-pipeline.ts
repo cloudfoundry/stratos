@@ -63,7 +63,7 @@ export const apiRequestPipelineFactory = (
 
   startEntityHandler(actionDispatcher, catalogEntity, requestType, action);
   return pipeline(store, httpClient, {
-    action: patchedAction, // Note - If this is just `action` it breaks maxed lists
+    action,
     requestType,
     catalogEntity,
     appState

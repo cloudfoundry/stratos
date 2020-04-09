@@ -106,10 +106,12 @@ export class PaginationPageIterator<R = any, E = any> {
       switchMap(maxEntities => {
         if (maxEntities && maxEntities <= totalResults) {
           // We've entered 'maxed' mode. Only respond with the first page of results.
-          const { entityType, endpointType, paginationKey, __forcedPageEntityConfig__ } = action;
-          const forcedEntityKey = entityCatalog.getEntityKey(__forcedPageEntityConfig__);
+          const { entityType, endpointType, paginationKey } = action;
+          const entityKey = entityCatalog.getEntityKey(action);
+          // The entity type should always match the pagination key. If in a multi-action list this means that of the action rather than
+          // the forced entity
           this.actionDispatcher(
-            new UpdatePaginationMaxedState(maxEntities, totalResults, entityType, endpointType, paginationKey, forcedEntityKey)
+            new UpdatePaginationMaxedState(maxEntities, totalResults, entityType, endpointType, paginationKey, entityKey)
           );
           return combineLatest([of(initialResponse), of([])]);
         }

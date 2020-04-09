@@ -61,7 +61,7 @@
           </div>
         </div>
         <div class="list-component__header__right">
-          <div class="filter" *ngIf="entitySelectConfig">
+          <div class="filter" *ngIf="entitySelectConfig && !(dataSource.maxedResults$ | async)">
             <mat-form-field [floatLabel]="'never'">
               <mat-select matInput [value]="initialEntitySelection$ | async"
                 (selectionChange)="setEntityPage($event.value)">
