@@ -13,14 +13,11 @@
       <app-metadata-item *ngIf="session.config.enableTechPreview" class="about-page__mat-warning-icon" icon="whatshot"
         label="Tech Preview">Tech Preview features are enabled</app-metadata-item>
       <app-metadata-item *ngIf="session.config.listMaxSize" class="about-page__mat-warning-icon diagnostics-page__maxed"
-        icon="list" label="Count Restricted Lists">
+        icon="list" label="Lists - Jetstream Configuration">
         <div class="diagnostics-page__maxed__content">
-          <span>Maximum Count: {{session.config.listMaxSize}}</span>
-          <span>Users can fetch all entities in a restricted list: {{!!session.config.listAllowLoadMaxed}}</span>
+          <span>List max size: {{session.config.listMaxSize || 'Not Set'}}</span>
+          <span>Allow fetch of all entities of a maxed list: {{!!session.config.listAllowLoadMaxed}}</span>
         </div>
-      </app-metadata-item>
-      <app-metadata-item *ngIf="" class="diagnostics-page__warning-icon about-page__mat-warning-icon" icon="list"
-        label="Count Restricted Lists">
       </app-metadata-item>
     </div>
   </mat-card>
