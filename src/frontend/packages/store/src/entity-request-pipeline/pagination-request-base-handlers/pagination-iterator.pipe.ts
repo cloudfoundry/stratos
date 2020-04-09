@@ -37,7 +37,6 @@ export class PaginationPageIterator<R = any, E = any> {
     public action: PaginatedAction,
     public actionDispatcher: ActionDispatcher,
     public config: PaginationPageIteratorConfig<R, E>,
-    // private ignorePaginationMaxed?: boolean,
     private paginationMaxedState?: PaginationMaxedState
   ) { }
 
