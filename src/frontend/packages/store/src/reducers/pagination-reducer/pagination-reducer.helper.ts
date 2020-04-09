@@ -149,6 +149,7 @@ function shouldFetchLocalList(
     return true;
   }
 
+  // Have we just reset pagination after choosing to ignore maxed?
   if (prevPagination && !prevPagination.maxedState.ignoreMaxed &&
     pagination.maxedState.ignoreMaxed &&
     invalidOrMissingPage) {
@@ -156,7 +157,7 @@ function shouldFetchLocalList(
   }
 
   // Should a maxed local list be re-fetched?
-  if (pagination.maxedState.isMaxedMode) {
+  if (pagination.maxedState.isMaxedMode && !pagination.maxedState.ignoreMaxed) {
     const paramsChanged = prevPagination && paginationParamsString(prevPagination.params) !== paginationParamsString(pagination.params);
     return invalidOrMissingPage || paramsChanged;
   }
