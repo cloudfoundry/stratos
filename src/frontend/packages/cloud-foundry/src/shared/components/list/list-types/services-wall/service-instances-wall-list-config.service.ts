@@ -46,7 +46,9 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
     maxedResults: {
       icon: 'service',
       iconFont: 'stratos-icons',
-      firstLine: 'There are a lot of service instances to fetch',
+      canIgnoreMaxFirstLine: 'Fetching all service instances might take a long time',
+      cannotIgnoreMaxFirstLine: 'There are too many service instances to fetch',
+      filterLine: 'Please use the Cloud Foundry, Organization or Space filters'
     }
   };
   enableTextFilter = true;

@@ -82,7 +82,8 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
     maxedResults: {
       icon: 'network_route',
       iconFont: 'stratos-icons',
-      firstLine: 'There are a lot of routes to fetch'
+      canIgnoreMaxFirstLine: 'Fetching all routes might take a long time',
+      cannotIgnoreMaxFirstLine: 'There are too many routes to fetch'
     }
   };
   enableTextFilter = true;

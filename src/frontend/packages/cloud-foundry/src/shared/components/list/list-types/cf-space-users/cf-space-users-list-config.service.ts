@@ -33,7 +33,6 @@ export class CfSpaceUsersListConfigService extends CfUserListConfigService {
       cfOrgService.org$,
       cfSpaceService.space$,
     );
-    this.text.maxedResults.firstLine = 'There are a lot of users to fetch';
     this.text.maxedResults.filterLine = '';
   }
 }

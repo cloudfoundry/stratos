@@ -25,13 +25,15 @@ export class MaxListMessageComponent implements OnDestroy {
   set config(config: ITableTextMaxed) {
     const safeConfig: ITableTextMaxed = config || {
       icon: '',
-      firstLine: '',
+      canIgnoreMaxFirstLine: '',
+      cannotIgnoreMaxFirstLine: '',
     };
     this.configSubject.next({
       icon: safeConfig.icon || MaxListMessageComponent.defaultConfig.icon,
       iconFont: safeConfig.iconFont || MaxListMessageComponent.defaultConfig.iconFont,
-      firstLine: safeConfig.firstLine || MaxListMessageComponent.defaultConfig.firstLine,
-      filterLine: safeConfig.filterLine,
+      canIgnoreMaxFirstLine: safeConfig.canIgnoreMaxFirstLine || MaxListMessageComponent.defaultConfig.canIgnoreMaxFirstLine,
+      cannotIgnoreMaxFirstLine: safeConfig.cannotIgnoreMaxFirstLine || MaxListMessageComponent.defaultConfig.cannotIgnoreMaxFirstLine,
+      filterLine: safeConfig.filterLine || MaxListMessageComponent.defaultConfig.filterLine
     });
   }
 
@@ -60,7 +62,8 @@ export class MaxListMessageComponent implements OnDestroy {
 
   static defaultConfig: ITableTextMaxed = {
     icon: 'apps',
-    firstLine: 'There are a lot of entities to fetch'
+    canIgnoreMaxFirstLine: 'Fetching all entities might take a long time',
+    cannotIgnoreMaxFirstLine: 'There are too many entities to fetch',
   };
 
   private canIgnoreMaxedStatePipeSub: Subscription;
@@ -71,7 +74,9 @@ export class MaxListMessageComponent implements OnDestroy {
   private config$ = this.configSubject.asObservable();
 
   public state$: Observable<{
-    basicText: ITableTextMaxed;
+    icon: string;
+    iconFont: string;
+    firstLine: string;
     otherLines: NoContentMessageLine[];
     canIgnoreMaxedState: boolean;
   }> = combineLatest([
@@ -85,15 +90,18 @@ export class MaxListMessageComponent implements OnDestroy {
         otherLines.push(
           { text: config.filterLine },
         );
+
+        if (canIgnoreMaxedState) {
+          otherLines.push(
+            { text: 'or' },
+          );
+        }
       }
 
-      if (canIgnoreMaxedState && config.filterLine) {
-        otherLines.push(
-          { text: 'or' }
-        );
-      }
       return {
-        basicText: config,
+        icon: config.icon,
+        iconFont: config.iconFont,
+        firstLine: canIgnoreMaxedState ? config.canIgnoreMaxFirstLine : config.cannotIgnoreMaxFirstLine,
         otherLines,
         canIgnoreMaxedState
       };

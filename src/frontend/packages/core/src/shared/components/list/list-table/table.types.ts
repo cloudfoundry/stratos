@@ -59,7 +59,8 @@ export interface ITableColumn<T> {
 export interface ITableTextMaxed {
   icon: string;
   iconFont?: string;
-  firstLine: string;
+  canIgnoreMaxFirstLine: string;
+  cannotIgnoreMaxFirstLine: string;
   filterLine?: string;
 }
 

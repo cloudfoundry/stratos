@@ -32,7 +32,6 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
       (user: CfUser): boolean => cfUserService.hasRolesInOrg(user, activeRouteCfOrgSpace.orgGuid, false),
       cfOrgService.org$
     );
-    this.text.maxedResults.firstLine = 'There are a lot of users to fetch';
     this.text.maxedResults.filterLine = 'Please navigate to a Space Users list';
   }
 }

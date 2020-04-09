@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { endpointsCfEntitiesConnectedSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
@@ -76,7 +76,8 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     noEntries: 'There are no services',
     maxedResults: {
       icon: 'store',
-      firstLine: 'There are a lot of services to fetch',
+      canIgnoreMaxFirstLine: 'Fetching all services might take a long time',
+      cannotIgnoreMaxFirstLine: 'There are too many services to fetch',
     }
   };
 

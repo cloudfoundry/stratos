@@ -10,7 +10,7 @@ import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.
 import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../../../core/src/core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   IListAction,
   IListMultiFilterConfig,
@@ -89,13 +89,14 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     },
   ];
   enableTextFilter = true;
-  text = {
+  text: ITableText = {
     title: null,
     filter: 'Search by username',
     noEntries: 'There are no users',
     maxedResults: {
       icon: 'people',
-      firstLine: 'There are a lot of users to fetch',
+      canIgnoreMaxFirstLine: 'Fetching all users might take a long time',
+      cannotIgnoreMaxFirstLine: 'There are too many users to fetch',
       filterLine: 'Please navigate to an Organization or Space users list'
     }
   };
