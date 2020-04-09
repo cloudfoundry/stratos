@@ -179,6 +179,11 @@ const config = {
     //   upload_throughput: 500 * 1024 * 1024 // Maximal aggregated upload throughput.
     // });
 
+    // Ensuer base URL does NOT end with a /
+    if (browser.baseUrl.endsWith('/')) {
+      browser.baseUrl = browser.baseUrl.substr(0, browser.baseUrl.length -1);
+    }
+
     skipPlugin.install(jasmine);
     require('ts-node').register({
       project: 'src/test-e2e/tsconfig.e2e.json'
