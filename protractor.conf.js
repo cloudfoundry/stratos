@@ -199,7 +199,10 @@ const config = {
     }).getJasmine2Reporter());
     jasmine.getEnv().addReporter(new SpecReporter({
       spec: {
-        displayStacktrace: true,
+        displayStacktrace: 'pretty',
+      },
+      summary: {
+        displayStacktrace: 'pretty',
       },
       customProcessors: specReporterCustomProcessors
     }));

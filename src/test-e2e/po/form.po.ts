@@ -20,9 +20,9 @@ export interface FormItem {
   checked: boolean;
   type: string;
   class: string;
-  sendKeys: Function;
-  clear: Function;
-  click: Function;
+  sendKeys: (text) => void;
+  clear: () => void;
+  click: () => void;
   tag: string;
   valid: string;
   error: string;
@@ -223,18 +223,22 @@ export class FormComponent extends Component {
               ctrl.sendKeys(Key.ESCAPE);
               break;
             }
-            let strValue = value as string;
-            // Handle spaces in text. (sendKeys sends space bar.. which closes drop down)
-            // Bonus - Sending string without space works... up until last character...which deselects desired option and selects top option
-            const containsSpace = strValue.indexOf(' ');
-            if (containsSpace >= 0) {
-              strValue = strValue.slice(0, containsSpace);
-            }
+
+            // Options are presented in a .mat-select-panel
+            // Open the selector
             ctrl.click();
-            ctrl.sendKeys(strValue);
-            ctrl.sendKeys(Key.RETURN);
+            const selectMenu = new Component(element(by.css('.mat-select-panel')));
+            selectMenu.waitUntilShown();
+            selectMenu.all(by.tagName('mat-option')).map(this.mapField).then(options => {
+              const opt: any = options.find((option: FormItem) => option.text === value);
+              if (opt) {
+                opt.click();
+                selectMenu.waitUntilNotShown();
+              }
+            });
+
             if (!expectFailure) {
-              expect(this.getText(field)).toBe(value, `Failed to set field '${field}' with '${strValue}'`);
+              expect(this.getText(field)).toBe(value, `Failed to set field '${field}' with '${value}'`);
             } else {
               expect(this.getText(field)).not.toBe(value);
             }
