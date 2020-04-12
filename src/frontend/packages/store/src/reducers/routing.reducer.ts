@@ -20,11 +20,17 @@ export function routingReducer(state: RoutingHistory = defaultRoutingState, acti
         return state;
       }
 
+      // This changed in Anagular 9 - state no longer embdedded
+      // This deuiplicated the rotuerState
+      // We will keep it as before
       return {
         // ATM don't track change of route history
         // history: state.history.concat([action.payload.event]),
         previousState: state.currentState ? state.currentState : null,
-        currentState: action.payload.event
+        currentState: {
+          ...action.payload.event,
+          state: action.payload.routerState
+        }
       };
 
     default:
