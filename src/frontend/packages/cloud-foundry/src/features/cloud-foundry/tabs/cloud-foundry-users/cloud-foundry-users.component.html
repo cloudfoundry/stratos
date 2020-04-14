@@ -10,11 +10,4 @@
   }"></app-no-content-message>
 </ng-template>
 
-<ng-template #noEntriesMaxedResults>
-  <app-no-content-message [icon]="'people'" [firstLine]="'There are too many users to show'" [secondLine]="{
-      text: 'Please navigate to an Organization or Space users list'
-    }"></app-no-content-message>
-</ng-template>
-
-<app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
-  [noEntriesMaxedResults]="noEntriesMaxedResults"></app-list>
+<app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"></app-list>

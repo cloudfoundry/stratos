@@ -9,6 +9,7 @@ import {
 } from './create-endpoint/create-endpoint-base-step/create-endpoint-base-step.component';
 import { CreateEndpointComponent } from './create-endpoint/create-endpoint.component';
 import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
+import { EditEndpointComponent } from './edit-endpoint/edit-endpoint.component';
 
 const endpointsRoutes: Routes = [
   {
@@ -24,6 +25,14 @@ const endpointsRoutes: Routes = [
   {
     path: 'new/:type/:subtype',
     component: CreateEndpointComponent
+  },
+  {
+    path: 'new/:type',
+    component: CreateEndpointComponent
+  },
+  {
+    path: 'edit/:id',
+    component: EditEndpointComponent
   },
   {
     path: '**',

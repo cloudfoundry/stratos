@@ -6,5 +6,10 @@
   <mat-icon [fontSet]="iconFont">{{icon}}</mat-icon>
   <div *ngIf="firstLine" class="first-line">{{firstLine}}</div>
   <div class="second-line">
-    <a *ngIf="secondLine?.link" [routerLink]="secondLine?.link">{{secondLine?.linkText}}</a>{{secondLine?.text}}</div>
+    <a *ngIf="secondLine?.link" [routerLink]="secondLine?.link">{{secondLine?.linkText}}</a>{{secondLine?.text}}
+  </div>
+  <div class="second-line" *ngFor="let line of otherLines">
+    <a *ngIf="line?.link" [routerLink]="line?.link">{{line?.linkText}}</a>{{line?.text}}
+  </div>
+  <ng-content></ng-content>
 </div>

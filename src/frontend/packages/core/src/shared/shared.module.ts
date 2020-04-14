@@ -74,6 +74,7 @@ import {
 } from './components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
+import { MaxListMessageComponent } from './components/list/max-list-message/max-list-message.component';
 import { ListHostDirective } from './components/list/simple-list/list-host.directive';
 import { SimpleListComponent } from './components/list/simple-list/simple-list.component';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -235,7 +236,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorTileComponent,
     SidepanelPreviewComponent,
     TableCellSidePanelComponent,
-    CardProgressOverlayComponent
+    CardProgressOverlayComponent,
+    MaxListMessageComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -332,6 +334,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     SidepanelPreviewComponent,
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,
+    MaxListMessageComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

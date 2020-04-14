@@ -26,9 +26,27 @@ export interface PaginationClientPagination {
   totalResults: number;
 }
 
+export interface PaginationMaxedState {
+  /**
+   * Is the pagination in maxed mode?
+   * - flattenPagination and flattenPaginationMax is true
+   * - Initial fetch of entities brought back a total above the allowed IStratosBaseEntityDefinition paginationConfig maxedStateStartAt
+   *   value
+   * - Pagination notionally now changes from local (has all entities & filtering locally) to non-local (has a single page &
+   *   filtering remotely)
+   */
+  isMaxedMode?: boolean;
+  /**
+   * Disregard flattenPaginationMax and ignore isMaxedMode true
+   */
+  ignoreMaxed?: boolean;
+}
+
+
 export class PaginationEntityState {
   /**
-   * For multi action lists, this is used to force a particular entity type.
+   * For multi action lists, this is used to force a particular entity type. For instance in the service instance wall selecting the option
+   * to only show user provided service instances
    */
   forcedLocalPage?: number;
   currentPage = 0;
@@ -44,11 +62,7 @@ export class PaginationEntityState {
    * The pagination key from where we share our values.
    */
   seed?: string;
-  /**
-   * Is the pagination state in maxed mode. This means the initial collection contained too many entities too handle, see PaginatedAction
-   * flattenPagination & flattenPaginationMax
-   */
-  maxedMode?: boolean;
+  maxedState: PaginationMaxedState;
 }
 
 export function isPaginatedAction(obj: any): PaginatedAction {
@@ -66,9 +80,9 @@ export interface PaginatedAction extends BasePaginatedAction, EntityRequestActio
    */
   flattenPagination?: boolean;
   /*
-   * The maximum number of entities to fetch. Note - Should be equal or higher than the page size
+   * When fetching all pages, abort if they exceed the maximum allowed. See IStratosBaseEntityDefinition paginationConfig maxedStateStartAt
    */
-  flattenPaginationMax?: number;
+  flattenPaginationMax?: boolean;
   initialParams?: PaginationParam;
   pageNumber?: number;
   options?: HttpRequest<any>;

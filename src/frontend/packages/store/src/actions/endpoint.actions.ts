@@ -30,6 +30,10 @@ export const UNREGISTER_ENDPOINTS = '[Endpoints] Unregister';
 export const UNREGISTER_ENDPOINTS_SUCCESS = '[Endpoints] Unregister succeed';
 export const UNREGISTER_ENDPOINTS_FAILED = '[Endpoints] Unregister failed';
 
+export const UPDATE_ENDPOINT = '[Endpoints] Update';
+export const UPDATE_ENDPOINT_SUCCESS = '[Endpoints] Update succeed';
+export const UPDATE_ENDPOINT_FAILED = '[Endpoints] Update failed';
+
 export class EndpointActionComplete implements Action {
   constructor(
     public type: string,
@@ -138,5 +142,22 @@ export class RegisterEndpoint extends EndpointAction {
 
   public guid(): string {
     return '<New Endpoint>' + this.name;
+  }
+}
+
+export class UpdateEndpoint extends EndpointAction {
+
+  type = UPDATE_ENDPOINT;
+
+  constructor(
+    public id: string,
+    public name: string,
+    public skipSSL: boolean,
+    public setClientInfo: boolean,
+    public clientID: string,
+    public clientSecret: string,
+    public allowSSO: boolean,
+  ) {
+    super();
   }
 }
