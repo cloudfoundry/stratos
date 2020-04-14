@@ -7,6 +7,7 @@ import { filter, first, map, tap } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../../store/src/actions/endpoint.actions';
 import { AppState } from '../../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
@@ -15,6 +16,7 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
 import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { BackupConnectionCellComponent } from '../backup-connection-cell/backup-connection-cell.component';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupRestoreCellComponent } from '../backup-restore-cell/backup-restore-cell.component';
 import { BackupEndpointTypes } from '../backup-restore-endpoints.service';
@@ -39,6 +41,13 @@ export class BackupEndpointsComponent implements OnInit {
       }
     },
     {
+      columnId: 'type',
+      headerCell: () => 'Type',
+      cellDefinition: {
+        getValue: this.getEndpointTypeString
+      },
+    },
+    {
       columnId: 'endpoint',
       headerCell: () => 'Backup',
       cellComponent: BackupRestoreCellComponent,
@@ -48,19 +57,8 @@ export class BackupEndpointsComponent implements OnInit {
     },
     {
       columnId: 'connect',
-      headerCell: () => 'Backup Your Connection Details',
-      cellComponent: BackupRestoreCellComponent,
-      cellConfig: {
-        type: BackupEndpointTypes.CONNECT
-      }
-    },
-    {
-      columnId: 'all-connect',
-      headerCell: () => 'Backup All Users Connection Details',
-      cellComponent: BackupRestoreCellComponent,
-      cellConfig: {
-        type: BackupEndpointTypes.ALL_CONNECT
-      }
+      headerCell: () => 'Connection Details',
+      cellComponent: BackupConnectionCellComponent,
     },
   ];
   endpointDataSource: ITableListDataSource<EndpointModel>;
@@ -71,6 +69,7 @@ export class BackupEndpointsComponent implements OnInit {
   // Step 2
   passwordValid$: Observable<boolean>;
   passwordForm: FormGroup;
+  show = false;
 
   constructor(
     public service: BackupEndpointsService,
@@ -81,6 +80,7 @@ export class BackupEndpointsComponent implements OnInit {
     this.setupSelectStep();
     this.setupPasswordStep();
   }
+
 
   setupSelectStep() {
     const action = new GetAllEndpoints();
@@ -181,4 +181,7 @@ export class BackupEndpointsComponent implements OnInit {
   }
 
 
+  private getEndpointTypeString(endpoint: EndpointModel): string {
+    return entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition.label;
+  }
 }

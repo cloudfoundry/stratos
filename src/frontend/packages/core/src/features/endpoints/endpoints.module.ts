@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
+import { BackupConnectionCellComponent } from './backup-restore/backup-connection-cell/backup-connection-cell.component';
 import { BackupEndpointsComponent } from './backup-restore/backup-endpoints/backup-endpoints.component';
 import { BackupRestoreCellComponent } from './backup-restore/backup-restore-cell/backup-restore-cell.component';
 import {
@@ -37,13 +38,15 @@ import { EndpointsRoutingModule } from './endpoints.routing';
     BackupEndpointsComponent,
     RestoreEndpointsComponent,
     BackupRestoreCellComponent,
+    BackupConnectionCellComponent,
   ],
   entryComponents: [
     ConnectEndpointDialogComponent,
     CredentialsAuthFormComponent,
     SSOAuthFormComponent,
     NoneAuthFormComponent,
-    BackupRestoreCellComponent
+    BackupRestoreCellComponent,
+    BackupConnectionCellComponent
   ]
 })
 export class EndpointsModule { }

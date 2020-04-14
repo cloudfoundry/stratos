@@ -12,6 +12,7 @@ import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { BrowserStandardEncoder } from '../../../helper';
 import {
   BackupEndpointConfigUI,
+  BackupEndpointConnectionTypes,
   BackupEndpointsConfig,
   BackupEndpointTypes,
   BackupRestoreEndpointService,
@@ -51,8 +52,7 @@ export class BackupEndpointsService extends BackupRestoreEndpointService {
     endpoints.forEach(entity => {
       this.state[entity.guid] = {
         [BackupEndpointTypes.ENDPOINT]: false,
-        [BackupEndpointTypes.CONNECT]: false,
-        [BackupEndpointTypes.ALL_CONNECT]: false,
+        [BackupEndpointTypes.CONNECT]: BackupEndpointConnectionTypes.NONE,
         entity
       };
     });
@@ -63,25 +63,19 @@ export class BackupEndpointsService extends BackupRestoreEndpointService {
     const endpoints = Object.values(this.state);
     endpoints.forEach(endpoint => {
       if (!endpoint[BackupEndpointTypes.ENDPOINT]) {
-        endpoint[BackupEndpointTypes.CONNECT] = false;
-        endpoint[BackupEndpointTypes.ALL_CONNECT] = false;
-      }
-      if (endpoint[BackupEndpointTypes.ALL_CONNECT] && this.canBackup(endpoint.entity, BackupEndpointTypes.CONNECT)) {
-        endpoint[BackupEndpointTypes.CONNECT] = true;
+        endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.NONE;
       }
     });
 
     const hasChanges = !!endpoints.find(endpoint =>
       endpoint[BackupEndpointTypes.ENDPOINT] ||
-      endpoint[BackupEndpointTypes.CONNECT] ||
-      endpoint[BackupEndpointTypes.ALL_CONNECT]
+      endpoint[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE
     );
     this.hasChanges.next(hasChanges);
     const allChanged = endpoints.every(endpoint => {
       const e = !this.canBackup(endpoint.entity, BackupEndpointTypes.ENDPOINT) || endpoint[BackupEndpointTypes.ENDPOINT];
-      const c = !this.canBackup(endpoint.entity, BackupEndpointTypes.CONNECT) || endpoint[BackupEndpointTypes.CONNECT];
-      const aC = !this.canBackup(endpoint.entity, BackupEndpointTypes.ALL_CONNECT) || endpoint[BackupEndpointTypes.ALL_CONNECT];
-      return e && c && aC;
+      const c = !this.canBackup(endpoint.entity, BackupEndpointTypes.CONNECT) || endpoint[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE;
+      return e && c;
     }
 
     );
@@ -105,14 +99,6 @@ export class BackupEndpointsService extends BackupRestoreEndpointService {
       return false;
     }
 
-    // Are all connection details backed up anyway?
-    // Does the user have connection details for this endpoint?
-    if (type === BackupEndpointTypes.CONNECT) {
-      return !this.state[endpoint.guid][BackupEndpointTypes.ALL_CONNECT] &&
-        endpoint.connectionStatus === 'connected';
-      // return !this.service.state[endpoint.guid][BackupRestoreTypes.CONNECT];
-    }
-
     return true;
   }
 
@@ -122,10 +108,7 @@ export class BackupEndpointsService extends BackupRestoreEndpointService {
         endpoint[BackupEndpointTypes.ENDPOINT] = true;
       }
       if (this.canBackup(endpoint.entity, BackupEndpointTypes.CONNECT)) {
-        endpoint[BackupEndpointTypes.CONNECT] = true;
-      }
-      if (this.canBackup(endpoint.entity, BackupEndpointTypes.ALL_CONNECT)) {
-        endpoint[BackupEndpointTypes.ALL_CONNECT] = true;
+        endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.CURRENT;
       }
     });
     this.validate();
@@ -134,8 +117,7 @@ export class BackupEndpointsService extends BackupRestoreEndpointService {
   selectNone() {
     Object.values(this.state).forEach(endpoint => {
       endpoint[BackupEndpointTypes.ENDPOINT] = false;
-      endpoint[BackupEndpointTypes.CONNECT] = false;
-      endpoint[BackupEndpointTypes.ALL_CONNECT] = false;
+      endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.NONE;
     });
     this.validate();
   }

@@ -6,15 +6,10 @@ import { first, map, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { getEventFiles } from '../../../../core/browser-helper';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
-import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
-import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
-import { BackupRestoreCellComponent } from '../backup-restore-cell/backup-restore-cell.component';
-import { BackupEndpointTypes } from '../backup-restore-endpoints.service';
 import { RestoreEndpointsService } from '../restore-endpoints.service';
 
 
@@ -29,34 +24,6 @@ import { RestoreEndpointsService } from '../restore-endpoints.service';
 export class RestoreEndpointsComponent implements OnInit {
 
   // Step 1
-  columns: ITableColumn<EndpointModel>[] = [
-    {
-      columnId: 'name',
-      headerCell: () => 'Name',
-      cellDefinition: {
-        valuePath: 'name'
-      }
-    },
-    {
-      columnId: 'endpoint',
-      headerCell: () => 'Restore',
-      cellComponent: BackupRestoreCellComponent,
-      cellConfig: {
-        type: BackupEndpointTypes.ENDPOINT,
-
-      }
-    },
-    {
-      columnId: 'connect',
-      headerCell: () => 'Include Connection',
-      cellComponent: BackupRestoreCellComponent,
-      cellConfig: {
-        type: BackupEndpointTypes.CONNECT
-      }
-    },
-    // TODO: RC disable backup token if unconnectable
-  ];
-  endpointDataSource: ITableListDataSource<EndpointModel>;
   fileValid$: Observable<boolean>;
   fileName: string;
 

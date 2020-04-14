@@ -637,6 +637,14 @@ func (p *portalProxy) updateEndpoint(c echo.Context) error {
 	return nil
 }
 
+type BackupConnectionType string
+
+const (
+	BACKUP_CONNECTION_NONE    BackupConnectionType = "NONE"
+	BACKUP_CONNECTION_CURRENT                      = "CURRENT"
+	BACKUP_CONNECTION_ALL                          = "ALL"
+)
+
 // TODO: RC position
 type BackupDataRequest struct {
 	State    map[string]BackupEndpointsState `json:"state"`
@@ -645,9 +653,8 @@ type BackupDataRequest struct {
 }
 
 type BackupEndpointsState struct {
-	Endpoint   bool `json:"endpoint"`
-	Connect    bool `json:"connect"`
-	AllConnect bool `json:"all_connect"`
+	Endpoint bool                 `json:"endpoint"`
+	Connect  BackupConnectionType `json:"connect"`
 }
 
 type BackupRestoreState struct {
@@ -727,7 +734,8 @@ func (p *portalProxy) createBackup(data *BackupDataRequest) (*BackupRestoreState
 			}
 		}
 
-		if endpoint.AllConnect {
+		switch connectionType := endpoint.Connect; connectionType {
+		case BACKUP_CONNECTION_ALL:
 			// allTokensFrom = append(allTokensFrom, endpointID)
 			if tokenRecords, ok := p.getCNSITokenRecordsBackup(endpointID); ok {
 				log.Warn("tokens for AllConnect")
@@ -736,7 +744,7 @@ func (p *portalProxy) createBackup(data *BackupDataRequest) (*BackupRestoreState
 				log.Warn("No tokens for AllConnect")
 				// TODO: RC
 			}
-		} else if endpoint.Connect {
+		case BACKUP_CONNECTION_CURRENT:
 			// userTokenFrom = append(userTokenFrom, endpointID)
 			if tokenRecord, ok := p.GetCNSITokenRecordWithDisconnected(endpointID, data.UserID); ok {
 				log.Warn("tokens for Connect")
@@ -759,6 +767,39 @@ func (p *portalProxy) createBackup(data *BackupDataRequest) (*BackupRestoreState
 				// return nil, nil, false
 			}
 		}
+
+		// if endpoint.Connect == BACKUP_CONNECTION_ALL {
+		// 	// allTokensFrom = append(allTokensFrom, endpointID)
+		// 	if tokenRecords, ok := p.getCNSITokenRecordsBackup(endpointID); ok {
+		// 		log.Warn("tokens for AllConnect")
+		// 		tokens = append(tokens, tokenRecords...)
+		// 	} else {
+		// 		log.Warn("No tokens for AllConnect")
+		// 		// TODO: RC
+		// 	}
+		// } else if endpoint.Connect {
+		// 	// userTokenFrom = append(userTokenFrom, endpointID)
+		// 	if tokenRecord, ok := p.GetCNSITokenRecordWithDisconnected(endpointID, data.UserID); ok {
+		// 		log.Warn("tokens for Connect")
+		// 		// var btr BackupTokenRecord
+		// 		// TODO: RC Q This will be the linked token as if it were the users token
+		// 		var btr = interfaces.BackupTokenRecord{
+		// 			// tokenRecord: tokenRecord,
+		// 			TokenRecord:  tokenRecord,
+		// 			EndpointGUID: endpointID,
+		// 			TokenType:    "CNSI",
+		// 			UserGUID:     data.UserID,
+		// 		}
+
+		// 		tokens = append(tokens, btr)
+		// 	} else {
+		// 		log.Warnf("No tokens for Connect: %+v,%+v", endpointID, data.UserID)
+		// 		// TODO: RC
+		// 		// msg := "Unable to retrieve CNSI token record."
+		// 		// log.Debug(msg)
+		// 		// return nil, nil, false
+		// 	}
+		// }
 	}
 
 	log.Infof("endpoints: %+v", endpoints)
