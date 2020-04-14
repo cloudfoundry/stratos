@@ -13,9 +13,6 @@ RUN zypper -n ref && \
     zypper -n up && \
     zypper in -y which tar curl wget gzip jq && \
     zypper in -y ruby && \
-    zypper in -y make gcc-c++ && \
-    zypper in -y libopenssl-devel readline-devel && \
-    zypper in -y ruby-devel && \
     zypper clean -a && \
     rm -f /var/log/zypper.log /var/log/zypp/history
 
