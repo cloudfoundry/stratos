@@ -4,7 +4,7 @@
     <span *ngIf="state.canIgnoreMaxedState">
       <button color="primary" (click)="showAll()" mat-raised-button>
         <ng-container *ngIf="!!count">
-          Fetch All {{count}}
+          Fetch All ({{count}})
         </ng-container>
         <ng-container *ngIf="!count && !!maxCount">
           Fetch All (over {{maxCount}})
