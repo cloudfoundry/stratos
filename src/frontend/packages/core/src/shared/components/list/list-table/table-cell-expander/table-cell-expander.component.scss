@@ -1,0 +1,10 @@
+.expander {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+
+  &__icon-container {
+    height: 18px;
+    width: 8px;
+  }
+}

@@ -74,7 +74,7 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
     'order-direction-field': 'username',
   };
   flattenPagination = true;
-  flattenPaginationMax = 600;
+  flattenPaginationMax = true;
   static is(action: any): boolean {
     return !!action.isGetAllUsersAsAdmin;
   }

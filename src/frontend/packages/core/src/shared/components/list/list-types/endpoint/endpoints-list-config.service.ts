@@ -115,7 +115,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     filter: 'Filter Endpoints'
   };
   enableTextFilter = true;
-  tableFixedRowHeight = true;
 
   constructor(
     private store: Store<CFAppState>,

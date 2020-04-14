@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { of as observableOf, Subject } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
@@ -16,10 +15,11 @@ import {
   IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { UpdateExistingApplication } from '../../../../../actions/application.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { appEnvVarsEntityType, applicationEntityType } from '../../../../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
@@ -84,6 +84,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     title: 'Environment Variables', filter: 'Search by name', noEntries: 'There are no variables'
   };
   enableTextFilter = true;
+  minRowHeight = '77px';
 
   private dispatchDeleteAction(newValues: ListAppEnvVar[]) {
     const confirmation = this.getConfirmationModal(newValues);

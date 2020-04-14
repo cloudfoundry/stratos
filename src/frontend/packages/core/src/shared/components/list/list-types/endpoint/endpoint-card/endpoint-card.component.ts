@@ -9,6 +9,8 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { CurrentUserPermissions } from 'frontend/packages/core/src/core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/current-user-permissions.service';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -24,14 +26,15 @@ import {
 } from '../../../../../../features/endpoints/endpoint-helpers';
 import { StratosStatus } from '../../../../../shared.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
-import { MetaCardMenuItem, createMetaCardMenuItemSeparator } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
+import {
+  createMetaCardMenuItemSeparator,
+  MetaCardMenuItem,
+} from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
-import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 import { RouterNav } from './../../../../../../../../store/src/actions/router.actions';
-import { CurrentUserPermissions } from 'frontend/packages/core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/current-user-permissions.service';
+import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 
 @Component({
   selector: 'app-endpoint-card',
