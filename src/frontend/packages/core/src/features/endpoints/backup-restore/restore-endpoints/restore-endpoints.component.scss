@@ -2,8 +2,13 @@
   flex: 1;
 }
 .file-step {
-  display: flex;
-  flex-direction: column;
+
+  &,
+  &__chunk {
+    display: flex;
+    flex-direction: column;
+  }
+  
   &__input {
     &--input {
       height: 0;

@@ -3,15 +3,27 @@
 </app-page-header>
 
 <app-steppers cancel="/endpoints" [basePreviousRedirect]="{ path: '/endpoints/backup-restore' }">
-  <app-step title="File" [valid]="fileValid$ | async">
+  <app-step title="File" [valid]="service.validFileContent$ | async">
     <div class="file-step">
-      <p>Provide the backup file to restore from.</p>
-      <div class="file-step__input">
-        <input #localPathSelectFile fileread="localPathFile" type="file" class="file-step__input--input"
-          name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" />Choose
-        <button (click)="localPathSelectFile.click()" color="primary" mat-button mat-raised-button>File</button>
-        {{service.fileName}}
+      <div class="file-step__chunk">
+        <p>Provide the backup file to restore from.</p>
+        <div class="file-step__input">
+          <input #localPathSelectFile fileread="localPathFile" type="file" class="file-step__input--input"
+            name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" />Choose
+          <button (click)="localPathSelectFile.click()" color="primary" mat-button mat-raised-button>File</button>
+          <ng-container *ngIf="service.file$ | async as file">{{file.name}}</ng-container>
+        </div>
       </div>
+      <ng-container *ngIf="service.file$ | async as file">
+        <div *ngIf="!(service.validDb$ | async)" class="file-step__chunk">
+          <p>The database version of Stratos (<code>{{service.currentDbVersion$ | async}}</code>) and the backup
+            (<code>{{file.content.dbVersion}}</code>) are different. Restoring this file may have adverse affects.
+          </p>
+          <mat-checkbox (change)="onIgnoreDbChange($event)">
+            Ignore different database versions
+          </mat-checkbox>
+        </div>
+      </ng-container>
     </div>
   </app-step>
   <app-step title="Password" finishButtonText="Restore" [onNext]="restore" [valid]="passwordValid$ | async">

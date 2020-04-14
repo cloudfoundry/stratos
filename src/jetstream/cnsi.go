@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -646,25 +647,34 @@ const (
 )
 
 // TODO: RC position
-type BackupDataRequest struct {
-	State    map[string]BackupEndpointsState `json:"state"`
-	UserID   string                          `json:"userId"`
-	Password string                          `json:"password"`
-}
-
 type BackupEndpointsState struct {
 	Endpoint bool                 `json:"endpoint"`
 	Connect  BackupConnectionType `json:"connect"`
 }
 
-type BackupRestoreState struct {
+// Sent to backup
+type BackupRequest struct {
+	State     map[string]BackupEndpointsState `json:"state"`
+	UserID    string                          `json:"userId"`
+	DBVersion string                          `json:"dbVersion"`
+	Password  string                          `json:"password"`
+}
+
+type BackupRequestEndpointsResponse struct {
 	Endpoints []*interfaces.CNSIRecord
 	Tokens    []interfaces.BackupTokenRecord
 }
 
-type RestoreDataRequest struct {
-	Data     string `json:"data"`
-	Password string `json:"password"`
+type BackupContent struct {
+	payload   BackupRequestEndpointsResponse `json:"payload"`
+	DBVersion int64                          `json:"dbVersion"`
+}
+
+type RestoreRequest struct {
+	// Data - Encrypted version of BackupContent
+	Data            string `json:"data"`
+	Password        string `json:"password"`
+	IgnoreDbVersion bool   `json:"ignoreDbVersion"`
 }
 
 // TODO: RC split out to new file?
@@ -677,7 +687,7 @@ func (p *portalProxy) backupEndpoints(c echo.Context) error {
 		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
 
-	data := &BackupDataRequest{}
+	data := &BackupRequest{}
 	if err = json.Unmarshal(body, data); err != nil {
 		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - could not parse JSON")
 	}
@@ -692,6 +702,8 @@ func (p *portalProxy) backupEndpoints(c echo.Context) error {
 		return err
 	}
 
+	log.Infof("response: %+v", response)
+
 	// Send back the response to the client
 	// TODO: RC Missing client_secret when serialised, `-` in definition
 	jsonString, err := json.Marshal(response)
@@ -699,16 +711,15 @@ func (p *portalProxy) backupEndpoints(c echo.Context) error {
 		return interfaces.NewHTTPError(http.StatusInternalServerError, "Failed to serialize response")
 	}
 
-	// Encrypt data (see above) // TODO: RC leave until last
-	encryptedResponse := jsonString
+	log.Infof("jsonString: %+v", jsonString)
 
 	// Return data
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(encryptedResponse)
+	c.Response().Write(jsonString)
 	return nil
 }
 
-func (p *portalProxy) createBackup(data *BackupDataRequest) (*BackupRestoreState, error) {
+func (p *portalProxy) createBackup(data *BackupRequest) (*BackupContent, error) {
 	log.Debug("createBackup")
 	allEndpoints, err := p.ListEndpoints()
 	if err != nil {
@@ -807,10 +818,27 @@ func (p *portalProxy) createBackup(data *BackupDataRequest) (*BackupRestoreState
 	// log.Infof("userTokenFrom: %+v", userTokenFrom)
 	log.Infof("tokens: %+v", tokens)
 
-	response := &BackupRestoreState{
+	payload := &BackupRequestEndpointsResponse{
 		Endpoints: endpoints,
 		Tokens:    tokens,
 	}
+
+	// Encrypt data (see above) // TODO: RC leave until last
+	// encryptedPayload := payload
+
+	versions, err := p.getVersionsData()
+	if err != nil {
+		return nil, errors.New("Could not find database version")
+	}
+
+	// log.Infof("payload: %+v", payload)
+
+	response := &BackupContent{
+		payload:   *payload,
+		DBVersion: versions.DatabaseVersion,
+	}
+
+	// log.Infof("response: %+v", response)
 
 	return response, nil
 }
@@ -854,18 +882,14 @@ func (p *portalProxy) restoreEndpoints(c echo.Context) error {
 		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
 
-	data := &RestoreDataRequest{}
+	data := &RestoreRequest{}
 	if err = json.Unmarshal(body, data); err != nil {
 		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - could not parse JSON")
 	}
 
-	backup := &BackupRestoreState{}
-	if err = json.Unmarshal([]byte(data.Data), backup); err != nil {
-		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid backup - could not parse JSON")
-	}
-
-	err = p.restoreBackup(backup)
+	err = p.restoreBackup(data)
 	if err != nil {
+		// TODO: RC write error?
 		return err
 	}
 
@@ -875,14 +899,36 @@ func (p *portalProxy) restoreEndpoints(c echo.Context) error {
 
 }
 
-func (p *portalProxy) restoreBackup(backup *BackupRestoreState) error {
+func (p *portalProxy) restoreBackup(backup *RestoreRequest) error {
 	log.Debug("restoreBackup")
+
+	// TODO: RC check return types of these functions... if we return shadow error
+
+	data := &BackupContent{}
+	if err := json.Unmarshal([]byte(backup.Data), backup); err != nil {
+		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid backup - could not parse JSON")
+	}
+
+	if backup.IgnoreDbVersion == false {
+		versions, err := p.getVersionsData()
+		if err != nil {
+			return errors.New("Could not find database version")
+		}
+
+		if versions.DatabaseVersion != data.DBVersion {
+			errorStr := fmt.Sprintf("Incompatible database versions. Expected %+v but got %+v", versions.DatabaseVersion, data.DBVersion)
+			return interfaces.NewHTTPShadowError(http.StatusBadRequest, errorStr, errorStr)
+		}
+	}
+
+	unencryptedBackup := data.payload
+
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to connect to db", "Failed to connect to db: %+v", err)
 	}
 
-	for _, endpoint := range backup.Endpoints {
+	for _, endpoint := range unencryptedBackup.Endpoints {
 		if err := cnsiRepo.Overwrite(*endpoint, p.Config.EncryptionKeyInBytes); err != nil {
 			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to overwrite endpoints", "Failed to overwrite endpoint: %+v", endpoint.Name)
 		}
@@ -893,7 +939,7 @@ func (p *portalProxy) restoreBackup(backup *BackupRestoreState) error {
 		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to connect to db", "Failed to connect to db: %+v", err)
 	}
 
-	for _, tr := range backup.Tokens {
+	for _, tr := range unencryptedBackup.Tokens {
 		if err := tokenRepo.SaveCNSIToken(tr.EndpointGUID, tr.UserGUID, tr.TokenRecord, p.Config.EncryptionKeyInBytes); err != nil {
 			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to overwrite token", "Failed to overwrite token: %+v", tr.TokenRecord.TokenGUID)
 		}

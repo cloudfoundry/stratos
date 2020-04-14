@@ -19,12 +19,10 @@ import {
   BaseEndpointConfig,
 } from './backup-restore-endpoints.service';
 
-interface BackupEndpointConfigRequest extends BaseEndpointConfig {
-  // connectedUser: string;
-}
 
-interface BackupEndpointRequestData {
-  state: BackupEndpointsConfig<BackupEndpointConfigRequest>;
+
+interface BackupRequest {
+  state: BackupEndpointsConfig<BaseEndpointConfig>;
   userId: string;
   password: string;
 }
@@ -144,10 +142,10 @@ export class BackupEndpointsService extends BackupRestoreEndpointService {
     );
   }
 
-  private createBodyToSend(sd: SessionData): BackupEndpointRequestData {
-    const state: BackupEndpointsConfig<BackupEndpointConfigRequest> = Object.entries(this.state).reduce((res, [endpointId, endpoint]) => {
+  private createBodyToSend(sd: SessionData): BackupRequest {
+    const state: BackupEndpointsConfig<BaseEndpointConfig> = Object.entries(this.state).reduce((res, [endpointId, endpoint]) => {
       const { entity, ...rest } = endpoint;
-      const requestConfig: BackupEndpointConfigRequest = {
+      const requestConfig: BaseEndpointConfig = {
         ...rest,
       };
       res[endpointId] = requestConfig;
@@ -156,7 +154,7 @@ export class BackupEndpointsService extends BackupRestoreEndpointService {
     return {
       state,
       userId: this.getUserIdFromSessionData(sd),
-      password: this.password
+      password: this.password,
     };
   }
 

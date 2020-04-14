@@ -1,11 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Store } from '@ngrx/store';
+import { MatCheckboxChange } from '@angular/material';
 import { Observable, of, Subject } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../store/src/app-state';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getEventFiles } from '../../../../core/browser-helper';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
@@ -21,11 +19,7 @@ import { RestoreEndpointsService } from '../restore-endpoints.service';
     RestoreEndpointsService
   ]
 })
-export class RestoreEndpointsComponent implements OnInit {
-
-  // Step 1
-  fileValid$: Observable<boolean>;
-  fileName: string;
+export class RestoreEndpointsComponent {
 
   // Step 2
   passwordValid$: Observable<boolean>;
@@ -33,29 +27,9 @@ export class RestoreEndpointsComponent implements OnInit {
 
   constructor(
     public service: RestoreEndpointsService,
-    store: Store<AppState>,
-    paginationMonitorFactory: PaginationMonitorFactory,
     private confirmDialog: ConfirmationDialogService,
   ) {
-
-    // const endpoints$ = of([]);
-    // this.endpointDataSource = {
-    //   isTableLoading$: of(false),
-    //   connect: () => endpoints$.pipe(
-    //     map(endpoints => endpoints.sort((a, b) => a.name.localeCompare(b.name)))
-    //   ),
-    //   disconnect: () => { },
-    //   trackBy: (index, row) => row.guid
-    // };
-
-    this.setupFileStep();
-
     this.setupPasswordStep();
-
-  }
-
-  setupFileStep() {
-    this.fileValid$ = this.service.validFile$;
   }
 
   setupPasswordStep() {
@@ -70,33 +44,17 @@ export class RestoreEndpointsComponent implements OnInit {
     );
   }
 
-  ngOnInit() {
-  }
-
   onFileChange(event) {
     const files = getEventFiles(event);
     if (!files.length) {
       return;
     }
     const file = files[0];
-    console.log(event, file);
     this.service.setFile(file);
+  }
 
-    // console.log(files);
-    // TODO: RC file load - get content of file
-    // TODO: RC file load - validate correct file
-    // TODO: RC file load - parse file
-    // TODO: RC file load - enable next step
-
-
-    // const utils = new DeployApplicationFsUtils();
-    // utils.handleFileInputSelection(files).pipe(
-    //   filter(res => !!res),
-    //   first()
-    // ).subscribe((res) => {
-    //   this.propagateChange(res);
-    //   this.sourceData$.next(res);
-    // });
+  onIgnoreDbChange(event: MatCheckboxChange) {
+    this.service.setIgnoreDbVersion(event.checked);
   }
 
   restore: StepOnNextFunction = () => {
