@@ -343,7 +343,7 @@ describe('Application Deploy -', () => {
     });
 
     it('Should be source step with correct values', () => {
-      expect(deployApp.header.getTitleText()).toBe(`Redeploy`);
+      deployApp.header.waitForTitleText('Redeploy');
 
       deployApp.stepper.getStepNames().then(steps => {
         expect(steps.length).toBe(3);

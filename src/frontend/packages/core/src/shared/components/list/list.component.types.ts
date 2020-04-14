@@ -155,7 +155,7 @@ export class ListConfig<T> implements IListConfig<T> {
   isLocal = false;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
-  text = null;
+  text: ITableText = null;
   enableTextFilter = false;
   cardComponent = null;
   defaultView = 'table' as ListView;

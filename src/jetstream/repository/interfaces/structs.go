@@ -206,7 +206,9 @@ type Info struct {
 	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
 	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
 	Configuration struct {
-		TechPreview bool `json:"enableTechPreview"`
+		TechPreview        bool  `json:"enableTechPreview"`
+		ListMaxSize        int64 `json:"listMaxSize,omitempty"`
+		ListAllowLoadMaxed bool  `json:"listAllowLoadMaxed,omitempty"`
 	} `json:"config"`
 }
 
@@ -344,6 +346,8 @@ type PortalConfig struct {
 	AuthEndpointType                   string   `configName:"AUTH_ENDPOINT_TYPE"`
 	CookieDomain                       string   `configName:"COOKIE_DOMAIN"`
 	LogLevel                           string   `configName:"LOG_LEVEL"`
+	UIListMaxSize                      int64    `configName:"UI_LIST_MAX_SIZE"`
+	UIListAllowLoadMaxed               bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
 	CFAdminIdentifier                  string
 	CloudFoundryInfo                   *CFInfo
 	HTTPS                              bool
