@@ -4,7 +4,6 @@ resource_types:
   type: docker-image
   source:
     repository: splatform/stratos-git-tag-resource
-    tag: "latest"
 resources:
 # Stratos Git Repository
 - name: stratos
