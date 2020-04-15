@@ -72,8 +72,8 @@ if [ -n "${FORK}" ]; then
   FORK_QUERY="repo:${FORK}+milestone:3.1.0+state:closed"
 fi
 
-BUGS="$QUERY+label:bug"
-NON_BUGS="$QUERY+-label:bug"
+BUGS="+label:bug"
+NON_BUGS="+-label:bug"
 
 mv ${CHANGELOG} CHANGELOG.old
 
