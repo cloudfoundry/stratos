@@ -22,7 +22,21 @@ echo ""
 
 # Get the version number from the package.json file
 
+# This is the base repository
 REPO=${1:-cloudfoundry/stratos}
+FORK=""
+
+# Check if this is a fork
+REPO_URL=$(git config --get remote.origin.url)
+REGEX="(https:\/\/|git@)github.com[\/:]([a-z0-9A-Z]*)\/([a-z0-9A-Z\-]*)"
+if [[ $REPO_URL =~ $REGEX ]]; then
+  FORK=${BASH_REMATCH[2]}/${BASH_REMATCH[3]}
+  if [ "$FORK" == "$REPO" ]; then
+    FORK=""
+  else
+    echo -e "GitHub repository: ${CYAN}${BOLD}$FORK${RESET}"
+  fi
+fi
 
 MILESTONE=$(cat "${STRATOS_DIR}/package.json" | jq -r .version)
 echo -e "${YELLOW}Current version  : ${BOLD}${MILESTONE}${RESET}"
@@ -42,8 +56,11 @@ fi
 echo -e "${YELLOW}Previous version : ${BOLD}$CURRENT${RESET}"
 
 function search() {
-  QUERY=$1
-  curl -s "https://api.github.com/search/issues?q=${QUERY}" | jq -r '.items | .[] | "- \(.title) [\\#\(.number)](\(.html_url))"' | tee -a ${CHANGELOG}
+  FILTER=$1
+  if [ -n "${FORK_QUERY}" ]; then
+    curl -s "https://api.github.com/search/issues?q=${FORK_QUERY}${FILTER}" | jq -r '.items | .[] | "- \(.title) [\\#\(.number)](\(.html_url))"' | tee -a ${CHANGELOG}
+  fi
+  curl -s "https://api.github.com/search/issues?q=${QUERY}${FILTER}" | jq -r '.items | .[] | "- \(.title) [\\#\(.number)](\(.html_url))"' | tee -a ${CHANGELOG}
 }
 
 function log() {
@@ -51,9 +68,12 @@ function log() {
 }
 
 QUERY="repo:${REPO}+milestone:3.1.0+state:closed"
+if [ -n "${FORK}" ]; then
+  FORK_QUERY="repo:${FORK}+milestone:3.1.0+state:closed"
+fi
 
-BUGS="$QUERY+label:bug"
-NON_BUGS="$QUERY+-label:bug"
+BUGS="+label:bug"
+NON_BUGS="+-label:bug"
 
 mv ${CHANGELOG} CHANGELOG.old
 
