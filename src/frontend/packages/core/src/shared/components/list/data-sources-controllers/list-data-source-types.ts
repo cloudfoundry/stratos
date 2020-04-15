@@ -90,6 +90,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, EntityCatalo
   isLoadingPage$: Observable<boolean>;
 
   maxedResults$: Observable<boolean>;
+  maxedStateStartAt$: Observable<number>;
   filter$: Observable<ListFilter>;
   sort$: Observable<ListSort>;
 
@@ -123,7 +124,10 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, EntityCatalo
   refresh();
 
   updateMetricsAction(newAction: MetricsAction);
-
+  /**
+   * Ensure that list maxed status is ignored. This will result in all results being shown when previously ignored
+   */
+  showAllAfterMax();
 }
 
 export type getRowUniqueId<T> = (T) => string;

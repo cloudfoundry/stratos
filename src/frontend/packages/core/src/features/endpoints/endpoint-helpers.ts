@@ -51,3 +51,9 @@ export function endpointHasMetricsByAvailable(store: Store<AppState>, endpointId
     first()
   );
 }
+
+// Client Redirect URI for SSO
+export function getSSOClientRedirectURI(): string {
+  return window.location.protocol + '//' + window.location.hostname +
+    (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
+}

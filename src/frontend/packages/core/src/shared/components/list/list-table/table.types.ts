@@ -56,11 +56,19 @@ export interface ITableColumn<T> {
   cellAlignSelf?: string;
 }
 
+export interface ITableTextMaxed {
+  icon: string;
+  iconFont?: string;
+  canIgnoreMaxFirstLine: string;
+  cannotIgnoreMaxFirstLine: string;
+  filterLine?: string;
+}
+
 export interface ITableText {
   title?: string;
   filter?: string;
   noEntries?: string;
-  maxedResults?: string;
+  maxedResults?: ITableTextMaxed;
 }
 
 export const listTableComponents = [

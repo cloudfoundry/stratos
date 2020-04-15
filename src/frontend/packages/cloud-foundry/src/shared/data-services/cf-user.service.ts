@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf, ReplaySubject } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, of, ReplaySubject } from 'rxjs';
 import { filter, first, map, multicast, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
@@ -17,6 +17,9 @@ import {
   UserRoleInSpace,
 } from '../../../../cloud-foundry/src/store/types/user.types';
 import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
+import {
+  LocalPaginationHelpers,
+} from '../../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
@@ -47,6 +50,7 @@ import {
   isSpaceManager,
   waitForCFPermissions,
 } from '../../features/cloud-foundry/cf.helpers';
+import { selectCfPaginationState } from '../../store/selectors/pagination.selectors';
 
 @Injectable()
 export class CfUserService {
@@ -81,11 +85,13 @@ export class CfUserService {
         if (!currentPage) {
           return false;
         }
-        return !currentPage.busy && (!!users || currentPage.error || currentPage.maxed);
+        const isMaxed = LocalPaginationHelpers.isPaginationMaxed(pagination);
+        return !currentPage.busy && (!!users || currentPage.error || isMaxed);
       }),
       map(([users, pagination]) => {
         const currentPage = getCurrentPageRequestInfo(pagination, null);
-        const hasFailed = currentPage.error || currentPage.maxed;
+        const isMaxed = LocalPaginationHelpers.isPaginationMaxed(pagination);
+        const hasFailed = currentPage.error || isMaxed;
         if (!currentPage || hasFailed) {
           return null;
         }
@@ -362,29 +368,67 @@ export class CfUserService {
   }
 
   /**
-   * Create a paginated action that will fetch a list of users. For admins attempt to fetch all users regardless of cf/org/space level if
-   * there's not too many, otherwise fetch list with respect to cf/org/level
+   * Create a paginated action that will fetch a list of users.
+   *  Admins - Aim to fetch all CF users regardless of cf/org/space level. If this is not possible (haven't previously fetched OR there's
+   *  too many to fetch) fall back to either org or space users lists depending on level
+   *  Non-admins - Show org or space users depending on level
    * @param orgGuid Populated if user is at org level
    * @param spaceGuid Populated if user is at space level
    */
   public createPaginationAction(isAdmin: boolean, cfGuid: string, orgGuid?: string, spaceGuid?: string): Observable<PaginatedAction> {
     if (isAdmin) {
+      const allCfUsersAction = this.createCfGetAllUsersAction(cfGuid);
 
-      const action = this.createCfGetUsersAction(cfGuid);
       if (!orgGuid) {
-        return observableOf(action);
+        return observableOf(allCfUsersAction);
       }
-      return this.fetchTotalUsers(cfGuid).pipe(
+
+      const cfUserEntityConfig = entityCatalog.getEntity(allCfUsersAction);
+
+      // Do we have the list already and it's not maxed (user has previously loaded all users, possibly forcing this load)?
+      const hasAllUsers$ = this.store.select(selectCfPaginationState(cfUserEntityConfig.type, allCfUsersAction.paginationKey)).pipe(
+        filter(paginationState =>
+          !paginationState || // No pagination state... list has never loaded
+          (paginationState.pageRequests &&
+            paginationState.pageRequests[paginationState.currentPage] &&
+            !paginationState.pageRequests[paginationState.currentPage].busy) || // Have list, not loading
+          !paginationState.pageRequests[paginationState.currentPage] // Had list, not loading
+        ),
+        map(paginationState => paginationState ? !LocalPaginationHelpers.isPaginationMaxed(paginationState) : false),
+        first()
+      );
+      // Will we max out if attempting to fetch all users?
+      const willBeMaxed$ = this.fetchTotalUsers(cfGuid).pipe(
         first(),
-        map(count => {
-          if (count < action.flattenPaginationMax) {
-            // We can safely show all users regardless of what cf/org/level list we're showing
-            return action;
+        switchMap(totalResults => combineLatest([
+          of(totalResults),
+          cfUserEntityConfig.getPaginationConfig().maxedStateStartAt(this.store, allCfUsersAction)
+        ])
+        ),
+        map(([totalResults, maxEntities]) => {
+          return maxEntities && totalResults >= maxEntities;
+        })
+      );
+
+
+      return hasAllUsers$.pipe(
+        first(),
+        switchMap(hasAllUsers => {
+          if (hasAllUsers) {
+            return of(false);
           }
-          // We can't fetch all users, fall back on org or space lists
-          return !spaceGuid ?
-            this.createOrgGetUsersAction(isAdmin, cfGuid, orgGuid) :
-            this.createSpaceGetUsersAction(isAdmin, cfGuid, spaceGuid);
+          return willBeMaxed$;
+        }),
+        map((cannotShowAllUsers) => {
+          if (cannotShowAllUsers) {
+            // Either show list of users from org or space, depending on level
+            return !spaceGuid ?
+              this.createOrgGetUsersAction(isAdmin, cfGuid, orgGuid) :
+              this.createSpaceGetUsersAction(isAdmin, cfGuid, spaceGuid);
+          }
+          // We can safely show all users regardless of what cf/org/level list we're showing
+          return allCfUsersAction;
+
         })
       );
     }
@@ -400,7 +444,7 @@ export class CfUserService {
     if (!orgGuid) {
       // Create an action to fetch all users across the entire cf
       if (isAdmin) {
-        return this.createCfGetUsersAction(cfGuid);
+        return this.createCfGetAllUsersAction(cfGuid);
       }
       // Non-admins at cf level should never reach here, this is a genuine issue that if we hit the extra feed back will help
       throw new Error('Unsupported: Cloud Foundry non-administrators cannot access all users list');
@@ -413,7 +457,7 @@ export class CfUserService {
     return this.createSpaceGetUsersAction(isAdmin, cfGuid, spaceGuid);
   }
 
-  private createCfGetUsersAction = (cfGuid: string): PaginatedAction => {
+  private createCfGetAllUsersAction = (cfGuid: string): PaginatedAction => {
     return this.userCatalogEntity.actionOrchestrator.getActionBuilder('getMultiple')(cfGuid, null);
   }
 

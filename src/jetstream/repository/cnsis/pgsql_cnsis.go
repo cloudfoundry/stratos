@@ -32,8 +32,8 @@ var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_end
 
 var deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 
-// Just update the SSO Allowed state for now
-var updateCNSI = `UPDATE cnsis SET sso_allowed = $1 WHERE guid = $2`
+// Update some of the endpoint metadata
+var updateCNSI = `UPDATE cnsis SET name = $1, skip_ssl_validation = $2, sso_allowed = $3, client_id = $4, client_secret = $5 WHERE guid = $6`
 
 // Update the metadata
 var updateCNSIMetadata = `UPDATE cnsis SET meta_data = $1 WHERE guid = $2`
@@ -270,11 +270,11 @@ func (p *PostgresCNSIRepository) Delete(guid string) error {
 	return nil
 }
 
-// UpdateCNSI - Update an endpoint's SSO permitted state
-func (p *PostgresCNSIRepository) Update(guid string, ssoAllowed bool) error {
-	log.Debug("UpdateCNSI")
+// Update - Update an endpoint's data
+func (p *PostgresCNSIRepository) Update(endpoint interfaces.CNSIRecord, encryptionKey []byte) error {
+	log.Debug("Update endpoint")
 
-	if guid == "" {
+	if endpoint.GUID == "" {
 		msg := "Unable to update Endpoint without a valid guid."
 		log.Debug(msg)
 		return errors.New(msg)
@@ -282,7 +282,13 @@ func (p *PostgresCNSIRepository) Update(guid string, ssoAllowed bool) error {
 
 	var err error
 
-	result, err := p.db.Exec(updateCNSI, ssoAllowed, guid)
+	// Encrypt the client secret
+	cipherTextClientSecret, err := crypto.EncryptToken(encryptionKey, endpoint.ClientSecret)
+	if err != nil {
+		return err
+	}
+
+	result, err := p.db.Exec(updateCNSI, endpoint.Name, endpoint.SkipSSLValidation, endpoint.SSOAllowed, endpoint.ClientId, cipherTextClientSecret, endpoint.GUID)
 	if err != nil {
 		msg := "Unable to UPDATE endpoint: %v"
 		log.Debugf(msg, err)

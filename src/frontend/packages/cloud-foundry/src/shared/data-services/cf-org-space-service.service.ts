@@ -106,7 +106,8 @@ export const initCfOrgSpaceService = (
 export const createCfOrSpaceMultipleFilterFn = (
   store: Store<CFAppState>,
   action: PaginatedAction,
-  setQParam: (setQ: QParam, qs: QParam[]) => boolean
+  setQParam: (setQ: QParam, qs: QParam[]) => boolean,
+  preResetUpdate?: () => void
 ) => {
   return (changes: ListPaginationMultiFilterChange[], params: PaginationParam) => {
     if (!changes.length) {
@@ -139,6 +140,10 @@ export const createCfOrSpaceMultipleFilterFn = (
     const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(action.endpointGuid);
     const orgChanged = startingOrgGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'organization_guid'), {}).value;
     const spaceChanged = startingSpaceGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'space_guid'), {}).value;
+
+    if (preResetUpdate) {
+      preResetUpdate();
+    }
 
     // Changes of org or space will reset pagination and start a new request. Changes of only cf require a punt
     if (cfGuidChanged && !orgChanged && !spaceChanged) {

@@ -33,14 +33,6 @@ import { CFListDataSource } from '../../../../cf-list-data-source';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 
-// export function createGetAllAppAction(paginationKey): GetAllApplications {
-//   return new GetAllApplications(paginationKey, null, [
-//     createEntityRelationKey(applicationEntityType, spaceEntityType),
-//     createEntityRelationKey(spaceEntityType, organizationEntityType),
-//     createEntityRelationKey(applicationEntityType, routeEntityType),
-//   ]);
-// }
-
 export class CfAppsDataSource extends CFListDataSource<APIResource> {
 
   public static paginationKey = 'applicationWall';
