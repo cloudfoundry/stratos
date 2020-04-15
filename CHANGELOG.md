@@ -19,6 +19,7 @@ This release contains a number of fixes and improvements:
 - Disable Jetstream API logging via Env Var [\#4130](https://github.com/cloudfoundry/stratos/issues/4130)
 - Improve UI element sizing and presentation on desktop [\#4129](https://github.com/cloudfoundry/stratos/pull/4129)
 - Allow org managers to add users outside of org [\#4103](https://github.com/cloudfoundry/stratos/issues/4103)
+- Allow Endpoint Name to be edited [\#3640](https://github.com/cloudfoundry/stratos/issues/3640)
 
 **Fixes:**
 
