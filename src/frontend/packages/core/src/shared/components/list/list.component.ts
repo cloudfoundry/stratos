@@ -110,8 +110,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   @Input() noEntriesForCurrentFilter: TemplateRef<any>;
 
-  @Input() noEntriesMaxedResults: TemplateRef<any>;
-
   // List config when supplied as an attribute rather than a dependency
   @Input() listConfig: ListConfig<T>;
   initialEntitySelection$: Observable<number>;
@@ -713,4 +711,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   private getRowStateFromRowsState = (row: T): Observable<RowState> =>
     this.dataSource.rowsState.pipe(map(state => state[this.dataSource.getRowUniqueId(row)] || getDefaultRowState()))
 
+  public showAllAfterMax() {
+    this.dataSource.showAllAfterMax();
+  }
 }

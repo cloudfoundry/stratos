@@ -5,7 +5,6 @@ resource_types:
   privileged: true
   source:
     repository: ((docker-resource-image))
-    tag: ((docker-resource-image-tag))
 resources:
 # Stratos Git Repository
 - name: stratos

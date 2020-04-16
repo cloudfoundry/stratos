@@ -59,10 +59,10 @@ export class CreateRoute extends BaseRouteAction {
         ...route,
         port: generatePort ? undefined : route.port
       }, {
-        params: new HttpParams(generatePort ? {
-          fromObject: { generate_port: 'true' }
-        } : {})
-      }
+      params: new HttpParams(generatePort ? {
+        fromObject: { generate_port: 'true' }
+      } : {})
+    }
     );
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
@@ -153,6 +153,6 @@ export class GetAllRoutes extends CFStartAction implements PaginatedAction, Enti
     'order-direction': 'desc',
     'order-direction-field': 'route',
   };
-  flattenPaginationMax = 800;
+  flattenPaginationMax = true;
   flattenPagination = true;
 }

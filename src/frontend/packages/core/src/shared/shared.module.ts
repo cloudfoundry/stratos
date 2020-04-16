@@ -24,6 +24,7 @@ import { ApplicationStateService } from './components/application-state/applicat
 import { BlurDirective } from './components/blur.directive';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
+import { CardProgressOverlayComponent } from './components/card-progress-overlay/card-progress-overlay.component';
 import { CardBooleanMetricComponent } from './components/cards/card-boolean-metric/card-boolean-metric.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
@@ -59,6 +60,9 @@ import { MetaCardValueComponent } from './components/list/list-cards/meta-card/m
 import {
   TableCellRequestMonitorIconComponent,
 } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+import {
+  TableCellSidePanelComponent,
+} from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
 import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
@@ -70,6 +74,7 @@ import {
 } from './components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
+import { MaxListMessageComponent } from './components/list/max-list-message/max-list-message.component';
 import { ListHostDirective } from './components/list/simple-list/list-host.directive';
 import { SimpleListComponent } from './components/list/simple-list/simple-list.component';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -124,8 +129,6 @@ import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundr
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-import { TableCellSidePanelComponent } from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
-import { CardProgressOverlayComponent } from './components/card-progress-overlay/card-progress-overlay.component';
 
 
 @NgModule({
@@ -234,6 +237,7 @@ import { CardProgressOverlayComponent } from './components/card-progress-overlay
     SidepanelPreviewComponent,
     TableCellSidePanelComponent,
     CardProgressOverlayComponent,
+    MaxListMessageComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -330,6 +334,7 @@ import { CardProgressOverlayComponent } from './components/card-progress-overlay
     SidepanelPreviewComponent,
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,
+    MaxListMessageComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

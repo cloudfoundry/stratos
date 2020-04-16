@@ -1,18 +1,18 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
+import { InternalAppState } from '../../store/src/app-state';
 import { StratosBaseCatalogEntity } from '../../store/src/entity-catalog/entity-catalog-entity';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog.service';
 import { EntityCatalogEntityConfig } from '../../store/src/entity-catalog/entity-catalog.types';
-import { InternalAppState } from '../../store/src/app-state';
 import {
   getPaginationParams,
 } from '../../store/src/entity-request-pipeline/pagination-request-base-handlers/get-params.pipe';
-import { QParam } from './shared/q-param';
 import { selectPaginationState } from '../../store/src/selectors/pagination.selectors';
 import { isPaginatedAction, PaginatedAction, PaginationParam } from '../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../store/src/types/request.types';
 import { listEntityRelations } from './entity-relations/entity-relations';
 import { EntityInlineParentAction, isEntityInlineParentAction } from './entity-relations/entity-relations.types';
+import { QParam } from './shared/q-param';
 
 export function getEntityRelationsForEntityRequest(action: EntityInlineParentAction & EntityRequestAction) {
   return listEntityRelations(
@@ -101,8 +101,12 @@ export function addCfQParams(
   // Add initial params from action
   const newParamsFromAction = setQParams(newParams, action.initialParams);
 
+  // If __forcedPageEntityConfig__ has been set we're in a multi action list scenario and params should come from the base action. In this
+  // instance it's the entity details from the action, not the catalogueEntity that's passed in (type of entity that we're requesting)
+  const entityKey = action.__forcedPageEntityConfig__ ? entityCatalog.getEntityKey(action) : catalogEntity.entityKey;
+
   // Overwrite initial params with params from store
-  const paginationState = selectPaginationState(catalogEntity.entityKey, action.paginationKey)(appState);
+  const paginationState = selectPaginationState(entityKey, action.paginationKey)(appState);
   const paginationParams = getPaginationParams(paginationState);
   const paramsFromPagination = setQParams(newParamsFromAction, paginationParams);
 
