@@ -2,12 +2,13 @@
 
 ## 3.1.0
 
-[Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.0.0...3.1.0)
+[Full Changelog](https://github.com/SUSE/stratos/compare/3.0.0...3.1.0)
 
 This release contains a number of fixes and improvements:
 
 **Improvements:**
 
+- Add containers table in pods list pod row drop down [\#351](https://github.com/SUSE/stratos/pull/351)
 - Update Feature Flags with new entries [\#4188](https://github.com/cloudfoundry/stratos/issues/4188)
 - Improve Application Deployment UI [\#4183](https://github.com/cloudfoundry/stratos/pull/4183)
 - Scalability: Improve handling of 'maxed' lists [\#4180](https://github.com/cloudfoundry/stratos/issues/4180)
@@ -23,6 +24,9 @@ This release contains a number of fixes and improvements:
 
 **Fixes:**
 
+- Metrics do not show for a Kubernetes 1.16+ cluster [\#362](https://github.com/SUSE/stratos/issues/362)
+- Logos squashed in Workloads view [\#361](https://github.com/SUSE/stratos/issues/361)
+- Can't deploy version 3.0.0 on EKS [\#357](https://github.com/SUSE/stratos/issues/357)
 - CF Quota's `Maximum Application Instance Memory Usage` not formatted correctly [\#4206](https://github.com/cloudfoundry/stratos/issues/4206)
 - Notification and error pages loop when using 'X' [\#4202](https://github.com/cloudfoundry/stratos/issues/4202)
 - Cf app redeploy stepper starts with empty step, cannot continue [\#4185](https://github.com/cloudfoundry/stratos/issues/4185)
