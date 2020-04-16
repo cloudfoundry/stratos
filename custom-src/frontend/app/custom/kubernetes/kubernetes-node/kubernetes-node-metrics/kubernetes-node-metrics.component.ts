@@ -35,8 +35,8 @@ export class KubernetesNodeMetricsComponent implements OnInit {
     const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(
       result => {
         const metric = result.metric;
-        if (!!metric.pod_name && !!metric.namespace) {
-          const containerName = `${metric.namespace}:${metric.pod_name}:${metric.container_name}`;
+        if (!!metric.pod && !!metric.namespace) {
+          const containerName = `${metric.namespace}:${metric.pod}:${metric.container}`;
           if (!!metric.cpu) {
             return `${containerName}:${metric.cpu}`;
           }
@@ -62,7 +62,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
         'Memory Usage (MB)',
         ChartDataTypes.BYTES,
         (series: ChartSeries[]) => {
-          return series.filter(s => s.name.indexOf('/') !== 0 && !!s.metadata.container_name && s.metadata.container_name !== 'POD');
+          return series.filter(s => s.name.indexOf('/') !== 0 && !!s.metadata.container && s.metadata.container !== 'POD');
         },
         null,
         (value: string) => value + ' MB'
@@ -76,7 +76,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
         'CPU Usage (secs)',
         ChartDataTypes.CPU_TIME,
         (series: ChartSeries[]) => {
-          return series.filter(s => s.name.indexOf('/') !== 0 && !!s.metadata.container_name && s.metadata.container_name !== 'POD');
+          return series.filter(s => s.name.indexOf('/') !== 0 && !!s.metadata.container && s.metadata.container !== 'POD');
         },
         (t) => formatAxisCPUTime(t),
         (t) => formatCPUTime(t)
