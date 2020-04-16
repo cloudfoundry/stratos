@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { TableCellCustom } from '../../../../shared/components/list/list.types';
 import { BackupEndpointsService } from '../backup-endpoints.service';
@@ -10,8 +11,9 @@ import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-re
   templateUrl: './backup-connection-cell.component.html',
   styleUrls: ['./backup-connection-cell.component.scss']
 })
-export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel> {
+export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel> implements OnInit {
 
+  connectable = false;
   backupType = BackupEndpointTypes;
   connectionTypes = BackupEndpointConnectionTypes;
   selected: BackupEndpointConnectionTypes;
@@ -19,4 +21,11 @@ export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel
   constructor(public service: BackupEndpointsService) {
     super();
   }
+
+  ngOnInit(): void {
+    const epType = entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type);
+    const epEntity = epType.definition;
+    this.connectable = !epEntity.unConnectable;
+  }
+
 }

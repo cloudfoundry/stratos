@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
@@ -45,20 +46,20 @@ type BackupRequest struct {
 
 // BackupContentPayload - Encrypted part of the backup
 type BackupContentPayload struct {
-	Endpoints []*interfaces.CNSIRecord
+	Endpoints []map[string]interface{}
 	Tokens    []interfaces.BackupTokenRecord
 }
 
 // BackupContent - Everything that's backed up and stored in a file client side
 type BackupContent struct {
-	Payload   BackupContentPayload `json:"payload"`
-	DBVersion int64                `json:"dbVersion"`
+	Payload   []byte `json:"payload"`
+	DBVersion int64  `json:"dbVersion"`
 }
 
 // RestoreRequest - Request from client to restore content from payload
 type RestoreRequest struct {
-	// Payload - Encrypted version of BackupContent
-	Payload         string `json:"data"`
+	// Data - Content of backup file. This should be of type BackupContent (//TODO: RC test as BackupContent)
+	Data            string `json:"data"`
 	Password        string `json:"password"`
 	IgnoreDbVersion bool   `json:"ignoreDbVersion"`
 }
@@ -89,7 +90,6 @@ func (ctb *cnsiTokenBackup) BackupEndpoints(c echo.Context) error {
 	log.Infof("response: %+v", response) // TODO: RC REMOVE
 
 	// Send back the response to the client
-	// TODO: RC Missing client_secret when serialised, `-` in definition
 	jsonString, err := json.Marshal(response)
 	if err != nil {
 		return interfaces.NewHTTPError(http.StatusInternalServerError, "Failed to serialize response")
@@ -111,7 +111,7 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 	}
 
 	// Fetch/Format required data
-	endpoints := make([]*interfaces.CNSIRecord, 0)
+	endpoints := make([]map[string]interface{}, 0)
 	tokens := make([]interfaces.BackupTokenRecord, 0)
 
 	for endpointID, endpoint := range data.State {
@@ -122,19 +122,19 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 
 		for _, e := range allEndpoints {
 			if endpointID == e.GUID {
-				endpoints = append(endpoints, e)
+				endpoints = append(endpoints, serializeEndpoint(e))
 				break
 			}
 		}
 
 		switch connectionType := endpoint.Connect; connectionType {
 		case BACKUP_CONNECTION_ALL:
-			// allTokensFrom = append(allTokensFrom, endpointID)
 			if tokenRecords, ok := ctb.getCNSITokenRecordsBackup(endpointID); ok {
 				log.Warn("tokens for AllConnect") // TODO: RC REMOVE
 				tokens = append(tokens, tokenRecords...)
 			} else {
-				log.Warn("No tokens for AllConnect") // TODO: RC REMOVE
+				text := fmt.Sprintf("Failed to fetch tokens for endpoint %+v", endpointID)
+				return nil, interfaces.NewHTTPError(http.StatusBadGateway, text)
 			}
 		case BACKUP_CONNECTION_CURRENT:
 			// userTokenFrom = append(userTokenFrom, endpointID)
@@ -151,10 +151,10 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 
 				tokens = append(tokens, btr)
 			} else {
-				log.Infof("Request to back up connected user's (%+v) token for endpoint (%+v) failed. No token for user.", endpointID, data.UserID)
+				text := fmt.Sprintf("Request to back up connected user's (%+v) token for endpoint (%+v) failed.", endpointID, data.UserID)
+				return nil, interfaces.NewHTTPError(http.StatusBadGateway, text)
 			}
 		}
-
 	}
 
 	log.Infof("endpoints: %+v", endpoints) // TODO: RC REMOVE
@@ -166,7 +166,9 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 	}
 
 	// Encrypt data (see above) // TODO: RC leave until last
-	// encryptedPayload := payload
+
+	bPayload, _ := json.Marshal(payload)
+	encryptedPayload, err := crypto.EncryptToken(encryptionKey, fmt.Sprintf("%+v", bPayload)) //TODO: RC error handling
 
 	versions, err := ctb.p.getVersionsData()
 	if err != nil {
@@ -176,7 +178,7 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 	// log.Infof("payload: %+v", payload)
 
 	response := &BackupContent{
-		Payload:   *payload,
+		Payload:   encryptedPayload,
 		DBVersion: versions.DatabaseVersion,
 	}
 
@@ -231,7 +233,7 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 	// TODO: RC Q all errors are NewHTTPError
 
 	data := &BackupContent{}
-	if err := json.Unmarshal([]byte(backup.Payload), backup); err != nil {
+	if err := json.Unmarshal([]byte(backup.Data), data); err != nil {
 		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid backup - could not parse JSON")
 	}
 
@@ -247,16 +249,25 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 		}
 	}
 
-	unencryptedBackup := data.Payload
+	unencryptedBackup, err := crypto.DecryptToken(encryptionKey, data.Payload) //TODO: RC error handling, comments
+	if err != nil {
+		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to decrypt payload", "Failed to decrypt payload: %+v", err)
+	}
+
+	payload := &BackupContentPayload{}
+	if err = json.Unmarshal([]byte(unencryptedBackup), payload); err != nil {
+		return interfaces.NewHTTPError(http.StatusBadRequest, "Could not parse payload")
+	}
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(ctb.databaseConnectionPool)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to connect to db", "Failed to connect to db: %+v", err)
 	}
 
-	for _, endpoint := range unencryptedBackup.Endpoints {
-		if err := cnsiRepo.Overwrite(*endpoint, ctb.p.Config.EncryptionKeyInBytes); err != nil {
-			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to overwrite endpoints", "Failed to overwrite endpoint: %+v", endpoint.Name)
+	for _, endpoint := range payload.Endpoints {
+		e := deSerializeEndpoint(endpoint)
+		if err := cnsiRepo.Overwrite(e, ctb.p.Config.EncryptionKeyInBytes); err != nil {
+			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to overwrite endpoints", "Failed to overwrite endpoint: %+v", e.Name)
 		}
 	}
 
@@ -265,7 +276,7 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to connect to db", "Failed to connect to db: %+v", err)
 	}
 
-	for _, tr := range unencryptedBackup.Tokens {
+	for _, tr := range payload.Tokens {
 		if err := tokenRepo.SaveCNSIToken(tr.EndpointGUID, tr.UserGUID, tr.TokenRecord, ctb.p.Config.EncryptionKeyInBytes); err != nil {
 			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to overwrite token", "Failed to overwrite token: %+v", tr.TokenRecord.TokenGUID)
 		}
@@ -274,30 +285,33 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 	return nil
 }
 
-// find := func(a interfaces.CNSIRecord) bool {
-// 	return endpointID == a.GUID
-// }
+// Work around the omission of the client secret when serialising the cnsi record
+func serializeEndpoint(endpoint *interfaces.CNSIRecord) map[string]interface{} {
+	// encode the original
+	m, _ := json.Marshal(endpoint)
 
-// endpointPos := sliceContainsFn(find, allEndpoints)
-// if endpointPos >= 0 {
-// 	endpoints = append(endpoints, endpoints[endpointPos])
-// }
+	// decode it back to get a map
+	var a interface{}
+	json.Unmarshal(m, &a)
+	newEndpoint := a.(map[string]interface{})
 
-// // TODO:RC pos
-// func sliceContains(what interface{}, where []interface{}) (idx int) {
-// 	for i, v := range where {
-// 		if v == what {
-// 			return i
-// 		}
-// 	}
-// 	return -1
-// }
+	// Replace the map key
+	newEndpoint["client_secret"] = endpoint.ClientSecret
 
-// func sliceContainsFn(is func(a interface{}) bool, where []interface{}) (idx int) {
-// 	for i, v := range where {
-// 		if is(v) {
-// 			return i
-// 		}
-// 	}
-// 	return -1
-// }
+	return newEndpoint
+}
+
+// Work around the omission of the client secret when serialising the cnsi record
+func deSerializeEndpoint(endpoint map[string]interface{}) interfaces.CNSIRecord {
+	// encode the endpoint map
+	m, _ := json.Marshal(endpoint)
+
+	// decode it back to get a record with all values except client secret
+	var a interfaces.CNSIRecord
+	json.Unmarshal(m, &a)
+
+	// manually add the client secret
+	a.ClientSecret = fmt.Sprintf("%v", endpoint["client_secret"])
+	log.Errorf("CLIENT SECRET: %+v", a.ClientSecret) // TODO: RC REMOVE
+	return a
+}

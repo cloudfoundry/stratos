@@ -6,7 +6,7 @@
   path: '/endpoints/backup-restore'
   }">
   <app-step title="Select" [valid]="selectValid$ | async">
-    <div class="select-step">
+    <div *ngIf="service.canBackup(); else noEndpoints" class="select-step">
       <p>Select the endpoints and connection details that you would like to backup</p>
       <div class="select-step__buttons">
         <button mat-raised-button color="primary" [disabled]="disableSelectAll$ | async"
@@ -16,6 +16,9 @@
       </div>
       <app-table [dataSource]="endpointDataSource" [columns]="columns"></app-table>
     </div>
+    <ng-template #noEndpoints>
+      <p>There are no endpoints to backup</p>
+    </ng-template>
   </app-step>
   <app-step title="Password" finishButtonText="Download" [onNext]="onNext" [valid]="passwordValid$ | async">
     <div class="password-step">

@@ -68,8 +68,8 @@ export class BackupEndpointsService {
     );
     this.hasChanges.next(hasChanges);
     const allChanged = endpoints.every(endpoint => {
-      const e = !this.canBackup(endpoint.entity, BackupEndpointTypes.ENDPOINT) || endpoint[BackupEndpointTypes.ENDPOINT];
-      const c = !this.canBackup(endpoint.entity, BackupEndpointTypes.CONNECT) || endpoint[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE;
+      const e = !this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.ENDPOINT) || endpoint[BackupEndpointTypes.ENDPOINT];
+      const c = !this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.CONNECT) || endpoint[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE;
       return e && c;
     }
 
@@ -77,7 +77,7 @@ export class BackupEndpointsService {
     this.allChanged.next(allChanged);
   }
 
-  canBackup(endpoint: EndpointModel, type: BackupEndpointTypes): boolean {
+  canBackupEndpoint(endpoint: EndpointModel, type: BackupEndpointTypes): boolean {
     // Can always back up endpoint
     if (type === BackupEndpointTypes.ENDPOINT) {
       return true;
@@ -97,12 +97,16 @@ export class BackupEndpointsService {
     return true;
   }
 
+  canBackup(): boolean {
+    return !!Object.values(this.state).length;
+  }
+
   selectAll() {
     Object.values(this.state).forEach(endpoint => {
-      if (this.canBackup(endpoint.entity, BackupEndpointTypes.ENDPOINT)) {
+      if (this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.ENDPOINT)) {
         endpoint[BackupEndpointTypes.ENDPOINT] = true;
       }
-      if (this.canBackup(endpoint.entity, BackupEndpointTypes.CONNECT)) {
+      if (this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.CONNECT)) {
         endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.ALL;
       }
     });

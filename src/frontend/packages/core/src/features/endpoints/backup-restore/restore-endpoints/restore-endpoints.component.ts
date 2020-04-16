@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material';
+import { Store } from '@ngrx/store';
 import { Observable, of, Subject } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
+import { GetAllEndpoints } from '../../../../../../store/src/actions/endpoint.actions';
+import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { getEventFiles } from '../../../../core/browser-helper';
 import { httpErrorResponseToSafeString } from '../../../../jetstream.helpers';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
@@ -28,6 +31,7 @@ export class RestoreEndpointsComponent {
   show = false;
 
   constructor(
+    private store: Store<GeneralEntityAppState>,
     public service: RestoreEndpointsService,
     private confirmDialog: ConfirmationDialogService,
   ) {
@@ -62,7 +66,7 @@ export class RestoreEndpointsComponent {
   restore: StepOnNextFunction = () => {
     const confirmation = new ConfirmationDialogConfig(
       'Restore',
-      'This will overwrite any matching endpoints and connection details',
+      'This will overwrite any matching endpoints and connection details.',
       'Continue',
       true
     );
@@ -75,6 +79,7 @@ export class RestoreEndpointsComponent {
     };
 
     const restoreSuccess = data => {
+      this.store.dispatch(new GetAllEndpoints());
       result.next({
         success: true,
         redirect: true,

@@ -20,6 +20,6 @@ export class BackupRestoreCellComponent extends TableCellCustom<EndpointModel> {
   }
 
   disabled(): boolean {
-    return !this.service.canBackup(this.row, this.config.type);
+    return !this.service.canBackupEndpoint(this.row, this.config.type);
   }
 }
