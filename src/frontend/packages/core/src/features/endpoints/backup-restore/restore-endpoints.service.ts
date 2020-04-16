@@ -9,7 +9,6 @@ import { selectSessionData } from '../../../../../store/src/reducers/auth.reduce
 import { SessionData } from '../../../../../store/src/types/auth.types';
 import { LoggerService } from '../../../core/logger.service';
 import { BrowserStandardEncoder } from '../../../helper';
-import { BackupRestoreEndpointService } from './backup-restore-endpoints.service';
 
 interface BackupContent {
   payload: string;
@@ -23,7 +22,7 @@ interface RestoreEndpointsData {
 }
 
 @Injectable()
-export class RestoreEndpointsService extends BackupRestoreEndpointService {
+export class RestoreEndpointsService {
 
   // Step 1
   validFileContent = new BehaviorSubject(false);
@@ -42,14 +41,13 @@ export class RestoreEndpointsService extends BackupRestoreEndpointService {
   ignoreDbVersion$ = this.ignoreDbVersion.asObservable();
 
   // Step 2
-  password: string; // TODO: RC use set password in both services
+  private password: string;
 
   constructor(
     private store: Store<GeneralEntityAppState>,
     private http: HttpClient,
     private logger: LoggerService
   ) {
-    super();
     this.setupStep1();
   }
 
@@ -112,6 +110,10 @@ export class RestoreEndpointsService extends BackupRestoreEndpointService {
 
   setIgnoreDbVersion(ignore: boolean) {
     this.ignoreDbVersion.next(ignore);
+  }
+
+  setPassword(password: string) {
+    this.password = password;
   }
 
   restoreBackup(): Observable<any> {

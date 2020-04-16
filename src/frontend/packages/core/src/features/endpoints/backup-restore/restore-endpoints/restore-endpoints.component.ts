@@ -5,6 +5,7 @@ import { Observable, of, Subject } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { getEventFiles } from '../../../../core/browser-helper';
+import { httpErrorResponseToSafeString } from '../../../../jetstream.helpers';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
@@ -24,6 +25,7 @@ export class RestoreEndpointsComponent {
   // Step 2
   passwordValid$: Observable<boolean>;
   passwordForm: FormGroup;
+  show = false;
 
   constructor(
     public service: RestoreEndpointsService,
@@ -38,7 +40,7 @@ export class RestoreEndpointsComponent {
     });
     this.passwordValid$ = this.passwordForm.statusChanges.pipe(
       map(() => {
-        this.service.password = this.passwordForm.controls.password.value;
+        this.service.setPassword(this.passwordForm.controls.password.value);
         return this.passwordForm.valid;
       })
     );
@@ -80,18 +82,16 @@ export class RestoreEndpointsComponent {
     };
 
     const backupFailure = err => {
-      const errorMessage = this.service.createError(err);
+      const errorMessage = httpErrorResponseToSafeString(err);
       result.next({
         success: false,
         message: `Failed to restore backup` + (errorMessage ? `: ${errorMessage}` : '')
       });
       return of(false);
     };
-    // TODO: RC make generic in base
 
     const createBackup = () => this.service.restoreBackup().pipe(first()).subscribe(restoreSuccess, backupFailure);
 
-    // TODO: RC tie in progress indicator (not sure if possible)
     this.confirmDialog.openWithCancel(confirmation, createBackup, userCancelledDialog);
 
     // TODO: RC Remove console.log

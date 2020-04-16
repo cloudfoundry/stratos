@@ -31,7 +31,12 @@
       <p>Provide the password that was given at the time the backup was created</p>
       <form [formGroup]="passwordForm" class="stepper-form">
         <mat-form-field>
-          <input matInput formControlName="password" placeholder="Password" required type="password">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" required [type]="!show ? 'password' : 'text'">
+          <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="!show">
+            <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
         </mat-form-field>
       </form>
     </div>

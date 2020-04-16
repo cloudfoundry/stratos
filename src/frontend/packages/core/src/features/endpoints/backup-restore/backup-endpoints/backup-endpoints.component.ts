@@ -11,6 +11,7 @@ import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { httpErrorResponseToSafeString } from '../../../../jetstream.helpers';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
@@ -19,7 +20,7 @@ import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/compone
 import { BackupConnectionCellComponent } from '../backup-connection-cell/backup-connection-cell.component';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupRestoreCellComponent } from '../backup-restore-cell/backup-restore-cell.component';
-import { BackupEndpointTypes } from '../backup-restore-endpoints.service';
+import { BackupEndpointTypes } from '../backup-restore.types';
 
 @Component({
   selector: 'app-backup-endpoints',
@@ -133,10 +134,9 @@ export class BackupEndpointsComponent implements OnInit {
   }
 
   onNext: StepOnNextFunction = () => {
-    // TODO: RC Complete/Finish token warning
     const confirmation = new ConfirmationDialogConfig(
       'Backup',
-      'Backing up connection details ?????????',
+      'This backup contains endpoint connection details. The contents will be encrypted, but please still ensure the safety of the file',
       'Continue',
       true
     );
@@ -157,13 +157,14 @@ export class BackupEndpointsComponent implements OnInit {
       const downloadURL = window.URL.createObjectURL(data);
       const link = document.createElement('a');
       link.href = downloadURL;
-      const dateTime = moment().format('YYYYMMDD-HHmmss'); // TODO: RC timezone?
+      // Time of client, not server
+      const dateTime = moment().format('YYYYMMDD-HHmmss');
       link.download = `stratos_backup_${dateTime}.bk`;
       link.click();
     };
 
     const backupFailure = err => {
-      const errorMessage = this.service.createError(err);
+      const errorMessage = httpErrorResponseToSafeString(err);
       result.next({
         success: false,
         message: `Failed to create backup` + (errorMessage ? `: ${errorMessage}` : '')
@@ -173,8 +174,11 @@ export class BackupEndpointsComponent implements OnInit {
 
     const createBackup = () => this.service.createBackup().pipe(first()).subscribe(backupSuccess, backupFailure);
 
-    // TODO: RC tie in progress indicator (not sure if possible)
-    this.confirmDialog.openWithCancel(confirmation, createBackup, userCancelledDialog);
+    if (this.service.hasConnectionDetails()) {
+      this.confirmDialog.openWithCancel(confirmation, createBackup, userCancelledDialog);
+    } else {
+      createBackup();
+    }
 
     // TODO: RC Remove console.log
     return result.asObservable().pipe(tap(console.log));

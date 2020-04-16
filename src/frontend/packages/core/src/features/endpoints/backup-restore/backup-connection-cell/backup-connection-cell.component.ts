@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { TableCellCustom } from '../../../../shared/components/list/list.types';
 import { BackupEndpointsService } from '../backup-endpoints.service';
-import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-restore-endpoints.service';
+import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-restore.types';
 
 @Component({
   selector: 'app-backup-connection-cell',

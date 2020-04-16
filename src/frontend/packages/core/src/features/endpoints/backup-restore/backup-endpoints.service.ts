@@ -15,10 +15,8 @@ import {
   BackupEndpointConnectionTypes,
   BackupEndpointsConfig,
   BackupEndpointTypes,
-  BackupRestoreEndpointService,
   BaseEndpointConfig,
-} from './backup-restore-endpoints.service';
-
+} from './backup-restore.types';
 
 
 interface BackupRequest {
@@ -28,7 +26,7 @@ interface BackupRequest {
 }
 
 @Injectable()
-export class BackupEndpointsService extends BackupRestoreEndpointService {
+export class BackupEndpointsService {
 
   hasChanges = new BehaviorSubject(false);
   hasChanges$ = this.hasChanges.asObservable();
@@ -42,7 +40,6 @@ export class BackupEndpointsService extends BackupRestoreEndpointService {
     private store: Store<GeneralEntityAppState>,
     private http: HttpClient
   ) {
-    super();
   }
 
   // State Related
@@ -106,7 +103,7 @@ export class BackupEndpointsService extends BackupRestoreEndpointService {
         endpoint[BackupEndpointTypes.ENDPOINT] = true;
       }
       if (this.canBackup(endpoint.entity, BackupEndpointTypes.CONNECT)) {
-        endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.CURRENT;
+        endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.ALL;
       }
     });
     this.validate();
@@ -118,6 +115,10 @@ export class BackupEndpointsService extends BackupRestoreEndpointService {
       endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.NONE;
     });
     this.validate();
+  }
+
+  hasConnectionDetails(): boolean {
+    return !!Object.values(this.state).find(e => e[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE);
   }
 
   // Request Related
@@ -144,11 +145,13 @@ export class BackupEndpointsService extends BackupRestoreEndpointService {
 
   private createBodyToSend(sd: SessionData): BackupRequest {
     const state: BackupEndpointsConfig<BaseEndpointConfig> = Object.entries(this.state).reduce((res, [endpointId, endpoint]) => {
-      const { entity, ...rest } = endpoint;
-      const requestConfig: BaseEndpointConfig = {
-        ...rest,
-      };
-      res[endpointId] = requestConfig;
+      if (endpoint[BackupEndpointTypes.ENDPOINT]) {
+        const { entity, ...rest } = endpoint;
+        const requestConfig: BaseEndpointConfig = {
+          ...rest,
+        };
+        res[endpointId] = requestConfig;
+      }
       return res;
     }, {});
     return {

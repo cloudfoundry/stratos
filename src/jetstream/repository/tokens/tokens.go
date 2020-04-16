@@ -18,8 +18,6 @@ type Repository interface {
 
 	FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error)
 	FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error)
-	FindAllCNSIToken(cnsiGUID string, encryptionKey []byte) ([]interfaces.TokenRecord, error)
-	FindAllCNSITokenIncludeDisconnected(cnsiGUID string, encryptionKey []byte) ([]interfaces.TokenRecord, error)
 	FindAllCNSITokenBackup(cnsiGUID string, encryptionKey []byte) ([]interfaces.BackupTokenRecord, error)
 	DeleteCNSIToken(cnsiGUID string, userGUID string) error
 	DeleteCNSITokens(cnsiGUID string) error

@@ -363,21 +363,10 @@ func (p *PostgresCNSIRepository) Overwrite(endpoint interfaces.CNSIRecord, encry
 		log.Errorf("Unknown error attempting to find CNSI: %v", err)
 	}
 
-	// if _, err := p.Find(endpoint.GUID, encryptionKey); err != nil {
-	// 	// Found, so update endpoint
-	// 	// TODO: RC ALL STRINGS?
-	// 	return p.Update(endpoint, encryptionKey)
-	// } else {
-	// 	// Not Found, create endpoint
-	// 	return p.Save(endpoint.GUID, endpoint, encryptionKey)
-	// 	// TODO: RC Q could actually be error
-	// }
-
 	switch count {
 	case 0:
 		return p.Save(endpoint.GUID, endpoint, encryptionKey)
 	default:
-
 		return p.Update(endpoint, encryptionKey)
 	}
 }

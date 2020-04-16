@@ -2,7 +2,7 @@
   <mat-select [(value)]="service.state[row.guid][backupType.CONNECT]"
     [disabled]="!service.state[row.guid][backupType.ENDPOINT]">
     <mat-option [value]="connectionTypes.NONE">None</mat-option>
-    <mat-option [value]="connectionTypes.CURRENT">Current User</mat-option>
+    <mat-option *ngIf="!!row.user" [value]="connectionTypes.CURRENT">Current User</mat-option>
     <mat-option [value]="connectionTypes.ALL">All Users</mat-option>
   </mat-select>
 </mat-form-field>
