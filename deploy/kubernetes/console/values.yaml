@@ -66,6 +66,12 @@ console:
   # Enable/disable Tech Preview
   techPreview: false
 
+  ui:
+    # Override the default maximum number of entities that a configured list can fetch. When a list meets this amount additional pages are not fetched 
+    listMaxSize:
+    # If the maximum list size is met give the user the option to fetch all results regardless
+    listAllowLoadMaxed: false
+
   # Use local admin user instead of UAA - set to a password to enable
   localAdminPassword: ~
 
