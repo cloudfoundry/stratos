@@ -973,7 +973,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// Apply edits for the given endpoint
 	adminGroup.POST("/endpoint/:id", p.updateEndpoint)
 
-	// TODO: RC Q better as `/backup` & `/restore`?
 	adminGroup.POST("/endpoints/backup", p.backupEndpoints)
 	adminGroup.POST("/endpoints/restore", p.restoreEndpoints)
 

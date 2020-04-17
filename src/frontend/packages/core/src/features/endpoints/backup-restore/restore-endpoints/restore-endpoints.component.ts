@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subject } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../../store/src/actions/endpoint.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
@@ -99,8 +99,7 @@ export class RestoreEndpointsComponent {
 
     this.confirmDialog.openWithCancel(confirmation, createBackup, userCancelledDialog);
 
-    // TODO: RC Remove console.log
-    return result.asObservable().pipe(tap(console.log));
+    return result.asObservable();
   }
 
 }

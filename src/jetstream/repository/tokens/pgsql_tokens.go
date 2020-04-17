@@ -348,7 +348,6 @@ func (p *PgsqlTokenRepository) FindAllCNSITokenBackup(cnsiGUID string, encryptio
 		return make([]interfaces.BackupTokenRecord, 0), fmt.Errorf(msg, err)
 	}
 
-	// TODO: RC Q should this close come before returning? it doesn't in cnsi List(encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
 	defer rows.Close()
 
 	btrs := make([]interfaces.BackupTokenRecord, 0)

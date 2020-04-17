@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Observable, of, Subject } from 'rxjs';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../../store/src/actions/endpoint.actions';
 import { AppState } from '../../../../../../store/src/app-state';
@@ -136,7 +136,7 @@ export class BackupEndpointsComponent implements OnInit {
   onNext: StepOnNextFunction = () => {
     const confirmation = new ConfirmationDialogConfig(
       'Backup',
-      'This backup contains endpoint connection details. The contents will be encrypted, but please still ensure the safety of the file',
+      'The backup that is about to be created may contain credentials, tokens and other sensitive information. Although it is encrypted, you should take the appropriate steps to secure it. ',
       'Continue',
       true
     );
@@ -180,8 +180,7 @@ export class BackupEndpointsComponent implements OnInit {
       createBackup();
     }
 
-    // TODO: RC Remove console.log
-    return result.asObservable().pipe(tap(console.log));
+    return result.asObservable();
   }
 
 

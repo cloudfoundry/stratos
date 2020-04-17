@@ -22,7 +22,7 @@
   </app-step>
   <app-step title="Password" finishButtonText="Download" [onNext]="onNext" [valid]="passwordValid$ | async">
     <div class="password-step">
-      <p>Protect the backup by providing as password. You will need this password when restoring from this backup</p>
+      <p>Protect the backup by providing a password. You will need this password when restoring from this backup</p>
       <form [formGroup]="passwordForm" class="stepper-form">
         <mat-form-field>
           <mat-label>Password</mat-label>
