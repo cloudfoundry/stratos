@@ -120,7 +120,7 @@ export class BackupEndpointsComponent implements OnInit {
 
   setupPasswordStep() {
     this.passwordForm = new FormGroup({
-      password: new FormControl('', [Validators.required]),
+      password: new FormControl('', [Validators.required, Validators.minLength(6)]),
     });
     this.passwordValid$ = this.passwordForm.statusChanges.pipe(
       map(() => {

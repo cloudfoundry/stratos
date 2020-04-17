@@ -37,6 +37,11 @@
             [attr.aria-pressed]="!show">
             <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
           </button>
+          <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.required">
+            Password is required</mat-error>
+          <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.minlength">
+            Password must be at least {{passwordForm.controls.password.errors.minlength.requiredLength}} characters
+          </mat-error>
         </mat-form-field>
       </form>
     </div>
