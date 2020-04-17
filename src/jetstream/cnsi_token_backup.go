@@ -1,9 +1,9 @@
 package main
 
 import (
+	"crypto/md5"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -18,6 +18,7 @@ import (
 
 type cnsiTokenBackup struct {
 	databaseConnectionPool *sql.DB
+	encryptionKey          []byte
 	p                      *portalProxy
 }
 
@@ -58,7 +59,7 @@ type BackupContent struct {
 
 // RestoreRequest - Request from client to restore content from payload
 type RestoreRequest struct {
-	// Data - Content of backup file. This should be of type BackupContent (//TODO: RC test as BackupContent)
+	// Data - Content of backup file. This should be of type BackupContent
 	Data            string `json:"data"`
 	Password        string `json:"password"`
 	IgnoreDbVersion bool   `json:"ignoreDbVersion"`
@@ -70,12 +71,12 @@ func (ctb *cnsiTokenBackup) BackupEndpoints(c echo.Context) error {
 	// Check we can unmarshall the request
 	body, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
-		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body")
+		return interfaces.NewHTTPShadowError(http.StatusBadRequest, "Invalid request body", "Invalid request body: %+v", err)
 	}
 
 	data := &BackupRequest{}
 	if err = json.Unmarshal(body, data); err != nil {
-		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - could not parse JSON")
+		return interfaces.NewHTTPShadowError(http.StatusBadRequest, "Invalid request body - could not parse JSON", "Invalid request body - could not parse JSON: %+v", err)
 	}
 
 	if data.State == nil || len(data.State) == 0 {
@@ -92,7 +93,7 @@ func (ctb *cnsiTokenBackup) BackupEndpoints(c echo.Context) error {
 	// Send back the response to the client
 	jsonString, err := json.Marshal(response)
 	if err != nil {
-		return interfaces.NewHTTPError(http.StatusInternalServerError, "Failed to serialize response")
+		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to serialize response", "Failed to serialize response: %+v", err)
 	}
 
 	log.Infof("jsonString: %+v", jsonString) // TODO: RC REMOVE
@@ -107,7 +108,7 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 	log.Debug("createBackup")
 	allEndpoints, err := ctb.p.ListEndpoints()
 	if err != nil {
-		return nil, interfaces.NewHTTPError(http.StatusBadGateway, "Failed to fetch endpoints")
+		return nil, interfaces.NewHTTPShadowError(http.StatusBadGateway, "Failed to fetch endpoints", "Failed to fetch endpoints: %+v", err)
 	}
 
 	// Fetch/Format required data
@@ -157,32 +158,30 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 		}
 	}
 
-	log.Infof("endpoints: %+v", endpoints) // TODO: RC REMOVE
-	log.Infof("tokens: %+v", tokens)       // TODO: RC REMOVE
-
 	payload := &BackupContentPayload{
 		Endpoints: endpoints,
 		Tokens:    tokens,
 	}
 
-	// Encrypt data (see above) // TODO: RC leave until last
-
-	bPayload, _ := json.Marshal(payload)
-	encryptedPayload, err := crypto.EncryptToken(encryptionKey, fmt.Sprintf("%+v", bPayload)) //TODO: RC error handling
+	// Encrypt the entire payload
+	encryptedPayload, err := encryptPayload(payload, data.Password, ctb.encryptionKey)
+	if err != nil {
+		return nil, interfaces.NewHTTPShadowError(http.StatusBadGateway, "Could not encrypt payload", "Could not encrypt payload: %+v", err)
+	}
 
 	versions, err := ctb.p.getVersionsData()
 	if err != nil {
-		return nil, errors.New("Could not find database version")
+		return nil, interfaces.NewHTTPShadowError(http.StatusBadGateway, "Could not find database version", "Could not find database version: %+v", err)
 	}
 
-	// log.Infof("payload: %+v", payload)
+	// log.Infof("payload: %+v", payload) // TODO: RC REMOVE
 
 	response := &BackupContent{
 		Payload:   encryptedPayload,
 		DBVersion: versions.DatabaseVersion,
 	}
 
-	// log.Infof("response: %+v", response)
+	// log.Infof("response: %+v", response) // TODO: RC REMOVE
 
 	return response, nil
 }
@@ -194,7 +193,7 @@ func (ctb *cnsiTokenBackup) getCNSITokenRecordsBackup(endpointID string) ([]inte
 		return make([]interfaces.BackupTokenRecord, 0), false
 	}
 
-	trs, err := tokenRepo.FindAllCNSITokenBackup(endpointID, ctb.p.Config.EncryptionKeyInBytes)
+	trs, err := tokenRepo.FindAllCNSITokenBackup(endpointID, ctb.encryptionKey)
 	if err != nil {
 		return make([]interfaces.BackupTokenRecord, 0), false
 	}
@@ -208,12 +207,12 @@ func (ctb *cnsiTokenBackup) RestoreEndpoints(c echo.Context) error {
 	// Check we can unmarshall the request
 	body, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
-		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body")
+		return interfaces.NewHTTPShadowError(http.StatusBadRequest, "Invalid request body", "Invalid request body: %+v", err)
 	}
 
 	data := &RestoreRequest{}
 	if err = json.Unmarshal(body, data); err != nil {
-		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - could not parse JSON")
+		return interfaces.NewHTTPShadowError(http.StatusBadRequest, "Invalid request body - could not parse JSON", "Invalid request body - could not parse JSON: %+v", err)
 	}
 
 	err = ctb.restoreBackup(data)
@@ -224,41 +223,40 @@ func (ctb *cnsiTokenBackup) RestoreEndpoints(c echo.Context) error {
 	// log.Warnf("BACKUP DATA: %+v", backup) // TODO: RC REMOVE
 	c.Response().WriteHeader(http.StatusOK)
 	return nil
-
 }
 
 func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 	log.Debug("restoreBackup")
 
-	// TODO: RC Q all errors are NewHTTPError
-
 	data := &BackupContent{}
 	if err := json.Unmarshal([]byte(backup.Data), data); err != nil {
-		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid backup - could not parse JSON")
+		return interfaces.NewHTTPShadowError(http.StatusBadRequest, "Invalid backup - could not parse JSON", "Invalid backup - could not parse JSON: %+v", err)
 	}
 
+	// Check that the db version of backup file matches the stratos db version
 	if backup.IgnoreDbVersion == false {
 		versions, err := ctb.p.getVersionsData()
 		if err != nil {
-			return errors.New("Could not find database version")
+			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Could not find database version", "Could not find database version: %+v", err)
 		}
 
 		if versions.DatabaseVersion != data.DBVersion {
 			errorStr := fmt.Sprintf("Incompatible database versions. Expected %+v but got %+v", versions.DatabaseVersion, data.DBVersion)
-			return interfaces.NewHTTPShadowError(http.StatusBadRequest, errorStr, errorStr)
+			return interfaces.NewHTTPError(http.StatusBadRequest, errorStr)
 		}
 	}
 
-	unencryptedBackup, err := crypto.DecryptToken(encryptionKey, data.Payload) //TODO: RC error handling, comments
+	// Get the actual, unencrypted set of endpoints and tokens
+	payloadString, err := decryptPayload(data.Payload, backup.Password, ctb.encryptionKey)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to decrypt payload", "Failed to decrypt payload: %+v", err)
 	}
-
 	payload := &BackupContentPayload{}
-	if err = json.Unmarshal([]byte(unencryptedBackup), payload); err != nil {
-		return interfaces.NewHTTPError(http.StatusBadRequest, "Could not parse payload")
+	if err = json.Unmarshal([]byte(*payloadString), payload); err != nil {
+		return interfaces.NewHTTPShadowError(http.StatusBadRequest, "Failed to parse payload. This could be due to an incorrect password", "Failed to decrypt payload, possible incorrect password: %+v", err)
 	}
 
+	// Insert/Update the endpoints and tokens
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(ctb.databaseConnectionPool)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to connect to db", "Failed to connect to db: %+v", err)
@@ -266,7 +264,7 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 
 	for _, endpoint := range payload.Endpoints {
 		e := deSerializeEndpoint(endpoint)
-		if err := cnsiRepo.Overwrite(e, ctb.p.Config.EncryptionKeyInBytes); err != nil {
+		if err := cnsiRepo.Overwrite(e, ctb.encryptionKey); err != nil {
 			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to overwrite endpoints", "Failed to overwrite endpoint: %+v", e.Name)
 		}
 	}
@@ -277,7 +275,7 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 	}
 
 	for _, tr := range payload.Tokens {
-		if err := tokenRepo.SaveCNSIToken(tr.EndpointGUID, tr.UserGUID, tr.TokenRecord, ctb.p.Config.EncryptionKeyInBytes); err != nil {
+		if err := tokenRepo.SaveCNSIToken(tr.EndpointGUID, tr.UserGUID, tr.TokenRecord, ctb.encryptionKey); err != nil {
 			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to overwrite token", "Failed to overwrite token: %+v", tr.TokenRecord.TokenGUID)
 		}
 	}
@@ -312,6 +310,66 @@ func deSerializeEndpoint(endpoint map[string]interface{}) interfaces.CNSIRecord 
 
 	// manually add the client secret
 	a.ClientSecret = fmt.Sprintf("%v", endpoint["client_secret"])
-	log.Errorf("CLIENT SECRET: %+v", a.ClientSecret) // TODO: RC REMOVE
+	// log.Errorf("CLIENT SECRET: %+v", a.ClientSecret) // TODO: RC REMOVE
 	return a
+}
+
+func encryptPayload(payload *BackupContentPayload, password string, encryptionKey []byte) ([]byte, error) {
+	// First ensure the password is an ok length
+	secret, err := createHash(password, encryptionKey)
+	if err != nil {
+		log.Warningf("Could not create hash: %+v", err)
+		return nil, fmt.Errorf("Could not create hash")
+	}
+
+	// log.Errorf("password: %+v", password) // TODO: RC REMOVE
+	// log.Errorf("secret: %+v", secret)     // TODO: RC REMOVE
+	// log.Errorf("payload: %+v", payload)   // TODO: RC REMOVE
+	// Create the text that will be encrypted
+	payloadBytes, err := json.Marshal(payload)
+	// log.Errorf("payloadBytes: %+v", string(payloadBytes)) // TODO: RC REMOVE
+	if err != nil {
+		return nil, fmt.Errorf("Could not marshal payload: %+v", err)
+	}
+
+	// Encrypt
+	payloadEncrypted, err := crypto.EncryptToken(secret, string(payloadBytes))
+	// log.Errorf("payloadEncrypted: %+v", string(payloadEncrypted)) // TODO: RC REMOVE
+	if err != nil {
+		return nil, fmt.Errorf("Could not encrypt payload: %+v", err)
+	}
+
+	return payloadEncrypted, nil
+}
+
+func decryptPayload(payloadEncrypted []byte, password string, encryptionKey []byte) (*string, error) {
+	// First ensure the password is an ok length
+	secret, err := createHash(password, encryptionKey)
+	if err != nil {
+		log.Warningf("Could not create hash: %+v", err)
+		return nil, fmt.Errorf("Could not create hash")
+	}
+
+	// log.Errorf("password: %+v", password)                 // TODO: RC REMOVE
+	// log.Errorf("secret: %+v", secret)                     // TODO: RC REMOVE
+	// log.Errorf("payloadEncrypted: %+v", payloadEncrypted) // TODO: RC REMOVE
+	payloadUnencrypted, err := crypto.DecryptToken(secret, payloadEncrypted)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to decrypt payload: %+v", err)
+	}
+	// log.Errorf("payloadUnencrypted: %+v", string(payloadUnencrypted)) // TODO: RC REMOVE
+
+	return &payloadUnencrypted, nil
+}
+
+// createHash - Ensure the token used by crypto is at an acceptable length
+func createHash(password string, salt []byte) ([]byte, error) {
+	hasher := md5.New()
+	if _, err := hasher.Write([]byte(password)); err != nil {
+		return nil, fmt.Errorf("Failed to write password to hash")
+	}
+	if _, err := hasher.Write(salt); err != nil {
+		return nil, fmt.Errorf("Failed to write salt to hash")
+	}
+	return hasher.Sum(nil), nil
 }

@@ -641,6 +641,7 @@ func (p *portalProxy) backupEndpoints(c echo.Context) error {
 
 	ctb := &cnsiTokenBackup{
 		databaseConnectionPool: p.DatabaseConnectionPool,
+		encryptionKey:          p.Config.EncryptionKeyInBytes,
 		p:                      p,
 	}
 
@@ -652,6 +653,7 @@ func (p *portalProxy) restoreEndpoints(c echo.Context) error {
 
 	ctb := &cnsiTokenBackup{
 		databaseConnectionPool: p.DatabaseConnectionPool,
+		encryptionKey:          p.Config.EncryptionKeyInBytes,
 		p:                      p,
 	}
 
