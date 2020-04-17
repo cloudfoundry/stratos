@@ -14,7 +14,7 @@ import {
   TableRowStateManager,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { PaginationMonitor } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';

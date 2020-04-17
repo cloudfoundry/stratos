@@ -13,7 +13,7 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { IRoute } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   IListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';

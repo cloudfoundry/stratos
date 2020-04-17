@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { environment } from '../../../core/src/environments/environment';
 import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState } from '../../../store/src/app-state';

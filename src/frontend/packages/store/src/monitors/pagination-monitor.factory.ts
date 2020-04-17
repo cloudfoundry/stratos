@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../app-state';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { PaginationMonitor } from './pagination-monitor';
 

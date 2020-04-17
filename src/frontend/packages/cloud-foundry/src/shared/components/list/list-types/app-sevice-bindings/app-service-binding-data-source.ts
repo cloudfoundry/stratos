@@ -19,7 +19,7 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
@@ -34,14 +34,14 @@ export class AppServiceBindingDataSource extends ListDataSource<APIResource<ISer
     const actionBuilder = serviceBindingEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
     const getAppServiceBindingsAction = actionBuilder(
       appGuid, cfGuid, paginationKey, {
-        includeRelations: [
-          createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
-          createEntityRelationKey(serviceBindingEntityType, serviceInstancesEntityType),
-          createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
-          createEntityRelationKey(servicePlanEntityType, serviceEntityType),
-        ],
-        populateMissing: true
-      });
+      includeRelations: [
+        createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
+        createEntityRelationKey(serviceBindingEntityType, serviceInstancesEntityType),
+        createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
+        createEntityRelationKey(servicePlanEntityType, serviceEntityType),
+      ],
+      populateMissing: true
+    });
     return getAppServiceBindingsAction;
   }
 

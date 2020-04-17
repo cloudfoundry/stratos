@@ -17,7 +17,7 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 

@@ -1,8 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { TableCellCustom } from '../../../list.types';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 
 @Component({
   selector: 'app-table-cell-endpoint-status',

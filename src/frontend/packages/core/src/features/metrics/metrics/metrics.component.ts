@@ -6,7 +6,7 @@ import { filter, first, map } from 'rxjs/operators';
 
 import { MetricsAPIAction, MetricsAPITargets } from '../../../../../store/src/actions/metrics-api.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { getIdFromRoute } from '../../../core/utils.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { EndpointIcon } from '../../endpoints/endpoint-helpers';

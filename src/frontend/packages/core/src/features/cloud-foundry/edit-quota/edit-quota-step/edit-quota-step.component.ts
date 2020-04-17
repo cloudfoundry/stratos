@@ -17,7 +17,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../../../../cloud-foundr
 import { AppState } from '../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../core/cf-api.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';

@@ -17,7 +17,7 @@ import {
   IServicePlanVisibility,
 } from '../../../../../core/src/core/cf-api-svc.types';
 import { CF_GUID } from '../../../../../core/src/shared/entity.tokens';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 
 import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '../../src/entity-catalog.module';
-import { entityCatalog, TestEntityCatalog } from '../../src/entity-catalog/entity-catalog.service';
+import { entityCatalog, TestEntityCatalog } from '../../src/entity-catalog/entity-catalog';
 
 @NgModule({
   imports: [

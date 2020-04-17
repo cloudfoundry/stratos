@@ -16,7 +16,7 @@ import { ConfirmationDialogService } from '../../../../../../../../core/src/shar
 import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shared/data-services/scm/scm.service';
 import { ENTITY_SERVICE } from '../../../../../../../../core/src/shared/entity.tokens';
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';

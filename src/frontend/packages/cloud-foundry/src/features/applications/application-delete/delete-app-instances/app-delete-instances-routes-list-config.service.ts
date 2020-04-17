@@ -14,7 +14,7 @@ import { IServiceBinding } from '../../../../../../core/src/core/cf-api-svc.type
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

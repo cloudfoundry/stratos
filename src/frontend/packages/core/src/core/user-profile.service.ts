@@ -10,21 +10,13 @@ import {
 } from '../../../store/src/actions/user-profile.actions';
 import { AppState } from '../../../store/src/app-state';
 import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../../store/src/effects/user-profile.effects';
-import {
-  ActionState,
-  getDefaultActionState,
-  rootUpdatingKey,
-} from '../../../store/src/reducers/api-request-reducer/types';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
+import { EntityMonitor } from '../../../store/src/monitors/entity-monitor';
+import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../../store/src/reducers/api-request-reducer/types';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { selectRequestInfo, selectUpdateInfo } from '../../../store/src/selectors/api.selectors';
-import {
-  UserProfileInfo,
-  UserProfileInfoEmail,
-  UserProfileInfoUpdates,
-} from '../../../store/src/types/user-profile.types';
+import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../../store/src/types/user-profile.types';
 import { userProfileEntitySchema } from '../base-entity-schemas';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityMonitor } from '../../../store/src/monitors/entity-monitor';
 
 
 @Injectable()
@@ -99,7 +91,7 @@ export class UserProfileService {
   updateProfile(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<[ActionState, ActionState]> {
     const didChangeProfile = (profileChanges.givenName !== undefined ||
       profileChanges.familyName !== undefined ||
-      profileChanges.emailAddress !== undefined );
+      profileChanges.emailAddress !== undefined);
     const didChangePassword = !!(profileChanges.newPassword && profileChanges.currentPassword);
     const profileObs$ = didChangeProfile ? this.updateProfileInfo(profile, profileChanges) : observableOf(getDefaultActionState());
     const passwordObs$ = didChangePassword ? this.updatePassword(profile, profileChanges) : observableOf(getDefaultActionState());

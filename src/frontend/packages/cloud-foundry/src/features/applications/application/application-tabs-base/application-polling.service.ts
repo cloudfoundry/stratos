@@ -6,7 +6,7 @@ import { first, map, tap } from 'rxjs/operators';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { appStatsEntityType, appSummaryEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IApp } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../../../../store/src/entity-service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { ENTITY_SERVICE } from '../../../../../../core/src/shared/entity.tokens';

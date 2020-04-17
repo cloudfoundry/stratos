@@ -20,7 +20,7 @@ import {
 import { IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../../core/src/core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';

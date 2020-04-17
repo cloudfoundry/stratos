@@ -10,7 +10,7 @@ import {
   QuotaDefinitionActionBuilder,
 } from '../../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';

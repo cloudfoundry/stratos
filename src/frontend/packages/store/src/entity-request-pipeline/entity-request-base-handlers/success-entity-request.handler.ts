@@ -2,7 +2,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/src/cf-types';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../../actions/pagination.actions';
 import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
 import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { WrapperRequestActionSuccess } from '../../types/request.types';
 
 export function successEntityHandler(

@@ -15,7 +15,7 @@ import {
   userProvidedServiceInstanceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-types';
 import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../../../core/src/core/cf-api-svc.types';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata, EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';

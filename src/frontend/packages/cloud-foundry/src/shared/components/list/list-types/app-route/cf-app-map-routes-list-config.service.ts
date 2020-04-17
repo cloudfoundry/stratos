@@ -11,7 +11,7 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
   TableCellRadioComponent,

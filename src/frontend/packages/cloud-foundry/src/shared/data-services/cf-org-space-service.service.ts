@@ -26,7 +26,7 @@ import {
   valueOrCommonFalsy,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import {
   getCurrentPageRequestInfo,

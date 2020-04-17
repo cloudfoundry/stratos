@@ -9,7 +9,7 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';

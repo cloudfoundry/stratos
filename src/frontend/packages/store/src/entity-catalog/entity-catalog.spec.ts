@@ -3,7 +3,7 @@ import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
 import { BaseEndpointAuth } from '../../../core/src/features/endpoints/endpoint-auth';
 import { EndpointListDetailsComponent } from '../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { StratosCatalogEndpointEntity, StratosCatalogEntity } from './entity-catalog-entity';
-import { TestEntityCatalog } from './entity-catalog.service';
+import { TestEntityCatalog } from './entity-catalog';
 import { IStratosEndpointDefinition, EntityCatalogSchemas } from './entity-catalog.types';
 
 describe('EntityCatalogService', () => {

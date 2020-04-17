@@ -11,7 +11,7 @@ import {
   getCfService,
   getServiceName,
 } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceBroker, IServiceInstance } from '../../../../../../core/cf-api-svc.types';

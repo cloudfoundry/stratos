@@ -13,7 +13,7 @@ import {
   QuotaDefinitionActionBuilder,
 } from '../../../../../cloud-foundry/src/entity-action-builders/quota-definition.action-builders';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';

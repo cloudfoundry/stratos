@@ -20,7 +20,7 @@ import { CfUserService } from '../../../cloud-foundry/src/shared/data-services/c
 import { OrgUserRoleNames } from '../../../cloud-foundry/src/store/types/user.types';
 import { CfRoleChange, UsersRolesState } from '../../../cloud-foundry/src/store/types/users-roles.types';
 import { ResetPagination } from '../actions/pagination.actions';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { ActionState } from '../reducers/api-request-reducer/types';
 import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';

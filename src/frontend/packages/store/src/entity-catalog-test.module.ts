@@ -7,7 +7,7 @@ import {
 import { chainApiReducers, requestActions } from './reducers/api-request-reducers.generator.helpers';
 import { InitCatalogEntitiesAction } from './entity-catalog.actions';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity';
-import { entityCatalog, TestEntityCatalog } from './entity-catalog/entity-catalog.service';
+import { entityCatalog, TestEntityCatalog } from './entity-catalog/entity-catalog';
 
 export const TEST_CATALOGUE_ENTITIES = '__TEST_CATALOGUE_ENTITIES__';
 

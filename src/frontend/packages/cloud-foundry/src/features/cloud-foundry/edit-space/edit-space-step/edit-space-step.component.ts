@@ -13,7 +13,7 @@ import {
 import { UpdateSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType, spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';

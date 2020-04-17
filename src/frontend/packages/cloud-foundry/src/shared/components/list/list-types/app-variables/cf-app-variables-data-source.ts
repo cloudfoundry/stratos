@@ -4,17 +4,17 @@ import { map } from 'rxjs/operators';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { appEnvVarsEntityType, applicationEntityType } from '../../../../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
 

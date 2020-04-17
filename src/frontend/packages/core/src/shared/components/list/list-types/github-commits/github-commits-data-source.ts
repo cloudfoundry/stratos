@@ -7,7 +7,7 @@ import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-e
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/src/cf-types';
 import { GitMeta } from '../../../../../../../cloud-foundry/src/entity-action-builders/git-action-builder';
 import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';

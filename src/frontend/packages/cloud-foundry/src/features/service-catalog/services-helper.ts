@@ -15,7 +15,7 @@ import {
 } from '../../../../core/src/core/cf-api-svc.types';
 import { getIdFromRoute, safeStringToObj } from '../../../../core/src/core/utils.service';
 import { StratosStatus } from '../../../../core/src/shared/shared.types';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';

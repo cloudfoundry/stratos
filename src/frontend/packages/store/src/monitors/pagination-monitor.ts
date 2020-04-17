@@ -18,8 +18,8 @@ import {
   LocalPaginationHelpers,
 } from '../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 import { AppState, GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { EntitySchema } from '../helpers/entity-schema';
 import { ActionState, ListActionState } from '../reducers/api-request-reducer/types';

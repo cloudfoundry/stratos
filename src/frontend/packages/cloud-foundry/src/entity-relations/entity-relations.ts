@@ -8,7 +8,7 @@ import { environment } from '../../../core/src/environments/environment';
 import { SetInitialParams } from '../../../store/src/actions/pagination.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { isEntityBlocked } from '../../../store/src/entity-service';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { pick } from '../../../store/src/helpers/reducer.helper';

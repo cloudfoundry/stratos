@@ -15,8 +15,8 @@ import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { StratosCatalogEndpointEntity } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';

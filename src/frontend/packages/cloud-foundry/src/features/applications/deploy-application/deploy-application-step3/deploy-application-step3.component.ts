@@ -14,7 +14,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { DeleteDeployAppSection } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { appEnvVarsEntityType, applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';

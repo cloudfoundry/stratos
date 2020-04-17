@@ -17,7 +17,7 @@ import { CurrentUserPermissions } from '../../../../../../../../core/src/core/cu
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getSpaceRoles } from '../../../../../../features/cloud-foundry/cf.helpers';

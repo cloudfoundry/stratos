@@ -20,7 +20,7 @@ import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import {
   LocalPaginationHelpers,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';

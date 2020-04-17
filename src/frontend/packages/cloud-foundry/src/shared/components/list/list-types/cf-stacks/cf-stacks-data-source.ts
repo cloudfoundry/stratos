@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../../../../store/src/entity-catalog/entity-catalog.types';
 import {
   ListDataSource,

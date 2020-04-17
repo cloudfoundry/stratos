@@ -28,7 +28,7 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 
 @Injectable()

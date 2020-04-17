@@ -17,10 +17,10 @@ import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/eff
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { CreateNewApplicationState } from '../../../../../../cloud-foundry/src/store/types/create-application.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
@@ -98,9 +98,9 @@ export class CreateApplicationStep3Component implements OnInit {
     this.store.dispatch(new CreateNewApplication(
       newAppGuid,
       cloudFoundry, {
-        name,
-        space_guid: space
-      }
+      name,
+      space_guid: space
+    }
     ));
     return this.wrapObservable(this.store.select(selectCfRequestInfo(applicationEntityType, newAppGuid)), 'Could not create application');
   }

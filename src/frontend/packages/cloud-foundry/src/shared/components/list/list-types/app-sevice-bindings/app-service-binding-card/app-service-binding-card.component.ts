@@ -19,7 +19,7 @@ import {
 } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';

@@ -5,7 +5,7 @@ import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import { GET_CF_INFO, GetCFInfo } from '../../actions/cloud-foundry.actions';
 import { CFAppState } from '../../cf-app-state';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { environment } from '../../../../core/src/environments/environment.prod';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';

@@ -33,7 +33,7 @@ import { isValidJsonValidator } from '../../../../../../core/src/shared/form-val
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';

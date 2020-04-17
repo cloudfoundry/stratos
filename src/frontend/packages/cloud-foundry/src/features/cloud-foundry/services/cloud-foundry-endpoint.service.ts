@@ -22,7 +22,7 @@ import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityService } from '../../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';

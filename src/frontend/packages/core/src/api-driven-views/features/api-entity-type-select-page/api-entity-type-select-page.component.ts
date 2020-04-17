@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { ApiEntityType } from '../../api-drive-views.types';
 import { TabNavService } from '../../../../tab-nav.service';
 import { Store } from '@ngrx/store';

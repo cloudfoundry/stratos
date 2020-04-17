@@ -12,7 +12,7 @@ import {
   ServiceActionHelperService,
 } from '../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
 import { IServiceBinding, IServiceInstance } from '../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import {
   AppMonitorComponentTypes,

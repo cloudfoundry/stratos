@@ -30,12 +30,12 @@ import {
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { AppState } from '../../store/src/app-state';
+import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from '../../store/src/entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog.service';
 import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,

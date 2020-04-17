@@ -4,8 +4,6 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import {
   StackedInputActionResult,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
@@ -15,10 +13,12 @@ import {
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-actions.component';
 import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
+import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../cf-types';
 import { SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -54,12 +54,12 @@ export class InviteUsersCreateComponent implements OnInit {
         label: UserRoleLabels.space.short[SpaceUserRoleNames.AUDITOR],
         value: UserInviteSendSpaceRoles.auditor,
       }, {
-        label: UserRoleLabels.space.short[SpaceUserRoleNames.DEVELOPER],
-        value: UserInviteSendSpaceRoles.developer,
-      }, {
-        label: UserRoleLabels.space.short[SpaceUserRoleNames.MANAGER],
-        value: UserInviteSendSpaceRoles.manager,
-      });
+      label: UserRoleLabels.space.short[SpaceUserRoleNames.DEVELOPER],
+      value: UserInviteSendSpaceRoles.developer,
+    }, {
+      label: UserRoleLabels.space.short[SpaceUserRoleNames.MANAGER],
+      value: UserInviteSendSpaceRoles.manager,
+    });
   }
 
   stateOut(users: StackedInputActionsUpdate) {

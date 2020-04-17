@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
 import { AppState, InternalAppState } from '../app-state';
 import { EntityRequestAction } from '../types/request.types';

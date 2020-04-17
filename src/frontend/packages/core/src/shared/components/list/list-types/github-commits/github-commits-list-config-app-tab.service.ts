@@ -19,7 +19,7 @@ import { ApplicationService } from '../../../../../../../cloud-foundry/src/featu
 import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { GitBranch, GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';

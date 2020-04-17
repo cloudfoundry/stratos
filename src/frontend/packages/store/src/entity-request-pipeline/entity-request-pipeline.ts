@@ -6,7 +6,7 @@ import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, InternalAppState } from '../app-state';
 import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { ApiRequestTypes, getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { PaginatedAction } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';

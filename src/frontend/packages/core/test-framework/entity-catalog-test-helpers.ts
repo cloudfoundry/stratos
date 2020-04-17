@@ -1,5 +1,5 @@
 import { StratosBaseCatalogEntity } from '../..store/src/entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../store/src/entity-catalog/entity-catalog.types';
 
 export interface EntityCatalogHelperConfig {

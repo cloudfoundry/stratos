@@ -18,7 +18,7 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';

@@ -19,7 +19,7 @@ import {
 
 import { LoggerService } from '../../../../core/src/core/logger.service';
 import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../../../../store/src/actions/endpoint.actions';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import {
   BaseHttpClientFetcher,
   flattenPagination,

@@ -13,7 +13,7 @@ import {
 import { IOrganization, IOrgQuotaDefinition } from '../../../../../../core/src/core/cf-api.types';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';

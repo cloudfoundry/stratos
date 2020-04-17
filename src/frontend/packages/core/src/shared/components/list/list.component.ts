@@ -51,7 +51,7 @@ import {
 } from '../../../../../store/src/actions/list.actions';
 import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pagination.actions';
 import { GeneralAppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';

@@ -25,7 +25,7 @@ import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../../
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';

@@ -30,7 +30,7 @@ import {
   ApplicationStateService,
 } from '../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID } from '../../../../core/src/shared/entity.tokens';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
@@ -60,13 +60,13 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
     guid,
     endpointGuid, [
-      createEntityRelationKey(applicationEntityType, routeEntityType),
-      createEntityRelationKey(applicationEntityType, spaceEntityType),
-      createEntityRelationKey(applicationEntityType, stackEntityType),
-      createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
-      createEntityRelationKey(routeEntityType, domainEntityType),
-      createEntityRelationKey(spaceEntityType, organizationEntityType),
-    ]
+    createEntityRelationKey(applicationEntityType, routeEntityType),
+    createEntityRelationKey(applicationEntityType, spaceEntityType),
+    createEntityRelationKey(applicationEntityType, stackEntityType),
+    createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
+    createEntityRelationKey(routeEntityType, domainEntityType),
+    createEntityRelationKey(spaceEntityType, organizationEntityType),
+  ]
   );
 }
 

@@ -10,7 +10,7 @@ import { appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-types
 import {
   createAppInstancesMetricAction,
 } from '../../../cloud-foundry/src/shared/components/list/list-types/app-instance/cf-app-instances-config.service';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { endpointHasMetrics } from '../../../core/src/features/endpoints/endpoint-helpers';
 import { EndpointOnlyAppState } from '../app-state';
 import { APISuccessOrFailedAction } from '../types/request.types';

@@ -11,7 +11,7 @@ import {
 } from '../../../../../../../../core/src/shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shared/data-services/scm/scm.service';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { FetchGitHubRepoInfo } from '../../../../../../actions/github.actions';

@@ -4,7 +4,7 @@ import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewCon
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';

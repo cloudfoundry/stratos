@@ -18,7 +18,7 @@ import { sortStringify } from '../../../../core/src/core/utils.service';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { CfValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';

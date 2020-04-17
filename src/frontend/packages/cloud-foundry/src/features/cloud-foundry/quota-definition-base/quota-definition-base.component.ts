@@ -9,7 +9,7 @@ import {
   ISpace,
   ISpaceQuotaDefinition,
 } from '../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';

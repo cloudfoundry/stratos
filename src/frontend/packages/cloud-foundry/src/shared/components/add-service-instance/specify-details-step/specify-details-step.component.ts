@@ -3,7 +3,13 @@ import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest as observableCombineLatest,
+  Observable,
+  of as observableOf,
+  Subscription,
+} from 'rxjs';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -27,7 +33,7 @@ import { IServiceInstance, IServicePlan } from '../../../../../../core/src/core/
 import { pathGet, safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
 import { UpdateServiceInstance } from '../../../../actions/service-instances.actions';

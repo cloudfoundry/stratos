@@ -1,5 +1,5 @@
 import { IRequestTypeState } from '../app-state';
-import { entityCatalog } from './entity-catalog.service';
+import { entityCatalog } from './entity-catalog';
 
 // FIXME: These should be removed/come from the entity catalog - STRAT-151
 const baseEntities = [

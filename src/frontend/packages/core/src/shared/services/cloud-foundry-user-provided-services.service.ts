@@ -25,7 +25,7 @@ import { fetchTotalResults } from '../../../../cloud-foundry/src/features/cloud-
 import { QParam, QParamJoiners } from '../../../../cloud-foundry/src/shared/q-param';
 import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { ClearPaginationOfType } from '../../../../store/src/actions/pagination.actions';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig, IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';

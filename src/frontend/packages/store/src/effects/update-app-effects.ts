@@ -6,7 +6,7 @@ import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 import { AppMetadataTypes } from '../../../cloud-foundry/src/actions/app-metadata.actions';
 import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
 import { appEnvVarsEntityType, appStatsEntityType, appSummaryEntityType } from '../../../cloud-foundry/src/cf-entity-types';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { WrapperRequestActionSuccess } from '../types/request.types';
 
 

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { AppState } from '../app-state';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { EntityMonitor } from './entity-monitor';
-import { AppState } from '../app-state';
 
 @Injectable()
 export class EntityMonitorFactory {

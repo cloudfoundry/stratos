@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';

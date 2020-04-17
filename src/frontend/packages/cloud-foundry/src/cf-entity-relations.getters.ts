@@ -1,8 +1,8 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { InternalAppState } from '../../store/src/app-state';
+import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { StratosBaseCatalogEntity } from '../../store/src/entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog.service';
 import { EntityCatalogEntityConfig } from '../../store/src/entity-catalog/entity-catalog.types';
 import {
   getPaginationParams,

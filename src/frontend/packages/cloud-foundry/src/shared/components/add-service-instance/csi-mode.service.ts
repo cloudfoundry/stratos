@@ -8,7 +8,7 @@ import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-en
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { selectCfRequestInfo } from '../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 
 export enum CreateServiceInstanceMode {

@@ -7,7 +7,7 @@ import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { IServiceBroker } from '../../../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';

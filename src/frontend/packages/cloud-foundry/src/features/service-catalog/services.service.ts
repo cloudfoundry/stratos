@@ -14,7 +14,7 @@ import {
 } from '../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../core/src/core/cf-api.types';
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';

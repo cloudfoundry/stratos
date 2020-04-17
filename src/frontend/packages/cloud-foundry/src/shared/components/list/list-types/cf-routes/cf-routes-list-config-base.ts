@@ -16,7 +16,7 @@ import {
   IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import {
