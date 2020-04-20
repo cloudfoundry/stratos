@@ -1,5 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../../tab-nav.service';
+import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
+import { SharedModule } from '../../../../shared/shared.module';
 import { BackupRestoreEndpointsComponent } from './backup-restore-endpoints.component';
 
 describe('BackupRestoreEndpointsComponent', () => {
@@ -8,9 +11,16 @@ describe('BackupRestoreEndpointsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ BackupRestoreEndpointsComponent ]
+      declarations: [BackupRestoreEndpointsComponent],
+      imports: [
+        ...BaseTestModulesNoShared,
+        SharedModule
+      ],
+      providers: [
+        TabNavService
+      ],
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

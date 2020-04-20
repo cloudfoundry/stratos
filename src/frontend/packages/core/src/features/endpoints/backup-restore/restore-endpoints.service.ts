@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
@@ -53,6 +53,7 @@ export class RestoreEndpointsService {
 
   private setupStep1() {
     this.currentDbVersion$ = this.store.select(selectSessionData()).pipe(
+      filter(sd => !!sd),
       map((sd: SessionData) => sd.version.database_version)
     );
 

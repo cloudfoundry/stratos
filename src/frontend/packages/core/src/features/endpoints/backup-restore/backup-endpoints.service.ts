@@ -84,7 +84,7 @@ export class BackupEndpointsService {
     }
 
     // All other settings require endpoint to be backed up
-    if (!this.state[endpoint.guid][BackupEndpointTypes.ENDPOINT]) {
+    if (!this.state[endpoint.guid] || !this.state[endpoint.guid][BackupEndpointTypes.ENDPOINT]) {
       return false;
     }
 
