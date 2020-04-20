@@ -1,7 +1,7 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, tap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
@@ -21,9 +21,14 @@ import {
 import { UserRoleLabels } from '../../../../cloud-foundry/src/store/types/users-roles.types';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../core/src/core/cf-api.types';
-import { CurrentUserPermissions } from '../../../../core/src/core/current-user-permissions.config';
+import {
+  CurrentUserPermissions,
+  PermissionConfig,
+  PermissionTypes,
+} from '../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../core/src/core/current-user-permissions.service';
 import { getIdFromRoute, pathGet } from '../../../../core/src/core/utils.service';
+import { CFFeatureFlagTypes } from '../../../../core/src/shared/components/cf-auth/cf-auth.types';
 import {
   extractActualListEntity,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
@@ -340,24 +345,25 @@ export function fetchTotalResults(
     action: newAction,
     paginationMonitor: paginationMonitorFactory.create(
       newAction.paginationKey,
-      cfEntityFactory(newAction.entityType)
+      cfEntityFactory(newAction.entityType),
+      newAction.flattenPagination
     )
-  });
-  // Ensure the request is made by sub'ing to the entities observable
-  pagObs.entities$.pipe(
-    first(),
-  ).subscribe();
+  }, newAction.flattenPagination);
 
-  return pagObs.pagination$.pipe(
+  return combineLatest(
+    pagObs.entities$, // Ensure the request is made by sub'ing to the entities observable
+    pagObs.pagination$
+  ).pipe(
+    map(([, pagination]) => pagination),
     filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
     first(),
-    map(pag => pag.totalResults)
+    map(pagination => pagination.totalResults)
   );
 }
 
 export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
   // Filtering is done remotely when maxedResults are hit (see `setMultiFilter`)
-  if (!!paginationState.maxedMode) {
+  if (!!paginationState.maxedState.isMaxedMode && !paginationState.maxedState.ignoreMaxed) {
     return entities;
   }
 
@@ -414,4 +420,19 @@ export function isServiceInstance(obj: any): IServiceInstance {
 
 export function isUserProvidedServiceInstance(obj: any): IUserProvidedServiceInstance {
   return !!obj && (obj.route_service_url !== null && obj.route_service_url !== undefined) ? obj as IUserProvidedServiceInstance : null;
+}
+
+export function someFeatureFlags(
+  ff: CFFeatureFlagTypes[],
+  cfGuid: string,
+  store: Store<CFAppState>,
+  userPerms: CurrentUserPermissionsService,
+): Observable<boolean> {
+  return waitForCFPermissions(store, cfGuid).pipe(
+    switchMap(() => combineLatest(ff.map(flag => {
+      const permConfig = new PermissionConfig(PermissionTypes.FEATURE_FLAG, flag);
+      return userPerms.can(permConfig, cfGuid);
+    }))),
+    map(results => results.some(result => !!result))
+  );
 }

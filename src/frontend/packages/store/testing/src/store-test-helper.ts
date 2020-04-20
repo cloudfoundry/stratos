@@ -165,6 +165,7 @@ function getDefaultInitialTestStratosStoreState() {
       pollingEnabled: true,
       themeKey: null,
       headerEventMinimized: true,
+      gravatarEnabled: false,
     },
     actionHistory: [],
     lists: {},
@@ -233,7 +234,8 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
               string: '',
               items: {}
             },
-          }
+          },
+          maxedState: {}
         }
       },
       metrics: {},

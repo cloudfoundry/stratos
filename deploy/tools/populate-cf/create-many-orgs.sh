@@ -5,7 +5,7 @@ COUNT=10
 SPACE_COUNT=
 DELETE=false
 
-while getopts o:c:s: option
+while getopts o:c:s:d: option
 do
  case "${option}"
  in
@@ -18,22 +18,23 @@ done
 
 echo "Creating $COUNT orgs with $SPACE_COUNT spaces"
 
-counter=0
+counter=14
 COUNT=$(expr $COUNT - 1)
 while [ $counter -le $COUNT ]
 do
     ORG=$ORG_PREFIX-$counter
     if [ "$DELETE" == "true" ]; then
-      cf delete-org $ORG
+      cf delete-org $ORG -f
     else
+      # echo "CREATE $ORG"
       cf create-org $ORG
     fi
     
-    if [ "$SPACE_COUNT" == "true" ]; then
+    if [ "$SPACE_COUNT" != "" ]; then
       cf target -o $ORG
-      ./create-many-spaces.sh -o "$ORG" -s "$ORG-spaces" -c $SPACE_COUNT -a 0 -r 0
+      ./create-many-spaces.sh -o "$ORG" -s "$ORG-spaces" -c $SPACE_COUNT -a 0 -r 0 -p "false"
     fi
     ((counter++))
   
 done
-echo "Created $COUNT orgs with $SPACE_COUNT spaces"
+echo "Created $counter orgs with $SPACE_COUNT spaces"

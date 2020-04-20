@@ -44,6 +44,7 @@ export interface EndpointModel {
   skip_ssl_validation?: boolean;
   endpoint_metadata?: any;
   token_endpoint?: string;
+  client_id?: string;
   user?: EndpointUser;
   metadata?: {
     metrics?: string;

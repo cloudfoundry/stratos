@@ -1,14 +1,27 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, NgZone } from '@angular/core';
+import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { UnregisterEndpoint } from 'frontend/packages/store/src/actions/endpoint.actions';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { endpointSchemaKey } from 'frontend/packages/store/src/helpers/entity-factory';
+import { selectDeletionInfo } from 'frontend/packages/store/src/selectors/api.selectors';
 import { of as observableOf } from 'rxjs';
+import { pairwise } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { STRATOS_ENDPOINT_TYPE } from '../../../base-entity-schemas';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
+import { environment } from '../../../environments/environment';
 import { getFullEndpointApiUrl } from '../../../features/endpoints/endpoint-helpers';
+import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 import {
   EndpointCardComponent,
@@ -16,23 +29,9 @@ import {
 import {
   TableCellEndpointStatusComponent,
 } from '../../../shared/components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { IListConfig, ListViewTypes, IListAction } from '../../../shared/components/list/list.component.types';
+import { IListAction, IListConfig, ListViewTypes } from '../../../shared/components/list/list.component.types';
 import { defaultHelmKubeListPageSize } from '../../kubernetes/list-types/kube-helm-list-types';
 import { MonocularRepositoryDataSource } from './monocular-repository-list-source';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-import { map, pairwise } from 'rxjs/operators';
-import { MatSnackBar } from '@angular/material';
-import { SendClearEventAction } from 'frontend/packages/store/src/actions/internal-events.actions';
-import { DisconnectEndpoint, UnregisterEndpoint } from 'frontend/packages/store/src/actions/endpoint.actions';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
-import { selectDeletionInfo } from 'frontend/packages/store/src/selectors/api.selectors';
-import { STRATOS_ENDPOINT_TYPE } from '../../../base-entity-schemas';
-import { endpointSchemaKey } from 'frontend/packages/store/src/helpers/entity-factory';
-import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
-import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
-import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
-import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 
 @Injectable()
 export class MonocularRepositoryListConfig implements IListConfig<EndpointModel> {
@@ -47,7 +46,6 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
   };
   pageSizeOptions = defaultHelmKubeListPageSize;
   enableTextFilter = true;
-  tableFixedRowHeight = true;
   columns: ITableColumn<EndpointModel>[] = [
     {
       columnId: 'name',

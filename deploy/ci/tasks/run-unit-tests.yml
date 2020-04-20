@@ -8,7 +8,6 @@ image_resource:
   type: docker-image
   source:
    repository:  ci-registry.ngrok.io:80/splatform/stratos-concourse
-   tag: "latest"
    insecure_registries: [ "ci-registry.ngrok.io:80" ]
 
 run:

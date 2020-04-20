@@ -1,10 +1,9 @@
-import { HttpHeaders, HttpRequest } from '@angular/common/http';
+import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CFEntityConfig } from '../cf-types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   cfUserEntityType,
@@ -13,6 +12,7 @@ import {
   spaceEntityType,
   spaceWithOrgEntityType,
 } from '../cf-entity-types';
+import { CFEntityConfig } from '../cf-types';
 import {
   createEntityRelationPaginationKey,
   EntityInlineChildAction,
@@ -173,9 +173,11 @@ export class DeleteOrganization extends CFStartAction implements ICFAction {
       'DELETE',
       `organizations/${guid}`,
       {
-        params: new HttpHeaders({
-          recursive: 'true',
-          async: 'false'
+        params: new HttpParams({
+          fromObject: {
+            recursive: 'true',
+            async: 'false'
+          }
         })
       }
     );
@@ -254,7 +256,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     'order-direction-field': 'username',
   };
   flattenPagination = true;
-  flattenPaginationMax = 600;
+  flattenPaginationMax = true;
   skipValidation: boolean;
   populateMissing: boolean;
 }

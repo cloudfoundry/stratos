@@ -73,7 +73,8 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
       action: this.paginationAction,
       paginationMonitor: this.paginationMonitorFactory.create(
         this.paginationAction.paginationKey,
-        kubernetesEntityFactory(this.paginationAction.entityType)
+        kubernetesEntityFactory(this.paginationAction.entityType),
+        true
       )
     }, true);
   }

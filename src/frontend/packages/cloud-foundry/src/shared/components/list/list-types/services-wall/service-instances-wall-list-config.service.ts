@@ -1,6 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { combineLatest, Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { getCFEntityKey } from '../../../../../../../cloud-foundry/src/cf-entity-helpers';
@@ -12,6 +14,7 @@ import { CurrentUserPermissionsService } from '../../../../../../../core/src/cor
 import {
   CardMultiActionComponents,
 } from '../../../../../../../core/src/shared/components/list/list-cards/card.component.types';
+import { ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsCards,
   ListViewTypes,
@@ -36,10 +39,17 @@ import {
 @Injectable()
 export class ServiceInstancesWallListConfigService extends CfServiceInstancesListConfigBase {
   endpointType = 'cf';
-  text = {
+  text: ITableText = {
     title: null,
     filter: 'Search by name',
-    noEntries: 'There are no service instances'
+    noEntries: 'There are no service instances',
+    maxedResults: {
+      icon: 'service',
+      iconFont: 'stratos-icons',
+      canIgnoreMaxFirstLine: 'Fetching all service instances might take a long time',
+      cannotIgnoreMaxFirstLine: 'There are too many service instances to fetch',
+      filterLine: 'Please use the Cloud Foundry, Organization or Space filters'
+    }
   };
   enableTextFilter = true;
   defaultView = 'cards' as ListView;
@@ -49,6 +59,7 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   });
   viewType = ListViewTypes.BOTH;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
+  getInitialised: () => Observable<boolean>;
 
   constructor(
     store: Store<CFAppState>,
@@ -71,6 +82,15 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
     this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {
       breadcrumbs: 'service-wall'
     };
+
+    this.getInitialised = () => combineLatest(
+      cfOrgSpaceService.cf.list$,
+      cfOrgSpaceService.org.list$,
+      cfOrgSpaceService.space.list$,
+    ).pipe(
+      map(loading => !loading),
+      startWith(true)
+    );
   }
 
   getDataSource = () => this.dataSource;

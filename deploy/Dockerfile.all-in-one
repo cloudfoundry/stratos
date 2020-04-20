@@ -1,6 +1,6 @@
 # Docker build for all-in-one Stratos
 # ---------------------------------------------------------------------------------------------------
-FROM splatform/stratos-aio-base:leap15_1 as jetstream-builder
+FROM splatform/stratos-bk-build-base:leap15_1 as jetstream-builder
 
 # Ensure that we copy the custom-src folder
 COPY --chown=stratos:users . ./
@@ -10,17 +10,8 @@ COPY --chown=stratos:users deploy/all-in-one/config.all-in-one.properties config
 ARG USE_PREBUILT_UI=false
 
 USER root
-RUN if [ $USE_PREBUILT_UI = "true" ] ; then \
-    unzip stratos-frontend-prebuild.zip -d ./dist ; \
-    else \
-		npm install \
-        && npm run build ; \
-    fi
-
-# Build backend
-RUN npm run build-backend \
-    && cp src/jetstream/jetstream . \
-    && mv dist ui
+RUN node --version
+RUN deploy/all-in-one/src-build.sh
 
 USER stratos
 
@@ -30,7 +21,6 @@ RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh
 # ---------------------------------------------------------------------------------------------------
 # Docker build for FDB Server component
 FROM splatform/stratos-bk-build-base:leap15_1 as fdbserver-builder
-
 
 # Install FoundationDB Binaries
 ARG FDB_VERSION=6.2.15
@@ -86,10 +76,14 @@ WORKDIR /go/src/github.com/helm/monocular
 ARG VERSION
 RUN GO111MODULE=on GOPROXY=https://gocenter.io CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags "-X main.version=$VERSION" .
 
+
 # ---------------------------------------------------------------------------------------------------
-# use --target=aio to build All-in-one image
+# Final AIO Container
+# ---------------------------------------------------------------------------------------------------
+
 FROM splatform/stratos-bk-base:leap15_1
 ARG CANARY_BUILD
+
 COPY --from=jetstream-builder /home/stratos/deploy/db /src/deploy/db
 COPY --from=jetstream-builder /home/stratos/dev-certs /srv/dev-certs
 COPY --from=jetstream-builder /home/stratos/ui /srv/ui
@@ -132,6 +126,7 @@ ENV FDB_PROCESS_CLASS unset
 ENV CLUSTER_ID docker:docker
 ENV FDB_COORDINATOR localhost
 ENV FDB_DOC_PORT 27016
+ENV FDB_LISTEN_IP 0.0.0.0
 
 # Pull in binaries from chartrepo-builder
 COPY --from=chartrepo-builder /go/src/github.com/helm/monocular/chartrepo /chartrepo

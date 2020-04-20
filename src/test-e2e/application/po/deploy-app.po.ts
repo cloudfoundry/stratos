@@ -1,4 +1,4 @@
-import { browser, by, element, protractor } from 'protractor';
+import { browser, by, element, promise, protractor } from 'protractor';
 
 import { FormComponent } from '../../po/form.po';
 import { ListComponent } from '../../po/list.po';
@@ -33,5 +33,9 @@ export class DeployApplication extends Page {
   public waitUntilDeployed(timeout = 120000) {
     const deployStatus = element(by.cssContainingText('.deploy-app__title', 'Deployed'));
     return browser.wait(until.presenceOf(deployStatus), timeout);
+  }
+
+  public sourceStepGetRedeployCommit(): promise.Promise<string> {
+    return element(by.css('.deploy-step2-form__commit a')).getText();
   }
 }

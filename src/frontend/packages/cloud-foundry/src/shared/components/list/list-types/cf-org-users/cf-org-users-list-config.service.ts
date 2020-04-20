@@ -22,6 +22,7 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
     router: Router,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     userPerms: CurrentUserPermissionsService) {
+
     super(
       store,
       cfUserService,
@@ -31,5 +32,6 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
       (user: CfUser): boolean => cfUserService.hasRolesInOrg(user, activeRouteCfOrgSpace.orgGuid, false),
       cfOrgService.org$
     );
+    this.text.maxedResults.filterLine = 'Please navigate to a Space Users list';
   }
 }

@@ -59,6 +59,14 @@
         <app-card-app-uptime></app-card-app-uptime>
       </app-tile>
     </app-tile-group>
+    <app-tile-group *ngIf="appSvc.app.entity.staging_failed_description as errorMsg">
+      <app-tile>
+        <mat-card class="summary__staging-error">
+          <mat-icon class="text-warning">warning</mat-icon>
+          <div>{{ errorMsg }}</div>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
     <app-tile-group>
       <app-tile>
         <mat-card>
@@ -178,6 +186,34 @@
           <ng-template #notDeployedFromStratos>
             <mat-card-content>None</mat-card-content>
           </ng-template>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
+
+    <!-- Advanced info -->
+    <app-tile-group>
+      <app-tile>
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Additional Application Info</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="appSvc.app.entity.guid">{{ appSvc.app.entity.guid }}</app-metadata-item>
+            <app-metadata-item icon="chevron_right" label="Command">{{ appSvc.app.entity.command || appSvc.app.entity.detected_start_command || '-' }}</app-metadata-item>
+            <app-metadata-item icon="power" label="Ports">{{ appSvc.app.entity.ports || '-' }}</app-metadata-item>
+          </mat-card-content>
+        </mat-card>
+      </app-tile>
+      <app-tile>
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Health Check Configuration</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <app-metadata-item icon="favorite_border" label="Health Check Type">{{ appSvc.app.entity.health_check_type }}</app-metadata-item>
+            <app-metadata-item icon="schedule" label="Health Check Timeout">{{ appSvc.app.entity.health_check_timeout | uptime }}</app-metadata-item>
+            <app-metadata-item *ngIf="appSvc.app.entity.health_check_type === 'http'" icon="http" label="Health Check HTTP Endpoint">{{ appSvc.app.entity.health_check_http_endpoint }}</app-metadata-item>
+          </mat-card-content>
         </mat-card>
       </app-tile>
     </app-tile-group>

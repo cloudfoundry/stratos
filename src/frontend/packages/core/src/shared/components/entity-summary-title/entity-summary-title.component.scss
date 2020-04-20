@@ -7,6 +7,9 @@
   }
   &__img {
     align-self: center;
+    height: 64px;
+    object-fit: contain;
+    width: 64px;
   }
   &__logo {
     font-size: 54px;

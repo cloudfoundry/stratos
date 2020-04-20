@@ -24,13 +24,14 @@
       <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu" [disabled]="isDeleting$ | async">
         <mat-icon>more_vert</mat-icon>
       </button>
-      <mat-menu class="meta-card__header__popup" #menu="matMenu">
+      <mat-menu class="meta-card__header__popup" #menu="matMenu" xPosition="before" >
         <ng-container *ngFor="let menuItem of actionMenu">
           <button class="meta-card__header__popup__btn" [disabled]="menuItem.disabled | async" mat-menu-item *ngIf="menuItem.can | async"
             (click)="menuItem.action()">
             <mat-icon *ngIf="menuItem.icon">{{menuItem.icon}}</mat-icon>
             <span>{{menuItem.label}}</span>
           </button>
+          <div *ngIf="menuItem.separator" class="meta-card__header__popup-separator"></div>
         </ng-container>
       </mat-menu>
     </div>

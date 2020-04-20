@@ -1,6 +1,6 @@
 {
   "name": "stratos",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Stratos Console",
   "main": "index.js",
   "scripts": {
@@ -110,9 +110,9 @@
     "@types/karma": "^3.0.2",
     "@types/node": "^12.7.9",
     "@types/request": "^2.48.1",
-    "acorn": "^7.1.0",
+    "acorn": "^7.1.1",
     "browserstack-local": "^1.4.0",
-    "codecov": "^3.6.1",
+    "codecov": "^3.6.5",
     "codelyzer": "^5.2.0",
     "delete": "^1.1.0",
     "fs-extra": "^8.1.0",
@@ -132,6 +132,7 @@
     "karma-jasmine": "~2.0.1",
     "karma-jasmine-html-reporter": "^1.4.0",
     "karma-spec-reporter": "0.0.32",
+    "kind-of": "^6.0.3",
     "lodash": "^4.17.13",
     "mem": "5.1.1",
     "mktemp": "^1.0.0",

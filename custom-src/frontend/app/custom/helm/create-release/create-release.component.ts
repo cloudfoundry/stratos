@@ -101,7 +101,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     const allNamespaces$ = getPaginationObservables<KubernetesNamespace>({
       store: this.store,
       action,
-      paginationMonitor: this.pmf.create(action.paginationKey, action)
+      paginationMonitor: this.pmf.create(action.paginationKey, action, true)
     }).entities$.pipe(
       filter(namespaces => !!namespaces),
       first()

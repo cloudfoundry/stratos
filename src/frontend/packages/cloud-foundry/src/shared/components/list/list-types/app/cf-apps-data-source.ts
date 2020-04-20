@@ -31,14 +31,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CFListDataSource } from '../../../../cf-list-data-source';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
-
-// export function createGetAllAppAction(paginationKey): GetAllApplications {
-//   return new GetAllApplications(paginationKey, null, [
-//     createEntityRelationKey(applicationEntityType, spaceEntityType),
-//     createEntityRelationKey(spaceEntityType, organizationEntityType),
-//     createEntityRelationKey(applicationEntityType, routeEntityType),
-//   ]);
-// }
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 
 export class CfAppsDataSource extends CFListDataSource<APIResource> {
 
@@ -133,7 +126,7 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
   }
 
   public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
-    return createCfOrSpaceMultipleFilterFn(this.store, this.action, this.setQParam)
+    return createCfOrSpaceMultipleFilterFn(this.store as Store<CFAppState>, this.action, this.setQParam)
       (changes, params);
   }
 

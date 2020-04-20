@@ -74,39 +74,58 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
     'order-direction-field': 'username',
   };
   flattenPagination = true;
-  flattenPaginationMax = 600;
+  flattenPaginationMax = true;
   static is(action: any): boolean {
     return !!action.isGetAllUsersAsAdmin;
   }
 }
+
+interface HttpParamsPayload {
+  [param: string]: string;
+}
+interface ChangeUserRoleByUsernameParams extends HttpParamsPayload {
+  username: string;
+  origin?: string;
+}
+enum ChangeUserRoleType {
+  ADD,
+  REMOVE
+}
+
+
 // FIXME: These actions are user related however return either an org or space entity. These responses can be ignored and not stored, need
 // a flag somewhere to handle that - https://jira.capbristol.com/browse/STRAT-119
+/**
+ *  Add or remove a user's role, either by user guid or name
+ */
 export class ChangeUserRole extends CFStartAction implements EntityRequestAction {
   public endpointType = 'cf';
   constructor(
     public endpointGuid: string,
     public userGuid: string,
-    public method: 'PUT' | 'DELETE',
+    public changeRoleType: ChangeUserRoleType,
     public actions: string[],
     public permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     public entityGuid: string,
     public isSpace = false,
     public updateConnectedUser = false,
-    public orgGuid?: string
+    public orgGuid?: string,
+    public username = '',
+    public usernameOrigin = '',
   ) {
     super();
     this.guid = entityGuid;
     this.updatingKey = ChangeUserRole.generateUpdatingKey(permissionTypeKey, userGuid);
     this.options = new HttpRequest(
-      method,
-      `${isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.updatingKey}`,
-      {}
+      this.createMethod(),
+      this.createUrl(),
+      this.createParams()
     );
     this.entityType = isSpace ? spaceEntityType : organizationEntityType;
     this.entity = cfEntityFactory(this.entityType);
   }
 
-  guid: string; you
+  guid: string;
   entity: EntitySchema;
   entityType: string;
   options: HttpRequest<any>;
@@ -114,6 +133,36 @@ export class ChangeUserRole extends CFStartAction implements EntityRequestAction
 
   static generateUpdatingKey<T>(permissionType: OrgUserRoleNames | SpaceUserRoleNames, userGuid: string) {
     return `${permissionType}/${userGuid}`;
+  }
+
+  createMethod(): string {
+    if (this.changeRoleType === ChangeUserRoleType.ADD) {
+      return 'PUT';
+    }
+    return this.username ? 'POST' : 'DELETE';
+  }
+
+  createUrl(): string {
+    const spaceOrOrg = this.isSpace ? 'spaces' : 'organizations';
+    if (this.username) {
+      // Change role via the username url
+      return `${spaceOrOrg}/${this.guid}/${this.permissionTypeKey}${this.changeRoleType === ChangeUserRoleType.REMOVE ? '/remove' : ''}`;
+    } else {
+      return `${spaceOrOrg}/${this.guid}/${this.updatingKey}`;
+    }
+  }
+
+  createParams(): object {
+    if (this.username) {
+      const payload: ChangeUserRoleByUsernameParams = {
+        username: this.username,
+      };
+      if (this.usernameOrigin) {
+        payload.origin = this.usernameOrigin;
+      }
+      return payload;
+    }
+    return null;
   }
 }
 
@@ -125,18 +174,22 @@ export class AddUserRole extends ChangeUserRole {
     permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     isSpace = false,
     updateConnectedUser = false,
-    orgGuid?: string
+    orgGuid?: string,
+    username = '',
+    usernameOrigin = '',
   ) {
     super(
       endpointGuid,
       userGuid,
-      'PUT',
+      ChangeUserRoleType.ADD,
       [ADD_ROLE, ADD_ROLE_SUCCESS, ADD_ROLE_FAILED],
       permissionTypeKey,
       entityGuid,
       isSpace,
       updateConnectedUser,
-      orgGuid
+      orgGuid,
+      username,
+      usernameOrigin
     );
   }
 }
@@ -149,18 +202,22 @@ export class RemoveUserRole extends ChangeUserRole {
     permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     isSpace = false,
     updateConnectedUser = false,
-    orgGuid?: string
+    orgGuid?: string,
+    username = '',
+    usernameOrigin = '',
   ) {
     super(
       endpointGuid,
       userGuid,
-      'DELETE',
+      ChangeUserRoleType.REMOVE,
       [REMOVE_ROLE, REMOVE_ROLE_SUCCESS, REMOVE_ROLE_FAILED],
       permissionTypeKey,
       entityGuid,
       isSpace,
       updateConnectedUser,
-      orgGuid
+      orgGuid,
+      username,
+      usernameOrigin
     );
   }
 }

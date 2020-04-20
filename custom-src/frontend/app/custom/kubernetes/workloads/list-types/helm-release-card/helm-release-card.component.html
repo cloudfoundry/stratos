@@ -2,7 +2,7 @@
   <app-meta-card-title>
     <div class="release-title">
       <app-multiline-title>{{ row.name }}</app-multiline-title>
-      <div class='release-title--icon'>
+      <div class="release-title--icon">
         <img *ngIf="icon; else noIcon" [src]="icon" (error)="loadImageError()">
         <ng-template #noIcon>
           <mat-icon fontSet="stratos-icons">workloads</mat-icon>

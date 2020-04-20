@@ -1,8 +1,45 @@
 # Change Log
 
+## 3.1.0
+
+[Full Changelog](https://github.com/SUSE/stratos/compare/3.0.0...3.1.0)
+
+This release contains a number of fixes and improvements:
+
+**Improvements:**
+
+- Add containers table in pods list pod row drop down [\#351](https://github.com/SUSE/stratos/pull/351)
+- Update Feature Flags with new entries [\#4188](https://github.com/cloudfoundry/stratos/issues/4188)
+- Improve Application Deployment UI [\#4183](https://github.com/cloudfoundry/stratos/pull/4183)
+- Scalability: Improve handling of 'maxed' lists [\#4180](https://github.com/cloudfoundry/stratos/issues/4180)
+- Scalability: Add button to load maxed lists [\#4179](https://github.com/cloudfoundry/stratos/issues/4179)
+- Scalability: Improve scaling of service instances [\#4162](https://github.com/cloudfoundry/stratos/pull/4162)
+- Scalability: Improve scaling of users and organisations [\#4156](https://github.com/cloudfoundry/stratos/pull/4156)
+- Local Admin User: Auto-login user if they have just set up account [\#4135](https://github.com/cloudfoundry/stratos/issues/4135)
+- Add support for showing Gravatar for the user icon [\#4134](https://github.com/cloudfoundry/stratos/pull/4134)
+- Disable Jetstream API logging via Env Var [\#4130](https://github.com/cloudfoundry/stratos/issues/4130)
+- Improve UI element sizing and presentation on desktop [\#4129](https://github.com/cloudfoundry/stratos/pull/4129)
+- Allow org managers to add users outside of org [\#4103](https://github.com/cloudfoundry/stratos/issues/4103)
+- Allow Endpoint Name to be edited [\#3640](https://github.com/cloudfoundry/stratos/issues/3640)
+
+**Fixes:**
+
+- Metrics do not show for a Kubernetes 1.16+ cluster [\#362](https://github.com/SUSE/stratos/issues/362)
+- Logos squashed in Workloads view [\#361](https://github.com/SUSE/stratos/issues/361)
+- Can't deploy version 3.0.0 on EKS [\#357](https://github.com/SUSE/stratos/issues/357)
+- CF Quota's `Maximum Application Instance Memory Usage` not formatted correctly [\#4206](https://github.com/cloudfoundry/stratos/issues/4206)
+- Notification and error pages loop when using 'X' [\#4202](https://github.com/cloudfoundry/stratos/issues/4202)
+- Cf app redeploy stepper starts with empty step, cannot continue [\#4185](https://github.com/cloudfoundry/stratos/issues/4185)
+- Can't push apps with multiple buildpacks [\#4181](https://github.com/cloudfoundry/stratos/issues/4181)
+- Deleting a Service Instance or User Provided Service Instance breaks list [\#4157](https://github.com/cloudfoundry/stratos/issues/4157)
+- Deleting an organisation with spaces fails [\#4155](https://github.com/cloudfoundry/stratos/issues/4155)
+- App Deploy should accept manifest .YML or .YAML [\#4152](https://github.com/cloudfoundry/stratos/issues/4152)
+- Only fetch first page of maxed lists [\#4138](https://github.com/cloudfoundry/stratos/pull/4138)
+- 'Register an endpoint' arrow misaligned [\#3519](https://github.com/cloudfoundry/stratos/issues/3519)
+
 ## 3.0.0
 
-[Full Changelog](https://github.com/cloudfoundry/stratos/compare/2.7.0...3.0.0)
+[Full Changelog](https://github.com/SUSE/stratos/compare/2.7.0...3.0.0)
 
 This release sees the Helm functionality move out of technology preview and get an upgrade to Helm 3. Helm releases have been brought out to the
 top-level under a new 'Workloads' side navigation item.

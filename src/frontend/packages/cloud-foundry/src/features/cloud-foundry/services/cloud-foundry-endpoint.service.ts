@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { GetAllApplications } from '../../../../../cloud-foundry/src/actions/application.actions';
 import { DeleteOrganization, GetAllOrganizations } from '../../../../../cloud-foundry/src/actions/organization.actions';
@@ -12,7 +12,6 @@ import {
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
-  routeEntityType,
   spaceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-types';
 import {
@@ -22,10 +21,9 @@ import {
 import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
-import { MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
-import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityService } from '../../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
@@ -35,13 +33,14 @@ import {
   PaginationObservables,
 } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
+import { GetAllRoutes } from '../../../actions/route.actions';
+import { GetSpaceRoutes } from '../../../actions/space.actions';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { CfInfoDefinitionActionBuilders } from '../../../entity-action-builders/cf-info.action-builders';
+import { OrganizationActionBuilders } from '../../../entity-action-builders/organization.action-builders';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { QParam, QParamJoiners } from '../../../shared/q-param';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -85,7 +84,8 @@ export class CloudFoundryEndpointService {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
       : createEntityRelationPaginationKey(endpointSchemaKey);
-    const organizationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
+    const organizationEntity = entityCatalog
+      .getEntity<IEntityMetadata, any, OrganizationActionBuilders>(CF_ENDPOINT_TYPE, organizationEntityType);
     const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const getAllOrganizationsAction = actionBuilder(cfGuid, paginationKey,
       {
@@ -94,10 +94,8 @@ export class CloudFoundryEndpointService {
           createEntityRelationKey(organizationEntityType, domainEntityType),
           createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
           createEntityRelationKey(organizationEntityType, privateDomainsEntityType),
-          createEntityRelationKey(spaceEntityType, routeEntityType), // Not really needed at top level, but if we drop down into an org with
-          // lots of spaces it saves spaces x routes requests
         ], populateMissing: false
-      }) as PaginatedAction;
+      });
     return getAllOrganizationsAction;
   }
   static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
@@ -127,6 +125,30 @@ export class CloudFoundryEndpointService {
     }
     if (spaceGuid) {
       action.initialParams.q.push(new QParam('space_guid', spaceGuid, QParamJoiners.in).toString());
+    }
+    return fetchTotalResults(action, store, pmf);
+  }
+
+  public static fetchRouteCount(
+    store: Store<CFAppState>,
+    pmf: PaginationMonitorFactory,
+    cfGuid: string,
+    orgGuid?: string,
+    spaceGuid?: string)
+    : Observable<number> {
+    if (spaceGuid) {
+      const spaceAction =
+        new GetSpaceRoutes(spaceGuid, cfGuid, createEntityRelationPaginationKey(spaceEntityType, spaceGuid), [], false, false);
+      return fetchTotalResults(spaceAction, store, pmf);
+    }
+
+    const parentSchemaKey = orgGuid ? organizationEntityType : 'cf';
+    const uniqueKey = orgGuid || cfGuid;
+    const action = new GetAllRoutes(cfGuid, createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), [], false);
+    action.initialParams = {};
+    action.initialParams.q = [];
+    if (orgGuid) {
+      action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
     }
     return fetchTotalResults(action, store, pmf);
   }
@@ -168,9 +190,10 @@ export class CloudFoundryEndpointService {
       action: this.getAllOrgsAction,
       paginationMonitor: this.pmf.create(
         this.getAllOrgsAction.paginationKey,
-        cfEntityFactory(organizationEntityType)
+        cfEntityFactory(organizationEntityType),
+        this.getAllOrgsAction.flattenPagination
       )
-    }, true).entities$;
+    }, this.getAllOrgsAction.flattenPagination).entities$;
 
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
@@ -182,12 +205,16 @@ export class CloudFoundryEndpointService {
   }
 
   constructAppObs() {
-    const appPaginationMonitor = this.pmf.create(this.getAllAppsAction.paginationKey, this.getAllAppsAction);
+    const appPaginationMonitor = this.pmf.create(
+      this.getAllAppsAction.paginationKey,
+      this.getAllAppsAction,
+      this.getAllAppsAction.flattenPagination
+    );
     this.appsPagObs = getPaginationObservables<APIResource<IApp>>({
       store: this.store,
       action: this.getAllAppsAction,
       paginationMonitor: appPaginationMonitor
-    });
+    }, this.getAllAppsAction.flattenPagination);
   }
 
   private constructSecondaryObservable() {
@@ -243,10 +270,11 @@ export class CloudFoundryEndpointService {
         action,
         paginationMonitor: this.pmf.create(
           action.paginationKey,
-          cfEntityFactory(domainEntityType)
+          cfEntityFactory(domainEntityType),
+          action.flattenPagination
         )
       },
-      true
+      action.flattenPagination
     ).entities$.pipe(first()).subscribe();
   }
 
@@ -258,34 +286,4 @@ export class CloudFoundryEndpointService {
     this.store.dispatch(this.getAllAppsAction);
   }
 
-  hasCellMetrics(endpointId: string): Observable<boolean> {
-    return this.endpointService.hasMetrics(endpointId).pipe(
-      switchMap(hasMetrics => {
-        if (!hasMetrics) {
-          return of(false);
-        }
-
-        // Check that we successfully retrieve some stats. If the metric is unknown an empty list is returned
-        const action = new FetchCFCellMetricsPaginatedAction(
-          endpointId,
-          endpointId,
-          new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),
-          MetricQueryType.QUERY
-        );
-
-        return getPaginationObservables<IMetrics>({
-          store: this.store,
-          action,
-          paginationMonitor: this.paginationMonitorFactory.create(
-            action.paginationKey,
-            action
-          )
-        }).entities$.pipe(
-          filter(entities => !!entities && !!entities.length),
-          map(entities => !!entities.find(entity => !!entity.data.result.length)),
-          first()
-        );
-      })
-    );
-  }
 }

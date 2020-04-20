@@ -11,7 +11,7 @@ import { CurrentUserPermissionsService } from '../../../../../../../core/src/cor
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   TableCellServiceLastOpComponent,
 } from '../../../../../../../core/src/shared/components/list/list-types/cf-spaces-service-instances/table-cell-service-last-op/table-cell-service-last-op.component';
@@ -49,7 +49,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   dataSource: ListDataSource<APIResource>;
   defaultView = 'table' as ListView;
-  text = {
+  text: ITableText = {
     title: null,
     filter: null,
     noEntries: 'There are no service instances'

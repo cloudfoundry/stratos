@@ -71,9 +71,10 @@ export class CloudFoundryUserProvidedServicesService {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        action
+        action,
+        action.flattenPagination
       )
-    });
+    }, action.flattenPagination);
     return combineLatest([
       pagObs.entities$, // Ensure entities is subbed to the fetch kicks off
       pagObs.fetchingEntities$

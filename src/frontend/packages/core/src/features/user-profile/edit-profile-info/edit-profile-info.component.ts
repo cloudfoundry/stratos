@@ -8,7 +8,7 @@ import { UserProfileInfo, UserProfileInfoUpdates } from '../../../../../store/sr
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-import { UserProfileService } from '../user-profile.service';
+import { UserProfileService } from '../../../core/user-profile.service';
 
 
 @Component({

@@ -1,5 +1,5 @@
 ---
-{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major .Capabilities.KubeVersion.Minor)}}
+{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
 apiVersion: apps/v1
 {{- else }}
 apiVersion: extensions/v1beta1

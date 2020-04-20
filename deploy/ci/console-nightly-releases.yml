@@ -7,7 +7,6 @@ resource_types:
   privileged: true
   source:
     repository: ((docker-resource-image))
-    tag: ((docker-resource-image-tag))
 
 resources:
 - name: midnight
@@ -114,7 +113,7 @@ jobs:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-    -do:
+    - do:
       - put: config-init-image
         params:
           dockerfile: stratos/deploy/Dockerfile.init

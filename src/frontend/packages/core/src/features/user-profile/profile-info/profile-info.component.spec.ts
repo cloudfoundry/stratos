@@ -8,7 +8,7 @@ import { CoreTestingModule } from '../../../../test-framework/core-test.modules'
 import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { UserProfileService } from '../user-profile.service';
+import { UserProfileService } from '../../../core/user-profile.service';
 import { ProfileInfoComponent } from './profile-info.component';
 
 describe('ProfileInfoComponent', () => {

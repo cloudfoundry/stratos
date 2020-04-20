@@ -39,6 +39,16 @@ body.stratos {
     color: #333;
   }
 
+  .user-avatar__initials {
+    background-color: $suse-primary-color;
+    color: $suse-text;
+  }
+
+  .user-avatar__large .user-avatar__initials {
+    background-color: $suse-text;
+    color: $suse-primary-color;
+  }  
+
   .setup .page-header .mat-toolbar.mat-primary {
     background-color: $suse-primary-color;
     color: $suse-text;

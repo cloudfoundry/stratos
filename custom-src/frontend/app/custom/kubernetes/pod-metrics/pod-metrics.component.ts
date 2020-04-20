@@ -65,9 +65,9 @@ export class PodMetricsComponent {
     this.podName = activatedRoute.snapshot.params.podName;
     this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
     const namespace = getIdFromRoute(activatedRoute, 'namespace') ? getIdFromRoute(activatedRoute, 'namespace') : this.namespaceName;
-    const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `${result.metric.container_name}`);
+    const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `${result.metric.container}`);
     const cpuChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>
-      (result => !!result.metric.cpu ? `${result.metric.container_name}:${result.metric.cpu}` : `${result.metric.container_name}`);
+      (result => !!result.metric.cpu ? `${result.metric.container}:${result.metric.cpu}` : `${result.metric.container}`);
     const networkChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>
       (result => `Network Interface: ${result.metric.interface}`);
     this.instanceMetricConfigs = [
@@ -75,13 +75,13 @@ export class PodMetricsComponent {
         new FetchKubernetesMetricsAction(
           this.podName,
           kubeEndpointService.kubeGuid,
-          `container_memory_usage_bytes{pod_name="${this.podName}",namespace="${namespace}"}`
+          `container_memory_usage_bytes{pod="${this.podName}",namespace="${namespace}"}`
         ),
         'Memory Usage (MB)',
         ChartDataTypes.BYTES,
         (series: ChartSeries[]) => {
           // Remove the metric series for pod overhead and for the total!
-          return series.filter(s => !!s.metadata.container_name && s.metadata.container_name !== 'POD');
+          return series.filter(s => !!s.metadata.container && s.metadata.container !== 'POD');
         },
         null,
         (value: string) => value + ' MB'
@@ -90,12 +90,12 @@ export class PodMetricsComponent {
         new FetchKubernetesMetricsAction(
           this.podName,
           kubeEndpointService.kubeGuid,
-          `container_cpu_usage_seconds_total{pod_name="${this.podName}",namespace="${namespace}"}`
+          `container_cpu_usage_seconds_total{pod="${this.podName}",namespace="${namespace}"}`
         ),
         'CPU Usage',
         ChartDataTypes.CPU_TIME,
         (series: ChartSeries[]) => {
-          return series.filter(s => !!s.metadata.container_name && s.metadata.container_name !== 'POD');
+          return series.filter(s => !!s.metadata.container && s.metadata.container !== 'POD');
         },
         (tick: string) => formatAxisCPUTime(tick),
         (value: string) => formatCPUTime(value),
@@ -104,7 +104,7 @@ export class PodMetricsComponent {
         new FetchKubernetesMetricsAction(
           this.podName,
           kubeEndpointService.kubeGuid,
-          `container_network_transmit_bytes_total{pod_name="${this.podName}",namespace="${namespace}"}`
+          `container_network_transmit_bytes_total{pod="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data transmitted (MB)',
         ChartDataTypes.BYTES,
@@ -116,7 +116,7 @@ export class PodMetricsComponent {
         new FetchKubernetesMetricsAction(
           this.podName,
           kubeEndpointService.kubeGuid,
-          `container_network_receive_bytes_total{pod_name="${this.podName}",namespace="${namespace}"}`
+          `container_network_receive_bytes_total{pod="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data received (MB)',
         ChartDataTypes.BYTES,

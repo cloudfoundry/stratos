@@ -1,5 +1,5 @@
-import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
 
 export class LocalPaginationHelpers {
 
@@ -8,7 +8,9 @@ export class LocalPaginationHelpers {
    */
   static isPaginationMaxed(pagination: PaginationEntityState) {
     if (pagination.forcedLocalPage) {
-      return !!pagination.pageRequests[pagination.forcedLocalPage].maxed;
+      const forcedPage = pagination.pageRequests[pagination.forcedLocalPage];
+      // SI Wall, 2 CFs, Select SI only, Filter to Org, Switch CFs, pagination has been reset so no page
+      return forcedPage && forcedPage.maxed;
     }
     return !!Object.values(pagination.pageRequests).find(request => request.maxed);
   }

@@ -26,7 +26,6 @@ import {
   valueOrCommonFalsy,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../store/src/app-state';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import {
@@ -105,9 +104,10 @@ export const initCfOrgSpaceService = (
 };
 
 export const createCfOrSpaceMultipleFilterFn = (
-  store: Store<AppState>,
+  store: Store<CFAppState>,
   action: PaginatedAction,
-  setQParam: (setQ: QParam, qs: QParam[]) => boolean
+  setQParam: (setQ: QParam, qs: QParam[]) => boolean,
+  preResetUpdate?: () => void
 ) => {
   return (changes: ListPaginationMultiFilterChange[], params: PaginationParam) => {
     if (!changes.length) {
@@ -140,6 +140,10 @@ export const createCfOrSpaceMultipleFilterFn = (
     const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(action.endpointGuid);
     const orgChanged = startingOrgGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'organization_guid'), {}).value;
     const spaceChanged = startingSpaceGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'space_guid'), {}).value;
+
+    if (preResetUpdate) {
+      preResetUpdate();
+    }
 
     // Changes of org or space will reset pagination and start a new request. Changes of only cf require a punt
     if (cfGuidChanged && !orgChanged && !spaceChanged) {
@@ -213,9 +217,10 @@ export class CfOrgSpaceDataService implements OnDestroy {
       action: this.paginationAction,
       paginationMonitor: this.paginationMonitorFactory.create(
         this.paginationAction.paginationKey,
-        cfEntityFactory(this.paginationAction.entityType)
+        cfEntityFactory(this.paginationAction.entityType),
+        this.paginationAction.flattenPagination
       )
-    }, true);
+    }, this.paginationAction.flattenPagination);
   }
 
   private createCf() {

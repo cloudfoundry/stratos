@@ -77,7 +77,7 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
         row.entity.cfGuid,
         'cf',
         applicationEntityType,
-        row.entity.guid,
+        row.metadata.guid,
       );
     }),
   ]

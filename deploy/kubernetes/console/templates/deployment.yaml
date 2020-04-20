@@ -255,6 +255,14 @@ spec:
           value: {{ default "" .Values.console.userInviteSubject | quote }}
         - name: ENABLE_TECH_PREVIEW
           value: {{ default "false" .Values.console.techPreview | quote }}
+        {{- if .Values.console.ui }}
+        {{- if .Values.console.ui.listMaxSize }}
+        - name: UI_LIST_MAX_SIZE
+          value: {{ .Values.console.ui.listMaxSize | quote }}
+        {{- end }}
+        - name: UI_LIST_ALLOW_LOAD_MAXED
+          value: {{ default "false" .Values.console.ui.listAllowLoadMaxed | quote }}
+        {{- end }}
         - name: MONOCULAR_CRT_PATH
           value: "/etc/monocular-certs/tls.crt"
         - name: MONOCULAR_KEY_PATH
