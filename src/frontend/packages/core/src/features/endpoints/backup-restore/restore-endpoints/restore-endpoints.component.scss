@@ -20,4 +20,13 @@
     }
   }
 
+  &__error {
+    p {
+      align-items: center;
+      display: flex;
+    }
+    mat-icon {
+      margin-right: 10px;
+    }
+  }
 }

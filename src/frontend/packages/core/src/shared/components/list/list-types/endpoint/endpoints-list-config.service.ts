@@ -106,7 +106,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     internalEventMonitorFactory: InternalEventMonitorFactory,
     endpointListHelper: EndpointListHelper,
     favoritesConfigMapper: FavoritesConfigMapper,
-    // private router: Router
   ) {
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(

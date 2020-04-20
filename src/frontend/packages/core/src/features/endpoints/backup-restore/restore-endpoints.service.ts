@@ -36,6 +36,7 @@ export class RestoreEndpointsService {
 
   validDb = new BehaviorSubject(false);
   validDb$: Observable<boolean>;
+  unparsableFileContent: string = null;
   currentDbVersion$: Observable<number>;
   ignoreDbVersion = new BehaviorSubject(false);
   ignoreDbVersion$ = this.ignoreDbVersion.asObservable();
@@ -61,8 +62,9 @@ export class RestoreEndpointsService {
       this.file$,
       this.currentDbVersion$
     ]).pipe(
+      filter(([file,]) => !!file && !!file.content),
       map(([file, currentDbVersion]) => {
-        return file && file.content.dbVersion === currentDbVersion;
+        return file && file.content && file.content.dbVersion === currentDbVersion;
       })
     );
 
@@ -93,20 +95,17 @@ export class RestoreEndpointsService {
     let parsedContent: BackupContent;
     try {
       parsedContent = JSON.parse(content);
-    } catch (e) {
-      this.logger.warn('Failed to parse file contents: ', e);
+      this.unparsableFileContent = null;
+    } catch (err) {
+      this.logger.warn('Failed to parse file contents: ', err);
+      parsedContent = null;
+      this.unparsableFileContent = `${err instanceof Error ? err.message : String(err)}`;
     }
 
-    if (!!parsedContent) {
-      this.file.next({
-        name: fileName,
-        content: parsedContent
-      });
-    } else {
-      this.file.next(null);
-    }
-
-    // this.updateFileContentValidation();
+    this.file.next({
+      name: fileName,
+      content: parsedContent
+    });
   }
 
   setIgnoreDbVersion(ignore: boolean) {

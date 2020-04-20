@@ -60,6 +60,8 @@ export interface EndpointModel {
   metricsAvailable: boolean;
 }
 
+export const SystemSharedUserGuid = '00000000-1111-2222-3333-444444444444';
+
 // Metadata for the user connected to an endpoint
 export interface EndpointUser {
   guid: string;

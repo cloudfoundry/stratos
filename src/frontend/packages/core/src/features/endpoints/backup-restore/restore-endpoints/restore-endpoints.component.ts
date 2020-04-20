@@ -78,7 +78,7 @@ export class RestoreEndpointsComponent {
       });
     };
 
-    const restoreSuccess = data => {
+    const restoreSuccess = () => {
       this.store.dispatch(new GetAllEndpoints());
       result.next({
         success: true,
@@ -95,9 +95,9 @@ export class RestoreEndpointsComponent {
       return of(false);
     };
 
-    const createBackup = () => this.service.restoreBackup().pipe(first()).subscribe(restoreSuccess, backupFailure);
+    const restoreBackup = () => this.service.restoreBackup().pipe(first()).subscribe(restoreSuccess, backupFailure);
 
-    this.confirmDialog.openWithCancel(confirmation, createBackup, userCancelledDialog);
+    this.confirmDialog.openWithCancel(confirmation, restoreBackup, userCancelledDialog);
 
     return result.asObservable();
   }

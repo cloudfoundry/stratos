@@ -2,9 +2,9 @@ import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
+import { BackupCheckboxCellComponent } from './backup-restore/backup-checkbox-cell/backup-checkbox-cell.component';
 import { BackupConnectionCellComponent } from './backup-restore/backup-connection-cell/backup-connection-cell.component';
 import { BackupEndpointsComponent } from './backup-restore/backup-endpoints/backup-endpoints.component';
-import { BackupRestoreCellComponent } from './backup-restore/backup-restore-cell/backup-restore-cell.component';
 import {
   BackupRestoreEndpointsComponent,
 } from './backup-restore/backup-restore-endpoints/backup-restore-endpoints.component';
@@ -37,7 +37,7 @@ import { EndpointsRoutingModule } from './endpoints.routing';
     BackupRestoreEndpointsComponent,
     BackupEndpointsComponent,
     RestoreEndpointsComponent,
-    BackupRestoreCellComponent,
+    BackupCheckboxCellComponent,
     BackupConnectionCellComponent,
   ],
   entryComponents: [
@@ -45,7 +45,7 @@ import { EndpointsRoutingModule } from './endpoints.routing';
     CredentialsAuthFormComponent,
     SSOAuthFormComponent,
     NoneAuthFormComponent,
-    BackupRestoreCellComponent,
+    BackupCheckboxCellComponent,
     BackupConnectionCellComponent
   ]
 })

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/md5"
+	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -19,6 +19,7 @@ import (
 type cnsiTokenBackup struct {
 	databaseConnectionPool *sql.DB
 	encryptionKey          []byte
+	userID                 string
 	p                      *portalProxy
 }
 
@@ -39,10 +40,8 @@ type BackupEndpointsState struct {
 
 // BackupRequest - Request from client to create a back up file
 type BackupRequest struct {
-	State     map[string]BackupEndpointsState `json:"state"`
-	UserID    string                          `json:"userId"`
-	DBVersion string                          `json:"dbVersion"`
-	Password  string                          `json:"password"`
+	State    map[string]BackupEndpointsState `json:"state"`
+	Password string                          `json:"password"`
 }
 
 // BackupContentPayload - Encrypted part of the backup
@@ -133,17 +132,16 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 				return nil, interfaces.NewHTTPError(http.StatusBadGateway, text)
 			}
 		case BACKUP_CONNECTION_CURRENT:
-			if tokenRecord, ok := ctb.p.GetCNSITokenRecordWithDisconnected(endpointID, data.UserID); ok {
-				log.Warn("tokens for Connect")
+			if tokenRecord, ok := ctb.p.GetCNSITokenRecordWithDisconnected(endpointID, ctb.userID); ok {
 				var btr = interfaces.BackupTokenRecord{
 					TokenRecord:  tokenRecord,
 					EndpointGUID: endpointID,
-					TokenType:    "CNSI",
-					UserGUID:     data.UserID,
+					TokenType:    "cnsi",
+					UserGUID:     ctb.userID,
 				}
 				tokens = append(tokens, btr)
 			} else {
-				text := fmt.Sprintf("Request to back up connected user's (%+v) token for endpoint (%+v) failed.", endpointID, data.UserID)
+				text := fmt.Sprintf("Request to back up connected user's (%+v) token for endpoint (%+v) failed.", endpointID, ctb.userID)
 				return nil, interfaces.NewHTTPError(http.StatusBadGateway, text)
 			}
 		}
@@ -156,7 +154,7 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 	}
 
 	// Encrypt the entire payload
-	encryptedPayload, err := encryptPayload(payload, data.Password, ctb.encryptionKey)
+	encryptedPayload, err := encryptPayload(payload, data.Password)
 	if err != nil {
 		return nil, interfaces.NewHTTPShadowError(http.StatusBadGateway, "Could not encrypt payload", "Could not encrypt payload: %+v", err)
 	}
@@ -235,7 +233,7 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 	}
 
 	// Get the actual, unencrypted set of endpoints and tokens
-	payloadString, err := decryptPayload(data.Payload, backup.Password, ctb.encryptionKey)
+	payloadString, err := decryptPayload(data.Payload, backup.Password)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to decrypt payload", "Failed to decrypt payload: %+v", err)
 	}
@@ -252,7 +250,7 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 
 	for _, endpoint := range payload.Endpoints {
 		e := deSerializeEndpoint(endpoint)
-		if err := cnsiRepo.Overwrite(e, ctb.encryptionKey); err != nil {
+		if err := cnsiRepo.SaveOrUpdate(e, ctb.encryptionKey); err != nil {
 			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to overwrite endpoints", "Failed to overwrite endpoint: %+v", e.Name)
 		}
 	}
@@ -273,15 +271,13 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 
 // Work around the omission of the client secret when serialising the cnsi record
 func serializeEndpoint(endpoint *interfaces.CNSIRecord) map[string]interface{} {
-	// encode the original
+	// Convert struct to generic map
 	m, _ := json.Marshal(endpoint)
-
-	// decode it back to get a map
 	var a interface{}
 	json.Unmarshal(m, &a)
 	newEndpoint := a.(map[string]interface{})
 
-	// Replace the map key
+	// Apply the correct client secret
 	newEndpoint["client_secret"] = endpoint.ClientSecret
 
 	return newEndpoint
@@ -289,21 +285,19 @@ func serializeEndpoint(endpoint *interfaces.CNSIRecord) map[string]interface{} {
 
 // Work around the omission of the client secret when serialising the cnsi record
 func deSerializeEndpoint(endpoint map[string]interface{}) interfaces.CNSIRecord {
-	// encode the endpoint map
+	// Convert struct to endpoint
 	m, _ := json.Marshal(endpoint)
+	var cnsi interfaces.CNSIRecord
+	json.Unmarshal(m, &cnsi)
 
-	// decode it back to get a record with all values except client secret
-	var a interfaces.CNSIRecord
-	json.Unmarshal(m, &a)
-
-	// manually add the client secret
-	a.ClientSecret = fmt.Sprintf("%v", endpoint["client_secret"])
-	return a
+	// Apply the correct client secret
+	cnsi.ClientSecret = fmt.Sprintf("%v", endpoint["client_secret"])
+	return cnsi
 }
 
-func encryptPayload(payload *BackupContentPayload, password string, encryptionKey []byte) ([]byte, error) {
+func encryptPayload(payload *BackupContentPayload, password string) ([]byte, error) {
 	// First ensure the password is an ok length
-	secret, err := createHash(password, encryptionKey)
+	secret, err := createHash(password)
 	if err != nil {
 		log.Warningf("Could not create hash: %+v", err)
 		return nil, fmt.Errorf("Could not create hash")
@@ -324,9 +318,9 @@ func encryptPayload(payload *BackupContentPayload, password string, encryptionKe
 	return payloadEncrypted, nil
 }
 
-func decryptPayload(payloadEncrypted []byte, password string, encryptionKey []byte) (*string, error) {
+func decryptPayload(payloadEncrypted []byte, password string) (*string, error) {
 	// First ensure the password is an ok length
-	secret, err := createHash(password, encryptionKey)
+	secret, err := createHash(password)
 	if err != nil {
 		log.Warningf("Could not create hash: %+v", err)
 		return nil, fmt.Errorf("Could not create hash")
@@ -341,13 +335,11 @@ func decryptPayload(payloadEncrypted []byte, password string, encryptionKey []by
 }
 
 // createHash - Ensure the token used by crypto is at an acceptable length
-func createHash(password string, salt []byte) ([]byte, error) {
-	hasher := md5.New()
+func createHash(password string) ([]byte, error) {
+	// Create a hash long enough to ensure with use AES-256
+	hasher := sha256.New()
 	if _, err := hasher.Write([]byte(password)); err != nil {
 		return nil, fmt.Errorf("Failed to write password to hash")
-	}
-	if _, err := hasher.Write(salt); err != nil {
-		return nil, fmt.Errorf("Failed to write salt to hash")
 	}
 	return hasher.Sum(nil), nil
 }

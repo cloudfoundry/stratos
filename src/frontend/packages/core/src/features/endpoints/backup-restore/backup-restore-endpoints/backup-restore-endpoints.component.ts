@@ -17,8 +17,6 @@ interface IAppTileData extends ITileData {
 })
 export class BackupRestoreEndpointsComponent {
 
-  // static BACKUP_RESTORE_PARAM = 'backup';
-
   public serviceType: string;
   public tileSelectorConfig: ITileConfig<IAppTileData>[];
 

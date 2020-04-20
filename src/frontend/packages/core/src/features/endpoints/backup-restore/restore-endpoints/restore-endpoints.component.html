@@ -15,13 +15,23 @@
         </div>
       </div>
       <ng-container *ngIf="service.file$ | async as file">
-        <div *ngIf="!(service.validDb$ | async)" class="file-step__chunk">
-          <p>The database version of Stratos (<code>{{service.currentDbVersion$ | async}}</code>) and the backup
-            (<code>{{file.content.dbVersion}}</code>) are different. Restoring this file may have adverse affects.
-          </p>
-          <mat-checkbox (change)="onIgnoreDbChange($event)">
-            Ignore different database versions
-          </mat-checkbox>
+        <div *ngIf="!!service.unparsableFileContent || !(service.validDb$ | async)" class="file-step__error">
+          <div *ngIf="!service.unparsableFileContent && !(service.validDb$ | async)" class="file-step__chunk">
+            <p>
+              <mat-icon>warning</mat-icon> The database version of Stratos
+              (<code>{{service.currentDbVersion$ | async}}</code>) and the backup
+              (<code>{{file.content.dbVersion}}</code>) are different. Restoring this file may have adverse affects.
+            </p>
+            <mat-checkbox (change)="onIgnoreDbChange($event)">
+              Ignore different database versions
+            </mat-checkbox>
+          </div>
+          <div *ngIf="!!service.unparsableFileContent">
+            <p>
+              <mat-icon>warning</mat-icon> Unable to parse file contents. Reason:
+              <code>{{service.unparsableFileContent}}</code>
+            </p>
+          </div>
         </div>
       </ng-container>
     </div>

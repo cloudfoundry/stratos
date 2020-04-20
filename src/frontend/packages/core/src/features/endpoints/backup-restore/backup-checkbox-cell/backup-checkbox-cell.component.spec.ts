@@ -4,15 +4,15 @@ import { EndpointModel } from '../../../../../../store/src/types/endpoint.types'
 import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointTypes } from '../backup-restore.types';
-import { BackupRestoreCellComponent } from './backup-restore-cell.component';
+import { BackupCheckboxCellComponent } from './backup-checkbox-cell.component';
 
-describe('BackupRestoreCellComponent', () => {
-  let component: BackupRestoreCellComponent;
-  let fixture: ComponentFixture<BackupRestoreCellComponent>;
+describe('BackupCheckboxCellComponent', () => {
+  let component: BackupCheckboxCellComponent;
+  let fixture: ComponentFixture<BackupCheckboxCellComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [BackupRestoreCellComponent],
+      declarations: [BackupCheckboxCellComponent],
       imports: [
         ...BaseTestModulesNoShared
       ],
@@ -24,7 +24,7 @@ describe('BackupRestoreCellComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(BackupRestoreCellComponent);
+    fixture = TestBed.createComponent(BackupCheckboxCellComponent);
     component = fixture.componentInstance;
     component.config = {
       type: BackupEndpointTypes.ENDPOINT

@@ -5,18 +5,18 @@ import { TableCellCustom } from '../../../../shared/components/list/list.types';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 
 @Component({
-  selector: 'app-backup-restore-cell',
-  templateUrl: './backup-restore-cell.component.html',
-  styleUrls: ['./backup-restore-cell.component.scss']
+  selector: 'app-backup-checkbox-cell',
+  templateUrl: './backup-checkbox-cell.component.html',
+  styleUrls: ['./backup-checkbox-cell.component.scss']
 })
-export class BackupRestoreCellComponent extends TableCellCustom<EndpointModel> {
+export class BackupCheckboxCellComponent extends TableCellCustom<EndpointModel> {
 
   constructor(public service: BackupEndpointsService) {
     super();
   }
 
   validate() {
-    this.service.validate();
+    this.service.stateUpdated();
   }
 
   disabled(): boolean {

@@ -9,7 +9,8 @@ type Token struct {
 	Record    interfaces.TokenRecord
 }
 
-const SystemSharedUserGuid = "00000000-1111-2222-3333-444444444444" // User ID for the system shared user for endpoints
+// SystemSharedUserGuid - User ID for the system shared user for endpoints. Also used by front end
+const SystemSharedUserGuid = "00000000-1111-2222-3333-444444444444"
 
 // Repository is an application of the repository pattern for storing tokens
 type Repository interface {

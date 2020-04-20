@@ -86,6 +86,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	updateAuthToken = datastore.ModifySQLStatement(updateAuthToken, databaseProvider)
 	findCNSIToken = datastore.ModifySQLStatement(findCNSIToken, databaseProvider)
 	findCNSITokenConnected = datastore.ModifySQLStatement(findCNSITokenConnected, databaseProvider)
+	findAllCNSIToken = datastore.ModifySQLStatement(findAllCNSIToken, databaseProvider)
 	countCNSITokens = datastore.ModifySQLStatement(countCNSITokens, databaseProvider)
 	insertCNSIToken = datastore.ModifySQLStatement(insertCNSIToken, databaseProvider)
 	updateCNSIToken = datastore.ModifySQLStatement(updateCNSIToken, databaseProvider)

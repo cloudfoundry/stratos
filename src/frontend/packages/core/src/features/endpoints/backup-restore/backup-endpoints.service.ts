@@ -2,12 +2,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
-import { SessionData } from '../../../../../store/src/types/auth.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { BrowserStandardEncoder } from '../../../helper';
 import {
@@ -21,7 +19,6 @@ import {
 
 interface BackupRequest {
   state: BackupEndpointsConfig<BaseEndpointConfig>;
-  userId: string;
   password: string;
 }
 
@@ -51,10 +48,10 @@ export class BackupEndpointsService {
         entity
       };
     });
-    this.validate();
+    this.stateUpdated();
   }
 
-  validate() {
+  stateUpdated() {
     const endpoints = Object.values(this.state);
     endpoints.forEach(endpoint => {
       if (!endpoint[BackupEndpointTypes.ENDPOINT]) {
@@ -69,7 +66,8 @@ export class BackupEndpointsService {
     this.hasChanges.next(hasChanges);
     const allChanged = endpoints.every(endpoint => {
       const e = !this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.ENDPOINT) || endpoint[BackupEndpointTypes.ENDPOINT];
-      const c = !this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.CONNECT) || endpoint[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE;
+      const c = !this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.CONNECT) ||
+        endpoint[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE;
       return e && c;
     }
 
@@ -110,7 +108,7 @@ export class BackupEndpointsService {
         endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.ALL;
       }
     });
-    this.validate();
+    this.stateUpdated();
   }
 
   selectNone() {
@@ -118,7 +116,7 @@ export class BackupEndpointsService {
       endpoint[BackupEndpointTypes.ENDPOINT] = false;
       endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.NONE;
     });
-    this.validate();
+    this.stateUpdated();
   }
 
   hasConnectionDetails(): boolean {
@@ -135,19 +133,18 @@ export class BackupEndpointsService {
       encoder: new BrowserStandardEncoder()
     });
 
-    return this.getSessionData().pipe(
-      switchMap(ses => this.http.post(url, this.createBodyToSend(ses), {
-        params
-      })),
-      map(res => {
-        console.log('Response: ', res);
-        return new Blob([JSON.stringify(res)]);
-      }),
+    // return this.getSessionData().pipe(
+    //   switchMap(ses => this.http.post(url, this.createBodyToSend(ses), { params })),
+    //   map(res => new Blob([JSON.stringify(res)])),
+    //   first(),
+    // );
+    return this.http.post(url, this.createBodyToSend(), { params }).pipe(
+      map(res => new Blob([JSON.stringify(res)])),
       first(),
     );
   }
 
-  private createBodyToSend(sd: SessionData): BackupRequest {
+  private createBodyToSend(): BackupRequest {
     const state: BackupEndpointsConfig<BaseEndpointConfig> = Object.entries(this.state).reduce((res, [endpointId, endpoint]) => {
       if (endpoint[BackupEndpointTypes.ENDPOINT]) {
         const { entity, ...rest } = endpoint;
@@ -160,25 +157,25 @@ export class BackupEndpointsService {
     }, {});
     return {
       state,
-      userId: this.getUserIdFromSessionData(sd),
+      // userId: this.getUserIdFromSessionData(sd),
       password: this.password,
     };
   }
 
-  private getUserIdFromSessionData(sd: SessionData): string {
-    if (sd && sd.user) {
-      return sd.user.guid;
-    }
-    return null;
-  }
+  // private getUserIdFromSessionData(sd: SessionData): string {
+  //   if (sd && sd.user) {
+  //     return sd.user.guid;
+  //   }
+  //   return null;
+  // }
 
-  private getSessionData(): Observable<SessionData> {
-    return this.store.select(s => s.auth).pipe(
-      filter(auth => !!(auth && auth.sessionData)),
-      map((auth: AuthState) => auth.sessionData),
-      first()
-    );
-  }
+  // private getSessionData(): Observable<SessionData> {
+  //   return this.store.select(s => s.auth).pipe(
+  //     filter(auth => !!(auth && auth.sessionData)),
+  //     map((auth: AuthState) => auth.sessionData),
+  //     first()
+  //   );
+  // }
 
 
 

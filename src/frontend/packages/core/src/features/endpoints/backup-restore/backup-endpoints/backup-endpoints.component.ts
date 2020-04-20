@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
@@ -17,9 +17,9 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
 import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { BackupCheckboxCellComponent } from '../backup-checkbox-cell/backup-checkbox-cell.component';
 import { BackupConnectionCellComponent } from '../backup-connection-cell/backup-connection-cell.component';
 import { BackupEndpointsService } from '../backup-endpoints.service';
-import { BackupRestoreCellComponent } from '../backup-restore-cell/backup-restore-cell.component';
 import { BackupEndpointTypes } from '../backup-restore.types';
 
 @Component({
@@ -30,7 +30,7 @@ import { BackupEndpointTypes } from '../backup-restore.types';
     BackupEndpointsService
   ]
 })
-export class BackupEndpointsComponent implements OnInit {
+export class BackupEndpointsComponent {
 
   // Step 1
   columns: ITableColumn<EndpointModel>[] = [
@@ -51,7 +51,7 @@ export class BackupEndpointsComponent implements OnInit {
     {
       columnId: 'endpoint',
       headerCell: () => 'Backup',
-      cellComponent: BackupRestoreCellComponent,
+      cellComponent: BackupCheckboxCellComponent,
       cellConfig: {
         type: BackupEndpointTypes.ENDPOINT
       }
@@ -130,9 +130,6 @@ export class BackupEndpointsComponent implements OnInit {
     );
   }
 
-  ngOnInit() {
-  }
-
   onNext: StepOnNextFunction = () => {
     const confirmation = new ConfirmationDialogConfig(
       'Backup',
@@ -149,11 +146,6 @@ export class BackupEndpointsComponent implements OnInit {
     };
 
     const backupSuccess = data => {
-      result.next({
-        success: true,
-        redirect: true,
-      });
-
       const downloadURL = window.URL.createObjectURL(data);
       const link = document.createElement('a');
       link.href = downloadURL;
@@ -161,6 +153,11 @@ export class BackupEndpointsComponent implements OnInit {
       const dateTime = moment().format('YYYYMMDD-HHmmss');
       link.download = `stratos_backup_${dateTime}.bk`;
       link.click();
+
+      result.next({
+        success: true,
+        redirect: true,
+      });
     };
 
     const backupFailure = err => {

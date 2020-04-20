@@ -61,6 +61,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	deleteCNSI = datastore.ModifySQLStatement(deleteCNSI, databaseProvider)
 	updateCNSI = datastore.ModifySQLStatement(updateCNSI, databaseProvider)
 	updateCNSIMetadata = datastore.ModifySQLStatement(updateCNSIMetadata, databaseProvider)
+	countCNSI = datastore.ModifySQLStatement(countCNSI, databaseProvider)
 }
 
 // List - Returns a list of CNSI Records
@@ -352,8 +353,8 @@ func (p *PostgresCNSIRepository) UpdateMetadata(guid string, metadata string) er
 	return nil
 }
 
-// Overwrite - Creates or Updates CNSI Record
-func (p *PostgresCNSIRepository) Overwrite(endpoint interfaces.CNSIRecord, encryptionKey []byte) error {
+// SaveOrUpdate - Creates or Updates CNSI Record
+func (p *PostgresCNSIRepository) SaveOrUpdate(endpoint interfaces.CNSIRecord, encryptionKey []byte) error {
 	log.Debug("Overwrite CNSI")
 
 	// Is there an existing token?

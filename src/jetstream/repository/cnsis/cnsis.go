@@ -14,7 +14,7 @@ type Repository interface {
 	Save(guid string, cnsiRecord interfaces.CNSIRecord, encryptionKey []byte) error
 	Update(endpoint interfaces.CNSIRecord, encryptionKey []byte) error
 	UpdateMetadata(guid string, metadata string) error
-	Overwrite(endpoint interfaces.CNSIRecord, encryptionKey []byte) error
+	SaveOrUpdate(endpoint interfaces.CNSIRecord, encryptionKey []byte) error
 }
 
 type Endpoint interface {
