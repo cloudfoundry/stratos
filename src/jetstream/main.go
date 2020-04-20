@@ -973,9 +973,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// Apply edits for the given endpoint
 	adminGroup.POST("/endpoint/:id", p.updateEndpoint)
 
-	adminGroup.POST("/endpoints/backup", p.backupEndpoints)
-	adminGroup.POST("/endpoints/restore", p.restoreEndpoints)
-
 	adminGroup.POST("/unregister", p.unregisterCluster)
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 

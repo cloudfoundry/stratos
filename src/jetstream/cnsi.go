@@ -635,39 +635,3 @@ func (p *portalProxy) updateEndpoint(c echo.Context) error {
 
 	return nil
 }
-
-func (p *portalProxy) backupEndpoints(c echo.Context) error {
-	log.Debug("backupEndpoints")
-
-	userID, err := p.GetSessionStringValue(c, "user_id")
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
-	}
-
-	ctb := &cnsiTokenBackup{
-		databaseConnectionPool: p.DatabaseConnectionPool,
-		encryptionKey:          p.Config.EncryptionKeyInBytes,
-		userID:                 userID,
-		p:                      p,
-	}
-
-	return ctb.BackupEndpoints(c)
-}
-
-func (p *portalProxy) restoreEndpoints(c echo.Context) error {
-	log.Debug("restoreEndpoints")
-
-	userID, err := p.GetSessionStringValue(c, "user_id")
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
-	}
-
-	ctb := &cnsiTokenBackup{
-		databaseConnectionPool: p.DatabaseConnectionPool,
-		encryptionKey:          p.Config.EncryptionKeyInBytes,
-		userID:                 userID,
-		p:                      p,
-	}
-
-	return ctb.RestoreEndpoints(c)
-}

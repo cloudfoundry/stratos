@@ -1,4 +1,4 @@
-package main
+package backup
 
 import (
 	"crypto/sha256"
@@ -20,22 +20,23 @@ type cnsiTokenBackup struct {
 	databaseConnectionPool *sql.DB
 	encryptionKey          []byte
 	userID                 string
-	p                      *portalProxy
+	dbVersion              int64
+	p                      interfaces.PortalProxy
 }
 
-// BackupConnectionType - Determine what kind of connection details are stored for an endpoint
-type BackupConnectionType string
+// ConnectionType - Determine what kind of connection details are stored for an endpoint
+type ConnectionType string
 
 const (
-	BACKUP_CONNECTION_NONE    BackupConnectionType = "NONE"
-	BACKUP_CONNECTION_CURRENT                      = "CURRENT"
-	BACKUP_CONNECTION_ALL                          = "ALL"
+	BACKUP_CONNECTION_NONE    ConnectionType = "NONE"
+	BACKUP_CONNECTION_CURRENT                = "CURRENT"
+	BACKUP_CONNECTION_ALL                    = "ALL"
 )
 
 // BackupEndpointsState - For a given endpoint define what's backed up
 type BackupEndpointsState struct {
-	Endpoint bool                 `json:"endpoint"`
-	Connect  BackupConnectionType `json:"connect"`
+	Endpoint bool           `json:"endpoint"`
+	Connect  ConnectionType `json:"connect"`
 }
 
 // BackupRequest - Request from client to create a back up file
@@ -160,14 +161,9 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 	}
 
 	// Add the db version to the response, this will allow client side up front validation
-	versions, err := ctb.p.getVersionsData()
-	if err != nil {
-		return nil, interfaces.NewHTTPShadowError(http.StatusBadGateway, "Could not find database version", "Could not find database version: %+v", err)
-	}
-
 	response := &BackupContent{
 		Payload:   encryptedPayload,
-		DBVersion: versions.DatabaseVersion,
+		DBVersion: ctb.dbVersion,
 	}
 
 	return response, nil
@@ -221,13 +217,8 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 
 	// Check that the db version of backup file matches the stratos db version
 	if backup.IgnoreDbVersion == false {
-		versions, err := ctb.p.getVersionsData()
-		if err != nil {
-			return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Could not find database version", "Could not find database version: %+v", err)
-		}
-
-		if versions.DatabaseVersion != data.DBVersion {
-			errorStr := fmt.Sprintf("Incompatible database versions. Expected %+v but got %+v", versions.DatabaseVersion, data.DBVersion)
+		if ctb.dbVersion != data.DBVersion {
+			errorStr := fmt.Sprintf("Incompatible database versions. Expected %+v but got %+v", ctb.dbVersion, data.DBVersion)
 			return interfaces.NewHTTPError(http.StatusBadRequest, errorStr)
 		}
 	}
