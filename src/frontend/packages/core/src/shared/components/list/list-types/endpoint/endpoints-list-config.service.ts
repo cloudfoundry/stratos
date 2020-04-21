@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { filter } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
@@ -27,8 +28,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   cardComponent = EndpointCardComponent;
 
   private singleActions: IListAction<EndpointModel>[];
-
-  private globalActions = [];
 
   public readonly columns: ITableColumn<EndpointModel>[] = [
     {
@@ -90,7 +89,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     }
   ];
 
-
   isLocal = true;
   dataSource: EndpointsDataSource;
   viewType = ListViewTypes.BOTH;
@@ -108,7 +106,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     internalEventMonitorFactory: InternalEventMonitorFactory,
     endpointListHelper: EndpointListHelper,
     favoritesConfigMapper: FavoritesConfigMapper,
-
   ) {
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(
@@ -124,7 +121,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     );
   }
 
-  public getGlobalActions = () => this.globalActions;
+  public getGlobalActions = () => [];
   public getMultiActions = () => [];
   public getSingleActions = () => this.singleActions;
   public getColumns = () => this.columns;
