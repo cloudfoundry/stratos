@@ -35,7 +35,7 @@ export class EntityCatalogEntityStoreHelpers {
     actionBuilderKey: string,
     action: any,
   ): EntityService<Y> {
-    const helper = EntityCatalogHelpers.GetEntityCatalogEntityHelper();
+    const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
     if (isPaginatedAction(action)) {
       throw new Error(`\`${actionBuilderKey}\` action is of type pagination`);
     }
@@ -52,7 +52,7 @@ export class EntityCatalogEntityStoreHelpers {
     actionBuilderKey: string,
     action: any,
   ): PaginationMonitor<Y> {
-    const helper = EntityCatalogHelpers.GetEntityCatalogEntityHelper();
+    const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
     if (!isPaginatedAction(action)) {
       throw new Error(`\`${actionBuilderKey}\` action is not of type pagination`);
     }
@@ -64,7 +64,7 @@ export class EntityCatalogEntityStoreHelpers {
     actionBuilderKey: string,
     action: any,
   ): PaginationObservables<Y> {
-    const helper = EntityCatalogHelpers.GetEntityCatalogEntityHelper();
+    const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
     if (!isPaginatedAction(action)) {
       throw new Error(`\`${actionBuilderKey}\` action is not of type pagination`);
     }
@@ -104,7 +104,7 @@ export class EntityCatalogEntityStoreHelpers {
   ): ActionDispatcher<K, ABC> {
     return <T extends RequestInfoState | ListActionState>(
       ...args: Parameters<ABC[K]>): Observable<T> => {
-      const helper = EntityCatalogHelpers.GetEntityCatalogEntityHelper();
+      const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
 
       const action = builder(...args);
       helper.store.dispatch(action);
@@ -144,7 +144,7 @@ export class EntityCatalogEntityStoreHelpers {
           startWithNull: false
         }
       ): EntityMonitor<Y> =>
-        new EntityMonitor<Y>(EntityCatalogHelpers.GetEntityCatalogEntityHelper().store, entityId, entityKey, getSchema(params.schemaKey), params.startWithNull)
+        new EntityMonitor<Y>(EntityCatalogHelpers.GetEntityCatalogHelper().store, entityId, entityKey, getSchema(params.schemaKey), params.startWithNull)
       ,
       getEntityService: (
         ...args: Parameters<ABC['get']>
@@ -199,7 +199,7 @@ export class EntityCatalogEntityStoreHelpers {
               throw new Error(`\`${key}\` action is of type pagination`);
             }
             return new EntityMonitor<Y>(
-              EntityCatalogHelpers.GetEntityCatalogEntityHelper().store,
+              EntityCatalogHelpers.GetEntityCatalogHelper().store,
               action.guid,
               entityKey,
               getSchema(action.schemaKey),

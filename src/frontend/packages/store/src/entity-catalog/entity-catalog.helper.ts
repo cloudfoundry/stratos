@@ -1,4 +1,4 @@
-import { EntityCatalogHelper as EntityCatalogEntityHelper } from './entity-catalog-entity/entity-catalog.service';
+import { EntityCatalogHelper } from './entity-catalog-entity/entity-catalog.service';
 
 export abstract class EntityCatalogHelpers {
   static readonly endpointType = 'endpoint';
@@ -13,11 +13,11 @@ export abstract class EntityCatalogHelpers {
     return `${endpointType}${entityType.charAt(0).toUpperCase() + entityType.slice(1)}`;
   }
 
-  private static Instance: EntityCatalogEntityHelper;
-  static SetEntityCatalogEntityHelper(ecf: EntityCatalogEntityHelper) {
+  private static Instance: EntityCatalogHelper;
+  static SetEntityCatalogHelper(ecf: EntityCatalogHelper) {
     this.Instance = ecf;
   }
-  static GetEntityCatalogEntityHelper(): EntityCatalogEntityHelper {
+  static GetEntityCatalogHelper(): EntityCatalogHelper {
     return this.Instance;
   }
 }
