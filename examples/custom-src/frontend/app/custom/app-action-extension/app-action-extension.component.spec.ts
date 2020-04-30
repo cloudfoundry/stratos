@@ -1,10 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { AppActionExtensionComponent } from './app-action-extension.component';
-import { CoreModule } from '../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
+
+import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
 import { createBasicStoreModule } from '@stratosui/store/testing';
+import { AppActionExtensionComponent } from './app-action-extension.component';
 
 describe('AppActionExtensionComponent', () => {
   let component: AppActionExtensionComponent;
