@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { createBasicStoreModule } from '@stratos/store/testing';
 import { IQuotaDefinition } from '../../../../../../core/cf-api.types';
 import { TableCellQuotaComponent } from './table-cell-quota.component';
 

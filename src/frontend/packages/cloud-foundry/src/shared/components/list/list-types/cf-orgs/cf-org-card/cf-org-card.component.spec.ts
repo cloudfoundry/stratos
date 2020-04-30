@@ -1,13 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
+import { testSessionData } from '@stratosui/store/testing';
 
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
+import { VerifiedSession } from '../../../../../../../../store/src/actions/auth.actions';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
-import { testSessionData } from '@stratos/store/testing';
-import { VerifiedSession } from '../../../../../../../../store/src/actions/auth.actions';
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,

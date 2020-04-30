@@ -95,19 +95,8 @@ src/jetstream/console-database.db
 src/jetstream/config.properties
 src/jetstream/db/dbconf.yml
 
-# Customisations
-
-src/frontend/packages/core/favicon.ico
-src/frontend/packages/core/sass/custom.scss
-src/frontend/packages/core/assets/eula.html
-src/frontend/packages/core/assets/logo.png
-src/frontend/packages/core/assets/nav-logo.png
-src/frontend/packages/core/assets/login-bg.jpg
-src/frontend/packages/core/src/custom-import.module.ts
-src/frontend/packages/core/src/custom
-src/frontend/packages/core/assets/custom
-src/frontend/packages/core/sass/custom
-src/frontend/packages/core/src/index.html
+# Customisation - generated import module
+src/frontend/packages/core/src/_custom-import.module.ts
 
 # Prebuild package
 
@@ -116,3 +105,5 @@ stratos-frontend-prebuild.zip
 src/frontend/assets
 src/frontend/sass
 go-vendor-*.tgz
+
+/dist-tools

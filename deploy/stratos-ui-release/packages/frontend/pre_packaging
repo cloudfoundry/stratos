@@ -4,7 +4,6 @@ set -e -x
 cd ${BUILD_DIR}/stratos
 
 npm install
-npm run customize
 export PATH=$PATH:$PWD/node_modules/.bin
 npm run build
 

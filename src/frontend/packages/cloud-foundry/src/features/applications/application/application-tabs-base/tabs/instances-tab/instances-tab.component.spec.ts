@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { testSCFEndpointGuid } from '@stratosui/store/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
@@ -9,7 +10,6 @@ import {
 import { CF_GUID } from '../../../../../../../../core/src/shared/entity.tokens';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { ApplicationServiceMock } from '../../../../../../../../core/test-framework/application-service-helper';
-import { testSCFEndpointGuid } from '@stratos/store/testing';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
 import {
   generateCfStoreModules,

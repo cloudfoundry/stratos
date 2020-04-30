@@ -10,7 +10,6 @@ curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 # Build backend
 npm install
-npm run customize
 export PATH=$PATH:$PWD/node_modules/.bin
 npm run bosh-build-backend
 

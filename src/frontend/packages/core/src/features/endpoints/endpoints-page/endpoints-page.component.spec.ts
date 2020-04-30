@@ -3,15 +3,15 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { appReducers } from '../../../../../store/src/reducers.module';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { EndpointsPageComponent } from './endpoints-page.component';
 import { SidePanelService } from './../../../shared/services/side-panel.service';
+import { EndpointsPageComponent } from './endpoints-page.component';
 
 describe('EndpointsPageComponent', () => {
   let component: EndpointsPageComponent;

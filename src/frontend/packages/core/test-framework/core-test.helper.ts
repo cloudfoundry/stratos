@@ -28,7 +28,7 @@ import {
 import { MultilineTitleComponent } from '../src/shared/components/multiline-title/multiline-title.component';
 import { SharedModule } from '../src/shared/shared.module';
 import { CoreTestingModule } from './core-test.modules';
-import { createBasicStoreModule } from '@stratos/store/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
 export function generateBaseTestStoreModules() {
   return [

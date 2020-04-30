@@ -12,7 +12,7 @@ import {
   createBasicStoreModule,
   createEntityStoreState,
   TestStoreEntity,
-} from '@stratos/store/testing';
+} from '@stratosui/store/testing';
 import { SetInitialParams } from '../../../store/src/actions/pagination.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { InternalAppState, IRequestTypeState } from '../../../store/src/app-state';
