@@ -4,10 +4,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, tap } from 'rxjs/operators';
 
-import { AppMetadataTypes, GetAppStatsAction } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { AppMetadataTypes } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { UpdateExistingApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType, appStatsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppSummary } from '../../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { getFullEndpointApiUrl } from '../../../../../../../../core/src/features/endpoints/endpoint-helpers';
@@ -16,11 +15,10 @@ import { ConfirmationDialogService } from '../../../../../../../../core/src/shar
 import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shared/data-services/scm/scm.service';
 import { ENTITY_SERVICE } from '../../../../../../../../core/src/shared/entity.tokens';
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
@@ -174,10 +172,7 @@ export class BuildTabComponent implements OnInit {
 
   private dispatchAppStats = () => {
     const { cfGuid, appGuid } = this.applicationService;
-    const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
-    const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
-    const getAppStatsAction = actionBuilder(appGuid, cfGuid);
-    this.store.dispatch(getAppStatsAction);
+    cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid);
   }
 
   restartApplication() {
@@ -237,18 +232,14 @@ export class BuildTabComponent implements OnInit {
     this.updateApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
       // On app reaching the 'STOPPED' state clear the app's stats pagination section
       const { cfGuid, appGuid } = this.applicationService;
-      const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
-      const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
-      const getAppStatsAction = actionBuilder(appGuid, cfGuid) as GetAppStatsAction;
+      const getAppStatsAction = cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid);
       this.store.dispatch(new ResetPagination(getAppStatsAction, getAppStatsAction.paginationKey));
     });
   }
 
   restageApplication() {
     const { cfGuid, appGuid } = this.applicationService;
-    const appEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-    const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('restage');
-    const restageAppAction = actionBuilder(appGuid, cfGuid);
+    const restageAppAction = cfEntityCatalog.application.actions.restage(appGuid, cfGuid)
     this.confirmAndPollForState(
       appRestageConfirmation,
       () => this.store.dispatch(restageAppAction),

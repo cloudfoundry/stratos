@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
 import { userProfileEntitySchema } from '../../../core/src/base-entity-schemas';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
 import { environment } from '../../../core/src/environments/environment';
 import {
   FetchUserProfileAction,
@@ -15,6 +14,7 @@ import {
   UpdateUserPasswordAction,
   UpdateUserProfileAction,
 } from '../actions/user-profile.actions';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { UserProfileInfo } from '../types/user-profile.types';
 import { DispatchOnlyAppState } from './../app-state';

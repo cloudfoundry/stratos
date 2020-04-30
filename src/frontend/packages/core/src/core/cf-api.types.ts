@@ -182,6 +182,7 @@ export interface IOrganization<T = unknown> {
   default_isolation_segment_guid?: any;
   quota_definition_url?: string;
   spaces_url?: string;
+  domains: APIResource<IDomain>[];
   domains_url?: string;
   private_domains_url?: string;
   users?: APIResource<CfUser>[];

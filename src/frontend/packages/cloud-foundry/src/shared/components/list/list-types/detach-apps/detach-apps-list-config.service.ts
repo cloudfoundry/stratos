@@ -26,7 +26,7 @@ export class DetachAppsListConfigService implements IListConfig<APIResource> {
     columnId: 'appName',
     headerCell: () => 'App Name',
     cellDefinition: {
-      getValue: (row: APIResource) => `${row.entity.app.entity.name}`
+      valuePath: 'entity.app.entity.name'
     },
     sort: {
       type: 'sort',

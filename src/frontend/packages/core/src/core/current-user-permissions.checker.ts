@@ -2,9 +2,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
-import {
-  createCfFeatureFlagFetchAction,
-} from '../../../cloud-foundry/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import { cfEntityCatalog } from '../../../cloud-foundry/src/cf-entity-catalog';
 import {
   getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
@@ -16,8 +14,6 @@ import {
   ISpacesRoleState,
 } from '../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
-import { PaginationMonitor } from '../../../store/src/monitors/pagination-monitor';
-import { getPaginationObservables } from '../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
@@ -194,24 +190,11 @@ export class CurrentUserPermissionsChecker {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
       switchMap(guids => {
-        const createFFObs = guid => {
+        const createFFObs = guid =>
           // For admins we don't have the ff list which is usually fetched right at the start,
           // so this can't be a pagination monitor on its own (which doesn't fetch if list is missing)
-          const action = createCfFeatureFlagFetchAction(guid);
-          return getPaginationObservables<IFeatureFlag>(
-            {
-              store: this.store,
-              action,
-              paginationMonitor: new PaginationMonitor<IFeatureFlag>(
-                this.store,
-                action.paginationKey,
-                action,
-                true
-              )
-            },
-            true
-          ).entities$;
-        };
+          cfEntityCatalog.featureFlag.store.getPaginationService(guid).entities$
+          ;
 
         return combineLatest(guids.map(createFFObs));
       }),

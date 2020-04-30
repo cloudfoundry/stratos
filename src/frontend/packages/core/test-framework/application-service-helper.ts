@@ -11,12 +11,10 @@ import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types'
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
-import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../src/shared/components/application-state/application-state.service';
-import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -91,28 +89,22 @@ export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: 
     provide: ApplicationService,
     useFactory: (
       store: Store<CFAppState>,
-      entityServiceFactory: EntityServiceFactory,
       applicationStateService: ApplicationStateService,
       applicationEnvVarsService: ApplicationEnvVarsHelper,
-      paginationMonitorFactory: PaginationMonitorFactory,
     ) => {
       const appService = new ApplicationService(
         cfGuid,
         appGuid,
         store,
-        entityServiceFactory,
         applicationStateService,
         applicationEnvVarsService,
-        paginationMonitorFactory
       );
       return appService;
     },
     deps: [
       Store,
-      EntityServiceFactory,
       ApplicationStateService,
       ApplicationEnvVarsHelper,
-      PaginationMonitorFactory
     ]
   };
 }

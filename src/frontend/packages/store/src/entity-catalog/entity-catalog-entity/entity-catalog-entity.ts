@@ -1,26 +1,24 @@
-import { ActionReducer, Store } from '@ngrx/store';
+import { ActionReducer } from '@ngrx/store';
 
-import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { getFullEndpointApiUrl } from '../../../core/src/features/endpoints/endpoint-helpers';
-import { AppState, IRequestEntityTypeState } from '../app-state';
+import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
+import { KnownKeys, NonOptionalKeys } from '../../../../core/src/core/utils.service';
+import { getFullEndpointApiUrl } from '../../../../core/src/features/endpoints/endpoint-helpers';
+import { IRequestEntityTypeState } from '../../app-state';
 import {
   PaginationPageIteratorConfig,
-} from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
-import { EntityPipelineEntity, stratosEndpointGuidKey } from '../entity-request-pipeline/pipeline.types';
-import { EntitySchema } from '../helpers/entity-schema';
-import { EntityMonitor } from '../monitors/entity-monitor';
-import { EndpointModel } from '../types/endpoint.types';
-import { APISuccessOrFailedAction, EntityRequestAction } from '../types/request.types';
-import { IEndpointFavMetadata } from '../types/user-favorites.types';
-import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
-import { EntityActionDispatcherManager } from './action-dispatcher/action-dispatcher';
+} from '../../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
+import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../entity-request-pipeline/pipeline.types';
+import { EntitySchema } from '../../helpers/entity-schema';
+import { EndpointModel } from '../../types/endpoint.types';
+import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
+import { IEndpointFavMetadata } from '../../types/user-favorites.types';
 import {
   ActionBuilderAction,
   ActionOrchestrator,
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
-} from './action-orchestrator/action-orchestrator';
-import { EntityCatalogHelpers } from './entity-catalog.helper';
+} from '../action-orchestrator/action-orchestrator';
+import { EntityCatalogHelpers } from '../entity-catalog.helper';
 import {
   EntityCatalogSchemas,
   IEntityMetadata,
@@ -29,12 +27,17 @@ import {
   IStratosEntityBuilder,
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
-} from './entity-catalog.types';
+} from '../entity-catalog.types';
+import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
+import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
+import { EntityCatalogEntityStore } from './entity-catalog-entity.types';
+
+export type KnownActionBuilders<ABC extends OrchestratedActionBuilders> = Pick<ABC, NonOptionalKeys<Pick<ABC, KnownKeys<ABC>>>>
 
 export interface EntityCatalogBuilders<
   T extends IEntityMetadata = IEntityMetadata,
   Y = any,
-  AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders
+  AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders,
   > {
   entityBuilder?: IStratosEntityBuilder<T, Y>;
   // Allows extensions to modify entities data in the store via none API Effect or unrelated actions.
@@ -49,15 +52,9 @@ export class StratosBaseCatalogEntity<
   Y = any,
   AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilderConfig,
   // This typing may cause an issue down the line.
-  ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders
+  ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders,
   > {
-  public readonly entityKey: string;
-  public readonly type: string;
-  public readonly definition: DefinitionTypes;
-  public readonly isEndpoint: boolean;
-  public readonly actionDispatchManager: EntityActionDispatcherManager<ABC>;
-  public readonly actionOrchestrator: ActionOrchestrator<ABC>;
-  public readonly endpointType: string;
+
   constructor(
     definition: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition,
     public readonly builders: EntityCatalogBuilders<T, Y, AB> = {}
@@ -77,9 +74,50 @@ export class StratosBaseCatalogEntity<
       this.type,
       (schemaKey: string) => this.getSchema(schemaKey)
     );
+
+    this.actions = actionBuilders as KnownActionBuilders<ABC>;
+
     this.actionOrchestrator = new ActionOrchestrator<ABC>(this.entityKey, actionBuilders as ABC);
-    this.actionDispatchManager = this.actionOrchestrator.getEntityActionDispatcher();
+
+    this.store = {
+      ...EntityCatalogEntityStoreHelpers.createCoreStore<Y, ABC>(
+        this.actionOrchestrator,
+        this.entityKey,
+        Object.bind(this.getSchema, this)
+      ),
+      ...EntityCatalogEntityStoreHelpers.getPaginationStore<Y>(
+        this.actions,
+        this.entityKey,
+        Object.bind(this.getSchema, this)
+      )
+    } as EntityCatalogEntityStore<Y, ABC>; // TODO: RC investigate more
+    this.api = EntityCatalogEntityStoreHelpers.getActionDispatchers(
+      this.store,
+      actionBuilders as ABC
+    );
   }
+
+
+  /**
+   * Create actions specific to the entity type
+   */
+  public readonly actions: KnownActionBuilders<ABC>;
+  /**
+   * Create and dispatch actions specific to the entity type. Response will provide an observable reporting entity or pagination state
+   */
+  public readonly api: ActionDispatchers<KnownActionBuilders<ABC>>;
+  /**
+   * Monitor an entity or collection of entities. Services will fetch the entity/entities if missing, monitors will not
+   */
+  public readonly store: EntityCatalogEntityStore<Y, ABC>;
+
+
+  public readonly entityKey: string;
+  public readonly type: string;
+  public readonly definition: DefinitionTypes;
+  public readonly isEndpoint: boolean;
+  public readonly actionOrchestrator: ActionOrchestrator<ABC>;
+  public readonly endpointType: string;
 
   private populateEntitySchemaKey(entitySchemas: EntityCatalogSchemas): EntityCatalogSchemas {
     return Object.keys(entitySchemas).reduce((newSchema, schemaKey) => {
@@ -143,17 +181,6 @@ export class StratosBaseCatalogEntity<
 
   public getEndpointGuidFromEntity(entity: Y & EntityPipelineEntity) {
     return entity[stratosEndpointGuidKey];
-  }
-
-  public getEntityMonitor<Q extends AppState, B = any>(
-    store: Store<Q>,
-    entityId: string,
-    {
-      schemaKey = '',
-      startWithNull = false
-    } = {}
-  ) {
-    return new EntityMonitor<B>(store, entityId, this.entityKey, this.getSchema(schemaKey), startWithNull);
   }
 
   public getTypeAndSubtype() {
@@ -229,8 +256,8 @@ export class StratosCatalogEntity<
   T extends IEntityMetadata = IEntityMetadata,
   Y = any,
   AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders,
-  ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders
-  > extends StratosBaseCatalogEntity<T, Y, AB> {
+  ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders,
+  > extends StratosBaseCatalogEntity<T, Y, AB, ABC> {
   public definition: IStratosEntityDefinition<EntityCatalogSchemas, Y, ABC>;
   constructor(
     entity: IStratosEntityDefinition,
@@ -284,3 +311,4 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
     });
   }
 }
+

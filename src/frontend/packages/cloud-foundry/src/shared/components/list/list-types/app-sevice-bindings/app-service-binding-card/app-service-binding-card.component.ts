@@ -19,16 +19,10 @@ import {
 } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
-import {
-  serviceBindingEntityType,
-  serviceInstancesEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../../../cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { serviceBindingEntityType } from '../../../../../../cf-entity-types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { isUserProvidedServiceInstance } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
@@ -73,7 +67,6 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   constructor(
     private dialog: MatDialog,
     private datePipe: DatePipe,
-    private entityServiceFactory: EntityServiceFactory,
     private appService: ApplicationService,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
@@ -126,16 +119,12 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsServiceInstance() {
-    const serviceInstanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
-    const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('get');
-    const getServiceInstanceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid);
-    const serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
-      this.row.entity.service_instance_guid,
-      getServiceInstanceAction
+    const serviceInstance$ = cfEntityCatalog.serviceInstance.store.getEntityService(
+      this.row.entity.service_instance_guid, this.appService.cfGuid
     ).waitForEntity$;
     this.serviceInstance$ = serviceInstance$;
     this.service$ = serviceInstance$.pipe(
-      switchMap(o => getCfService(o.entity.entity.service_guid, this.appService.cfGuid, this.entityServiceFactory).waitForEntity$),
+      switchMap(o => getCfService(o.entity.entity.service_guid, this.appService.cfGuid).waitForEntity$),
       filter(service => !!service)
     );
     this.listData = [{
@@ -163,7 +152,6 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
               return getServiceBrokerName(
                 service.entity.entity.service_broker_guid,
                 serviceInstance.cfGuid,
-                this.entityServiceFactory
               );
             })
           );
@@ -188,12 +176,8 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsUserProvidedServiceInstance() {
-    const serviceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
-    const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('get');
-    const getUserProvidedServiceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid);
-    const userProvidedServiceInstance$ = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
-      this.row.entity.service_instance_guid,
-      getUserProvidedServiceAction
+    const userProvidedServiceInstance$ = cfEntityCatalog.userProvidedService.store.getEntityService(
+      this.row.entity.service_instance_guid, this.appService.cfGuid
     ).waitForEntity$;
     this.serviceInstance$ = userProvidedServiceInstance$;
     this.service$ = of(null);

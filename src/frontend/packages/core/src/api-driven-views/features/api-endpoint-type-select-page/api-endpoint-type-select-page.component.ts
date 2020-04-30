@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 
 import { GeneralAppState } from '../../../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { ApiEntityType } from '../../api-drive-views.types';
 
 @Component({

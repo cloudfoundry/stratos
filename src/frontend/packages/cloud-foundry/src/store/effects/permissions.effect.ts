@@ -19,7 +19,7 @@ import {
 
 import { LoggerService } from '../../../../core/src/core/logger.service';
 import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../../../../store/src/actions/endpoint.actions';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import {
   BaseHttpClientFetcher,
   flattenPagination,
@@ -44,9 +44,7 @@ import {
   UserRelationTypes,
 } from '../../actions/permissions.actions';
 import { CFAppState } from '../../cf-app-state';
-import {
-  createCfFeatureFlagFetchAction,
-} from '../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { CFResponse } from '../types/cf-api.types';
 
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements PaginationFlattener<CFResponse, CFResponse> {
@@ -213,7 +211,7 @@ export class PermissionsEffects {
         this.store.dispatch(new GetUserCfRelations(endpoint.guid, GET_CURRENT_USER_CF_RELATIONS));
 
         // Dispatch feature flags fetch actions
-        const ffAction = createCfFeatureFlagFetchAction(endpoint.guid);
+        const ffAction = cfEntityCatalog.featureFlag.actions.getMultiple(endpoint.guid)
         requests[endpoint.guid] = [createPaginationCompleteWatcher(this.store, ffAction)];
         this.store.dispatch(ffAction);
 

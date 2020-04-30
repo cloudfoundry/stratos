@@ -5,20 +5,12 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import {
-  AssociateSpaceQuota,
-  DisassociateSpaceQuota,
-} from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
+import { AssociateSpaceQuota } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { UpdateSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { spaceEntityType, spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
-import { SpaceQuotaDefinitionActionBuilders } from '../../../../entity-action-builders/space-quota.action-builders';
+import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
@@ -43,11 +35,10 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   constructor(
     store: Store<CFAppState>,
     activatedRoute: ActivatedRoute,
-    paginationMonitorFactory: PaginationMonitorFactory,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private cfSpaceService: CloudFoundrySpaceService
+    private cfSpaceService: CloudFoundrySpaceService,
   ) {
-    super(store, activatedRoute, paginationMonitorFactory, activeRouteCfOrgSpace);
+    super(store, activatedRoute, activeRouteCfOrgSpace);
     this.spaceGuid = activatedRoute.snapshot.params.spaceId;
     this.editSpaceForm = new FormGroup({
       spaceName: new FormControl('', this.spaceNameTakenValidator()),
@@ -111,15 +102,10 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   }
 
   updateSpace$() {
-    const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
-    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('update');
-    const updateSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid, {
+    return cfEntityCatalog.space.api.update<RequestInfoState>(this.spaceGuid, this.cfGuid, {
       name: this.editSpaceForm.value.spaceName,
       allow_ssh: this.editSpaceForm.value.toggleSsh as boolean,
-    });
-    this.store.dispatch(updateSpaceAction);
-
-    return this.store.select(selectRequestInfo(updateSpaceAction, this.spaceGuid)).pipe(
+    }).pipe(
       filter(o => !!o && !o.updating[UpdateSpace.UpdateExistingSpace].busy),
       map((state) => state.updating[UpdateSpace.UpdateExistingSpace])
     );
@@ -127,26 +113,10 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
 
   updateSpaceQuota$() {
     const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
-    let spaceQuotaQueryGuid;
-    let action: AssociateSpaceQuota | DisassociateSpaceQuota;
-
-    const spaceQuotaEntity = entityCatalog.getEntity<IEntityMetadata, any, SpaceQuotaDefinitionActionBuilders>(
-      CF_ENDPOINT_TYPE,
-      spaceQuotaEntityType
-    );
-    if (spaceQuotaGuid) {
-      spaceQuotaQueryGuid = spaceQuotaGuid;
-      const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('associateWithSpace');
-      action = actionBuilder(this.spaceGuid, this.cfGuid, spaceQuotaQueryGuid) as AssociateSpaceQuota;
-    } else {
-      spaceQuotaQueryGuid = this.originalSpaceQuotaGuid;
-      const actionBuilder = spaceQuotaEntity.actionOrchestrator.getActionBuilder('disassociateFromSpace');
-      action = actionBuilder(this.spaceGuid, this.cfGuid, spaceQuotaQueryGuid) as DisassociateSpaceQuota;
-    }
-    this.store.dispatch(action);
-
-
-    return this.store.select(selectRequestInfo(action, spaceQuotaQueryGuid)).pipe(
+    const mon = spaceQuotaGuid ?
+      cfEntityCatalog.spaceQuota.api.associateWithSpace<RequestInfoState>(this.spaceGuid, this.cfGuid, spaceQuotaGuid) :
+      cfEntityCatalog.spaceQuota.api.disassociateFromSpace<RequestInfoState>(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid)
+    return mon.pipe(
       filter(o => {
         return !!o &&
           o.updating[AssociateSpaceQuota.UpdateExistingSpaceQuota] &&

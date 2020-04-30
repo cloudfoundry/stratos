@@ -1,19 +1,12 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { GetOrganizationSpaceQuotaDefinitions } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
-import { spaceQuotaEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
+import { cfEntityCatalog } from '../../../../../cloud-foundry/src/cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { AppState } from '../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 
@@ -28,15 +21,13 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   cfGuid: string;
   orgGuid: string;
   allQuotas: string[];
-  spaceQuotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
+  spaceQuotaDefinitions$: Observable<string[]>;
   formGroup: FormGroup;
 
   @Input() quota: IQuotaDefinition;
 
   constructor(
-    private store: Store<AppState>,
     private activatedRoute: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
     this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
     this.orgGuid = this.activatedRoute.snapshot.params.orgId;
@@ -65,24 +56,16 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   fetchQuotasDefinitions() {
-    const spaceQuotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    const action = new GetOrganizationSpaceQuotaDefinitions(spaceQuotaPaginationKey, this.orgGuid, this.cfGuid);
-    this.spaceQuotaDefinitions$ = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          spaceQuotaPaginationKey,
-          cfEntityFactory(spaceQuotaEntityType),
-          action.flattenPagination
-        )
-      },
-      action.flattenPagination
-    ).entities$.pipe(
-      filter(o => !!o),
-      map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allQuotas = o)
-    );
+    this.spaceQuotaDefinitions$ = cfEntityCatalog.spaceQuota.store.getAllInOrganization.getPaginationService(
+      this.orgGuid,
+      this.cfGuid,
+      createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid)
+    ).entities$
+      .pipe(
+        filter(o => !!o),
+        map(o => o.map(org => org.entity.name)),
+        tap((o) => this.allQuotas = o)
+      );
 
     this.quotasSubscription = this.spaceQuotaDefinitions$.subscribe();
   }
