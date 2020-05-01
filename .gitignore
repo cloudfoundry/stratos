@@ -52,7 +52,6 @@ environment.dev.ts
 #v1
 *.iml
 docs/src
-lib
 tools/test-backend/config/mock.config.json
 tools/.coverage-karma/
 dev-certs/*

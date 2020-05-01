@@ -1,5 +1,5 @@
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
 
 import { StratosConfig } from '../lib/stratos.config';
 
@@ -24,19 +24,26 @@ export class IndexHtmlHandler {
 
     // Loading view (provided by theme)
     if (this.config.themePackageJson.stratos && this.config.themePackageJson.stratos.theme) {
-      console.log('Theme has custom loading screen');
       const css = this.config.themePackageJson.stratos.theme.loadingCss;
       const html = this.config.themePackageJson.stratos.theme.loadingHtml;
-      const cssFile = path.resolve(this.config.themePackageFolder, css);
-      const htmlFile = path.resolve(this.config.themePackageFolder, html);
 
-      const loadingCss = fs.readFileSync(cssFile, 'utf8');
-      src = src.replace(/\/\*\* @@LOADING_CSS@@ \*\*\//g, loadingCss);
+      if (css) {
+        const cssFile = path.resolve(this.config.themePackageFolder, css);
+        if (fs.existsSync(cssFile)) {
+          console.log('css file exists');
+          const loadingCss = fs.readFileSync(cssFile, 'utf8');
+          src = src.replace(/\/\*\* @@LOADING_CSS@@ \*\*\//g, loadingCss);
+        }
+      }
 
-      const loadingHtml = fs.readFileSync(htmlFile, 'utf8');
-      src = src.replace(/<!-- @@LOADING_HTML@@ -->/g, loadingHtml);
+      if (html) {
+        const htmlFile = path.resolve(this.config.themePackageFolder, html);
+        if (fs.existsSync(htmlFile)) {
+          const loadingHtml = fs.readFileSync(htmlFile, 'utf8');
+          src = src.replace(/<!-- @@LOADING_HTML@@ -->/g, loadingHtml);
+        }
+      }
     }
-
     return src;
   }
 }

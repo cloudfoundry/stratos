@@ -1,0 +1,19 @@
+{
+  "name": "@custom/theme",
+  "version": "0.0.1",
+  "stratos": {
+    "assets": {
+      "assets/core": "core/assets",
+      "assets/favicon.ico": "favicon.ico"
+    },
+    "theme":{
+      "loadingCss": "loader/loading.css",
+      "loadingHtml": "loader/loading.html"
+    }
+  },
+  "peerDependencies": {
+  },
+  "scripts": {
+    "build": "rm -rf ../../../../dist/theme && mkdir -p ../../../../dist/theme && cp -R * ../../../../dist/theme"
+  }
+}
