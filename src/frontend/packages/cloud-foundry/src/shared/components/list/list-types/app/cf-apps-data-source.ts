@@ -51,7 +51,9 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
     startingCfGuidFilter?: string
   ) {
     const syncNeeded = paginationKey !== seedPaginationKey;
-    const action = cfEntityCatalog.application.actions.getMultiple(undefined, CfAppsDataSource.paginationKey);
+    const action = cfEntityCatalog.application.actions.getMultiple(undefined, CfAppsDataSource.paginationKey, {
+      includeRelations: CfAppsDataSource.includeRelations,
+    });
 
     const dispatchSequencer = new DispatchSequencer(store);
 

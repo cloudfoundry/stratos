@@ -79,7 +79,9 @@ export class DeployApplicationStep3Component implements OnDestroy {
       this.appGuid = guid;
 
       // Update the root app wall list
-      cfEntityCatalog.application.api.getMultiple(undefined, CfAppsDataSource.paginationKey);
+      cfEntityCatalog.application.api.getMultiple(undefined, CfAppsDataSource.paginationKey, {
+        includeRelations: CfAppsDataSource.includeRelations,
+      });
 
       // Pre-fetch the app env vars
       cfEntityCatalog.appEnvVar.api.getMultiple(this.appGuid, this.deployer.cfGuid);
