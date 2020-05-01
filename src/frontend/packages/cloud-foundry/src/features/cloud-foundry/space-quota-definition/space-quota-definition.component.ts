@@ -58,7 +58,7 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
     const quotaGuid$ = this.quotaGuid ? of(this.quotaGuid) : this.space$.pipe(map(space => space.entity.space_quota_definition_guid));
     const entityInfo$ = quotaGuid$.pipe(
       first(),
-      switchMap(quotaGuid => cfEntityCatalog.spaceQuota.store.getEntityService(quotaGuid, this.cfGuid).entityObs$)
+      switchMap(quotaGuid => cfEntityCatalog.spaceQuota.store.getEntityService(quotaGuid, this.cfGuid, {}).entityObs$)
     );
 
     this.quotaDefinition$ = entityInfo$.pipe(

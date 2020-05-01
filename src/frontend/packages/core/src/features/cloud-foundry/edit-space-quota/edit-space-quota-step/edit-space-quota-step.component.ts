@@ -41,7 +41,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
   }
 
   fetchQuotaDefinition() {
-    this.spaceQuotaDefinition$ = cfEntityCatalog.spaceQuota.store.getEntityService(this.spaceQuotaGuid, this.cfGuid).waitForEntity$.pipe(
+    this.spaceQuotaDefinition$ = cfEntityCatalog.spaceQuota.store.getEntityService(this.spaceQuotaGuid, this.cfGuid, {}).waitForEntity$.pipe(
       map(data => data.entity),
       tap((resource) => this.quota = resource.entity)
     );

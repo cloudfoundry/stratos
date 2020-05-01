@@ -193,9 +193,7 @@ export class CurrentUserPermissionsChecker {
         const createFFObs = guid =>
           // For admins we don't have the ff list which is usually fetched right at the start,
           // so this can't be a pagination monitor on its own (which doesn't fetch if list is missing)
-          cfEntityCatalog.featureFlag.store.getPaginationService(guid).entities$
-          ;
-
+          cfEntityCatalog.featureFlag.store.getPaginationService(guid).entities$;
         return combineLatest(guids.map(createFFObs));
       }),
       map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
