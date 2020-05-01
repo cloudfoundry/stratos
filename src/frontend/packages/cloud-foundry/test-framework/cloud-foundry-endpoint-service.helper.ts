@@ -7,6 +7,7 @@ import { testSCFEndpointGuid } from '@stratos/store/testing';
 
 import { CoreModule } from '../../core/src/core/core.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
+import { AppTestModule } from '../../core/test-framework/core-test.helper';
 import { CfUserServiceTestProvider } from '../../core/test-framework/user-service-helper';
 import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../store/src/monitors/entity-monitor.factory.service';
@@ -174,7 +175,8 @@ export function generateCfStoreModules() {
     StoreModule.forRoot(
       appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } },
       // Do not include initial store here, it's properties will be ignored as they won't have corresponding reducers in appReducers
-    )
+    ),
+    AppTestModule
   ];
 }
 

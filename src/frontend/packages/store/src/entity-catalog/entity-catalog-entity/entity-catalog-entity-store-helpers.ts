@@ -37,10 +37,11 @@ export class EntityCatalogEntityStoreHelpers {
   ): EntityService<Y> {
     const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
     if (isPaginatedAction(action)) {
-      throw new Error(`\`${actionBuilderKey}\` action is of type pagination`);
+      throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` is of type pagination`);
     }
     if (!action.guid) {
-      throw new Error(`\`${actionBuilderKey}\` action has no guid`);
+      console.log('1: ', action);
+      throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` has no guid`);
     }
     return helper.esf.create<Y>(
       action.guid,
@@ -54,7 +55,7 @@ export class EntityCatalogEntityStoreHelpers {
   ): PaginationMonitor<Y> {
     const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
     if (!isPaginatedAction(action)) {
-      throw new Error(`\`${actionBuilderKey}\` action is not of type pagination`);
+      throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` is not of type pagination`);
     }
     const pAction = action as PaginatedAction;
     return helper.pmf.create<Y>(pAction.paginationKey, pAction, pAction.flattenPagination);
@@ -66,7 +67,7 @@ export class EntityCatalogEntityStoreHelpers {
   ): PaginationObservables<Y> {
     const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
     if (!isPaginatedAction(action)) {
-      throw new Error(`\`${actionBuilderKey}\` action is not of type pagination`);
+      throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` is not of type pagination`);
     }
     const pAction = action as PaginatedAction;
     return helper.getPaginationObservables<Y>({
@@ -118,7 +119,7 @@ export class EntityCatalogEntityStoreHelpers {
       const schemaKey = schema ? schema.schemaKey : null;
 
       if (!rAction.guid) {
-        throw new Error(`\`${actionKey}\` action has no guid`);
+        throw new Error(`\`${actionKey}\` action for entity \`${rAction.entityType}\` has no guid`);
       }
 
       return es.getEntityMonitor(

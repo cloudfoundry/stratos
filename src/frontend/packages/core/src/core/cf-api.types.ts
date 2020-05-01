@@ -2,6 +2,8 @@ import { CfUser } from '../../../cloud-foundry/src/store/types/user.types';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IService, IServiceBinding } from './cf-api-svc.types';
 
+// TODO: Move file to CF package (#3769)
+
 export interface StratosCFEntity {
   cfGuid: string;
 }
@@ -140,8 +142,8 @@ export interface IApp<T = unknown> {
   ports?: number[];
   service_bindings?: APIResource<IServiceBinding>[];
   routes?: T extends string ? string[] : APIResource<IRoute>[];
-  stack?: string | APIResource<IStack>;
-  space?: string | APIResource<ISpace>;
+  stack?: T extends string ? string : APIResource<IStack>;
+  space?: T extends string ? string : APIResource<ISpace>;
   space_url?: string;
   stack_url?: string;
   routes_url?: string;
@@ -182,7 +184,7 @@ export interface IOrganization<T = unknown> {
   default_isolation_segment_guid?: any;
   quota_definition_url?: string;
   spaces_url?: string;
-  domains: APIResource<IDomain>[];
+  domains?: APIResource<IDomain>[];
   domains_url?: string;
   private_domains_url?: string;
   users?: APIResource<CfUser>[];

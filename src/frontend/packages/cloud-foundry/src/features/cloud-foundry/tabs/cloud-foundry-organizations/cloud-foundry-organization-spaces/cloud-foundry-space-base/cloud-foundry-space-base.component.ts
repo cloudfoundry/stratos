@@ -21,6 +21,9 @@ import {
   FavoritesConfigMapper,
 } from '../../../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
@@ -38,7 +41,8 @@ import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-spa
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
     CloudFoundrySpaceService,
-    CloudFoundryOrganizationService
+    CloudFoundryOrganizationService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class CloudFoundrySpaceBaseComponent implements OnDestroy {

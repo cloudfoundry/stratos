@@ -19,7 +19,7 @@ import {
   spaceEntityType,
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-types';
-import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
+import { IApp, IAppSummary, IDomain, IOrganization, ISpace, IStack } from '../../../../core/src/core/cf-api.types';
 import {
   ApplicationStateData,
   ApplicationStateService,
@@ -62,8 +62,8 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
 
 export interface ApplicationData {
   fetching: boolean;
-  app: EntityInfo<IApp>;
-  stack: EntityInfo;
+  app: APIResource<IApp>;
+  stack: APIResource<IStack>;
   cf: any;
 }
 
@@ -198,10 +198,10 @@ export class ApplicationService {
 
     this.application$ = this.waitForAppEntity$.pipe(
       combineLatest(this.store.select(endpointEntitiesSelector)),
-      filter(([{ entity }]: [EntityInfo, any]) => {
-        return entity && entity.entity && entity.entity.cfGuid;
+      filter(([entityInfo]) => {
+        return !!entityInfo && !!entityInfo.entity && !!entityInfo.entity.entity && !!entityInfo.entity.entity.cfGuid;
       }),
-      map(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]): ApplicationData => {
+      map(([{ entity, entityRequestInfo }, endpoints]): ApplicationData => {
         return {
           fetching: entityRequestInfo.fetching,
           app: entity,

@@ -7,6 +7,8 @@ import { MomentModule } from 'ngx-moment';
 
 import { EntityCatalogHelper } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityServiceFactory } from '../../../store/src/entity-service-factory.service';
+import { EntityMonitorFactory } from '../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
 import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
 import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
 import { UserAvatarComponent } from './../shared/components/user-avatar/user-avatar.component';
@@ -78,7 +80,9 @@ import { WindowRef } from './window-ref/window-ref.service';
     EndpointsService,
     UserService,
     EntityServiceFactory,
+    EntityMonitorFactory,
     EntityCatalogHelper,
+    PaginationMonitorFactory,
     UserProfileService,
     CurrentUserPermissionsService,
     {

@@ -1,5 +1,6 @@
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
+import { map } from 'rxjs/internal/operators/map';
 
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { ApplicationData, ApplicationService } from '../../cloud-foundry/src/features/applications/application.service';
@@ -20,7 +21,7 @@ function createEntity<T>(entity: T): APIResource<T> {
   return {
     metadata: {
       created_at: '',
-      guid: '',
+      guid: 'mockEntityGuid',
       updated_at: '',
       url: ''
     },
@@ -35,42 +36,43 @@ export class ApplicationServiceMock {
   appGuid = ApplicationServiceMock.appGuid;
   application$: Observable<ApplicationData> = observableOf(({
     cf: {
-      guid: 'mockCfGuid'
+      guid: this.cfGuid
     },
     app: {
-      metadata: {},
-      entity: {
+      metadata: {
+        guid: this.appGuid
       },
-      entityRequestInfo: {} as RequestInfoState
-    } as EntityInfo,
+      entity: {
+        space_guid: 'mockSpaceGuid',
+        cfGuid: this.cfGuid
+      } as IApp,
+    } as APIResource<IApp>,
     stack: {
       entity: {
       },
     },
     fetching: false
   } as ApplicationData));
-  app$: Observable<EntityInfo<APIResource<IApp>>> = observableOf({
-    entity: { entity: {} }
-  } as EntityInfo<APIResource<IApp>>);
-  appSummary$: Observable<EntityInfo<IAppSummary>> = observableOf({
+  app$: Observable<EntityInfo<APIResource<IApp>>> = this.application$.pipe(
+    map(appData => {
+      return {
+        entity: appData.app,
+        entityRequestInfo: {
+
+        } as RequestInfoState
+      }
+    })
+  );
+  appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>> = observableOf({
     entityRequestInfo: { fetching: false }
-  } as EntityInfo<IAppSummary>);
+  } as EntityInfo<APIResource<IAppSummary>>);
   appStats$: Observable<AppStat[]> = observableOf(new Array<AppStat>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
     observableOf({ deploySource: { type: 'github', timestamp: 0, commit: '' }, deployOverrides: null });
   isFetchingApp$: Observable<boolean> = observableOf(false);
   isFetchingEnvVars$: Observable<boolean> = observableOf(false);
   isUpdatingEnvVars$: Observable<boolean> = observableOf(false);
-  waitForAppEntity$: Observable<EntityInfo> = observableOf({
-    entity: createEntity({
-      space: {
-        metadata: {},
-        entity: {
-          domains: []
-        }
-      }
-    })
-  } as EntityInfo);
+  waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>> = this.app$;
   appEnvVars = {
     entities$: observableOf(new Array<APIResource<any>>())
   };
