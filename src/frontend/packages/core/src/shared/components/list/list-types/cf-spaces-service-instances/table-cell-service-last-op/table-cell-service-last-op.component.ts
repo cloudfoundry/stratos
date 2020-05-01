@@ -1,8 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 
+import { IServiceInstance } from '../../../../../../../../cloud-foundry/src/cf-api-svc.types';
 import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { TableCellCustom } from '../../../list.types';
 
 @Component({

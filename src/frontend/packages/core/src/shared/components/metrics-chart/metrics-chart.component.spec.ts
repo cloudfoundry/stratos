@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '@stratos/store/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { FetchApplicationMetricsAction } from '../../../../../cloud-foundry/src/actions/cf-metrics.actions';
 import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';

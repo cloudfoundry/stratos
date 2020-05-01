@@ -4,9 +4,9 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { IServiceInstance, IServicePlan } from '../../../../../core/src/core/cf-api-svc.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IServiceInstance, IServicePlan } from '../../../cf-api-svc.types';
 import { ServicesService } from '../services.service';
 
 @Component({

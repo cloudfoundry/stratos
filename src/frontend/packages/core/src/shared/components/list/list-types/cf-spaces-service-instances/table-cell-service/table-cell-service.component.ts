@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { IServiceBroker, IServiceInstance } from '../../../../../../../../cloud-foundry/src/cf-api-svc.types';
 import {
   serviceBrokerEntityType,
   userProvidedServiceInstanceEntityType,
@@ -14,7 +15,6 @@ import {
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceBroker, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { TableCellCustom } from '../../../list.types';
 
 // TODO: Move CF code to CF Module #3769

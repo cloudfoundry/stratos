@@ -5,21 +5,21 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, ReplaySubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import {
   ServiceActionHelperService,
 } from '../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
-import { IServiceBinding, IServiceInstance } from '../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IServiceBinding, IServiceInstance } from '../../../cf-api-svc.types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 
 @Component({
   selector: 'app-detach-service-instance',

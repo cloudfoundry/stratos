@@ -9,7 +9,7 @@ import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
-import { testSessionData } from '@stratos/store/testing';
+import { testSessionData } from '@stratosui/store/testing';
 import { VerifiedSession } from '../../../../../../../../store/src/actions/auth.actions';
 import {
   generateCfBaseTestModulesNoShared,

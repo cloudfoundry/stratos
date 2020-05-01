@@ -7,9 +7,9 @@ import { of } from 'rxjs';
 
 import { CloudFoundryComponentsModule } from '../../cloud-foundry/src/shared/components/components.module';
 import { CoreModule } from '../../core/src/core/core.module';
-import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
+import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { AutoscalerModule } from './core/autoscaler.module';
 import { AutoscalerTabExtensionComponent } from './features/autoscaler-tab-extension/autoscaler-tab-extension.component';
 import { generateASEntities } from './store/autoscaler-entity-generator';
@@ -48,7 +48,6 @@ const customRoutes: Routes = [
   ],
   declarations: [
     AutoscalerTabExtensionComponent
-  ],
-  entryComponents: [AutoscalerTabExtensionComponent]
+  ]
 })
 export class CfAutoscalerModule { }

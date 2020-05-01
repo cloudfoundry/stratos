@@ -7,7 +7,7 @@ import { CF_GUID } from '../../../../../../../core/src/shared/entity.tokens';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../../../core/test-framework/entity-service.helper';
-import { testSCFEndpointGuid } from '@stratos/store/testing';
+import { testSCFEndpointGuid } from '@stratosui/store/testing';
 import {
   generateCfStoreModules,
   generateTestCfEndpointServiceProvider,

@@ -4,7 +4,7 @@ import { AppActionExtensionComponent } from './app-action-extension.component';
 import { CoreModule } from '../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { SharedModule } from '../../shared/shared.module';
-import { createBasicStoreModule } from '@stratos/store/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
 describe('AppActionExtensionComponent', () => {
   let component: AppActionExtensionComponent;

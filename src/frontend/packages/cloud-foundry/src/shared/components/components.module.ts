@@ -28,6 +28,7 @@ import { SpecifyDetailsStepComponent } from './add-service-instance/specify-deta
 import {
   SpecifyUserProvidedDetailsComponent,
 } from './add-service-instance/specify-user-provided-details/specify-user-provided-details.component';
+import { ApplicationInstanceChartComponent } from './application-instance-chart/application-instance-chart.component';
 import { CardAppInstancesComponent } from './cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './cards/card-app-uptime/card-app-uptime.component';
@@ -288,7 +289,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     ...cfListTableCells,
     ...cfListCards,
     ServiceInstanceLastOpComponent,
-    TableCellFeatureFlagDescriptionComponent
+    TableCellFeatureFlagDescriptionComponent,
+    ApplicationInstanceChartComponent,
   ],
   exports: [
     ServiceIconComponent,
@@ -326,15 +328,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     ServicePlanPublicComponent,
     ServicePlanPriceComponent,
     CreateApplicationStep1Component,
-    CloudFoundryEventsListComponent
-  ],
-  entryComponents: [
-    CfEndpointDetailsComponent,
-    NoServicePlansComponent,
-    EventMetadataComponent,
-
-    ...cfListTableCells,
-    ...cfListCards
+    CloudFoundryEventsListComponent,
+    ApplicationInstanceChartComponent,
   ]
 })
 export class CloudFoundryComponentsModule { }
