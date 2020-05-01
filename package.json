@@ -43,7 +43,9 @@
     "store-git-metadata": "gulp store-git-metadata",
     "postinstall": "npm run customize && gulp dev-setup",
     "update": "ng update @nrwl/workspace",
-    "nx": "nx"
+    "nx": "nx",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -91,7 +93,8 @@
     "xterm": "^4.0.2",
     "xterm-addon-fit": "^0.3.0",
     "zone.js": "~0.10.2",
-    "@nrwl/angular": "8.5.2"
+    "@nrwl/angular": "8.5.2",
+    "snyk": "^1.316.1"
   },
   "engines": {
     "node": "12.13.0"
@@ -151,5 +154,6 @@
     "tslint": "~5.20.0",
     "typescript": "<3.6.0",
     "@nrwl/workspace": "8.5.2"
-  }
+  },
+  "snyk": true
 }
