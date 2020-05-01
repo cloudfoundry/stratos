@@ -40,7 +40,7 @@ const enum OrgStatus {
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService
-  ] // TODO: RC test
+  ]
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 

@@ -17,7 +17,10 @@ import { CFAppState } from '../src/cf-app-state';
 import { CloudFoundryTestingModule } from '../src/cloud-foundry-test.module';
 import { ActiveRouteCfOrgSpace } from '../src/features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { UserInviteService } from '../src/features/cloud-foundry/user-invites/user-invite.service';
+import {
+  UserInviteConfigureService,
+  UserInviteService,
+} from '../src/features/cloud-foundry/user-invites/user-invite.service';
 import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
@@ -75,6 +78,7 @@ export function generateTestCfEndpointServiceProvider(guid = testSCFEndpointGuid
     CfUserServiceTestProvider,
     CloudFoundryEndpointService,
     UserInviteService,
+    UserInviteConfigureService,
     HttpClient,
     HttpHandler
   ];

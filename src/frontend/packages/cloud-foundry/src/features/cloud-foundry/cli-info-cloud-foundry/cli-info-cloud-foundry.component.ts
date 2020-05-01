@@ -34,7 +34,7 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
     CloudFoundryOrganizationService,
     CloudFoundrySpaceService,
     CloudFoundryUserProvidedServicesService
-  ] // TODO: RC Test
+  ]
 })
 export class CliInfoCloudFoundryComponent implements OnInit {
 

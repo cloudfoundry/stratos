@@ -100,9 +100,7 @@ export class CloudFoundryUserProvidedServicesService {
     guid: string,
     data: Partial<IUserProvidedServiceInstanceData>,
   ): Observable<RequestInfoState> {
-    // TODO: RC Q
     const updatingKey = cfEntityCatalog.userProvidedService.actions.update(guid, cfGuid, data).updatingKey;
-    // const updatingKey = UpdateUserProvidedServiceInstance.updateServiceInstance;
     return cfEntityCatalog.userProvidedService.api.update<RequestInfoState>(
       guid,
       cfGuid,
