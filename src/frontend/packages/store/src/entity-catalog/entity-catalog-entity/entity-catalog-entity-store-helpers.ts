@@ -40,7 +40,6 @@ export class EntityCatalogEntityStoreHelpers {
       throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` is of type pagination`);
     }
     if (!action.guid) {
-      console.log('1: ', action);
       throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` has no guid`);
     }
     return helper.esf.create<Y>(

@@ -54,36 +54,14 @@ interface UserInviteSend {
 }
 
 @Injectable()
-export class UserInviteService {
-
-  configured$: Observable<boolean>;
-  enabled$: Observable<boolean>;
-  canConfigure$: Observable<boolean>;
+export class UserInviteConfigureService {
 
   constructor(
     private store: Store<CFAppState>,
     private http: HttpClient,
     private snackBar: MatSnackBar,
-    cfEndpointService: CloudFoundryEndpointService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private confirmDialog: ConfirmationDialogService,
-  ) {
-    this.configured$ = cfEndpointService.endpoint$.pipe(
-      filter(v => !!v && !!v.entity),
-      // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing
-      map(v => v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
-    );
-
-    this.canConfigure$ = combineLatest(
-      waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid),
-      this.store.select('auth')
-    ).pipe(
-      map(([cf, auth]) =>
-        cf.global.isAdmin &&
-        auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].userInvitationsEnabled === 'true')
-    );
-  }
+  ) { }
 
   configure(cfGUID: string, clientID: string, clientSecret: string): Observable<UserInviteBaseResponse> {
     const formData: FormData = new FormData();
@@ -143,8 +121,40 @@ export class UserInviteService {
         }
       });
     });
-
   }
+}
+
+@Injectable()
+export class UserInviteService {
+
+  configured$: Observable<boolean>;
+  enabled$: Observable<boolean>;
+  canConfigure$: Observable<boolean>;
+
+  constructor(
+    private store: Store<CFAppState>,
+    private http: HttpClient,
+    cfEndpointService: CloudFoundryEndpointService,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+  ) {
+    this.configured$ = cfEndpointService.endpoint$.pipe(
+      filter(v => !!v && !!v.entity),
+      // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing
+      map(v => v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
+    );
+
+    this.canConfigure$ = combineLatest(
+      waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid),
+      this.store.select('auth')
+    ).pipe(
+      map(([cf, auth]) =>
+        cf.global.isAdmin &&
+        auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].userInvitationsEnabled === 'true')
+    );
+  }
+
+
 
   canShowInviteUser(cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> {
     // Can only invite someone to an org or space and user must be admin or org manager
