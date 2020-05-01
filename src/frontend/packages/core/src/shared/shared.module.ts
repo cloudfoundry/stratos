@@ -5,9 +5,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
-import {
-  ApplicationInstanceChartComponent,
-} from '../../../cloud-foundry/src/features/applications/application/application-instance-chart/application-instance-chart.component';
 import { EntityMonitorFactory } from '../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
@@ -188,7 +185,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     EnvVarViewComponent,
     RingChartComponent,
     MetricsChartComponent,
-    ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
     EnumerateComponent,
@@ -287,7 +283,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardNumberMetricComponent,
     EnvVarViewComponent,
     MetricsChartComponent,
-    ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
     UserProfileBannerComponent,
@@ -335,12 +330,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,
     MaxListMessageComponent
-  ],
-  entryComponents: [
-    DialogConfirmComponent,
-    EnvVarViewComponent,
-    SnackBarReturnComponent,
-    MarkdownPreviewComponent,
   ],
   providers: [
     ListConfig,

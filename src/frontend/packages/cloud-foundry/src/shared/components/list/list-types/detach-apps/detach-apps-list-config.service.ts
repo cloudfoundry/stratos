@@ -3,11 +3,11 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { IServiceBinding } from '../../../../../../../core/src/core/cf-api-svc.types';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { DetachAppsDataSource } from './detach-apps-data-source';
 

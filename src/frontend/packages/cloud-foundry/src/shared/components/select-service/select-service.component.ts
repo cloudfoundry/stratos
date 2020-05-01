@@ -4,11 +4,11 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
-import { IService } from '../../../../../core/src/core/cf-api-svc.types';
 import { StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { SetCreateServiceInstanceServiceGuid } from '../../../actions/create-service-instance.actions';
+import { IService } from '../../../cf-api-svc.types';
 import { CFAppState } from '../../../cf-app-state';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { serviceEntityType } from '../../../cf-entity-types';

@@ -9,6 +9,7 @@ import {
   IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
+import { IUserProvidedServiceInstance } from '../../../../cloud-foundry/src/cf-api-svc.types';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import {
   organizationEntityType,
@@ -33,7 +34,6 @@ import { RequestInfoState } from '../../../../store/src/reducers/api-request-red
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
-import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 
 
 @Injectable()

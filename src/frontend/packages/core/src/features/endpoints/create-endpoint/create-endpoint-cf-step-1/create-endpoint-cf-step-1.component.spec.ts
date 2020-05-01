@@ -8,8 +8,7 @@ import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
 
-// TODO: Fix after metrics has been sorted - STRAT-152
-xdescribe('CreateEndpointCfStep1Component', () => {
+describe('CreateEndpointCfStep1Component', () => {
   let component: CreateEndpointCfStep1Component;
   let fixture: ComponentFixture<CreateEndpointCfStep1Component>;
 

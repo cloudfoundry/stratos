@@ -4,14 +4,6 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import {
-  IService,
-  IServiceBroker,
-  IServiceExtra,
-  IServiceInstance,
-  IServicePlan,
-  IServicePlanVisibility,
-} from '../../../../core/src/core/cf-api-svc.types';
 import { ISpace } from '../../../../core/src/core/cf-api.types';
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
@@ -20,6 +12,14 @@ import { EntityServiceFactory } from '../../../../store/src/entity-service-facto
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
+import {
+  IService,
+  IServiceBroker,
+  IServiceExtra,
+  IServiceInstance,
+  IServicePlan,
+  IServicePlanVisibility,
+} from '../../cf-api-svc.types';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { serviceBrokerEntityType, servicePlanVisibilityEntityType, spaceEntityType } from '../../cf-entity-types';

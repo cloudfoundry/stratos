@@ -8,10 +8,10 @@ import {
   getServicePlanAccessibilityCardStatus,
 } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { ServicesService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { IServiceBroker, IServicePlan } from '../../../../../core/src/core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IServiceBroker, IServicePlan } from '../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-service-plan-public',

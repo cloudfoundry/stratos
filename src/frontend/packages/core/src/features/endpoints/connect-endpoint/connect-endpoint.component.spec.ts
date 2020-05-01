@@ -7,8 +7,7 @@ import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { ConnectEndpointComponent } from './connect-endpoint.component';
 
-// TODO: Fix after metrics has been sorted - STRAT-152
-xdescribe('ConnectEndpointComponent', () => {
+describe('ConnectEndpointComponent', () => {
   let component: ConnectEndpointComponent;
   let fixture: ComponentFixture<ConnectEndpointComponent>;
 

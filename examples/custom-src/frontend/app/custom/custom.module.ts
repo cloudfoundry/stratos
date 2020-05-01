@@ -26,13 +26,6 @@ const AcmeCustomizations: CustomizationsMetadata = {
     AppTabExtensionComponent,
     AppActionExtensionComponent,
     AcmeSupportInfoComponent
-  ],
-  entryComponents: [
-    AcmeLoginComponent,
-    // You must specify the tab and action as an entry components
-    AppTabExtensionComponent,
-    AppActionExtensionComponent,
-    AcmeSupportInfoComponent
   ]
 })
 export class CustomModule {

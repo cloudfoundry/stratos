@@ -11,8 +11,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { MetricsService } from '../services/metrics-service';
 import { MetricsComponent } from './metrics.component';
 
-// TODO: Fix after metrics has been sorted - STRAT-152
-xdescribe('MetricsComponent', () => {
+describe('MetricsComponent', () => {
   let component: MetricsComponent;
   let fixture: ComponentFixture<MetricsComponent>;
 

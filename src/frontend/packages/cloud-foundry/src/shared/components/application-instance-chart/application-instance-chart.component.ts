@@ -1,13 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-import { MetricsConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
-import { MetricsLineChartConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
-import { MetricsChartHelpers } from '../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
-import { MetricQueryType } from '../../../../../../core/src/shared/services/metrics-range-selector.types';
-import { MetricQueryConfig } from '../../../../../../store/src/actions/metrics.actions';
-import { IMetricMatrixResult } from '../../../../../../store/src/types/base-metric.types';
-import { IMetricApplication } from '../../../../../../store/src/types/metric.types';
-import { FetchApplicationMetricsAction } from '../../../../actions/cf-metrics.actions';
+import { MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
+import { MetricsLineChartConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
+import { MetricsChartHelpers } from '../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
+import { MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
+import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
+import { IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
+import { IMetricApplication } from '../../../../../store/src/types/metric.types';
+import { FetchApplicationMetricsAction } from '../../../actions/cf-metrics.actions';
 
 @Component({
   selector: 'app-application-instance-chart',

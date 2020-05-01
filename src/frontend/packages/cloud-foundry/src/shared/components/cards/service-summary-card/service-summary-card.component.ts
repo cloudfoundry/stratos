@@ -6,9 +6,9 @@ import { ServicesService } from '../../../../../../cloud-foundry/src/features/se
 import {
   ServiceTag,
 } from '../../../../../../cloud-foundry/src/shared/components/list/list-types/cf-services/cf-service-card/cf-service-card.component';
-import { IService } from '../../../../../../core/src/core/cf-api-svc.types';
 import { AppChip } from '../../../../../../core/src/shared/components/chips/chips.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IService } from '../../../../cf-api-svc.types';
 
 
 @Component({

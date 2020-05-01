@@ -8,14 +8,14 @@ import { createBasicStoreModule } from '@stratosui/store/testing';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
+import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect/create-endpoint-connect.component';
 import { CreateEndpointComponent } from './create-endpoint.component';
 
-// TODO: Fix after metrics has been sorted - STRAT-152
-xdescribe('CreateEndpointComponent', () => {
+describe('CreateEndpointComponent', () => {
   let component: CreateEndpointComponent;
   let fixture: ComponentFixture<CreateEndpointComponent>;
 
@@ -47,7 +47,9 @@ xdescribe('CreateEndpointComponent', () => {
             }
           }
         }
-      }, TabNavService],
+      },
+        TabNavService,
+        SidePanelService],
     })
       .compileComponents();
   }));

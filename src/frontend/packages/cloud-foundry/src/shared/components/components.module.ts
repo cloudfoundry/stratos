@@ -28,6 +28,7 @@ import { SpecifyDetailsStepComponent } from './add-service-instance/specify-deta
 import {
   SpecifyUserProvidedDetailsComponent,
 } from './add-service-instance/specify-user-provided-details/specify-user-provided-details.component';
+import { ApplicationInstanceChartComponent } from './application-instance-chart/application-instance-chart.component';
 import { CardAppInstancesComponent } from './cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './cards/card-app-uptime/card-app-uptime.component';
@@ -100,6 +101,9 @@ import {
 import {
   TableCellEventTypeComponent,
 } from './list/list-types/cf-events/table-cell-event-type/table-cell-event-type.component';
+import {
+  TableCellFeatureFlagDescriptionComponent,
+} from './list/list-types/cf-feature-flags/table-cell-feature-flag-description/table-cell-feature-flag-description.component';
 import {
   TableCellFeatureFlagStateComponent,
 } from './list/list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
@@ -175,7 +179,6 @@ import { SelectServiceComponent } from './select-service/select-service.componen
 import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
-import { TableCellFeatureFlagDescriptionComponent } from './list/list-types/cf-feature-flags/table-cell-feature-flag-description/table-cell-feature-flag-description.component';
 
 // tslint:disable:max-line-length
 // tslint:enable:max-line-length
@@ -219,7 +222,7 @@ const cfListTableCells: Type<TableCellCustom<any>>[] = [
   TableCellServiceBindableComponent,
   TableCellServiceActiveComponent,
   TableCellServiceReferencesComponent,
-  TableCellServiceInstanceTagsComponent
+  TableCellServiceInstanceTagsComponent,
 ];
 
 const cfListCards: Type<CardCell<any>>[] = [
@@ -286,7 +289,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     ...cfListTableCells,
     ...cfListCards,
     ServiceInstanceLastOpComponent,
-    TableCellFeatureFlagDescriptionComponent
+    TableCellFeatureFlagDescriptionComponent,
+    ApplicationInstanceChartComponent,
   ],
   exports: [
     ServiceIconComponent,
@@ -324,15 +328,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     ServicePlanPublicComponent,
     ServicePlanPriceComponent,
     CreateApplicationStep1Component,
-    CloudFoundryEventsListComponent
-  ],
-  entryComponents: [
-    CfEndpointDetailsComponent,
-    NoServicePlansComponent,
-    EventMetadataComponent,
-
-    ...cfListTableCells,
-    ...cfListCards
+    CloudFoundryEventsListComponent,
+    ApplicationInstanceChartComponent,
   ]
 })
 export class CloudFoundryComponentsModule { }

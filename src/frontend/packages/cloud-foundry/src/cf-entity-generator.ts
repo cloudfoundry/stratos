@@ -4,14 +4,6 @@ import { combineLatest, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
-  IService,
-  IServiceBinding,
-  IServiceBroker,
-  IServiceInstance,
-  IServicePlan,
-  IUserProvidedServiceInstance,
-} from '../../core/src/core/cf-api-svc.types';
-import {
   IApp,
   IAppSummary,
   IBuildpack,
@@ -50,6 +42,14 @@ import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducer
 import { APIResource } from '../../store/src/types/api.types';
 import { PaginatedAction } from '../../store/src/types/pagination.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
+import {
+  IService,
+  IServiceBinding,
+  IServiceBroker,
+  IServiceInstance,
+  IServicePlan,
+  IUserProvidedServiceInstance,
+} from './cf-api-svc.types';
 import { cfEntityFactory } from './cf-entity-factory';
 import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
 import {

@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import {
   DeleteUserProvidedInstance,
   UpdateUserProvidedServiceInstance,
@@ -14,16 +13,17 @@ import {
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-types';
-import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../../../core/src/core/cf-api-svc.types';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata, EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityCatalogEntityConfig, IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { UpdateServiceInstance } from '../../actions/service-instances.actions';
+import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { ServiceBindingActionBuilders } from '../../entity-action-builders/service-binding.action-builders';
 import { ServiceInstanceActionBuilders } from '../../entity-action-builders/service-instance.action.builders';
 import {

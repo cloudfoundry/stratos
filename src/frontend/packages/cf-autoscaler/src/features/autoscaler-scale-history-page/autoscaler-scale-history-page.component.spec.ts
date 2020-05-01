@@ -12,8 +12,7 @@ import { ApplicationServiceMock } from '../../../../core/test-framework/applicat
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { AutoscalerScaleHistoryPageComponent } from './autoscaler-scale-history-page.component';
 
-// TODO: Fix after metrics has been sorted - STRAT-152
-xdescribe('AutoscalerScaleHistoryPageComponent', () => {
+describe('AutoscalerScaleHistoryPageComponent', () => {
   let component: AutoscalerScaleHistoryPageComponent;
   let fixture: ComponentFixture<AutoscalerScaleHistoryPageComponent>;
 
@@ -47,9 +46,5 @@ xdescribe('AutoscalerScaleHistoryPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  // TODO: Fix after metrics has been sorted - STRAT-152 (cause of `Cannot read property 'getEntityMonitor' of undefined` test failure)
-  it('Blocked', () => {
-    fail('Blocked: Requires metrics to be working (specifically metrics entities)');
-  });
 
 });
