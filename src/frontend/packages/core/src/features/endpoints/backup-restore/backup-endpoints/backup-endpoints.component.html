@@ -1,0 +1,43 @@
+<app-page-header>
+  <h1>Backup Endpoints</h1>
+</app-page-header>
+
+<app-steppers cancel="/endpoints" [basePreviousRedirect]="{
+  path: '/endpoints/backup-restore'
+  }">
+  <app-step title="Select" [valid]="selectValid$ | async">
+    <div *ngIf="service.canBackup(); else noEndpoints" class="select-step">
+      <p>Select the endpoints and connection details that you would like to backup</p>
+      <div class="select-step__buttons">
+        <button mat-raised-button color="primary" [disabled]="disableSelectAll$ | async"
+          (click)="service.selectAll()">Select All</button>
+        <button mat-raised-button color="primary" [disabled]="disableSelectNone$ | async"
+          (click)="service.selectNone()">Select None</button>
+      </div>
+      <app-table [dataSource]="endpointDataSource" [columns]="columns"></app-table>
+    </div>
+    <ng-template #noEndpoints>
+      <p>There are no endpoints to backup</p>
+    </ng-template>
+  </app-step>
+  <app-step title="Password" finishButtonText="Download" [onNext]="onNext" [valid]="passwordValid$ | async">
+    <div class="password-step">
+      <p>Protect the backup by providing a password. You will need this password when restoring from this backup</p>
+      <form [formGroup]="passwordForm" class="stepper-form">
+        <mat-form-field>
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" name="password" required [type]="!show ? 'password' : 'text'">
+          <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="!show">
+            <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.required">
+            Password is required</mat-error>
+          <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.minlength">
+            Password must be at least {{passwordForm.controls.password.errors.minlength.requiredLength}} characters
+          </mat-error>
+        </mat-form-field>
+      </form>
+    </div>
+  </app-step>
+</app-steppers>

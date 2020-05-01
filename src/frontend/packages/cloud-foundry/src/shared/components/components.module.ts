@@ -101,6 +101,9 @@ import {
   TableCellEventTypeComponent,
 } from './list/list-types/cf-events/table-cell-event-type/table-cell-event-type.component';
 import {
+  TableCellFeatureFlagDescriptionComponent,
+} from './list/list-types/cf-feature-flags/table-cell-feature-flag-description/table-cell-feature-flag-description.component';
+import {
   TableCellFeatureFlagStateComponent,
 } from './list/list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
 import { CfOrgCardComponent } from './list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
@@ -175,7 +178,6 @@ import { SelectServiceComponent } from './select-service/select-service.componen
 import { ServiceIconComponent } from './service-icon/service-icon.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
-import { TableCellFeatureFlagDescriptionComponent } from './list/list-types/cf-feature-flags/table-cell-feature-flag-description/table-cell-feature-flag-description.component';
 
 // tslint:disable:max-line-length
 // tslint:enable:max-line-length
@@ -219,7 +221,7 @@ const cfListTableCells: Type<TableCellCustom<any>>[] = [
   TableCellServiceBindableComponent,
   TableCellServiceActiveComponent,
   TableCellServiceReferencesComponent,
-  TableCellServiceInstanceTagsComponent
+  TableCellServiceInstanceTagsComponent,
 ];
 
 const cfListCards: Type<CardCell<any>>[] = [

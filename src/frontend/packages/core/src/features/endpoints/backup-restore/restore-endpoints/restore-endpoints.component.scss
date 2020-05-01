@@ -1,0 +1,32 @@
+:host {
+  flex: 1;
+}
+.file-step {
+
+  &,
+  &__chunk {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  &__input {
+    &--input {
+      height: 0;
+      visibility: hidden;
+      width: 0;
+    }
+    button {
+      margin-right: 5px;
+    }
+  }
+
+  &__error {
+    p {
+      align-items: center;
+      display: flex;
+    }
+    mat-icon {
+      margin-right: 10px;
+    }
+  }
+}

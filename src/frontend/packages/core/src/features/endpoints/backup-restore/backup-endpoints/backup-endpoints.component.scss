@@ -1,0 +1,15 @@
+:host {
+  flex: 1;
+}
+.select-step {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  &__buttons {
+    padding-bottom: 12px;
+    button {
+      margin-right: 24px;
+    }
+  }
+}
