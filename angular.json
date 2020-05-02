@@ -83,15 +83,14 @@
     },
     "core": {
       "root": "src/frontend/packages/core/",
-      "sourceRoot": "src/frontend/packages/core/src",
-      "projectType": "application",
+      "sourceRoot": "src/frontend/packages/core",
+      "projectType": "library",
       "prefix": "app",
       "schematics": {},
       "architect": {
         "build": {
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
-            "aot": true,
             "preserveSymlinks": true,
             "outputPath": "dist/core",
             "index": "src/frontend/packages/core/src/index.html",
@@ -99,11 +98,18 @@
             "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
             "assets": [
-              "src/frontend/packages/core/assets"
+              "src/frontend/packages/core/assets",
+              {
+                "glob": "**/*",
+                "input": "custom-src/frontend/assets/custom",
+                "output": "/core/assets/custom"
+              },
+              "src/frontend/packages/core/favicon.ico"
             ],
             "styles": [
-              "src/frontend/packages/core/src/styles.css",
-              "src/frontend/packages/cf-autoscaler/src/styles.css"
+              "src/frontend/packages/core/src/styles.scss",
+              "src/frontend/packages/cf-autoscaler/src/styles.scss",
+              "node_modules/xterm/css/xterm.css"
             ],
             "scripts": []
           },
