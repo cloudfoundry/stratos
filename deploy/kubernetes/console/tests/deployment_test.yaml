@@ -74,3 +74,4 @@ tests:
       - equal:
           path: spec.template.spec.nodeSelector.kubernetes.io/arch
           value: amd64
+        documentIndex: 0

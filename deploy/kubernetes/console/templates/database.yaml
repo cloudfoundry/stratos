@@ -49,9 +49,9 @@ spec:
         {{ toYaml .Values.console.podExtraLabels | nindent 8 }}
         {{- end}}        
     spec:
-{{- if .Values.configInit }}
+{{- if .Values.mariadb }}
       nodeSelector:
-{{ toYaml .Values.configInit.nodeSelector | indent 8 }}
+{{ toYaml .Values.mariadb.nodeSelector | indent 8 }}
 {{- end }}
       containers:
       - name: mariadb
