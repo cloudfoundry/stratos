@@ -83,15 +83,15 @@ export class StratosBaseCatalogEntity<
       ...EntityCatalogEntityStoreHelpers.createCoreStore<Y, ABC>(
         this.actionOrchestrator,
         this.entityKey,
-        Object.bind(this.getSchema, this)
+        (schemaKey: string) => this.getSchema(schemaKey)
       ),
       ...EntityCatalogEntityStoreHelpers.getPaginationStore<Y, ABC>(
         this.actions,
         this.entityKey,
-        Object.bind(this.getSchema, this)
+        (schemaKey: string) => this.getSchema(schemaKey)
       )
     };
-    this.api = EntityCatalogEntityStoreHelpers.getActionDispatchers(
+    this.api = EntityCatalogEntityStoreHelpers.getActionDispatchers<Y, ABC>(
       this.store,
       actionBuilders as ABC
     );
