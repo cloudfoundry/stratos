@@ -3,10 +3,9 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
-import { filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
 import { AssociateSpaceQuota } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { UpdateSpace } from '../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
@@ -77,7 +76,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   submit: StepOnNextFunction = () => {
     const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
 
-    return this.updateSpace$().pipe(
+    return this.updateSpace().pipe(
       switchMap((spaceStateAction) => {
         let message = '';
 
@@ -101,13 +100,16 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     );
   }
 
-  updateSpace$() {
-    return cfEntityCatalog.space.api.update<RequestInfoState>(this.spaceGuid, this.cfGuid, {
+  updateSpace() {
+    const action = cfEntityCatalog.space.actions.update(this.spaceGuid, this.cfGuid, {
       name: this.editSpaceForm.value.spaceName,
       allow_ssh: this.editSpaceForm.value.toggleSsh as boolean,
-    }).pipe(
-      filter(o => !!o && !o.updating[UpdateSpace.UpdateExistingSpace].busy),
-      map((state) => state.updating[UpdateSpace.UpdateExistingSpace])
+    })
+    this.store.dispatch(action);
+    return cfEntityCatalog.space.store.getEntityMonitor(this.spaceGuid).getUpdatingSection(action.updatingKey).pipe(
+      pairwise(),
+      filter(([oldS, newS]) => oldS.busy && !newS.busy),
+      map(([, newS]) => newS),
     );
   }
 

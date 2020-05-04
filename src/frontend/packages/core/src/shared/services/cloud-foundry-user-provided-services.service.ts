@@ -14,6 +14,7 @@ import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src
 import { fetchTotalResults } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { QParam, QParamJoiners } from '../../../../cloud-foundry/src/shared/q-param';
 import { ClearPaginationOfType } from '../../../../store/src/actions/pagination.actions';
+import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../store/src/types/api.types';
@@ -79,7 +80,6 @@ export class CloudFoundryUserProvidedServicesService {
       cfGuid,
       guid,
       data,
-      // this.userProvidedServiceInstancesEntityConfig
     ).pipe(
       pairwise(),
       filter(([oldV, newV]) => oldV.creating && !newV.creating),
@@ -89,7 +89,8 @@ export class CloudFoundryUserProvidedServicesService {
         if (!v.error) {
           // Problem - Lists with multiple actions aren't updated following the creation of an entity based on secondary action
           // Here the service instance list (1st action SI, 2nd action UPSI) isn't updated so manually do so
-          this.store.dispatch(new ClearPaginationOfType(cfEntityCatalog.service));
+          const serviceEntityConfig: EntityCatalogEntityConfig = cfEntityCatalog.serviceInstance.actions.getMultiple('', '', {});
+          this.store.dispatch(new ClearPaginationOfType(serviceEntityConfig));
         }
       })
     );

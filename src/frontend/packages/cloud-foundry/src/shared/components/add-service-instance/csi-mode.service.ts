@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, pairwise } from 'rxjs/operators';
 
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
@@ -136,9 +136,9 @@ export class CsiModeService {
       cfGuid,
       { applicationGuid: appGuid, serviceInstanceGuid, params }
     ).pipe(
-      filter(s => {
-        return s && !s.creating;
-      }),
+      pairwise(),
+      filter(([oldS, newS]) => oldS.creating && !newS.creating),
+      map(([, newS]) => newS),
       map(req => {
         if (req.error) {
           return { success: false, message: `Failed to create service instance binding: ${req.message}` };

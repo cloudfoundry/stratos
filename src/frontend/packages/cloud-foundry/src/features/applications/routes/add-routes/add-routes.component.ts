@@ -212,8 +212,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     ).pipe(
       pairwise(),
       filter(([oldR, newR]) => oldR.creating && !newR.creating),
-      map(([oldR, newR]) => newR),
-      filter(route => !route.creating && !route.fetching),
+      map(([, newR]) => newR),
       mergeMap(route => {
         if (route.error) {
           return observableOf({ success: false, message: `Failed to create route: ${route.message}` });

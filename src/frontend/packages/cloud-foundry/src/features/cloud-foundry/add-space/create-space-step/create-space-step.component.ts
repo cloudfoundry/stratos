@@ -3,7 +3,7 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, map, pairwise } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
@@ -81,7 +81,9 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       },
       orgGuid: this.orgGuid
     }).pipe(
-      filter(o => !!o && !o.fetching && !o.creating),
+      pairwise(),
+      filter(([oldS, newS]) => oldS.creating && !newS.creating),
+      map(([, newS]) => newS),
       this.map('Failed to create space: ')
     );
   }
