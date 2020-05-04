@@ -8,8 +8,8 @@ import {
   SimpleSnackBar,
 } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { delay, filter, first, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
@@ -47,6 +47,12 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
 
   private appAutoscalerCredentialErrorSub: Subscription;
   private appAutoscalerCredentialSnackBarRef: MatSnackBarRef<SimpleSnackBar>;
+
+
+  private creating = new BehaviorSubject(false);
+  public creating$ = this.creating.asObservable();
+  private deleting = new BehaviorSubject(false);
+  public deleting$ = this.deleting.asObservable();
 
   constructor(
     public applicationService: ApplicationService,
@@ -93,6 +99,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   }
 
   createCredential() {
+    this.creating.next(true);
     let action: UpdateAppAutoscalerCredentialAction;
     if (this.randomCredential) {
       action = new UpdateAppAutoscalerCredentialAction(this.applicationService.appGuid, this.applicationService.cfGuid);
@@ -101,9 +108,6 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
         username: this.editCredentialForm.controls.acusername.value,
         password: this.editCredentialForm.controls.acpassword.value,
       };
-      if (!credential.username || !credential.password) {
-        return;
-      }
       action = new UpdateAppAutoscalerCredentialAction(this.applicationService.appGuid, this.applicationService.cfGuid, credential);
     }
     const updateAppAutoscalerCredentialService: EntityService = this.entityServiceFactory.create(
@@ -115,37 +119,41 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
       publishReplay(1),
       refCount()
     );
-    updateAppAutoscalerCredentialService.entityMonitor.entityRequest$.pipe(
-      filter(request => !!request.error),
-      map(request => {
-        const msg = request.message;
-        request.error = false;
-        request.message = '';
-        return msg;
-      }),
-      distinctUntilChanged(),
-    ).subscribe(errorMessage => {
-      if (this.appAutoscalerCredentialSnackBarRef) {
-        this.appAutoscalerCredentialSnackBarRef.dismiss();
+    updateAppAutoscalerCredentialService.entityMonitor.getUpdatingSection(action.updatingKey).pipe(
+      delay(250),
+      pairwise(),
+      filter(([oldV, newV]) => oldV.busy && !newV.busy),
+      map(([, newV]) => newV),
+      first(),
+    ).subscribe(actionState => {
+      this.creating.next(false);
+      if (actionState.error) {
+        if (this.appAutoscalerCredentialSnackBarRef) {
+          this.appAutoscalerCredentialSnackBarRef.dismiss();
+        }
+        this.appAutoscalerCredentialSnackBarRef =
+          this.appAutoscalerCredentialSnackBar.open(`Failed to create credentials: ${actionState.message}`, 'Dismiss');
       }
-      this.appAutoscalerCredentialSnackBarRef = this.appAutoscalerCredentialSnackBar.open(errorMessage, 'Dismiss');
+
     });
     this.store.dispatch(action);
   }
 
   deleteCredentialConfirm() {
     const confirmation = new ConfirmationDialogConfig(
-      'Delete Credential',
-      'Are you sure you want to delete the credential?',
+      'Delete Credentials',
+      'Are you sure you want to delete the credentials?',
       'Delete',
       true
     );
     this.confirmDialog.open(confirmation, () => {
-      const doUpdate = () => this.deleteCredential();
-      doUpdate().pipe(
+      this.deleteCredential().pipe(
         first(),
       ).subscribe(actionState => {
         if (actionState.error) {
+          if (this.appAutoscalerCredentialSnackBarRef) {
+            this.appAutoscalerCredentialSnackBarRef.dismiss();
+          }
           this.appAutoscalerCredentialSnackBarRef =
             this.appAutoscalerCredentialSnackBar.open(`Failed to delete credential: ${actionState.message}`, 'Dismiss');
         }
@@ -154,14 +162,17 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   }
 
   deleteCredential(): Observable<ActionState> {
+    this.deleting.next(true);
     const action = new DeleteAppAutoscalerCredentialAction(this.applicationService.appGuid, this.applicationService.cfGuid);
     this.store.dispatch(action);
     const entityKey = entityCatalog.getEntityKey(action);
 
     return this.store.select(selectDeletionInfo(entityKey, this.applicationService.appGuid)).pipe(
+      delay(250),
       pairwise(),
       filter(([oldV, newV]) => oldV.busy && !newV.busy),
-      map(([, newV]) => newV)
+      map(([, newV]) => newV),
+      tap(() => this.deleting.next(false))
     );
   }
 

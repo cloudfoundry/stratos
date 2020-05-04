@@ -1,21 +1,22 @@
+import { HttpRequest } from '@angular/common/http';
+
 import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
-import { AppAutoscalerPolicyLocal, AppScalingTrigger, AppAutoscalerCredential } from './app-autoscaler.types';
+import { AppAutoscalerCredential, AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricEntityType,
+  appAutoscalerCredentialEntityType,
   appAutoscalerHealthEntityType,
   appAutoscalerInfoEntityType,
   appAutoscalerPolicyEntityType,
   appAutoscalerPolicyTriggerEntityType,
   appAutoscalerScalingHistoryEntityType,
-  appAutoscalerCredentialEntityType,
   AUTOSCALER_ENDPOINT_TYPE,
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
-import { HttpRequest } from '@angular/common/http';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -250,10 +251,10 @@ export class UpdateAppAutoscalerCredentialAction implements EntityRequestAction 
   entity = autoscalerEntityFactory(appAutoscalerCredentialEntityType);
   entityType = appAutoscalerCredentialEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
+  updatingKey = UpdateAppAutoscalerCredentialAction.updateKey;
 }
 
 export class DeleteAppAutoscalerCredentialAction implements EntityRequestAction {
-  static updateKey = 'Deleting-Application-Credential';
   constructor(
     public guid: string,
     public endpointGuid: string,
