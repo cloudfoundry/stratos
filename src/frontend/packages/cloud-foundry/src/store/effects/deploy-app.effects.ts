@@ -6,6 +6,7 @@ import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/src/core/logger.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import {
@@ -29,10 +30,9 @@ import {
 } from '../../actions/deploy-applications.actions';
 import { CFAppState } from '../../cf-app-state';
 import { gitBranchesEntityType, gitCommitEntityType } from '../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { GitCommit } from '../types/git.types';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
 
 function parseHttpPipeError(res: any, logger: LoggerService): { message?: string } {
   if (!res.status) {
@@ -96,10 +96,10 @@ export class DeployAppEffects {
       return action.scm.getBranches(this.httpClient, action.projectName).pipe(
         mergeMap(branches => {
           const entityKey = entityCatalog.getEntity(apiAction).entityKey;
-          const mappedData = {
+          const mappedData: NormalizedResponse = {
             entities: { [entityKey]: {} },
             result: []
-          } as NormalizedResponse;
+          };
 
           const scmType = action.scm.getType();
           branches.forEach(b => {

@@ -6,18 +6,19 @@ import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
 import { GitCommit, GitRepo } from '../../../../../../../../cloud-foundry/src/store/types/git.types';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityService } from '../../../../../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../../../core/src/shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shared/data-services/scm/scm.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { FetchGitHubRepoInfo } from '../../../../../../actions/github.actions';
 import { CFAppState } from '../../../../../../cf-app-state';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from '../../../../../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { GitMeta } from '../../../../../../entity-action-builders/git-action-builder';
 import { GitBranch } from '../../../../../../store/types/github.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
@@ -81,7 +82,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       take(1),
       tap((stProject: EnvVarStratosProject) => {
         const projectName = stProject.deploySource.project;
-        const commitId = stProject.deploySource.commit.trim();
+        const commitSha = stProject.deploySource.commit.trim();
 
         // Fallback to type if scm is not set (legacy support)
         const scmType = stProject.deploySource.scm || stProject.deploySource.type;
@@ -89,7 +90,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
         // Ensure the SCM type is included in the key
         const repoEntityID = `${scmType}-${projectName}`;
-        const commitEntityID = `${repoEntityID}-${commitId}`;
+        const commitEntityID = `${repoEntityID}-${commitSha}`;
 
         const gitRepoEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, gitRepoEntityType);
         const getRepoActionBuilder = gitRepoEntity.actionOrchestrator.getActionBuilder('getRepoInfo');
@@ -99,11 +100,12 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
           getRepoAction
         );
 
+        const gitMeta: GitMeta = { projectName: stProject.deploySource.project, scm, commitSha };
         this.gitCommitEntityService = this.entityServiceFactory.create(
           {
             endpointType: CF_ENDPOINT_TYPE,
             entityType: gitCommitEntityType,
-            actionMetadata: { projectName: stProject.deploySource.project, scm, commitId },
+            actionMetadata: gitMeta,
             entityGuid: commitEntityID,
           }
         );

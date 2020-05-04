@@ -33,7 +33,12 @@ export class GetServiceInstances
   constructor(
     public endpointGuid: string,
     public paginationKey: string,
-    public includeRelations: string[] = getServiceInstanceRelations,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
+      createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
+      createEntityRelationKey(servicePlanEntityType, serviceEntityType),
+      createEntityRelationKey(serviceInstancesEntityType, spaceEntityType),
+    ],
     public populateMissing = true
   ) {
     super();
@@ -55,6 +60,7 @@ export class GetServiceInstances
     q: []
   };
   flattenPagination = true;
+  flattenPaginationMax = true;
 }
 
 export class GetServiceInstance

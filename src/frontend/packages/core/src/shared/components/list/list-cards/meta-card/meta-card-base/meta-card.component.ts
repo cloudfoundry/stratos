@@ -18,6 +18,15 @@ export interface MetaCardMenuItem {
   action: () => void;
   can?: Observable<boolean>;
   disabled?: Observable<boolean>;
+  separator?: boolean;
+}
+
+export function createMetaCardMenuItemSeparator() {
+  return {
+    label: '-',
+    separator: true,
+    action: () => {}
+  };
 }
 
 @Component({
@@ -79,7 +88,8 @@ export class MetaCardComponent implements OnDestroy {
     if (actionMenu) {
       this.pActionMenu = actionMenu.map(menuItem => {
         if (!menuItem.can) {
-          menuItem.can = observableOf(true);
+          menuItem.separator = menuItem.label === '-';
+          menuItem.can = observableOf(!menuItem.separator);
         }
         if (!menuItem.disabled) {
           menuItem.disabled = observableOf(false);

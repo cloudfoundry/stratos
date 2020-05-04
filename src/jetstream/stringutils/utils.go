@@ -1,9 +1,9 @@
 package stringutils
 
 import (
+	"net/url"
 	"strings"
 	"unicode"
-	"net/url"
 )
 
 // ArrayContainsString checks the string array to see if it contains the specifed value

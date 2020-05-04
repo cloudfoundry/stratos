@@ -40,7 +40,8 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
   }
 
   ngOnInit() {
-    this.isUserProvidedServiceInstance = this.entityKey === userProvidedServiceInstanceEntityType;
+    this.isUserProvidedServiceInstance =
+      this.entityKey === entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
 
     const service$ = getCfService(this.row.entity.service_guid, this.row.entity.cfGuid, this.entityServiceFactory).waitForEntity$.pipe(
       filter(s => !!s),
@@ -51,7 +52,7 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
     );
 
     this.serviceUrl$ = service$.pipe(
-      map(service => `/marketplace/${service.entity.entity.cfGuid}/${service.entity.entity.guid}/summary`)
+      map(service => `/marketplace/${service.entity.entity.cfGuid}/${service.entity.metadata.guid}/summary`)
     );
 
     this.serviceBrokerName$ = service$.pipe(

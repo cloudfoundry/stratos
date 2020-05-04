@@ -101,6 +101,9 @@ import {
   TableCellEventTypeComponent,
 } from './list/list-types/cf-events/table-cell-event-type/table-cell-event-type.component';
 import {
+  TableCellFeatureFlagDescriptionComponent,
+} from './list/list-types/cf-feature-flags/table-cell-feature-flag-description/table-cell-feature-flag-description.component';
+import {
   TableCellFeatureFlagStateComponent,
 } from './list/list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
 import { CfOrgCardComponent } from './list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
@@ -187,6 +190,7 @@ const cfListTableCells: Type<TableCellCustom<any>>[] = [
   CfOrgPermissionCellComponent,
   CfSpacePermissionCellComponent,
   TableCellFeatureFlagStateComponent,
+  TableCellFeatureFlagDescriptionComponent,
   TableCellConfirmOrgSpaceComponent,
   TableCellSelectOrgComponent,
   TableCellAppStatusComponent,
@@ -217,7 +221,7 @@ const cfListTableCells: Type<TableCellCustom<any>>[] = [
   TableCellServiceBindableComponent,
   TableCellServiceActiveComponent,
   TableCellServiceReferencesComponent,
-  TableCellServiceInstanceTagsComponent
+  TableCellServiceInstanceTagsComponent,
 ];
 
 const cfListCards: Type<CardCell<any>>[] = [
@@ -283,7 +287,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     EventMetadataComponent,
     ...cfListTableCells,
     ...cfListCards,
-    ServiceInstanceLastOpComponent
+    ServiceInstanceLastOpComponent,
+    TableCellFeatureFlagDescriptionComponent
   ],
   exports: [
     ServiceIconComponent,

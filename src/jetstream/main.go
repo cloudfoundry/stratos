@@ -53,6 +53,7 @@ const (
 	UpgradeVolume        = "UPGRADE_VOLUME"
 	UpgradeLockFileName  = "UPGRADE_LOCK_FILENAME"
 	LogToJSON            = "LOG_TO_JSON"
+	LogAPIRequests       = "LOG_API_REQUESTS" // Defaults to true
 	VCapApplication      = "VCAP_APPLICATION"
 	defaultSessionSecret = "wheeee!"
 )
@@ -142,7 +143,7 @@ func main() {
 
 	if isUpgrading {
 		log.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
-		start(portalConfig, &portalProxy{env: envLookup}, false, true)
+		start(portalConfig, &portalProxy{env: envLookup}, false, true, envLookup)
 	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
@@ -346,7 +347,7 @@ func main() {
 	portalProxy.StoreDiagnostics()
 
 	// Start the back-end
-	if err := start(portalProxy.Config, portalProxy, needSetupMiddleware, false); err != nil {
+	if err := start(portalProxy.Config, portalProxy, needSetupMiddleware, false, envLookup); err != nil {
 		log.Fatalf("Unable to start: %v", err)
 	}
 	log.Info("Unable to start Stratos JetStream backend")
@@ -728,7 +729,7 @@ func echoShouldNotLog(ec echo.Context) bool {
 	return false
 }
 
-func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool) error {
+func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool, envLookup *env.VarSet) error {
 	log.Debug("start")
 	e := echo.New()
 	e.HideBanner = true
@@ -738,14 +739,24 @@ func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware b
 	if !isUpgrade {
 		e.Use(sessionCleanupMiddleware)
 	}
-	customLoggerConfig := middleware.LoggerConfig{
-		Format: `Request: [${time_rfc3339}] Remote-IP:"${remote_ip}" ` +
-			`Method:"${method}" Path:"${path}" Status:${status} Latency:${latency_human} ` +
-			`Bytes-In:${bytes_in} Bytes-Out:${bytes_out}` + "\n",
-	}
-	customLoggerConfig.Skipper = echoShouldNotLog
 
-	e.Use(middleware.LoggerWithConfig(customLoggerConfig))
+	logAPIRequests := "true"
+	if envLogAPIRequests, ok := envLookup.Lookup(LogAPIRequests); ok {
+		logAPIRequests = envLogAPIRequests
+	}
+	if logAPIRequests == "true" {
+		customLoggerConfig := middleware.LoggerConfig{
+			Format: `Request: [${time_rfc3339}] Remote-IP:"${remote_ip}" ` +
+				`Method:"${method}" Path:"${path}" Status:${status} Latency:${latency_human} ` +
+				`Bytes-In:${bytes_in} Bytes-Out:${bytes_out}` + "\n",
+		}
+		customLoggerConfig.Skipper = echoShouldNotLog
+
+		e.Use(middleware.LoggerWithConfig(customLoggerConfig))
+	} else {
+		log.Warn("Disabled logging of API requests received by Jetstream")
+	}
+
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     config.AllowedOrigins,
@@ -958,6 +969,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 			routePlugin.AddAdminGroupRoutes(adminGroup)
 		}
 	}
+
+	// Apply edits for the given endpoint
+	adminGroup.POST("/endpoint/:id", p.updateEndpoint)
 
 	adminGroup.POST("/unregister", p.unregisterCluster)
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)

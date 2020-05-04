@@ -3,6 +3,9 @@ import { ActionReducer, Store } from '@ngrx/store';
 import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { getFullEndpointApiUrl } from '../../../core/src/features/endpoints/endpoint-helpers';
 import { AppState, IRequestEntityTypeState } from '../app-state';
+import {
+  PaginationPageIteratorConfig,
+} from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntityPipelineEntity, stratosEndpointGuidKey } from '../entity-request-pipeline/pipeline.types';
 import { EntitySchema } from '../helpers/entity-schema';
 import { EntityMonitor } from '../monitors/entity-monitor';
@@ -215,6 +218,11 @@ export class StratosBaseCatalogEntity<
 
   }
 
+  public getPaginationConfig(): PaginationPageIteratorConfig {
+    return this.definition.paginationConfig ?
+      this.definition.paginationConfig :
+      null;
+  }
 }
 
 export class StratosCatalogEntity<
@@ -229,6 +237,12 @@ export class StratosCatalogEntity<
     config?: EntityCatalogBuilders<T, Y, AB>
   ) {
     super(entity, config);
+  }
+
+  public getPaginationConfig(): PaginationPageIteratorConfig {
+    return this.definition.paginationConfig ?
+      this.definition.paginationConfig :
+      this.definition.endpoint ? this.definition.endpoint.paginationConfig : null;
   }
 }
 

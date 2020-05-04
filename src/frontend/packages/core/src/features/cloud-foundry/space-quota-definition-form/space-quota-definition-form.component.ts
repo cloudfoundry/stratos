@@ -11,11 +11,11 @@ import { spaceQuotaEntityType } from '../../../../../cloud-foundry/src/cf-entity
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 
 
 @Component({
@@ -66,16 +66,18 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
 
   fetchQuotasDefinitions() {
     const spaceQuotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
+    const action = new GetOrganizationSpaceQuotaDefinitions(spaceQuotaPaginationKey, this.orgGuid, this.cfGuid);
     this.spaceQuotaDefinitions$ = getPaginationObservables<APIResource>(
       {
         store: this.store,
-        action: new GetOrganizationSpaceQuotaDefinitions(spaceQuotaPaginationKey, this.orgGuid, this.cfGuid),
+        action,
         paginationMonitor: this.paginationMonitorFactory.create(
           spaceQuotaPaginationKey,
-          cfEntityFactory(spaceQuotaEntityType)
+          cfEntityFactory(spaceQuotaEntityType),
+          action.flattenPagination
         )
       },
-      true
+      action.flattenPagination
     ).entities$.pipe(
       filter(o => !!o),
       map(o => o.map(org => org.entity.name)),

@@ -44,6 +44,7 @@ export interface EndpointModel {
   skip_ssl_validation?: boolean;
   endpoint_metadata?: any;
   token_endpoint?: string;
+  client_id?: string;
   user?: EndpointUser;
   metadata?: {
     metrics?: string;
@@ -58,6 +59,8 @@ export interface EndpointModel {
   connectionStatus?: endpointConnectionStatus;
   metricsAvailable: boolean;
 }
+
+export const SystemSharedUserGuid = '00000000-1111-2222-3333-444444444444';
 
 // Metadata for the user connected to an endpoint
 export interface EndpointUser {

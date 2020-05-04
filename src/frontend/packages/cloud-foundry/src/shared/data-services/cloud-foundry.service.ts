@@ -22,7 +22,7 @@ export class CloudFoundryService {
     store: Store<CFAppState>
   ) {
 
-    this.cfEndpointsMonitor = new PaginationMonitor(store, endpointListKey, endpointEntitySchema);
+    this.cfEndpointsMonitor = new PaginationMonitor(store, endpointListKey, endpointEntitySchema, true);
 
     this.cFEndpoints$ = this.cfEndpointsMonitor.currentPage$.pipe(
       map(endpoints => endpoints.filter(e => e.cnsi_type === 'cf'))

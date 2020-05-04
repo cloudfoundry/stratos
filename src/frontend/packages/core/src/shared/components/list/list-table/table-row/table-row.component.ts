@@ -1,9 +1,22 @@
 import { CdkRow } from '@angular/cdk/table';
-import { ChangeDetectionStrategy, Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ComponentFactoryResolver,
+  ComponentRef,
+  Input,
+  OnInit,
+  ViewChild,
+  ViewContainerRef,
+  ViewEncapsulation,
+} from '@angular/core';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
+import { ListExpandedComponentType } from '../../list.component.types';
+import { CardCell } from '../../list.types';
+import { TableRowExpandedService } from './table-row-expanded-service';
 
 
 @Component({
@@ -14,10 +27,17 @@ import { RowState } from '../../data-sources-controllers/list-data-source-types'
   encapsulation: ViewEncapsulation.None,
   preserveWhitespaces: false
 })
-export class TableRowComponent extends CdkRow implements OnInit {
+export class TableRowComponent<T = any> extends CdkRow implements OnInit {
 
-  @Input()
-  rowState: Observable<RowState>;
+  @ViewChild('expandedComponent', { read: ViewContainerRef, static: true })
+  expandedComponent: ViewContainerRef;
+
+  @Input() rowState: Observable<RowState>;
+  @Input() expandComponent: ListExpandedComponentType<T>;
+  @Input() row: T;
+  @Input() minRowHeight: string;
+  @Input() inExpandedRow: boolean;
+  @Input() rowId: string;
 
   public inErrorState$: Observable<boolean>;
   public inWarningState$: Observable<boolean>;
@@ -25,6 +45,16 @@ export class TableRowComponent extends CdkRow implements OnInit {
   public isBlocked$: Observable<boolean>;
   public isHighlighted$: Observable<boolean>;
   public isDeleting$: Observable<boolean>;
+  public defaultMinRowHeight = '50px';
+
+  private expandedComponentRef: ComponentRef<any>;
+
+  constructor(
+    private componentFactoryResolver: ComponentFactoryResolver,
+    public expandedService: TableRowExpandedService
+  ) {
+    super();
+  }
 
   ngOnInit() {
     if (this.rowState) {
@@ -47,6 +77,40 @@ export class TableRowComponent extends CdkRow implements OnInit {
         map(state => state.deleting)
       );
     }
+
+    // Ensure we 'register' with the expander service. This also helps with page changes
+    this.expandedService.collapse(this.rowId);
+  }
+
+  private getComponent() {
+    if (!this.expandComponent) {
+      return;
+    }
+    return this.componentFactoryResolver.resolveComponentFactory(
+      this.expandComponent
+    );
+  }
+
+  private createComponent() {
+    const component = this.getComponent();
+    return !!component ? this.expandedComponent.createComponent(component) : null;
+  }
+
+  public panelOpened() {
+    this.createExpandedComponent();
+    this.expandedService.expand(this.rowId);
+  }
+
+  public createExpandedComponent() {
+    if (this.expandedComponentRef) {
+      return;
+    }
+    this.expandedComponentRef = this.createComponent();
+    if (!this.expandedComponentRef) {
+      return;
+    }
+    const instance: CardCell<any> = this.expandedComponentRef.instance;
+    instance.row = this.row; // This could be set again when `row` changes above
   }
 
 }

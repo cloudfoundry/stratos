@@ -1,8 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
-import { publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
@@ -30,6 +30,7 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
 
   getDataSource: () => CfRoutesDataSource;
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
+  getInitialised: () => Observable<boolean>;
 
   constructor(
     store: Store<CFAppState>,
@@ -53,6 +54,8 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
     super(store, confirmDialog, cfService.cfGuid, datePipe, true, true, canEditRoute, observableOf(false));
 
     this.setupList(store, cfService, cfOrgSpaceService);
+
+    this.text.maxedResults.filterLine = 'Please use the Organization filter';
   }
 
   private setupList(
@@ -69,12 +72,20 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
     // Show drop down filters for org and space
     const multiFilterConfigs = [
       createCfOrgSpaceFilterConfig('org', 'Organization', cfOrgSpaceService.org),
-      createCfOrgSpaceFilterConfig('space', 'Space', cfOrgSpaceService.space),
     ];
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
     initCfOrgSpaceService(store, cfOrgSpaceService,
       this.dataSource.masterAction.entityType,
       this.dataSource.masterAction.paginationKey).subscribe();
     cfOrgSpaceService.cf.select.next(cfService.cfGuid);
+
+    this.getInitialised = () => combineLatest(
+      cfOrgSpaceService.cf.list$,
+      cfOrgSpaceService.org.list$,
+      cfOrgSpaceService.space.list$,
+    ).pipe(
+      map(loading => !loading),
+      startWith(true)
+    );
   }
 }

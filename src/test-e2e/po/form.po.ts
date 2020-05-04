@@ -234,7 +234,7 @@ export class FormComponent extends Component {
             ctrl.sendKeys(strValue);
             ctrl.sendKeys(Key.RETURN);
             if (!expectFailure) {
-              expect(this.getText(field)).toBe(value, `Failed to set field ${field} with ${strValue}`);
+              expect(this.getText(field)).toBe(value, `Failed to set field '${field}' with '${strValue}'`);
             } else {
               expect(this.getText(field)).not.toBe(value);
             }

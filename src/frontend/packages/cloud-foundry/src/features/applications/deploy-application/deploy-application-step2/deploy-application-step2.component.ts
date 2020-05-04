@@ -8,6 +8,7 @@ import {
   combineLatest,
   Observable,
   of as observableOf,
+  of,
   Subscription,
   timer as observableTimer,
 } from 'rxjs';
@@ -27,10 +28,8 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cf-types';
 import {
   FetchBranchesForProject,
-  FetchCommit,
   ProjectDoesntExist,
   SaveAppDetails,
   SetAppSourceDetails,
@@ -53,14 +52,13 @@ import {
 } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { GitCommit, GitRepo } from '../../../../../../cloud-foundry/src/store/types/git.types';
 import { GitBranch } from '../../../../../../cloud-foundry/src/store/types/github.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { GitSCM } from '../../../../../../core/src/shared/data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../../../core/src/shared/data-services/scm/scm.service';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { EntityInfo } from '../../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cf-types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 @Component({
@@ -77,10 +75,10 @@ export class DeployApplicationStep2Component
   sourceTypes: SourceType[];
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
   sourceType$: Observable<SourceType>;
-  INITIAL_SOURCE_TYPE = 0; // GitHub by default
+  INITIAL_SOURCE_TYPE = 0; // Fall back to GitHub, for cases where there's no type in store (refresh) or url (removed & nav)
   validate: Observable<boolean>;
 
-  stepperText = 'Please specify the source';
+  stepperText$: Observable<string>;
 
   // Observables for source types
   sourceTypeGithub$: Observable<boolean>;
@@ -125,8 +123,6 @@ export class DeployApplicationStep2Component
 
   @ViewChild('fsChooser', { static: false }) fsChooser;
 
-  public selectedSourceType: SourceType = null;
-
   ngOnDestroy() {
     this.subscriptions.forEach(p => p.unsubscribe());
     if (this.commitSubscription) {
@@ -137,17 +133,13 @@ export class DeployApplicationStep2Component
   constructor(
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<CFAppState>,
-    route: ActivatedRoute,
+    private route: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private scmService: GitSCMService,
     private httpClient: HttpClient,
     private appDeploySourceTypes: ApplicationDeploySourceTypes
   ) {
     this.sourceTypes = appDeploySourceTypes.getTypes();
-    this.selectedSourceType = appDeploySourceTypes.getAutoSelectedType(route);
-    if (this.selectedSourceType) {
-      this.stepperText = this.selectedSourceType.helpText;
-    }
   }
 
   onNext: StepOnNextFunction = () => {
@@ -156,7 +148,8 @@ export class DeployApplicationStep2Component
       this.store.dispatch(new SaveAppDetails({
         projectName: this.repository,
         branch: this.repositoryBranch,
-        url: this.scm.getCloneURL(this.repository)
+        url: this.scm.getCloneURL(this.repository),
+        commit: this.isRedeploy ? this.commitInfo.sha : undefined
       }, null));
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
       this.store.dispatch(new SaveAppDetails({
@@ -176,11 +169,14 @@ export class DeployApplicationStep2Component
   }
 
   ngOnInit() {
-    if (this.isRedeploy) {
-      this.stepperText = 'Review source details';
-    }
-
-    this.sourceType$ = this.store.select(selectSourceType);
+    this.sourceType$ = combineLatest(
+      of(this.appDeploySourceTypes.getAutoSelectedType(this.route)),
+      this.store.select(selectSourceType),
+      of(this.sourceTypes[this.INITIAL_SOURCE_TYPE])
+    ).pipe(
+      map(([sourceFromStore, sourceFromParam, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
+      filter(sourceType => !!sourceType),
+    );
 
     this.sourceTypeGithub$ = this.sourceType$.pipe(
       filter(type => type && !!type.id),
@@ -192,14 +188,12 @@ export class DeployApplicationStep2Component
       map(type => type.id === DEPLOY_TYPES_IDS.FOLDER || type.id === DEPLOY_TYPES_IDS.FILE)
     );
 
-    const setInitialSourceType$ = this.store.select(selectSourceType).pipe(
-      filter(p => !p),
+
+    const setInitialSourceType$ = this.sourceType$.pipe(
       first(),
-      tap(p => {
-        this.setSourceType(this.selectedSourceType || this.sourceTypes[this.INITIAL_SOURCE_TYPE]);
-        if (this.selectedSourceType) {
-          this.sourceType = this.selectedSourceType;
-        }
+      tap(sourceType => {
+        this.setSourceType(sourceType);
+        this.sourceType = sourceType;
       })
     );
 
@@ -216,6 +210,13 @@ export class DeployApplicationStep2Component
       switchMap(([cfGuid, sourceType]) => this.appDeploySourceTypes.canDeployType(cfGuid, sourceType.id)),
       publishReplay(1),
       refCount()
+    );
+
+    this.stepperText$ = this.canDeployType$.pipe(
+      switchMap(canDeployType => canDeployType ?
+        this.isRedeploy ? of('Review source details') : this.sourceType$.pipe(map(st => st.helpText)) :
+        of(null)
+      )
     );
 
     this.subscriptions.push(setInitialSourceType$.subscribe());
@@ -265,7 +266,8 @@ export class DeployApplicationStep2Component
               action: fetchBranchesAction,
               paginationMonitor: this.paginationMonitorFactory.create(
                 fetchBranchesAction.paginationKey,
-                new CFEntityConfig(gitBranchesEntityType)
+                new CFEntityConfig(gitBranchesEntityType),
+                true
               )
             },
             true
@@ -294,27 +296,31 @@ export class DeployApplicationStep2Component
         const branch = branches.find(b => b.name === name);
         if (branch && !!projectInfo && branch.projectId === projectInfo.full_name) {
           this.store.dispatch(new SetBranch(branch));
-          const commitSha = commit || branch.commit.sha;
-          const entityID = projectInfo.full_name + '-' + commitSha;
-          const gitCommitEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, gitCommitEntityType);
-          const fetchCommitActionBuilder = gitCommitEntity.actionOrchestrator.getActionBuilder('get');
-          const fetchCommitAction = fetchCommitActionBuilder(null, null, {
-            scm: this.scm,
-            projectName: projectInfo.full_name,
-            commitId: commitSha
-          }) as FetchCommit;
-          const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
-            entityID,
-            fetchCommitAction
-          );
 
-          if (this.commitSubscription) {
-            this.commitSubscription.unsubscribe();
+
+          if (this.isRedeploy) {
+            const commitSha = commit || branch.commit.sha;
+            // This method to create entity id's should be standardised....
+            const repoEntityID = `${this.scm.getType()}-${projectInfo.full_name}`;
+            const commitEntityID = `${repoEntityID}-${commitSha}`;
+            const commitEntityService = this.entityServiceFactory.create<GitCommit>(
+              {
+                endpointType: CF_ENDPOINT_TYPE,
+                entityType: gitCommitEntityType,
+                actionMetadata: { projectName: projectInfo.full_name, scm: this.scm, commitSha },
+                entityGuid: commitEntityID,
+              }
+            );
+
+            if (this.commitSubscription) {
+              this.commitSubscription.unsubscribe();
+            }
+            this.commitSubscription = commitEntityService.waitForEntity$.pipe(
+              first(),
+              map(p => p.entity),
+              tap(p => this.commitInfo = p),
+            ).subscribe();
           }
-          this.commitSubscription = commitEntityService.waitForEntity$.pipe(
-            map(p => p.entity.entity),
-            tap(p => this.commitInfo = p)
-          ).subscribe();
         }
       })
     );

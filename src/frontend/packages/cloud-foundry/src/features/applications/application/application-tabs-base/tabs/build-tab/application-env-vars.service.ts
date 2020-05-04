@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { appEnvVarsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
@@ -13,6 +12,7 @@ import {
 } from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 
 
 export interface EnvVarStratosProject {
@@ -49,9 +49,10 @@ export class ApplicationEnvVarsHelper {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        catalogEntity.getSchema()
+        catalogEntity.getSchema(),
+        action.flattenPagination
       )
-    }, true);
+    }, action.flattenPagination);
   }
 
   FetchStratosProject(appEnvVars): EnvVarStratosProject {

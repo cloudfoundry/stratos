@@ -1,3 +1,11 @@
+<app-page-sub-nav>
+  <button mat-icon-button *ngIf="addRolesByUsernameLink$ | async as addRolesByUsernameLink"
+    [routerLink]="addRolesByUsernameLink.link" [queryParams]="addRolesByUsernameLink.params"
+    matTooltip="Manage Roles By Username">
+    <mat-icon>people</mat-icon>
+  </button>
+</app-page-sub-nav>
+
 <ng-template #noEntriesForCurrentFilter>
   <app-no-content-message [icon]="'people'" [firstLine]="'There are no users for the current filter'" [secondLine]="{
       text: ''
@@ -10,12 +18,6 @@
     }"></app-no-content-message>
 </ng-template>
 
-<ng-template #noEntriesMaxedResults>
-  <app-no-content-message [icon]="'people'" [firstLine]="'There are too many users to show'" [secondLine]="{
-        text: 'Please navigate to a Space users list'
-      }"></app-no-content-message>
-</ng-template>
-
 <app-cf-admin-add-user-warning></app-cf-admin-add-user-warning>
 <app-cloud-foundry-invite-user-link></app-cloud-foundry-invite-user-link>
-<app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter" [noEntriesMaxedResults]="noEntriesMaxedResults"></app-list>
+<app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"></app-list>

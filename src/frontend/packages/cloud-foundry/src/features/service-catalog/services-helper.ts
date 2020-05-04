@@ -16,6 +16,7 @@ import {
 import { getIdFromRoute, safeStringToObj } from '../../../../core/src/core/utils.service';
 import { StratosStatus } from '../../../../core/src/shared/shared.types';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
@@ -34,6 +35,7 @@ import {
   spaceEntityType,
 } from '../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { ServiceInstanceActionBuilders } from '../../entity-action-builders/service-instance.action.builders';
 import { QParam, QParamJoiners } from '../../shared/q-param';
 import { fetchTotalResults } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
@@ -89,8 +91,8 @@ export const getServiceInstancesInCf = (cfGuid: string, store: Store<CFAppState>
   return getPaginationObservables<APIResource<IServiceInstance>>({
     store,
     action,
-    paginationMonitor: paginationMonitorFactory.create(paginationKey, action)
-  }, true).entities$;
+    paginationMonitor: paginationMonitorFactory.create(paginationKey, action, action.flattenPagination)
+  }, action.flattenPagination).entities$;
 };
 
 export const fetchServiceInstancesCount = (
@@ -150,8 +152,12 @@ export const getServicePlans = (
         return getPaginationObservables<APIResource<IServicePlan>>({
           store,
           action: getServicePlansAction,
-          paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, cfEntityFactory(servicePlanEntityType))
-        }, true)
+          paginationMonitor: paginationMonitorFactory.create(
+            getServicePlansAction.paginationKey,
+            cfEntityFactory(servicePlanEntityType),
+            getServicePlansAction.flattenPagination
+          )
+        }, getServicePlansAction.flattenPagination)
           .entities$.pipe(share(), first());
       }
     }));
@@ -220,7 +226,7 @@ export const populateServicePlanExtraTyped = (servicePlan: APIResource<IServiceP
   };
 };
 
-export const getEntityService = <T extends IService | IServiceBroker>(
+export const getEntityService = <T extends IService | IServiceBroker | IServiceInstance>(
   serviceGuid: string,
   entityRequestAction: EntityRequestAction,
   entityServiceFactory: EntityServiceFactory
@@ -262,4 +268,24 @@ export const getCfService = (
   const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('get');
   const getServiceAction = actionBuilder(serviceGuid, cfGuid);
   return getEntityService(serviceGuid, getServiceAction, entityServiceFactory);
+};
+
+export const getCfServiceInstance = (
+  serviceInstanceGuid: string,
+  cfGuid: string,
+  entityServiceFactory: EntityServiceFactory,
+  includeRelations: string[] = null
+): EntityService<APIResource<IServiceInstance>> => {
+  const entity = entityCatalog
+    .getEntity<IEntityMetadata, any, ServiceInstanceActionBuilders>(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
+  const actionBuilder = entity.actionOrchestrator.getActionBuilder('get');
+  const getAction = actionBuilder(
+    serviceInstanceGuid,
+    cfGuid,
+    {
+      includeRelations,
+      populateMissing: !!includeRelations
+    }
+  );
+  return getEntityService<IServiceInstance>(serviceInstanceGuid, getAction, entityServiceFactory);
 };

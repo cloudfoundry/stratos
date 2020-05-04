@@ -17,10 +17,10 @@ import {
   ListRowSateHelper,
   ListRowStateSetUpManager,
 } from '../../../../../../../core/src/shared/components/list/list.helper';
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
@@ -95,7 +95,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       switchMap(entities => entities
         .map(entity => {
           const hasMissingRoles = this.hasMissingRoles(entity.entity.missingRoles);
-          rowStateManager.updateRowState(entity.entity.guid, { warning: hasMissingRoles });
+          rowStateManager.updateRowState(entity.metadata.guid, { warning: hasMissingRoles });
         })
       ),
     ).subscribe();
@@ -108,7 +108,8 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       this.entityMonitorFactory,
       action.paginationKey,
       action,
-      this.cfUserRowStateSetUpManager.bind(this)
+      this.cfUserRowStateSetUpManager.bind(this),
+      action.flattenPagination
     );
     this.dataSource = new CfSelectUsersDataSourceService(this.cfGuid, this.store, action, this, rowStateManager, () => {
       sub.unsubscribe();
@@ -116,8 +117,8 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   }
 
   private getUsername = (user: CfUser): string => {
-    const userName = user.username || user.guid;
-    return this.hasMissingRoles(user.missingRoles) ? `${userName} - Not all roles for this user are known` : userName;
+    const username = user.username || user.guid;
+    return this.hasMissingRoles(user.missingRoles) ? `${username} - Not all roles for this user are known` : username;
   }
 
   private hasMissingRoles(missingRoles: CfUserMissingRoles): boolean {
