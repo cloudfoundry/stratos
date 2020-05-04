@@ -18,7 +18,7 @@
   var paths = config.paths;
 
   // Import customization tasks
-  require('./customize-build');
+  //require('./customize-build');
 
   // Clean dist dir
   gulp.task('clean', function (next) {
