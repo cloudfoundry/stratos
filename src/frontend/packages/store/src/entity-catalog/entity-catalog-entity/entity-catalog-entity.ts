@@ -85,12 +85,12 @@ export class StratosBaseCatalogEntity<
         this.entityKey,
         Object.bind(this.getSchema, this)
       ),
-      ...EntityCatalogEntityStoreHelpers.getPaginationStore<Y>(
+      ...EntityCatalogEntityStoreHelpers.getPaginationStore<Y, ABC>(
         this.actions,
         this.entityKey,
         Object.bind(this.getSchema, this)
       )
-    } as EntityCatalogEntityStore<Y, ABC>; // TODO: RC investigate more
+    };
     this.api = EntityCatalogEntityStoreHelpers.getActionDispatchers(
       this.store,
       actionBuilders as ABC
