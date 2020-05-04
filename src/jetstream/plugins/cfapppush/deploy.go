@@ -479,7 +479,7 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID str
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_SESSION)
 		return nil, err
 	}
-	cnsiTokenRecord, found := cfAppPush.portalProxy.GetCNSITokenRecord(cnsiGUID, userID)
+	_, found := cfAppPush.portalProxy.GetCNSITokenRecord(cnsiGUID, userID)
 	if !found {
 		log.Warnf("Failed to retrieve record for CNSI %s", cnsiGUID)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI_USERTOKEN)
@@ -487,7 +487,7 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID str
 	}
 
 	// Refresh token first - makes sure it will be valid when we do the push
-	refreshedTokenRec, err := p.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiRecord.GUID, userID, cnsiRecord.ClientId, cnsiRecord.ClientSecret, cnsiRecord.TokenEndpoint)
+	refreshedTokenRec, err := cfAppPush.portalProxy.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiRecord.GUID, userID, cnsiRecord.ClientId, cnsiRecord.ClientSecret, cnsiRecord.TokenEndpoint)
 	if err != nil {
 		log.Warnf("Couldn't get refresh token for endpoint with GUID %s", cnsiRecord.GUID)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI_USERTOKEN)
