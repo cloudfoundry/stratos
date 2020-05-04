@@ -6,6 +6,8 @@ import { filter, map, tap } from 'rxjs/operators';
 
 import { cfEntityCatalog } from '../../../../../cloud-foundry/src/cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -14,7 +16,10 @@ import { safeUnsubscribe } from '../../../core/utils.service';
 @Component({
   selector: 'app-space-quota-definition-form',
   templateUrl: './space-quota-definition-form.component.html',
-  styleUrls: ['./space-quota-definition-form.component.scss']
+  styleUrls: ['./space-quota-definition-form.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider
+  ]
 })
 export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription: Subscription;
@@ -27,9 +32,10 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   @Input() quota: IQuotaDefinition;
 
   constructor(
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private activatedRoute: ActivatedRoute,
   ) {
-    this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = this.activatedRoute.snapshot.params.orgId;
   }
 

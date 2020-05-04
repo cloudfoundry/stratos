@@ -5,6 +5,8 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, tap } from 'rxjs/operators';
 
 import { cfEntityCatalog } from '../../../../../../cloud-foundry/src/cf-entity-catalog';
+import { ActiveRouteCfOrgSpace } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { AppState } from '../../../../../../store/src/app-state';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { ISpaceQuotaDefinition } from '../../../../core/cf-api.types';
@@ -16,7 +18,10 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
 @Component({
   selector: 'app-edit-space-quota-step',
   templateUrl: './edit-space-quota-step.component.html',
-  styleUrls: ['./edit-space-quota-step.component.scss']
+  styleUrls: ['./edit-space-quota-step.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider
+  ]
 })
 export class EditSpaceQuotaStepComponent implements OnDestroy {
 
@@ -33,8 +38,10 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
   constructor(
     private store: Store<AppState>,
     private activatedRoute: ActivatedRoute,
+    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
+
+    this.cfGuid = this.activeRouteCfOrgSpace.cfGuid;
     this.spaceQuotaGuid = this.activatedRoute.snapshot.params.quotaId;
 
     this.fetchQuotaDefinition();
@@ -56,7 +63,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
 
     const action = cfEntityCatalog.spaceQuota.actions.update(this.spaceQuotaGuid, this.cfGuid, formValues);
     this.store.dispatch(action);
-    return cfEntityCatalog.quotaDefinition.store.getEntityMonitor(this.spaceQuotaGuid)
+    return cfEntityCatalog.spaceQuota.store.getEntityMonitor(this.spaceQuotaGuid)
       .getUpdatingSection(action.updatingKey)
       .pipe(
         pairwise(),

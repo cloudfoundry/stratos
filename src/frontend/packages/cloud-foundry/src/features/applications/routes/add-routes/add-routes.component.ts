@@ -102,6 +102,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       switchMap(() => this.appService.waitForAppEntity$
         .pipe(
           switchMap(app => {
+            this.spaceGuid = app.entity.entity.space_guid;
             return cfEntityCatalog.space.store.getEntityService(
               app.entity.entity.space_guid,
               app.entity.entity.cfGuid,
@@ -209,6 +210,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       this.cfGuid,
       new Route(domainGuid, this.spaceGuid, host, path, port)
     ).pipe(
+      pairwise(),
+      filter(([oldR, newR]) => oldR.creating && !newR.creating),
+      map(([oldR, newR]) => newR),
       filter(route => !route.creating && !route.fetching),
       mergeMap(route => {
         if (route.error) {

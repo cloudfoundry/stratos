@@ -1,11 +1,12 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { cfEntityCatalog } from '../../../../../cloud-foundry/src/cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { IQuotaDefinition } from '../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -27,7 +28,10 @@ export interface QuotaFormValues {
 @Component({
   selector: 'app-quota-definition-form',
   templateUrl: './quota-definition-form.component.html',
-  styleUrls: ['./quota-definition-form.component.scss']
+  styleUrls: ['./quota-definition-form.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider
+  ]
 })
 export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription: Subscription;
@@ -38,9 +42,9 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   @Input() quota: IQuotaDefinition;
 
   constructor(
-    private activatedRoute: ActivatedRoute,
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
   ) {
-    this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
   }
 
   ngOnInit() {

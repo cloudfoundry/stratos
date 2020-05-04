@@ -4,6 +4,8 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
 import { cfEntityCatalog } from '../../../../../../cloud-foundry/src/cf-entity-catalog';
+import { ActiveRouteCfOrgSpace } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../core/cf-api.types';
@@ -14,7 +16,10 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
 @Component({
   selector: 'app-create-space-quota-step',
   templateUrl: './create-space-quota-step.component.html',
-  styleUrls: ['./create-space-quota-step.component.scss']
+  styleUrls: ['./create-space-quota-step.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider
+  ]
 })
 export class CreateSpaceQuotaStepComponent {
 
@@ -27,9 +32,10 @@ export class CreateSpaceQuotaStepComponent {
   form: SpaceQuotaDefinitionFormComponent;
 
   constructor(
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private activatedRoute: ActivatedRoute,
   ) {
-    this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = this.activatedRoute.snapshot.params.orgId;
   }
 
