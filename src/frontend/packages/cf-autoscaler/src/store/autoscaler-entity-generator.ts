@@ -2,10 +2,7 @@ import { cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
 import { metricEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { IOrgFavMetadata } from '../../../cloud-foundry/src/cf-metadata-types';
 import { IOrganization } from '../../../core/src/core/cf-api.types';
-import {
-  StratosBaseCatalogEntity,
-  StratosCatalogEntity,
-} from '../../../store/src/entity-catalog/entity-catalog-entity';
+import { StratosBaseCatalogEntity, StratosCatalogEntity } from '../../../store/src/entity-catalog/entity-catalog-entity';
 import { IStratosEndpointDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
@@ -17,12 +14,12 @@ import {
 } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricEntityType,
+  appAutoscalerCredentialEntityType,
   appAutoscalerHealthEntityType,
   appAutoscalerInfoEntityType,
   appAutoscalerPolicyEntityType,
   appAutoscalerPolicyTriggerEntityType,
   appAutoscalerScalingHistoryEntityType,
-  appAutoscalerCredentialEntityType,
   AUTOSCALER_ENDPOINT_TYPE,
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
@@ -65,7 +62,7 @@ function generateCredentialEntity(endpointDefinition: IStratosEndpointDefinition
     schema: autoscalerEntityFactory(appAutoscalerCredentialEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogueEntity<IFavoriteMetadata, APIResource<AppAutoscalerPolicy>>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerPolicy>>(definition);
 }
 
 function generateInfoEntity(endpointDefinition: IStratosEndpointDefinition) {

@@ -1,24 +1,32 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
-import { map, publishReplay, refCount, distinctUntilChanged, filter, first, pairwise } from 'rxjs/operators';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  ErrorStateMatcher,
+  MatSnackBar,
+  MatSnackBarRef,
+  ShowOnDirtyErrorStateMatcher,
+  SimpleSnackBar,
+} from '@angular/material';
 import { Store } from '@ngrx/store';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount } from 'rxjs/operators';
 
-import { AppState } from '../../../../store/src/app-state';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
-import { UpdateAppAutoscalerCredentialAction, DeleteAppAutoscalerCredentialAction } from '../../store/app-autoscaler.actions';
-import { EntityService } from '../../../../core/src/core/entity-service';
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
-import { entityCatalogue } from '../../../../core/src/core/entity-catalogue/entity-catalogue.service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
-import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
+import { AppState } from '../../../../store/src/app-state';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
-import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
+import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
+import {
+  DeleteAppAutoscalerCredentialAction,
+  UpdateAppAutoscalerCredentialAction,
+} from '../../store/app-autoscaler.actions';
+import { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
 
 @Component({
   selector: 'app-edit-autoscaler-credential',
@@ -148,7 +156,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   deleteCredential(): Observable<ActionState> {
     const action = new DeleteAppAutoscalerCredentialAction(this.applicationService.appGuid, this.applicationService.cfGuid);
     this.store.dispatch(action);
-    const entityKey = entityCatalogue.getEntityKey(action);
+    const entityKey = entityCatalog.getEntityKey(action);
 
     return this.store.select(selectDeletionInfo(entityKey, this.applicationService.appGuid)).pipe(
       pairwise(),

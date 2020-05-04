@@ -6,10 +6,10 @@ import { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { environment } from '../../../core/src/environments/environment';
 import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState } from '../../../store/src/app-state';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import {
   resultPerPageParam,
@@ -36,11 +36,11 @@ import {
   APP_AUTOSCALER_SCALING_HISTORY,
   AUTOSCALER_INFO,
   AutoscalerPaginationParams,
-  UPDATE_APP_AUTOSCALER_CREDENTIAL,
-  DELETE_APP_AUTOSCALER_CREDENTIAL,
   AutoscalerQuery,
   CREATE_APP_AUTOSCALER_POLICY,
   CreateAppAutoscalerPolicyAction,
+  DELETE_APP_AUTOSCALER_CREDENTIAL,
+  DeleteAppAutoscalerCredentialAction,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
@@ -50,12 +50,13 @@ import {
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerPolicyTriggerAction,
   GetAppAutoscalerScalingHistoryAction,
+  UPDATE_APP_AUTOSCALER_CREDENTIAL,
   UPDATE_APP_AUTOSCALER_POLICY,
-  UpdateAppAutoscalerPolicyAction,
   UpdateAppAutoscalerCredentialAction,
-  DeleteAppAutoscalerCredentialAction,
+  UpdateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
 import {
+  AppAutoscalerCredential,
   AppAutoscalerEvent,
   AppAutoscalerFetchPolicyFailedResponse,
   AppAutoscalerMetricData,
@@ -63,7 +64,6 @@ import {
   AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
   AppScalingTrigger,
-  AppAutoscalerCredential,
 } from './app-autoscaler.types';
 
 const { proxyAPIVersion } = environment;
@@ -227,7 +227,7 @@ export class AutoscalerEffects {
         }).pipe(
           mergeMap(response => {
             const credentialInfo = response;
-            const entity = entityCatalogue.getEntity(action);
+            const entity = entityCatalog.getEntity(action);
             const mappedData = {
               entities: { [entity.entityKey]: {} },
               result: []
@@ -253,7 +253,7 @@ export class AutoscalerEffects {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
           mergeMap(response => {
-            const entity = entityCatalogue.getEntity(action);
+            const entity = entityCatalog.getEntity(action);
             const mappedData = {
               entities: { [entity.entityKey]: {} },
               result: []
