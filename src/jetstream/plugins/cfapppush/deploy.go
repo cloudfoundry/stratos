@@ -486,6 +486,14 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID str
 		return nil, errors.New("Failed to find token record")
 	}
 
+	// Refresh token first - makes sure it will be valid when we do the push
+	refreshedTokenRec, err := p.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiRecord.GUID, userID, cnsiRecord.ClientId, cnsiRecord.ClientSecret, cnsiRecord.TokenEndpoint)
+	if err != nil {
+		log.Warnf("Couldn't get refresh token for endpoint with GUID %s", cnsiRecord.GUID)
+		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI_USERTOKEN)
+		return nil, fmt.Errorf("Couldn't get refresh token for endpoint with GUID %s", cnsiRecord.GUID)
+	}
+
 	config := &CFPushAppConfig{
 		AuthorizationEndpoint:  cnsiRecord.AuthorizationEndpoint,
 		CFClient:               cnsiRecord.ClientId,
@@ -493,8 +501,8 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID str
 		APIEndpointURL:         cnsiRecord.APIEndpoint.String(),
 		DopplerLoggingEndpoint: cnsiRecord.DopplerLoggingEndpoint,
 		SkipSSLValidation:      cnsiRecord.SkipSSLValidation,
-		AuthToken:              cnsiTokenRecord.AuthToken,
-		RefreshToken:           cnsiTokenRecord.RefreshToken,
+		AuthToken:              refreshedTokenRec.AuthToken,
+		RefreshToken:           refreshedTokenRec.RefreshToken,
 		OrgGUID:                orgGUID,
 		OrgName:                orgName,
 		SpaceGUID:              spaceGUID,
