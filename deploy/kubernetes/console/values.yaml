@@ -79,6 +79,7 @@ console:
   tlsSecretName:
 
   # URL of a Cloud Foundry to use for authentication and to auto-register on login
+  # Deprecated
   autoRegisterCF: ~
 
   # Custom annotations to apply to Stateful sets
@@ -142,13 +143,18 @@ mariadb:
     accessMode: ReadWriteOnce
     size: 1Gi
     storageClass:
+
+# UAA configuration
 uaa:
-  protocol: https://
-  port: 
-  host: 
+  # UAA endpoint (e.g. https://uaa.domain:2793)
+  endpoint: ~
+  # Client to use when authenticating (default is 'cf')
   consoleClient: 
+  # Client Secret to use when authenticating (default is '')
   consoleClientSecret: 
-  consoleAdminIdentifier: 
+  # Scope that determines if a user is a Stratos admin
+  consoleAdminIdentifier:
+  # Skip SSL validation when communicating with the UAA
   skipSSLValidation: false
 
 # SCF values compatability 
