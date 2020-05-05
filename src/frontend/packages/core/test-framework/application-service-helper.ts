@@ -2,6 +2,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 
 import { IApp, IAppSummary, IDomain, ISpace } from '../../cloud-foundry/src/cf-api.types';
+import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { ApplicationData, ApplicationService } from '../../cloud-foundry/src/features/applications/application.service';
 import {
   ApplicationEnvVarsHelper,
@@ -99,7 +100,7 @@ export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: 
       const appService = new ApplicationService(
         cfGuid,
         appGuid,
-        store,
+        store as Store<CFAppState>,
         entityServiceFactory,
         applicationStateService,
         applicationEnvVarsService,
