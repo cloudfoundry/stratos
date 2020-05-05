@@ -64,10 +64,6 @@ export class AutoscalerConstants {
     instance_max_count: 10,
     initial_min_instance_count: 5
   };
-  public static CredentialDefault = {
-    username: 'my-username',
-    password: 'my-password',
-  };
 
   public static metricMap: { [metricName: string]: AppAutoscalerMetricMapInfo } = {
     memoryused: {

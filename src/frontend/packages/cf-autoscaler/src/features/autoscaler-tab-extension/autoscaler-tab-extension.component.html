@@ -10,7 +10,8 @@
         <mat-icon class="nav-button-with-text__icon">delete</mat-icon> Delete Policy
       </span>
     </button>
-    <button mat-button name="credential" (click)="manageCredentialPage()" class="nav-button-with-text">
+    <button *ngIf="canManageCredentials$ | async" mat-button name="credential" (click)="manageCredentialPage()"
+      class="nav-button-with-text">
       <span class="nav-button-with-text__span">
         <mat-icon class="nav-button-with-text__icon">vpn_key</mat-icon> Manage Credentials
       </span>

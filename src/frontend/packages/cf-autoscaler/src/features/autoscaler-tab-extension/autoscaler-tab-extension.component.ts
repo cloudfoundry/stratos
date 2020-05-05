@@ -24,7 +24,7 @@ import { ActionState } from '../../../../store/src/reducers/api-request-reducer/
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
+import { fetchAutoscalerInfo, isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import {
   AutoscalerPaginationParams,
@@ -34,11 +34,11 @@ import {
   GetAppAutoscalerScalingHistoryAction,
 } from '../../store/app-autoscaler.actions';
 import {
+  AppAutoscaleMetricChart,
   AppAutoscalerMetricData,
   AppAutoscalerPolicyLocal,
   AppAutoscalerScalingHistory,
   AppScalingTrigger,
-  AppAutoscaleMetricChart,
 } from '../../store/app-autoscaler.types';
 import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
 
@@ -62,6 +62,8 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
   ]
 })
 export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
+
+  canManageCredentials$: Observable<boolean>;
 
   scalingRuleColumns: string[] = ['metric', 'condition', 'action'];
   specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max'];
@@ -128,6 +130,22 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+
+    this.canManageCredentials$ = fetchAutoscalerInfo(
+      this.applicationService.cfGuid,
+      this.entityServiceFactory
+    ).pipe(
+      filter(info => !!info && !!info.entity && !!info.entity.entity),
+      map(info => {
+        const build = info.entity.entity.build;
+        const buildParts = build.split('.');
+        if (buildParts.length < 0) {
+          return false;
+        }
+        return Number.parseInt(buildParts[0]) >= 3
+      })
+    )
+
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
       new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
