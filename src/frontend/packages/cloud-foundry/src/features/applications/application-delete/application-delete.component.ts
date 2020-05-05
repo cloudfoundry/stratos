@@ -11,8 +11,6 @@ import {
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-types';
-import { IServiceBinding } from '../../../../../core/src/core/cf-api-svc.types';
-import { IApp, IRoute } from '../../../../../core/src/core/cf-api.types';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -26,6 +24,8 @@ import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-m
 import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IServiceBinding } from '../../../cf-api-svc.types';
+import { IApp, IRoute } from '../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { RoutesActionBuilders } from '../../../entity-action-builders/routes.action-builder';
 import {

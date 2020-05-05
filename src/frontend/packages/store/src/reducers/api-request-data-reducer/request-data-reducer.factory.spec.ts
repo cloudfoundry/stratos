@@ -1,5 +1,5 @@
+import { IDomain } from '../../../../cloud-foundry/src/cf-api.types';
 import { domainEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
-import { IDomain } from '../../../../core/src/core/cf-api.types';
 import { APIResource } from '../../types/api.types';
 import { EntityRequestAction, ISuccessRequestAction } from '../../types/request.types';
 import { requestDataReducerFactory } from './request-data-reducer.factory';

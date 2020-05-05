@@ -4,12 +4,12 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { IRoute } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IRoute } from '../../../../cf-api.types';
 import {
   CfAppRoutesListConfigServiceBase,
 } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config-base';

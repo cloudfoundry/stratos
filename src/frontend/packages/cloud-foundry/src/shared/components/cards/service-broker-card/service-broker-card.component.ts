@@ -5,14 +5,14 @@ import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { IServiceBroker } from '../../../../../../core/src/core/cf-api-svc.types';
-import { ISpace } from '../../../../../../core/src/core/cf-api.types';
+import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { IServiceBroker } from '../../../../cf-api-svc.types';
+import { ISpace } from '../../../../cf-api.types';
 import { spaceEntityType } from '../../../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 
 @Component({
   selector: 'app-service-broker-card',

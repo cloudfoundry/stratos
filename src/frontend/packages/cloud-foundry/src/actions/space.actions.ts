@@ -1,9 +1,9 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
-import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
+import { IUpdateSpace } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,

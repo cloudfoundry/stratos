@@ -24,7 +24,6 @@ import {
   spaceWithOrgEntityType,
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-types';
-import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import {
   ApplicationStateData,
   ApplicationStateService,
@@ -46,6 +45,7 @@ import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors'
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../cf-types';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';

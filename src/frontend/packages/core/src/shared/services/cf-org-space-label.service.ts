@@ -2,17 +2,17 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
+import { IOrganization, ISpace } from '../../../../cloud-foundry/src/cf-api.types';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { haveMultiConnectedCfs } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { selectCfEntity } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
-import { IOrganization, ISpace } from '../../core/cf-api.types';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 
 export class CfOrgSpaceLabelService {
 

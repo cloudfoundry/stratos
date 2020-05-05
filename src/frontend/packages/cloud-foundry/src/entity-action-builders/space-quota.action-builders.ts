@@ -1,14 +1,12 @@
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import {
-  QuotaFormValues,
-} from '../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
-import {
   AssociateSpaceQuota,
   CreateSpaceQuotaDefinition,
   DisassociateSpaceQuota,
   GetOrganizationSpaceQuotaDefinitions,
   UpdateSpaceQuotaDefinition,
 } from '../actions/quota-definitions.actions';
+import { QuotaFormValues } from '../features/cloud-foundry/quota-definition-form/quota-definition-form.component';
 
 export interface SpaceQuotaDefinitionActionBuilders extends OrchestratedActionBuilders {
   create: (

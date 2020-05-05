@@ -3,16 +3,16 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { appStatsEntityType, appSummaryEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { IApp } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityService } from '../../../../../../store/src/entity-service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { ENTITY_SERVICE } from '../../../../../../core/src/shared/entity.tokens';
 import { AppState } from '../../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityService } from '../../../../../../store/src/entity-service';
 import { selectDashboardState } from '../../../../../../store/src/selectors/dashboard.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IApp } from '../../../../cf-api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { ApplicationService } from '../../application.service';
 
 @Injectable()

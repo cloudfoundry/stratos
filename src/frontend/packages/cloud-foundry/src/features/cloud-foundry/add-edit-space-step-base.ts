@@ -11,7 +11,6 @@ import {
   spaceQuotaEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { ISpaceQuotaDefinition } from '../../../../core/src/core/cf-api.types';
 import { StepOnNextResult } from '../../../../core/src/shared/components/stepper/step/step.component';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
@@ -20,6 +19,7 @@ import { PaginationMonitorFactory } from '../../../../store/src/monitors/paginat
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { ISpaceQuotaDefinition } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../cf-types';
 import { SpaceQuotaDefinitionActionBuilders } from '../../entity-action-builders/space-quota.action-builders';

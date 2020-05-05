@@ -6,7 +6,6 @@ import { map, startWith } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
-import { IApp, ISpace } from '../../../../../../../../core/src/core/cf-api.types';
 import { getFavoriteFromCfEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
 import {
   ApplicationStateData,
@@ -20,6 +19,7 @@ import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 

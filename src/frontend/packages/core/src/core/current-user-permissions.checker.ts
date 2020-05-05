@@ -2,6 +2,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
+import { IFeatureFlag } from '../../../cloud-foundry/src/cf-api.types';
 import {
   createCfFeatureFlagFetchAction,
 } from '../../../cloud-foundry/src/shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
@@ -24,7 +25,6 @@ import {
 } from '../../../store/src/selectors/current-user-role.selectors';
 import { connectedEndpointsSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
-import { IFeatureFlag } from './cf-api.types';
 import {
   PermissionConfig,
   PermissionStrings,

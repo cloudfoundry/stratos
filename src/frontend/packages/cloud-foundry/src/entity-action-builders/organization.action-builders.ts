@@ -1,10 +1,10 @@
-import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import {
   DeleteOrganization,
   GetAllOrganizations,
   GetOrganization,
   UpdateOrganization,
 } from '../actions/organization.actions';
+import { IUpdateOrganization } from '../cf-api.types';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 

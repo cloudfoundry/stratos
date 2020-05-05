@@ -1,15 +1,15 @@
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { IRoute } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   IListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { IRoute } from '../../../../../cf-api.types';
 import { routeEntityType } from '../../../../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
 
 

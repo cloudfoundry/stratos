@@ -19,8 +19,6 @@ import {
   UserRoleInSpace,
 } from '../../../../cloud-foundry/src/store/types/user.types';
 import { UserRoleLabels } from '../../../../cloud-foundry/src/store/types/users-roles.types';
-import { IServiceInstance, IUserProvidedServiceInstance } from '../../../../core/src/core/cf-api-svc.types';
-import { ISpace } from '../../../../core/src/core/cf-api.types';
 import {
   CurrentUserPermissions,
   PermissionConfig,
@@ -42,6 +40,8 @@ import { selectPaginationState } from '../../../../store/src/selectors/paginatio
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
+import { ISpace } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { CFEntityConfig } from '../../cf-types';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';

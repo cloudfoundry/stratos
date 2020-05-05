@@ -9,19 +9,13 @@ import {
   servicePlanVisibilityEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import {
-  IService,
-  IServiceBroker,
-  IServiceInstance,
-  IServicePlan,
-  IServicePlanVisibility,
-} from '../../../../../core/src/core/cf-api-svc.types';
 import { CF_GUID } from '../../../../../core/src/shared/entity.tokens';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IService, IServiceBroker, IServiceInstance, IServicePlan, IServicePlanVisibility } from '../../../cf-api-svc.types';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import {

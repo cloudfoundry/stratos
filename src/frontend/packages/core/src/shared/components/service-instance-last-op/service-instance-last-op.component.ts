@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
+import { IServiceInstance } from '../../../../../cloud-foundry/src/cf-api-svc.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
-import { IServiceInstance } from '../../../core/cf-api-svc.types';
 
 // TODO: Move CF code to CF Module #3769
 

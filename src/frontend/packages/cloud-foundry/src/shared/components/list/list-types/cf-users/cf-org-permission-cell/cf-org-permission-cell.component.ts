@@ -11,7 +11,6 @@ import {
   IUserPermissionInOrg,
   OrgUserRoleNames,
 } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
-import { IOrganization } from '../../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
@@ -19,6 +18,7 @@ import { AppChip } from '../../../../../../../../core/src/shared/components/chip
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IOrganization } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getOrgRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';

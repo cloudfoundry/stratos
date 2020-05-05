@@ -6,7 +6,6 @@ import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/o
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
-import { IApp, IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
@@ -38,6 +37,7 @@ import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
+import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { ApplicationService } from '../../application.service';
 import { ApplicationPollingService } from './application-polling.service';

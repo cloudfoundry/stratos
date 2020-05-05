@@ -6,9 +6,6 @@ import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
 import { GitCommit, GitRepo } from '../../../../../../../../cloud-foundry/src/store/types/git.types';
-import {
-  GithubCommitsListConfigServiceAppTab,
-} from '../../../../../../../../core/src/shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shared/data-services/scm/scm.service';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -19,6 +16,9 @@ import { CFAppState } from '../../../../../../cf-app-state';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from '../../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { GitMeta } from '../../../../../../entity-action-builders/git-action-builder';
+import {
+  GithubCommitsListConfigServiceAppTab,
+} from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { GitBranch } from '../../../../../../store/types/github.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';

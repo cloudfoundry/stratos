@@ -4,12 +4,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import {
-  IService,
-  IServiceBinding,
-  IServiceInstance,
-  IUserProvidedServiceInstance,
-} from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
@@ -22,6 +16,12 @@ import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/s
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import {
+  IService,
+  IServiceBinding,
+  IServiceInstance,
+  IUserProvidedServiceInstance,
+} from '../../../../../../cf-api-svc.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import {
   serviceBindingEntityType,

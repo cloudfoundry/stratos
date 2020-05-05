@@ -4,15 +4,6 @@ import { Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, share, switchMap } from 'rxjs/operators';
 
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import {
-  IService,
-  IServiceBroker,
-  IServiceExtra,
-  IServiceInstance,
-  IServicePlan,
-  IServicePlanExtra,
-  IServicePlanVisibility,
-} from '../../../../core/src/core/cf-api-svc.types';
 import { getIdFromRoute, safeStringToObj } from '../../../../core/src/core/utils.service';
 import { StratosStatus } from '../../../../core/src/shared/shared.types';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
@@ -24,6 +15,15 @@ import { getPaginationObservables } from '../../../../store/src/reducers/paginat
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../../store/src/types/request.types';
+import {
+  IService,
+  IServiceBroker,
+  IServiceExtra,
+  IServiceInstance,
+  IServicePlan,
+  IServicePlanExtra,
+  IServicePlanVisibility,
+} from '../../cf-api-svc.types';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import {

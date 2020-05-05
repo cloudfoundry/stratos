@@ -1,15 +1,14 @@
-import { IQuotaDefinition } from '../../../core/src/core/cf-api.types';
-import {
-  QuotaFormValues,
-} from '../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
+import { HttpParams, HttpRequest } from '@angular/common/http';
+
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CFEntityConfig } from '../cf-types';
+import { IQuotaDefinition } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { organizationEntityType, quotaDefinitionEntityType, spaceQuotaEntityType } from '../cf-entity-types';
+import { CFEntityConfig } from '../cf-types';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+import { QuotaFormValues } from '../features/cloud-foundry/quota-definition-form/quota-definition-form.component';
 import { CFStartAction } from './cf-action.types';
-import { HttpRequest, HttpParams } from '@angular/common/http';
 
 export const GET_QUOTA_DEFINITION = '[QuotaDefinition] Get one';
 export const GET_QUOTA_DEFINITION_SUCCESS = '[QuotaDefinition] Get one success';

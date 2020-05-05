@@ -1,4 +1,3 @@
-import { IApp } from '../../../core/src/core/cf-api.types';
 import { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
 import {
@@ -11,6 +10,7 @@ import {
   UpdateExistingApplication,
 } from '../actions/application.actions';
 import { GetAllAppsInSpace } from '../actions/space.actions';
+import { IApp } from '../cf-api.types';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 

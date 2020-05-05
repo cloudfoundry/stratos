@@ -3,15 +3,6 @@ import { ApplicationModule, NgModule, Type } from '@angular/core';
 import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
-import {
-  TableCellQuotaComponent,
-} from '../../../../core/src/shared/components/list/list-types/cf-quotas/table-cell-quota/table-cell-quota.component';
-import {
-  TableCellServiceLastOpComponent,
-} from '../../../../core/src/shared/components/list/list-types/cf-spaces-service-instances/table-cell-service-last-op/table-cell-service-last-op.component';
-import {
-  TableCellServiceComponent,
-} from '../../../../core/src/shared/components/list/list-types/cf-spaces-service-instances/table-cell-service/table-cell-service.component';
 import { CardCell, TableCellCustom } from '../../../../core/src/shared/components/list/list.types';
 import {
   ServiceInstanceLastOpComponent,
@@ -107,6 +98,7 @@ import {
   TableCellFeatureFlagStateComponent,
 } from './list/list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
 import { CfOrgCardComponent } from './list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
+import { TableCellQuotaComponent } from './list/list-types/cf-quotas/table-cell-quota/table-cell-quota.component';
 import {
   TableCellRouteAppsAttachedComponent,
 } from './list/list-types/cf-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
@@ -141,6 +133,12 @@ import {
   TableCellServiceInstanceTagsComponent,
 } from './list/list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
 import {
+  TableCellServiceLastOpComponent,
+} from './list/list-types/cf-spaces-service-instances/table-cell-service-last-op/table-cell-service-last-op.component';
+import {
+  TableCellServiceComponent,
+} from './list/list-types/cf-spaces-service-instances/table-cell-service/table-cell-service.component';
+import {
   TableCellSpaceNameComponent,
 } from './list/list-types/cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
 import { CfSpaceCardComponent } from './list/list-types/cf-spaces/cf-space-card/cf-space-card.component';
@@ -157,6 +155,9 @@ import {
 import {
   CfSpacePermissionCellComponent,
 } from './list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
+import {
+  TableCellCommitAuthorComponent,
+} from './list/list-types/github-commits/table-cell-commit-author/table-cell-commit-author.component';
 import {
   TableCellAServicePlanExtrasComponent,
 } from './list/list-types/service-plans/table-cell-service-plan-extras/table-cell-service-plan-extras.component';
@@ -222,6 +223,7 @@ const cfListTableCells: Type<TableCellCustom<any>>[] = [
   TableCellServiceActiveComponent,
   TableCellServiceReferencesComponent,
   TableCellServiceInstanceTagsComponent,
+  TableCellCommitAuthorComponent,
 ];
 
 const cfListCards: Type<CardCell<any>>[] = [

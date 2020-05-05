@@ -8,7 +8,6 @@ import { AppMetadataTypes, GetAppStatsAction } from '../../../../../../../../clo
 import { UpdateExistingApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType, appStatsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { IAppSummary } from '../../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { getFullEndpointApiUrl } from '../../../../../../../../core/src/features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
@@ -20,6 +19,7 @@ import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/
 import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { IAppSummary } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';

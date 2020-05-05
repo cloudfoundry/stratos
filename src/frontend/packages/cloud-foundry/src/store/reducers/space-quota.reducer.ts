@@ -1,14 +1,14 @@
-import { getCFEntityKey } from '../../cf-entity-helpers';
-import { ISpace, ISpaceQuotaDefinition } from '../../../../core/src/core/cf-api.types';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 import {
   ASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS,
   AssociateSpaceQuota,
   DISASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS,
   DisassociateSpaceQuota,
 } from '../../actions/quota-definitions.actions';
-import { IRequestEntityTypeState } from '../../../../store/src/app-state';
-import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
-import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { ISpace, ISpaceQuotaDefinition } from '../../cf-api.types';
+import { getCFEntityKey } from '../../cf-entity-helpers';
 
 type entityOrgType = APIResource<ISpace>;
 export function updateSpaceQuotaReducer(

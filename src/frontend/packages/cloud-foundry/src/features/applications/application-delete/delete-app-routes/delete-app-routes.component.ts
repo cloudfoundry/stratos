@@ -1,9 +1,9 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { IServiceBinding } from '../../../../../../core/src/core/cf-api-svc.types';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IServiceBinding } from '../../../../cf-api-svc.types';
 import { AppDeleteRoutesListConfigService } from './app-delete-routes-list-config.service';
 
 @Component({

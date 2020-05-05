@@ -1,6 +1,7 @@
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 
+import { IApp, IAppSummary, IDomain, ISpace } from '../../cloud-foundry/src/cf-api.types';
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { ApplicationData, ApplicationService } from '../../cloud-foundry/src/features/applications/application.service';
 import {
@@ -8,15 +9,14 @@ import {
   EnvVarStratosProject,
 } from '../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
+import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
-import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../src/shared/components/application-state/application-state.service';
-import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {

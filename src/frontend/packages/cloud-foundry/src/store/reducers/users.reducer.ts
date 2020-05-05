@@ -1,4 +1,3 @@
-import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { deepMergeState } from '../../../../store/src/helpers/reducer.helper';
@@ -11,6 +10,7 @@ import {
   createDefaultUserRelations,
   REMOVE_ROLE_SUCCESS,
 } from '../../actions/users.actions';
+import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfUserEntityType } from '../../cf-entity-types';
 import {
   CfUser,

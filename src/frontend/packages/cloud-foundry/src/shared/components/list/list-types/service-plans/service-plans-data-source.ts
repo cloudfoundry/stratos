@@ -14,16 +14,16 @@ import { getRowMetadata } from '../../../../../../../cloud-foundry/src/features/
 import {
   populateServicePlanExtraTyped,
 } from '../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
-import { IServicePlan } from '../../../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { IServicePlan } from '../../../../../cf-api-svc.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 
 export class ServicePlansDataSource extends ListDataSource<APIResource<IServicePlan>> {
   constructor(

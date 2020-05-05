@@ -19,7 +19,6 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
-import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -37,6 +36,7 @@ import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endp
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 import { GetAllRoutes } from '../../../actions/route.actions';
 import { GetSpaceRoutes } from '../../../actions/space.actions';
+import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../cf-api.types';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { CfInfoDefinitionActionBuilders } from '../../../entity-action-builders/cf-info.action-builders';

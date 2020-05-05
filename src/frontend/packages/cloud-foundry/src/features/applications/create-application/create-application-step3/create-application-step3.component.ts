@@ -16,13 +16,13 @@ import {
 import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/effects/create-app-effects';
 import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { CreateNewApplicationState } from '../../../../../../cloud-foundry/src/store/types/create-application.types';
-import { IDomain } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IDomain } from '../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import { createGetApplicationAction } from '../../application.service';
