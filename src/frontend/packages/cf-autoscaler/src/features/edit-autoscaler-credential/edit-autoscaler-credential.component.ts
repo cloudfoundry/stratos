@@ -21,7 +21,6 @@ import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
-import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import {
   DeleteAppAutoscalerCredentialAction,
   UpdateAppAutoscalerCredentialAction,
@@ -42,7 +41,6 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   applicationName$: Observable<string>;
 
   public editCredentialForm: FormGroup;
-  public randomCredential = true;
   public appAutoscalerCredential$: Observable<AppAutoscalerCredential>;
 
   private appAutoscalerCredentialErrorSub: Subscription;
@@ -63,8 +61,9 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
     private confirmDialog: ConfirmationDialogService,
   ) {
     this.editCredentialForm = this.fb.group({
-      acusername: new FormControl({ value: '', disabled: this.randomCredential }, Validators.required),
-      acpassword: new FormControl({ value: '', disabled: this.randomCredential }, Validators.required),
+      actype: new FormControl({ value: true }),
+      acusername: new FormControl({ value: '', disabled: true }, Validators.required),
+      acpassword: new FormControl({ value: '', disabled: true }, Validators.required),
     });
   }
 
@@ -84,15 +83,14 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   }
 
   toggleChange() {
-    this.randomCredential = !this.randomCredential;
-    if (this.randomCredential) {
+    if (this.editCredentialForm.controls.actype.value) {
       this.editCredentialForm.controls.acusername.setValue('');
       this.editCredentialForm.controls.acpassword.setValue('');
       this.editCredentialForm.controls.acusername.disable();
       this.editCredentialForm.controls.acpassword.disable();
     } else {
-      this.editCredentialForm.controls.acusername.setValue(AutoscalerConstants.CredentialDefault.username);
-      this.editCredentialForm.controls.acpassword.setValue(AutoscalerConstants.CredentialDefault.password);
+      this.editCredentialForm.controls.acusername.setValue('');
+      this.editCredentialForm.controls.acpassword.setValue('');
       this.editCredentialForm.controls.acusername.enable();
       this.editCredentialForm.controls.acpassword.enable();
     }
@@ -101,7 +99,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   createCredential() {
     this.creating.next(true);
     let action: UpdateAppAutoscalerCredentialAction;
-    if (this.randomCredential) {
+    if (this.editCredentialForm.controls.actype.value) {
       action = new UpdateAppAutoscalerCredentialAction(this.applicationService.appGuid, this.applicationService.cfGuid);
     } else {
       const credential: AppAutoscalerCredential = {
@@ -115,12 +113,26 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
       action,
     );
     this.appAutoscalerCredential$ = updateAppAutoscalerCredentialService.entityObs$.pipe(
+      filter(({ entity, entityRequestInfo }) => {
+        console.log(entity, entityRequestInfo)
+        return entityRequestInfo && !entityRequestInfo.creating && !entityRequestInfo.deleting.busy;
+      }),
       map(({ entity }) => entity ? entity.entity : null),
+      map(creds => {
+        if (!creds) {
+          return;
+        }
+        return {
+          ...creds,
+          authHeader: 'basic ' + btoa(`${creds.username}:${creds.password}`),
+          fullUrl: `${creds.url}/v1/apps/${creds.app_id}/metrics`
+        }
+      }),
       publishReplay(1),
       refCount()
     );
     updateAppAutoscalerCredentialService.entityMonitor.getUpdatingSection(action.updatingKey).pipe(
-      delay(250),
+      delay(150),
       pairwise(),
       filter(([oldV, newV]) => oldV.busy && !newV.busy),
       map(([, newV]) => newV),
