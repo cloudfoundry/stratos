@@ -261,7 +261,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 
 func santizeInfoForSystemSharedTokenUser(cnsiUser *interfaces.ConnectedUser, isSysystemShared bool) {
 	if isSysystemShared {
-		cnsiUser.GUID = tokens.SystemSharedUserGuid
+		cnsiUser.GUID = tokens.SystemSharedUserGuid // Used by front end also
 		cnsiUser.Scopes = make([]string, 0)
 		cnsiUser.Name = "system_shared"
 	}

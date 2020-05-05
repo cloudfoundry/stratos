@@ -1,15 +1,15 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { createBasicStoreModule } from '@stratos/store/testing';
 
+import { FetchApplicationMetricsAction } from '../../../../../cloud-foundry/src/actions/cf-metrics.actions';
 import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { SharedModule } from '../../shared.module';
 import { MetricsChartComponent } from './metrics-chart.component';
 import { MetricsLineChartConfig } from './metrics-chart.types';
-import { FetchApplicationMetricsAction } from '../../../../../cloud-foundry/src/actions/cf-metrics.actions';
 
 // TODO: Fix after metrics has been sorted - STRAT-152
 xdescribe('MetricsChartComponent', () => {

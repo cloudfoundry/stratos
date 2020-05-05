@@ -17,8 +17,7 @@ import { applicationEntityType } from '../../../../../../cf-entity-types';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { MetricsTabComponent } from './metrics-tab.component';
 
-// TODO: Fix after metrics has been sorted - STRAT-152
-xdescribe('MetricsTabComponent', () => {
+describe('MetricsTabComponent', () => {
   let component: MetricsTabComponent;
   let fixture: ComponentFixture<MetricsTabComponent>;
   const appId = '1';

@@ -1,0 +1,12 @@
+<app-page-header>
+  <h1>Backup/Restore Endpoints</h1>
+</app-page-header>
+
+<app-steppers cancel="/endpoints">
+  <app-step [hideNextButton]="true">
+    <div class="tiles">
+      <p>Create a backup of endpoints and their connection details or restore from an existing backup.</p>
+      <app-tile-selector [options]="tileSelectorConfig" (selection)="selectedTile = $event"></app-tile-selector>
+    </div>
+  </app-step>
+</app-steppers>
