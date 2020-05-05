@@ -1,4 +1,4 @@
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { AppState } from '../../../store/src/app-state';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 
 
@@ -22,7 +22,7 @@ export interface StratosStatusMetadata {
   indicator: StratosStatus;
 }
 
-export type PartialAppState = Partial<CFAppState>;
+export type PartialAppState = Partial<AppState>;
 
-export type PickAppState = keyof CFAppState;
+export type PickAppState = keyof AppState;
 

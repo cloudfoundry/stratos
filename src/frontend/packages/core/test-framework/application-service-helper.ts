@@ -2,7 +2,6 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 
 import { IApp, IAppSummary, IDomain, ISpace } from '../../cloud-foundry/src/cf-api.types';
-import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { ApplicationData, ApplicationService } from '../../cloud-foundry/src/features/applications/application.service';
 import {
   ApplicationEnvVarsHelper,
@@ -13,6 +12,7 @@ import {
   ApplicationStateService,
 } from '../../cloud-foundry/src/shared/services/application-state.service';
 import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
+import { AppState } from '../../store/src/app-state';
 import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
@@ -90,7 +90,7 @@ export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: 
   return {
     provide: ApplicationService,
     useFactory: (
-      store: Store<CFAppState>,
+      store: Store<AppState>,
       entityServiceFactory: EntityServiceFactory,
       applicationStateService: ApplicationStateService,
       applicationEnvVarsService: ApplicationEnvVarsHelper,

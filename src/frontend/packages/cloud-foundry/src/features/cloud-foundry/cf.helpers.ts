@@ -32,6 +32,7 @@ import {
 } from '../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
 import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../store/src/app-state';
 import { MultiActionListEntity } from '../../../../store/src/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -297,7 +298,7 @@ export function canUpdateOrgRoles(
   return perms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
 }
 
-export function waitForCFPermissions(store: Store<CFAppState>, cfGuid: string): Observable<ICfRolesState> {
+export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Observable<ICfRolesState> {
   return store.select<ICfRolesState>(getCurrentUserCFEndpointRolesState(cfGuid)).pipe(
     filter(cf => cf && cf.state.initialised),
     first(),
@@ -306,14 +307,14 @@ export function waitForCFPermissions(store: Store<CFAppState>, cfGuid: string): 
   );
 }
 
-export function selectConnectedCfs(store: Store<CFAppState>): Observable<EndpointModel[]> {
+export function selectConnectedCfs(store: Store<AppState>): Observable<EndpointModel[]> {
   return store.select(endpointEntitiesSelector).pipe(
     map(endpoints => Object.values(endpoints)),
     map(endpoints => endpoints.filter(endpoint => endpoint.cnsi_type === 'cf' && endpoint.connectionStatus === 'connected')),
   );
 }
 
-export function haveMultiConnectedCfs(store: Store<CFAppState>): Observable<boolean> {
+export function haveMultiConnectedCfs(store: Store<AppState>): Observable<boolean> {
   return selectConnectedCfs(store).pipe(
     map(connectedCfs => connectedCfs.length > 1)
   );
@@ -329,7 +330,7 @@ export function createFetchTotalResultsPagKey(standardActionKey: string): string
 
 export function fetchTotalResults(
   action: PaginatedAction,
-  store: Store<CFAppState>,
+  store: Store<AppState>,
   paginationMonitorFactory: PaginationMonitorFactory
 ): Observable<number> {
   const newAction = {
@@ -425,7 +426,7 @@ export function isUserProvidedServiceInstance(obj: any): IUserProvidedServiceIns
 export function someFeatureFlags(
   ff: CFFeatureFlagTypes[],
   cfGuid: string,
-  store: Store<CFAppState>,
+  store: Store<AppState>,
   userPerms: CurrentUserPermissionsService,
 ): Observable<boolean> {
   return waitForCFPermissions(store, cfGuid).pipe(

@@ -1,20 +1,24 @@
-import { ActivatedRoute } from '@angular/router';
 import { Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, first, pairwise, startWith } from 'rxjs/operators';
-import { EndpointModel } from './../../../../../../store/src/types/endpoint.types';
-import { UpdateEndpoint } from './../../../../../../store/src/actions/endpoint.actions';
-import { IStratosEndpointDefinition, EntityCatalogSchemas } from './../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { entityCatalog } from './../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { endpointEntitiesSelector } from './../../../../../../store/src/selectors/endpoint.selectors';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { filter, first, map, pairwise } from 'rxjs/operators';
+
+import { AppState } from '../../../../../../store/src/app-state';
 import { selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
-import { safeUnsubscribe, getIdFromRoute } from './../../../../core/utils.service';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
+import { UpdateEndpoint } from './../../../../../../store/src/actions/endpoint.actions';
+import { entityCatalog } from './../../../../../../store/src/entity-catalog/entity-catalog.service';
+import {
+  EntityCatalogSchemas,
+  IStratosEndpointDefinition,
+} from './../../../../../../store/src/entity-catalog/entity-catalog.types';
+import { endpointEntitiesSelector } from './../../../../../../store/src/selectors/endpoint.selectors';
+import { EndpointModel } from './../../../../../../store/src/types/endpoint.types';
+import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
-import { CFAppState } from 'frontend/packages/cloud-foundry/src/cf-app-state';
 
 interface EndpointModelMap {
   [id: string]: EndpointModel;
@@ -42,7 +46,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   setClientInfo = false;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     activatedRoute: ActivatedRoute,
   ) {
     this.editEndpoint = new FormGroup({
