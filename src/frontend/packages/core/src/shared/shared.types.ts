@@ -16,6 +16,12 @@ export enum StratosStatus {
   BUSY = 'busy'
 }
 
+export interface StratosStatusMetadata {
+  label: string;
+  subLabel?: string;
+  indicator: StratosStatus;
+}
+
 export type PartialAppState = Partial<CFAppState>;
 
 export type PickAppState = keyof CFAppState;

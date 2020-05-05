@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { GitBranch, GitCommit, GitRepo } from '../../../../../cloud-foundry/src/store/types/git.types';
+import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
 import { GitSCMType } from './scm.service';
 
 export interface SCMIcon {

@@ -53,12 +53,12 @@ import {
 import { GitCommit, GitRepo } from '../../../../../../cloud-foundry/src/store/types/git.types';
 import { GitBranch } from '../../../../../../cloud-foundry/src/store/types/github.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { GitSCM } from '../../../../../../core/src/shared/data-services/scm/scm';
-import { GitSCMService, GitSCMType } from '../../../../../../core/src/shared/data-services/scm/scm.service';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../cf-types';
+import { GitSCM } from '../../../../shared/data-services/scm/scm';
+import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 @Component({

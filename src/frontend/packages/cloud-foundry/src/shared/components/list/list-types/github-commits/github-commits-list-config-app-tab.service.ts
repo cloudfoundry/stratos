@@ -19,11 +19,11 @@ import { ApplicationService } from '../../../../../../../cloud-foundry/src/featu
 import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { GitBranch, GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { IListAction } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { GitSCM } from '../../../../../../../core/src/shared/data-services/scm/scm';
-import { GitSCMService, GitSCMType } from '../../../../../../../core/src/shared/data-services/scm/scm.service';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
+import { GitSCM } from '../../../../data-services/scm/scm';
+import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
 

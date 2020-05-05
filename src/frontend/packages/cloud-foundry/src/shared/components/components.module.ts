@@ -8,6 +8,7 @@ import {
   ServiceInstanceLastOpComponent,
 } from '../../../../core/src/shared/components/service-instance-last-op/service-instance-last-op.component';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
+import { AppNameUniqueDirective } from '../directives/app-name-unique.directive/app-name-unique.directive';
 import {
   AddServiceInstanceBaseStepComponent,
 } from './add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
@@ -290,7 +291,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     ...cfListTableCells,
     ...cfListCards,
     ServiceInstanceLastOpComponent,
-    TableCellFeatureFlagDescriptionComponent
+    TableCellFeatureFlagDescriptionComponent,
+    AppNameUniqueDirective,
   ],
   exports: [
     ServiceIconComponent,
@@ -328,7 +330,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     ServicePlanPublicComponent,
     ServicePlanPriceComponent,
     CreateApplicationStep1Component,
-    CloudFoundryEventsListComponent
+    CloudFoundryEventsListComponent,
+    AppNameUniqueDirective,
   ],
   entryComponents: [
     CfEndpointDetailsComponent,

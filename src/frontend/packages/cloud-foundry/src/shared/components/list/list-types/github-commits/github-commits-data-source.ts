@@ -11,8 +11,8 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { GitSCM } from '../../../../../../../core/src/shared/data-services/scm/scm';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { GitSCM } from '../../../../data-services/scm/scm';
 
 export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
   store: Store<CFAppState>;

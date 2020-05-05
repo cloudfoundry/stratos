@@ -193,6 +193,6 @@ export function generateCfBaseTestModulesNoShared() {
 export function generateCfBaseTestModules() {
   return [
     ...generateCfBaseTestModulesNoShared(),
-    SharedModule
+    SharedModule,
   ];
 }

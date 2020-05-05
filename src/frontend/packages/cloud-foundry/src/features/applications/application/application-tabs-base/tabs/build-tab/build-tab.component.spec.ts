@@ -6,9 +6,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { GITHUB_API_URL } from '../../../../../../../../core/src/core/github.helpers';
-import {
-  ApplicationStateService,
-} from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../../../../core/src/shared/entity.tokens';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../../../core/tab-nav.service';
@@ -17,6 +14,7 @@ import { EntityServiceFactory } from '../../../../../../../../store/src/entity-s
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryComponentsModule } from '../../../../../../shared/components/components.module';
+import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
 import { ApplicationService } from '../../../../application.service';
 import { cfApplicationEntityServiceFactory } from '../../../application-base.component';
 import { ApplicationPollComponent } from '../../application-poll/application-poll.component';

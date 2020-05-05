@@ -24,10 +24,6 @@ import {
   spaceWithOrgEntityType,
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-types';
-import {
-  ApplicationStateData,
-  ApplicationStateService,
-} from '../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID } from '../../../../core/src/shared/entity.tokens';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityService } from '../../../../store/src/entity-service';
@@ -49,6 +45,7 @@ import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../cf-api.
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../cf-types';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
+import { ApplicationStateData, ApplicationStateService } from '../../shared/services/application-state.service';
 import { AppStat } from '../../store/types/app-metadata.types';
 import {
   ApplicationEnvVarsHelper,

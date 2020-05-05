@@ -8,10 +8,6 @@ import { applicationEntityType } from '../../../../../../../../cloud-foundry/src
 import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { getFavoriteFromCfEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
 import {
-  ApplicationStateData,
-  ApplicationStateService,
-} from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
-import {
   FavoritesConfigMapper,
 } from '../../../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -21,6 +17,7 @@ import { UserFavorite } from '../../../../../../../../store/src/types/user-favor
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
+import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
 @Component({

@@ -8,15 +8,15 @@ import {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,
 } from '../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import {
+  ApplicationStateData,
+  ApplicationStateService,
+} from '../../cloud-foundry/src/shared/services/application-state.service';
 import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
 import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import {
-  ApplicationStateData,
-  ApplicationStateService,
-} from '../src/shared/components/application-state/application-state.service';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {

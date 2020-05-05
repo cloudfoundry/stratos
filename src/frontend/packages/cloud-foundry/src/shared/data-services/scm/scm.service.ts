@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
 
-import { GITHUB_API_URL } from '../../../core/github.helpers';
+import { GITHUB_API_URL } from '../../../../../core/src/core/github.helpers';
 import { GitHubSCM } from './github-scm';
 import { GitLabSCM } from './gitlab-scm';
 import { GitSCM } from './scm';

@@ -8,6 +8,8 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import {
   ApplicationInstanceChartComponent,
 } from '../../../cloud-foundry/src/features/applications/application/application-instance-chart/application-instance-chart.component';
+import { GitSCMService } from '../../../cloud-foundry/src/shared/data-services/scm/scm.service';
+import { ApplicationStateService } from '../../../cloud-foundry/src/shared/services/application-state.service';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../cloud-foundry/src/shared/services/cloud-foundry-user-provided-services.service';
@@ -15,7 +17,6 @@ import { EntityMonitorFactory } from '../../../store/src/monitors/entity-monitor
 import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
 import { CoreModule } from '../core/core.module';
-import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
@@ -23,7 +24,6 @@ import {
 } from './components/application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
-import { ApplicationStateService } from './components/application-state/application-state.service';
 import { BlurDirective } from './components/blur.directive';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
@@ -121,7 +121,6 @@ import {
 } from './components/upload-progress-indicator/upload-progress-indicator.component';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
-import { GitSCMService } from './data-services/scm/scm.service';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { PercentagePipe } from './pipes/percentage.pipe';
@@ -217,8 +216,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    AppNameUniqueDirective,
-    AppNameUniqueDirective,
     EndpointCardComponent,
     SimpleUsageChartComponent,
     PageSubNavComponent,
@@ -319,12 +316,10 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    AppNameUniqueDirective,
     SimpleUsageChartComponent,
     EntitySummaryTitleComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    AppNameUniqueDirective,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     JsonViewerComponent,

@@ -1,6 +1,6 @@
-/* tslint:disable:max-line-length */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { ApplicationStateService } from '../../../../../../../cloud-foundry/src/shared/services/application-state.service';
 import { CoreModule } from '../../../../../core/core.module';
 import { UtilsService } from '../../../../../core/utils.service';
 import { PercentagePipe } from '../../../../pipes/percentage.pipe';
@@ -11,12 +11,12 @@ import {
 } from '../../../application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from '../../../application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from '../../../application-state/application-state.component';
-import { ApplicationStateService } from '../../../application-state/application-state.service';
 import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../chips/chips.component';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { listTableCells, TableCellComponent } from './table-cell.component';
 
+/* tslint:disable:max-line-length */
 
 /* tslint:enable:max-line-length */
 

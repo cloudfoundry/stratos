@@ -5,17 +5,17 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/src/core/logger.service';
-import { GitSCMService, GitSCMType } from '../../../../core/src/shared/data-services/scm/scm.service';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import {
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../../actions/github.actions';
 import { CFAppState } from '../../cf-app-state';
 import { gitRepoEntityType } from '../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { GitSCMService, GitSCMType } from '../../shared/data-services/scm/scm.service';
 import { createFailedGithubRequestMessage } from './deploy-app.effects';
 
 // TODO: Remove this in favour of action builder config.

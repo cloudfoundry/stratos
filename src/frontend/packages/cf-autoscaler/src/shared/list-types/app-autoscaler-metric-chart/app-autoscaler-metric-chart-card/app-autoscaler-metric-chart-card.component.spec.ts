@@ -1,6 +1,6 @@
-/* tslint:disable:max-line-length */
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { createEmptyStoreModule } from '@stratos/store/testing';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import {
@@ -9,20 +9,18 @@ import {
 import {
   ServiceActionHelperService,
 } from '../../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
+import { ApplicationStateService } from '../../../../../../cloud-foundry/src/shared/services/application-state.service';
 import { CoreModule } from '../../../../../../core/src/core/core.module';
-import {
-  ApplicationStateService,
-} from '../../../../../../core/src/shared/components/application-state/application-state.service';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { generateTestApplicationServiceProvider } from '../../../../../../core/test-framework/application-service-helper';
 import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { generateTestApplicationServiceProvider } from '../../../../../../core/test-framework/application-service-helper';
-import { createEmptyStoreModule } from '@stratos/store/testing';
 import { CfAutoscalerTestingModule } from '../../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card.component';
 import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
 
+/* tslint:disable:max-line-length */
 /* tslint:enable:max-line-length */
 
 describe('AppAutoscalerMetricChartCardComponent', () => {

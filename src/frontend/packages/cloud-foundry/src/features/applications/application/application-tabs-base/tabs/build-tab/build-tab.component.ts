@@ -12,7 +12,6 @@ import { CurrentUserPermissions } from '../../../../../../../../core/src/core/cu
 import { getFullEndpointApiUrl } from '../../../../../../../../core/src/features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shared/data-services/scm/scm.service';
 import { ENTITY_SERVICE } from '../../../../../../../../core/src/shared/entity.tokens';
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -21,6 +20,7 @@ import { ActionState } from '../../../../../../../../store/src/reducers/api-requ
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { IAppSummary } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';

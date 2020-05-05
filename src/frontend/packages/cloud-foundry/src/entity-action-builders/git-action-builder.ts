@@ -1,4 +1,3 @@
-import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import {
   EntityRequestActionConfig,
   KnownEntityActionBuilder,
@@ -10,6 +9,7 @@ import { FetchGitHubRepoInfo } from '../actions/github.actions';
 import {
   EnvVarStratosProject,
 } from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { GitSCM } from '../shared/data-services/scm/scm';
 
 export interface GitRepoActionBuilders extends OrchestratedActionBuilders {
   getRepoInfo: (

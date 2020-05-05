@@ -9,7 +9,7 @@ import { DeployApplicationSource } from '../../../../../../../cloud-foundry/src/
 import {
   TableCellRadioComponent,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
-import { GitSCMService, GitSCMType } from '../../../../../../../core/src/shared/data-services/scm/scm.service';
+import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
 

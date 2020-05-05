@@ -24,15 +24,13 @@ import {
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { safeUnsubscribe, urlValidationExpression } from '../../../../../../core/src/core/utils.service';
 import { environment } from '../../../../../../core/src/environments/environment';
-import {
-  AppNameUniqueChecking,
-} from '../../../../../../core/src/shared/app-name-unique.directive/app-name-unique.directive';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { isValidJsonValidator } from '../../../../../../core/src/shared/form-validators';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 

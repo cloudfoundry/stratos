@@ -7,16 +7,17 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 import { createBasicStoreModule } from '@stratos/store/testing';
 
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { ActiveRouteCfOrgSpace } from '../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
-import { CfUserService } from '../../../../cloud-foundry/src/shared/data-services/cf-user.service';
-import { AppStoreModule } from '../../../../store/src/store.module';
-import { CoreTestingModule } from '../../../test-framework/core-test.modules';
-import { CoreModule } from '../../core/core.module';
-import { ExtensionService } from '../../core/extension/extension-service';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../core/github.helpers';
-import { SharedModule } from '../shared.module';
+import { CoreModule } from '../../../../../core/src/core/core.module';
+import { ExtensionService } from '../../../../../core/src/core/extension/extension-service';
+import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../core/src/core/github.helpers';
+import { SharedModule } from '../../../../../core/src/shared/shared.module';
+import { CoreTestingModule } from '../../../../../core/test-framework/core-test.modules';
+import { AppStoreModule } from '../../../../../store/src/store.module';
+import { CFAppState } from '../../../cf-app-state';
+import { ActiveRouteCfOrgSpace } from '../../../features/cloud-foundry/cf-page.types';
+import { CfUserService } from '../../data-services/cf-user.service';
 import { AppNameUniqueDirective } from './app-name-unique.directive';
+
 
 describe('AppNameUniqueDirective', () => {
 

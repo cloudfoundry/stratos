@@ -1,12 +1,9 @@
 import { Injectable } from '@angular/core';
 
-import { AppStat } from '../../../../../cloud-foundry/src/store/types/app-metadata.types';
-import { StratosStatus } from '../../shared.types';
+import { StratosStatus, StratosStatusMetadata } from '../../../../core/src/shared/shared.types';
+import { AppStat } from '../../store/types/app-metadata.types';
 
-export interface ApplicationStateData {
-  label: string;
-  subLabel?: string;
-  indicator: StratosStatus;
+export interface ApplicationStateData extends StratosStatusMetadata {
   actions: {
     [key: string]: boolean
   };
