@@ -13,9 +13,6 @@ import {
   spaceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { OrgUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
 import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
@@ -34,6 +31,9 @@ import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../cf.
 import { OrganizationActionBuilders } from '../../../entity-action-builders/organization.action-builders';
 import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';

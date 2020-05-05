@@ -8,6 +8,9 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import {
   ApplicationInstanceChartComponent,
 } from '../../../cloud-foundry/src/features/applications/application/application-instance-chart/application-instance-chart.component';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../cloud-foundry/src/shared/services/cloud-foundry-user-provided-services.service';
 import { EntityMonitorFactory } from '../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
@@ -125,7 +128,6 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';

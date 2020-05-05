@@ -3,28 +3,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import {
-  CreateUserProvidedServiceInstance,
-  getUserProvidedServiceInstanceRelations,
-  IUserProvidedServiceInstanceData,
-  UpdateUserProvidedServiceInstance,
-} from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { IUserProvidedServiceInstance } from '../../../../cloud-foundry/src/cf-api-svc.types';
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import {
-  organizationEntityType,
-  serviceInstancesEntityType,
-  spaceEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/src/cf-types';
-import {
-  UserProvidedServiceActionBuilder,
-} from '../../../../cloud-foundry/src/entity-action-builders/user-provided-service.action-builders';
-import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { fetchTotalResults } from '../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
-import { QParam, QParamJoiners } from '../../../../cloud-foundry/src/shared/q-param';
-import { selectCfRequestInfo } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { ClearPaginationOfType } from '../../../../store/src/actions/pagination.actions';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityCatalogEntityConfig, IEntityMetadata } from '../../../../store/src/entity-catalog/entity-catalog.types';
@@ -34,6 +12,26 @@ import { RequestInfoState } from '../../../../store/src/reducers/api-request-red
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import {
+  CreateUserProvidedServiceInstance,
+  getUserProvidedServiceInstanceRelations,
+  IUserProvidedServiceInstanceData,
+  UpdateUserProvidedServiceInstance,
+} from '../../actions/user-provided-service.actions';
+import { IUserProvidedServiceInstance } from '../../cf-api-svc.types';
+import { CFAppState } from '../../cf-app-state';
+import {
+  organizationEntityType,
+  serviceInstancesEntityType,
+  spaceEntityType,
+  userProvidedServiceInstanceEntityType,
+} from '../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { UserProvidedServiceActionBuilder } from '../../entity-action-builders/user-provided-service.action-builders';
+import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
+import { fetchTotalResults } from '../../features/cloud-foundry/cf.helpers';
+import { selectCfRequestInfo } from '../../store/selectors/api.selectors';
+import { QParam, QParamJoiners } from '../q-param';
 
 
 @Injectable()

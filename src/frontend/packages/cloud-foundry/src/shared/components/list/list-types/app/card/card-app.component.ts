@@ -15,13 +15,13 @@ import {
   FavoritesConfigMapper,
 } from '../../../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/services/cf-org-space-label.service';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
+import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
 @Component({
   selector: 'app-card-app',
