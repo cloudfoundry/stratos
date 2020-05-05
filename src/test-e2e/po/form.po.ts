@@ -83,8 +83,30 @@ export class FormComponent extends Component {
     return this.getFields().count();
   }
 
-  getFieldsMapped(): promise.Promise<FormItem[]> {
-    return this.getFields().map(this.mapField);
+  getFieldsMapped(mapper?: (elm: ElementFinder, index: number) => FormItem | any): promise.Promise<FormItem[]> {
+    return mapper ? this.getFields().map(mapper) : this.getFields().map(this.mapField);
+  }
+
+  // Less fields to fetch == quicker tests
+  mapFieldFormFill(elm: ElementFinder, index: number): FormItem | any {
+    return {
+      index,
+      type: elm.getAttribute('type'),
+      sendKeys: elm.sendKeys,
+      clear: elm.clear,
+      click: elm.click,
+      tag: elm.getTagName(),
+      multiple: elm.getAttribute('multiple'),
+      id: elm.getAttribute('name').then(name => {
+        if (name) {
+          return name;
+        } else return elm.getAttribute('formcontrolname').then(name => {
+          if (name) {
+            return name;
+          } else return elm.getAttribute('id');
+        });
+      })
+    };
   }
 
   mapField(elm: ElementFinder, index: number): FormItem | any {
@@ -107,7 +129,7 @@ export class FormComponent extends Component {
       id: elm.getAttribute('id'),
       multiple: elm.getAttribute('multiple'),
     };
-  }
+  }  
 
   // Get the form field with the specified name or formcontrolname
   getField(ctrlName: string): ElementFinder {
@@ -174,9 +196,18 @@ export class FormComponent extends Component {
     });
   }
 
+  getControlsMapFormFill(): promise.Promise<FormItemMap> {
+    return this.getFieldsMapped(this.mapFieldFormFill).then(items => {
+      const form = {};
+      items.forEach((item: FormItem) => form[item.id.toLowerCase()] = item);
+      return form;
+    });
+  }
+
+
   // Fill the form fields in the specified object
   fill(fields: { [fieldKey: string]: string | boolean | number[] }, expectFailure = false): promise.Promise<void> {
-    return this.getControlsMap().then(ctrls => {
+    return this.getControlsMapFormFill().then(ctrls => {
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
         const value: any = fields[field];
