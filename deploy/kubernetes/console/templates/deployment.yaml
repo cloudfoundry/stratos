@@ -190,7 +190,15 @@ spec:
           value: stratos.admin
         {{- else }}
         # UAA
-        {{- if or .Values.env.UAA_HOST .Values.env.DOMAIN }}  
+        # Highest priority setting to use is uaa.endpoint
+        {{- if .Values.uaa.endpoint }}
+        - name: UAA_ENDPOINT 
+          value: {{ .Values.uaa.endpoint | quote }}
+        - name: CONSOLE_ADMIN_SCOPE
+          value: {{ default "cloud_controller.admin" .Values.uaa.consoleAdminIdentifier }}
+        - name: SKIP_SSL_VALIDATION 
+          value: {{default "true" .Values.uaa.skipSSLValidation | quote}}
+        {{- else if or .Values.env.UAA_HOST .Values.env.DOMAIN }}          
         - name: UAA_ENDPOINT 
           value: {{ template "scfUaaEndpoint" . }}
         {{- if and .Values.env.DOMAIN (not .Values.console.autoRegisterCF) }}
