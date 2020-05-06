@@ -4,9 +4,6 @@ import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form
 
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { CardCell, TableCellCustom } from '../../../../core/src/shared/components/list/list.types';
-import {
-  ServiceInstanceLastOpComponent,
-} from '../../../../core/src/shared/components/service-instance-last-op/service-instance-last-op.component';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { AppNameUniqueDirective } from '../directives/app-name-unique.directive/app-name-unique.directive';
 import {
@@ -178,6 +175,7 @@ import { RunningInstancesComponent } from './running-instances/running-instances
 import { SchemaFormComponent } from './schema-form/schema-form.component';
 import { SelectServiceComponent } from './select-service/select-service.component';
 import { ServiceIconComponent } from './service-icon/service-icon.component';
+import { ServiceInstanceLastOpComponent } from './service-instance-last-op/service-instance-last-op.component';
 import { ServicePlanPriceComponent } from './service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './service-plan-public/service-plan-public.component';
 

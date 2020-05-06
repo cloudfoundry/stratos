@@ -3,11 +3,9 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import {
-  ServiceInstanceLastOpComponent,
-} from '../../../../../../../../core/src/shared/components/service-instance-last-op/service-instance-last-op.component';
 import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/core-test.helper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import { TableCellServiceLastOpComponent } from './table-cell-service-last-op.component';
 
 describe('TableCellServiceLastOpComponent', () => {

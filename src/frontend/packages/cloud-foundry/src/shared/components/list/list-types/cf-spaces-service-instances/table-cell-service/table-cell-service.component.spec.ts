@@ -9,10 +9,8 @@ import {
 import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import {
-  ServiceInstanceLastOpComponent,
-} from '../../../../../../../../core/src/shared/components/service-instance-last-op/service-instance-last-op.component';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import { TableCellServiceComponent } from './table-cell-service.component';
 
 describe('TableCellServiceComponent', () => {

@@ -1,7 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
-import { BooleanIndicatorComponent } from '../boolean-indicator/boolean-indicator.component';
+import {
+  BooleanIndicatorComponent,
+} from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
 import { ServiceInstanceLastOpComponent } from './service-instance-last-op.component';
 
 describe('ServiceInstanceLastOpComponent', () => {
