@@ -40,7 +40,6 @@ describe('Manage Users Stepper', () => {
   const timeout = 100000;
   extendE2ETestTime(timeout);
 
-
   let managerUsersStepper: StepperComponent;
   let orgManagerCheckbox: CheckboxComponent;
   let orgAuditorCheckbox: CheckboxComponent;
@@ -68,8 +67,7 @@ describe('Manage Users Stepper', () => {
 
         const selectUser = new CheckboxComponent(usersTable.table.getCell(usersRow, 0));
         selectUser.scrollIntoView();
-        selectUser.waitUntilShown();
-        selectUser.getComponent().click();
+        selectUser.toggle();
 
         const usersButton = usersTable.header.getIconButton('people');
         browser.wait(until.visibilityOf(usersButton));
