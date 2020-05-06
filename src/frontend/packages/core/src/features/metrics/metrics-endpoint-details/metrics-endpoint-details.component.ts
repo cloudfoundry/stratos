@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { MetricsStratosAction } from 'frontend/packages/store/src/actions/metrics-api.actions';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
+import { MetricsStratosAction } from '../../../../../store/src/actions/metrics-api.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { EndpointListDetailsComponent } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { mapMetricsData } from '../metrics.helpers';
@@ -36,24 +36,37 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
   ) {
     super();
 
+    const endpoints$ = this.metricsService.metricsEndpoints$.pipe(
+      filter(endpoints => !!endpoints),
+      distinctUntilChanged()
+    )
+
+    const guid$ = this.guid$.asObservable().pipe(
+      filter(guid => !!guid),
+      distinctUntilChanged()
+    )
+
     // Raw endpoint data for this metrics endpoint
     this.data$ = combineLatest(
-      this.metricsService.metricsEndpoints$,
-      this.guid$.asObservable()).pipe(
-        map(([endpoints, guid]) => endpoints.find((item) => item.provider.guid === guid)),
-        filter(provider => !!provider),
-        tap(data => {
-          if (!this.hasStratosData(data)) {
-            this.store.dispatch(new MetricsStratosAction(data.provider.guid));
-          }
-        }),
-        map((provider) => this.processProvider(provider))
+      endpoints$,
+      guid$
+    ).pipe(
+      map(([endpoints, guid]) => endpoints.find((item) => item.provider.guid === guid)),
+      filter(provider => !!provider),
+      tap(data => {
+        if (!this.hasStratosData(data)) {
+          this.store.dispatch(new MetricsStratosAction(data.provider.guid));
+        }
+      }),
+      map((provider) => this.processProvider(provider)),
+      publishReplay(1),
+      refCount()
     );
   }
 
   private hasStratosData(provider: MetricsEndpointProvider): boolean {
     const data = provider.provider;
-    return data && data.metadata && data.metadata.metrics_stratos && Array.isArray(data.metadata.metrics_stratos);
+    return !!data && !!data.metadata && !!data.metadata.metrics_stratos;
   }
 
   private processProvider(provider: MetricsEndpointProvider): MetricsDetailsInfo {
