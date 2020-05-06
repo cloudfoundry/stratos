@@ -5,9 +5,9 @@
 
   // Last item uses background color to overwrisr the side bar to make it appear
   // like its the last item in th tree
-  .tree li:last-child:before {
+  .tree li:last-child::before {
     background-color: $tree-background-color;
-  }  
+  }
 
   .metrics-tree__root {
     background-color: mat-contrast($primary, 300);

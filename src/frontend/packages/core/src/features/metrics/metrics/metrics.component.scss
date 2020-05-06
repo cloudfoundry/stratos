@@ -65,8 +65,8 @@ $tree-indicator-width: 3px;
 
 .metrics-tree {
   display: flex;
-  flex-direction: column;
   flex: 1;
+  flex-direction: column;
 
   &__root {
     height: 24px;
@@ -84,19 +84,19 @@ $tree-indicator-width: 3px;
 }
 
 .tree ul {
-  margin-left: .5em
+  margin-left: .5em;
 }
 
-.tree:before,
+.tree::before,
 .tree ul:before {
   border-left: $tree-indicator-width solid;
   bottom: 0;
-  content: "";
+  content: '';
   display: block;
   left: 0;
   position: absolute;
   top: 0;
-  width:0;
+  width: 0;
 }
 
 .tree li {
@@ -105,14 +105,14 @@ $tree-indicator-width: 3px;
   position: relative;
 }
 
-.tree li:before {
+.tree li::before {
   border-top: $tree-indicator-width solid;
-  content:"";
+  content: '';
   display: block;
-  height:0;
+  height: 0;
   left: 0;
   margin-top: -1px;
-  position:absolute;
+  position: absolute;
   top: $hz-indent-top;
   width: $hz-indent-width;
 }
