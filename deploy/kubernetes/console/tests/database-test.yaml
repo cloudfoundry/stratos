@@ -1,0 +1,12 @@
+suite: test stratos database
+templates:
+  - database.yaml
+tests:
+  - it: should set kubernetes.io/arch if mariadb.nodeSelector.kubernetes.io/arch is set
+    set:
+      mariadb.nodeSelector.kubernetes.io/arch: amd64
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.kubernetes.io/arch
+          value: amd64
+        documentIndex: 0

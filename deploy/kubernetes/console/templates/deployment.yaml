@@ -47,6 +47,10 @@ spec:
 {{ toYaml .Values.console.podExtraLabels | indent 8 }}
 {{- end }}
     spec:
+{{- if .Values.console }}
+      nodeSelector:
+{{ toYaml .Values.console.nodeSelector | indent 8 }}
+{{- end }}
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
