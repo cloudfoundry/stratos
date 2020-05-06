@@ -88,7 +88,7 @@ $tree-indicator-width: 3px;
 }
 
 .tree::before,
-.tree ul:before {
+.tree ul::before {
   border-left: $tree-indicator-width solid;
   bottom: 0;
   content: '';
@@ -117,7 +117,7 @@ $tree-indicator-width: 3px;
   width: $hz-indent-width;
 }
 
-.tree li:last-child:before {
+.tree li:last-child::before {
   bottom: 0;
   height: auto;
   top: $hz-indent-top;
