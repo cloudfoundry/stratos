@@ -3,12 +3,12 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { CoreModule } from '../../../../core/src/core/core.module';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../core/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../store/testing/public-api';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { EditAutoscalerCredentialComponent } from './edit-autoscaler-credential.component';
 
