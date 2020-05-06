@@ -231,7 +231,7 @@ spec:
         - name: HELM_CHART_VERSION
           value: "{{ .Chart.Version }}"
         - name: HELM_LAST_MODIFIED
-          value: "{{ .Release.Time }}"
+          value: "seconds:{{ now | unixEpoch }} nanos:0 "        
         - name: SSO_LOGIN
           value: {{default "false" .Values.console.ssoLogin | quote}}
         - name: SSO_OPTIONS
