@@ -29,21 +29,16 @@ describe('Autoscaler -', () => {
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo(ConsoleUserType.admin);
     applicationE2eHelper = new ApplicationE2eHelper(setup);
+    // Should be deployed, no web-socket open, so we can wait for angular again
+    browser.waitForAngularEnabled(true);
   });
 
   beforeAll(() => applicationE2eHelper.cfHelper.updateDefaultCfOrgSpace());
-
-  afterAll(() => {
-    browser.waitForAngularEnabled(true);
-  });
 
   const { testAppName, appDetails } = createApplicationDeployTests(CREATE_APP_DEPLOY_TEST_TYPE.GIT_URL);
 
   describe('Tab Tests -', () => {
     beforeAll(() => {
-      // Should be deployed, no web-socket open, so we can wait for angular again
-      browser.waitForAngularEnabled(true);
-
       expect(appDetails.cfGuid).toBeDefined();
       expect(appDetails.appGuid).toBeDefined();
       // Fresh reload so that we know the app status is correct
@@ -461,7 +456,7 @@ describe('Autoscaler -', () => {
       });
 
       // This depends on scheduleStartDate1
-      extendE2ETestTime(120000);
+      extendE2ETestTime(125000);
 
       /**
        * Find the required scaling event row via row count and row content
@@ -512,10 +507,7 @@ describe('Autoscaler -', () => {
         e2e.debugLog(`${loggingPrefix} Waiting For Autoscale Event Page`);
         eventPageBase.waitForPage();
         expect(eventPageBase.header.getTitleText()).toBe('AutoScaler Scaling Events: ' + testAppName);
-
-        browser.waitForAngularEnabled().then(res => e2e.debugLog('browser.waitForAngularEnabled: ' + res));
         waitForRow();
-
         eventPageBase.header.clickIconButton('clear');
       });
 
