@@ -82,7 +82,10 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     );
 
     // Fill the form in with the endpoint data
-    this.endpoint$.pipe(first()).subscribe(endpoint => {
+    this.endpoint$.pipe(
+      filter(ep => !!ep),
+      first()
+    ).subscribe(endpoint => {
       this.setAdvancedFields(endpoint);
       this.editEndpoint.setValue({
         name: endpoint.name,
@@ -152,9 +155,10 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
 
   // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
   setAdvancedFields(endpoint: any) {
-    this.showAdvancedFields = endpoint.cnsi_type === 'cf';
+    const isCloudFoundry = endpoint && endpoint.cnsi_type === 'cf';
+    this.showAdvancedFields = isCloudFoundry;
     // Only allow SSL if the endpoint type is Cloud Foundry
-    this.endpointTypeSupportsSSO = endpoint.cnsi_type === 'cf';
+    this.endpointTypeSupportsSSO = isCloudFoundry;
   }
 
 }
