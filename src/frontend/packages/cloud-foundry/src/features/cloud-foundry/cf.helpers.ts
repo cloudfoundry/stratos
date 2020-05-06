@@ -33,7 +33,6 @@ import {
 import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/app-state';
-import { MultiActionListEntity } from '../../../../store/src/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
@@ -214,13 +213,6 @@ function hasRole(user: CfUser, guid: string, roleType: string) {
   }
   return false;
 }
-
-export const getRowMetadata = (entity: APIResource | MultiActionListEntity) => {
-  if (entity instanceof MultiActionListEntity) {
-    return entity.entity.metadata ? entity.entity.metadata.guid : null;
-  }
-  return entity.metadata ? entity.metadata.guid : null;
-};
 
 export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
   return ({

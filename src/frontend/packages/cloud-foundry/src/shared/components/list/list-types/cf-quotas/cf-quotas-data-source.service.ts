@@ -1,4 +1,5 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 import { of } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
@@ -17,7 +18,6 @@ import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { quotaDefinitionEntityType } from '../../../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfQuotasDataSourceService extends ListDataSource<APIResource> {
 

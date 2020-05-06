@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 
-import { GetAllUserProvidedServices } from '../../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
@@ -21,12 +21,13 @@ import {
   defaultPaginationPageSizeOptionsTable,
   IListConfig,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
-import { UserProvidedServiceActionBuilder } from '../../../../../entity-action-builders/user-provided-service.action-builders';
+import {
+  UserProvidedServiceActionBuilder,
+} from '../../../../../entity-action-builders/user-provided-service.action-builders';
 
 export class CfSpacesUserServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {

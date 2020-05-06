@@ -6,7 +6,6 @@ import { createBasicStoreModule } from '@stratos/store/testing';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
-import { ApplicationStateService } from '../../../../../cloud-foundry/src/shared/services/application-state.service';
 import { ListView } from '../../../../../store/src/actions/list.actions';
 import { GeneralAppState } from '../../../../../store/src/app-state';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
@@ -123,7 +122,7 @@ describe('ListComponent', () => {
       TestBed.configureTestingModule({
         providers: [
           { provide: ListConfig, useClass: EndpointsListConfigService },
-          ApplicationStateService,
+          // ApplicationStateService,
           PaginationMonitorFactory,
           EntityMonitorFactory,
           EndpointListHelper
