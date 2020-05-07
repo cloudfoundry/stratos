@@ -81,8 +81,7 @@ export class MetaCardComponent implements OnDestroy {
             entity,
             entityConfig.schema.key,
             this.favoritesConfigMapper,
-            entityConfig.schema.endpointType,
-            entityConfig
+            entityConfig.schema.endpointType
           ))
         ).subscribe();
       }

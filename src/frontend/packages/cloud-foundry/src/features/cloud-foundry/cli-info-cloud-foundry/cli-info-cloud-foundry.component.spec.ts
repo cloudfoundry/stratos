@@ -7,6 +7,10 @@ import {
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
 import { CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
+import { ApplicationStateService } from '../../../shared/services/application-state.service';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry.component';
@@ -23,6 +27,8 @@ describe('CliInfoCloudFoundryComponent', () => {
         CloudFoundryEndpointService,
         generateTestCfEndpointServiceProvider(),
         ActiveRouteCfOrgSpace,
+        ApplicationStateService,
+        CloudFoundryUserProvidedServicesService,
         TabNavService
       ]
     })

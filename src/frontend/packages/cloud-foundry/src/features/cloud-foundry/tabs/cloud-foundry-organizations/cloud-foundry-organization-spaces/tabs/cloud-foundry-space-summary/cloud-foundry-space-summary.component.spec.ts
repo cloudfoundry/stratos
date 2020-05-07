@@ -18,6 +18,9 @@ import {
   CardCfSpaceDetailsComponent,
 } from '../../../../../../../shared/components/cards/card-cf-space-details/card-cf-space-details.component';
 import { CfUserService } from '../../../../../../../shared/data-services/cf-user.service';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
@@ -37,7 +40,8 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         CloudFoundryOrganizationService,
         TabNavService,
-        CfUserService
+        CfUserService,
+        CloudFoundryUserProvidedServicesService,
       ]
     })
       .compileComponents();

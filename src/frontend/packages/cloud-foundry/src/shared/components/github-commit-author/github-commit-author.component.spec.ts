@@ -1,4 +1,5 @@
-import { async, ComponentFixture, TestBed } from './@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { GithubCommitAuthorComponent } from './github-commit-author.component';
 
 describe('GithubCommitAuthorComponent', () => {

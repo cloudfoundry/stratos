@@ -4,6 +4,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
+import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
 import { CsiModeService } from '../csi-mode.service';
 import { SpecifyUserProvidedDetailsComponent } from './specify-user-provided-details.component';
 
@@ -23,7 +24,8 @@ describe('SpecifyUserProvidedDetailsComponent', () => {
         HttpClientTestingModule
       ],
       providers: [
-        CsiModeService
+        CsiModeService,
+        CloudFoundryUserProvidedServicesService,
       ]
     })
       .compileComponents();

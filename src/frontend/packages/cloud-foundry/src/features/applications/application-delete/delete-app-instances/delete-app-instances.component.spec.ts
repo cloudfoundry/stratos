@@ -11,6 +11,7 @@ import { ServiceActionHelperService } from '../../../../shared/data-services/ser
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationStateService } from './../../../../shared/services/application-state.service';
 import { DeleteAppServiceInstancesComponent } from './delete-app-instances.component';
 
 describe('DeleteAppInstancesComponent', () => {
@@ -31,7 +32,8 @@ describe('DeleteAppInstancesComponent', () => {
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationEnvVarsHelper,
         DatePipe,
-        ServiceActionHelperService
+        ServiceActionHelperService,
+        ApplicationStateService,
       ]
     })
       .compileComponents();
