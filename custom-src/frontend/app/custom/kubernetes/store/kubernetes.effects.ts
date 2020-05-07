@@ -124,9 +124,8 @@ export class KubernetesEffects {
             result: []
           } as NormalizedResponse;
           const status = response as KubeDashboardStatus;
-          const id = status.guid;
-          result.entities[dashboardEntityConfig.entityKey][id] = status;
-          result.result.push(id);
+          result.entities[dashboardEntityConfig.entityKey][action.guid] = status;
+          result.result.push(action.guid);
           return [
             new WrapperRequestActionSuccess(result, action)
           ];
@@ -155,8 +154,7 @@ export class KubernetesEffects {
       const nodeEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNodesEntityType);
       return this.processSingleItemAction<KubernetesNode>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes/${action.nodeName}`,
-        nodeEntityConfig.entityKey,
-        (node) => node.metadata.name);
+        nodeEntityConfig.entityKey);
     })
   );
 
@@ -168,7 +166,7 @@ export class KubernetesEffects {
       return this.processSingleItemAction<KubernetesNamespace>(action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}`,
         namespaceEntityConfig.entityKey,
-        getKubeAPIResourceGuid);
+        getKubeAPIResourceGuid); // TODO: RC HERE
     })
   );
 
@@ -314,10 +312,9 @@ export class KubernetesEffects {
   }
 
   private processListAction<T = any>(
-    action: KubePaginationAction | KubeAction,
+    action: KubePaginationAction,
     url: string,
     entityKey: string,
-    getId: GetID<T>,
     filterResults?: Filter<T>) {
     this.store.dispatch(new StartRequestAction(action));
 
@@ -397,7 +394,6 @@ export class KubernetesEffects {
     action: KubeAction,
     url: string,
     schemaKey: string,
-    getId: GetID<T>,
     body?: any) {
     const requestType: ApiRequestTypes = body ? 'create' : 'fetch';
     this.store.dispatch(new StartRequestAction(action, requestType));
@@ -418,12 +414,11 @@ export class KubernetesEffects {
             entities: { [schemaKey]: {} },
             result: []
           } as NormalizedResponse;
-          const id = getId(response);
           const data = action.entityType === kubernetesPodsEntityType ?
             KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(response as unknown as KubernetesPod) :
             response;
-          res.entities[schemaKey][id] = data;
-          res.result.push(id);
+          res.entities[schemaKey][action.guid] = data;
+          res.result.push(action.guid);
           const actions: Action[] = [
             new WrapperRequestActionSuccess(res, action)
           ];

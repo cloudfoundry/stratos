@@ -5,8 +5,11 @@ import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-} from '../../../../store/src/entity-catalog/entity-catalog-entity';
-import { StratosEndpointExtensionDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
+} from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import {
+  IStratosEntityDefinition,
+  StratosEndpointExtensionDefinition,
+} from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
 import { EndpointAuthTypeConfig, EndpointType } from '../../core/extension/extension-types';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
@@ -29,6 +32,24 @@ import {
   kubernetesServicesEntityType,
   kubernetesStatefulSetsEntityType,
 } from './kubernetes-entity-factory';
+import {
+  KubeAppActionBuilders,
+  kubeAppActionBuilders,
+  KubeDashboardActionBuilders,
+  kubeDashboardActionBuilders,
+  KubeDeploymentActionBuilders,
+  kubeDeploymentActionBuilders,
+  KubeNamespaceActionBuilders,
+  kubeNamespaceActionBuilders,
+  KubeNodeActionBuilders,
+  kubeNodeActionBuilders,
+  KubePodActionBuilders,
+  kubePodActionBuilders,
+  KubeServiceActionBuilders,
+  kubeServiceActionBuilders,
+  KubeStatefulSetsActionBuilders,
+  kubeStatefulSetsActionBuilders,
+} from './store/action-builders/kube.action-builders';
 import {
   KubernetesApp,
   KubernetesDeployment,
@@ -160,79 +181,97 @@ function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefi
 }
 
 function generateAppEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: kubernetesAppsEntityType,
     schema: kubernetesEntityFactory(kubernetesAppsEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesApp>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesApp, KubeAppActionBuilders>(definition, {
+    actionBuilders: kubeAppActionBuilders
+  });
 }
 
 function generateStatefulSetsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: kubernetesStatefulSetsEntityType,
     schema: kubernetesEntityFactory(kubernetesStatefulSetsEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesStatefulSet>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesStatefulSet, KubeStatefulSetsActionBuilders>(definition, {
+    actionBuilders: kubeStatefulSetsActionBuilders
+  });
 }
 
 function generatePodsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: kubernetesPodsEntityType,
     schema: kubernetesEntityFactory(kubernetesPodsEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubePodActionBuilders>(definition, {
+    actionBuilders: kubePodActionBuilders
+  });
 }
 
 function generateDeploymentsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: kubernetesDeploymentsEntityType,
     schema: kubernetesEntityFactory(kubernetesDeploymentsEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesDeployment>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesDeployment, KubeDeploymentActionBuilders>(definition, {
+    actionBuilders: kubeDeploymentActionBuilders
+  });
 }
 
 function generateNodesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: kubernetesNodesEntityType,
     schema: kubernetesEntityFactory(kubernetesNodesEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesNode>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesNode, KubeNodeActionBuilders>(definition, {
+    actionBuilders: kubeNodeActionBuilders
+  });
 }
 
 function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: kubernetesNamespacesEntityType,
     schema: kubernetesEntityFactory(kubernetesNamespacesEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(definition, {
+    actionBuilders: kubeNamespaceActionBuilders
+  });
 }
 
 function generateServicesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: kubernetesServicesEntityType,
     schema: kubernetesEntityFactory(kubernetesServicesEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubeService>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, KubeService, KubeServiceActionBuilders>(definition, {
+    actionBuilders: kubeServiceActionBuilders
+  });
 }
 
 function generateDashboardEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: kubernetesDashboardEntityType,
     schema: kubernetesEntityFactory(kubernetesDashboardEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata>(definition);
+  // TODO: RC any
+  return new StratosCatalogEntity<IFavoriteMetadata, any, KubeDashboardActionBuilders>(definition, {
+    actionBuilders: kubeDashboardActionBuilders
+  });
 }
 
 function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
+  const definition: IStratosEntityDefinition = {
     type: metricEntityType,
     schema: kubernetesEntityFactory(metricEntityType),
     label: 'Kubernetes Metric',

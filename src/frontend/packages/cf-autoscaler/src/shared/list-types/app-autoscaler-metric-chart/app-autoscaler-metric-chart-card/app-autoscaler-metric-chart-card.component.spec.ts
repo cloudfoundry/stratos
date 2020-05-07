@@ -18,7 +18,7 @@ import { generateTestApplicationServiceProvider } from '../../../../../../core/t
 import { AppTestModule } from '../../../../../../core/test-framework/core-test.helper';
 import {
   EntityCatalogHelper,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
+} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity/entity-catalog.service';
 import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { CfAutoscalerTestingModule } from '../../../../cf-autoscaler-testing.module';

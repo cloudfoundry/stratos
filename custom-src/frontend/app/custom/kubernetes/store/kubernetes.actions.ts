@@ -17,6 +17,7 @@ import {
   kubernetesServicesEntityType,
   kubernetesStatefulSetsEntityType,
 } from '../kubernetes-entity-factory';
+import { getKubeAPIResourceGuid } from './kube.selectors';
 
 export const GET_RELEASE_POD_INFO = '[KUBERNETES Endpoint] Get Release Pods Info';
 export const GET_RELEASE_POD_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Release Pods Info Success';
@@ -89,7 +90,12 @@ const sortPodsByName = {
 export interface KubeAction extends EntityRequestAction {
   kubeGuid: string;
 }
-export interface KubePaginationAction extends PaginatedAction, KubeAction { }
+export interface KubePaginationAction extends PaginatedAction, KubeAction {
+  getId: (r: any) => string;
+}
+export interface KubeSingleEntityAction extends KubeAction {
+  guid: string;
+}
 
 export class KubeHealthCheck implements KubePaginationAction {
   constructor(public kubeGuid) {
@@ -128,10 +134,12 @@ export class GetKubernetesNodes implements KubePaginationAction {
     'order-direction': 'desc' as SortDirection,
     'order-direction-field': 'name'
   };
+  getId = getKubeAPIResourceGuid;
 }
 
-export class GetKubernetesNode implements KubeAction {
+export class GetKubernetesNode implements KubeSingleEntityAction {
   constructor(public nodeName: string, public kubeGuid: string) {
+    this.guid = this.nodeName;
   }
   type = GET_NODE_INFO;
   entityType = kubernetesNodesEntityType;
@@ -143,9 +151,10 @@ export class GetKubernetesNode implements KubeAction {
     GET_NODE_INFO_SUCCESS,
     GET_NODE_INFO_FAILURE
   ];
+  guid: string;
 }
 
-export class GetKubernetesNamespace implements KubeAction {
+export class GetKubernetesNamespace implements KubeSingleEntityAction {
   constructor(public namespaceName: string, public kubeGuid: string) {
   }
   type = GET_NAMESPACE_INFO;
@@ -160,7 +169,7 @@ export class GetKubernetesNamespace implements KubeAction {
   ];
 }
 
-export class CreateKubernetesNamespace implements KubeAction {
+export class CreateKubernetesNamespace implements KubeSingleEntityAction {
   public guid: string;
   constructor(public namespaceName: string, public kubeGuid: string) {
     this.guid = `Creating-${namespaceName}-${kubeGuid}`;
@@ -193,7 +202,7 @@ export class GetKubernetesPods implements KubePaginationAction {
   };
 }
 
-export class GetKubernetesPodsOnNode implements PaginatedAction, KubeAction {
+export class GetKubernetesPodsOnNode implements KubePaginationAction {
   constructor(public kubeGuid: string, public nodeName: string) {
     this.paginationKey = getPaginationKey(kubernetesPodsEntityType, `node-${nodeName}`, kubeGuid);
     this.initialParams = {
@@ -214,7 +223,7 @@ export class GetKubernetesPodsOnNode implements PaginatedAction, KubeAction {
   initialParams: PaginationParam;
 }
 
-export class GetKubernetesServicesInNamespace implements PaginatedAction, KubeAction {
+export class GetKubernetesServicesInNamespace implements KubePaginationAction {
   constructor(public kubeGuid: string, public namespaceName: string) {
     this.paginationKey = getPaginationKey(kubernetesPodsEntityType, `ns-${namespaceName}`, kubeGuid);
   }
@@ -233,7 +242,7 @@ export class GetKubernetesServicesInNamespace implements PaginatedAction, KubeAc
   };
 }
 
-export class GetKubernetesPodsInNamespace implements PaginatedAction, KubeAction {
+export class GetKubernetesPodsInNamespace implements KubePaginationAction {
   constructor(public kubeGuid: string, public namespaceName: string) {
     this.paginationKey = getPaginationKey(kubernetesPodsEntityType, `ns-${namespaceName}`, kubeGuid);
   }
@@ -292,7 +301,7 @@ export class GetKubernetesServices implements KubePaginationAction {
   };
 }
 
-export class GetKubernetesPod implements KubeAction {
+export class GetKubernetesPod implements KubeSingleEntityAction {
   constructor(public podName, public namespaceName, public kubeGuid) {
   }
   type = GET_KUBE_POD;
@@ -338,8 +347,9 @@ export class GeKubernetesDeployments implements KubePaginationAction {
   paginationKey: string;
 }
 
-export class GetKubernetesDashboard implements KubeAction {
+export class GetKubernetesDashboard implements KubeSingleEntityAction {
   constructor(public kubeGuid: string) {
+    this.guid = this.getId();
   }
   type = GET_KUBE_DASHBOARD;
   entityType = kubernetesDashboardEntityType;
@@ -351,6 +361,8 @@ export class GetKubernetesDashboard implements KubeAction {
     GET_KUBE_DASHBOARD_SUCCESS,
     GET_KUBE_DASHBOARD_FAILURE
   ];
+  getId = () => this.kubeGuid;
+  guid: string;
 }
 
 function getKubeMetricsAction(guid: string) {
