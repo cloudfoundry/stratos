@@ -164,7 +164,8 @@ export function setupInviteUserTests(
       inviteUserStepper.snackBar.waitForMessage('Failed to invite one or more users. Please address per user message and try again');
       expect(stackedActions.isInputSuccess(0)).toBe(true);
       expect(stackedActions.isInputSuccess(1)).toBe(false);
-      expect(stackedActions.getInputMessage(1)).toBe(`${slightlyValidEmail} is invalid email.`);
+      // expect(stackedActions.getInputMessage(1)).toBe(`${slightlyValidEmail} is invalid email.`); // See #4272
+      expect(stackedActions.getInputMessage(1)).toBe(`No authentication provider found.`);
       // Clear state
       inviteUserStepper.cancel();
       usersTable.inviteUser();
