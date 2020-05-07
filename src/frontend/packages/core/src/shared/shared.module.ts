@@ -5,14 +5,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
-import {
-  ApplicationInstanceChartComponent,
-} from '../../../cloud-foundry/src/features/applications/application/application-instance-chart/application-instance-chart.component';
-import { GitSCMService } from '../../../cloud-foundry/src/shared/data-services/scm/scm.service';
-import { ApplicationStateService } from '../../../cloud-foundry/src/shared/services/application-state.service';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../cloud-foundry/src/shared/services/cloud-foundry-user-provided-services.service';
 import { EntityMonitorFactory } from '../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
@@ -51,7 +43,6 @@ import { FavoritesGlobalListComponent } from './components/favorites-global-list
 import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
-import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
@@ -189,12 +180,10 @@ import { UserPermissionDirective } from './user-permission.directive';
     EnvVarViewComponent,
     RingChartComponent,
     MetricsChartComponent,
-    ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
     EnumerateComponent,
     UploadProgressIndicatorComponent,
-    GithubCommitAuthorComponent,
     UserProfileBannerComponent,
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
@@ -286,13 +275,11 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardNumberMetricComponent,
     EnvVarViewComponent,
     MetricsChartComponent,
-    ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
     UserProfileBannerComponent,
     EnumerateComponent,
     UploadProgressIndicatorComponent,
-    GithubCommitAuthorComponent,
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
     UserPermissionDirective,
@@ -341,7 +328,6 @@ import { UserPermissionDirective } from './user-permission.directive';
   ],
   providers: [
     ListConfig,
-    ApplicationStateService,
     EndpointListHelper,
     EndpointsListConfigService,
     // CfUserService,
@@ -352,9 +338,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     InternalEventMonitorFactory,
     // ServiceActionHelperService,
     MetricsRangeSelectorService,
-    GitSCMService,
     LongRunningOperationsService,
-    CloudFoundryUserProvidedServicesService
   ]
 })
 export class SharedModule { }

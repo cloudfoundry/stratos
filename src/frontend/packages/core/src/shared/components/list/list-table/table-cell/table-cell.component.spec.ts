@@ -1,6 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ApplicationStateService } from '../../../../../../../cloud-foundry/src/shared/services/application-state.service';
 import { CoreModule } from '../../../../../core/core.module';
 import { UtilsService } from '../../../../../core/utils.service';
 import { PercentagePipe } from '../../../../pipes/percentage.pipe';
@@ -51,7 +50,6 @@ describe('TableCellComponent', () => {
         CoreModule
       ],
       providers: [
-        ApplicationStateService,
         UtilsService,
       ]
     })

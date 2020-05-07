@@ -13,7 +13,7 @@ import { ApplicationServiceMock } from '../../../../../../../../core/test-framew
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryComponentsModule } from '../../../../../../shared/components/components.module';
+import { CloudFoundrySharedModule } from '../../../../../../shared/cf-shared.module';
 import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
 import { ApplicationService } from '../../../../application.service';
 import { cfApplicationEntityServiceFactory } from '../../../application-base.component';
@@ -42,7 +42,7 @@ describe('BuildTabComponent', () => {
         NoopAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule,
-        CloudFoundryComponentsModule
+        CloudFoundrySharedModule
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

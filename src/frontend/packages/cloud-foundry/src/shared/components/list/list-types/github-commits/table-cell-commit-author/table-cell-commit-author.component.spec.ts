@@ -1,9 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  GithubCommitAuthorComponent,
-} from '../../../../../../../../core/src/shared/components/github-commit-author/github-commit-author.component';
 import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/core-test.helper';
+import { GithubCommitAuthorComponent } from '../../../../github-commit-author/github-commit-author.component';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author.component';
 
 describe('TableCellCommitAuthorComponent', () => {

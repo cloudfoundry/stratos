@@ -16,7 +16,7 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../../../core/src/core/extension/extension-service';
-import { getFavoriteFromCfEntity } from '../../../../../../core/src/core/user-favorite-helpers';
+import { getFavoriteFromEntity } from '../../../../../../core/src/core/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import {
@@ -52,7 +52,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public favorite$ = this.applicationService.app$.pipe(
     filter(app => !!app),
-    map(app => getFavoriteFromCfEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.favoritesConfigMapper))
+    map(app => getFavoriteFromEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE))
   );
 
   isBusyUpdating$: Observable<{ updating: boolean }>;

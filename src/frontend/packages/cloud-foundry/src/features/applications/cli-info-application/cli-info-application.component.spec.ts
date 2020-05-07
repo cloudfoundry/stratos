@@ -11,7 +11,7 @@ import { generateTestApplicationServiceProvider } from '../../../../../core/test
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
 import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { applicationEntityType } from '../../../cf-entity-types';
-import { CloudFoundryComponentsModule } from '../../../shared/components/components.module';
+import { CloudFoundrySharedModule } from '../../../shared/cf-shared.module';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CliInfoApplicationComponent } from './cli-info-application.component';
@@ -32,7 +32,7 @@ describe('CliInfoApplicationComponent', () => {
         SharedModule,
         MDAppModule,
         RouterTestingModule,
-        CloudFoundryComponentsModule
+        CloudFoundrySharedModule
       ],
       providers: [
         generateTestEntityServiceProvider(

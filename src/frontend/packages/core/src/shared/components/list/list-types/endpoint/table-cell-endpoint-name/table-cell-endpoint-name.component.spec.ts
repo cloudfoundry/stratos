@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CFBaseTestModules } from '../../../../../../../../cloud-foundry/test-framework/cf-test-helper';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { CoreModule } from '../../../../../../core/core.module';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { BaseTestModules } from '../../../../../../../test-framework/core-test.helper';
+import { CoreModule } from '../../../../../../core/core.module';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.component';
 
 describe('TableCellEndpointNameComponent', () => {
@@ -14,9 +14,7 @@ describe('TableCellEndpointNameComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,
-        // CoreTestingModule,
-        // createBasicStoreModule(),
-        ...CFBaseTestModules
+        ...BaseTestModules,
       ],
       providers: [
         EntityMonitorFactory,

@@ -12,7 +12,7 @@ import {
   generateCfStoreModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryComponentsModule } from '../../../../../../shared/components/components.module';
+import { CloudFoundrySharedModule } from '../../../../../../shared/cf-shared.module';
 import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
@@ -31,7 +31,7 @@ describe('InstancesTabComponent', () => {
         SharedModule,
         RouterTestingModule,
         NoopAnimationsModule,
-        CloudFoundryComponentsModule
+        CloudFoundrySharedModule
       ],
       providers: [
         generateTestCfEndpointServiceProvider(),

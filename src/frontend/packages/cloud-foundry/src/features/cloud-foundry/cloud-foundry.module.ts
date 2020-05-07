@@ -4,7 +4,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { CloudFoundryComponentsModule } from '../../shared/components/components.module';
+import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
 import {
   CFEndpointsListConfigService,
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
@@ -140,7 +140,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CloudFoundryRoutingModule,
     RouterModule,
     NgxChartsModule,
-    CloudFoundryComponentsModule
+    CloudFoundrySharedModule
   ],
   declarations: [
     CloudFoundryBaseComponent,

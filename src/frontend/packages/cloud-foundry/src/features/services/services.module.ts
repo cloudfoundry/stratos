@@ -7,7 +7,7 @@ import {
 import { ServiceCatalogModule } from '../../../../cloud-foundry/src/features/service-catalog/service-catalog.module';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { CloudFoundryComponentsModule } from '../../shared/components/components.module';
+import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
 import { DetachAppsComponent } from './detach-service-instance/detach-apps/detach-apps.component';
 import { DetachServiceInstanceComponent } from './detach-service-instance/detach-service-instance.component';
 import { ServicesWallComponent } from './services-wall/services-wall.component';
@@ -21,7 +21,7 @@ import { ServicesRoutingModule } from './services.routing';
     ServicesRoutingModule,
     ServiceCatalogModule,
     CreateApplicationModule,
-    CloudFoundryComponentsModule,
+    CloudFoundrySharedModule,
   ],
   declarations: [
     ServicesWallComponent,

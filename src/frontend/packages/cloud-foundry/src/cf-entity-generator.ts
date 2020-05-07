@@ -3,6 +3,7 @@ import * as moment from 'moment';
 import { combineLatest, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { EndpointHealthCheck } from '../../core/endpoints-health-checks';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { AppState } from '../../store/src/app-state';
@@ -13,6 +14,7 @@ import {
 } from '../../store/src/entity-catalog/entity-catalog-entity';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog.service';
 import {
+  IEntityMetadata,
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../store/src/entity-catalog/entity-catalog.types';
@@ -88,6 +90,7 @@ import {
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
 import { CfErrorResponse, getCfError } from './cf-error-helpers';
+import { getFavoriteFromCfEntity } from './cf-favorites-helpers';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { CF_ENDPOINT_TYPE } from './cf-types';
 import { appEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
@@ -160,6 +163,11 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     listDetailsComponent: CfEndpointDetailsComponent,
     renderPriority: 1,
+    healthCheck: new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => {
+      entityCatalog.getEntity<IEntityMetadata, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType)
+        .actionDispatchManager.dispatchGet(endpoint.guid);
+    }),
+    favoriteFromEntity: getFavoriteFromCfEntity,
     globalPreRequest: (request, action) => {
       return addCfRelationParams(request, action);
     },
