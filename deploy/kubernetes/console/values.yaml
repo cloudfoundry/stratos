@@ -105,6 +105,9 @@ console:
 
   # Extra labels to apply to Pods
   podExtraLabels: {}
+
+  # Node Selector for console Pod
+  nodeSelector: {}
   
 images:
   console: stratos-console
@@ -143,7 +146,13 @@ mariadb:
     accessMode: ReadWriteOnce
     size: 1Gi
     storageClass:
+  # Node selector for the database pod
+  nodeSelector: {}
 
+configInit:
+  # Node selector for the config init pod
+  nodeSelector: {}
+  
 # UAA configuration
 uaa:
   # UAA endpoint (e.g. https://uaa.domain:2793)

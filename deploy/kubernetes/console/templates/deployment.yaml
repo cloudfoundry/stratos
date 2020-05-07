@@ -48,8 +48,10 @@ spec:
 {{- end }}
     spec:
 {{- if .Values.console }}
+{{- if .Values.console.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.console.nodeSelector | indent 8 }}
+{{ toYaml .Values.console.nodeSelector | trim | indent 8 }}
+{{- end }}
 {{- end }}
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
