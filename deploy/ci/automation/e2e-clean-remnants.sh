@@ -70,8 +70,8 @@ function clean() {
         EPOCH=$(date -d "$TIMESTAMP" "+%s")
       fi
       DIFF=$(($NOW-$EPOCH))
-      # Delete anything older than 2 hours
-      if [ $DIFF -gt 7200 ]; then
+      # Delete anything older than 1 hour
+      if [ $DIFF -gt 3600 ]; then
         if [ $DRYRUN == "false" ]; then
           echo "$NAME  [DELETE]"
           cf $CMD $NAME -f
@@ -120,6 +120,9 @@ USERS=$(cf curl "/v2/users?results-per-page=100" | jq -r .resources[].entity.use
 clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travisci)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travis)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+
+clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travisci)(-manage-by-username)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+
 
 # Routes
 echo "Cleaning routes"
