@@ -39,12 +39,12 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
     const endpoints$ = this.metricsService.metricsEndpoints$.pipe(
       filter(endpoints => !!endpoints),
       distinctUntilChanged()
-    )
+    );
 
     const guid$ = this.guid$.asObservable().pipe(
       filter(guid => !!guid),
       distinctUntilChanged()
-    )
+    );
 
     // Raw endpoint data for this metrics endpoint
     this.data$ = combineLatest(
