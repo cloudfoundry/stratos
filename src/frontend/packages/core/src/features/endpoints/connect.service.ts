@@ -17,7 +17,7 @@ import { GetSystemInfo } from '../../../../store/src/actions/system.actions';
 import { EndpointOnlyAppState } from '../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../store/src/effects/endpoint.effects';
 import { SystemEffects } from '../../../../store/src/effects/system.effects';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';

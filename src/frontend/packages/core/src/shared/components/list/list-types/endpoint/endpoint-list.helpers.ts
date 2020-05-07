@@ -9,13 +9,13 @@ import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../sto
 import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
 import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { LoggerService } from '../../../../../core/logger.service';
 import {
   ConnectEndpointDialogComponent,
@@ -98,7 +98,7 @@ export class EndpointListHelper {
         description: '',
         createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => {
           const endpoint = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
-          const ep = endpoint ? endpoint.definition : {unConnectable: false};
+          const ep = endpoint ? endpoint.definition : { unConnectable: false };
           return !ep.unConnectable && row.connectionStatus === 'disconnected';
         }))
       },

@@ -4,17 +4,12 @@ import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewCon
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
 import { GetCurrentUsersRelations } from '../../../../../cloud-foundry/src/actions/permissions.actions';
-import { cfInfoEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
+import { cfEntityCatalog } from '../../../../../cloud-foundry/src/cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/src/cf-types';
-import {
-  CfInfoDefinitionActionBuilders,
-} from '../../../../../cloud-foundry/src/entity-action-builders/cf-info.action-builders';
 import { CloseSideNav, DisableMobileNav, EnableMobileNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
@@ -144,10 +139,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     );
     // TODO: Move cf code out to cf module #3849
     this.endpointsService.registerHealthCheck(
-      new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => {
-        entityCatalog.getEntity<IEntityMetadata, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType)
-          .actionDispatchManager.dispatchGet(endpoint.guid);
-      })
+      new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => cfEntityCatalog.cfInfo.api.get(endpoint.guid))
     );
     this.dispatchRelations();
     this.store.dispatch(new GetUserFavoritesAction());

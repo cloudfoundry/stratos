@@ -12,6 +12,7 @@ import { APIResource } from '../../../store/src/types/api.types';
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
 import { BaseEntityValues } from '../../../store/src/types/entity.types';
 import { PaginationState } from '../../../store/src/types/pagination.types';
+import { AppTestModule } from '../../test-framework/core-test.helper';
 import { endpointEntitySchema } from '../base-entity-schemas';
 import { generateStratosEntities } from '../base-entity-types';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
@@ -928,6 +929,7 @@ describe('CurrentUserPermissionsService', () => {
           ]
         },
         createBasicStoreModule(createStoreState()),
+        AppTestModule
       ],
 
     });
@@ -978,6 +980,19 @@ describe('CurrentUserPermissionsService', () => {
     ).pipe(
       tap(can => {
         expect(can).toBe(true);
+        done();
+      }),
+      first()
+    ).subscribe();
+  });
+
+  it('should allow if feature flag with cf', done => {
+    service.can(
+      [new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)],
+      'c80420ca-204b-4879-bf69-b6b7a202ad87'
+    ).pipe(
+      tap(can => {
+        expect(can).toBe(false);
         done();
       }),
       first()

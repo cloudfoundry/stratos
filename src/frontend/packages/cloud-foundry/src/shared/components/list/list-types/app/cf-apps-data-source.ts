@@ -6,7 +6,6 @@ import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from '
 import { GetAllApplications } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import {
   applicationEntityType,
-  appStatsEntityType,
   organizationEntityType,
   routeEntityType,
   spaceEntityType,
@@ -22,12 +21,11 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CFListDataSource } from '../../../../cf-list-data-source';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
@@ -44,18 +42,18 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
   private subs: Subscription[];
   public action: GetAllApplications;
 
-
   constructor(
     store: Store<AppState>,
     listConfig?: IListConfig<APIResource>,
     transformEntities?: any[],
     paginationKey = CfAppsDataSource.paginationKey,
     seedPaginationKey = CfAppsDataSource.paginationKey,
-    startingCfGuid?: string
+    startingCfGuidFilter?: string
   ) {
     const syncNeeded = paginationKey !== seedPaginationKey;
-    const action = new GetAllApplications(paginationKey, null, CfAppsDataSource.includeRelations);
-    action.endpointGuid = startingCfGuid;
+    const action = cfEntityCatalog.application.actions.getMultiple(undefined, CfAppsDataSource.paginationKey, {
+      includeRelations: CfAppsDataSource.includeRelations,
+    });
 
     const dispatchSequencer = new DispatchSequencer(store);
 
@@ -107,12 +105,9 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
           const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;
           if (appState === 'STARTED') {
-            const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
-            const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
-            const getAction = actionBuilder(appGuid, cfGuid);
             actions.push({
               id: appGuid,
-              action: getAction
+              action: cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid)
             });
           }
         });

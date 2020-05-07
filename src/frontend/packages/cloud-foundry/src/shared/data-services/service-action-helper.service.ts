@@ -3,29 +3,19 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import {
-  DeleteUserProvidedInstance,
-  UpdateUserProvidedServiceInstance,
-} from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
+import { UpdateUserProvidedServiceInstance } from '../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import {
-  serviceBindingEntityType,
-  serviceInstancesEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-types';
+import { serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../../../core/src/core/cf-api-svc.types';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata, EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
+import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { UpdateServiceInstance } from '../../actions/service-instances.actions';
-import { ServiceBindingActionBuilders } from '../../entity-action-builders/service-binding.action-builders';
-import { ServiceInstanceActionBuilders } from '../../entity-action-builders/service-instance.action.builders';
+import { cfEntityCatalog } from '../../cf-entity-catalog';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import {
   SERVICE_INSTANCE_TYPES,
 } from '../components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
@@ -34,20 +24,9 @@ import {
 @Injectable()
 export class ServiceActionHelperService {
 
-  private sgEntity = entityCatalog.getEntity<IEntityMetadata, any, ServiceBindingActionBuilders>(
-    CF_ENDPOINT_TYPE,
-    serviceBindingEntityType
-  );
-
-  private serviceInstanceEntity = entityCatalog.getEntity<IEntityMetadata, any, ServiceInstanceActionBuilders>(
-    CF_ENDPOINT_TYPE,
-    serviceInstancesEntityType
-  );
-
   constructor(
     private confirmDialog: ConfirmationDialogService,
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory
   ) { }
 
   detachServiceBinding = (
@@ -65,8 +44,7 @@ export class ServiceActionHelperService {
       return;
     }
 
-    const actionBuilder = this.sgEntity.actionOrchestrator.getActionBuilder('remove');
-    const action = actionBuilder(serviceBindings[0].metadata.guid, endpointGuid, { serviceInstanceGuid });
+    const action = cfEntityCatalog.serviceBinding.actions.remove(serviceBindings[0].metadata.guid, endpointGuid, { serviceInstanceGuid });
     if (!noConfirm) {
       const confirmation = new ConfirmationDialogConfig(
         'Detach Service Instance',
@@ -94,8 +72,8 @@ export class ServiceActionHelperService {
     };
 
     const action = userProvided ?
-      new DeleteUserProvidedInstance(endpointGuid, serviceInstanceGuid, serviceInstancesEntityConfig) :
-      this.serviceInstanceEntity.actionOrchestrator.getActionBuilder('remove')(serviceInstanceGuid, endpointGuid);
+      cfEntityCatalog.userProvidedService.actions.remove(serviceInstanceGuid, endpointGuid, serviceInstancesEntityConfig) :
+      cfEntityCatalog.serviceInstance.actions.remove(serviceInstanceGuid, endpointGuid);
 
     const confirmation = new ConfirmationDialogConfig(
       'Delete Service Instance',
@@ -147,22 +125,10 @@ export class ServiceActionHelperService {
 
   private createUserProvidedServiceInstanceObs(guid: string, endpointGuid: string):
     Observable<EntityInfo<APIResource<IUserProvidedServiceInstance>>> {
-    const serviceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
-    const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('get');
-    const getUserProvidedServiceAction = actionBuilder(guid, endpointGuid);
-    return this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
-      guid,
-      getUserProvidedServiceAction
-    ).entityObs$;
+    return cfEntityCatalog.userProvidedService.store.getEntityService(guid, endpointGuid, {}).entityObs$;
   }
 
   private createServiceInstanceObs(guid: string, endpointGuid: string): Observable<EntityInfo<APIResource<IServiceInstance>>> {
-    const serviceInstanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
-    const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('get');
-    const getServiceInstanceAction = actionBuilder(guid, endpointGuid);
-    return this.entityServiceFactory.create<APIResource<IServiceInstance>>(
-      guid,
-      getServiceInstanceAction
-    ).entityObs$;
+    return cfEntityCatalog.serviceInstance.store.getEntityService(guid, endpointGuid).entityObs$;
   }
 }

@@ -9,7 +9,6 @@ import {
 } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { ServicesService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { IServiceBroker, IServicePlan } from '../../../../../core/src/core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
 
@@ -51,13 +50,12 @@ export class ServicePlanPublicComponent {
 
   constructor(
     private servicesService: ServicesService,
-    private entityServiceFactory: EntityServiceFactory
   ) {
   }
 
   private getServiceBroker(serviceGuid: string, cfGuid: string): Observable<APIResource<IServiceBroker>> {
-    return getCfService(serviceGuid, cfGuid, this.entityServiceFactory).waitForEntity$.pipe(
-      map(service => getServiceBroker(service.entity.entity.service_broker_guid, cfGuid, this.entityServiceFactory)),
+    return getCfService(serviceGuid, cfGuid).waitForEntity$.pipe(
+      map(service => getServiceBroker(service.entity.entity.service_broker_guid, cfGuid)),
       switchMap(serviceService => serviceService.waitForEntity$),
       map(entity => entity.entity)
     );

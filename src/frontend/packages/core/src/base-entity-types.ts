@@ -1,8 +1,12 @@
-import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
+import {
+  StratosCatalogEndpointEntity,
+  StratosCatalogEntity,
+} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
   addOrUpdateUserFavoriteMetadataReducer,
   deleteUserFavoriteMetadataReducer,
 } from '../../store/src/reducers/favorite.reducer';
+import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
 import {
   endpointEntitySchema,
   STRATOS_ENDPOINT_TYPE,
@@ -10,7 +14,6 @@ import {
   userFavoritesEntitySchema,
   userProfileEntitySchema,
 } from './base-entity-schemas';
-import { StratosCatalogEndpointEntity, StratosCatalogEntity } from '../../store/src/entity-catalog/entity-catalog-entity';
 import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
 
 //
@@ -38,10 +41,10 @@ class DefaultEndpointCatalogEntity extends StratosCatalogEntity {
       type: endpointEntitySchema.entityType,
       endpoint: stratosType,
     }, {
-        dataReducers: [
-          systemEndpointsReducer
-        ]
-      });
+      dataReducers: [
+        systemEndpointsReducer
+      ]
+    });
   }
 }
 
@@ -52,11 +55,11 @@ class UserFavoriteCatalogEntity extends StratosCatalogEntity {
       type: userFavoritesEntitySchema.entityType,
       endpoint: stratosType,
     }, {
-        dataReducers: [
-          addOrUpdateUserFavoriteMetadataReducer,
-          deleteUserFavoriteMetadataReducer,
-        ]
-      });
+      dataReducers: [
+        addOrUpdateUserFavoriteMetadataReducer,
+        deleteUserFavoriteMetadataReducer,
+      ]
+    });
   }
 }
 

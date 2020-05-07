@@ -14,7 +14,6 @@ import {
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/services/cf-org-space-label.service';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import {
@@ -86,7 +85,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         this.serviceBrokerName$ = getServiceBrokerName(
           this.serviceInstanceEntity.entity.service_plan.entity.service.entity.service_broker_guid,
           this.serviceInstanceEntity.entity.cfGuid,
-          this.entityServiceFactory
         );
       }
     }
@@ -96,7 +94,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     private store: Store<CFAppState>,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    private entityServiceFactory: EntityServiceFactory
   ) {
     super();
   }
