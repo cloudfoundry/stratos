@@ -58,6 +58,7 @@ describe('Manage Users Stepper', () => {
     cfPage.goToUsersTab();
 
     const usersTable = new CFUsersListComponent();
+    usersTable.pagination.setPageSize('80', 'mat-select-3')
     usersTable.header.setSearchText(userName);
     let usersRow = -1;
     usersTable.table.findRow('username', userName)
