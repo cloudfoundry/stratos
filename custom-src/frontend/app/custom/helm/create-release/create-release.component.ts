@@ -10,7 +10,7 @@ import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rx
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
