@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { createBasicStoreModule } from '../../../../../store/testing/src/store-test-helper';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { SharedModule } from '../../../shared/shared.module';
+import { MetricsService } from '../services/metrics-service';
 import { CoreModule } from './../../../core/core.module';
 import { MetricsEndpointDetailsComponent } from './metrics-endpoint-details.component';
 
@@ -12,9 +15,12 @@ describe('MetricsEndpointDetailsComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,
-        SharedModule
+        SharedModule,
+        CoreTestingModule,
+        createBasicStoreModule()
       ],
-      declarations: [ MetricsEndpointDetailsComponent ]
+      declarations: [ MetricsEndpointDetailsComponent ],
+      providers: [ MetricsService ]
     })
     .compileComponents();
   }));
