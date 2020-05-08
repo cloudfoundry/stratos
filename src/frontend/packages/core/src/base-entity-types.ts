@@ -1,8 +1,9 @@
-import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
+import { StratosCatalogEndpointEntity, StratosCatalogEntity } from '../../store/src/entity-catalog/entity-catalog-entity';
 import {
   addOrUpdateUserFavoriteMetadataReducer,
   deleteUserFavoriteMetadataReducer,
 } from '../../store/src/reducers/favorite.reducer';
+import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
 import {
   endpointEntitySchema,
   STRATOS_ENDPOINT_TYPE,
@@ -10,8 +11,10 @@ import {
   userFavoritesEntitySchema,
   userProfileEntitySchema,
 } from './base-entity-schemas';
-import { StratosCatalogEndpointEntity, StratosCatalogEntity } from '../../store/src/entity-catalog/entity-catalog-entity';
 import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
+import {
+  MetricsEndpointDetailsComponent,
+} from './features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
 
 //
 // These types are used to represent the base stratos types.
@@ -94,7 +97,8 @@ export function generateStratosEntities() {
       tokenSharing: true,
       logoUrl: '/core/assets/endpoint-icons/metrics.svg',
       authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None],
-      renderPriority: 1
+      renderPriority: 1,
+      listDetailsComponent: MetricsEndpointDetailsComponent,
     },
       metadata => `/endpoints/metrics/${metadata.guid}`
     )
