@@ -10,8 +10,8 @@ const until = protractor.ExpectedConditions;
  */
 export class Component {
 
-  public static waitUntilNotShown(elm): promise.Promise<void> {
-    return browser.wait(until.invisibilityOf(elm), 5000);
+  public static waitUntilNotShown(elm, failMsg?: string): promise.Promise<void> {
+    return browser.wait(until.invisibilityOf(elm), 5000, failMsg);
   }
 
   public static scrollIntoView(elm: ElementFinder): promise.Promise<void> {
