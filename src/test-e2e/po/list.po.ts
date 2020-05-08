@@ -93,11 +93,13 @@ export class ListTableComponent extends Component {
     });
   }
 
-  waitUntilNotBusy() {
+  waitUntilNotBusy(failMsg?: string) {
     return Component.waitUntilNotShown(
-      this.locator.element(by.css('.table-row__deletion-bar-wrapper'))
+      this.locator.element(by.css('.table-row__deletion-bar-wrapper')),
+      'Failed to wait for list busy indicator to be shown'
     ).then(() => Component.waitUntilNotShown(
-      this.locator.element(by.css('.table-row-wrapper__blocked'))
+      this.locator.element(by.css('.table-row-wrapper__blocked')),
+      'Failed to wait for list busy indicator to be not shown'
     ));
   }
 
