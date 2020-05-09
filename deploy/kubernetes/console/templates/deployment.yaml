@@ -47,6 +47,12 @@ spec:
 {{ toYaml .Values.console.podExtraLabels | indent 8 }}
 {{- end }}
     spec:
+{{- if .Values.console }}
+{{- if .Values.console.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.console.nodeSelector | trim | indent 8 }}
+{{- end }}
+{{- end }}
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
@@ -184,7 +190,15 @@ spec:
           value: stratos.admin
         {{- else }}
         # UAA
-        {{- if or .Values.env.UAA_HOST .Values.env.DOMAIN }}  
+        # Highest priority setting to use is uaa.endpoint
+        {{- if .Values.uaa.endpoint }}
+        - name: UAA_ENDPOINT 
+          value: {{ .Values.uaa.endpoint | quote }}
+        - name: CONSOLE_ADMIN_SCOPE
+          value: {{ default "cloud_controller.admin" .Values.uaa.consoleAdminIdentifier }}
+        - name: SKIP_SSL_VALIDATION 
+          value: {{default "true" .Values.uaa.skipSSLValidation | quote}}
+        {{- else if or .Values.env.UAA_HOST .Values.env.DOMAIN }}          
         - name: UAA_ENDPOINT 
           value: {{ template "scfUaaEndpoint" . }}
         {{- if and .Values.env.DOMAIN (not .Values.console.autoRegisterCF) }}
@@ -219,7 +233,7 @@ spec:
         - name: HELM_CHART_VERSION
           value: "{{ .Chart.Version }}"
         - name: HELM_LAST_MODIFIED
-          value: "{{ .Release.Time }}"
+          value: "seconds:{{ now | unixEpoch }} nanos:0 "        
         - name: SSO_LOGIN
           value: {{default "false" .Values.console.ssoLogin | quote}}
         - name: SSO_OPTIONS

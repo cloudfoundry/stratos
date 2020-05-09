@@ -15,6 +15,7 @@
     &__inner {
       .table-row__inner__expansion.mat-expansion-panel {
         box-shadow: none;
+        box-sizing: inherit;
       }
     }
 

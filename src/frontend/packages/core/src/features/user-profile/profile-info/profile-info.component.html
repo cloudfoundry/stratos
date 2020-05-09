@@ -86,7 +86,7 @@
             [ngClass]="{'user-profile__option-warning': pollingEnabled === 'false'}">
             <div class="user-profile__option-inner">
               <mat-slide-toggle color="warn" [checked]="pollingEnabled === 'false'"
-                (change)="updatePolling(timeoutSession)">
+                (change)="updatePolling(pollingEnabled)">
                 <div class="user-profile__option-header">Disable polling
                   <mat-icon *ngIf="pollingEnabled === 'false'" #tooltip="matTooltip"
                     matTooltip="Polling is disabled, some pages may not automatically update."
