@@ -134,7 +134,7 @@ export class FormComponent extends Component {
       id: elm.getAttribute('id'),
       multiple: elm.getAttribute('multiple'),
     };
-  }  
+  }
 
   // Get the form field with the specified name or formcontrolname
   getField(ctrlName: string): ElementFinder {
