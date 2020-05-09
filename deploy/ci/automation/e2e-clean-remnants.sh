@@ -70,8 +70,8 @@ function clean() {
         EPOCH=$(date -d "$TIMESTAMP" "+%s")
       fi
       DIFF=$(($NOW-$EPOCH))
-      # Delete anything older than 1 hour
-      if [ $DIFF -gt 3600 ]; then
+      # Delete anything older than 2 hours
+      if [ $DIFF -gt 7200 ]; then
         if [ $DRYRUN == "false" ]; then
           echo "$NAME  [DELETE]"
           cf $CMD $NAME -f
