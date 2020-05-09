@@ -48,6 +48,14 @@ export class Component {
     return Component.scrollIntoView(this.locator);
   }
 
+  scrollToTop(): promise.Promise<any> {
+    return new E2EHelpers().scrollToTop();
+  }
+
+  scrollToBottom(): promise.Promise<any> {
+    return new E2EHelpers().scrollToBottom();
+  }
+
   protected hasClass(cls, element = this.locator): promise.Promise<boolean> {
     return element.getAttribute('class')
       .then((classes) => {
