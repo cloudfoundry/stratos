@@ -365,22 +365,16 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.canNext()).toBeTruthy();
 
       createPolicy.stepper.clickEditButton();
-      createPolicy.stepper.getScheduleStartTime().then((startTime: moment.Moment) => {
 
-        const now = moment();
-        const diff = moment.duration(now.diff(startTime));
+      // When setting the start time it must be after the current time. It seems like AS checks to the nearest minute, so start time needs
+      // to be at least +1m from now
 
-        console.log('Testing schedule start time. Should be at least a minute into future');
-        console.log(`Now: ${now.toString()}. StartTime: ${startTime.toString()}. Diff (ms): ${diff.asMilliseconds()}`);
-        if (diff.asMinutes() > -1) {
-          const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(15, 'seconds');
-          const scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
-          console.log(`Updating schedule. Start: ${scheduleStartDate1.toString()}. End ${scheduleEndDate1.toString()}`);
-          createPolicy.stepper.getStepperForm().waitUntilShown();
-          createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateAndTimeFormat) });
-          return createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateAndTimeFormat) });
-        }
-      });
+      const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(15, 'seconds');
+      const scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
+      console.log(`Setting schedule. Now: ${moment().tz('UTC').toString()}. Start: ${scheduleStartDate1.toString()}. End ${scheduleEndDate1.toString()}`);
+      createPolicy.stepper.getStepperForm().waitUntilShown();
+      createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateAndTimeFormat) });
+      createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateAndTimeFormat) });
       createPolicy.stepper.clickDoneButton();
 
       expect(createPolicy.stepper.canNext()).toBeTruthy();
@@ -461,7 +455,7 @@ describe('Autoscaler -', () => {
       });
 
       // This depends on scheduleStartDate1
-      extendE2ETestTime(120000);
+      extendE2ETestTime(180000);
 
       /**
        * Find the required scaling event row via row count and row content
@@ -479,7 +473,6 @@ describe('Autoscaler -', () => {
             eventPageBase.list.table.getCell(0, 2).getText(),
             eventPageBase.list.table.getCell(0, 4).getText()
           ]).then(([type, action]) => {
-            e2e.debugLog('');
             return type === 'schedule' && action === '+1 instance(s) because limited by min instances 2';
           });
         });
@@ -492,16 +485,18 @@ describe('Autoscaler -', () => {
             eventPageBase.list.header.isRefreshing()
           ]))
         ).subscribe(([foundRow, isRefreshing]) => {
-          e2e.debugLog('Waiting for event row: Checking');
+          // These console.logs help by
+          // .. Showing the actual time we're checking, which can be compared with schedule start/end times
+          // .. Showing when successful runs complete, over time this should show on average events take to show
           if (isRefreshing) {
-            e2e.debugLog('Waiting for event row: Skip actions... list is refreshing');
+            console.log(`${moment().toString()}: Waiting for event row: Skip actions... list is refreshing`);
             return;
           }
           if (foundRow) {
-            e2e.debugLog('Waiting for event row: Found row!');
+            console.log(`${moment().toString()}: Waiting for event row: Found row!`);
             sub.unsubscribe();
           } else {
-            e2e.debugLog('Waiting for event row: manually refreshing list');
+            console.log(`${moment().toString()}: Waiting for event row: manually refreshing list`);
             eventPageBase.list.header.refresh();
           }
         });

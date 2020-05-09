@@ -95,16 +95,21 @@ export class FormComponent extends Component {
       sendKeys: elm.sendKeys,
       clear: elm.clear,
       click: elm.click,
+      checked: elm.getAttribute('aria-checked').then(v => v === 'true'),
       tag: elm.getTagName(),
       multiple: elm.getAttribute('multiple'),
       id: elm.getAttribute('name').then(name => {
         if (name) {
           return name;
-        } else return elm.getAttribute('formcontrolname').then(name => {
-          if (name) {
-            return name;
-          } else return elm.getAttribute('id');
-        });
+        } else {
+          return elm.getAttribute('formcontrolname').then(controlName => {
+            if (controlName) {
+              return controlName;
+            } else {
+              return elm.getAttribute('id');
+            }
+          });
+        }
       })
     };
   }
