@@ -8,6 +8,7 @@ This release contains a number of fixes and improvements:
 
 **Improvements:**
 
+- SSO_WHITELIST should be able to ignore path [\#4273](https://github.com/cloudfoundry/stratos/issues/4273)
 - Improve view that shows details for a metrics endpoint [\#4271](https://github.com/cloudfoundry/stratos/issues/4271)
 - Helm Chart: Add support for node selectors [\#4265](https://github.com/cloudfoundry/stratos/issues/4265)
 - Add documentation for list's 'max' feature, include info on 'fetch all' button [\#4259](https://github.com/cloudfoundry/stratos/issues/4259)
