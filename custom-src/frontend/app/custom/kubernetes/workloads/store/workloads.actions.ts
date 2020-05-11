@@ -8,6 +8,8 @@ import {
   kubernetesPodsEntityType,
   kubernetesServicesEntityType,
 } from '../../kubernetes-entity-factory';
+import { KubernetesPod, KubeService } from '../../store/kube.types';
+import { GetKubernetesPod, GetKubernetesServices, KubePaginationAction } from '../../store/kubernetes.actions';
 import { helmReleaseEntityKey, helmReleaseGraphEntityType, helmReleaseResourceEntityType } from './workloads-entity-factory';
 
 export const GET_HELM_RELEASES = '[Helm] Get Releases';
@@ -103,12 +105,12 @@ export class GetHelmReleaseResource implements EntityRequestAction {
 /**
  * Won't fetch pods, used to push/retrieve data from store
  */
-export class GetHelmReleasePods implements MonocularPaginationAction {
+export class GetHelmReleasePods implements KubePaginationAction {
   constructor(
-    public endpointGuid: string,
+    public kubeGuid: string,
     public releaseTitle: string
   ) {
-    this.paginationKey = `${endpointGuid}/${releaseTitle}/pods`;
+    this.paginationKey = `${kubeGuid}/${releaseTitle}/pods`;
   }
   type = GET_HELM_RELEASE_PODS;
   endpointType = KUBERNETES_ENDPOINT_TYPE;
@@ -124,17 +126,19 @@ export class GetHelmReleasePods implements MonocularPaginationAction {
     'order-direction': 'desc',
     'order-direction-field': 'name',
   };
+  getId = (pod: KubernetesPod, kubeGuid: string) => GetKubernetesPod.getId(kubeGuid, pod.metadata.namespace, pod.metadata.name);
+
 }
 
 /**
  * Won't fetch pods, used to push/retrieve data from store
  */
-export class GetHelmReleaseServices implements MonocularPaginationAction {
+export class GetHelmReleaseServices implements KubePaginationAction {
   constructor(
-    public endpointGuid: string,
+    public kubeGuid: string,
     public releaseTitle: string
   ) {
-    this.paginationKey = `${endpointGuid}/${releaseTitle}/services`;
+    this.paginationKey = `${kubeGuid}/${releaseTitle}/services`;
   }
   type = GET_HELM_RELEASE_SERVICES;
   endpointType = KUBERNETES_ENDPOINT_TYPE;
@@ -150,6 +154,8 @@ export class GetHelmReleaseServices implements MonocularPaginationAction {
     'order-direction': 'desc',
     'order-direction-field': 'name',
   };
+  getId = (service: KubeService, kubeGuid: string) => GetKubernetesServices.getId(kubeGuid, service.metadata.namespace, service.metadata.name);
+
 }
 
 export class HelmUpdateRelease implements Action {

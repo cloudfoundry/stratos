@@ -7,18 +7,20 @@ import { Store } from '@ngrx/store';
 import { PaginationMonitorFactory } from 'frontend/packages/store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from 'frontend/packages/store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../shared/components/stepper/step/step.component';
+import { kubeEntityCatalog } from '../../kubernetes/kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
 import { KubernetesNamespace } from '../../kubernetes/store/kube.types';
-import { CreateKubernetesNamespace, GetKubernetesNamespaces } from '../../kubernetes/store/kubernetes.actions';
+import { GetKubernetesNamespaces } from '../../kubernetes/store/kubernetes.actions';
 import { HelmInstall } from '../store/helm.actions';
 import { HelmInstallValues } from '../store/helm.types';
 
@@ -64,7 +66,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private httpClient: HttpClient,
     private confirmDialog: ConfirmationDialogService,
-    private pmf: PaginationMonitorFactory
+    private pmf: PaginationMonitorFactory, // TODO: RC search and destroy
+    private emf: EntityMonitorFactory // TODO: RC search and destroy
   ) {
     const chart = this.route.snapshot.params;
     this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
@@ -103,6 +106,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       action,
       paginationMonitor: this.pmf.create(action.paginationKey, action, true)
     }).entities$.pipe(
+      tap(a => console.log(action, a)),
       filter(namespaces => !!namespaces),
       first()
     );
@@ -112,15 +116,18 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       this.details.controls.releaseNamespace.valueChanges.pipe(startWith(''), distinctUntilChanged())
     ]).pipe(
       // Filter out namespaces from other kubes
+      tap(a => console.log(1, a)),
       map(([namespaces, kubeId, namespace]: [KubernetesNamespace[], string, string]) => ([
         namespaces.filter(ns => ns.metadata.kubeId === kubeId),
         namespace
       ])),
+      tap(a => console.log(2, a)),
       // Map to endpoint names
       map(([namespaces, namespace]: [KubernetesNamespace[], string]) => [
         namespaces.map(ns => ns.metadata.name),
         namespace
       ]),
+      tap(a => console.log(3, a)),
       // Filter out namespaces not matching existing text
       map(([namespaces, namespace]: [string[], string]) => this.filterTyped(namespaces, namespace)),
     );
@@ -233,14 +240,10 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       });
     }
 
-    const action = new CreateKubernetesNamespace(
+    return kubeEntityCatalog.namespace.api.create<RequestInfoState>(
       this.details.controls.releaseNamespace.value,
-      this.details.controls.endpoint.value);
-    this.store.dispatch(action);
-
-    const namespaceEntityConfig = entityCatalog.getEntity(action);
-    const monitor = namespaceEntityConfig.getEntityMonitor(this.store, action.guid);
-    return monitor.entityRequest$.pipe(
+      this.details.controls.endpoint.value
+    ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => oldVal.creating && !newVal.creating),
       map(([, newVal]) => newVal),
@@ -267,14 +270,19 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       chart: this.route.snapshot.params
     };
 
+    // TODO: RC
     // Make the request
     const action = new HelmInstall(values);
     this.store.dispatch(action);
 
-    const releaseEntityConfig = entityCatalog.getEntity(action);
+    // const releaseEntityConfig = entityCatalog.getEntity(action);
 
-    // Wait for result of request
-    return releaseEntityConfig.getEntityMonitor(this.store, action.guid).entityRequest$.pipe(
+    return this.emf.create(
+      action.guid,
+      action
+    ).entityRequest$.pipe(
+      // Wait for result of request
+      // return releaseEntityConfig.getEntityMonitor(this.store, action.guid).entityRequest$.pipe(
       filter(state => !!state),
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.creating && !newVal.creating)),

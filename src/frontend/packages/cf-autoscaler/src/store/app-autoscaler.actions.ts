@@ -1,3 +1,5 @@
+import { HttpRequest } from '@angular/common/http';
+
 import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
@@ -14,7 +16,6 @@ import {
   AUTOSCALER_ENDPOINT_TYPE,
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
-import { HttpRequest } from '@angular/common/http';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',

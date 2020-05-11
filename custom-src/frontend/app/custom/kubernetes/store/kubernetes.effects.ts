@@ -21,15 +21,9 @@ import { isJetstreamError } from '../../../jetstream.helpers';
 import {
   KUBERNETES_ENDPOINT_TYPE,
   kubernetesDashboardEntityType,
-  kubernetesDeploymentsEntityType,
-  kubernetesNamespacesEntityType,
-  kubernetesNodesEntityType,
   kubernetesPodsEntityType,
-  kubernetesServicesEntityType,
-  kubernetesStatefulSetsEntityType,
 } from '../kubernetes-entity-factory';
 import { KubernetesPodExpandedStatusHelper } from '../services/kubernetes-expanded-state';
-import { getKubeAPIResourceGuid } from './kube.selectors';
 import {
   BasicKubeAPIResource,
   KubernetesDeployment,
@@ -150,172 +144,133 @@ export class KubernetesEffects {
   @Effect()
   fetchNodeInfo$ = this.actions$.pipe(
     ofType<GetKubernetesNode>(GET_NODE_INFO),
-    flatMap(action => {
-      const nodeEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNodesEntityType);
-      return this.processSingleItemAction<KubernetesNode>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes/${action.nodeName}`,
-        nodeEntityConfig.entityKey);
-    })
+    flatMap(action => this.processSingleItemAction<KubernetesNode>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes/${action.nodeName}`
+    ))
   );
 
   @Effect()
   fetchNamespaceInfo$ = this.actions$.pipe(
     ofType<GetKubernetesNamespace>(GET_NAMESPACE_INFO),
-    flatMap(action => {
-      const namespaceEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNamespacesEntityType);
-      return this.processSingleItemAction<KubernetesNamespace>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}`,
-        namespaceEntityConfig.entityKey,
-        getKubeAPIResourceGuid); // TODO: RC HERE
-    })
+    flatMap(action => this.processSingleItemAction<KubernetesNamespace>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}`)
+    )
   );
 
   @Effect()
   fetchPodsInfo$ = this.actions$.pipe(
     ofType<GetKubernetesPods>(GET_POD_INFO),
-    flatMap(action => {
-      const podsEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsEntityType);
-      return this.processListAction<KubernetesPod>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
-        podsEntityConfig.entityKey,
-        getKubeAPIResourceGuid
-      );
-    })
+    flatMap(action => this.processListAction<KubernetesPod>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`
+    ))
   );
 
   @Effect()
   fetchPodsOnNodeInfo$ = this.actions$.pipe(
     ofType<GetKubernetesPodsOnNode>(GET_PODS_ON_NODE_INFO),
-    flatMap(action => {
-      const podsEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsEntityType);
-      return this.processListAction<KubernetesPod>(action,
+    flatMap(action =>
+      this.processListAction<KubernetesPod>(
+        action,
         `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`,
-        podsEntityConfig.entityKey,
-        getKubeAPIResourceGuid
-      );
-    })
+        // Note - filtering done via param in action
+      )
+    )
   );
 
   @Effect()
   fetchPodsInNamespaceInfo$ = this.actions$.pipe(
     ofType<GetKubernetesPodsInNamespace>(GET_PODS_IN_NAMESPACE_INFO),
-    flatMap(action => {
-      const podsEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsEntityType);
-      return this.processListAction<KubernetesPod>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods`,
-        podsEntityConfig.entityKey,
-        getKubeAPIResourceGuid
-      );
-    })
+    flatMap(action => this.processListAction<KubernetesPod>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods`,
+    ))
   );
 
   @Effect()
   fetchServicesInNamespaceInfo$ = this.actions$.pipe(
     ofType<GetKubernetesServicesInNamespace>(GET_SERVICES_IN_NAMESPACE_INFO),
-    flatMap(action => {
-      const servicesEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesServicesEntityType);
-      return this.processListAction<KubeService>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/services`,
-        servicesEntityConfig.entityKey,
-        getKubeAPIResourceGuid
-      );
-    })
+    flatMap(action => this.processListAction<KubeService>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/services`,
+    ))
   );
 
   @Effect()
   fetchPodInfo$ = this.actions$.pipe(
     ofType<GetKubernetesPod>(GET_KUBE_POD),
-    flatMap(action => {
-      const podsEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsEntityType);
-      return this.processListAction<KubernetesPod>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods/${action.podName}`,
-        podsEntityConfig.entityKey,
-        getKubeAPIResourceGuid
-      );
-    })
+    flatMap(action => this.processSingleItemAction<KubernetesPod>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods/${action.podName}`,
+    ))
   );
 
   @Effect()
   fetchServicesInfo$ = this.actions$.pipe(
     ofType<GetKubernetesServices>(GET_SERVICE_INFO),
-    flatMap(action => {
-      const servicesEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesServicesEntityType);
-      return this.processListAction<KubeService>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/services`,
-        servicesEntityConfig.entityKey,
-        getKubeAPIResourceGuid);
-    })
+    flatMap(action => this.processListAction<KubeService>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/api/v1/services`,
+    ))
   );
 
   @Effect()
   fetchNamespacesInfo$ = this.actions$.pipe(
     ofType<GetKubernetesNamespaces>(GET_NAMESPACES_INFO),
-    flatMap(action => {
-      const namespaceEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNamespacesEntityType);
-      return this.processListAction<KubernetesNamespace>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`,
-        namespaceEntityConfig.entityKey,
-        getKubeAPIResourceGuid);
-    })
+    flatMap(action => this.processListAction<KubernetesNamespace>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`,
+    ))
   );
 
 
   @Effect()
   createNamespace$ = this.actions$.pipe(
     ofType<CreateKubernetesNamespace>(CREATE_NAMESPACE),
-    flatMap(action => {
-      const namespaceEntityConfig = entityCatalog.getEntity(action);
-      return this.processSingleItemAction<KubernetesNamespace>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`,
-        namespaceEntityConfig.entityKey,
-        getKubeAPIResourceGuid,
-        {
-          kind: 'Namespace',
-          apiVersion: 'v1',
-          metadata: {
-            name: action.namespaceName,
-          },
-        });
-    })
+    flatMap(action => this.processSingleItemAction<KubernetesNamespace>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`,
+      {
+        kind: 'Namespace',
+        apiVersion: 'v1',
+        metadata: {
+          name: action.namespaceName,
+        },
+      }
+    )
+    )
   );
 
   @Effect()
   fetchStatefulSets$ = this.actions$.pipe(
     ofType<GetKubernetesStatefulSets>(GET_KUBE_STATEFULSETS),
-    flatMap(action => {
-      const statefulSetsEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesStatefulSetsEntityType);
-      return this.processListAction<KubernetesStatefulSet>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/statefulsets`,
-        statefulSetsEntityConfig.entityKey,
-        getKubeAPIResourceGuid);
-    })
+    flatMap(action => this.processListAction<KubernetesStatefulSet>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/statefulsets`,
+    ))
   );
 
   @Effect()
   fetchDeployments$ = this.actions$.pipe(
     ofType<GeKubernetesDeployments>(GET_KUBE_DEPLOYMENT),
-    flatMap(action => {
-      const deploymentsEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesDeploymentsEntityType);
-      return this.processListAction<KubernetesDeployment>(action,
-        `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`,
-        deploymentsEntityConfig.entityKey,
-        getKubeAPIResourceGuid);
-    })
+    flatMap(action => this.processListAction<KubernetesDeployment>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`,
+    ))
   );
 
   private processNodeAction(action: GetKubernetesNodes) {
-    const nodeEntityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesNodesEntityType);
-    return this.processListAction<KubernetesNode>(action,
-      `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes`,
-      nodeEntityConfig.entityKey,
-      getKubeAPIResourceGuid);
+    return this.processListAction<KubernetesNode>(
+      action,
+      `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes`
+    );
   }
 
-  private processListAction<T = any>(
+  private processListAction<T extends BasicKubeAPIResource>(
     action: KubePaginationAction,
-    url: string,
-    entityKey: string,
-    filterResults?: Filter<T>) {
+    url: string) {
     this.store.dispatch(new StartRequestAction(action));
 
     const getKubeIds = action.kubeGuid ?
@@ -326,6 +281,7 @@ export class KubernetesEffects {
       );
     let pKubeIds: string[];
 
+    const entityKey = entityCatalog.getEntityKey(action);
     return getKubeIds.pipe(
       switchMap(kubeIds => {
         pKubeIds = kubeIds;
@@ -360,10 +316,9 @@ export class KubernetesEffects {
           });
           return combinedRes;
         }, []);
-        const filteredItems = filterResults ? items.filter(res => filterResults(res)) : items;
-        const processesData = filteredItems
+        const processesData = items
           .reduce((res, data) => {
-            const id = getId(data);
+            const id = action.getId(data, data.metadata.kubeId);
             const updatedData = action.entityType === kubernetesPodsEntityType ?
               KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(data as unknown as KubernetesPod) :
               data;
@@ -393,7 +348,6 @@ export class KubernetesEffects {
   private processSingleItemAction<T extends BasicKubeAPIResource>(
     action: KubeAction,
     url: string,
-    schemaKey: string,
     body?: any) {
     const requestType: ApiRequestTypes = body ? 'create' : 'fetch';
     this.store.dispatch(new StartRequestAction(action, requestType));
@@ -406,18 +360,18 @@ export class KubernetesEffects {
       headers
     };
     const request = body ? this.http.post(url, body, requestArgs) : this.http.get(url, requestArgs);
-
+    const entityKey = entityCatalog.getEntityKey(action);
     return request
       .pipe(
         mergeMap((response: T) => {
           const res = {
-            entities: { [schemaKey]: {} },
+            entities: { [entityKey]: {} },
             result: []
           } as NormalizedResponse;
           const data = action.entityType === kubernetesPodsEntityType ?
             KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(response as unknown as KubernetesPod) :
             response;
-          res.entities[schemaKey][action.guid] = data;
+          res.entities[entityKey][action.guid] = data;
           res.result.push(action.guid);
           const actions: Action[] = [
             new WrapperRequestActionSuccess(res, action)

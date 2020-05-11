@@ -46,6 +46,7 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
     if (!row || !!this.containerDataSource) {
       return;
     }
+    // TODO: RC 
     this.containerDataSource = {
       isTableLoading$: of(false),
       connect: () => this.store.select<KubernetesPod>(selectEntity(this.entityConfig.entityKey, row.metadata.uid)).pipe(

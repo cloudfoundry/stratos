@@ -5,16 +5,14 @@ import { LoggerService } from 'frontend/packages/core/src/core/logger.service';
 import { IPageSideNavTab } from 'frontend/packages/core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
-import { PaginatedAction } from 'frontend/packages/store/src/types/pagination.types';
 import { EntityRequestAction, WrapperRequestActionSuccess } from 'frontend/packages/store/src/types/request.types';
 import { Observable, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, map, share, switchMap } from 'rxjs/operators';
 
 import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';
-import { getKubeAPIResourceGuid } from '../../../store/kube.selectors';
-import { KubernetesPod } from '../../../store/kube.types';
-import { getHelmReleaseServiceId } from '../../store/workloads-entity-factory';
+import { KubernetesPod, KubeService } from '../../../store/kube.types';
+import { KubePaginationAction } from '../../../store/kubernetes.actions';
 import {
   GetHelmReleaseGraph,
   GetHelmReleasePods,
@@ -23,9 +21,6 @@ import {
 } from '../../store/workloads.actions';
 import { HelmReleaseGraph, HelmReleaseGuid, HelmReleasePod } from '../../workload.types';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
-
-type IDGetterFunction = (data: any) => string;
-
 
 
 @Component({
@@ -113,9 +108,13 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           prefix = messageObj.data;
         } else if (messageObj.kind === 'Pods') {
           const pods: KubernetesPod[] = messageObj.data || [];
-          const podsWithInfo: KubernetesPod[] = pods.map(pod => KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod));
+          const podsWithInfo: KubernetesPod[] = pods.map(pod => {
+            const res = KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod);
+            res.metadata.kubeId = this.helmReleaseHelper.endpointGuid;
+            return res;
+          });
           const releasePodsAction = new GetHelmReleasePods(this.helmReleaseHelper.endpointGuid, this.helmReleaseHelper.releaseTitle);
-          this.populateList(releasePodsAction, podsWithInfo, getKubeAPIResourceGuid);
+          this.populateList(releasePodsAction, podsWithInfo);
         } else if (messageObj.kind === 'Graph') {
           const graph: HelmReleaseGraph = messageObj.data;
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
@@ -126,10 +125,11 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
         } else if (messageObj.kind === 'Manifest' || messageObj.kind === 'Resources') {
           // Store all of the services
           const manifest = messageObj.data;
-          const svcs = [];
+          const svcs: KubeService[] = [];
           // Store ALL resources for the release
           manifest.forEach(resource => {
             if (resource.kind === 'Service' && prefix) {
+              resource.metadata.kubeId = this.helmReleaseHelper.endpointGuid;
               svcs.push(resource);
             }
           });
@@ -138,7 +138,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
               this.helmReleaseHelper.endpointGuid,
               this.helmReleaseHelper.releaseTitle
             );
-            this.populateList(releaseServicesAction, svcs, getHelmReleaseServiceId);
+            this.populateList(releaseServicesAction, svcs);
           }
 
           const resources = { ...manifest };
@@ -167,15 +167,15 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
     this.store.dispatch(successWrapper);
   }
 
-  private populateList(action: PaginatedAction, resources: any, idGetter: IDGetterFunction) {
+  private populateList(action: KubePaginationAction, resources: any) {
     const newResources = {};
     resources.forEach(resource => {
       const newResource: HelmReleasePod = {
-        endpointId: action.endpointGuid,
+        endpointId: action.kubeGuid,
         releaseTitle: this.helmReleaseHelper.releaseTitle,
         ...resource
       };
-      newResources[idGetter(newResource)] = newResource;
+      newResources[action.getId(newResource, action.kubeGuid)] = newResource;
     });
 
     const releasePods = {

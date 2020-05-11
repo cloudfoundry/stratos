@@ -18,6 +18,7 @@ export function generateWorkloadsEntities(endpointDefinition: StratosEndpointExt
   ];
 }
 
+// TODO: RC
 
 function generateReleaseEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {

@@ -9,8 +9,7 @@ import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators'
 
 import { kubernetesEntityFactory } from '../../kubernetes-entity-factory';
 import { KubeService } from '../../store/kube.types';
-import { GetKubernetesServicesInNamespace } from '../../store/kubernetes.actions';
-import { getHelmReleaseServiceId } from '../store/workloads-entity-factory';
+import { GetKubernetesServices, GetKubernetesServicesInNamespace } from '../../store/kubernetes.actions';
 import { GetHelmReleases, GetHelmReleaseServices } from '../store/workloads.actions';
 import { HelmRelease, HelmReleaseService } from '../workload.types';
 
@@ -51,7 +50,7 @@ export class HelmReleaseServicesDataSource extends ListDataSource<KubeService> {
       store,
       action,
       schema: action.entity[0],
-      getRowUniqueId: getHelmReleaseServiceId,
+      getRowUniqueId: (row: KubeService) => GetKubernetesServices.getId(row.metadata.kubeId, row.metadata.namespace, row.metadata.name),
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,

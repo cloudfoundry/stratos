@@ -20,6 +20,7 @@ import {
   KubernetesConfigAuthFormComponent,
 } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
+import { kubeEntityCatalog } from './kubernetes-entity-catalog';
 import {
   KUBERNETES_ENDPOINT_TYPE,
   kubernetesAppsEntityType,
@@ -242,9 +243,10 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
     schema: kubernetesEntityFactory(kubernetesNamespacesEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(definition, {
+  kubeEntityCatalog.namespace = new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(definition, {
     actionBuilders: kubeNamespaceActionBuilders
   });
+  return kubeEntityCatalog.namespace;
 }
 
 function generateServicesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
