@@ -11,7 +11,7 @@ const until = protractor.ExpectedConditions;
 export interface CardMetadata {
   index: number;
   title: string;
-  click: Function;
+  click: () => void;
 }
 
 // Page Object for the List Table View
@@ -399,7 +399,15 @@ export class ListPaginationComponent extends Component {
 
   setPageSize(pageSize, customCtrlName?: string): promise.Promise<void> {
     const name = customCtrlName || 'mat-select-2';
-    return this.getPageSizeForm().fill({ [name]: pageSize });
+    // Only try to set the page size, if the page size control is shown
+    // Pagination controls will be hidden if there are not enough items to require more than 1 page
+    return this.getPageSizeForm().isDisplayed().then(displayed => {
+      if (displayed) {
+        this.scrollToBottom();
+        this.getPageSizeForm().fill({ [name]: pageSize });
+        return this.scrollToTop();
+      }
+    });
   }
 
   getPageSizeForm(): FormComponent {
