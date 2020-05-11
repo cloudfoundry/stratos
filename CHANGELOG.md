@@ -1,5 +1,28 @@
 # Change Log
 
+## 3.2.0
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.1.0...3.2.0)
+
+This release contains a number of fixes and improvements:
+
+**Improvements:**
+
+- SSO_WHITELIST should be able to ignore path [\#4273](https://github.com/cloudfoundry/stratos/issues/4273)
+- Improve view that shows details for a metrics endpoint [\#4271](https://github.com/cloudfoundry/stratos/issues/4271)
+- Helm Chart: Add support for node selectors [\#4265](https://github.com/cloudfoundry/stratos/issues/4265)
+- Add documentation for list's 'max' feature, include info on 'fetch all' button [\#4259](https://github.com/cloudfoundry/stratos/issues/4259)
+- Backup Endpoints & Tokens [\#4228](https://github.com/cloudfoundry/stratos/issues/4228)
+
+**Fixes:**
+
+- Deployment time does not show correctly in diagnostics when deployed with Helm 3 [\#4261](https://github.com/cloudfoundry/stratos/issues/4261)
+- Pushing app from Stratos can sometimes fail due to expired token [\#4253](https://github.com/cloudfoundry/stratos/issues/4253)
+- Helm: Chart fails to render if `uaa` section is missing, docs misleading [\#4248](https://github.com/cloudfoundry/stratos/issues/4248)
+- Profile: Disabling polling fails to disable polling [\#4244](https://github.com/cloudfoundry/stratos/issues/4244)
+- App Summary: Github tab: Row highlight of deployed commit is obscured [\#4243](https://github.com/cloudfoundry/stratos/issues/4243)
+- Data Inaccuracies in PCF [\#4237](https://github.com/cloudfoundry/stratos/issues/4237)
+
 ## 3.1.0
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.0.0...3.1.0)
