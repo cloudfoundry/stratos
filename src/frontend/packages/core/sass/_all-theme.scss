@@ -65,7 +65,9 @@
 @import '../../cloud-foundry/src/features/cloud-foundry/tabs/cloud-foundry-firehose/cloud-foundry-firehose.component.theme';
 @import '../../cloud-foundry/src/features/service-catalog/service-catalog-page/service-catalog-page.component.theme';
 @import '../../cloud-foundry/src/features/applications/application-wall/application-wall.component.theme';
-@import '../../core/src/features/error-page/error-page/error-page.component.theme.scss';
+@import '../../core/src/features/error-page/error-page/error-page.component.theme';
+@import '../../core/src/features/endpoints/backup-restore/restore-endpoints/restore-endpoints.component.theme';
+@import '../../core/src/features/metrics/metrics/metrics.component.theme';
 
 // Defaults
 $side-nav-light-text: #fff;
@@ -159,6 +161,8 @@ $side-nav-light-active: #484848;
   @include code-block-theme($theme, $app-theme);
   @include copy-to-clipboard-theme($theme, $app-theme);
   @include app-user-avatar-theme($theme, $app-theme);
+  @include restore-endpoints-theme($theme, $app-theme);
+  @include metrics-component-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

@@ -21,10 +21,11 @@
       display: flex;
     }
   }
-  &__highlighted {
+  &__highlighted.mat-expansion-panel {
     border-left-style: solid;
     border-left-width: 4px;
-    .table-row__inner {
+    border-radius: 0;
+    mat-expansion-panel-header {
       margin-left: -4px; // Cancel out highlighted padding (border left in theme)
     }
   }
@@ -92,8 +93,6 @@
     }
 
     .table-row__inner__expansion.mat-expansion-panel {
-      box-shadow: none;
-      box-sizing: inherit;
       width: 100%;
 
       .table-row__inner__expansion--header {

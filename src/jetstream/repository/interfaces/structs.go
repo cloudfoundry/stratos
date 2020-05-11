@@ -85,13 +85,21 @@ const (
 	AuthConnectTypeNone = "none"
 )
 
-// Token record for an endpoint (includes the Endpoint GUID)
-type EndpointTokenRecord struct {
-	*TokenRecord
-	EndpointGUID    string
-	EndpointType    string
-	APIEndpint      string
-	LoggingEndpoint string
+// // Token record for an endpoint (includes the Endpoint GUID)
+// type EndpointTokenRecord struct {
+// 	*TokenRecord
+// 	EndpointGUID    string
+// 	EndpointType    string
+// 	APIEndpint      string
+// 	LoggingEndpoint string
+// }
+
+// BackupTokenRecord used when backing up tokens
+type BackupTokenRecord struct {
+	TokenRecord  TokenRecord
+	UserGUID     string
+	EndpointGUID string
+	TokenType    string
 }
 
 // TokenRecord repsrents and endpoint or uaa token

@@ -24,3 +24,15 @@ helm unittest console
 
 # Run lint
 helm lint console
+
+# Run helm3 lint as well
+echo "Installing Helm 3"
+export BINARY_NAME=helm3
+curl -fsSL -o get_helm3.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+chmod 700 get_helm3.sh
+./get_helm3.sh
+
+# RUn Helm 3 lint
+helm3 lint console
+
+echo "All done"

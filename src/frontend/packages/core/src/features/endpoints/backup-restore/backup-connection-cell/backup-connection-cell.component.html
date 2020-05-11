@@ -1,0 +1,10 @@
+<mat-form-field *ngIf="connectable; else unConnectable">
+  <mat-select [(value)]="service.state[row.guid][backupType.CONNECT]"
+    [disabled]="!service.state[row.guid][backupType.ENDPOINT]">
+    <mat-option [value]="connectionTypes.NONE">None</mat-option>
+    <mat-option [value]="connectionTypes.CURRENT" [disabled]="!!userConnectionWarning"
+      [matTooltip]="userConnectionWarning">Current User</mat-option>
+    <mat-option [value]="connectionTypes.ALL">All Users</mat-option>
+  </mat-select>
+</mat-form-field>
+<ng-template #unConnectable>N/A</ng-template>

@@ -154,6 +154,14 @@ export class E2EHelpers {
     });
   }
 
+  scrollToTop() {
+    return browser.executeScript('window.scrollTo(0,0);');
+  }
+
+  scrollToBottom() {
+    return browser.executeScript('window.scrollTo(0, document.body.scrollHeight);');
+  }
+
   waitForElementAndClick(element) {
     const until = protractor.ExpectedConditions;
     browser.wait(until.presenceOf(element), 10000);
