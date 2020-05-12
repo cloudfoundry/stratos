@@ -83,6 +83,8 @@ export class ListTableComponent extends Component {
         }
         return -1;
       }
+    }).catch(e => {
+      throw new Error(`Could not get table data (findRow '${columnHeader}' and value '${value}'`);
     });
   }
 

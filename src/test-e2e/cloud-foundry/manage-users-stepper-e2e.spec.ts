@@ -70,7 +70,7 @@ describe('Manage Users Stepper', () => {
 
         const selectUser = new CheckboxComponent(usersTable.table.getCell(usersRow, 0));
         selectUser.scrollIntoView();
-        selectUser.waitUntilShown();
+        selectUser.waitUntilShown('User checkbox');
         selectUser.getComponent().click();
 
         const usersButton = usersTable.header.getIconButton('people');
