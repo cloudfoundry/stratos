@@ -6,8 +6,6 @@ import { of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { selectEntity } from '../../../../../../../store/src/selectors/api.selectors';
 import { BooleanIndicatorType } from '../../../../../shared/components/boolean-indicator/boolean-indicator.component';
 import { ITableListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import {
@@ -20,7 +18,7 @@ import {
 } from '../../../../../shared/components/list/list-table/table-cell-icon/table-cell-icon.component';
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
 import { CardCell } from '../../../../../shared/components/list/list.types';
-import { KUBERNETES_ENDPOINT_TYPE, kubernetesPodsEntityType } from '../../../kubernetes-entity-factory';
+import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
 import { Container, ContainerState, ContainerStatus, InitContainer, KubernetesPod } from '../../../store/kube.types';
 
 export interface ContainerForTable {
@@ -39,17 +37,15 @@ export interface ContainerForTable {
 })
 export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
 
-  private entityConfig = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsEntityType);
-
   @Input()
   set row(row: KubernetesPod) {
     if (!row || !!this.containerDataSource) {
       return;
     }
-    // TODO: RC 
+    const id = kubeEntityCatalog.pod.getSchema().getId(row);
     this.containerDataSource = {
       isTableLoading$: of(false),
-      connect: () => this.store.select<KubernetesPod>(selectEntity(this.entityConfig.entityKey, row.metadata.uid)).pipe(
+      connect: () => kubeEntityCatalog.pod.store.getEntityMonitor(id).entity$.pipe(
         filter(pod => !!pod),
         map(pod => this.map(pod)),
       ),

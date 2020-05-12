@@ -175,10 +175,11 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
 }
 
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  return new StratosCatalogEndpointEntity(
+  kubeEntityCatalog.endpoint = new StratosCatalogEndpointEntity(
     endpointDefinition,
     metadata => `/kubernetes/${metadata.guid}`
   );
+  return kubeEntityCatalog.endpoint;
 }
 
 function generateAppEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -186,11 +187,11 @@ function generateAppEntity(endpointDefinition: StratosEndpointExtensionDefinitio
     type: kubernetesAppsEntityType,
     schema: kubernetesEntityFactory(kubernetesAppsEntityType),
     endpoint: endpointDefinition,
-
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesApp, KubeAppActionBuilders>(definition, {
+  kubeEntityCatalog.app = new StratosCatalogEntity<IFavoriteMetadata, KubernetesApp, KubeAppActionBuilders>(definition, {
     actionBuilders: kubeAppActionBuilders
   });
+  return kubeEntityCatalog.app;
 }
 
 function generateStatefulSetsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -199,9 +200,10 @@ function generateStatefulSetsEntity(endpointDefinition: StratosEndpointExtension
     schema: kubernetesEntityFactory(kubernetesStatefulSetsEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesStatefulSet, KubeStatefulSetsActionBuilders>(definition, {
+  kubeEntityCatalog.statefulSet = new StratosCatalogEntity<IFavoriteMetadata, KubernetesStatefulSet, KubeStatefulSetsActionBuilders>(definition, {
     actionBuilders: kubeStatefulSetsActionBuilders
   });
+  return kubeEntityCatalog.statefulSet;
 }
 
 function generatePodsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -210,9 +212,10 @@ function generatePodsEntity(endpointDefinition: StratosEndpointExtensionDefiniti
     schema: kubernetesEntityFactory(kubernetesPodsEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubePodActionBuilders>(definition, {
+  kubeEntityCatalog.pod = new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubePodActionBuilders>(definition, {
     actionBuilders: kubePodActionBuilders
   });
+  return kubeEntityCatalog.pod;
 }
 
 function generateDeploymentsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -221,9 +224,10 @@ function generateDeploymentsEntity(endpointDefinition: StratosEndpointExtensionD
     schema: kubernetesEntityFactory(kubernetesDeploymentsEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesDeployment, KubeDeploymentActionBuilders>(definition, {
+  kubeEntityCatalog.deployment = new StratosCatalogEntity<IFavoriteMetadata, KubernetesDeployment, KubeDeploymentActionBuilders>(definition, {
     actionBuilders: kubeDeploymentActionBuilders
   });
+  return kubeEntityCatalog.deployment;
 }
 
 function generateNodesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -232,9 +236,10 @@ function generateNodesEntity(endpointDefinition: StratosEndpointExtensionDefinit
     schema: kubernetesEntityFactory(kubernetesNodesEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubernetesNode, KubeNodeActionBuilders>(definition, {
+  kubeEntityCatalog.node = new StratosCatalogEntity<IFavoriteMetadata, KubernetesNode, KubeNodeActionBuilders>(definition, {
     actionBuilders: kubeNodeActionBuilders
   });
+  return kubeEntityCatalog.node;
 }
 
 function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -255,9 +260,10 @@ function generateServicesEntity(endpointDefinition: StratosEndpointExtensionDefi
     schema: kubernetesEntityFactory(kubernetesServicesEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, KubeService, KubeServiceActionBuilders>(definition, {
+  kubeEntityCatalog.service = new StratosCatalogEntity<IFavoriteMetadata, KubeService, KubeServiceActionBuilders>(definition, {
     actionBuilders: kubeServiceActionBuilders
   });
+  return kubeEntityCatalog.service;
 }
 
 function generateDashboardEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -266,10 +272,10 @@ function generateDashboardEntity(endpointDefinition: StratosEndpointExtensionDef
     schema: kubernetesEntityFactory(kubernetesDashboardEntityType),
     endpoint: endpointDefinition
   };
-  // TODO: RC any
-  return new StratosCatalogEntity<IFavoriteMetadata, any, KubeDashboardActionBuilders>(definition, {
+  kubeEntityCatalog.dashboard = new StratosCatalogEntity<IFavoriteMetadata, any, KubeDashboardActionBuilders>(definition, {
     actionBuilders: kubeDashboardActionBuilders
   });
+  return kubeEntityCatalog.dashboard;
 }
 
 function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
