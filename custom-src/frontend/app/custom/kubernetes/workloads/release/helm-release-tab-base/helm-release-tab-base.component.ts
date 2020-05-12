@@ -19,7 +19,7 @@ import {
   GetHelmReleaseResource,
   GetHelmReleaseServices,
 } from '../../store/workloads.actions';
-import { HelmReleaseGraph, HelmReleaseGuid, HelmReleasePod } from '../../workload.types';
+import { HelmReleaseGraph, HelmReleaseGuid, HelmReleasePod, HelmReleaseService } from '../../workload.types';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 
 
@@ -168,18 +168,22 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   }
 
   private populateList(action: KubePaginationAction, resources: any) {
+    const entity = entityCatalog.getEntity(action);
+    const entityKey = entity.entityKey;
     const newResources = {};
     resources.forEach(resource => {
-      const newResource: HelmReleasePod = {
+      const newResource: HelmReleasePod | HelmReleaseService = {
         endpointId: action.kubeGuid,
         releaseTitle: this.helmReleaseHelper.releaseTitle,
         ...resource
       };
-      newResources[action.getId(newResource, action.kubeGuid)] = newResource;
+      newResource.metadata.kubeId = action.kubeGuid;
+      const entityId = entity.getSchema(action.schemaKey).getId(resource)
+      newResources[entityId] = newResource;
     });
 
     const releasePods = {
-      entities: { [entityCatalog.getEntityKey(action)]: newResources },
+      entities: { [entityKey]: newResources },
       result: Object.keys(newResources)
     };
     const successWrapper = new WrapperRequestActionSuccess(releasePods, action, 'fetch', releasePods.result.length, 1);

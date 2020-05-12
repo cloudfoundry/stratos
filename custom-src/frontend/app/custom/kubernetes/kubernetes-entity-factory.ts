@@ -3,7 +3,15 @@ import { Schema, schema } from 'normalizr';
 import { metricEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { getAPIResourceGuid } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { getKubeAPIResourceGuid } from './store/kube.selectors';
+import {
+  getGuidFromKubeDashboardObj,
+  getGuidFromKubeDeploymentObj,
+  getGuidFromKubeNamespaceObj,
+  getGuidFromKubeNodeObj,
+  getGuidFromKubePodObj,
+  getGuidFromKubeServiceObj,
+  getGuidFromKubeStatefulSetObj,
+} from './store/kube.getIds';
 import { KubernetesApp } from './store/kube.types';
 
 export const kubernetesEntityType = 'kubernetesInfo';
@@ -58,43 +66,49 @@ entityCache[kubernetesAppsEntityType] = new KubernetesEntitySchema(
 entityCache[kubernetesStatefulSetsEntityType] = new KubernetesEntitySchema(
   kubernetesStatefulSetsEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  {
+    idAttribute: getGuidFromKubeStatefulSetObj
+  }
 );
 
 entityCache[kubernetesPodsEntityType] = new KubernetesEntitySchema(
   kubernetesPodsEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  {
+    idAttribute: getGuidFromKubePodObj
+  }
 );
 
 entityCache[kubernetesDeploymentsEntityType] = new KubernetesEntitySchema(
   kubernetesDeploymentsEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  {
+    idAttribute: getGuidFromKubeDeploymentObj
+  }
 );
 
 entityCache[kubernetesNodesEntityType] = new KubernetesEntitySchema(
   kubernetesNodesEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  { idAttribute: getGuidFromKubeNodeObj }
 );
 
 entityCache[kubernetesNamespacesEntityType] = new KubernetesEntitySchema(
   kubernetesNamespacesEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  { idAttribute: getGuidFromKubeNamespaceObj }
 );
 
 entityCache[kubernetesServicesEntityType] = new KubernetesEntitySchema(
   kubernetesServicesEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  { idAttribute: getGuidFromKubeServiceObj }
 );
 
 entityCache[kubernetesDashboardEntityType] = new KubernetesEntitySchema(
   kubernetesDashboardEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  { idAttribute: getGuidFromKubeDashboardObj }
 );
 
 entityCache[metricEntityType] = new KubernetesEntitySchema(metricEntityType);

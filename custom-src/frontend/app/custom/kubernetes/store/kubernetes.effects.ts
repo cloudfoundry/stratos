@@ -73,6 +73,7 @@ export interface KubeDashboardContainer {
 
 export interface KubeDashboardStatus {
   guid: string;
+  kubeGuid: string;
   installed: boolean;
   stratosInstalled: boolean;
   running: boolean;
@@ -89,9 +90,6 @@ export interface KubeDashboardStatus {
   };
   serviceAccount: any;
 }
-
-type GetID<T> = (p: T) => string;
-type Filter<T> = (p: T) => boolean;
 
 @Injectable()
 export class KubernetesEffects {
@@ -118,6 +116,7 @@ export class KubernetesEffects {
             result: []
           } as NormalizedResponse;
           const status = response as KubeDashboardStatus;
+          status.kubeGuid = action.kubeGuid;
           result.entities[dashboardEntityConfig.entityKey][action.guid] = status;
           result.result.push(action.guid);
           return [
@@ -318,7 +317,7 @@ export class KubernetesEffects {
         }, []);
         const processesData = items
           .reduce((res, data) => {
-            const id = action.getId(data, data.metadata.kubeId);
+            const id = action.entity[0].getId(data);
             const updatedData = action.entityType === kubernetesPodsEntityType ?
               KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(data as unknown as KubernetesPod) :
               data;
