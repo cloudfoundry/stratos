@@ -32,10 +32,7 @@ import { SideNavItem } from './../side-nav/side-nav.component';
 @Component({
   selector: 'app-dashboard-base',
   templateUrl: './dashboard-base.component.html',
-  styleUrls: ['./dashboard-base.component.scss'],
-  providers: [
-    SidePanelService
-  ]
+  styleUrls: ['./dashboard-base.component.scss']
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -159,6 +156,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   ngOnDestroy() {
     this.mobileSub.unsubscribe();
     this.closeSub.unsubscribe();
+    this.sidePanelService.unsetContainer();
   }
 
   isNoMarginView(route: ActivatedRouteSnapshot): boolean {
