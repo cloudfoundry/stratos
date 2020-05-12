@@ -32,7 +32,10 @@ import { SideNavItem } from './../side-nav/side-nav.component';
 @Component({
   selector: 'app-dashboard-base',
   templateUrl: './dashboard-base.component.html',
-  styleUrls: ['./dashboard-base.component.scss']
+  styleUrls: ['./dashboard-base.component.scss'],
+  providers: [
+    SidePanelService
+  ]
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
