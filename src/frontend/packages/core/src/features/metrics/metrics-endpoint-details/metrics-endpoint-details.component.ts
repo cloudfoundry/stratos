@@ -53,6 +53,7 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
     ).pipe(
       map(([endpoints, guid]) => endpoints.find((item) => item.provider.guid === guid)),
       filter(provider => !!provider),
+      filter(data => data.provider.connectionStatus === 'connected'),
       tap(data => {
         if (!this.hasStratosData(data)) {
           this.store.dispatch(new MetricsStratosAction(data.provider.guid));
