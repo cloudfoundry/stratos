@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, range } from 'rxjs';
-import { map, mergeMap, reduce, switchMap } from 'rxjs/operators';
+import { first, map, mergeMap, reduce, switchMap } from 'rxjs/operators';
 
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
@@ -95,10 +95,9 @@ export class PaginationPageIterator<R = any, E = any> {
   private handleRequests(initialResponse: JetstreamResponse<R>, action: PaginatedAction, totalPages: number, totalResults: number):
     Observable<[JetstreamResponse<R>, JetstreamResponse<R>[]]> {
 
-    const allResults = combineLatest(of(initialResponse), this.getAllOtherPageRequests(totalPages));
-
+    const createAllResults = () => combineLatest(of(initialResponse), this.getAllOtherPageRequests(totalPages));
     if (totalResults === 0 || (this.paginationMaxedState && this.paginationMaxedState.ignoreMaxed)) {
-      return allResults;
+      return createAllResults();
     }
 
     return this.config.maxedStateStartAt(this.store, action).pipe(
@@ -114,7 +113,7 @@ export class PaginationPageIterator<R = any, E = any> {
           );
           return combineLatest([of(initialResponse), of([])]);
         }
-        return allResults;
+        return createAllResults();
       })
     );
   }
@@ -126,7 +125,7 @@ export class PaginationPageIterator<R = any, E = any> {
   public mergeAllPagesEntities(): Observable<PagedJetstreamResponse> {
     const initialRequest = this.addPageToRequest(1);
     return this.makeRequest(initialRequest).pipe(
-      mergeMap(initialResponse => {
+      switchMap(initialResponse => {
         const totalPages = this.config.getTotalPages(initialResponse);
         const totalResults = this.config.getTotalEntities(initialResponse);
         return this.handleRequests(
@@ -135,6 +134,7 @@ export class PaginationPageIterator<R = any, E = any> {
           this.getValidNumber(totalPages),
           this.getValidNumber(totalResults)
         ).pipe(
+          first(),
           map(([initialRequestResponse, othersResponse]) => [initialRequestResponse, ...othersResponse]),
           map(responsePages => this.reducePages(responsePages)),
         );
