@@ -16,6 +16,8 @@ This release contains a number of fixes and improvements:
 
 **Fixes:**
 
+- User profile is fetched on most page changes [\#4284](https://github.com/cloudfoundry/stratos/issues/4284)
+- Service Marketplace: Create service icon is incorrectly aligned [\#4280](https://github.com/cloudfoundry/stratos/issues/4280)
 - Deployment time does not show correctly in diagnostics when deployed with Helm 3 [\#4261](https://github.com/cloudfoundry/stratos/issues/4261)
 - Pushing app from Stratos can sometimes fail due to expired token [\#4253](https://github.com/cloudfoundry/stratos/issues/4253)
 - Helm: Chart fails to render if `uaa` section is missing, docs misleading [\#4248](https://github.com/cloudfoundry/stratos/issues/4248)
