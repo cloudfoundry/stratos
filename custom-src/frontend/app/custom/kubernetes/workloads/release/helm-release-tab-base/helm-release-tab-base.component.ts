@@ -10,16 +10,12 @@ import { Observable, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, map, share, switchMap } from 'rxjs/operators';
 
+import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
 import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';
 import { KubernetesPod, KubeService } from '../../../store/kube.types';
 import { KubePaginationAction } from '../../../store/kubernetes.actions';
-import {
-  GetHelmReleaseGraph,
-  GetHelmReleasePods,
-  GetHelmReleaseResource,
-  GetHelmReleaseServices,
-} from '../../store/workloads.actions';
 import { HelmReleaseGraph, HelmReleaseGuid, HelmReleasePod, HelmReleaseService } from '../../workload.types';
+import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 
 
@@ -113,14 +109,16 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
             res.metadata.kubeId = this.helmReleaseHelper.endpointGuid;
             return res;
           });
-          const releasePodsAction = new GetHelmReleasePods(this.helmReleaseHelper.endpointGuid, this.helmReleaseHelper.releaseTitle);
+          const releasePodsAction = kubeEntityCatalog.pod.actions.getInWorkload(
+            this.helmReleaseHelper.endpointGuid,
+            this.helmReleaseHelper.releaseTitle
+          );
           this.populateList(releasePodsAction, podsWithInfo);
         } else if (messageObj.kind === 'Graph') {
           const graph: HelmReleaseGraph = messageObj.data;
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
           graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
-          const releaseGraphAction = new GetHelmReleaseGraph(graph.endpointId, graph.releaseTitle);
-
+          const releaseGraphAction = workloadsEntityCatalog.graph.actions.get(graph.releaseTitle, graph.endpointId);
           this.addResource(releaseGraphAction, graph);
         } else if (messageObj.kind === 'Manifest' || messageObj.kind === 'Resources') {
           // Store all of the services
@@ -134,17 +132,20 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
             }
           });
           if (svcs.length > 0) {
-            const releaseServicesAction = new GetHelmReleaseServices(
+            const releaseServicesAction = kubeEntityCatalog.service.actions.getInWorkload(
+              this.helmReleaseHelper.releaseTitle,
               this.helmReleaseHelper.endpointGuid,
-              this.helmReleaseHelper.releaseTitle
-            );
+            )
             this.populateList(releaseServicesAction, svcs);
           }
 
           const resources = { ...manifest };
           resources.endpointId = this.helmReleaseHelper.endpointGuid;
           resources.releaseTitle = this.helmReleaseHelper.releaseTitle;
-          const releaseResourceAction = new GetHelmReleaseResource(resources.endpointId, resources.releaseTitle);
+          const releaseResourceAction = workloadsEntityCatalog.resource.actions.get(
+            resources.releaseTitle,
+            resources.endpointId,
+          );
           this.addResource(releaseResourceAction, resources);
         }
       }

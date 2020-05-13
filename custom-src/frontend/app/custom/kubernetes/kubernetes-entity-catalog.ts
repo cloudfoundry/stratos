@@ -37,8 +37,10 @@ export class KubeEntityCatalog {
   public namespace: StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>;
   public service: StratosCatalogEntity<IFavoriteMetadata, KubeService, KubeServiceActionBuilders>
   public dashboard: StratosCatalogEntity<IFavoriteMetadata, any, KubeDashboardActionBuilders>;
-  // TODO: RC workloads stuff
 }
 
-
+/**
+ * A strongly typed collection of Kube Catalog Entities.
+ * This can be used to access functionality exposed by each specific type, such as get, update, delete, etc
+ */
 export const kubeEntityCatalog: KubeEntityCatalog = new KubeEntityCatalog();

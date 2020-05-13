@@ -16,6 +16,7 @@ import {
   WrapperRequestActionSuccess,
 } from '../../../../../../store/src/types/request.types';
 import { HelmRelease } from '../workload.types';
+import { getHelmReleaseId } from './workloads-entity-factory';
 import { GET_HELM_RELEASE, GET_HELM_RELEASES, GetHelmRelease, GetHelmReleases } from './workloads.actions';
 
 @Injectable()
@@ -48,7 +49,7 @@ export class WorkloadsEffects {
             return;
           }
           endpointData.forEach((data) => {
-            const helmRelease = this.mapHelmRelease(data, endpointId);
+            const helmRelease = this.mapHelmRelease(data, endpointId, getHelmReleaseId(endpointId, data.namespace, data.name));
             processedData.entities[entityKey][helmRelease.guid] = helmRelease;
             processedData.result.push(helmRelease.guid);
           });
@@ -73,20 +74,20 @@ export class WorkloadsEffects {
           } as NormalizedResponse;
 
           // Go through each endpoint ID
-          processedData.entities[entityKey][action.guid] = this.mapHelmRelease(response, action.endpointGuid);
+          processedData.entities[entityKey][action.guid] = this.mapHelmRelease(response, action.endpointGuid, action.guid);
           processedData.result.push(action.guid);
           return processedData;
         }, [action.endpointGuid]);
     })
   );
 
-  private mapHelmRelease(data, endpointId) {
+  private mapHelmRelease(data, endpointId, guid: string) {
     const helmRelease: HelmRelease = {
       ...data,
       endpointId
     };
     // Release name is unique for an endpoint - for Helm 3, include the namespace
-    helmRelease.guid = endpointId + ':' + data.namespace + ':' + data.name;
+    helmRelease.guid = guid;//endpointId + ':' + data.namespace + ':' + data.name; //TODO: RC delete
     // Make a note of the guid of the endpoint for the release
     helmRelease.status = data.info.status;
     helmRelease.lastDeployed = this.mapHelmModifiedDate(data.info.last_deployed);
@@ -108,6 +109,7 @@ export class WorkloadsEffects {
     return this.httpClient.get(url, requestArgs).pipe(
       mergeMap((response: any) => [new WrapperRequestActionSuccess(mapResult(response), action)]),
       catchError(error => [
+        // TODO: RC trigger this, understand error (app.module.ts:173) guid of undefined
         new WrapperRequestActionFailed(error.message, action, 'fetch', {
           endpointIds,
           url: error.url || url,
