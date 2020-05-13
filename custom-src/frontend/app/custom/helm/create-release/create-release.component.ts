@@ -4,8 +4,6 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTextareaAutosize } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { PaginationMonitorFactory } from 'frontend/packages/store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from 'frontend/packages/store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
@@ -20,9 +18,13 @@ import { StepOnNextFunction, StepOnNextResult } from '../../../shared/components
 import { kubeEntityCatalog } from '../../kubernetes/kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
 import { KubernetesNamespace } from '../../kubernetes/store/kube.types';
-import { GetKubernetesNamespaces } from '../../kubernetes/store/kubernetes.actions';
 import { HelmInstall } from '../store/helm.actions';
 import { HelmInstallValues } from '../store/helm.types';
+
+
+// private pmf: PaginationMonitorFactory, // TODO: RC search and destroy
+// private emf: EntityMonitorFactory // TODO: RC search and destroy
+// store.dispatch
 
 @Component({
   selector: 'app-create-release',
@@ -66,7 +68,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private httpClient: HttpClient,
     private confirmDialog: ConfirmationDialogService,
-    private pmf: PaginationMonitorFactory, // TODO: RC search and destroy
+    // private pmf: PaginationMonitorFactory, // TODO: RC search and destroy
     private emf: EntityMonitorFactory // TODO: RC search and destroy
   ) {
     const chart = this.route.snapshot.params;
@@ -100,13 +102,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
     this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
 
-    const action = new GetKubernetesNamespaces(null);
-    const allNamespaces$ = getPaginationObservables<KubernetesNamespace>({
-      store: this.store,
-      action,
-      paginationMonitor: this.pmf.create(action.paginationKey, action, true)
-    }).entities$.pipe(
-      tap(a => console.log(action, a)),
+    const allNamespaces$ = kubeEntityCatalog.namespace.store.getPaginationService(null).entities$.pipe(
+      // tap(a => console.log(action, a)), // TODO: RC find all console.log
       filter(namespaces => !!namespaces),
       first()
     );

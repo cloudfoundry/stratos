@@ -6,14 +6,13 @@ import { filter, first, map, shareReplay } from 'rxjs/operators';
 
 import { MetricQueryConfig, MetricsAction } from '../../../../../store/src/actions/metrics.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { getIdFromRoute } from '../../../core/utils.service';
 import { MetricQueryType } from '../../../shared/services/metrics-range-selector.types';
+import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
 import { KubernetesNode, MetricStatistic } from '../store/kube.types';
-import { FetchKubernetesMetricsAction, GetKubernetesNode } from '../store/kubernetes.actions';
+import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
 
@@ -33,17 +32,12 @@ export class KubernetesNodeService {
     public kubeEndpointService: KubernetesEndpointService,
     public activatedRoute: ActivatedRoute,
     public store: Store<AppState>,
-    public paginationMonitorFactory: PaginationMonitorFactory,
-    public entityServiceFactory: EntityServiceFactory,
     public entityMonitorFactory: EntityMonitorFactory
   ) {
     this.nodeName = getIdFromRoute(activatedRoute, 'nodeName');
     this.kubeGuid = kubeEndpointService.kubeGuid;
 
-    const nodeEntityService = this.entityServiceFactory.create<KubernetesNode>(
-      this.nodeName,
-      new GetKubernetesNode(this.nodeName, this.kubeGuid),
-    );
+    const nodeEntityService = kubeEntityCatalog.node.store.getEntityService(this.nodeName, this.kubeGuid);
 
     this.node$ = nodeEntityService.entityObs$.pipe(
       filter(p => !!p && !!p.entity),

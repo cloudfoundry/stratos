@@ -2,9 +2,9 @@ import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
+import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubeService } from '../../store/kube.types';
-import { GetKubernetesServicesInNamespace } from '../../store/kubernetes.actions';
 import { BaseKubernetesServicesDataSource } from '../kubernetes-services/kubernetes-services-data-source';
 
 
@@ -16,10 +16,9 @@ export class KubernetesNamespaceServicesDataSource extends BaseKubernetesService
     listConfig: IListConfig<KubeService>,
     namespace: string,
   ) {
-    const action = new GetKubernetesServicesInNamespace(kubeGuid.guid, namespace);
     super(
       store,
-      action,
+      kubeEntityCatalog.service.actions.getInNamespace(namespace, kubeGuid.guid),
       listConfig
     );
   }

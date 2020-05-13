@@ -16,8 +16,8 @@ import {
   IChartThresholds,
   ISimpleUsageChartData,
 } from '../../../../shared/components/simple-usage-chart/simple-usage-chart.types';
+import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
-import { GetKubernetesNamespaces, GetKubernetesNodes, GetKubernetesPods } from '../../store/kubernetes.actions';
 
 interface IValueLabels {
   usedLabel?: string;
@@ -113,9 +113,11 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
 
-    const podCountAction = new GetKubernetesPods(guid);
-    const nodeCountAction = new GetKubernetesNodes(guid);
-    const namespacesCountAction = new GetKubernetesNamespaces(guid);
+
+
+    const podCountAction = kubeEntityCatalog.pod.actions.getMultiple(guid);
+    const nodeCountAction = kubeEntityCatalog.node.actions.getMultiple(guid);
+    const namespacesCountAction = kubeEntityCatalog.namespace.actions.getMultiple(guid);
     const pods$ = this.getPaginationObservable(podCountAction);
     const nodes$ = this.getPaginationObservable(nodeCountAction);
     const namespaces$ = this.getPaginationObservable(namespacesCountAction);
@@ -182,6 +184,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
       true
     );
 
+    // TODO: RC this could easily get backed up, would entityService .poll be better??
     this.ngZone.runOutsideAngular(() => {
       this.polls.push(
         interval(10000).subscribe(() => {
