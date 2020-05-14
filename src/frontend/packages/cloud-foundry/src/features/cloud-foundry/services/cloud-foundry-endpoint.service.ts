@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { GetAllApplications } from '../../../../../cloud-foundry/src/actions/application.actions';
-import { DeleteOrganization } from '../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   domainEntityType,
@@ -174,8 +173,6 @@ export class CloudFoundryEndpointService {
     this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid);
 
     this.constructAppObs();
-
-    this.fetchDomains();
   }
 
   constructAppObs() {
@@ -225,12 +222,12 @@ export class CloudFoundryEndpointService {
       .reduce((a, t) => a + t, 0) : 0;
   }
 
-  public fetchDomains = () => {
+  public fetchDomains() {
     cfEntityCatalog.domain.api.getMultiple(this.cfGuid, null, {});
   }
 
   public deleteOrg(orgGuid: string, endpointGuid: string) {
-    this.store.dispatch(new DeleteOrganization(orgGuid, endpointGuid));
+    cfEntityCatalog.org.api.remove(orgGuid, endpointGuid);
   }
 
   fetchApps() {
