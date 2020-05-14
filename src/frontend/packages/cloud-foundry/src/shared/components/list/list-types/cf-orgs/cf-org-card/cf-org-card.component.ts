@@ -6,8 +6,6 @@ import { map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createUserRoleInOrg } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { getFavoriteFromEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
@@ -28,6 +26,8 @@ import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.t
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { IApp, IOrganization } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
+import { CFUserPermissions } from '../../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../../cf-user-permissions.service';
 import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
@@ -66,7 +66,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     private cfUserService: CfUserService,
     public cfEndpointService: CloudFoundryEndpointService,
     private store: Store<CFAppState>,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private currentUserPermissionsService: CFUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private emf: EntityMonitorFactory,
@@ -78,12 +78,12 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       {
         label: 'Edit',
         action: this.edit,
-        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_EDIT, this.cfEndpointService.cfGuid)
+        can: this.currentUserPermissionsService.can(CFUserPermissions.ORGANIZATION_EDIT, this.cfEndpointService.cfGuid)
       },
       {
         label: 'Delete',
         action: this.delete,
-        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_DELETE, this.cfEndpointService.cfGuid)
+        can: this.currentUserPermissionsService.can(CFUserPermissions.ORGANIZATION_DELETE, this.cfEndpointService.cfGuid)
       }
     ];
   }

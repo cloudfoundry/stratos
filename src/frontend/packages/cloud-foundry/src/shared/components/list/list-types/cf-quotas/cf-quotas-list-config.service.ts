@@ -9,8 +9,6 @@ import { ActiveRouteCfOrgSpace } from '../../../../../../../cloud-foundry/src/fe
 import {
   BaseCfListConfig,
 } from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/base-cf/base-cf-list-config';
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
@@ -18,6 +16,8 @@ import { IListAction, ListViewTypes } from '../../../../../../../core/src/shared
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../../cf-api.types';
+import { CFUserPermissions } from '../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { CfQuotasDataSourceService } from './cf-quotas-data-source.service';
 import { TableCellQuotaComponent } from './table-cell-quota/table-cell-quota.component';
 
@@ -35,12 +35,12 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
     private datePipe: DatePipe,
     private confirmDialog: ConfirmationDialogService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private currentUserPermissionsService: CFUserPermissionsService,
   ) {
     super();
     this.dataSource = new CfQuotasDataSourceService(this.store, activeRouteCfOrgSpace.cfGuid, this);
-    this.canEdit = this.currentUserPermissionsService.can(CurrentUserPermissions.QUOTA_EDIT, this.activeRouteCfOrgSpace.cfGuid);
-    this.canDelete = this.currentUserPermissionsService.can(CurrentUserPermissions.QUOTA_DELETE, this.activeRouteCfOrgSpace.cfGuid);
+    this.canEdit = this.currentUserPermissionsService.can(CFUserPermissions.QUOTA_EDIT, this.activeRouteCfOrgSpace.cfGuid);
+    this.canDelete = this.currentUserPermissionsService.can(CFUserPermissions.QUOTA_DELETE, this.activeRouteCfOrgSpace.cfGuid);
   }
 
 

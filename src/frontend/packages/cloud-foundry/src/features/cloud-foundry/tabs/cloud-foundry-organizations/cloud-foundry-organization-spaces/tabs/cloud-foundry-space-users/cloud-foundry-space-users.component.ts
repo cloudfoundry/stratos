@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { CFAppState } from 'frontend/packages/cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from 'frontend/packages/core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/current-user-permissions.service';
+import { CFUserPermissions } from 'frontend/packages/cloud-foundry/src/cf-user-permissions.config';
+import { CFUserPermissionsService } from 'frontend/packages/cloud-foundry/src/cf-user-permissions.service';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
@@ -31,7 +31,7 @@ export class CloudFoundrySpaceUsersComponent {
 
   constructor(
     store: Store<CFAppState>,
-    userPerms: CurrentUserPermissionsService,
+    userPerms: CFUserPermissionsService,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     const requiredFeatureFlags = [
@@ -42,7 +42,7 @@ export class CloudFoundrySpaceUsersComponent {
       switchMap(() => combineLatest([
         someFeatureFlags(requiredFeatureFlags, activeRouteCfOrgSpace.cfGuid, store, userPerms),
         userPerms.can(
-          CurrentUserPermissions.SPACE_CHANGE_ROLES,
+          CFUserPermissions.SPACE_CHANGE_ROLES,
           activeRouteCfOrgSpace.cfGuid,
           activeRouteCfOrgSpace.orgGuid,
           activeRouteCfOrgSpace.spaceGuid

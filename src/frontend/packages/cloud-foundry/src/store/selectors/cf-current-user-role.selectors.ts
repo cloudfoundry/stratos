@@ -1,16 +1,12 @@
 import { compose } from '@ngrx/store';
 
 import {
-  PermissionStrings,
-  PermissionValues,
-  ScopeStrings,
-} from '../../../../core/src/core/current-user-permissions.config';
-import {
   selectCurrentUserCFGlobalHasScopes,
   selectCurrentUserRequestState,
   selectCurrentUserRolesState,
 } from '../../../../store/src/selectors/current-user-role.selectors';
 import { ICurrentUserRolesState } from '../../../../store/src/types/current-user-roles.types';
+import { CFPermissionStrings, PermissionValues, ScopeStrings } from '../../cf-user-permissions.config';
 import {
   IAllCfRolesState,
   ICfRolesState,
@@ -19,7 +15,7 @@ import {
   ISpacesRoleState,
 } from '../types/cf-current-user-roles.types';
 
-const selectSpaceWithRoleFromOrg = (role: PermissionStrings, orgId: string) => (state: ICfRolesState) => {
+const selectSpaceWithRoleFromOrg = (role: CFPermissionStrings, orgId: string) => (state: ICfRolesState) => {
   if (!state) {
     return 'all';
   }
@@ -142,7 +138,7 @@ export const getCurrentUserCFOrgRolesState = (endpointGuid: string, orgId: strin
 // Get an array of space guid that have a particular role
 // anf from a particular org
 // ============================
-export const getSpacesFromOrgWithRole = (endpointGuid: string, orgId: string, role: PermissionStrings) => compose(
+export const getSpacesFromOrgWithRole = (endpointGuid: string, orgId: string, role: CFPermissionStrings) => compose(
   selectSpaceWithRoleFromOrg(role, orgId),
   getCurrentUserCFEndpointRolesState(endpointGuid)
 );

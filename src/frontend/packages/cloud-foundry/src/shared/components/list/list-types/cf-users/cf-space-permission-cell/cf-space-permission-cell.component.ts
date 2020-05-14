@@ -12,14 +12,14 @@ import {
   IUserPermissionInSpace,
   SpaceUserRoleNames,
 } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization, ISpace } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CFUserPermissions } from '../../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../../cf-user-permissions.service';
 import { getSpaceRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
@@ -37,7 +37,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
   constructor(
     public store: Store<CFAppState>,
     cfUserService: CfUserService,
-    private userPerms: CurrentUserPermissionsService,
+    private userPerms: CFUserPermissionsService,
     confirmDialog: ConfirmationDialogService
   ) {
     super(store, confirmDialog, cfUserService);
@@ -157,5 +157,5 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
   }
 
   public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
-    this.userPerms.can(CurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
+    this.userPerms.can(CFUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
 }

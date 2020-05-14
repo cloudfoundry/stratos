@@ -7,8 +7,6 @@ import { UsersRolesSetUsers } from '../../../../../../../cloud-foundry/src/actio
 import { GetAllUsersAsAdmin } from '../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
-import { CurrentUserPermissionsChecker } from '../../../../../../../core/src/core/current-user-permissions.checker';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   IListAction,
@@ -23,6 +21,8 @@ import { selectPaginationState } from '../../../../../../../store/src/selectors/
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { IOrganization, ISpace } from '../../../../../cf-api.types';
+import { CFUserPermissionsChecker } from '../../../../../cf-user-permissions.checker';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import {
   canUpdateOrgSpaceRoles,
@@ -211,7 +211,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     private cfUserService: CfUserService,
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private userPerms: CurrentUserPermissionsService,
+    private userPerms: CFUserPermissionsService,
     userHasRoles: (user: CfUser) => boolean = defaultUserHasRoles,
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>,
@@ -348,7 +348,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.activeRouteCfOrgSpace.cfGuid,
     this.activeRouteCfOrgSpace.orgGuid,
     this.activeRouteCfOrgSpace.orgGuid && !this.activeRouteCfOrgSpace.spaceGuid ?
-      CurrentUserPermissionsChecker.ALL_SPACES : this.activeRouteCfOrgSpace.spaceGuid)
+      CFUserPermissionsChecker.ALL_SPACES : this.activeRouteCfOrgSpace.spaceGuid)
 
   private createCanUpdateOrgRoles = () => canUpdateOrgSpaceRoles(
     this.userPerms,

@@ -9,7 +9,6 @@ import {
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -17,6 +16,7 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { ISpace } from '../../../../../cf-api.types';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { CfRolesService } from '../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 
 export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResource<ISpace>> {
@@ -26,7 +26,7 @@ export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResour
     orgGuid: string,
     spaceGuid: string,
     store: Store<CFAppState>,
-    userPerms: CurrentUserPermissionsService,
+    userPerms: CFUserPermissionsService,
     listConfig?: IListConfig<APIResource>
   ) {
     const paginationKey = cfUserEntityType + '-' + orgGuid;

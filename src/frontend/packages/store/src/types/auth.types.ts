@@ -1,4 +1,4 @@
-import { ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
+import { ScopeStrings } from '../../../cloud-foundry/src/cf-user-permissions.config';
 
 export interface SessionDataEndpoint {
   guid: string;

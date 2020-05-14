@@ -6,8 +6,6 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { getFavoriteFromEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
@@ -29,6 +27,8 @@ import { UserFavorite } from '../../../../../../../../store/src/types/user-favor
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CFUserPermissions } from '../../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../../cf-user-permissions.service';
 import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
@@ -68,7 +68,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     public cfEndpointService: CloudFoundryEndpointService,
     private store: Store<CFAppState>,
     private cfOrgService: CloudFoundryOrganizationService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private currentUserPermissionsService: CFUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private emf: EntityMonitorFactory,
@@ -87,7 +87,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
         label: 'Edit',
         action: this.edit,
         can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SPACE_EDIT,
+          CFUserPermissions.SPACE_EDIT,
           this.cfEndpointService.cfGuid,
           this.orgGuid,
           this.spaceGuid
@@ -97,7 +97,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
         label: 'Delete',
         action: this.delete,
         can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SPACE_DELETE,
+          CFUserPermissions.SPACE_DELETE,
           this.cfEndpointService.cfGuid,
           this.orgGuid
         )

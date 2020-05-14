@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import {
   CloudFoundryOrganizationService,
@@ -21,7 +21,7 @@ export class CfOrgUsersListConfigService extends CfUserListConfigService {
     cfUserService: CfUserService,
     router: Router,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    userPerms: CurrentUserPermissionsService) {
+    userPerms: CFUserPermissionsService) {
 
     super(
       store,

@@ -1,9 +1,9 @@
+import { ScopeStrings } from '../../../../cloud-foundry/src/cf-user-permissions.config';
 import {
   IAllCfRolesState,
   ICfRolesState,
   IGlobalRolesState,
 } from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
-import { ScopeStrings } from '../../../../core/src/core/current-user-permissions.config';
 import { VerifiedSession } from '../../actions/auth.actions';
 import { EndpointActionComplete } from '../../actions/endpoint.actions';
 import { SessionUser } from '../../types/auth.types';

@@ -28,6 +28,7 @@ import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducer
 import { APIResource } from '../../store/src/types/api.types';
 import { PaginatedAction } from '../../store/src/types/pagination.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
+import { GetCurrentUsersRelations } from './actions/permissions.actions';
 import {
   IService,
   IServiceBinding,
@@ -167,6 +168,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
       entityCatalog.getEntity<IEntityMetadata, any, CfInfoDefinitionActionBuilders>(CF_ENDPOINT_TYPE, cfInfoEntityType)
         .actionDispatchManager.dispatchGet(endpoint.guid);
     }),
+    permissionsAction: new GetCurrentUsersRelations(),
     favoriteFromEntity: getFavoriteFromCfEntity,
     globalPreRequest: (request, action) => {
       return addCfRelationParams(request, action);

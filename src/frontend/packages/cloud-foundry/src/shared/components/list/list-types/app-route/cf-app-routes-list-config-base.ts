@@ -3,17 +3,17 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { GetAppRoutes } from '../../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CFUserPermissions } from '../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
@@ -37,14 +37,14 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
     appService: ApplicationService,
     confirmDialog: ConfirmationDialogService,
     datePipe: DatePipe,
-    currentUserPermissionsService: CurrentUserPermissionsService,
+    currentUserPermissionsService: CFUserPermissionsService,
     getRoutesAction: GetAppRoutes | PaginatedAction = null,
     hasActions = false,
     genericRouteState = true
   ) {
     const canEditAppsInSpace = hasActions ? appService.app$.pipe(
       switchMap(app => currentUserPermissionsService.can(
-        CurrentUserPermissions.APPLICATION_EDIT,
+        CFUserPermissions.APPLICATION_EDIT,
         appService.cfGuid,
         app.entity.entity.space_guid
       )),

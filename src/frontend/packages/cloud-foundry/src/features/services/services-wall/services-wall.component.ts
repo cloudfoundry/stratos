@@ -13,8 +13,8 @@ import {
   initCfOrgSpaceService,
 } from '../../../../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../../../cloud-foundry/src/shared/data-services/cloud-foundry.service';
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { CFUserPermissions } from '../../../cf-user-permissions.config';
 
 @Component({
   selector: 'app-services-wall',
@@ -32,7 +32,7 @@ export class ServicesWallComponent implements OnDestroy {
 
   public haveConnectedCf$: Observable<boolean>;
 
-  canCreateServiceInstance: CurrentUserPermissions;
+  canCreateServiceInstance: CFUserPermissions;
   initCfOrgSpaceService: Subscription;
   cfIds$: Observable<string[]>;
 
@@ -41,7 +41,7 @@ export class ServicesWallComponent implements OnDestroy {
     public store: Store<CFAppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService) {
 
-    this.canCreateServiceInstance = CurrentUserPermissions.SERVICE_INSTANCE_CREATE;
+    this.canCreateServiceInstance = CFUserPermissions.SERVICE_INSTANCE_CREATE;
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
       map(endpoints => endpoints
         .filter(endpoint => endpoint.connectionStatus === 'connected')

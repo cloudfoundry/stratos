@@ -4,12 +4,12 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IRoute } from '../../../../cf-api.types';
+import { CFUserPermissionsService } from '../../../../cf-user-permissions.service';
 import {
   CfAppRoutesListConfigServiceBase,
 } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config-base';
@@ -22,7 +22,7 @@ export class AppDeleteRoutesListConfigService extends CfAppRoutesListConfigServi
     appService: ApplicationService,
     confirmDialog: ConfirmationDialogService,
     datePipe: DatePipe,
-    currentUserPermissionsService: CurrentUserPermissionsService,
+    currentUserPermissionsService: CFUserPermissionsService,
   ) {
     super(store, appService, confirmDialog, datePipe, currentUserPermissionsService, null, false, false);
 

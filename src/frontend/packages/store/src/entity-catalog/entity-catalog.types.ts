@@ -1,4 +1,4 @@
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { EndpointHealthCheck } from '../../../core/endpoints-health-checks';
@@ -102,6 +102,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly globalPrePaginationRequest?: PrePaginationApiRequest;
   readonly globalErrorMessageHandler?: ApiErrorMessageHandler;
   readonly healthCheck?: EndpointHealthCheck;
+  readonly permissionsAction?: Action;
   readonly favoriteFromEntity?: <M extends IEntityMetadata = IEntityMetadata>(
     entity: any, entityKey: string, favoritesConfigMapper: FavoritesConfigMapper
   ) => UserFavorite<M>;

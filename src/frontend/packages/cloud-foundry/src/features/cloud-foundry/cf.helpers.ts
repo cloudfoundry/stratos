@@ -19,12 +19,6 @@ import {
   UserRoleInSpace,
 } from '../../../../cloud-foundry/src/store/types/user.types';
 import { UserRoleLabels } from '../../../../cloud-foundry/src/store/types/users-roles.types';
-import {
-  CurrentUserPermissions,
-  PermissionConfig,
-  PermissionTypes,
-} from '../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../core/src/core/current-user-permissions.service';
 import { getIdFromRoute, pathGet } from '../../../../core/src/core/utils.service';
 import { CFFeatureFlagTypes } from '../../../../core/src/shared/components/cf-auth/cf-auth.types';
 import {
@@ -44,6 +38,8 @@ import { IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc
 import { ISpace } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { CFEntityConfig } from '../../cf-types';
+import { CFUserPermissions, PermissionConfig, PermissionTypes } from '../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../cf-user-permissions.service';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
 
 export interface IUserRole<T> {
@@ -271,23 +267,23 @@ export function goToAppWall(store: Store<CFAppState>, cfGuid: string, orgGuid?: 
 }
 
 export function canUpdateOrgSpaceRoles(
-  perms: CurrentUserPermissionsService,
+  perms: CFUserPermissionsService,
   cfGuid: string,
   orgGuid?: string,
   spaceGuid?: string): Observable<boolean> {
   return combineLatest(
-    perms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid),
-    perms.can(CurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
+    perms.can(CFUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid),
+    perms.can(CFUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
   ).pipe(
     map((checks: boolean[]) => checks.some(check => check))
   );
 }
 
 export function canUpdateOrgRoles(
-  perms: CurrentUserPermissionsService,
+  perms: CFUserPermissionsService,
   cfGuid: string,
   orgGuid?: string): Observable<boolean> {
-  return perms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
+  return perms.can(CFUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
 }
 
 export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Observable<ICfRolesState> {
@@ -419,7 +415,7 @@ export function someFeatureFlags(
   ff: CFFeatureFlagTypes[],
   cfGuid: string,
   store: Store<AppState>,
-  userPerms: CurrentUserPermissionsService,
+  userPerms: CFUserPermissionsService,
 ): Observable<boolean> {
   return waitForCFPermissions(store, cfGuid).pipe(
     switchMap(() => combineLatest(ff.map(flag => {

@@ -246,7 +246,7 @@
       "root": "src/frontend/packages/cloud-foundry",
       "sourceRoot": "src/frontend/packages/cloud-foundry/src",
       "projectType": "library",
-      "prefix": "lib",
+      "prefix": "cf",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-ng-packagr:build",

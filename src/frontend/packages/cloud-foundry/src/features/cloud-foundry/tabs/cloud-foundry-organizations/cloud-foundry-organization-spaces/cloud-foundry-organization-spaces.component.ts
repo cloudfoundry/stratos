@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { CFUserPermissions } from '../../../../../cf-user-permissions.config';
 import {
   CfSpacesListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-spaces/cf-spaces-list-config.service';
@@ -20,7 +20,7 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
   ]
 })
 export class CloudFoundryOrganizationSpacesComponent {
-  public permsSpaceCreate = CurrentUserPermissions.SPACE_CREATE;
+  public permsSpaceCreate = CFUserPermissions.SPACE_CREATE;
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public cfOrgService: CloudFoundryOrganizationService

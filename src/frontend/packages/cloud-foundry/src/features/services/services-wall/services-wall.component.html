@@ -2,7 +2,7 @@
   <h1>Services</h1>
   <div class="page-header-right">
     <ng-container *ngIf="(haveConnectedCf$ | async)">
-      <ng-container *appUserPermission="canCreateServiceInstance">
+      <ng-container *cfUserPermission="canCreateServiceInstance">
         <button mat-icon-button [routerLink]="'/services/new/'">
           <mat-icon>add</mat-icon>
         </button>

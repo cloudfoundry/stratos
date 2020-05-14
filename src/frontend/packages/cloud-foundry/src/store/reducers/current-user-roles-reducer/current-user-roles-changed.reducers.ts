@@ -1,7 +1,7 @@
-import { PermissionStrings } from '../../../../../core/src/core/current-user-permissions.config';
 import { ICurrentUserRolesState } from '../../../../../store/src/types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
 import { ChangeUserRole } from '../../../actions/users.actions';
+import { CFPermissionStrings } from '../../../cf-user-permissions.config';
 import { ICfRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/cf-current-user-roles.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/user.types';
 import { defaultUserOrgRoleState } from './current-user-roles-org.reducer';
@@ -53,22 +53,22 @@ function createEmptyState(isSpace: boolean, orgId?: string): ISpaceRoleState | I
     };
 }
 
-function userRoleNameToPermissionName(roleName: OrgUserRoleNames | SpaceUserRoleNames): PermissionStrings {
+function userRoleNameToPermissionName(roleName: OrgUserRoleNames | SpaceUserRoleNames): CFPermissionStrings {
   switch (roleName) {
     case OrgUserRoleNames.AUDITOR:
-      return PermissionStrings.ORG_AUDITOR;
+      return CFPermissionStrings.ORG_AUDITOR;
     case OrgUserRoleNames.BILLING_MANAGERS:
-      return PermissionStrings.ORG_BILLING_MANAGER;
+      return CFPermissionStrings.ORG_BILLING_MANAGER;
     case OrgUserRoleNames.MANAGER:
-      return PermissionStrings.ORG_MANAGER;
+      return CFPermissionStrings.ORG_MANAGER;
     case OrgUserRoleNames.USER:
-      return PermissionStrings.ORG_USER;
+      return CFPermissionStrings.ORG_USER;
     case SpaceUserRoleNames.AUDITOR:
-      return PermissionStrings.SPACE_AUDITOR;
+      return CFPermissionStrings.SPACE_AUDITOR;
     case SpaceUserRoleNames.DEVELOPER:
-      return PermissionStrings.SPACE_DEVELOPER;
+      return CFPermissionStrings.SPACE_DEVELOPER;
     case SpaceUserRoleNames.MANAGER:
-      return PermissionStrings.SPACE_MANAGER;
+      return CFPermissionStrings.SPACE_MANAGER;
   }
 }
 

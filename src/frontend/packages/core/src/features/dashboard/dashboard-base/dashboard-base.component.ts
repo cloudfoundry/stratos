@@ -8,7 +8,6 @@ import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
-import { GetCurrentUsersRelations } from '../../../../../cloud-foundry/src/actions/permissions.actions';
 import { CloseSideNav, DisableMobileNav, EnableMobileNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
@@ -116,8 +115,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     });
   }
 
+  // Each endpoint type can declare an action that should be dispatched to fetch permissions metadata
   dispatchRelations() {
-    this.store.dispatch(new GetCurrentUsersRelations());
+    entityCatalog.getAllEndpointTypes().forEach(epType => {
+      if (epType && epType.definition && epType.definition.permissionsAction) {
+        this.store.dispatch(epType.definition.permissionsAction);
+      }
+    });
   }
 
   sideHelpClosed() {

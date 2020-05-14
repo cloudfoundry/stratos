@@ -3,15 +3,15 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../../core/test-framework/cloud-foundry-organization.service.mock';
 import { CloudFoundrySpaceServiceMock } from '../../../../../../../core/test-framework/cloud-foundry-space.service.mock';
+import {
+  generateCfBaseTestModules,
+  generateTestCfEndpointServiceProvider,
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import {
   CloudFoundryOrganizationService,
@@ -32,9 +32,9 @@ describe('CfUserListConfigService', () => {
             cfUserService: CfUserService,
             router: Router,
             activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-            userPerms: CurrentUserPermissionsService,
+            userPerms: CFUserPermissionsService,
           ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
-          deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
+          deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CFUserPermissionsService]
         }
         ,
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },

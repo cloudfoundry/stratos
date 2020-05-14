@@ -4,12 +4,12 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { ApplicationServiceMock } from '../../../../../../../core/test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CFAppState } from '../../../../../cf-app-state';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppRoutesListConfigService } from './cf-app-routes-list-config.service';
 
@@ -28,10 +28,10 @@ describe('CfAppRoutesListConfigService', () => {
             appService: ApplicationService,
             confirmDialog: ConfirmationDialogService,
             datePipe: DatePipe,
-            cups: CurrentUserPermissionsService) => {
+            cups: CFUserPermissionsService) => {
             return new CfAppRoutesListConfigService(store, appService, confirmDialog, datePipe, cups);
           },
-          deps: [Store, ApplicationService, ConfirmationDialogService, DatePipe, CurrentUserPermissionsService]
+          deps: [Store, ApplicationService, ConfirmationDialogService, DatePipe, CFUserPermissionsService]
         },
         DatePipe
       ],

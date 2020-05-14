@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
+import { CFUserPermissions } from '../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../cf-user-permissions.service';
 import {
   CfSpaceQuotasListConfigService,
 } from '../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-list-config.service';
@@ -27,9 +27,9 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    currentUserPermissionsService: CurrentUserPermissionsService
+    currentUserPermissionsService: CFUserPermissionsService
   ) {
     const { cfGuid, orgGuid } = this.activeRouteCfOrgSpace;
-    this.canAddQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_CREATE, cfGuid, orgGuid);
+    this.canAddQuota$ = currentUserPermissionsService.can(CFUserPermissions.SPACE_QUOTA_CREATE, cfGuid, orgGuid);
   }
 }

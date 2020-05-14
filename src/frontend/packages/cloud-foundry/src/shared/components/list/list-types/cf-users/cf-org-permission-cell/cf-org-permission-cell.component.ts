@@ -11,8 +11,6 @@ import {
   IUserPermissionInOrg,
   OrgUserRoleNames,
 } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -20,6 +18,8 @@ import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CFUserPermissions } from '../../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../../cf-user-permissions.service';
 import { getOrgRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
@@ -35,7 +35,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
   constructor(
     public store: Store<CFAppState>,
     cfUserService: CfUserService,
-    private userPerms: CurrentUserPermissionsService,
+    private userPerms: CFUserPermissionsService,
     confirmDialog: ConfirmationDialogService
   ) {
     super(store, confirmDialog, cfUserService);
@@ -99,6 +99,6 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
   }
 
   public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
-    this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
+    this.userPerms.can(CFUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
 
 }

@@ -10,7 +10,6 @@ import { serviceBindingEntityType, serviceEntityType } from '../../../../../../c
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
@@ -20,6 +19,7 @@ import { getPaginationObservables } from '../../../../../../store/src/reducers/p
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../../cf-api-svc.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { CFUserPermissionsService } from '../../../../cf-user-permissions.service';
 import { ServiceBindingActionBuilders } from '../../../../entity-action-builders/service-binding.action-builders';
 import {
   AppServiceBindingListConfigService,
@@ -53,7 +53,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
     store: Store<CFAppState>,
     appService: ApplicationService,
     datePipe: DatePipe,
-    currentUserPermissionService: CurrentUserPermissionsService,
+    currentUserPermissionService: CFUserPermissionsService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     serviceActionHelperService: ServiceActionHelperService
   ) {

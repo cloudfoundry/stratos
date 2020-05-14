@@ -3,8 +3,8 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
+import { CFUserPermissionsService } from '../../../../cf-user-permissions.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import {
@@ -22,9 +22,9 @@ import {
       cfUserService: CfUserService,
       router: Router,
       activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-      userPerms: CurrentUserPermissionsService,
+      userPerms: CFUserPermissionsService,
     ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
-    deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
+    deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CFUserPermissionsService]
   }]
 })
 export class CloudFoundryUsersComponent { }

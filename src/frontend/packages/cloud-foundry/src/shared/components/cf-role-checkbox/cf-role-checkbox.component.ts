@@ -13,13 +13,13 @@ import {
   SpaceUserRoleNames,
 } from '../../../../../cloud-foundry/src/store/types/user.types';
 import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
 import {
   selectUsersIsRemove,
   selectUsersIsSetByUsername,
   selectUsersRolesPicked,
 } from '../../../../../store/src/selectors/users-roles.selector';
+import { CFUserPermissions } from '../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../cf-user-permissions.service';
 import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 
@@ -245,7 +245,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   constructor(
     private cfRolesService: CfRolesService,
     private store: Store<CFAppState>,
-    private userPerms: CurrentUserPermissionsService
+    private userPerms: CFUserPermissionsService
   ) { }
 
   ngOnInit() {
@@ -254,7 +254,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     // If setting an org role user must be admin or org manager.
     // If setting a space role user must be admin, org manager or space manager
     const canEditRole$ = this.isOrgRole ?
-      this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, this.orgGuid) :
+      this.userPerms.can(CFUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, this.orgGuid) :
       canUpdateOrgSpaceRoles(
         this.userPerms,
         this.cfGuid,

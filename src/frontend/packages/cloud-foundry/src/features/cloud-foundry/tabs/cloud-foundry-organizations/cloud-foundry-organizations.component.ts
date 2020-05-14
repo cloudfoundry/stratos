@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
+import { CFUserPermissions } from '../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../cf-user-permissions.service';
 import { CfOrgCardComponent } from '../../../../shared/components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
 import { CfOrgsListConfigService } from '../../../../shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
@@ -23,9 +23,9 @@ export class CloudFoundryOrganizationsComponent {
   public canAddOrg$: Observable<boolean>;
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
-    currentUserPermissionsService: CurrentUserPermissionsService
+    currentUserPermissionsService: CFUserPermissionsService
   ) {
-    this.canAddOrg$ = currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
+    this.canAddOrg$ = currentUserPermissionsService.can(CFUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
   }
   cardComponent = CfOrgCardComponent;
 }

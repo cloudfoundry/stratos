@@ -17,8 +17,6 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { CurrentUserPermissionsChecker } from '../../../../../../core/src/core/current-user-permissions.checker';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
@@ -36,6 +34,8 @@ import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../cf-entity-factory';
 import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { CFUserPermissionsChecker } from '../../../../cf-user-permissions.checker';
+import { CFUserPermissionsService } from '../../../../cf-user-permissions.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';
@@ -54,7 +54,7 @@ export class CfRolesService {
    * Given a list of orgs or spaces remove those that the connected user cannot edit roles in.
    */
   static filterEditableOrgOrSpace<T extends IOrganization | ISpace>(
-    userPerms: CurrentUserPermissionsService,
+    userPerms: CFUserPermissionsService,
     isOrg: boolean,
     orgOrSpaces$: Observable<APIResource<T>[]>
   ): Observable<APIResource<T>[]> {
@@ -68,7 +68,7 @@ export class CfRolesService {
             orgOrSpace.metadata.guid,
             orgOrSpace.entity.cfGuid,
             isOrg ? orgOrSpace.metadata.guid : (orgOrSpace as APIResource<ISpace>).entity.organization_guid,
-            isOrg ? CurrentUserPermissionsChecker.ALL_SPACES : orgOrSpace.metadata.guid,
+            isOrg ? CFUserPermissionsChecker.ALL_SPACES : orgOrSpace.metadata.guid,
           ))));
       }),
       // Filter out orgs than the current user cannot edit
@@ -80,7 +80,7 @@ export class CfRolesService {
    * Create an observable with an org/space guids and whether it can be edited by the connected user
    */
   static canEditOrgOrSpace<T>(
-    userPerms: CurrentUserPermissionsService,
+    userPerms: CFUserPermissionsService,
     guid: string,
     cfGuid: string,
     orgGuid: string,
@@ -96,7 +96,7 @@ export class CfRolesService {
     private cfUserService: CfUserService,
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private userPerms: CurrentUserPermissionsService,
+    private userPerms: CFUserPermissionsService,
   ) {
     this.existingRoles$ = this.store.select(selectUsersRolesPicked).pipe(
       combineLatestOperators(this.store.select(selectUsersRolesCf)),

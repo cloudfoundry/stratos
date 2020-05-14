@@ -5,8 +5,6 @@ import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -20,6 +18,8 @@ import {
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IUserProvidedServiceInstance } from '../../../../../cf-api-svc.types';
+import { CFUserPermissions } from '../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import {
@@ -123,7 +123,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDeleteCache, CurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid)
+          row => this.can(this.canDeleteCache, CFUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid)
         )
       )
   };
@@ -137,7 +137,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => this.can(this.canDetachCache, CFUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
         )
       )
   };
@@ -158,12 +158,12 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => this.can(this.canDetachCache, CFUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
         )
       )
   };
 
-  private can(cache: CanCache, perm: CurrentUserPermissions, cfGuid: string, spaceGuid: string): Observable<boolean> {
+  private can(cache: CanCache, perm: CFUserPermissions, cfGuid: string, spaceGuid: string): Observable<boolean> {
     let can = cache[spaceGuid];
     if (!can) {
       can = this.currentUserPermissionsService.can(perm, cfGuid, spaceGuid);
@@ -176,7 +176,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     protected store: Store<CFAppState>,
     cfSpaceService: CloudFoundrySpaceService,
     protected datePipe: DatePipe,
-    protected currentUserPermissionsService: CurrentUserPermissionsService,
+    protected currentUserPermissionsService: CFUserPermissionsService,
     private serviceActionHelperService: ServiceActionHelperService
   ) {
     this.dataSource = new CfSpacesUserServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);

@@ -4,8 +4,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { EnvVarViewComponent } from '../../../../../../../../core/src/shared/components/env-var-view/env-var-view.component';
 import {
@@ -29,6 +27,8 @@ import {
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CFUserPermissions } from '../../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../../cf-user-permissions.service';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { isUserProvidedServiceInstance } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
@@ -76,7 +76,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     private entityServiceFactory: EntityServiceFactory,
     private appService: ApplicationService,
     private serviceActionHelperService: ServiceActionHelperService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private currentUserPermissionsService: CFUserPermissionsService,
   ) {
     super();
     this.cardMenu = [
@@ -85,7 +85,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
         action: this.edit,
         can: this.appService.waitForAppEntity$.pipe(
           switchMap(app => this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            CFUserPermissions.SERVICE_BINDING_EDIT,
             this.appService.cfGuid,
             app.entity.entity.space_guid
           )))
@@ -95,7 +95,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
         action: this.detach,
         can: this.appService.waitForAppEntity$.pipe(
           switchMap(app => this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            CFUserPermissions.SERVICE_BINDING_EDIT,
             this.appService.cfGuid,
             app.entity.entity.space_guid
           )))

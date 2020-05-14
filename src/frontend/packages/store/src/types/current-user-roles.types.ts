@@ -1,5 +1,5 @@
+import { ScopeStrings } from '../../../cloud-foundry/src/cf-user-permissions.config';
 import { IAllCfRolesState, ICfRolesState } from '../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
-import { ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
 
 export interface RolesRequestState {
   initialised: boolean;

@@ -4,8 +4,6 @@ import { BehaviorSubject, of as observableOf } from 'rxjs';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
   MetaCardMenuItem,
@@ -15,6 +13,8 @@ import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/s
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IUserProvidedServiceInstance } from '../../../../../../cf-api-svc.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
+import { CFUserPermissions } from '../../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../../cf-user-permissions.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
@@ -56,7 +56,7 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
         label: 'Edit',
         action: this.edit,
         can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
+          CFUserPermissions.SERVICE_INSTANCE_EDIT,
           this.serviceInstanceEntity.entity.cfGuid,
           this.serviceInstanceEntity.entity.space_guid
         )
@@ -66,7 +66,7 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
         action: this.detach,
         disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0),
         can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
+          CFUserPermissions.SERVICE_INSTANCE_EDIT,
           this.serviceInstanceEntity.entity.cfGuid,
           this.serviceInstanceEntity.entity.space_guid
         )
@@ -75,7 +75,7 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
         label: 'Delete',
         action: this.delete,
         can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SERVICE_INSTANCE_DELETE,
+          CFUserPermissions.SERVICE_INSTANCE_DELETE,
           this.serviceInstanceEntity.entity.cfGuid,
           this.serviceInstanceEntity.entity.space_guid
         )
@@ -93,7 +93,7 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
   constructor(
     private store: Store<CFAppState>,
     private serviceActionHelperService: ServiceActionHelperService,
-    private currentUserPermissionsService: CurrentUserPermissionsService
+    private currentUserPermissionsService: CFUserPermissionsService
   ) {
     super();
   }

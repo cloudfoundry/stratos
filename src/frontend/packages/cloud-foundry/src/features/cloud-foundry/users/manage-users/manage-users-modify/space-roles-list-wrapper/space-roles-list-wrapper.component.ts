@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { CFAppState } from '../../../../../../cf-app-state';
+import { CFUserPermissionsService } from '../../../../../../cf-user-permissions.service';
 import {
   CfUsersSpaceRolesListConfigService,
 } from '../../../../../../shared/components/list/list-types/cf-users-org-space-roles/cf-users-space-roles-list-config.service';
@@ -19,10 +19,10 @@ import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
       useFactory: (
         store: Store<CFAppState>,
         activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-        userPerms: CurrentUserPermissionsService) => {
+        userPerms: CFUserPermissionsService) => {
         return new CfUsersSpaceRolesListConfigService(store, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.spaceGuid, userPerms);
       },
-      deps: [Store, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
+      deps: [Store, ActiveRouteCfOrgSpace, CFUserPermissionsService]
     }
   ]
 })

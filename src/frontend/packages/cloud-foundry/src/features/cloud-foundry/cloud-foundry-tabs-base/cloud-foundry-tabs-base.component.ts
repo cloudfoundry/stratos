@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import {
   getActionsFromExtensions,
@@ -16,6 +14,8 @@ import { environment } from '../../../../../core/src/environments/environment.pr
 import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { FavoritesConfigMapper } from '../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
+import { CFUserPermissions } from '../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../cf-user-permissions.service';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
 @Component({
@@ -43,7 +43,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private currentUserPermissionsService: CFUserPermissionsService,
     endpointsService: EndpointsService,
     favoritesConfigMapper: FavoritesConfigMapper
   ) {
@@ -54,7 +54,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     );
 
     const firehoseHidden$ = this.currentUserPermissionsService
-      .can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
+      .can(CFUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
       .pipe(map(visible => !visible));
 
     const usersHidden$ = cfEndpointService.usersCount$.pipe(
@@ -101,7 +101,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   ngOnInit() {
     this.isFetching$ = observableOf(false);
-    this.canAddOrg$ = this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
+    this.canAddOrg$ = this.currentUserPermissionsService.can(CFUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
   }
 
 }

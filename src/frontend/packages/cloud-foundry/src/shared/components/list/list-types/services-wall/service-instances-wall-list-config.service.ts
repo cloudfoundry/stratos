@@ -10,7 +10,6 @@ import {
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import {
   CardMultiActionComponents,
 } from '../../../../../../../core/src/shared/components/list/list-cards/card.component.types';
@@ -20,6 +19,7 @@ import {
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { cfOrgSpaceFilter } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
@@ -65,7 +65,7 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
     store: Store<CFAppState>,
     datePipe: DatePipe,
     private cfOrgSpaceService: CfOrgSpaceDataService,
-    currentUserPermissionsService: CurrentUserPermissionsService,
+    currentUserPermissionsService: CFUserPermissionsService,
     serviceActionHelperService: ServiceActionHelperService
   ) {
     super(store, datePipe, currentUserPermissionsService, serviceActionHelperService);

@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import { CFFeatureFlagTypes } from '../../../../../../../core/src/shared/components/cf-auth/cf-auth.types';
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { CFAppState } from '../../../../../cf-app-state';
+import { CFUserPermissions } from '../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import {
   CfOrgUsersListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-org-users/cf-org-users-list-config.service';
@@ -32,7 +32,7 @@ export class CloudFoundryOrganizationUsersComponent {
 
   constructor(
     store: Store<CFAppState>,
-    userPerms: CurrentUserPermissionsService,
+    userPerms: CFUserPermissionsService,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     const requiredFeatureFlags = [
@@ -42,7 +42,7 @@ export class CloudFoundryOrganizationUsersComponent {
     this.addRolesByUsernameLink$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => combineLatest([
         someFeatureFlags(requiredFeatureFlags, activeRouteCfOrgSpace.cfGuid, store, userPerms),
-        userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.orgGuid)
+        userPerms.can(CFUserPermissions.ORGANIZATION_CHANGE_ROLES, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.orgGuid)
       ])),
       map(([canSetRolesByUsername, canChangeOrgRole]) => {
         if (canSetRolesByUsername && canChangeOrgRole) {

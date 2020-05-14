@@ -7,8 +7,8 @@ import { first, map, take } from 'rxjs/operators';
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../../../store/src/types/user-profile.types';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { UserProfileService } from '../../../core/user-profile.service';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 
 
 @Component({

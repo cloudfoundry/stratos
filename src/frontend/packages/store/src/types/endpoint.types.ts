@@ -1,4 +1,4 @@
-import { ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
+import { ScopeStrings } from '../../../cloud-foundry/src/cf-user-permissions.config';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { MetricsAPITargets } from '../actions/metrics-api.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';

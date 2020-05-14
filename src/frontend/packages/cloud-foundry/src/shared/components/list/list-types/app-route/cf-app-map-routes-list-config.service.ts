@@ -3,21 +3,21 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { GetSpaceRoutes } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType, spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
   TableCellRadioComponent,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
 
@@ -30,7 +30,7 @@ export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServic
     confirmDialog: ConfirmationDialogService,
     datePipe: DatePipe,
     activatedRoute: ActivatedRoute,
-    currentUserPermissionsService: CurrentUserPermissionsService,
+    currentUserPermissionsService: CFUserPermissionsService,
   ) {
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
     const routeEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);

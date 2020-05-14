@@ -5,14 +5,14 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
   IListConfig,
   IListMultiFilterConfig,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CFUserPermissions } from '../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
   CfOrgSpaceDataService,
@@ -37,13 +37,13 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
     confirmDialog: ConfirmationDialogService,
     cfService: CloudFoundryEndpointService,
     datePipe: DatePipe,
-    currentUserPermissionsService: CurrentUserPermissionsService,
+    currentUserPermissionsService: CFUserPermissionsService,
     cfOrgSpaceService: CfOrgSpaceDataService,
   ) {
     const canEditRoute = (route$: Observable<APIResource<ListCfRoute>>) => {
       return route$.pipe(
         switchMap(route => currentUserPermissionsService.can(
-          CurrentUserPermissions.APPLICATION_EDIT,
+          CFUserPermissions.APPLICATION_EDIT,
           route.entity.cfGuid,
           route.entity.space_guid
         )),

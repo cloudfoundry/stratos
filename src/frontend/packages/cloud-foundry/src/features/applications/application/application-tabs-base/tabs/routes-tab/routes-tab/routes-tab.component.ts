@@ -5,11 +5,11 @@ import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissionsService } from '../../../../../../../../../core/src/core/current-user-permissions.service';
 import {
   ConfirmationDialogService,
 } from '../../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
+import { CFUserPermissionsService } from '../../../../../../../cf-user-permissions.service';
 import {
   CfAppRoutesListConfigService,
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
@@ -28,11 +28,11 @@ import { ApplicationService } from '../../../../../application.service';
         appService: ApplicationService,
         confirmDialog: ConfirmationDialogService,
         datePipe: DatePipe,
-        cups: CurrentUserPermissionsService
+        cups: CFUserPermissionsService
       ) => {
         return new CfAppRoutesListConfigService(store, appService, confirmDialog, datePipe, cups);
       },
-      deps: [Store, ApplicationService, ConfirmationDialogService, DatePipe, CurrentUserPermissionsService]
+      deps: [Store, ApplicationService, ConfirmationDialogService, DatePipe, CFUserPermissionsService]
     },
     CfOrgSpaceDataService
   ]

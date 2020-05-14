@@ -10,6 +10,7 @@ import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/t
 import { EntityInfo } from '../../store/src/types/api.types';
 import { ICFAction } from '../../store/src/types/request.types';
 import { generateCFEntities } from './cf-entity-generator';
+import { CFUserPermissionsService } from './cf-user-permissions.service';
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { ApplicationsModule } from './features/applications/applications.module';
 import { CloudFoundryModule } from './features/cloud-foundry/cloud-foundry.module';
@@ -83,7 +84,8 @@ function infoValidator(action: ICFAction, dispatcher) {
     CfUserService,
     CloudFoundryService,
     ServiceActionHelperService,
-    LongRunningCfOperationsService
+    LongRunningCfOperationsService,
+    CFUserPermissionsService,
   ]
 })
 export class CloudFoundryPackageModule { }

@@ -4,8 +4,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, startWith } from 'rxjs/operators';
 
-import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { LoggerService } from '../../../../../../core/src/core/logger.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../../store/src/app-state';
@@ -16,6 +14,8 @@ import {
   UsersRolesSetChanges,
   UsersRolesSetUsers,
 } from '../../../../actions/users-roles.actions';
+import { CFUserPermissions } from '../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../cf-user-permissions.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace } from '../../../../store/types/user.types';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
@@ -51,7 +51,7 @@ export class RemoveUserComponent implements OnDestroy {
     private cfRolesService: CfRolesService,
     private logService: LoggerService,
     private route: ActivatedRoute,
-    private userPerms: CurrentUserPermissionsService
+    private userPerms: CFUserPermissionsService
   ) {
     this.defaultCancelUrl = this.createReturnUrl(activeRouteCfOrgSpace);
     this.cfGuid = this.activeRouteCfOrgSpace.cfGuid;
@@ -114,12 +114,12 @@ export class RemoveUserComponent implements OnDestroy {
       const isOrgRole = !c.spaceGuid;
 
       if (isOrgRole) {
-        return this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, c.orgGuid).pipe(
+        return this.userPerms.can(CFUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, c.orgGuid).pipe(
           map((can) => ({ can, change: c }))
         );
       }
 
-      return this.userPerms.can(CurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid, c.orgGuid, c.spaceGuid).pipe(
+      return this.userPerms.can(CFUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid, c.orgGuid, c.spaceGuid).pipe(
         map((can) => ({ can, change: c }))
       );
     });

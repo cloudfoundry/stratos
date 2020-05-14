@@ -8,7 +8,6 @@ import { AppMetadataTypes, GetAppStatsAction } from '../../../../../../../../clo
 import { UpdateExistingApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType, appStatsEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { getFullEndpointApiUrl } from '../../../../../../../../core/src/features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -20,6 +19,7 @@ import { ActionState } from '../../../../../../../../store/src/reducers/api-requ
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { IAppSummary } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { CFUserPermissions } from '../../../../../../cf-user-permissions.config';
 import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
@@ -59,7 +59,7 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
 })
 export class BuildTabComponent implements OnInit {
   public isBusyUpdating$: Observable<{ updating: boolean }>;
-  public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
+  public manageAppPermission = CFUserPermissions.APPLICATION_MANAGE;
   constructor(
     public applicationService: ApplicationService,
     private scmService: GitSCMService,

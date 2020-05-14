@@ -4,8 +4,6 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { first, map, publishReplay, refCount, startWith, switchMap, take, tap } from 'rxjs/operators';
 
-import { PermissionConfig, PermissionTypes } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import { CFFeatureFlagTypes } from '../../../../../../../core/src/shared/components/cf-auth/cf-auth.types';
 import {
   StackedInputActionConfig,
@@ -21,6 +19,8 @@ import {
   UsersRolesSetUsers,
 } from '../../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../../cf-app-state';
+import { PermissionConfig, PermissionTypes } from '../../../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { CfUser } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { waitForCFPermissions } from '../../../cf.helpers';
@@ -65,7 +65,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   constructor(
     private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    userPerms: CurrentUserPermissionsService,
+    userPerms: CFUserPermissionsService,
   ) {
     const ffSetPermConfig = new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
     const ffRemovePermConfig = new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);

@@ -2,7 +2,7 @@
   <div class="summary__sub-nav">
     <div class="summary__actions" *ngIf="applicationService.appSpace$ | async as space">
       <ng-container
-        *appUserPermission="manageAppPermission;spaceGuid:space.metadata.guid;endpointGuid:applicationService.cfGuid">
+        *cfUserPermission="manageAppPermission;spaceGuid:space.metadata.guid;endpointGuid:applicationService.cfGuid">
         <app-page-sub-nav-section>
           <button mat-icon-button name="edit" *ngIf="(applicationService.applicationState$ | async)"
             routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit"

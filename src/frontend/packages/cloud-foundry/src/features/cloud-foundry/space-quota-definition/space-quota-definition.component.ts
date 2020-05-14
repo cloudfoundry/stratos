@@ -5,14 +5,14 @@ import { Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { GetSpaceQuotaDefinition } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { IOrganization, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
+import { CFUserPermissions } from '../../../cf-user-permissions.config';
+import { CFUserPermissionsService } from '../../../cf-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
@@ -46,12 +46,12 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
     protected store: Store<AppState>,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     activatedRoute: ActivatedRoute,
-    currentUserPermissionsService: CurrentUserPermissionsService
+    currentUserPermissionsService: CFUserPermissionsService
   ) {
     super(entityServiceFactory, store, activeRouteCfOrgSpace, activatedRoute);
     this.setupQuotaDefinitionObservable();
     const { cfGuid, orgGuid, spaceGuid } = activeRouteCfOrgSpace;
-    this.canEditQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
+    this.canEditQuota$ = currentUserPermissionsService.can(CFUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
     this.isOrg = !spaceGuid;
     this.editParams = { [QUOTA_SPACE_GUID]: spaceGuid };
   }
