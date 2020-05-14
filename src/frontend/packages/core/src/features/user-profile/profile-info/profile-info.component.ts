@@ -1,5 +1,4 @@
-import { SetGravatarEnabledAction } from './../../../../../store/src/actions/dashboard-actions';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -9,15 +8,16 @@ import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
 import { ThemeService } from '../../../core/theme.service';
-import { UserService } from '../../../core/user.service';
 import { UserProfileService } from '../../../core/user-profile.service';
+import { UserService } from '../../../core/user.service';
+import { SetGravatarEnabledAction } from './../../../../../store/src/actions/dashboard-actions';
 
 @Component({
   selector: 'app-profile-info',
   templateUrl: './profile-info.component.html',
   styleUrls: ['./profile-info.component.scss']
 })
-export class ProfileInfoComponent implements OnInit {
+export class ProfileInfoComponent {
 
   public timeoutSession$ = this.store.select(selectDashboardState).pipe(
     map(dashboardState => dashboardState.timeoutSession ? 'true' : 'false')
@@ -31,7 +31,7 @@ export class ProfileInfoComponent implements OnInit {
     map(dashboardState => dashboardState.gravatarEnabled ? 'true' : 'false')
   );
 
-  public allowGravatar$ =  this.store.select(selectDashboardState).pipe(
+  public allowGravatar$ = this.store.select(selectDashboardState).pipe(
     map(dashboardState => dashboardState.gravatarEnabled)
   );
 
@@ -83,10 +83,6 @@ export class ProfileInfoComponent implements OnInit {
     );
 
     this.hasMultipleThemes = themeService.getThemes().length > 1;
-  }
-
-  ngOnInit() {
-    this.userProfileService.fetchUserProfile();
   }
 
 }

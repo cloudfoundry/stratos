@@ -9,11 +9,21 @@
   }
   &-info {
     display: flex;
-    mat-icon {
+    > mat-icon {
       font-size: 48px;
       height: 48px;
       margin-right: 8px;
       width: 48px;
+    }
+  }
+  &-unknown {
+    display: flex;
+    mat-icon {
+      margin-right: 8px;
+    }
+    &__detail {
+      margin-left: 32px;
+      opacity: .8;
     }
   }
   &-metadata {
@@ -42,5 +52,73 @@
       margin-top: 0;
     }
   }
+  &-detail {
+    padding-top: 12px;
+  }
 }
 
+// Adapted from: http://cssdeck.com/labs/pure-css-tree-menu-framework
+$hz-indent-top: 60px;
+$hz-indent-left: 40px;
+$hz-indent-width: 40px;
+$tree-indicator-width: 3px;
+
+.metrics-tree {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  &__root {
+    height: 24px;
+    margin-left: $hz-indent-left;
+    width: 3px;
+  }
+}
+
+.tree,
+.tree ul {
+  list-style: none;
+  margin: 0 0 0 $hz-indent-left;
+  padding: 0;
+  position: relative;
+}
+
+.tree ul {
+  margin-left: .5em;
+}
+
+.tree::before,
+.tree ul::before {
+  border-left: $tree-indicator-width solid;
+  bottom: 0;
+  content: '';
+  display: block;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 0;
+}
+
+.tree li {
+  margin: 0;
+  padding: 0 $hz-indent-width;
+  position: relative;
+}
+
+.tree li::before {
+  border-top: $tree-indicator-width solid;
+  content: '';
+  display: block;
+  height: 0;
+  left: 0;
+  margin-top: -1px;
+  position: absolute;
+  top: $hz-indent-top;
+  width: $hz-indent-width;
+}
+
+.tree li:last-child::before {
+  bottom: 0;
+  height: auto;
+  top: $hz-indent-top;
+}

@@ -71,16 +71,22 @@ export class CardComponent<T> {
       return;
     }
     const { component, entityKey, entity } = this.getComponent(componentType, item);
-    if (component) {
+    if (!this.cardComponent && component) {
       const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
       if (componentFactory) {
         this.clear();
         this.componentRef = this.target.createComponent(componentFactory);
         this.cardComponent = this.componentRef.instance as CardCell<T>;
-        this.cardComponent.row = entity;
-        this.cardComponent.dataSource = dataSource;
-        this.cardComponent.entityKey = entityKey;
       }
+    }
+    this.updateComponentInputs(dataSource, entityKey, entity);
+  }
+
+  private updateComponentInputs(dataSource, entityKey, entity) {
+    if (this.cardComponent) {
+      this.cardComponent.row = entity;
+      this.cardComponent.dataSource = dataSource;
+      this.cardComponent.entityKey = entityKey;
     }
   }
 
