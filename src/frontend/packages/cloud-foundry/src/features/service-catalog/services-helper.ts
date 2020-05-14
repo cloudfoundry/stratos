@@ -20,12 +20,7 @@ import { PaginationMonitorFactory } from '../../../../store/src/monitors/paginat
 import { APIResource } from '../../../../store/src/types/api.types';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
-import {
-  organizationEntityType,
-  serviceInstancesEntityType,
-  servicePlanEntityType,
-  spaceEntityType,
-} from '../../cf-entity-types';
+import { organizationEntityType, servicePlanEntityType, spaceEntityType } from '../../cf-entity-types';
 import { QParam, QParamJoiners } from '../../shared/q-param';
 import { fetchTotalResults } from '../cloud-foundry/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
@@ -71,11 +66,6 @@ export const isEditServiceInstanceMode = (activatedRoute: ActivatedRoute) => {
   const serviceInstanceId = getIdFromRoute(activatedRoute, 'serviceInstanceId');
   const cfId = getIdFromRoute(activatedRoute, 'endpointId');
   return !!cfId && !!serviceInstanceId;
-};
-
-export const getServiceInstancesInCf = (cfGuid: string) => {
-  const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, cfGuid);
-  return cfEntityCatalog.serviceInstance.store.getPaginationService(cfGuid, paginationKey).entities$;
 };
 
 export const fetchServiceInstancesCount = (
@@ -194,25 +184,14 @@ export const populateServicePlanExtraTyped = (servicePlan: APIResource<IServiceP
   };
 };
 
-
-export const getServiceBroker = (
-  serviceBrokerGuid: string,
-  cfGuid: string,
-): EntityService<APIResource<IServiceBroker>> => cfEntityCatalog.serviceBroker.store.getEntityService(serviceBrokerGuid, cfGuid, {});
-
 export const getServiceBrokerName = (
   serviceBrokerGuid: string,
   cfGuid: string,
-): Observable<string> => getServiceBroker(serviceBrokerGuid, cfGuid).waitForEntity$.pipe(
+): Observable<string> => cfEntityCatalog.serviceBroker.store.getEntityService(serviceBrokerGuid, cfGuid, {}).waitForEntity$.pipe(
   filter(res => !!res),
   map(a => a.entity.entity.name),
   first()
 );
-
-export const getCfService = (
-  serviceGuid: string,
-  cfGuid: string,
-): EntityService<APIResource<IService>> => cfEntityCatalog.service.store.getEntityService(serviceGuid, cfGuid, {});
 
 export const getCfServiceInstance = (
   serviceInstanceGuid: string,

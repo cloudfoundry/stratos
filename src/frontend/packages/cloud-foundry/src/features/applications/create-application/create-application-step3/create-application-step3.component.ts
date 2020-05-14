@@ -3,7 +3,7 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { catchError, filter, first, map, mergeMap, switchMap, tap } from 'rxjs/operators';
+import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { domainEntityType, organizationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
@@ -12,7 +12,11 @@ import { CreateNewApplicationState } from '../../../../../../cloud-foundry/src/s
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import {
+  ActionState,
+  getDefaultRequestState,
+  RequestInfoState,
+} from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
@@ -89,11 +93,9 @@ export class CreateApplicationStep3Component implements OnInit {
     const obs$ = cfEntityCatalog.application.api.create<RequestInfoState>(
       newAppGuid,
       cloudFoundry, {
-      name,
-      space_guid: space
-    }).pipe(
-      filter(ris => !!ris.response)
-    );
+        name,
+        space_guid: space
+      });
     return this.wrapObservable(obs$, 'Could not create application');
   }
 
@@ -115,8 +117,6 @@ export class CreateApplicationStep3Component implements OnInit {
           domain_guid: selectedDomainGuid,
           host: hostName
         }
-      ).pipe(
-        filter(ris => !!ris.response)
       )
       return this.wrapObservable(obs$, 'Application created. Could not create route');
     }
@@ -127,13 +127,25 @@ export class CreateApplicationStep3Component implements OnInit {
   }
 
   associateRoute(appGuid: string, routeGuid: string, endpointGuid: string): Observable<RequestInfoState> {
-    const obs$ = cfEntityCatalog.application.api.assignRoute<RequestInfoState>(endpointGuid, routeGuid, appGuid)
+    const obs$ = cfEntityCatalog.application.api.assignRoute<ActionState>(endpointGuid, routeGuid, appGuid).pipe(
+      map((actionState: ActionState): RequestInfoState => ({
+        creating: actionState.busy,
+        error: actionState.error,
+        message: actionState.message,
+        fetching: null,
+        updating: null,
+        deleting: null,
+        response: null
+      }))
+    )
     return this.wrapObservable(obs$, 'Application and route created. Could not associated route with app');
   }
 
   private wrapObservable(obs$: Observable<RequestInfoState>, errorString: string): Observable<RequestInfoState> {
     return obs$.pipe(
-      filter((state: RequestInfoState) => state && !state.creating),
+      pairwise(),
+      filter(([oldS, newS]) => oldS.creating && !newS.creating),
+      map(([, newS]) => newS),
       first(),
       tap(state => {
         if (state.error) {

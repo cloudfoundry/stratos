@@ -8,10 +8,7 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import {
-  IUserProvidedServiceInstanceData,
-  UpdateUserProvidedServiceInstance,
-} from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
+import { IUserProvidedServiceInstanceData } from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   serviceBindingEntityType,
@@ -305,9 +302,9 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       updateData
     ).pipe(
       map(er => ({
-        success: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error,
-        redirect: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error,
-        message: `Failed to update service instance: ${er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].message}`
+        success: !er.error,
+        redirect: !er.error,
+        message: `Failed to update service instance: ${er.message}`
       }))
     );
   }

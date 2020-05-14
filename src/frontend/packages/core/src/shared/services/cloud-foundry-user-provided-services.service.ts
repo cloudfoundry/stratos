@@ -16,7 +16,7 @@ import { QParam, QParamJoiners } from '../../../../cloud-foundry/src/shared/q-pa
 import { ClearPaginationOfType } from '../../../../store/src/actions/pagination.actions';
 import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
-import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
+import { ActionState, RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { IUserProvidedServiceInstance } from '../../core/cf-api-svc.types';
 
@@ -100,24 +100,7 @@ export class CloudFoundryUserProvidedServicesService {
     cfGuid: string,
     guid: string,
     data: Partial<IUserProvidedServiceInstanceData>,
-  ): Observable<RequestInfoState> {
-    const updatingKey = cfEntityCatalog.userProvidedService.actions.update(guid, cfGuid, data).updatingKey;
-    return cfEntityCatalog.userProvidedService.api.update<RequestInfoState>(
-      guid,
-      cfGuid,
-      data,
-      // this.userProvidedServiceInstancesEntityConfig
-    ).pipe(
-      filter(v => !!v.updating[updatingKey]),
-      pairwise(),
-      filter(([oldV, newV]) =>
-        oldV.updating[updatingKey].busy &&
-        !newV.updating[updatingKey].busy),
-      map(([, newV]) => newV)
-    );
+  ): Observable<ActionState> {
+    return cfEntityCatalog.userProvidedService.api.update<ActionState>(guid, cfGuid, data);
   }
-
 }
-
-
-

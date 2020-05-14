@@ -8,6 +8,7 @@ import { cfEntityCatalog } from '../../../../../../cloud-foundry/src/cf-entity-c
 import { ActiveRouteCfOrgSpace } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { AppState } from '../../../../../../store/src/app-state';
+import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { ISpaceQuotaDefinition } from '../../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../../core/utils.service';
@@ -58,24 +59,18 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
 
   validate = () => !!this.form && this.form.valid();
 
-  submit: StepOnNextFunction = () => {
-    const formValues = this.form.formGroup.value;
+  submit: StepOnNextFunction = () =>
+    cfEntityCatalog.spaceQuota.api.update<ActionState>(this.spaceQuotaGuid, this.cfGuid, this.form.formGroup.value).pipe(
+      pairwise(),
+      filter(([oldV, newV]) => oldV.busy && !newV.busy),
+      map(([, newV]) => newV),
+      map(requestInfo => ({
+        success: !requestInfo.error,
+        redirect: !requestInfo.error,
+        message: requestInfo.error ? `Failed to update space quota: ${requestInfo.message}` : ''
+      }))
+    );
 
-    const action = cfEntityCatalog.spaceQuota.actions.update(this.spaceQuotaGuid, this.cfGuid, formValues);
-    this.store.dispatch(action);
-    return cfEntityCatalog.spaceQuota.store.getEntityMonitor(this.spaceQuotaGuid)
-      .getUpdatingSection(action.updatingKey)
-      .pipe(
-        pairwise(),
-        filter(([oldV, newV]) => oldV.busy && !newV.busy),
-        map(([, newV]) => newV),
-        map(requestInfo => ({
-          success: !requestInfo.error,
-          redirect: !requestInfo.error,
-          message: requestInfo.error ? `Failed to update space quota: ${requestInfo.message}` : ''
-        }))
-      );
-  }
 
   ngOnDestroy() {
     safeUnsubscribe(this.spaceQuotaSubscription);

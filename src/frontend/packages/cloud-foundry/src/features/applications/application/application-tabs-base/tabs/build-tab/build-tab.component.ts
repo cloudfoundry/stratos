@@ -239,10 +239,9 @@ export class BuildTabComponent implements OnInit {
 
   restageApplication() {
     const { cfGuid, appGuid } = this.applicationService;
-    const restageAppAction = cfEntityCatalog.application.actions.restage(appGuid, cfGuid)
     this.confirmAndPollForState(
       appRestageConfirmation,
-      () => this.store.dispatch(restageAppAction),
+      () => cfEntityCatalog.application.api.restage(appGuid, cfGuid),
       'starting',
       'STARTED',
       () => { }

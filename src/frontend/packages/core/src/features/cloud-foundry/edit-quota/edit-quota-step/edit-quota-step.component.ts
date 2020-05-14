@@ -8,6 +8,7 @@ import { cfEntityCatalog } from '../../../../../../cloud-foundry/src/cf-entity-c
 import { ActiveRouteCfOrgSpace } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { AppState } from '../../../../../../store/src/app-state';
+import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IOrgQuotaDefinition } from '../../../../core/cf-api.types';
 import { safeUnsubscribe } from '../../../../core/utils.service';
@@ -57,22 +58,18 @@ export class EditQuotaStepComponent implements OnDestroy {
 
   validate = () => this.form && this.form.valid();
 
-  submit: StepOnNextFunction = () => {
-    const formValues = this.form.formGroup.value;
-    const action = cfEntityCatalog.quotaDefinition.actions.update(this.quotaGuid, this.cfGuid, formValues);
-    this.store.dispatch(action);
-    return cfEntityCatalog.quotaDefinition.store.getEntityMonitor(this.quotaGuid)
-      .getUpdatingSection(action.updatingKey).pipe(
-        pairwise(),
-        filter(([oldV, newV]) => oldV.busy && !newV.busy),
-        map(([, newV]) => newV),
-        map(requestInfo => ({
-          success: !requestInfo.error,
-          redirect: !requestInfo.error,
-          message: requestInfo.error ? `Failed to update quota: ${requestInfo.message}` : ''
-        }))
-      );
-  }
+  submit: StepOnNextFunction = () =>
+    cfEntityCatalog.quotaDefinition.api.update<ActionState>(this.quotaGuid, this.cfGuid, this.form.formGroup.value).pipe(
+      pairwise(),
+      filter(([oldV, newV]) => oldV.busy && !newV.busy),
+      map(([, newV]) => newV),
+      map(requestInfo => ({
+        success: !requestInfo.error,
+        redirect: !requestInfo.error,
+        message: requestInfo.error ? `Failed to update quota: ${requestInfo.message}` : ''
+      }))
+    );
+
 
   ngOnDestroy() {
     safeUnsubscribe(this.quotaSubscription);

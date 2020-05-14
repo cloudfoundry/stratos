@@ -15,9 +15,9 @@ import { getIdFromRoute } from '../../../../core/src/core/utils.service';
 import { EntityService } from '../../../../store/src/entity-service';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
-import { serviceBrokerEntityType, servicePlanVisibilityEntityType } from '../../cf-entity-types';
+import { serviceBrokerEntityType, serviceInstancesEntityType, servicePlanVisibilityEntityType } from '../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
-import { getCfService, getServiceInstancesInCf, getServiceName, getServicePlans } from './services-helper';
+import { getServiceName, getServicePlans } from './services-helper';
 
 
 export interface ServicePlanAccessibility {
@@ -61,7 +61,7 @@ export class ServicesService {
       return;
     }
 
-    this.serviceEntityService = getCfService(this.serviceGuid, this.cfGuid);
+    this.serviceEntityService = cfEntityCatalog.service.store.getEntityService(this.serviceGuid, this.cfGuid, {});
     this.service$ = this.serviceEntityService.waitForEntity$.pipe(
       filter(o => !!o && !!o.entity),
       map(o => o.entity),
@@ -72,18 +72,6 @@ export class ServicesService {
     this.initBaseObservables();
   }
 
-  getServicePlanVisibilities = () => {
-    const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid);
-    return cfEntityCatalog.servicePlanVisibility.store.getPaginationService(this.cfGuid, paginationKey, {}).entities$
-  }
-  private getServiceInstances = () => {
-    return getServiceInstancesInCf(this.cfGuid);
-  }
-
-  private getServiceBrokers = () => {
-    const paginationKey = createEntityRelationPaginationKey(serviceBrokerEntityType, this.cfGuid);
-    return cfEntityCatalog.serviceBroker.store.getPaginationService(this.cfGuid, paginationKey, {}).entities$
-  }
 
   getServiceBrokerById = (guid: string): Observable<APIResource<IServiceBroker>> => this.serviceBrokers$
     .pipe(
@@ -94,37 +82,17 @@ export class ServicesService {
       first()
     )
 
-  getServiceName = () => {
-    return this.service$
-      .pipe(
-        map(getServiceName)
-      );
-  }
+  getServiceName = () => this.service$.pipe(
+    map(getServiceName)
+  )
 
-  getServiceProviderName = () => {
-    return observableCombineLatest(this.serviceExtraInfo$, this.service$)
-      .pipe(
-        map(([extraInfo]) => {
-          if (extraInfo && extraInfo.providerDisplayName) {
-            return extraInfo.providerDisplayName;
-          } else {
-            return '';
-          }
-        }));
-  }
+  getServiceProviderName = () => observableCombineLatest(this.serviceExtraInfo$, this.service$).pipe(
+    map(([extraInfo]) => extraInfo && extraInfo.providerDisplayName ? extraInfo.providerDisplayName : '')
+  );
 
-  getServiceDescription = () => {
-    return observableCombineLatest(this.serviceExtraInfo$, this.service$)
-      .pipe(
-        map(([extraInfo, service]) => {
-          if (extraInfo && extraInfo.longDescription) {
-            return extraInfo.longDescription;
-          } else {
-            return service.entity.description;
-          }
-        }));
-  }
-
+  getServiceDescription = () => observableCombineLatest(this.serviceExtraInfo$, this.service$).pipe(
+    map(([extraInfo, service]) => extraInfo && extraInfo.longDescription ? extraInfo.longDescription : service.entity.description)
+  );
 
   getDocumentationUrl = () => this.serviceExtraInfo$.pipe(
     map(p => p ? p.documentationUrl : null)
@@ -153,10 +121,18 @@ export class ServicesService {
   )
 
   private initBaseObservables() {
-    this.servicePlanVisibilities$ = this.getServicePlanVisibilities();
+    this.servicePlanVisibilities$ = cfEntityCatalog.servicePlanVisibility.store.getPaginationService(
+      this.cfGuid,
+      createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid),
+      {}
+    ).entities$;
     this.serviceExtraInfo$ = this.service$.pipe(map(o => JSON.parse(o.entity.extra)));
     this.servicePlans$ = getServicePlans(this.service$, this.cfGuid);
-    this.serviceBrokers$ = this.getServiceBrokers();
+    this.serviceBrokers$ = cfEntityCatalog.serviceBroker.store.getPaginationService(
+      this.cfGuid,
+      createEntityRelationPaginationKey(serviceBrokerEntityType, this.cfGuid),
+      {}
+    ).entities$;
     this.serviceBroker$ = this.serviceBrokers$.pipe(
       filter(p => !!p && p.length > 0),
       combineLatest(this.service$),
@@ -185,7 +161,10 @@ export class ServicesService {
         }
       })
     );
-    this.allServiceInstances$ = this.getServiceInstances();
+    this.allServiceInstances$ = cfEntityCatalog.serviceInstance.store.getPaginationService(
+      this.cfGuid,
+      createEntityRelationPaginationKey(serviceInstancesEntityType, this.cfGuid)
+    ).entities$;
     this.serviceInstances$ = this.allServiceInstances$.pipe(
       map(instances => instances.filter(instance => instance.entity.service_guid === this.serviceGuid))
     );

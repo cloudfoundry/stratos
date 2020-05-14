@@ -5,10 +5,7 @@ import { filter, first, map, switchMap } from 'rxjs/operators';
 import { cfEntityCatalog } from '../../../../../../../../cloud-foundry/src/cf-entity-catalog';
 import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/src/cf-types';
-import {
-  getCfService,
-  getServiceName,
-} from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
+import { getServiceName } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
@@ -38,9 +35,10 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
       this.entityKey === entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
 
     if (!this.isUserProvidedServiceInstance) {
-      const service$ = getCfService(this.row.entity.service_guid, this.row.entity.cfGuid).waitForEntity$.pipe(
-        filter(s => !!s),
-      );
+      const service$ = cfEntityCatalog.service.store.getEntityService(this.row.entity.service_guid, this.row.entity.cfGuid, {})
+        .waitForEntity$.pipe(
+          filter(s => !!s),
+        );
 
       this.serviceName$ = service$.pipe(
         map(s => getServiceName(s.entity))
