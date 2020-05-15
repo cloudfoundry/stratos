@@ -9,7 +9,6 @@ import { IServicePlan } from '../../../../../../core/src/core/cf-api-svc.types';
 import { IApp } from '../../../../../../core/src/core/cf-api.types';
 import { pathGet, safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 
@@ -37,7 +36,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
   constructor(
     private store: Store<CFAppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.stepperForm = new FormGroup({
       apps: new FormControl(''),

@@ -149,7 +149,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
 
   private listActionEdit: IListAction<APIResource> = {
     action: (item: APIResource<IServiceInstance>) =>
-      this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid, {
+      this.serviceActionHelperService.startEditServiceBindingStepper(item.metadata.guid, item.entity.cfGuid, {
         [CANCEL_SPACE_ID_PARAM]: item.entity.space_guid,
         [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid
       }),

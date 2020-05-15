@@ -6,15 +6,13 @@ import {
   ApplicationStateService,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   generateTestApplicationServiceProvider,
 } from '../../../../../../../../core/test-framework/application-service-helper';
-import {
-  generateCfBaseTestModules,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   ApplicationEnvVarsHelper,
 } from '../../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -55,7 +53,7 @@ describe('AppServiceBindingCardComponent', () => {
     component.row = {
       entity: {
         app_guid: '',
-        service_instance_guid: '',
+        service_instance_guid: 'service_instance_guid',
         credentials: {},
         binding_options: {},
         gateway_name: '',

@@ -46,6 +46,17 @@ export class GitLabSCM implements GitSCM {
     );
   }
 
+  getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
+    const prjNameEncoded = encodeURIComponent(projectName);
+    return httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches/${branchName}`).pipe(
+      map((data: any) => {
+        const nb = { ...data };
+        nb.commit.sha = nb.commit.id;
+        return nb;
+      })
+    );
+  }
+
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
     const prjNameEncoded = encodeURIComponent(projectName);
     return httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches`).pipe(

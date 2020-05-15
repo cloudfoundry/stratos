@@ -62,6 +62,7 @@ export class GetSpace extends CFStartAction implements ICFAction, EntityInlinePa
     GET_SPACE_FAILED
   ];
   entity = [cfEntityFactory(spaceEntityType)];
+  schemaKey = ''; // Required by builder
   entityType = spaceEntityType;
   options: HttpRequest<any>;
 }

@@ -7,7 +7,7 @@ import { filter, map, first, pairwise, startWith } from 'rxjs/operators';
 import { EndpointModel } from './../../../../../../store/src/types/endpoint.types';
 import { UpdateEndpoint } from './../../../../../../store/src/actions/endpoint.actions';
 import { IStratosEndpointDefinition, EntityCatalogSchemas } from './../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { entityCatalog } from './../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { endpointEntitiesSelector } from './../../../../../../store/src/selectors/endpoint.selectors';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';

@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
 import { SendEventAction } from '../../actions/internal-events.actions';
-import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { InternalEventSeverity } from '../../types/internal-events.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';

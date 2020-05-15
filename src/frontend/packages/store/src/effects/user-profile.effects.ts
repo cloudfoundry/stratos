@@ -14,7 +14,7 @@ import {
   UpdateUserPasswordAction,
   UpdateUserProfileAction,
 } from '../actions/user-profile.actions';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { UserProfileInfo } from '../types/user-profile.types';
 import { DispatchOnlyAppState } from './../app-state';

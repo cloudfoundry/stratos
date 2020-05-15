@@ -1,4 +1,7 @@
-import { StratosCatalogEndpointEntity, StratosCatalogEntity } from '../../store/src/entity-catalog/entity-catalog-entity';
+import {
+  StratosCatalogEndpointEntity,
+  StratosCatalogEntity,
+} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
   addOrUpdateUserFavoriteMetadataReducer,
   deleteUserFavoriteMetadataReducer,

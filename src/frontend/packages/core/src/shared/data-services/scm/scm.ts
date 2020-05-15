@@ -15,6 +15,7 @@ export interface GitSCM {
   getLabel(): string;
   getIcon(): SCMIcon;
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo>;
+  getBranch(httpClient: HttpClient, projectName: string, branchId: string): Observable<GitBranch>;
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]>;
   getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit>;
   getCommits(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit[]>;

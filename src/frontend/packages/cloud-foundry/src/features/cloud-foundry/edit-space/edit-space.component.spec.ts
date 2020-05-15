@@ -1,5 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModules,
@@ -18,7 +21,13 @@ describe('EditSpaceComponent', () => {
     TestBed.configureTestingModule({
       declarations: [EditSpaceComponent, EditSpaceStepComponent],
       imports: generateCfBaseTestModules(),
-      providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider(), TabNavService, CloudFoundryOrganizationService]
+      providers: [
+        ActiveRouteCfOrgSpace,
+        generateTestCfEndpointServiceProvider(),
+        TabNavService,
+        CloudFoundryOrganizationService,
+        CloudFoundryUserProvidedServicesService
+      ]
     })
       .compileComponents();
   }));

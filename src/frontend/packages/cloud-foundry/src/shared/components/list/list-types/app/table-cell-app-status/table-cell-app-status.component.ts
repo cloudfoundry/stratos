@@ -45,7 +45,6 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
   ngOnInit() {
     const applicationState = this.appStateService.get(this.row.entity, null);
     this.fetchAppState$ = ApplicationService.getApplicationState(
-      this.store,
       this.appStateService,
       this.row.entity,
       this.row.metadata.guid,

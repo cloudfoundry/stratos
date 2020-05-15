@@ -5,7 +5,7 @@ import { IOrganization } from '../../../core/src/core/cf-api.types';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEntity,
-} from '../../../store/src/entity-catalog/entity-catalog-entity';
+} from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEndpointDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';

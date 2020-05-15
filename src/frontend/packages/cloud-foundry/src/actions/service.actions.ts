@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { serviceEntityType, servicePlanEntityType } from '../cf-entity-types';

@@ -3,7 +3,27 @@ import { GetAllServices, GetService } from '../actions/service.actions';
 import { GetAllServicesForSpace } from '../actions/space.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
-export const serviceActionBuilders = {
+export interface ServiceActionBuilders extends OrchestratedActionBuilders {
+  get: (
+    guid,
+    endpointGuid,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+  ) => GetService;
+  getMultiple: (
+    endpointGuid,
+    paginationKey,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+  ) => GetAllServices;
+  getAllInSpace: (
+    endpointGuid: string,
+    paginationKey: string,
+    spaceGuid: string,
+    includeRelations?: string[],
+    populateMissing?: boolean,
+  ) => GetAllServicesForSpace;
+}
+
+export const serviceActionBuilders: ServiceActionBuilders = {
   get: (
     guid,
     endpointGuid,
@@ -26,4 +46,4 @@ export const serviceActionBuilders = {
     includeRelations?: string[],
     populateMissing?: boolean,
   ) => new GetAllServicesForSpace(paginationKey, endpointGuid, spaceGuid, includeRelations, populateMissing)
-} as OrchestratedActionBuilders;
+};
