@@ -2,7 +2,10 @@ import { cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
 import { metricEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { IOrgFavMetadata } from '../../../cloud-foundry/src/cf-metadata-types';
 import { IOrganization } from '../../../core/src/core/cf-api.types';
-import { StratosBaseCatalogEntity, StratosCatalogEntity } from '../../../store/src/entity-catalog/entity-catalog-entity';
+import {
+  StratosBaseCatalogEntity,
+  StratosCatalogEntity,
+} from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEndpointDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';

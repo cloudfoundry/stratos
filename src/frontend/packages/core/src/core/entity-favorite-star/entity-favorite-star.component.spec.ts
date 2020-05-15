@@ -2,12 +2,12 @@ import { OverlayContainer } from '@angular/cdk/overlay';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BehaviorSubject, of } from 'rxjs';
 
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
 import { BaseTestModulesNoShared } from '../../../test-framework/core-test.helper';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { DialogConfirmComponent } from '../../shared/components/dialog-confirm/dialog-confirm.component';
 import { FavoritesConfigMapper } from '../../shared/components/favorites-meta-card/favorite-config-mapper';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { UserFavoriteManager } from '../user-favorite-manager';
 import { EntityFavoriteStarComponent } from './entity-favorite-star.component';
 
@@ -35,7 +35,7 @@ describe('EntityFavoriteStarComponent', () => {
       declarations: [
         DialogConfirmComponent
       ],
-      imports: [...BaseTestModulesNoShared, ],
+      imports: [...BaseTestModulesNoShared,],
     })
       .compileComponents();
   }));

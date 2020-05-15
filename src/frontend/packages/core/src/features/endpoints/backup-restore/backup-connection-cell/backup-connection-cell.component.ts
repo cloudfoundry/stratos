@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { EndpointModel, SystemSharedUserGuid } from '../../../../../../store/src/types/endpoint.types';
 import { TableCellCustom } from '../../../../shared/components/list/list.types';
 import { BackupEndpointsService } from '../backup-endpoints.service';

@@ -19,7 +19,7 @@ import {
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';

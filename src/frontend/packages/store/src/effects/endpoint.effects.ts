@@ -1,4 +1,3 @@
-import { UpdateEndpoint, UPDATE_ENDPOINT, UPDATE_ENDPOINT_SUCCESS, UPDATE_ENDPOINT_FAILED } from './../actions/endpoint.actions';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
@@ -35,7 +34,7 @@ import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 import { DispatchOnlyAppState } from '../app-state';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
@@ -46,6 +45,12 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
+import {
+  UPDATE_ENDPOINT,
+  UPDATE_ENDPOINT_FAILED,
+  UPDATE_ENDPOINT_SUCCESS,
+  UpdateEndpoint,
+} from './../actions/endpoint.actions';
 import { PaginatedAction } from './../types/pagination.types';
 
 
@@ -236,36 +241,36 @@ export class EndpointsEffect {
       );
     }));
 
-    @Effect() updateEndpoint$ = this.actions$.pipe(
-      ofType<UpdateEndpoint>(UPDATE_ENDPOINT),
-      mergeMap(action => {
-        const apiAction = this.getEndpointUpdateAction(action.id, action.type, EndpointsEffect.updatingKey);
-        const paramsObj = {
-          name: action.name,
-          skipSSL: action.skipSSL,
-          setClientInfo: action.setClientInfo,
-          clientID: action.clientID,
-          clientSecret: action.clientSecret,
-          allowSSO: action.allowSSO,
-        };
+  @Effect() updateEndpoint$ = this.actions$.pipe(
+    ofType<UpdateEndpoint>(UPDATE_ENDPOINT),
+    mergeMap(action => {
+      const apiAction = this.getEndpointUpdateAction(action.id, action.type, EndpointsEffect.updatingKey);
+      const paramsObj = {
+        name: action.name,
+        skipSSL: action.skipSSL,
+        setClientInfo: action.setClientInfo,
+        clientID: action.clientID,
+        clientSecret: action.clientSecret,
+        allowSSO: action.allowSSO,
+      };
 
-        // Encode auth values in the body, not the query string
-        const body: any = new FormData();
-        Object.keys(paramsObj).forEach(key => {
-          body.set(key, paramsObj[key]);
-        });
+      // Encode auth values in the body, not the query string
+      const body: any = new FormData();
+      Object.keys(paramsObj).forEach(key => {
+        body.set(key, paramsObj[key]);
+      });
 
-        return this.doEndpointAction(
-          apiAction,
-          '/pp/v1/endpoint/' + action.id,
-          new HttpParams({}),
-          'update',
-          [UPDATE_ENDPOINT_SUCCESS, UPDATE_ENDPOINT_FAILED],
-          action.endpointType,
-          body,
-          this.processUpdateError
-        );
-      }));
+      return this.doEndpointAction(
+        apiAction,
+        '/pp/v1/endpoint/' + action.id,
+        new HttpParams({}),
+        'update',
+        [UPDATE_ENDPOINT_SUCCESS, UPDATE_ENDPOINT_FAILED],
+        action.endpointType,
+        body,
+        this.processUpdateError
+      );
+    }));
 
   private processUpdateError(e: HttpErrorResponse): string {
     const err = e.error ? e.error.error : {};

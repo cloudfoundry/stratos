@@ -9,7 +9,7 @@ import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-ap
 import { environment } from '../../../core/src/environments/environment';
 import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import {
   resultPerPageParam,

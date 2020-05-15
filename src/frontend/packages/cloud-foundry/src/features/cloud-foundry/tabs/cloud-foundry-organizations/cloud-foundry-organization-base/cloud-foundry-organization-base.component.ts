@@ -18,6 +18,9 @@ import {
   FavoritesConfigMapper,
 } from '../../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
@@ -34,7 +37,8 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
     CloudFoundryEndpointService,
-    CloudFoundryOrganizationService
+    CloudFoundryOrganizationService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class CloudFoundryOrganizationBaseComponent {

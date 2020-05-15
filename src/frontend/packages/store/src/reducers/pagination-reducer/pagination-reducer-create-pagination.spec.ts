@@ -1,4 +1,4 @@
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { CreatePagination } from '../../actions/pagination.actions';
 import { PaginationState } from '../../types/pagination.types';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';

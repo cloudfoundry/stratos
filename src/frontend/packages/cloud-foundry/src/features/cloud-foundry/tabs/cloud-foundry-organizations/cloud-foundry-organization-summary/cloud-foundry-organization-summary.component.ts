@@ -8,7 +8,7 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { entityCatalog } from '../../../../../../../store/src//entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { selectDeletionInfo } from '../../../../../../../store/src/selectors/api.selectors';
 import { organizationEntityType } from '../../../../../cf-entity-types';

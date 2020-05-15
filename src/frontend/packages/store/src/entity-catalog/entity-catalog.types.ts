@@ -2,7 +2,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { EndpointAuthTypeConfig } from '../../../core/src/core/extension/extension-types';
-import { Omit } from '../../../core/src/core/utils.service';
 import { StratosStatus } from '../../../core/src/shared/shared.types';
 import { GeneralEntityAppState } from '../app-state';
 import {

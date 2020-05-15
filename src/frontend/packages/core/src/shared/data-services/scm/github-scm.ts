@@ -32,6 +32,10 @@ export class GitHubSCM implements GitSCM {
     return httpClient.get(`${this.gitHubURL}/repos/${projectName}`) as Observable<GitRepo>;
   }
 
+  getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
+    return httpClient.get(`${this.gitHubURL}/repos/${projectName}/branches/${branchName}`) as Observable<GitBranch>;
+  }
+
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
     return httpClient.get(`${this.gitHubURL}/repos/${projectName}/branches`) as Observable<GitBranch[]>;
   }
@@ -44,8 +48,8 @@ export class GitHubSCM implements GitSCM {
     return `${this.gitHubURL}/repos/${projectName}/commits/${commitSha}`;
   }
 
-  getCommits(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit[]> {
-    return httpClient.get(`${this.gitHubURL}/repos/${projectName}/commits?sha=${commitSha}`) as Observable<GitCommit[]>;
+  getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]> {
+    return httpClient.get(`${this.gitHubURL}/repos/${projectName}/commits?sha=${ref}`) as Observable<GitCommit[]>;
   }
 
   getCloneURL(projectName: string): string {

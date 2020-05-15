@@ -41,7 +41,6 @@ export class CompactAppCardComponent implements OnInit {
     this.bcType = this.setBreadcrumbType(this.activeRouteCfOrgSpace);
     const initState = this.appStateService.get(this.app.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
-      this.store,
       this.appStateService,
       this.app.entity,
       this.app.metadata.guid,

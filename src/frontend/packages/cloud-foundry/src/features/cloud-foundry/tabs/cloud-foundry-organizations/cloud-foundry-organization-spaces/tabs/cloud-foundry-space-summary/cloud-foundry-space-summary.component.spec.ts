@@ -1,5 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { TabNavService } from '../../../../../../../../../core/tab-nav.service';
 import {
   CloudFoundrySpaceServiceMock,
@@ -37,7 +40,8 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         CloudFoundryOrganizationService,
         TabNavService,
-        CfUserService
+        CfUserService,
+        CloudFoundryUserProvidedServicesService
       ]
     })
       .compileComponents();

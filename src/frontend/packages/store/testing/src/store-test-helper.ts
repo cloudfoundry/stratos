@@ -4,7 +4,7 @@ import { Store, StoreModule } from '@ngrx/store';
 
 import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
 import { AppState } from '../../src/app-state';
-import { entityCatalog } from '../../src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../src/entity-catalog/entity-catalog.types';
 import { appReducers } from '../../src/reducers.module';
 import { getDefaultRequestState } from '../../src/reducers/api-request-reducer/types';
