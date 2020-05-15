@@ -4,7 +4,7 @@ import { EntityService } from '../../entity-service';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { PaginationMonitor } from '../../monitors/pagination-monitor';
-import { ListActionState, RequestInfoState } from '../../reducers/api-request-reducer/types';
+import { ActionState, ListActionState, RequestInfoState } from '../../reducers/api-request-reducer/types';
 import { PaginationObservables } from '../../reducers/pagination-reducer/pagination-reducer.types';
 import { isPaginatedAction, PaginatedAction } from '../../types/pagination.types';
 import { EntityRequestAction, RequestAction } from '../../types/request.types';
@@ -21,9 +21,10 @@ import {
   EntityCatalogEntityStore,
 } from './entity-catalog-entity.types';
 
-type ActionDispatcher<K extends keyof ABC, ABC extends OrchestratedActionBuilders> = <T extends RequestInfoState | ListActionState>(
-  ...args: Parameters<ABC[K]>
-) => Observable<T>;
+type ActionDispatcher<K extends keyof ABC, ABC extends OrchestratedActionBuilders> =
+  <T extends RequestInfoState | ActionState | ListActionState>(
+    ...args: Parameters<ABC[K]>
+  ) => Observable<T>;
 
 export type ActionDispatchers<ABC extends OrchestratedActionBuilders> = {
   [K in keyof ABC]: ActionDispatcher<K, ABC>
@@ -102,7 +103,7 @@ export class EntityCatalogEntityStoreHelpers {
     builder: OrchestratedActionBuilder,
     actionKey: string,
   ): ActionDispatcher<K, ABC> {
-    return <T extends RequestInfoState | ListActionState>(
+    return <T extends RequestInfoState | ActionState | ListActionState>(
       ...args: Parameters<ABC[K]>): Observable<T> => {
       const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
 
@@ -120,14 +121,16 @@ export class EntityCatalogEntityStoreHelpers {
       if (!rAction.guid) {
         throw new Error(`\`${actionKey}\` action for entity \`${rAction.entityType}\` has no guid`);
       }
-
-      return es.getEntityMonitor(
+      const entityMonitor = es.getEntityMonitor(
         rAction.guid,
         {
           schemaKey,
           startWithNull: false
         }
-      ).entityRequest$ as unknown as Observable<T>;
+      );
+      return rAction.updatingKey ?
+        entityMonitor.getUpdatingSection(rAction.updatingKey) as Observable<T> :
+        entityMonitor.entityRequest$ as Observable<T>;
     };
   }
 

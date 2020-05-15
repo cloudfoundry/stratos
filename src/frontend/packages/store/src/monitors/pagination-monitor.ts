@@ -239,6 +239,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       distinctUntilChanged(),
       // Improve efficiency
       observeOn(asapScheduler),
+      filter(pagination => this.hasPage(pagination) && !LocalPaginationHelpers.isPaginationMaxed(pagination)),
       combineLatestOperator(entityObservable$),
       withLatestFrom(allEntitiesObservable$),
       map(([[pagination], allEntities]) => {

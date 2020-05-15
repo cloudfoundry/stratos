@@ -48,10 +48,10 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
     transformEntities?: any[],
     paginationKey = CfAppsDataSource.paginationKey,
     seedPaginationKey = CfAppsDataSource.paginationKey,
-    startingCfGuidFilter?: string
+    cfGuid?: string
   ) {
     const syncNeeded = paginationKey !== seedPaginationKey;
-    const action = cfEntityCatalog.application.actions.getMultiple(undefined, CfAppsDataSource.paginationKey, {
+    const action = cfEntityCatalog.application.actions.getMultiple(cfGuid, CfAppsDataSource.paginationKey, {
       includeRelations: CfAppsDataSource.includeRelations,
     });
 

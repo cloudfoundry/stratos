@@ -26,7 +26,6 @@ import { serviceBindingEntityType } from '../../../../../../cf-entity-types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { isUserProvidedServiceInstance } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
-  getCfService,
   getServiceBrokerName,
   getServiceName,
   getServicePlanName,
@@ -124,7 +123,8 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     ).waitForEntity$;
     this.serviceInstance$ = serviceInstance$;
     this.service$ = serviceInstance$.pipe(
-      switchMap(o => getCfService(o.entity.entity.service_guid, this.appService.cfGuid).waitForEntity$),
+      switchMap(o => cfEntityCatalog.service.store.getEntityService(o.entity.entity.service_guid, this.appService.cfGuid, {})
+        .waitForEntity$),
       filter(service => !!service)
     );
     this.listData = [{
@@ -236,7 +236,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     );
   }
 
-  private edit = () => this.serviceActionHelperService.editServiceBinding(
+  private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.row.entity.service_instance_guid,
     this.appService.cfGuid,
     { appId: this.appService.appGuid },

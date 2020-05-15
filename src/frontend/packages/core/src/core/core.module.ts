@@ -84,6 +84,7 @@ import { WindowRef } from './window-ref/window-ref.service';
     EntityCatalogHelper,
     PaginationMonitorFactory,
     UserProfileService,
+    EntityServiceFactory,
     CurrentUserPermissionsService,
     {
       provide: APP_TITLE,

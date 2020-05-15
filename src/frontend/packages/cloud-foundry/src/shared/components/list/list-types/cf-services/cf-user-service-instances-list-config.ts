@@ -144,7 +144,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
 
   private listActionEdit: IListAction<APIResource> = {
     action: (item: APIResource<IUserProvidedServiceInstance>) =>
-      this.serviceActionHelperService.editServiceBinding(
+      this.serviceActionHelperService.startEditServiceBindingStepper(
         item.metadata.guid,
         item.entity.cfGuid,
         {

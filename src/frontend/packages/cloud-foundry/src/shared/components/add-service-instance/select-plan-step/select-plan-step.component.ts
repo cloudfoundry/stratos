@@ -119,7 +119,7 @@ export class SelectPlanStepComponent implements OnDestroy {
         tap(selectedServicePlan => {
           getServicePlanAccessibilityCardStatus(
             selectedServicePlan,
-            this.cSIHelperService.getServicePlanVisibilities(),
+            this.cSIHelperService.servicePlanVisibilities$,
             this.cSIHelperService.serviceBroker$).pipe(
               first()
             ).subscribe(cardStatus => this.selectedPlanAccessibility$.next(cardStatus));

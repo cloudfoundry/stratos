@@ -5,10 +5,9 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
-import { AssociateSpaceQuota } from '../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -95,36 +94,31 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
           return of({ success: true, redirect: true });
         }
 
-        return this.updateSpaceQuota$();
+        return this.updateSpaceQuota();
       }),
     );
   }
 
   updateSpace() {
-    const action = cfEntityCatalog.space.actions.update(this.spaceGuid, this.cfGuid, {
+    return cfEntityCatalog.space.api.update<ActionState>(this.spaceGuid, this.cfGuid, {
       name: this.editSpaceForm.value.spaceName,
       allow_ssh: this.editSpaceForm.value.toggleSsh as boolean,
-    })
-    this.store.dispatch(action);
-    return cfEntityCatalog.space.store.getEntityMonitor(this.spaceGuid).getUpdatingSection(action.updatingKey).pipe(
+    }).pipe(
       pairwise(),
       filter(([oldS, newS]) => oldS.busy && !newS.busy),
       map(([, newS]) => newS),
     );
   }
 
-  updateSpaceQuota$() {
+  updateSpaceQuota() {
     const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
     const mon = spaceQuotaGuid ?
-      cfEntityCatalog.spaceQuota.api.associateWithSpace<RequestInfoState>(this.spaceGuid, this.cfGuid, spaceQuotaGuid) :
-      cfEntityCatalog.spaceQuota.api.disassociateFromSpace<RequestInfoState>(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid)
+      cfEntityCatalog.spaceQuota.api.associateWithSpace<ActionState>(this.spaceGuid, this.cfGuid, spaceQuotaGuid) :
+      cfEntityCatalog.spaceQuota.api.disassociateFromSpace<ActionState>(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid)
     return mon.pipe(
-      filter(o => {
-        return !!o &&
-          o.updating[AssociateSpaceQuota.UpdateExistingSpaceQuota] &&
-          !o.updating[AssociateSpaceQuota.UpdateExistingSpaceQuota].busy;
-      }),
-      map((state) => state.updating[AssociateSpaceQuota.UpdateExistingSpaceQuota]),
+      pairwise(),
+      filter(([oldS, newS]) => oldS.busy && !newS.busy),
+      map(([, newS]) => newS),
       map(stateAction => ({
         success: !stateAction.error,
         redirect: !stateAction.error,

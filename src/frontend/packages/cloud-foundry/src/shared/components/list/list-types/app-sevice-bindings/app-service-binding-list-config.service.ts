@@ -55,7 +55,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
 
   private listActionEdit: IListAction<APIResource<IServiceBinding>> = {
     action: (item) => {
-      this.serviceActionHelperService.editServiceBinding(
+      this.serviceActionHelperService.startEditServiceBindingStepper(
         item.entity.service_instance_guid,
         this.appService.cfGuid,
         { appId: this.appService.appGuid },

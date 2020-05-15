@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { combineLatest, filter, first, map, pairwise, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { AppMetadataTypes } from '../../../../cloud-foundry/src/actions/app-metadata.actions';
 import {
@@ -25,19 +25,16 @@ import {
   ApplicationStateService,
 } from '../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID } from '../../../../core/src/shared/entity.tokens';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../../store/src/entity-service';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
   getCurrentPageRequestInfo,
   PaginationObservables,
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
 import { AppStat } from '../../store/types/app-metadata.types';
 import {
@@ -50,13 +47,13 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
     guid,
     endpointGuid, [
-    createEntityRelationKey(applicationEntityType, routeEntityType),
-    createEntityRelationKey(applicationEntityType, spaceEntityType),
-    createEntityRelationKey(applicationEntityType, stackEntityType),
-    createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
-    createEntityRelationKey(routeEntityType, domainEntityType),
-    createEntityRelationKey(spaceEntityType, organizationEntityType),
-  ]
+      createEntityRelationKey(applicationEntityType, routeEntityType),
+      createEntityRelationKey(applicationEntityType, spaceEntityType),
+      createEntityRelationKey(applicationEntityType, stackEntityType),
+      createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
+      createEntityRelationKey(routeEntityType, domainEntityType),
+      createEntityRelationKey(spaceEntityType, organizationEntityType),
+    ]
   );
 }
 
@@ -289,21 +286,18 @@ export class ApplicationService {
     updatedApplication: UpdateApplication,
     updateEntities?: AppMetadataTypes[],
     existingApplication?: IApp): Observable<ActionState> {
-    this.store.dispatch(new UpdateExistingApplication(
+    return cfEntityCatalog.application.api.update<ActionState>(
       this.appGuid,
       this.cfGuid,
       { ...updatedApplication },
       existingApplication,
       updateEntities
-    ));
-
-    // Create an Observable that can be used to determine when the update completed
-    const actionState = selectUpdateInfo(
-      entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, applicationEntityType),
-      this.appGuid,
-      UpdateExistingApplication.updateKey
+    ).pipe(
+      pairwise(),
+      filter(([oldS, newS]) => oldS.busy && !newS.busy),
+      map(([, newS]) => newS),
+      first()
     );
-    return this.store.select(actionState).pipe(filter(item => !item.busy), first());
   }
 }
 

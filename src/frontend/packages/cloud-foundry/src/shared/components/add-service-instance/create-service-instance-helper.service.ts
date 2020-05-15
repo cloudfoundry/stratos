@@ -22,12 +22,7 @@ import { getPaginationObservables } from '../../../../../store/src/reducers/pagi
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../cf-entity-factory';
-import {
-  getCfService,
-  getServiceBroker,
-  getServiceName,
-  getServicePlans,
-} from '../../../features/service-catalog/services-helper';
+import { getServiceName, getServicePlans } from '../../../features/service-catalog/services-helper';
 import { QParam, QParamJoiners } from '../../q-param';
 
 export class CreateServiceInstanceHelper {
@@ -48,7 +43,7 @@ export class CreateServiceInstanceHelper {
 
   initBaseObservables = () => {
 
-    this.service$ = getCfService(this.serviceGuid, this.cfGuid).waitForEntity$.pipe(
+    this.service$ = cfEntityCatalog.service.store.getEntityService(this.serviceGuid, this.cfGuid, {}).waitForEntity$.pipe(
       filter(o => !!o && !!o.entity && !!o.entity.entity && !!o.entity.entity.service_plans),
       // filter(o => !!o && !!o.entity),
       map(o => o.entity),
@@ -57,7 +52,7 @@ export class CreateServiceInstanceHelper {
     );
 
     this.serviceBroker$ = this.service$.pipe(
-      map(service => getServiceBroker(service.entity.service_broker_guid, this.cfGuid)),
+      map(service => cfEntityCatalog.serviceBroker.store.getEntityService(service.entity.service_broker_guid, this.cfGuid, {})),
       switchMap(serviceService => serviceService.waitForEntity$),
       map(entity => entity.entity)
     );

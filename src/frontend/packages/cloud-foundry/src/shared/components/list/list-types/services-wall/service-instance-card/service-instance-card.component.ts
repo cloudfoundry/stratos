@@ -110,7 +110,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   cfOrgSpace: CfOrgSpaceLabelService;
   serviceBrokerName$: Observable<string>;
 
-  detach = () => {
+  private detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
       this.serviceInstanceEntity.entity.service_bindings,
       this.serviceInstanceEntity.metadata.guid,
@@ -119,13 +119,13 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     );
   }
 
-  delete = () => this.serviceActionHelperService.deleteServiceInstance(
+  private delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.name,
     this.serviceInstanceEntity.entity.cfGuid
   )
 
-  edit = () => this.serviceActionHelperService.editServiceBinding(
+  private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.cfGuid,
     null
