@@ -9,14 +9,14 @@ import { CurrentUserPermissionsChecker } from '../../../../../core/src/core/curr
 import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { getFullEndpointApiUrl } from '../../../../../core/src/features/endpoints/endpoint-helpers';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
 import { IOrganization, ISpace } from '../../../cf-api.types';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';

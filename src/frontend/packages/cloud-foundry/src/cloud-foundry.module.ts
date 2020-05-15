@@ -2,9 +2,6 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
 import { MDAppModule } from '../../core/src/core/md.module';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { SharedModule } from '../../core/src/shared/shared.module';
 import { CfValidateEntitiesStart } from '../../store/src/actions/request.actions';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
@@ -23,6 +20,7 @@ import { CfUserService } from './shared/data-services/cf-user.service';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
+import { CloudFoundryUserProvidedServicesService } from './shared/services/cloud-foundry-user-provided-services.service';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
 
 function shouldValidate(action: ICFAction, isValidated: boolean, entityInfo: RequestInfoState) {
