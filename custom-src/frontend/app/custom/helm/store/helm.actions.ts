@@ -1,6 +1,4 @@
 import { EntityRequestAction } from '../../../../../store/src/types/request.types';
-import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
-import { helmReleaseEntityKey } from '../../kubernetes/workloads/store/workloads-entity-factory';
 import {
   HELM_ENDPOINT_TYPE,
   helmEntityFactory,
@@ -8,7 +6,6 @@ import {
   monocularChartsEntityType,
 } from '../helm-entity-factory';
 import { PaginatedAction } from './../../../../../store/src/types/pagination.types';
-import { HelmInstallValues } from './helm.types';
 
 export const GET_MONOCULAR_CHARTS = '[Monocular] Get Charts';
 export const GET_MONOCULAR_CHARTS_SUCCESS = '[Monocular] Get Charts Success';
@@ -17,10 +14,6 @@ export const GET_MONOCULAR_CHARTS_FAILURE = '[Monocular] Get Charts Failure';
 export const GET_HELM_VERSIONS = '[Helm] Get Versions';
 export const GET_HELM_VERSIONS_SUCCESS = '[Helm] Get Versions Success';
 export const GET_HELM_VERSIONS_FAILURE = '[Helm] Get Versions Failure';
-
-export const HELM_INSTALL = '[Helm] Install';
-export const HELM_INSTALL_SUCCESS = '[Helm] Install Success';
-export const HELM_INSTALL_FAILURE = '[Helm] Install Failure';
 
 export interface MonocularPaginationAction extends PaginatedAction, EntityRequestAction { }
 
@@ -42,6 +35,7 @@ export class GetMonocularCharts implements MonocularPaginationAction {
     'order-direction': 'desc',
     'order-direction-field': 'name',
   };
+  flattenPagination = true;
 }
 
 
@@ -63,15 +57,5 @@ export class GetHelmVersions implements MonocularPaginationAction {
     'order-direction': 'asc',
     'order-direction-field': 'version',
   };
+  flattenPagination = true;
 }
-
-export class HelmInstall implements EntityRequestAction {
-  type = HELM_INSTALL;
-  endpointType = KUBERNETES_ENDPOINT_TYPE;
-  entityType = helmReleaseEntityKey;
-  guid: string;
-  constructor(public values: HelmInstallValues) {
-    this.guid = '<New Release>' + this.values.releaseName;
-  }
-}
-

@@ -18,7 +18,7 @@ import { StepOnNextFunction, StepOnNextResult } from '../../../shared/components
 import { kubeEntityCatalog } from '../../kubernetes/kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
 import { KubernetesNamespace } from '../../kubernetes/store/kube.types';
-import { HelmInstall } from '../store/helm.actions';
+import { workloadsEntityCatalog } from '../../kubernetes/workloads/workloads-entity-catalog';
 import { HelmInstallValues } from '../store/helm.types';
 
 
@@ -263,17 +263,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     };
 
     // Make the request
-    const action = new HelmInstall(values);
-    this.store.dispatch(action);
-
-    // const releaseEntityConfig = entityCatalog.getEntity(action);
-
-    return this.emf.create(
-      action.guid,
-      action
-    ).entityRequest$.pipe(
+    return workloadsEntityCatalog.release.api.install<RequestInfoState>(values).pipe(
       // Wait for result of request
-      // return releaseEntityConfig.getEntityMonitor(this.store, action.guid).entityRequest$.pipe(
       filter(state => !!state),
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.creating && !newVal.creating)),

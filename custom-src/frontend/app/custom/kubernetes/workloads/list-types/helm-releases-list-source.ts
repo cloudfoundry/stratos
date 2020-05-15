@@ -10,8 +10,6 @@ import { IListConfig } from 'frontend/packages/core/src/shared/components/list/l
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { PaginationEntityState } from 'frontend/packages/store/src/types/pagination.types';
 
-import { kubernetesEntityFactory } from '../../kubernetes-entity-factory';
-import { helmReleaseEntityKey } from '../store/workloads-entity-factory';
 import { HelmRelease } from '../workload.types';
 import { workloadsEntityCatalog } from '../workloads-entity-catalog';
 
@@ -33,12 +31,13 @@ export class HelmReleasesDataSource extends ListDataSource<HelmRelease> {
     store: Store<AppState>,
     listConfig: IListConfig<HelmRelease>
   ) {
+
     const action = workloadsEntityCatalog.release.actions.getMultiple();
     const transformEntities = [{ type: 'filter' as DataFunctionDefinitionType, field: 'name' }, kubeEndpointFilter];
     super({
       store,
       action,
-      schema: kubernetesEntityFactory(helmReleaseEntityKey),
+      schema: action.entity[0],
       getRowUniqueId: row => action.entity[0].getId(row),
       paginationKey: action.paginationKey,
       isLocal: true,

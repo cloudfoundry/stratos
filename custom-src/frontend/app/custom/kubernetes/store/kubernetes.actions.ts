@@ -281,6 +281,7 @@ export class GetKubernetesServicesInNamespace extends GetKubernetesServices {
     super(kubeGuid);
     this.paginationKey = getPaginationKey(kubernetesPodsEntityType, namespaceName, kubeGuid);
   }
+  type = GET_SERVICES_IN_NAMESPACE_INFO;
   actions = [
     GET_SERVICES_IN_NAMESPACE_INFO,
     GET_SERVICES_IN_NAMESPACE_INFO_SUCCESS,

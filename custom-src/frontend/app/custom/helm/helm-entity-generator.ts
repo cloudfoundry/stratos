@@ -5,12 +5,14 @@ import {
 } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
+import { helmEntityCatalog } from './helm-entity-catalog';
 import {
   HELM_ENDPOINT_TYPE,
   helmEntityFactory,
   helmVersionsEntityType,
   monocularChartsEntityType,
 } from './helm-entity-factory';
+import { HelmChartActionBuilders, HelmVersionActionBuilders } from './store/helm.action-builders';
 import { HelmVersion, MonocularChart } from './store/helm.types';
 
 
@@ -36,10 +38,11 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
 }
 
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  return new StratosCatalogEndpointEntity(
+  helmEntityCatalog.endpoint = new StratosCatalogEndpointEntity(
     endpointDefinition,
     metadata => `/monocular/repos/${metadata.guid}`,
   );
+  return helmEntityCatalog.endpoint;
 }
 
 function generateChartEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -48,7 +51,8 @@ function generateChartEntity(endpointDefinition: StratosEndpointExtensionDefinit
     schema: helmEntityFactory(monocularChartsEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, MonocularChart>(definition);
+  helmEntityCatalog.chart = new StratosCatalogEntity<IFavoriteMetadata, MonocularChart, HelmChartActionBuilders>(definition);
+  return helmEntityCatalog.chart;
 }
 
 function generateVersionEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -57,7 +61,8 @@ function generateVersionEntity(endpointDefinition: StratosEndpointExtensionDefin
     schema: helmEntityFactory(helmVersionsEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, HelmVersion>(definition);
+  helmEntityCatalog.version = new StratosCatalogEntity<IFavoriteMetadata, HelmVersion, HelmVersionActionBuilders>(definition);
+  return helmEntityCatalog.version;
 }
 
 
