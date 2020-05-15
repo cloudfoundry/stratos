@@ -57,19 +57,11 @@ export class ServicesService {
     this.cfGuid = getIdFromRoute(activatedRoute, 'endpointId');
     this.serviceGuid = getIdFromRoute(activatedRoute, 'serviceId');
 
-    if (!this.serviceGuid) {
-      return;
+    this.initServicesObservables();
+
+    if (this.serviceGuid) {
+      this.initServiceObservables();
     }
-
-    this.serviceEntityService = cfEntityCatalog.service.store.getEntityService(this.serviceGuid, this.cfGuid, {});
-    this.service$ = this.serviceEntityService.waitForEntity$.pipe(
-      filter(o => !!o && !!o.entity),
-      map(o => o.entity),
-      publishReplay(1),
-      refCount()
-    );
-
-    this.initBaseObservables();
   }
 
 
@@ -120,19 +112,19 @@ export class ServicesService {
     )
   )
 
-  private initBaseObservables() {
-    this.servicePlanVisibilities$ = cfEntityCatalog.servicePlanVisibility.store.getPaginationService(
-      this.cfGuid,
-      createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid),
-      {}
-    ).entities$;
+  /**
+   * Init observables specific to a service
+   */
+  private initServiceObservables() {
+    this.serviceEntityService = cfEntityCatalog.service.store.getEntityService(this.serviceGuid, this.cfGuid, {});
+    this.service$ = this.serviceEntityService.waitForEntity$.pipe(
+      filter(o => !!o && !!o.entity),
+      map(o => o.entity),
+      publishReplay(1),
+      refCount()
+    );
     this.serviceExtraInfo$ = this.service$.pipe(map(o => JSON.parse(o.entity.extra)));
     this.servicePlans$ = getServicePlans(this.service$, this.cfGuid);
-    this.serviceBrokers$ = cfEntityCatalog.serviceBroker.store.getPaginationService(
-      this.cfGuid,
-      createEntityRelationPaginationKey(serviceBrokerEntityType, this.cfGuid),
-      {}
-    ).entities$;
     this.serviceBroker$ = this.serviceBrokers$.pipe(
       filter(p => !!p && p.length > 0),
       combineLatest(this.service$),
@@ -161,12 +153,30 @@ export class ServicesService {
         }
       })
     );
+    this.serviceInstances$ = this.allServiceInstances$.pipe(
+      map(instances => instances.filter(instance => instance.entity.service_guid === this.serviceGuid))
+    );
+  }
+
+  /**
+   * Init observables of service related cf level types
+   */
+  private initServicesObservables() {
+    this.servicePlanVisibilities$ = cfEntityCatalog.servicePlanVisibility.store.getPaginationService(
+      this.cfGuid,
+      createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid),
+      {}
+    ).entities$;
+
+    this.serviceBrokers$ = cfEntityCatalog.serviceBroker.store.getPaginationService(
+      this.cfGuid,
+      createEntityRelationPaginationKey(serviceBrokerEntityType, this.cfGuid),
+      {}
+    ).entities$;
+
     this.allServiceInstances$ = cfEntityCatalog.serviceInstance.store.getPaginationService(
       this.cfGuid,
       createEntityRelationPaginationKey(serviceInstancesEntityType, this.cfGuid)
     ).entities$;
-    this.serviceInstances$ = this.allServiceInstances$.pipe(
-      map(instances => instances.filter(instance => instance.entity.service_guid === this.serviceGuid))
-    );
   }
 }
