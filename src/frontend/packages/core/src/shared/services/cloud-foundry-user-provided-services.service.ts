@@ -101,6 +101,10 @@ export class CloudFoundryUserProvidedServicesService {
     guid: string,
     data: Partial<IUserProvidedServiceInstanceData>,
   ): Observable<ActionState> {
-    return cfEntityCatalog.userProvidedService.api.update<ActionState>(guid, cfGuid, data);
+    return cfEntityCatalog.userProvidedService.api.update<ActionState>(guid, cfGuid, data).pipe(
+      pairwise(),
+      filter(([oldV, newV]) => oldV.busy && !newV.busy),
+      map(([, newV]) => newV),
+    );
   }
 }

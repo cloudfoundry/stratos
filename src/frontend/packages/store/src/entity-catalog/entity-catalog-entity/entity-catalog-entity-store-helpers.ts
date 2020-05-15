@@ -21,8 +21,10 @@ import {
   EntityCatalogEntityStore,
 } from './entity-catalog-entity.types';
 
+type ActionDispatcherReturnTypes = RequestInfoState | ActionState | ListActionState;
+
 type ActionDispatcher<K extends keyof ABC, ABC extends OrchestratedActionBuilders> =
-  <T extends RequestInfoState | ActionState | ListActionState>(
+  <T extends ActionDispatcherReturnTypes>(
     ...args: Parameters<ABC[K]>
   ) => Observable<T>;
 
@@ -103,8 +105,7 @@ export class EntityCatalogEntityStoreHelpers {
     builder: OrchestratedActionBuilder,
     actionKey: string,
   ): ActionDispatcher<K, ABC> {
-    return <T extends RequestInfoState | ActionState | ListActionState>(
-      ...args: Parameters<ABC[K]>): Observable<T> => {
+    return <T extends ActionDispatcherReturnTypes>(...args: Parameters<ABC[K]>): Observable<T> => {
       const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
 
       const action = builder(...args);
