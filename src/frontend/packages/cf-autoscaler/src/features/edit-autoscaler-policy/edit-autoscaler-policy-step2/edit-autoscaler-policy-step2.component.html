@@ -12,22 +12,20 @@
           </mat-card-header>
           <mat-card-content class="autoscaler-policy-edit-trigger-item">
             <div *ngIf="editIndex!=index" class="autoscaler-policy-edit-trigger-item-desc">
-              If average {{rule.metric_type}} {{rule.operator}} {{rule.threshold}} {{getMetricUnit(rule.metric_type, rule.unit)}}
+              If average {{rule.metric_type}} {{rule.operator}} {{rule.threshold}}
+              {{getMetricUnit(rule.metric_type, rule.unit)}}
               for {{rule.breach_duration_secs}} seconds, then {{rule.adjustment}} instances. Cooldown:
               {{rule.cool_down_secs}} seconds.
             </div>
             <div *ngIf="editIndex==index">
               <form [formGroup]="editTriggerForm" validate>
                 If average
-                <mat-form-field *ngIf="metricTypes.length > 1" class="autoscaler-edit-select">
-                  <input matInput placeholder="Metric Type" type="text" name="metric_type"
-                    formControlName="metric_type">
-                  <mat-select class="reset-margin" placeholder="Metric Type" name="metric_type_select"
-                    formControlName="metric_type_select" required>
-                    <mat-option *ngFor="let metricType of metricTypes" [value]="metricType">
-                      {{ metricType }}
-                    </mat-option>
-                  </mat-select>
+                <mat-form-field *ngIf="metricTypes.length > 1">
+                  <input matInput placeholder="Metric Type" type="text" name="metric_type" formControlName="metric_type"
+                    [matAutocomplete]="metricTypeAuto" required>
+                  <mat-autocomplete #metricTypeAuto="matAutocomplete">
+                    <mat-option *ngFor="let metricType of metricTypes" [value]="metricType">{{metricType}}</mat-option>
+                  </mat-autocomplete>
                 </mat-form-field>
                 <mat-form-field *ngIf="metricTypes.length > 1">
                   <mat-select class="reset-margin" placeholder="Operator" name="operator" formControlName="operator"

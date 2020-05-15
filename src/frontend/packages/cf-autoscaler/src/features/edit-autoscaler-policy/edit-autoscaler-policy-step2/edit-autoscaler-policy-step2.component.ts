@@ -16,8 +16,8 @@ import {
 import {
   getThresholdMax,
   getThresholdMin,
-  numberWithFractionOrExceedRange,
   inValidMetricType,
+  numberWithFractionOrExceedRange,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
@@ -58,7 +58,6 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
     super(service, route);
     this.editTriggerForm = this.fb.group({
       metric_type: [0, [Validators.required, this.validateTriggerMetricType()]],
-      metric_type_select: [0, this.validateTriggerMetricTypeSelect()],
       operator: [0, this.validateTriggerOperator()],
       threshold: [0, [Validators.required, Validators.min(1), this.validateTriggerThreshold()]],
       unit: [0],
@@ -101,10 +100,9 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
     this.editAdjustmentType = getAdjustmentType(this.currentPolicy.scaling_rules_form[index].adjustment);
     this.editTriggerForm.setValue({
       metric_type: this.editMetricType,
-      metric_type_select: this.editMetricType,
       operator: this.currentPolicy.scaling_rules_form[index].operator,
       threshold: this.currentPolicy.scaling_rules_form[index].threshold,
-      unit: this.currentPolicy.scaling_rules_form[index].unit || '' ,
+      unit: this.currentPolicy.scaling_rules_form[index].unit || '',
       adjustment: Math.abs(Number(this.currentPolicy.scaling_rules_form[index].adjustment)),
       breach_duration_secs: this.currentPolicy.scaling_rules_form[index].breach_duration_secs,
       cool_down_secs: this.currentPolicy.scaling_rules_form[index].cool_down_secs,
@@ -150,15 +148,6 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
       }
       this.editTriggerForm.controls.threshold.updateValueAndValidity();
       return Object.keys(errors).length === 0 ? null : errors;
-    };
-  }
-
-  validateTriggerMetricTypeSelect(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
-      if (this.editTriggerForm) {
-        this.editTriggerForm.controls.metric_type.setValue(control.value);
-      }
-      return null;
     };
   }
 
