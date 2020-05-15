@@ -22,8 +22,14 @@ describe('CloudFoundryEventsListComponent', () => {
         provide: ListConfig,
         useClass: CfAllEventsConfigService,
       },
-        CloudFoundryEndpointService,
-        ActiveRouteCfOrgSpace,
+        CloudFoundryEndpointService, {
+        provide: ActiveRouteCfOrgSpace,
+        useValue: {
+          cfGuid: 'cfGuid',
+          orgGuid: 'orgGuid',
+          spaceGuid: 'spaceGuid'
+        }
+      },
         CfUserService
       ]
     })

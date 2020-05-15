@@ -3,17 +3,15 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { GetAppRoutes } from '../../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
@@ -64,9 +62,7 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
     this.getDataSource = () => {
       // Lazy init so that any changes to the columns & data functions (like sort) are correctly applied
       if (!this.dataSource) {
-        const routeEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
-        const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
-        const getAppRoutesAction = actionBuilder(appService.appGuid, appService.cfGuid) as PaginatedAction;
+        const getAppRoutesAction = cfEntityCatalog.route.actions.getAllForApplication(appService.appGuid, appService.cfGuid)
         this.dataSource = new CfAppRoutesDataSource(
           store,
           appService,

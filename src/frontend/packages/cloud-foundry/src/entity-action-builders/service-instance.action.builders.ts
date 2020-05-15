@@ -1,3 +1,4 @@
+import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import {
   CreateServiceInstance,
   DeleteServiceInstance,
@@ -8,7 +9,6 @@ import {
 import { GetServicePlanServiceInstances } from '../actions/service-plan.actions';
 import { GetServiceInstancesForSpace } from '../actions/space.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
-import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 
 export interface CreateUpdateActionMeta {
   name: string;
@@ -18,7 +18,7 @@ export interface CreateUpdateActionMeta {
   tags: string[];
 }
 
-export interface ServiceInstanceActionBuilders extends CFOrchestratedActionBuilders {
+export interface ServiceInstanceActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,

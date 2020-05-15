@@ -62,7 +62,6 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
 
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
-      this.store,
       this.appStateService,
       this.row.entity,
       this.row.metadata.guid,

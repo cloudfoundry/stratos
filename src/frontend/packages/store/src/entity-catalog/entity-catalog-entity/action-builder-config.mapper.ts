@@ -1,4 +1,4 @@
-import { EntitySchema } from '../helpers/entity-schema';
+import { EntitySchema } from '../../helpers/entity-schema';
 import {
   BaseEntityRequestAction,
   BaseEntityRequestConfig,
@@ -10,7 +10,7 @@ import {
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
   PaginationRequestActionConfig,
-} from './action-orchestrator/action-orchestrator';
+} from '../action-orchestrator/action-orchestrator';
 
 export class ActionBuilderConfigMapper {
 
@@ -49,7 +49,9 @@ export class ActionBuilderConfigMapper {
     schemaGetter: (schemaKey: string) => EntitySchema
   ): OrchestratedActionBuilder {
     if (configOrBuilder instanceof EntityRequestActionConfig) {
-      return (...args: Parameters<KnownEntityActionBuilder>) => {
+      return (
+        ...args: Parameters<KnownEntityActionBuilder>
+      ) => {
         const [guid, endpointGuid, ...meta] = args;
         return new BaseEntityRequestAction(
           schemaGetter(configOrBuilder.schemaKey),

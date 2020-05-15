@@ -1,27 +1,25 @@
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cloud-foundry/src/cf-types';
-import {
-  SpaceQuotaDefinitionActionBuilders,
-} from '../../../../../../cloud-foundry/src/entity-action-builders/space-quota.action-builders';
-import { AppState } from '../../../../../../store/src/app-state';
+import { cfEntityCatalog } from '../../../../../../cloud-foundry/src/cf-entity-catalog';
+import { ActiveRouteCfOrgSpace } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
+import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../core/cf-api.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
-import { spaceQuotaEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 
 
 @Component({
   selector: 'app-create-space-quota-step',
   templateUrl: './create-space-quota-step.component.html',
-  styleUrls: ['./create-space-quota-step.component.scss']
+  styleUrls: ['./create-space-quota-step.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider
+  ]
 })
 export class CreateSpaceQuotaStepComponent {
 
@@ -34,10 +32,10 @@ export class CreateSpaceQuotaStepComponent {
   form: SpaceQuotaDefinitionFormComponent;
 
   constructor(
-    private store: Store<AppState>,
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private activatedRoute: ActivatedRoute,
   ) {
-    this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = this.activatedRoute.snapshot.params.orgId;
   }
 
@@ -46,14 +44,10 @@ export class CreateSpaceQuotaStepComponent {
   submit: StepOnNextFunction = () => {
     const formValues = this.form.formGroup.value;
 
-    const entityConfig =
-      entityCatalog.getEntity<IEntityMetadata, any, SpaceQuotaDefinitionActionBuilders>(CF_ENDPOINT_TYPE, spaceQuotaEntityType);
-    entityConfig.actionDispatchManager.dispatchCreate(formValues.name, this.cfGuid, {
+    return cfEntityCatalog.spaceQuota.api.create<RequestInfoState>(formValues.name, this.cfGuid, {
       orgGuid: this.orgGuid,
       createQuota: formValues
-    });
-
-    return entityConfig.getEntityMonitor(this.store, formValues.name).entityRequest$.pipe(
+    }).pipe(
       pairwise(),
       filter(([oldV, newV]) => oldV.creating && !newV.creating),
       map(([, newV]) => newV),

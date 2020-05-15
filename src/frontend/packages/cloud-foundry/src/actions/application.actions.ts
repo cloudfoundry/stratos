@@ -8,7 +8,7 @@ import { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { applicationEntityType, appStatsEntityType } from '../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
-import { EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+import { createEntityRelationPaginationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { AppMetadataTypes } from './app-metadata.actions';
 import { CFStartAction } from './cf-action.types';
 
@@ -55,6 +55,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
       'GET',
       'apps'
     );
+    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey('cf', endpointGuid)
   }
   actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
   entity = [applicationEntitySchema];

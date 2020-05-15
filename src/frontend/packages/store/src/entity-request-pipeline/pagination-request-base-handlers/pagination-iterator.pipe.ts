@@ -5,7 +5,7 @@ import { map, mergeMap, reduce, switchMap } from 'rxjs/operators';
 
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginatedAction, PaginationMaxedState } from '../../types/pagination.types';
 import { ActionDispatcher, JetstreamResponse, PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PipelineHttpClient } from '../pipline-http-client.service';

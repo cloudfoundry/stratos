@@ -4,8 +4,11 @@ import { isObservable, Observable, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
 import { AppState, InternalAppState } from '../app-state';
-import { StratosBaseCatalogEntity, StratosCatalogEntity } from '../entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
+import {
+  StratosBaseCatalogEntity,
+  StratosCatalogEntity,
+} from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
 import { PaginationFlattenerConfig } from '../helpers/paginated-request-helpers';
 import { selectPaginationState } from '../selectors/pagination.selectors';

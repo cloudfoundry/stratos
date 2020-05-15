@@ -10,7 +10,7 @@ import {
   ITableCellRequestMonitorIconConfig,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   selectUsersRoles,
   selectUsersRolesChangedRoles,

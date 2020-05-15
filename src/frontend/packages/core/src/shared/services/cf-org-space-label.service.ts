@@ -12,7 +12,7 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 
 export class CfOrgSpaceLabelService {
 

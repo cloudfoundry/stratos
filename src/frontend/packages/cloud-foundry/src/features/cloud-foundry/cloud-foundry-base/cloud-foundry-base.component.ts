@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
-import { UserInviteService } from '../user-invites/user-invite.service';
+import { UserInviteConfigureService, UserInviteService } from '../user-invites/user-invite.service';
 
 @Component({
   selector: 'app-cloud-foundry-base',
@@ -12,6 +12,7 @@ import { UserInviteService } from '../user-invites/user-invite.service';
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     UserInviteService,
+    UserInviteConfigureService,
     CfUserService,
     CloudFoundryEndpointService,
   ]
