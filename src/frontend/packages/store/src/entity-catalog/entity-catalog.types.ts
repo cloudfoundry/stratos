@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 
 import { EndpointHealthCheck } from '../../../core/endpoints-health-checks';
 import { EndpointAuthTypeConfig } from '../../../core/src/core/extension/extension-types';
-import { Omit } from '../../../core/src/core/utils.service';
 import { FavoritesConfigMapper } from '../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { StratosStatus } from '../../../core/src/shared/shared.types';
 import { GeneralEntityAppState } from '../app-state';

@@ -7,6 +7,7 @@ import {
   RemoveUserFavoriteAction,
 } from '../../../../../store/src/actions/user-favourites-actions/remove-user-favorite-action';
 import { AppState } from '../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { userFavoritesEntitySchema } from '../../../base-entity-schemas';
@@ -16,7 +17,6 @@ import { ComponentEntityMonitorConfig, StratosStatus } from '../../shared.types'
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { entityCatalog } from './../../../../../store/src/entity-catalog/entity-catalog.service';
 import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
 
 

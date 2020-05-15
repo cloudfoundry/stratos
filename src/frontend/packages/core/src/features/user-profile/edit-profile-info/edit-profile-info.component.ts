@@ -2,13 +2,13 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { Subscription } from 'rxjs';
-import { first, map, take } from 'rxjs/operators';
+import { first, map, take, tap } from 'rxjs/operators';
 
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../../../store/src/types/user-profile.types';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { UserProfileService } from '../../../core/user-profile.service';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 
 
 @Component({
@@ -58,7 +58,6 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   public passwordRequired = false;
 
   ngOnInit() {
-    this.userProfileService.fetchUserProfile();
     this.userProfileService.userProfile$.pipe(first()).subscribe(profile => {
       // UAA needs the user's password for email changes. Local user does not
       // Both need it for password change
@@ -131,6 +130,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
           redirect: okay,
           message: okay ? '' : `An error occurred whilst updating your profile: ${message}`
         };
-      }));
+      }),
+      tap(() => this.userProfileService.fetchUserProfile())
+    );
   }
 }

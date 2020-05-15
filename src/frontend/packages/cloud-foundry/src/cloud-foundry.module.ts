@@ -2,6 +2,9 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
 import { MDAppModule } from '../../core/src/core/md.module';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { SharedModule } from '../../core/src/shared/shared.module';
 import { CfValidateEntitiesStart } from '../../store/src/actions/request.actions';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
@@ -83,7 +86,8 @@ function infoValidator(action: ICFAction, dispatcher) {
     CfUserService,
     CloudFoundryService,
     ServiceActionHelperService,
-    LongRunningCfOperationsService
+    LongRunningCfOperationsService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class CloudFoundryPackageModule { }

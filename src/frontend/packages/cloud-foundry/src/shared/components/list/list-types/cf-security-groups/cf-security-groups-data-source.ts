@@ -10,18 +10,15 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 
 export class CfSecurityGroupsDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
-    const sgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, securityGroupEntityType);
-    const actionBuilder = sgEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const action = actionBuilder(cfGuid, paginationKey);
+    const action = cfEntityCatalog.securityGroup.actions.getMultiple(cfGuid, paginationKey, {})
     super({
       store,
       action,

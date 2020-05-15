@@ -67,9 +67,9 @@ function log() {
   echo $1 | tee -a ${CHANGELOG}
 }
 
-QUERY="repo:${REPO}+milestone:3.1.0+state:closed"
+QUERY="repo:${REPO}+milestone:${MILESTONE}+state:closed"
 if [ -n "${FORK}" ]; then
-  FORK_QUERY="repo:${FORK}+milestone:3.1.0+state:closed"
+  FORK_QUERY="repo:${FORK}+milestone:${MILESTONE}+state:closed"
 fi
 
 BUGS="+label:bug"

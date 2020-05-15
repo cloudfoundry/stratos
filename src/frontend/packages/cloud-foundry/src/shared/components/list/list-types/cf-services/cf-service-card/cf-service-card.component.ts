@@ -50,7 +50,6 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
         this.serviceBrokerName$ = getServiceBrokerName(
           this.serviceEntity.entity.service_broker_guid,
           this.serviceEntity.entity.cfGuid,
-          this.entityServiceFactory
         );
       }
     }
@@ -58,7 +57,6 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
 
   constructor(
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory
   ) {
     super();
   }

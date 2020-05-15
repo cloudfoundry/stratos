@@ -120,6 +120,7 @@ USERS=$(cf curl "/v2/users?results-per-page=100" | jq -r .resources[].entity.use
 clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travisci)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travis)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travisci)(-manage-by-username)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 
 # Routes
 echo "Cleaning routes"

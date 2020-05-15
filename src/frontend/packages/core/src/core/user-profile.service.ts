@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import {
   FetchUserProfileAction,
@@ -9,22 +9,15 @@ import {
   UpdateUserProfileAction,
 } from '../../../store/src/actions/user-profile.actions';
 import { AppState } from '../../../store/src/app-state';
-import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../../store/src/effects/user-profile.effects';
-import {
-  ActionState,
-  getDefaultActionState,
-  rootUpdatingKey,
-} from '../../../store/src/reducers/api-request-reducer/types';
+import { userProfilePasswordUpdatingKey } from '../../../store/src/effects/user-profile.effects';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
+import { EntityService } from '../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../store/src/entity-service-factory.service';
+import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../../store/src/reducers/api-request-reducer/types';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { selectRequestInfo, selectUpdateInfo } from '../../../store/src/selectors/api.selectors';
-import {
-  UserProfileInfo,
-  UserProfileInfoEmail,
-  UserProfileInfoUpdates,
-} from '../../../store/src/types/user-profile.types';
+import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../../store/src/types/user-profile.types';
 import { userProfileEntitySchema } from '../base-entity-schemas';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityMonitor } from '../../../store/src/monitors/entity-monitor';
 
 
 @Injectable()
@@ -34,40 +27,57 @@ export class UserProfileService {
 
   isFetching$: Observable<boolean>;
 
-  entityMonitor: EntityMonitor<UserProfileInfo>;
+  entityService: Observable<EntityService<UserProfileInfo>>;
 
   userProfile$: Observable<UserProfileInfo>;
 
   private stratosUserConfig = entityCatalog.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
 
-  constructor(private store: Store<AppState>) {
+  constructor(
+    private store: Store<AppState>,
+    esf: EntityServiceFactory
+  ) {
     if (!this.stratosUserConfig) {
       console.error('Can not get user profile entity');
       this.userProfile$ = of({} as UserProfileInfo);
       return;
     }
 
-    this.entityMonitor = this.stratosUserConfig.getEntityMonitor(this.store, UserProfileEffect.guid);
+    this.entityService = this.createFetchUserAction().pipe(
+      first(),
+      map(action => esf.create<UserProfileInfo>(action.guid, action)),
+      publishReplay(1),
+      refCount()
+    );
 
-    this.userProfile$ = this.entityMonitor.entity$.pipe(
+    this.userProfile$ = this.entityService.pipe(
+      switchMap(service => service.waitForEntity$),
+      map(({ entity }) => entity),
       filter(data => data && !!data.id)
     );
-    this.isFetching$ = this.entityMonitor.isFetchingEntity$;
+    this.isFetching$ = this.entityService.pipe(
+      switchMap(service => service.isFetchingEntity$)
+    );
 
-    this.isError$ = this.store.select(selectRequestInfo(this.stratosUserConfig.entityKey, UserProfileEffect.guid)).pipe(
+    this.isError$ = this.store.select(selectRequestInfo(this.stratosUserConfig.entityKey, FetchUserProfileAction.guid)).pipe(
       filter(requestInfo => !!requestInfo && !requestInfo.fetching),
       map(requestInfo => requestInfo.error)
     );
   }
 
-  fetchUserProfile() {
-    // Once we have the user's guid, fetch their profile
-    this.store.select(s => s.auth).pipe(
+  private createFetchUserAction(): Observable<FetchUserProfileAction> {
+    return this.store.select(s => s.auth).pipe(
       filter((auth: AuthState) => !!(auth && auth.sessionData)),
       map((auth: AuthState) => auth.sessionData),
-      first()
-    ).subscribe(data => {
-      this.store.dispatch(new FetchUserProfileAction(data.user.guid));
+      first(),
+      map(data => new FetchUserProfileAction(data.user.guid))
+    );
+  }
+
+  fetchUserProfile() {
+    // Once we have the user's guid, fetch their profile
+    this.createFetchUserAction().pipe(first()).subscribe(action => {
+      this.store.dispatch(action);
     });
   }
 
@@ -99,7 +109,7 @@ export class UserProfileService {
   updateProfile(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<[ActionState, ActionState]> {
     const didChangeProfile = (profileChanges.givenName !== undefined ||
       profileChanges.familyName !== undefined ||
-      profileChanges.emailAddress !== undefined );
+      profileChanges.emailAddress !== undefined);
     const didChangePassword = !!(profileChanges.newPassword && profileChanges.currentPassword);
     const profileObs$ = didChangeProfile ? this.updateProfileInfo(profile, profileChanges) : observableOf(getDefaultActionState());
     const passwordObs$ = didChangePassword ? this.updatePassword(profile, profileChanges) : observableOf(getDefaultActionState());
@@ -125,7 +135,7 @@ export class UserProfileService {
     }
     this.store.dispatch(new UpdateUserProfileAction(updatedProfile, profileChanges.currentPassword));
     const actionState = selectUpdateInfo(this.stratosUserConfig.entityKey,
-      UserProfileEffect.guid,
+      FetchUserProfileAction.guid,
       rootUpdatingKey);
     return this.store.select(actionState).pipe(
       filter(item => item && !item.busy)
@@ -139,7 +149,7 @@ export class UserProfileService {
     };
     this.store.dispatch(new UpdateUserPasswordAction(profile.id, passwordUpdates));
     const actionState = selectUpdateInfo(this.stratosUserConfig.entityKey,
-      UserProfileEffect.guid,
+      FetchUserProfileAction.guid,
       userProfilePasswordUpdatingKey);
     return this.store.select(actionState).pipe(
       filter(item => item && !item.busy)

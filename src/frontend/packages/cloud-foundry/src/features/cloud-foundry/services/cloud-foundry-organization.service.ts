@@ -13,9 +13,6 @@ import {
   spaceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { OrgUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import {
@@ -26,9 +23,8 @@ import {
   ISpace,
   ISpaceQuotaDefinition,
 } from '../../../cf-api.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../cf.helpers';
-import { OrganizationActionBuilders } from '../../../entity-action-builders/organization.action-builders';
 import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import {
@@ -89,7 +85,6 @@ export class CloudFoundryOrganizationService {
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfEndpointService: CloudFoundryEndpointService,
@@ -102,10 +97,7 @@ export class CloudFoundryOrganizationService {
   }
 
   public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
-    const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
-    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('remove');
-    const deleteSpaceAction = actionBuilder(spaceGuid, endpointGuid, { orgGuid });
-    this.store.dispatch(deleteSpaceAction);
+    cfEntityCatalog.space.api.remove(spaceGuid, endpointGuid, { orgGuid })
   }
 
   public fetchApps() {
@@ -132,15 +124,7 @@ export class CloudFoundryOrganizationService {
             createEntityRelationKey(organizationEntityType, OrgUserRoleNames.AUDITOR),
           );
         }
-        const orgEntity = entityCatalog
-          .getEntity<IEntityMetadata, any, OrganizationActionBuilders>(CF_ENDPOINT_TYPE, organizationEntityType);
-        const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
-        const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid, { includeRelations: relations });
-        const orgEntityService = this.entityServiceFactory.create<APIResource<IOrganization>>(
-          this.orgGuid,
-          getOrgAction
-        );
-        return orgEntityService.waitForEntity$;
+        return cfEntityCatalog.org.store.getEntityService(this.orgGuid, this.cfGuid, { includeRelations: relations }).waitForEntity$;
       }),
       publishReplay(1),
       refCount()

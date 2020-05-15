@@ -109,7 +109,7 @@ describe('ServiceInstanceCardComponent', () => {
                 extra: '',
                 tags: [''],
                 requires: [''],
-                service_broker_guid: '',
+                service_broker_guid: 'service_broker_guid',
                 plan_updateable: 1,
                 service_plans_url: '',
                 service_plans: [],

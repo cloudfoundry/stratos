@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { CFBaseTestModules } from '../../../../test-framework/cf-test-helper';
@@ -14,7 +15,20 @@ describe('EditQuotaComponent', () => {
     TestBed.configureTestingModule({
       declarations: [EditQuotaComponent, EditQuotaStepComponent, QuotaDefinitionFormComponent],
       imports: [...CFBaseTestModules],
-      providers: [TabNavService]
+      providers: [
+        TabNavService, {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {
+                quotaId: 'quotaId',
+                cfId: 'cfGuid'
+              },
+              queryParams: {}
+            },
+          }
+        }
+      ]
     })
       .compileComponents();
   }));

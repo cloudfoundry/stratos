@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
@@ -16,9 +15,8 @@ import {
   IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import {
   TableCellRouteAppsAttachedComponent,
 } from '../cf-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
@@ -88,8 +86,6 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   };
   enableTextFilter = true;
 
-  private routeCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
-
   private multiListActionDelete: IMultiListAction<APIResource> = {
     action: (items: APIResource[]) => {
       if (items.length === 1) {
@@ -136,7 +132,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   private dispatchDeleteAction(route: APIResource<ListCfRoute>) {
     const appGuids = (route.entity.apps || []).map(app => app.metadata.guid);
     const singleApp = appGuids.length === 1;
-    this.routeCatalogEntity.actionDispatchManager.dispatchDelete(
+    cfEntityCatalog.route.api.delete(
       route.metadata.guid,
       this.cfGuid,
       // FIXME: The appGuid/appGuids params need merging
@@ -147,7 +143,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
 
   private dispatchUnmapAction(routeGuid: string, appGuids: string[]) {
     appGuids.forEach(appGuid => {
-      this.routeCatalogEntity.actionDispatchManager.dispatchAction('unmap',
+      cfEntityCatalog.route.api.unmap(
         routeGuid,
         appGuid,
         this.cfGuid,

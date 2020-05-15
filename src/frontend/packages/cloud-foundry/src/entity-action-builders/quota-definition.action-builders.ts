@@ -1,7 +1,7 @@
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import {
   CreateQuotaDefinition,
-  GetOrganizationSpaceQuotaDefinitions,
+  GetQuotaDefinition,
   GetQuotaDefinitions,
   UpdateQuotaDefinition,
 } from '../actions/quota-definitions.actions';
@@ -9,6 +9,11 @@ import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 import { QuotaFormValues } from '../features/cloud-foundry/quota-definition-form/quota-definition-form.component';
 
 export interface QuotaDefinitionActionBuilder extends OrchestratedActionBuilders {
+  get: (
+    guid: string,
+    endpointGuid: string,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+  ) => GetQuotaDefinition;
   create: (
     id: string,
     endpointGuid: string,
@@ -24,16 +29,14 @@ export interface QuotaDefinitionActionBuilder extends OrchestratedActionBuilders
     endpointGuid: string,
     { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetQuotaDefinitions;
-  getOrganizationSpaceQuotaDefinitions: (
-    orgGuid: string,
-    paginationKey: string,
-    endpointGuid: string,
-    includeRelations: string[],
-    populateMissing
-  ) => GetOrganizationSpaceQuotaDefinitions;
 }
 
 export const quotaDefinitionActionBuilder: QuotaDefinitionActionBuilder = {
+  get: (
+    guid: string,
+    endpointGuid: string,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+  ) => new GetQuotaDefinition(guid, endpointGuid, includeRelations, populateMissing),
   create: (
     id: string,
     endpointGuid: string,
@@ -49,22 +52,5 @@ export const quotaDefinitionActionBuilder: QuotaDefinitionActionBuilder = {
     endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetQuotaDefinitions(paginationKey, endpointGuid, includeRelations, populateMissing),
-  // associateSpaceQuota: (
-  //   spaceGuid: string,
-  //   endpointGuid: string,
-  //   spaceQuotaGuid: string
-  // ) => new AssociateSpaceQuota(spaceGuid, endpointGuid, spaceQuotaGuid),
-  // disassociateSpaceQuota: (
-  //   spaceGuid: string,
-  //   endpointGuid: string,
-  //   spaceQuotaGuid: string
-  // ) => new DisassociateSpaceQuota(spaceGuid, endpointGuid, spaceQuotaGuid),
-  getOrganizationSpaceQuotaDefinitions: (
-    orgGuid: string,
-    paginationKey: string,
-    endpointGuid: string,
-    includeRelations: string[] = [],
-    populateMissing = true
-  ) => new GetOrganizationSpaceQuotaDefinitions(paginationKey, orgGuid, endpointGuid, includeRelations, populateMissing)
 };
 

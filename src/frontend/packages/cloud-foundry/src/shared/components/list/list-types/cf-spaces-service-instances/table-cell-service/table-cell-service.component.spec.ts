@@ -35,11 +35,11 @@ describe('TableCellServiceComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        service_plan_guid: '',
+        service_plan_guid: 'service_plan_guid',
         space_guid: '',
         dashboard_url: '',
         type: '',
-        service_guid: '',
+        service_guid: 'service_guid',
         service_plan_url: '',
         service_bindings_url: '',
         service_keys_url: '',
@@ -48,7 +48,7 @@ describe('TableCellServiceComponent', () => {
       },
       metadata: {
         created_at: '',
-        guid: '',
+        guid: 'guid',
         updated_at: '',
         url: ''
       }

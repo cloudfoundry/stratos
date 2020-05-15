@@ -1,8 +1,12 @@
 import { HttpClientModule } from '@angular/common/http';
+import { NgModule } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
+import { createBasicStoreModule } from '@stratos/store/testing';
 
+import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
+import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
 import { appReducers } from '../../store/src/reducers.module';
 import { CoreModule } from '../src/core/core.module';
 import {
@@ -28,7 +32,18 @@ import {
 import { MultilineTitleComponent } from '../src/shared/components/multiline-title/multiline-title.component';
 import { SharedModule } from '../src/shared/shared.module';
 import { CoreTestingModule } from './core-test.modules';
-import { createBasicStoreModule } from '@stratos/store/testing';
+
+
+@NgModule({
+  imports: [CoreModule]
+})
+export class AppTestModule {
+  constructor(
+    ech: EntityCatalogHelper
+  ) {
+    EntityCatalogHelpers.SetEntityCatalogHelper(ech);
+  }
+}
 
 export function generateBaseTestStoreModules() {
   return [
@@ -38,7 +53,8 @@ export function generateBaseTestStoreModules() {
       {
         initialState: createBasicStoreModule(), runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
       }
-    )
+    ),
+    AppTestModule
   ];
 }
 

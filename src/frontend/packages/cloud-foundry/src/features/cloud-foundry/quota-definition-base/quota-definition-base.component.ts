@@ -5,14 +5,11 @@ import { first, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { IOrganization, IOrgQuotaDefinition, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
-import { organizationEntityType, spaceEntityType } from '../../../cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 export class QuotaDefinitionBaseComponent {
@@ -28,7 +25,6 @@ export class QuotaDefinitionBaseComponent {
   orgSubscriber: Subscription;
 
   constructor(
-    protected entityServiceFactory: EntityServiceFactory,
     protected store: Store<AppState>,
     protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     protected activatedRoute: ActivatedRoute,
@@ -44,13 +40,7 @@ export class QuotaDefinitionBaseComponent {
 
   setupOrgObservable() {
     if (this.orgGuid) {
-      const orgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
-      const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
-      const getOrgAction = getOrgActionBuilder(this.orgGuid, this.cfGuid);
-      this.org$ = this.entityServiceFactory.create<APIResource<IOrganization>>(
-        this.orgGuid,
-        getOrgAction
-      ).waitForEntity$.pipe(
+      this.org$ = cfEntityCatalog.org.store.getEntityService(this.orgGuid, this.cfGuid).waitForEntity$.pipe(
         map(data => data.entity),
       );
     }
@@ -58,13 +48,7 @@ export class QuotaDefinitionBaseComponent {
 
   setupSpaceObservable() {
     if (this.spaceGuid) {
-      const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
-      const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
-      const getSpaceAction = actionBuilder(this.spaceGuid, this.cfGuid);
-      this.space$ = this.entityServiceFactory.create<APIResource<ISpace>>(
-        this.spaceGuid,
-        getSpaceAction
-      ).waitForEntity$.pipe(
+      this.space$ = cfEntityCatalog.space.store.getEntityService(this.spaceGuid, this.cfGuid).waitForEntity$.pipe(
         map(data => data.entity),
       );
     }

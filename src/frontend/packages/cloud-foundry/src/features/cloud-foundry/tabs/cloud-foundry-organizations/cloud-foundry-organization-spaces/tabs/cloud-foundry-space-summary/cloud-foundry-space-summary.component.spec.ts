@@ -41,7 +41,7 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
         CloudFoundryOrganizationService,
         TabNavService,
         CfUserService,
-        CloudFoundryUserProvidedServicesService,
+        CloudFoundryUserProvidedServicesService
       ]
     })
       .compileComponents();

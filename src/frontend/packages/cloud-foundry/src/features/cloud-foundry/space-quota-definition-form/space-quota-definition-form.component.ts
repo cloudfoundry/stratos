@@ -1,44 +1,41 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { cfEntityCatalog } from '../../../../../cloud-foundry/src/cf-entity-catalog';
+import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { AppState } from '../../../../../store/src/app-state';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { GetOrganizationSpaceQuotaDefinitions } from '../../../actions/quota-definitions.actions';
 import { IQuotaDefinition } from '../../../cf-api.types';
-import { cfEntityFactory } from '../../../cf-entity-factory';
-import { spaceQuotaEntityType } from '../../../cf-entity-types';
-import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 
 
 @Component({
   selector: 'app-space-quota-definition-form',
   templateUrl: './space-quota-definition-form.component.html',
-  styleUrls: ['./space-quota-definition-form.component.scss']
+  styleUrls: ['./space-quota-definition-form.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider
+  ]
 })
 export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription: Subscription;
   cfGuid: string;
   orgGuid: string;
   allQuotas: string[];
-  spaceQuotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
+  spaceQuotaDefinitions$: Observable<string[]>;
   formGroup: FormGroup;
 
   @Input() quota: IQuotaDefinition;
 
   constructor(
-    private store: Store<AppState>,
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private activatedRoute: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
-    this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = this.activatedRoute.snapshot.params.orgId;
   }
 
@@ -65,24 +62,16 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   fetchQuotasDefinitions() {
-    const spaceQuotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    const action = new GetOrganizationSpaceQuotaDefinitions(spaceQuotaPaginationKey, this.orgGuid, this.cfGuid);
-    this.spaceQuotaDefinitions$ = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          spaceQuotaPaginationKey,
-          cfEntityFactory(spaceQuotaEntityType),
-          action.flattenPagination
-        )
-      },
-      action.flattenPagination
-    ).entities$.pipe(
-      filter(o => !!o),
-      map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allQuotas = o)
-    );
+    this.spaceQuotaDefinitions$ = cfEntityCatalog.spaceQuota.store.getAllInOrganization.getPaginationService(
+      this.orgGuid,
+      this.cfGuid,
+      createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid)
+    ).entities$
+      .pipe(
+        filter(o => !!o),
+        map(o => o.map(org => org.entity.name)),
+        tap((o) => this.allQuotas = o)
+      );
 
     this.quotasSubscription = this.spaceQuotaDefinitions$.subscribe();
   }

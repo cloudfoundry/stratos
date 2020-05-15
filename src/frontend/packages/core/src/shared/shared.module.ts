@@ -5,9 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
-import { EntityMonitorFactory } from '../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
 import { CoreModule } from '../core/core.module';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
@@ -330,13 +328,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     ListConfig,
     EndpointListHelper,
     EndpointsListConfigService,
-    // CfUserService,
     ConfirmationDialogService,
-    EntityMonitorFactory,
-    PaginationMonitorFactory,
-    // CloudFoundryService,
     InternalEventMonitorFactory,
-    // ServiceActionHelperService,
     MetricsRangeSelectorService,
     LongRunningOperationsService,
   ]

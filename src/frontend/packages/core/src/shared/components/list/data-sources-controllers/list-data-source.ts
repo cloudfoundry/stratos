@@ -29,7 +29,7 @@ import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.a
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
 import { IgnorePaginationMaxedState, SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { PaginationMonitor } from '../../../../../../store/src/monitors/pagination-monitor';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';

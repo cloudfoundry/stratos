@@ -1,6 +1,10 @@
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAppSummaryAction } from '../actions/app-metadata.actions';
 
-export const appSummaryActionBuilders = {
+export interface AppSummaryActionBuilders extends OrchestratedActionBuilders {
+  get: (appGuid, endpointGuid) => GetAppSummaryAction;
+}
+
+export const appSummaryActionBuilders: AppSummaryActionBuilders = {
   get: (appGuid, endpointGuid) => new GetAppSummaryAction(appGuid, endpointGuid)
-} as OrchestratedActionBuilders;
+};

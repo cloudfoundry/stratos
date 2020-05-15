@@ -1,5 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 
+import { CFBaseTestModules } from '../../../../../../cloud-foundry/test-framework/cf-test-helper';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { CFBaseTestModules } from '../../../../../test-framework/cf-test-helper';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
@@ -15,7 +17,20 @@ describe('EditSpaceQuotaStepComponent', () => {
       imports: [
         ...CFBaseTestModules
       ],
-      providers: [PaginationMonitorFactory]
+      providers: [
+        PaginationMonitorFactory, {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {
+                quotaId: 'quotaId',
+                endpointId: 'endpointId'
+              },
+              queryParams: {}
+            },
+          }
+        }
+      ]
     })
       .compileComponents();
   }));

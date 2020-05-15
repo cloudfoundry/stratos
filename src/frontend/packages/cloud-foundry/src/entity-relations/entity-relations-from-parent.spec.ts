@@ -1,16 +1,16 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratos/store/testing';
 import { first } from 'rxjs/operators';
 
 import { RequestTypes } from '../../../store/src/actions/request.actions';
 import { AppState } from '../../../store/src/app-state';
 import { EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES } from '../../../store/src/entity-catalog-test.module';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EntityRelationSpecHelper } from '../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
 import { APIResource } from '../../../store/src/types/api.types';
 import { WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '../../../store/testing/public-api';
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
 import { ISpace } from '../cf-api.types';
 import { CFAppState } from '../cf-app-state';

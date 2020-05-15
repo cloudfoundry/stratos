@@ -51,7 +51,7 @@ describe('TableCellServiceInstanceAppsAttachedComponent', () => {
       },
       metadata: {
         created_at: '',
-        guid: '',
+        guid: 'guid',
         updated_at: '',
         url: ''
       }

@@ -1,9 +1,9 @@
 import { Action, ActionReducer } from '@ngrx/store';
 
-import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
-import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import { RECURSIVE_ENTITY_SET_DELETED, SetTreeDeleted } from '../../effects/recursive-entity-delete.effect';
+import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import { deepMergeState } from '../../helpers/reducer.helper';
 import { IFlatTree } from '../../helpers/schema-tree-traverse';
 import { ISuccessRequestAction } from '../../types/request.types';

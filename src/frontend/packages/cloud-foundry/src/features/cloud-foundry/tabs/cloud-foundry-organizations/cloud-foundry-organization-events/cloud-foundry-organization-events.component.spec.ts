@@ -38,7 +38,7 @@ describe('CloudFoundryOrganizationEventsComponent', () => {
         CloudFoundryOrganizationService,
         CfUserService,
         CloudFoundryEndpointService,
-        CloudFoundryUserProvidedServicesService,
+        CloudFoundryUserProvidedServicesService
       ],
       imports: [...CFBaseTestModules]
     })

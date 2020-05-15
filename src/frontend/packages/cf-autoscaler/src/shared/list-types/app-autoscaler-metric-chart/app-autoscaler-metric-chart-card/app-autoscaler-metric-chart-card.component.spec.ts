@@ -13,6 +13,10 @@ import { ApplicationStateService } from '../../../../../../cloud-foundry/src/sha
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { generateTestApplicationServiceProvider } from '../../../../../../core/test-framework/application-service-helper';
+import { AppTestModule } from '../../../../../../core/test-framework/core-test.helper';
+import {
+  EntityCatalogHelper,
+} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { CfAutoscalerTestingModule } from '../../../../cf-autoscaler-testing.module';
@@ -38,9 +42,11 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         createEmptyStoreModule(),
         CoreModule,
         NgxChartsModule,
+        AppTestModule
       ],
       providers: [
         EntityMonitorFactory,
+        EntityCatalogHelper,
         generateTestApplicationServiceProvider('1', '1'),
         ApplicationEnvVarsHelper,
         ApplicationStateService,
