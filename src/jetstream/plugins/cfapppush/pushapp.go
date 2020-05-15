@@ -52,13 +52,14 @@ type CFPushAppConfig struct {
 	DopplerLoggingEndpoint string
 	SkipSSLValidation      bool
 	AuthToken              string
-	RefreshToken           string
 	OrgGUID                string
 	OrgName                string
 	SpaceGUID              string
 	SpaceName              string
 	OutputWriter           io.Writer
 	DialTimeout            string
+	EndpointID             string
+	UserID                 string
 }
 
 // CFPushAppOverrides represents the document that can be sent from the client with the app overrrides for the push
@@ -308,8 +309,8 @@ func (c *CFPushApp) Run(msgSender DeployAppMessageSender, clientWebsocket *webso
 	return nil
 }
 
-func (push *CFPushApp) setup(config command.Config, ui command.UI, msgSender DeployAppMessageSender, clientWebsocket *websocket.Conn) error {
-	cmd := push.pushCommand
+func (c *CFPushApp) setup(config command.Config, ui command.UI, msgSender DeployAppMessageSender, clientWebsocket *websocket.Conn) error {
+	cmd := c.pushCommand
 	cmd.UI = ui
 	cmd.Config = config
 	sharedActor := sharedaction.NewActor(config)
@@ -319,6 +320,15 @@ func (push *CFPushApp) setup(config command.Config, ui command.UI, msgSender Dep
 	if err != nil {
 		return err
 	}
+
+	// Initialize connection wrapper that will refresh the auto token if needed
+	pushConnectionWrapper := PushConnectionWrapper{
+		portalProxy: c.portalProxy,
+		config:      c.config,
+		cmdConfig:   config,
+	}
+
+	ccClient.WrapConnection(pushConnectionWrapper)
 
 	ccClientV3, _, err := sharedV3.NewV3BasedClients(config, ui, true)
 	if err != nil {
