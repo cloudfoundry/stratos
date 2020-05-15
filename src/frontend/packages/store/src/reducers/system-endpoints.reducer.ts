@@ -111,7 +111,20 @@ function updateMetricsInfo(state: IRequestEntityTypeState<EndpointModel>, action
         }
       },
     };
+  } else if (action.queryType === MetricAPIQueryTypes.STRATOS_METADATA) {
+    const existingEndpoint = state[action.endpointGuid];
+    return {
+      ...state,
+      [action.endpointGuid]: {
+        ...existingEndpoint,
+        metadata: {
+          ...existingEndpoint.metadata,
+          metrics_stratos: action.data
+        }
+      },
+    };
   }
+
   return state;
 
 }

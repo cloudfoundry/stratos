@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async">{{ (metricsEndpoint$ | async)?.entity.provider.name }}</app-page-header>
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">{{ (metricsEndpoint$ | async)?.provider.name }}</app-page-header>
 
 <div *ngIf="(metricsEndpoint$ | async) as ep">
   <mat-card>
@@ -6,57 +6,67 @@
       <div class="metrics-info">
         <mat-icon>equalizer</mat-icon>
         <div>
-          <div>{{ ep.entity.provider.name }}</div>
+          <div>{{ ep.provider.name }}</div>
           <h2 class="metrics-url">
-            <a target="metrics" href="{{ ep.entity.provider.token_endpoint }}">{{ ep.entity.provider.token_endpoint }}</a>
+            <a target="metrics" href="{{ ep.provider.token_endpoint }}">{{ ep.provider.token_endpoint }}</a>
           </h2>
+          <div *ngIf="error">
+            <p>This metrics endpoint does not provide a Stratos metadata file</p>
+          </div>
         </div>
       </div>
     </mat-card-content>
   </mat-card>
 
-  <div class="metrics-detail" *ngIf="ep.entity.endpoints && ep.entity.endpoints.length >0">
-    <P>Provides metrics for the following endpoints:</P>
-  </div>
-
-  <div class="metrics-detail" *ngIf="!ep.entity.endpoints || ep.entity.endpoints.length === 0">
-    <P>Does not provide metrics for any endpoints</P>
-  </div>
-
-  <div>
-    <div *ngFor="let svc of ep.entity.endpoints" class="metric-endpoint">
-      <mat-card class="metrics-provision">
-        <mat-card-content>
-          <div class="metrics-info">
-            <mat-icon fontSet="{{ ep.metadata[svc.guid].icon.font }}">{{ ep.metadata[svc.guid].icon.name }}</mat-icon>
-            <div class="metrics-metadata">
-              <div>{{ svc.name }}</div>
-              <div>{{ ep.metadata[svc.guid].type }}</div>
-              <div class="metrics-metadata__cols">
-                <div class="metrics-metadata__two-cols">
-                  <app-metadata-item icon="link" label="Address">{{ svc.url }}</app-metadata-item>
-                  <app-metadata-item icon="history" label="Prometheus Job">{{ svc.metadata.metrics_job || 'N/A' }}</app-metadata-item>
-                  <app-metadata-item icon="history" label="Prometheus Environment">{{ svc.metadata.metrics_environment || 'N/A' }}</app-metadata-item>
-                </div>
-                <div class="metrics-metadata__two-cols">
-                  <div class="metrics-extra" *ngIf="svc.metadata && svc.metadata.metrics_job && (jobDetails$ | async) as jobDetails">
-                    <div *ngIf="jobDetails[svc.metadata.metrics_job]">
-                      <app-metadata-item icon="help_outline" label="Exporter Health">{{
-                        jobDetails[svc.metadata.metrics_job].health | uppercase }}</app-metadata-item>
-                      <app-metadata-item icon="schedule" label="Exporter Last Scrape">{{
-                        jobDetails[svc.metadata.metrics_job].lastScrape | date:'medium' }}</app-metadata-item>
-                      <app-metadata-item icon="error_outline" label="Exporter Last Error">{{
-                        jobDetails[svc.metadata.metrics_job].lastError || 'None' }}</app-metadata-item>
+  <div *ngIf="metricsInfo$ | async as infos">
+    <div class="metrics-detail" *ngIf="infos.length === 0">
+      <p>This metrics endpoint does not provide data for any endpoints</p>
+    </div>
+    <div *ngIf="infos.length > 0">
+      <div class="metrics-tree__root"></div>
+        <ul class="metrics-tree tree">
+          <li *ngFor="let info of infos" class="metric-endpoint">
+            <mat-card class="metrics-provision">
+            <app-card-status *ngIf="info.status" [status$]="info.status"></app-card-status>
+              <mat-card-content>
+              <div class="metrics-info">
+                <mat-icon fontSet="{{ info.icon.font }}">{{info.icon.name }}</mat-icon>
+                <div class="metrics-metadata">
+                  <div>{{ info.name }}</div>
+                  <div>{{ info.type }}</div>
+                  <div class="metrics-metadata__cols">
+                    <div class="metrics-metadata__two-cols">
+                      <app-metadata-item icon="link" label="Address" [clipboardValue]="info.url">{{ info.url }}</app-metadata-item>
+                      <app-metadata-item icon="history" label="Prometheus Job">{{ info.metadata.metrics_job || 'N/A' }}</app-metadata-item>
+                      <app-metadata-item icon="history" label="Prometheus Environment">{{ info.metadata.metrics_environment || 'N/A' }}</app-metadata-item>
                     </div>
+                    <div class="metrics-metadata__two-cols">
+                      <div class="metrics-extra" *ngIf="info.metadata.metrics_job && (jobDetails$ | async) as jobDetails">
+                        <div *ngIf="jobDetails[info.metadata.metrics_job]">
+                          <app-metadata-item icon="help_outline" label="Exporter Health">{{
+                            jobDetails[info.metadata.metrics_job].health | uppercase }}</app-metadata-item>
+                          <app-metadata-item icon="schedule" label="Exporter Last Scrape">{{
+                            jobDetails[info.metadata.metrics_job].lastScrape | date:'medium' }}</app-metadata-item>
+                          <app-metadata-item icon="error_outline" label="Exporter Last Error">{{
+                            jobDetails[info.metadata.metrics_job].lastError || 'None' }}</app-metadata-item>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="!info.known">
+                    <div class="metrics-unknown">
+                      <mat-icon class="text-warning">warning</mat-icon>
+                      <div>The metrics endpoint reports that it provides data for this endpoint which is not registered with Stratos</div>
+                    </div>
+                    <div class="metrics-unknown__detail">This could be intentional or there may be a mismatch in the endpoint address used by this Metrics endpoint and that which is registered with Stratos.</div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+            </mat-card-content>
+          </mat-card>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
-
 

@@ -30,6 +30,7 @@ func (c *CFPushApp) setEndpointInfo(config *configv3.Config) error {
 		// Got the info we need - update the config with it
 		config.SetTargetInformation(apiEndpoint, info.APIVersion, info.AuthorizationEndpoint, info.MinCLIVersion, info.DopplerLoggingEndpoint, info.RoutingEndpoint, skipSSLValidation)
 		config.SetAccessToken("bearer " + c.config.AuthToken)
+		// Note: We do not give the refresh token to the CLI code as we do NOT want it to refresh the token
 	} else {
 		return errors.New("Did not get a CF /v2/info response")
 	}
