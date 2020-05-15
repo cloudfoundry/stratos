@@ -14,6 +14,7 @@ import {
 } from 'rxjs/operators';
 
 import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
+import { isEntityInlineParentAction } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { sortStringify } from '../../../../core/src/core/utils.service';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { CfValidateEntitiesStart } from '../../actions/request.actions';
@@ -194,6 +195,23 @@ function getObservables<T = any>(
     map(([, newPag]) => newPag)
   );
 
+  const shouldValidate = (action: PaginatedAction): boolean => {
+    // Validate if..
+    // 1) The action is the correct type
+    const parentAction = isEntityInlineParentAction(action);
+    if (!parentAction) {
+      return false;
+    }
+    // 2) We have basic request info
+    // 3) The action states it should not be skipped
+    // 4) It's already been validated
+    // 5) There are actual relations to validate
+    if (action.skipValidation || parentAction.includeRelations.length === 0) {
+      return false;
+    }
+    return true;
+  }
+
   let lastValidationFootprint: string;
   const entities$: Observable<T[]> =
     combineLatest(
@@ -211,11 +229,15 @@ function getObservables<T = any>(
           if (lastValidationFootprint !== newValidationFootprint) {
             lastValidationFootprint = newValidationFootprint;
             // FIXME: Move cf - #3675
-            // This should use something similar to ENTITY_INFO_HANDLER or come from entity itself
-            arrayAction.forEach(action => store.dispatch(new CfValidateEntitiesStart(
-              action,
-              pagination.ids[action.__forcedPageNumber__ || pagination.currentPage]
-            )));
+            // This should use something similar to ENTITY_INFO_HANDLER or come from entity itself. See #4296
+            arrayAction.forEach(action => {
+              if (shouldValidate(action)) {
+                store.dispatch(new CfValidateEntitiesStart(
+                  action,
+                  pagination.ids[action.__forcedPageNumber__ || pagination.currentPage]
+                ))
+              }
+            });
           }
         }),
         switchMap(() => paginationMonitor.currentPage$),

@@ -61,10 +61,6 @@ export const endpointsCFEntitiesSelector = createSelector(
   cfEndpointEntitiesSelector
 );
 
-// const log = (label) => {
-//   return (val) => console.log(label, val);
-// };
-
 // TODO: Move this #3769
 export const endpointsCfEntitiesConnectedSelector = connectedEndpointsOfTypesSelector('cf');
 

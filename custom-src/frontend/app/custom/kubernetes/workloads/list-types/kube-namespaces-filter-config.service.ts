@@ -52,17 +52,9 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
 
     // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
     this.namespace.list$.pipe(first()).subscribe(() => this.setupAutoSelectors());
-
-    // this.isLoading$ = combineLatest( // TODO: RC Not used??
-    //   this.kube.loading$,
-    //   this.namespace.loading$,
-    // ).pipe(
-    //   map(([kubeLoading, nsLoading]) => kubeLoading || nsLoading)
-    // );
   }
 
   private getNamespacesObservable() {
-    // TODO: RC is local???
     return kubeEntityCatalog.namespace.store.getPaginationService(null);
   }
 

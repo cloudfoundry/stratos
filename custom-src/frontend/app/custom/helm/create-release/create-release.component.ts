@@ -5,7 +5,7 @@ import { MatTextareaAutosize } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
@@ -68,8 +68,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private httpClient: HttpClient,
     private confirmDialog: ConfirmationDialogService,
-    // private pmf: PaginationMonitorFactory, // TODO: RC search and destroy
-    private emf: EntityMonitorFactory // TODO: RC search and destroy
+    private emf: EntityMonitorFactory
   ) {
     const chart = this.route.snapshot.params;
     this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
@@ -103,7 +102,6 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
 
     const allNamespaces$ = kubeEntityCatalog.namespace.store.getPaginationService(null).entities$.pipe(
-      // tap(a => console.log(action, a)), // TODO: RC find all console.log
       filter(namespaces => !!namespaces),
       first()
     );
@@ -113,18 +111,15 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       this.details.controls.releaseNamespace.valueChanges.pipe(startWith(''), distinctUntilChanged())
     ]).pipe(
       // Filter out namespaces from other kubes
-      tap(a => console.log(1, a)),
       map(([namespaces, kubeId, namespace]: [KubernetesNamespace[], string, string]) => ([
         namespaces.filter(ns => ns.metadata.kubeId === kubeId),
         namespace
       ])),
-      tap(a => console.log(2, a)),
       // Map to endpoint names
       map(([namespaces, namespace]: [KubernetesNamespace[], string]) => [
         namespaces.map(ns => ns.metadata.name),
         namespace
       ]),
-      tap(a => console.log(3, a)),
       // Filter out namespaces not matching existing text
       map(([namespaces, namespace]: [string[], string]) => this.filterTyped(namespaces, namespace)),
     );
@@ -267,7 +262,6 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       chart: this.route.snapshot.params
     };
 
-    // TODO: RC
     // Make the request
     const action = new HelmInstall(values);
     this.store.dispatch(action);

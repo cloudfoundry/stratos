@@ -87,7 +87,7 @@ export class WorkloadsEffects {
       endpointId
     };
     // Release name is unique for an endpoint - for Helm 3, include the namespace
-    helmRelease.guid = guid;//endpointId + ':' + data.namespace + ':' + data.name; //TODO: RC delete
+    helmRelease.guid = guid;
     // Make a note of the guid of the endpoint for the release
     helmRelease.status = data.info.status;
     helmRelease.lastDeployed = this.mapHelmModifiedDate(data.info.last_deployed);
@@ -109,7 +109,6 @@ export class WorkloadsEffects {
     return this.httpClient.get(url, requestArgs).pipe(
       mergeMap((response: any) => [new WrapperRequestActionSuccess(mapResult(response), action)]),
       catchError(error => [
-        // TODO: RC trigger this, understand error (app.module.ts:173) guid of undefined
         new WrapperRequestActionFailed(error.message, action, 'fetch', {
           endpointIds,
           url: error.url || url,

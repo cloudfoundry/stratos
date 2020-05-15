@@ -142,10 +142,10 @@ export class GetHelmReleasePods implements KubePaginationAction {
     'order-direction': 'desc',
     'order-direction-field': 'name',
   };
+  flattenPagination = true;
 }
 
 
-// TODO: RC add to kube action builder
 /**
  * Won't fetch services, used to push/retrieve data from store
  */
@@ -170,4 +170,5 @@ export class GetHelmReleaseServices implements KubePaginationAction {
     'order-direction': 'desc',
     'order-direction-field': 'name',
   };
+  flattenPagination = true;
 }

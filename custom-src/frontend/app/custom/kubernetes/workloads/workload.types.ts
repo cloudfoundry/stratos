@@ -31,28 +31,11 @@ export interface HelmReleaseEntity {
   releaseTitle: string;
 }
 
-export interface HelmReleasePod extends HelmReleaseEntity, KubernetesPod {
-  // endpointId: string;
-  // releaseTitle: string;
-  // name: string;
-  // ready: string;
-  // status: string;
-  // restarts: string;
-  // age: string;
-}
+export interface HelmReleasePod extends HelmReleaseEntity, KubernetesPod { }
 
-export interface HelmReleaseService extends HelmReleaseEntity, KubeService {
-  // endpointId: string;
-  // releaseTitle: string;
-  // name: string;
-  //kubeService$?: Observable<KubeService>; // TODO: RC ??
-  // metadata: any;
-  // spec: any;
-}
+export interface HelmReleaseService extends HelmReleaseEntity, KubeService { }
 
 export interface HelmReleaseGraph extends HelmReleaseEntity {
-  // endpointId: string;
-  // releaseTitle: string;
   nodes: {};
   links: {};
 }
