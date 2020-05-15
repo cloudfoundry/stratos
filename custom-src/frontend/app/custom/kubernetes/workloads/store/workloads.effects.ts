@@ -6,10 +6,8 @@ import { environment } from 'frontend/packages/core/src/environments/environment
 import { Observable } from 'rxjs';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
-import { ClearPaginationOfType } from '../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { ApiRequestTypes } from '../../../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../../../../../store/src/types/api.types';
 import {
   EntityRequestAction,
@@ -20,14 +18,7 @@ import {
 import { HelmEffects } from '../../../helm/store/helm.effects';
 import { HelmRelease } from '../workload.types';
 import { getHelmReleaseId } from './workloads-entity-factory';
-import {
-  GET_HELM_RELEASE,
-  GET_HELM_RELEASES,
-  GetHelmRelease,
-  GetHelmReleases,
-  HELM_INSTALL,
-  HelmInstall,
-} from './workloads.actions';
+import { GET_HELM_RELEASE, GET_HELM_RELEASES, GetHelmRelease, GetHelmReleases } from './workloads.actions';
 
 @Injectable()
 export class WorkloadsEffects {
@@ -88,37 +79,6 @@ export class WorkloadsEffects {
           processedData.result.push(action.guid);
           return processedData;
         }, [action.endpointGuid]);
-    })
-  );
-
-  @Effect()
-  helmInstall$ = this.actions$.pipe(
-    ofType<HelmInstall>(HELM_INSTALL),
-    flatMap(action => {
-      const requestType: ApiRequestTypes = 'create';
-      const url = '/pp/v1/helm/install';
-      this.store.dispatch(new StartRequestAction(action, requestType));
-      return this.httpClient.post(url, action.values).pipe(
-        mergeMap(() => {
-          return [
-            new ClearPaginationOfType(action),
-            new WrapperRequestActionSuccess(null, action)
-          ];
-        }),
-        catchError(error => {
-          const { status, message } = HelmEffects.createHelmError(error);
-          const errorMessage = `Failed to install helm chart: ${message}`;
-          return [
-            new WrapperRequestActionFailed(errorMessage, action, requestType, {
-              endpointIds: [action.values.endpoint],
-              url: error.url || url,
-              eventCode: status,
-              message: errorMessage,
-              error
-            })
-          ];
-        })
-      );
     })
   );
 

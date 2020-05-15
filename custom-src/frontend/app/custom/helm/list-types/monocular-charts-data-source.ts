@@ -18,7 +18,7 @@ export class MonocularChartsDataSource extends ListDataSource<MonocularChart> {
       store,
       action,
       schema: action.entity[0],
-      getRowUniqueId: action.entity[0].getId,
+      getRowUniqueId: (row) => action.entity[0].getId(row),
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,

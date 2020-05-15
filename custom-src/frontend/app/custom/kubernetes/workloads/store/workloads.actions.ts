@@ -2,7 +2,6 @@ import { EntityRequestAction } from 'frontend/packages/store/src/types/request.t
 
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 import { MonocularPaginationAction } from '../../../helm/store/helm.actions';
-import { HelmInstallValues } from '../../../helm/store/helm.types';
 import {
   KUBERNETES_ENDPOINT_TYPE,
   kubernetesEntityFactory,
@@ -39,26 +38,12 @@ export const UPDATE_HELM_RELEASE = '[Helm] Update Release';
 export const UPDATE_HELM_RELEASE_SUCCESS = '[Helm] Update Release Success';
 export const UPDATE_HELM_RELEASE_FAILURE = '[Helm] Update Release Failure';
 
-export const HELM_INSTALL = '[Helm] Install';
-export const HELM_INSTALL_SUCCESS = '[Helm] Install Success';
-export const HELM_INSTALL_FAILURE = '[Helm] Install Failure';
-
 interface HelmReleaseSingleEntity extends EntityRequestAction {
   guid: string;
 }
 
 interface HelmReleasePaginated extends PaginatedAction, EntityRequestAction {
 
-}
-
-export class HelmInstall implements HelmReleaseSingleEntity {
-  type = HELM_INSTALL;
-  endpointType = KUBERNETES_ENDPOINT_TYPE;
-  entityType = helmReleaseEntityKey;
-  guid: string;
-  constructor(public values: HelmInstallValues) {
-    this.guid = '<New Release>' + this.values.releaseName;
-  }
 }
 
 export class GetHelmReleases implements MonocularPaginationAction {

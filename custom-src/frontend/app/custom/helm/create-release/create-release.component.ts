@@ -18,13 +18,8 @@ import { StepOnNextFunction, StepOnNextResult } from '../../../shared/components
 import { kubeEntityCatalog } from '../../kubernetes/kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
 import { KubernetesNamespace } from '../../kubernetes/store/kube.types';
-import { workloadsEntityCatalog } from '../../kubernetes/workloads/workloads-entity-catalog';
+import { helmEntityCatalog } from '../helm-entity-catalog';
 import { HelmInstallValues } from '../store/helm.types';
-
-
-// private pmf: PaginationMonitorFactory, // TODO: RC search and destroy
-// private emf: EntityMonitorFactory // TODO: RC search and destroy
-// store.dispatch
 
 @Component({
   selector: 'app-create-release',
@@ -263,7 +258,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     };
 
     // Make the request
-    return workloadsEntityCatalog.release.api.install<RequestInfoState>(values).pipe(
+    return helmEntityCatalog.chart.api.install<RequestInfoState>(values).pipe(
       // Wait for result of request
       filter(state => !!state),
       pairwise(),

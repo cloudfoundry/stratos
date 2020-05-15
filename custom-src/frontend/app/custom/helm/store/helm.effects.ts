@@ -15,10 +15,20 @@ import {
 import { Observable } from 'rxjs';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
+import { ClearPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
+import { ApiRequestTypes } from '../../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { environment } from '../../../environments/environment';
 import { isJetstreamError } from '../../../jetstream.helpers';
+import { helmEntityCatalog } from '../helm-entity-catalog';
 import { getHelmVersionId, getMonocularChartId, HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
-import { GET_HELM_VERSIONS, GET_MONOCULAR_CHARTS, GetHelmVersions, GetMonocularCharts } from './helm.actions';
+import {
+  GET_HELM_VERSIONS,
+  GET_MONOCULAR_CHARTS,
+  GetHelmVersions,
+  GetMonocularCharts,
+  HELM_INSTALL,
+  HelmInstall,
+} from './helm.actions';
 import { HelmVersion } from './helm.types';
 
 @Injectable()
@@ -118,7 +128,36 @@ export class HelmEffects {
     })
   );
 
-
+  @Effect()
+  helmInstall$ = this.actions$.pipe(
+    ofType<HelmInstall>(HELM_INSTALL),
+    flatMap(action => {
+      const requestType: ApiRequestTypes = 'create';
+      const url = '/pp/v1/helm/install';
+      this.store.dispatch(new StartRequestAction(action, requestType));
+      return this.httpClient.post(url, action.values).pipe(
+        mergeMap(() => {
+          return [
+            new ClearPaginationOfType(action),
+            new WrapperRequestActionSuccess(null, action)
+          ];
+        }),
+        catchError(error => {
+          const { status, message } = HelmEffects.createHelmError(error);
+          const errorMessage = `Failed to install helm chart: ${message}`;
+          return [
+            new WrapperRequestActionFailed(errorMessage, action, requestType, {
+              endpointIds: [action.values.endpoint],
+              url: error.url || url,
+              eventCode: status,
+              message: errorMessage,
+              error
+            })
+          ];
+        })
+      );
+    })
+  );
 
   private makeRequest(
     action: EntityRequestAction,
@@ -204,7 +243,7 @@ export class HelmEffects {
         this.syncing = syncing;
         if (remaining !== existing) {
           // Dispatch action to refresh charts
-          this.store.dispatch(new GetMonocularCharts());
+          helmEntityCatalog.chart.api.getMultiple();
         }
         if (remaining > 0) {
           this.scheduleSyncStatusCheck();

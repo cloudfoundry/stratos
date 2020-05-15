@@ -188,7 +188,6 @@ export class KubernetesEndpointService {
   }
 
   public refreshKubernetesDashboardStatus() {
-    // this.store.dispatch(new GetKubernetesDashboard(this.kubeGuid)); // TODO: RC store.dispatch
     kubeEntityCatalog.dashboard.api.get(this.kubeGuid);
   }
 
