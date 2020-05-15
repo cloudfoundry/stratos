@@ -2,20 +2,19 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
+import { filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { domainEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
 import { IDomain } from '../../../../../../core/src/core/cf-api.types';
-import { pathGet } from '../../../../../../core/src/core/utils.service';
 import {
   StepOnNextFunction,
   StepOnNextResult,
 } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { ActionState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
@@ -224,16 +223,15 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   private mapRoute(routeGuid: string): Observable<StepOnNextResult> {
-    return cfEntityCatalog.application.api.assignRoute<RequestInfoState>(this.cfGuid, routeGuid, this.appGuid).pipe(
+    return cfEntityCatalog.application.api.assignRoute<ActionState>(this.cfGuid, routeGuid, this.appGuid).pipe(
       pairwise(),
-      filter(([oldApp, newApp]) => {
-        return pathGet('updating.Assigning-Route.busy', oldApp) && !pathGet('updating.Assigning-Route.busy', newApp);
-      }),
-      map(([oldApp, newApp]) => newApp),
-      map((requestState: RequestInfoState) => {
+      filter(([oldR, newR]) => oldR.busy && !newR.busy),
+      map(([, newR]) => newR),
+      map((requestState: ActionState) => {
         if (requestState.error) {
           return { success: false, message: `Failed to associate route with app: ${requestState.error}` };
         }
+        cfEntityCatalog.route.api.getAllForApplication(this.appGuid, this.cfGuid)
         this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid, 'routes'] }));
         return { success: true };
       })
@@ -241,21 +239,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   private mapRouteSubmit(): Observable<StepOnNextResult> {
-
     return this.selectedRoute$.pipe(
-      tap(route => cfEntityCatalog.application.api.assignRoute(this.cfGuid, route.metadata.guid, this.appGuid)),
-      switchMap(() => this.appService.app$),
-      map(requestInfo => requestInfo.entityRequestInfo.updating['Assigning-Route']),
-      filter(requestInfo => !requestInfo.busy),
-      take(1),
-      map(requestInfo => {
-        if (requestInfo.error) {
-          return { success: false, message: `Failed to associate route with app: ${requestInfo.message}` };
-        } else {
-          cfEntityCatalog.route.api.getAllForApplication(this.appGuid, this.cfGuid)
-          return { success: true, redirect: true };
-        }
-      })
+      switchMap(route => this.mapRoute(route.metadata.guid))
     );
   }
 
