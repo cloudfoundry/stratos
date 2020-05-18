@@ -53,7 +53,6 @@ import {
 } from './cf-api.types';
 import { cfEntityCatalog } from './cf-entity-catalog';
 import { cfEntityFactory } from './cf-entity-factory';
-import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
 import {
   appEnvVarsEntityType,
   applicationEntityType,
@@ -159,6 +158,7 @@ import {
   userProvidedServiceActionBuilder,
 } from './entity-action-builders/user-provided-service.action-builders';
 import { UserActionBuilders, userActionBuilders } from './entity-action-builders/user.action-builders';
+import { addCfQParams, addCfRelationParams } from './entity-relations/cf-entity-relations.getters';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
