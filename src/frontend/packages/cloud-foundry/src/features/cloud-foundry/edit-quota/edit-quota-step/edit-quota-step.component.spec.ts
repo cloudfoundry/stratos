@@ -3,7 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 
 import { CFBaseTestModules } from '../../../../../../cloud-foundry/test-framework/cf-test-helper';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { CFBaseTestModules } from '../../../../../test-framework/cf-test-helper';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
 import { EditQuotaStepComponent } from './edit-quota-step.component';
 
