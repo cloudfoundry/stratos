@@ -24,7 +24,8 @@
                   <input matInput placeholder="Metric Type" type="text" name="metric_type" formControlName="metric_type"
                     [matAutocomplete]="metricTypeAuto" required>
                   <mat-autocomplete #metricTypeAuto="matAutocomplete">
-                    <mat-option *ngFor="let metricType of metricTypes" [value]="metricType">{{metricType}}</mat-option>
+                    <mat-option *ngFor="let metricType of filteredMetricTypes$ | async" [value]="metricType">
+                      {{metricType}}</mat-option>
                   </mat-autocomplete>
                 </mat-form-field>
                 <mat-form-field *ngIf="metricTypes.length > 1">

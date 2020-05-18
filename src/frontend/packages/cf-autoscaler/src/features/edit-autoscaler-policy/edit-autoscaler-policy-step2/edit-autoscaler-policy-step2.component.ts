@@ -3,7 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
@@ -35,6 +35,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
 
   policyAlert = PolicyAlert;
   metricTypes = AutoscalerConstants.MetricTypes;
+  filteredMetricTypes$: Observable<string[]>;
   private metricUnitSubject = new BehaviorSubject(this.metricTypes[0]);
   metricUnit$: Observable<string>;
   operatorTypes = AutoscalerConstants.UpperOperators.concat(AutoscalerConstants.LowerOperators);
@@ -78,6 +79,11 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicy imp
     this.subs.push(this.editTriggerForm.get('metric_type').valueChanges.pipe(
       map(value => this.getMetricUnit(value)),
     ).subscribe(unit => this.metricUnitSubject.next(unit)));
+
+    this.filteredMetricTypes$ = this.editTriggerForm.controls.metric_type.valueChanges.pipe(
+      startWith(''),
+      map(value => this.metricTypes.filter(type => type.toLocaleLowerCase().includes(value)))
+    )
   }
 
   addTrigger = () => {
