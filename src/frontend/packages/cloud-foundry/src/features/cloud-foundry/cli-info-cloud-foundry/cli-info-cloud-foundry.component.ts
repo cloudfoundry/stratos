@@ -101,7 +101,6 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   private setupRouteObservable(defaultBackLink: string) {
     this.route$ = this.store.select(getPreviousRoutingState).pipe(
       map(route => {
-        console.log(route);
         return {
           url: route && route.state ? route.state.url : defaultBackLink,
           queryParams: route && route.state && route.state.queryParams ? route.state.queryParams : {}
