@@ -11,7 +11,7 @@
     "test-backend": "./build/bk-build.sh test",
     "update-webdriver": "webdriver-manager update",
     "build": "node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng build --prod",
-    "build-cf": "node --max_old_space_size=2692 --gc_interval=100 node_modules/@angular/cli/bin/ng build --prod",
+    "build-cf": "node --max_old_space_size=1500 --gc_interval=100 node_modules/@angular/cli/bin/ng build --prod",
     "build-dev": "ng build --dev",
     "prebuild-ui": "npm run customize && npm run build && gulp package-prebuild",
     "ng": "ng",
