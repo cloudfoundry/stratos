@@ -83,6 +83,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       columnId: 'manager',
       headerCell: () => 'Manager',
       cellComponent: TableCellRoleOrgSpaceComponent,
+      class: 'app-table__cell--table-column-additional-padding',
       cellConfig: {
         role: OrgUserRoleNames.MANAGER
       }
@@ -91,6 +92,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       columnId: 'auditor',
       headerCell: () => 'Auditor',
       cellComponent: TableCellRoleOrgSpaceComponent,
+      class: 'app-table__cell--table-column-additional-padding',
       cellConfig: {
         role: OrgUserRoleNames.AUDITOR
       }
@@ -99,6 +101,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       columnId: 'billingManager',
       headerCell: () => 'Billing Manager',
       cellComponent: TableCellRoleOrgSpaceComponent,
+      class: 'app-table__cell--table-column-additional-padding',
       cellConfig: {
         role: OrgUserRoleNames.BILLING_MANAGERS
       }
@@ -107,6 +110,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       columnId: 'user',
       headerCell: () => 'User',
       cellComponent: TableCellRoleOrgSpaceComponent,
+      class: 'app-table__cell--table-column-additional-padding',
       cellConfig: {
         role: OrgUserRoleNames.USER
       }
@@ -304,7 +308,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       this.store.select(selectUsersIsRemove).pipe(first()),
       this.cfRolesService.createRolesDiff(this.selectedOrgGuid)
     ]).pipe(
-      map(([isRemove, ]) => {
+      map(([isRemove,]) => {
         if (isRemove) {
           // If we're going to eventually remove the roles flip the add to remove
           this.store.dispatch(new UsersRolesFlipSetRoles());
