@@ -18,7 +18,7 @@ import { sortStringify } from '../../../../core/src/core/utils.service';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { CfValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
@@ -28,24 +28,7 @@ import {
   PaginationEntityState,
   PaginationParam,
 } from '../../types/pagination.types';
-import { ListActionState } from '../api-request-reducer/types';
-
-export interface PaginationObservables<T> {
-  pagination$: Observable<PaginationEntityState>;
-  entities$: Observable<T[]>;
-  /**
-   * Convenience observable on !!entities
-   */
-  hasEntities$: Observable<boolean>;
-  /**
-   * Convenience observable on pagination totalResults (note - not entities.length. In maxed world this can be different)
-   */
-  totalEntities$: Observable<number>;
-  /**
-   * Equate to current page fetching observable
-   */
-  fetchingEntities$: Observable<boolean>;
-}
+import { getCurrentPageRequestInfo, PaginationObservables } from './pagination-reducer.types';
 
 export function removeEmptyParams(params: PaginationParam) {
   const newObject = {};
@@ -304,14 +287,6 @@ export function hasValidOrGettingPage(pagination: PaginationEntityState): boolea
 
 export function hasError(pagination: PaginationEntityState): boolean {
   return pagination && getCurrentPageRequestInfo(pagination).error;
-}
-
-export function getCurrentPageRequestInfo(pagination: PaginationEntityState, valueIfMissing = {
-  busy: false,
-  error: false,
-  message: ''
-}): ListActionState {
-  return pagination.pageRequests[pagination.currentPage] || valueIfMissing;
 }
 
 export function spreadClientPagination(pag: PaginationClientPagination): PaginationClientPagination {

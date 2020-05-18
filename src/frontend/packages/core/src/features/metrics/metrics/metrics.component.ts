@@ -78,7 +78,7 @@ export class MetricsComponent {
 
     // Breadcrumbs
     this.breadcrumbs$ = this.metricsEndpoint$.pipe(
-      map(() => ([ { breadcrumbs: [ { value: 'Endpoints', routerLink: `/endpoints` } ] } ])),
+      map(() => ([{ breadcrumbs: [{ value: 'Endpoints', routerLink: `/endpoints` }] }])),
       first()
     );
 

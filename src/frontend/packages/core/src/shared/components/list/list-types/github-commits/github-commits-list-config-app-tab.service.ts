@@ -13,14 +13,12 @@ import {
   StoreCFSettings,
 } from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { gitBranchesEntityType, gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cloud-foundry/src/cf-types';
+import { cfEntityCatalog } from '../../../../../../../cloud-foundry/src/cf-entity-catalog';
+import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { GitBranch, GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
+import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { GitSCM } from '../../../../data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
 import { IListAction } from '../../list.component.types';
@@ -103,7 +101,6 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
     datePipe: DatePipe,
     private scmService: GitSCMService,
     private applicationService: ApplicationService,
-    private entityServiceFactory: EntityServiceFactory
   ) {
     super(store, datePipe);
     this.setGuids();
@@ -131,25 +128,19 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       const scmType = stratosProject.deploySource.scm || stratosProject.deploySource.type;
       this.scm = this.scmService.getSCM(scmType as GitSCMType);
 
-      const branchKey = `${scmType}-${this.projectName}-${stratosProject.deploySource.branch}`;
-      const gitBranchesEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, gitBranchesEntityType);
-      const fetchBranchesActionBuilder = gitBranchesEntity.actionOrchestrator.getActionBuilder('get');
-      const fetchBranchesAction = fetchBranchesActionBuilder(this.projectName, this.cfGuid, {
+      cfEntityCatalog.gitBranch.store.getEntityService(undefined, undefined, {
         scm: this.scm,
-        projectName: this.projectName
-      });
-      const gitBranchEntityService = this.entityServiceFactory.create<GitBranch>(
-        branchKey,
-        fetchBranchesAction
-      );
-      gitBranchEntityService.waitForEntity$.pipe(
-        first(),
-      ).subscribe(branch => {
-        this.branchName = branch.entity.name;
-        this.dataSource = new GithubCommitsDataSource(
-          this.store, this, this.scm, this.projectName, this.branchName, this.deployedCommitSha);
-        this.initialised.next(true);
-      });
+        projectName: this.projectName,
+        branchName: stratosProject.deploySource.branch
+      })
+        .waitForEntity$.pipe(
+          first(),
+        ).subscribe(branch => {
+          this.branchName = branch.entity.name;
+          this.dataSource = new GithubCommitsDataSource(
+            this.store, this, this.scm, this.projectName, this.branchName, this.deployedCommitSha);
+          this.initialised.next(true);
+        });
 
       this.setDeployedCommitDetails();
     });

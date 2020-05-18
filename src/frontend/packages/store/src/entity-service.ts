@@ -4,14 +4,14 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from './app-state';
+import { entityCatalog } from './entity-catalog/entity-catalog';
+import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
 import { ActionDispatcher } from './entity-request-pipeline/entity-request-pipeline.types';
+import { EntityMonitor } from './monitors/entity-monitor';
 import { RequestInfoState, UpdatingSection } from './reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from './selectors/api.selectors';
 import { EntityInfo } from './types/api.types';
 import { EntityRequestAction } from './types/request.types';
-import { EntityMonitor } from './monitors/entity-monitor';
-import { entityCatalog } from './entity-catalog/entity-catalog.service';
-import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
 
 export const ENTITY_INFO_HANDLER = '__ENTITY_INFO_HANDLER__';
 
@@ -25,7 +25,6 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
     entityRequestInfo.error ||
     entityRequestInfo.deleting.busy ||
     entityRequestInfo.deleting.deleted;
-  // TODO: RC test removal of updating._root_.busy
 }
 
 const dispatcherFactory = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => (updatingKey?: string) => {

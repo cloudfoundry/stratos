@@ -12,7 +12,7 @@ import {
 } from '../actions/metrics-api.actions';
 import { getFullMetricQueryQuery, METRICS_START, MetricsAction } from '../actions/metrics.actions';
 import { DispatchOnlyAppState } from '../app-state';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { IMetricsResponse } from '../types/base-metric.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 

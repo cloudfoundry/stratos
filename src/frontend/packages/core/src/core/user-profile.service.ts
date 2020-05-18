@@ -10,7 +10,7 @@ import {
 } from '../../../store/src/actions/user-profile.actions';
 import { AppState } from '../../../store/src/app-state';
 import { userProfilePasswordUpdatingKey } from '../../../store/src/effects/user-profile.effects';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../store/src/entity-service-factory.service';
 import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../../store/src/reducers/api-request-reducer/types';

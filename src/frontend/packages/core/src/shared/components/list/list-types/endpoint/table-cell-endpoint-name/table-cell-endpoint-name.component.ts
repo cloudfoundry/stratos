@@ -3,11 +3,11 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
 
 import { GetAllEndpoints } from '../../../../../../../../store/src/actions/endpoint.actions';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { TableCellCustom } from '../../../list.types';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 
 export interface RowWithEndpointId {
   endpointId: string;

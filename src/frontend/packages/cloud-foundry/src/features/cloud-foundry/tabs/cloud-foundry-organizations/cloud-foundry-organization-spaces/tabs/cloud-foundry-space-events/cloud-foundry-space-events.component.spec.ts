@@ -4,6 +4,9 @@ import {
 } from 'frontend/packages/cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
 
 import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { CFBaseTestModules } from '../../../../../../../../test-framework/cf-test-helper';
 import {
   CloudFoundryEventsListComponent,
@@ -36,7 +39,8 @@ describe('CloudFoundrySpaceEventsComponent', () => {
         CloudFoundrySpaceService,
         CfUserService,
         CloudFoundryEndpointService,
-        CloudFoundryOrganizationService
+        CloudFoundryOrganizationService,
+        CloudFoundryUserProvidedServicesService
       ],
       imports: [...CFBaseTestModules]
     })

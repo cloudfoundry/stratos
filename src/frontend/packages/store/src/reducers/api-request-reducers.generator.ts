@@ -6,7 +6,7 @@ import { requestReducerFactory } from './api-request-reducer/request-reducer.fac
 import { RequestInfoState } from './api-request-reducer/types';
 import { chainApiReducers, ExtraApiReducers, requestActions } from './api-request-reducers.generator.helpers';
 import { appStatsReducer } from '../../../cloud-foundry/src/store/reducers/app-stats-request.reducer';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 
 /**

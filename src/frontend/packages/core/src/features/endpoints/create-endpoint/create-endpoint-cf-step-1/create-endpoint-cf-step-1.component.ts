@@ -10,8 +10,10 @@ import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/a
 import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
-import { StratosCatalogEndpointEntity } from '../../../../../../store/src/entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
+import {
+  StratosCatalogEndpointEntity,
+} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';

@@ -34,6 +34,7 @@ export interface AppScalingRule {
   metric_type: string;
   operator: string;
   threshold: number;
+  unit?: string;
 }
 
 export interface AppScalingTrigger {
@@ -147,6 +148,7 @@ export interface AppAutoscalerFetchPolicyFailedResponse {
 }
 
 export interface AppAutoscalerInvalidPolicyError {
+  alertInvalidPolicyTriggerMetricName?: AppAutoscalerInvalidPolicyErrorEntity;
   alertInvalidPolicyTriggerThreshold100?: AppAutoscalerInvalidPolicyErrorEntity;
   alertInvalidPolicyTriggerThresholdRange?: AppAutoscalerInvalidPolicyErrorEntity;
   alertInvalidPolicyTriggerStepRange?: AppAutoscalerInvalidPolicyErrorEntity;
@@ -162,3 +164,14 @@ export interface AppAutoscalerInvalidPolicyErrorEntity {
   value?: string | number;
 }
 
+export interface AppAutoscaleMetricChart {
+  name: string;
+  unit: string;
+}
+
+export interface AppAutoscalerCredential {
+  username: string;
+  password: string;
+  app_id?: string;
+  url?: string;
+}

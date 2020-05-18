@@ -2,7 +2,7 @@ import { Observable, of as observableOf } from 'rxjs';
 
 import { StratosStatus } from '../../shared/shared.types';
 import { EndpointIcon, getFullEndpointApiUrl } from '../endpoints/endpoint-helpers';
-import { entityCatalog } from './../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from './../../../../store/src/entity-catalog/entity-catalog';
 import { MetricsEndpointProvider } from './services/metrics-service';
 
 // Info for an endpoint that a metrics endpoint provides for

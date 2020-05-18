@@ -1,16 +1,23 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import {
   QuotaFormValues,
 } from '../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
+import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import {
   AssociateSpaceQuota,
   CreateSpaceQuotaDefinition,
   DisassociateSpaceQuota,
   GetOrganizationSpaceQuotaDefinitions,
+  GetSpaceQuotaDefinition,
   UpdateSpaceQuotaDefinition,
 } from '../actions/quota-definitions.actions';
+import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface SpaceQuotaDefinitionActionBuilders extends OrchestratedActionBuilders {
+  get: (
+    guid: string,
+    endpointGuid: string,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+  ) => GetSpaceQuotaDefinition
   create: (
     id: string,
     endpointGuid: string,
@@ -44,6 +51,11 @@ export interface SpaceQuotaDefinitionActionBuilders extends OrchestratedActionBu
 }
 
 export const spaceQuotaDefinitionActionBuilders: SpaceQuotaDefinitionActionBuilders = {
+  get: (
+    guid: string,
+    endpointGuid: string,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+  ) => new GetSpaceQuotaDefinition(guid, endpointGuid, includeRelations, populateMissing),
   create: (
     id: string,
     endpointGuid: string,
