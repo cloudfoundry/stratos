@@ -4,7 +4,7 @@ import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { UnregisterEndpoint } from 'frontend/packages/store/src/actions/endpoint.actions';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
 import { endpointSchemaKey } from 'frontend/packages/store/src/helpers/entity-factory';
 import { selectDeletionInfo } from 'frontend/packages/store/src/selectors/api.selectors';
 import { of as observableOf } from 'rxjs';

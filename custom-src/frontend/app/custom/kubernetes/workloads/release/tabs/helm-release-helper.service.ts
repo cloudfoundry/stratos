@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from 'frontend/packages/store/src/app-state';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
 import { EntityServiceFactory } from 'frontend/packages/store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from 'frontend/packages/store/src/monitors/pagination-monitor.factory';
 import { selectEntity } from 'frontend/packages/store/src/selectors/api.selectors';
