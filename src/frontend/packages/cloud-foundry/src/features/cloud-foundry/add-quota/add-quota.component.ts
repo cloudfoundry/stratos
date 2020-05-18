@@ -3,8 +3,6 @@ import { Component } from '@angular/core';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
-// TODO: Move CF code to CF Module #3769. There's a few quota related components to move
-
 @Component({
   selector: 'app-add-quota',
   templateUrl: './add-quota.component.html',

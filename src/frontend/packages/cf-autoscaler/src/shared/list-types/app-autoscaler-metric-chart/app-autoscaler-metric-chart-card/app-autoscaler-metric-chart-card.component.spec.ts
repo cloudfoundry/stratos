@@ -10,9 +10,11 @@ import {
   ServiceActionHelperService,
 } from '../../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
 import { ApplicationStateService } from '../../../../../../cloud-foundry/src/shared/services/application-state.service';
+import {
+  generateTestApplicationServiceProvider,
+} from '../../../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { generateTestApplicationServiceProvider } from '../../../../../../core/test-framework/application-service-helper';
 import { AppTestModule } from '../../../../../../core/test-framework/core-test.helper';
 import {
   EntityCatalogHelper,

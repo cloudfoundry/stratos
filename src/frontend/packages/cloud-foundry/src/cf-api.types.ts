@@ -2,8 +2,6 @@ import { APIResource } from '../../store/src/types/api.types';
 import { IService, IServiceBinding } from './cf-api-svc.types';
 import { CfUser } from './store/types/user.types';
 
-// TODO: Move file to CF package (#3769)
-
 export interface StratosCFEntity {
   cfGuid: string;
 }

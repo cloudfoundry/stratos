@@ -3,6 +3,7 @@ import { EffectsModule } from '@ngrx/effects';
 
 import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
 import { AppVariablesEffect } from './effects/app-variables.effects';
+import { AppEffects } from './effects/app.effects';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
@@ -23,7 +24,8 @@ import { ServiceInstanceEffects } from './effects/service-instance.effects';
       RouteEffect,
       PermissionsEffects,
       PermissionEffects,
-      ServiceInstanceEffects
+      ServiceInstanceEffects,
+      AppEffects
     ])
   ]
 })

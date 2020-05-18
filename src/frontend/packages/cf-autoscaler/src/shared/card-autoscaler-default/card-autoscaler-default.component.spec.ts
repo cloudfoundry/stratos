@@ -8,12 +8,12 @@ import {
   RunningInstancesComponent,
 } from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
 import { ApplicationStateService } from '../../../../cloud-foundry/src/shared/services/application-state.service';
+import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import {
   CopyToClipboardComponent,
 } from '../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
 import { AppTestModule } from '../../../../core/test-framework/core-test.helper';
 import { EntityCatalogHelper } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';

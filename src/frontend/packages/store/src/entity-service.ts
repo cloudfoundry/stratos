@@ -1,4 +1,3 @@
-import { Inject, Optional } from '@angular/core';
 import { compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -6,16 +5,11 @@ import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatest
 import { GeneralEntityAppState } from './app-state';
 import { entityCatalog } from './entity-catalog/entity-catalog';
 import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
-import { ActionDispatcher } from './entity-request-pipeline/entity-request-pipeline.types';
 import { EntityMonitor } from './monitors/entity-monitor';
 import { RequestInfoState, UpdatingSection } from './reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById } from './selectors/api.selectors';
 import { EntityInfo } from './types/api.types';
 import { EntityRequestAction } from './types/request.types';
-
-export const ENTITY_INFO_HANDLER = '__ENTITY_INFO_HANDLER__';
-
-export type EntityInfoHandler = (action: EntityRequestAction, actionDispatcher: ActionDispatcher) => (entityInfo: EntityInfo) => void;
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   if (!entityRequestInfo) {
@@ -47,9 +41,9 @@ export class EntityService<T = any> {
     store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
     actionOrConfig: EntityRequestAction | EntityActionBuilderEntityConfig,
-    @Optional() @Inject(ENTITY_INFO_HANDLER) entityInfoHandlerBuilder?: EntityInfoHandler
   ) {
     this.action = this.getAction(actionOrConfig);
+    const entityInfoHandlerBuilder = entityCatalog.getEntity(this.action).getEntityEmitHandler();
     const actionInfoHandler = entityInfoHandlerBuilder ? entityInfoHandlerBuilder(
       this.action, (action) => store.dispatch(action)
     ) : () => { };

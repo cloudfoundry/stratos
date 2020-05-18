@@ -24,11 +24,6 @@ import {
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
 
-// tslint:disable:max-line-length
-
-// TODO: Move file to CF package (#3769)
-// tslint:enable:max-line-length
-
 @Injectable()
 export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealthEntry> {
 

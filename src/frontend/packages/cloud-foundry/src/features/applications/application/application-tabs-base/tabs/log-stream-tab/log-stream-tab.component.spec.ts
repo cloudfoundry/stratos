@@ -8,13 +8,11 @@ import { cfEntityFactory } from '../../../../../../../../cloud-foundry/src/cf-en
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import { LogViewerComponent } from '../../../../../../../../core/src/shared/components/log-viewer/log-viewer.component';
-import {
-  generateTestApplicationServiceProvider,
-} from '../../../../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../../../../core/test-framework/entity-service.helper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
+import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { applicationEntityType } from '../../../../../../cf-entity-types';
 import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';

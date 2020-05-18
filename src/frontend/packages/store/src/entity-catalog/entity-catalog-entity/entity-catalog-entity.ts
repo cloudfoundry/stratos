@@ -4,6 +4,7 @@ import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../core/sr
 import { KnownKeys, NonOptionalKeys } from '../../../../core/src/core/utils.service';
 import { getFullEndpointApiUrl } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import { IRequestEntityTypeState } from '../../app-state';
+import { EntitiesInfoHandler, EntityInfoHandler } from '../../entity-request-pipeline/entity-request-pipeline.types';
 import {
   PaginationPageIteratorConfig,
 } from '../../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
@@ -128,8 +129,8 @@ export class StratosBaseCatalogEntity<
       }
       return newSchema;
     }, {
-      default: entitySchemas.default
-    });
+        default: entitySchemas.default
+      });
   }
 
   private getEndpointType(definition: IStratosBaseEntityDefinition) {
@@ -250,6 +251,14 @@ export class StratosBaseCatalogEntity<
       this.definition.paginationConfig :
       null;
   }
+
+  public getEntityEmitHandler(): EntityInfoHandler {
+    return this.definition.entityEmitHandler;
+  }
+
+  public getEntitiesEmitHandler(): EntitiesInfoHandler {
+    return this.definition.entitiesEmitHandler;
+  }
 }
 
 export class StratosCatalogEntity<
@@ -270,6 +279,16 @@ export class StratosCatalogEntity<
     return this.definition.paginationConfig ?
       this.definition.paginationConfig :
       this.definition.endpoint ? this.definition.endpoint.paginationConfig : null;
+  }
+
+  public getEntityEmitHandler(): EntityInfoHandler {
+    return this.definition.entityEmitHandler ||
+      this.definition.endpoint ? this.definition.endpoint.entityEmitHandler : null;
+  }
+
+  public getEntitiesEmitHandler(): EntitiesInfoHandler {
+    return this.definition.entitiesEmitHandler ||
+      this.definition.endpoint ? this.definition.endpoint.entitiesEmitHandler : null
   }
 }
 

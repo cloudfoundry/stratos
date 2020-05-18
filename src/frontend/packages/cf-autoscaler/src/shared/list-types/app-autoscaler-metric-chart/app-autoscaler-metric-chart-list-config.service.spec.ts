@@ -6,8 +6,10 @@ import {
   ApplicationEnvVarsHelper,
 } from '../../../../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateService } from '../../../../../cloud-foundry/src/shared/services/application-state.service';
+import {
+  generateTestApplicationServiceProvider,
+} from '../../../../../cloud-foundry/test-framework/application-service-helper';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
-import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
 import { EntityCatalogHelper } from '../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';

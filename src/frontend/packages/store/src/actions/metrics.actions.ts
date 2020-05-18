@@ -1,4 +1,4 @@
-import { metricEntityType } from '../../../cloud-foundry/src/cf-entity-types';
+import { metricEntityType } from '../../../core/src/base-entity-schemas';
 import { environment } from '../../../core/src/environments/environment';
 import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
 import { EntityRequestAction } from '../types/request.types';

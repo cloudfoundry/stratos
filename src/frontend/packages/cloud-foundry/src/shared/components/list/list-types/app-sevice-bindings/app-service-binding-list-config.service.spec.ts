@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 
-import { generateTestApplicationServiceProvider } from '../../../../../../../core/test-framework/application-service-helper';
+import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
 import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   ApplicationEnvVarsHelper,

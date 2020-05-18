@@ -7,6 +7,8 @@ import {
 } from '../../store/src/helpers/entity-factory';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 
+export const metricEntityType = 'metrics';
+
 export const STRATOS_ENDPOINT_TYPE = 'stratos';
 export const ENDPOINT_TYPE = 'endpoint';
 
