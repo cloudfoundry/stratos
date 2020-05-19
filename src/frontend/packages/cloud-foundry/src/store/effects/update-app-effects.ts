@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Action } from '@ngrx/store';
 import { mergeMap } from 'rxjs/operators';
 
-import { AppMetadataTypes } from '../../../cloud-foundry/src/actions/app-metadata.actions';
-import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
-import { cfEntityCatalog } from '../../../cloud-foundry/src/cf-entity-catalog';
-import { WrapperRequestActionSuccess } from '../types/request.types';
-
-// TODO: RC TWEAK/MOVE
+import { WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
+import { AppMetadataTypes } from '../../actions/app-metadata.actions';
+import { DeleteApplicationInstance, UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
+import { cfEntityCatalog } from '../../cf-entity-catalog';
 
 @Injectable()
 export class UpdateAppEffects {
@@ -45,6 +44,40 @@ export class UpdateAppEffects {
             break;
         }
       });
-      return actions;
+
+      return actions.concat(this.markAppStatsAsDeleted(updateAction));
     }));
+
+  private markAppStatsAsDeleted(action: UpdateExistingApplication): Action[] {
+    const actions = [];
+    // Only interest if we have the old and new app and either the app has been stopped or now contains zero instances
+    if (!action.newApplication || !action.existingApplication) {
+      return;
+    }
+    if (action.newApplication.state !== 'STOPPED' && action.newApplication.instances !== 0) {
+      return;
+    }
+    // TODO: RC 
+    // Delete root stat
+    // this.deleteState(action.guid)
+
+    // Delete each instance stat
+    const instances = action.existingApplication.instances || 0;
+    for (let i = 0; i < instances; i++) {
+      actions.push(this.deleteState(action.guid, i, action.endpointGuid));
+    }
+    return actions;
+  }
+
+  private deleteState(guid: string, instanceId: number = null, endpointGuid: string): Action {
+    return new WrapperRequestActionSuccess(
+      {
+        entities: {},
+        result: []
+      },
+      {
+        ...new DeleteApplicationInstance(guid, instanceId, endpointGuid)
+      }
+    )
+  }
 }

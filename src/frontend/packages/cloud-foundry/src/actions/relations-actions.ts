@@ -1,11 +1,16 @@
 import { Action } from '@ngrx/store';
 
-import {
-  APIResponse,
-  EntitiesPipelineAction,
-  EntitiesPipelineActionTypes,
-} from '../../../store/src/actions/request.actions';
+import { APIResponse } from '../../../store/src/actions/request.actions';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import { ICFAction } from '../../../store/src/types/request.types';
 import { ValidationResult } from '../entity-relations/entity-relations.types';
+
+type EntitiesPipelineAction = ICFAction | PaginatedAction;
+
+export const EntitiesPipelineActionTypes = {
+  VALIDATE: '[Validation] Starting',
+  COMPLETE: '[Validation] Completed',
+};
 
 export class CfValidateEntitiesStart implements Action {
   type = EntitiesPipelineActionTypes.VALIDATE;

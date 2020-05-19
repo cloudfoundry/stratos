@@ -16,7 +16,6 @@ import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { SnackBarEffects } from './effects/snackBar.effects';
 import { SystemEffects } from './effects/system.effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
-import { UpdateAppEffects } from './effects/update-app-effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
@@ -38,7 +37,6 @@ import { AppReducersModule } from './reducers.module';
       AuthEffect,
       UAASetupEffect,
       EndpointsEffect,
-      UpdateAppEffects,
       PaginationEffects,
       ActionHistoryEffect,
       RouterEffect,

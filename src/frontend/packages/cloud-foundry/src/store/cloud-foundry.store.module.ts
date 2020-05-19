@@ -12,6 +12,7 @@ import { PermissionEffects, PermissionsEffects } from './effects/permissions.eff
 import { CfValidateEffects } from './effects/request.effects';
 import { RouteEffect } from './effects/route.effects';
 import { ServiceInstanceEffects } from './effects/service-instance.effects';
+import { UpdateAppEffects } from './effects/update-app-effects';
 
 @NgModule({
   imports: [
@@ -27,6 +28,7 @@ import { ServiceInstanceEffects } from './effects/service-instance.effects';
       PermissionEffects,
       ServiceInstanceEffects,
       AppEffects,
+      UpdateAppEffects,
       CfValidateEffects
     ])
   ]
