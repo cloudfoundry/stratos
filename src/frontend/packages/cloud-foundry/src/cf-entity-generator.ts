@@ -25,7 +25,6 @@ import { ActionDispatcher, JetstreamResponse } from '../../store/src/entity-requ
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { selectSessionData } from '../../store/src/reducers/auth.reducer';
-import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../store/src/types/pagination.types';
 import { ICFAction } from '../../store/src/types/request.types';
@@ -166,6 +165,7 @@ import { populatePaginationFromParent } from './entity-relations/entity-relation
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
+import { endpointDisconnectRemoveEntitiesReducer } from './store/reducers/endpoint-disconnect-application.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
 import { routeReducer, updateAppSummaryRoutesReducer } from './store/reducers/routes.reducer';

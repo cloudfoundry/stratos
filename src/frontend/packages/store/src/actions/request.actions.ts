@@ -23,6 +23,7 @@ export const EntitiesPipelineActionTypes = {
 
 export type EntitiesPipelineAction = ICFAction | PaginatedAction;
 
+// TODO: RC TWEAK/MOVE
 export class CfValidateEntitiesStart implements Action {
   type = EntitiesPipelineActionTypes.VALIDATE;
   constructor(
@@ -32,12 +33,14 @@ export class CfValidateEntitiesStart implements Action {
   }
 }
 
+// TODO: RC TWEAK/MOVE
 export class APIResponse {
   response: NormalizedResponse;
   totalResults: number;
   totalPages: number;
 }
 
+// TODO: RC TWEAK/MOVE
 export class CfValidateEntitiesComplete implements Action {
   type = EntitiesPipelineActionTypes.COMPLETE;
   constructor(

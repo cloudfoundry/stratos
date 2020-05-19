@@ -2,6 +2,7 @@ import { QParam } from '../../../../cloud-foundry/src/shared/q-param';
 import { RemoveParams } from '../../actions/pagination.actions';
 import { PaginationEntityState } from '../../types/pagination.types';
 
+// TODO: RC
 export function paginationRemoveParams(state: PaginationEntityState, action: RemoveParams) {
 
   const removeParamsState = {

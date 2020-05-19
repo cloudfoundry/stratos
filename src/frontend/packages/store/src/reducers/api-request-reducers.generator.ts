@@ -1,14 +1,17 @@
 import { Action } from '@ngrx/store';
+
 import { appStatsEntityType } from '../../../cloud-foundry/src/cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
+import { appStatsReducer } from '../../../cloud-foundry/src/store/reducers/app-stats-request.reducer';
 import { IRequestEntityTypeState } from '../app-state';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { IRequestState } from '../types/entity.types';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
 import { RequestInfoState } from './api-request-reducer/types';
 import { chainApiReducers, ExtraApiReducers, requestActions } from './api-request-reducers.generator.helpers';
-import { appStatsReducer } from '../../../cloud-foundry/src/store/reducers/app-stats-request.reducer';
-import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 
+
+// TODO: RC TWEAK/MOVE
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
