@@ -69,15 +69,6 @@ export interface AppAutoscalerHealth {
   };
 }
 
-export interface AppAutoscalerScalingHistory {
-  next_url: string;
-  prev_url: string;
-  page: number;
-  resources: AppAutoscalerEvent[];
-  total_pages: number;
-  total_results: number;
-}
-
 export interface AppAutoscalerEvent {
   app_id: string;
   error: string;

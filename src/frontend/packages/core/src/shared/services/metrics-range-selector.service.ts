@@ -75,7 +75,7 @@ export class MetricsRangeSelectorService {
         };
       } else {
         return {
-          timeRange: metrics.query.params && metrics.query.params.window ?
+          timeRange: metrics.query && metrics.query.params && metrics.query.params.window ?
             times.find(time => time.value === metrics.query.params.window) :
             this.getDefaultTimeRange(times)
         };
