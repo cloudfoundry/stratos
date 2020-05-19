@@ -19,7 +19,7 @@ import { PageAutoscalerMetricBase } from './po/page-autoscaler-metric-base.po';
 
 let applicationE2eHelper: ApplicationE2eHelper;
 
-fdescribe('Autoscaler -', () => {
+describe('Autoscaler -', () => {
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.user)
