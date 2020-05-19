@@ -76,10 +76,10 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   metricTypes: string[] = AutoscalerConstants.MetricTypes;
 
   appAutoscalerPolicyService: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
-  public appAutoscalerScalingHistoryService: PaginationObservables<AppAutoscalerEvent>;
+  public appAutoscalerScalingHistoryService: PaginationObservables<APIResource<AppAutoscalerEvent>>;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicyLocal>;
   appAutoscalerPolicySafe$: Observable<AppAutoscalerPolicyLocal>;
-  appAutoscalerScalingHistory$: Observable<APIResource<AppAutoscalerEvent[]>>;
+  appAutoscalerScalingHistory$: Observable<AppAutoscalerEvent[]>;
   appAutoscalerAppMetricNames$: Observable<AppAutoscaleMetricChart[]>;
 
   public showNoPolicyMessage$: Observable<boolean>;
