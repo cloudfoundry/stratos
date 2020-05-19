@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
+import { EnvVarViewComponent } from '../../../cloud-foundry/src/shared/components/env-var-view/env-var-view.component';
 import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
 import { CoreModule } from '../core/core.module';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -35,7 +36,6 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { EntitySummaryTitleComponent } from './components/entity-summary-title/entity-summary-title.component';
 import { EnumerateComponent } from './components/enumerate/enumerate.component';
-import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { FavoritesEntityListComponent } from './components/favorites-entity-list/favorites-entity-list.component';
 import { FavoritesGlobalListComponent } from './components/favorites-global-list/favorites-global-list.component';
 import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
@@ -151,9 +151,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     EndpointsMissingComponent,
     DialogErrorComponent,
     SshViewerComponent,
-    ApplicationStateIconPipe, // TODO: RC MOVE
-    ApplicationStateIconComponent,// TODO: RC MOVE
-    ApplicationStateComponent,// TODO: RC MOVE
+    ApplicationStateIconPipe,
+    ApplicationStateIconComponent,
+    ApplicationStateComponent,
     TileComponent,
     TileGroupComponent,
     TileGridComponent,
@@ -175,7 +175,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     AppChipsComponent,
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
-    EnvVarViewComponent,// TODO: RC MOVE
     RingChartComponent,
     MetricsChartComponent,
     StratosTitleComponent,
@@ -271,7 +270,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     AppChipsComponent,
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
-    EnvVarViewComponent,
     MetricsChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,

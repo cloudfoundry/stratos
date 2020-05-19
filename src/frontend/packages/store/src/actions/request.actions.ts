@@ -1,6 +1,3 @@
-import { Action } from '@ngrx/store';
-
-import { ValidationResult } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
@@ -21,17 +18,8 @@ export const EntitiesPipelineActionTypes = {
   COMPLETE: '[Validation] Completed',
 };
 
+// TODO: RC TWEAK/MOVE ICFACTION
 export type EntitiesPipelineAction = ICFAction | PaginatedAction;
-
-// TODO: RC TWEAK/MOVE
-export class CfValidateEntitiesStart implements Action {
-  type = EntitiesPipelineActionTypes.VALIDATE;
-  constructor(
-    public action: EntitiesPipelineAction,
-    public validateEntities: string[],
-  ) {
-  }
-}
 
 // TODO: RC TWEAK/MOVE
 export class APIResponse {
@@ -40,16 +28,4 @@ export class APIResponse {
   totalPages: number;
 }
 
-// TODO: RC TWEAK/MOVE
-export class CfValidateEntitiesComplete implements Action {
-  type = EntitiesPipelineActionTypes.COMPLETE;
-  constructor(
-    public apiAction: EntitiesPipelineAction,
-    public apiResponse: APIResponse,
-    public validateAction: CfValidateEntitiesStart,
-    public validationResult: ValidationResult,
-    public independentUpdates: boolean
-  ) {
 
-  }
-}

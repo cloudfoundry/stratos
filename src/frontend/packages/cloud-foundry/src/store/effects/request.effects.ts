@@ -5,15 +5,12 @@ import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators
 
 import { LoggerService } from '../../../../core/src/core/logger.service';
 import { SET_PAGE_BUSY } from '../../../../store/src/actions/pagination.actions';
-import {
-  CfValidateEntitiesComplete,
-  CfValidateEntitiesStart,
-  EntitiesPipelineActionTypes,
-} from '../../../../store/src/actions/request.actions';
+import { EntitiesPipelineActionTypes } from '../../../../store/src/actions/request.actions';
 import { rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../../../../store/src/selectors/api.selectors';
 import { getPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { UpdateCfAction } from '../../../../store/src/types/request.types';
+import { CfValidateEntitiesComplete, CfValidateEntitiesStart } from '../../actions/relations-actions';
 import { CFAppState } from '../../cf-app-state';
 import { validateEntityRelations } from '../../entity-relations/entity-relations';
 

@@ -1,6 +1,5 @@
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 
-// TODO: RC REMOVE ALL CF???
 export enum CurrentUserPermissions {
   APPLICATION_VIEW = 'view.application',
   APPLICATION_EDIT = 'edit.application',

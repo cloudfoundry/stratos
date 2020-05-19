@@ -13,8 +13,6 @@ import {
   createAppInstancesMetricAction,
 } from '../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
 
-// TODO: RC search for cloud-foundry in store
-// TODO: RC search for cloud-foundry in others
 @Injectable()
 export class AppEffects {
 

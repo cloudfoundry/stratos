@@ -7,7 +7,6 @@ import { EndpointHealthCheck } from '../../core/endpoints-health-checks';
 import { metricEntityType } from '../../core/src/base-entity-schemas';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
-import { CfValidateEntitiesStart } from '../../store/src/actions/request.actions';
 import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
@@ -28,6 +27,7 @@ import { selectSessionData } from '../../store/src/reducers/auth.reducer';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../store/src/types/pagination.types';
 import { ICFAction } from '../../store/src/types/request.types';
+import { CfValidateEntitiesStart } from './actions/relations-actions';
 import {
   IService,
   IServiceBinding,
