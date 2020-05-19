@@ -85,10 +85,10 @@ export class RequestHelpers {
     }
 
     E2E.debugLog('REQ: ' + options.method + ' ' + options.url);
-    E2E.debugLog('   > ' + JSON.stringify(options));
+    this.showOptions(options);
 
     reqObj(options).then((response) => {
-      E2E.debugLog('OK');
+      E2E.debugLog('   + OK : ' + response.statusCode);
 
       // Get XSRF Token
       if (response.headers && response.headers['x-xsrf-token']) {
@@ -96,13 +96,33 @@ export class RequestHelpers {
       }
       p.fulfill(response.body);
     }).catch((e) => {
-      E2E.debugLog('ERROR');
-      E2E.debugLog(e);
-      E2E.debugLog(e.statusCode + ' : ' + e.message);
+      // E2E.debugLog('ERROR');
+      // E2E.debugLog(e);
+      E2E.debugLog('   - ERR: ' + e.statusCode + ' : ' + e.message);
       p.reject(e);
     });
 
     return p.promise;
+  }
+
+  showOptions(options: any) {
+    if (!options) {
+      return;
+    }
+    const cpy = JSON.parse(JSON.stringify(options));
+    this.sanitizeOption(cpy);
+    E2E.debugLog('   > ' + JSON.stringify(cpy));
+  }
+
+  sanitizeOption(options) {
+    Object.keys(options).forEach(key => {
+      const v = options[key];
+      if (typeof v === 'string' && key === 'password') {
+        options[key]='******';
+      } else if  (typeof v === 'object') {
+        this.sanitizeOption(options[key]);
+      }
+    });
   }
 
   /**
