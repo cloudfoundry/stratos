@@ -10,7 +10,7 @@ import {
 } from '../../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { RouterNav } from '../../../../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { selectDeletionInfo } from '../../../../../../../../../store/src/selectors/api.selectors';
 import { spaceEntityType } from '../../../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';

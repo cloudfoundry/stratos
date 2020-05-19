@@ -1,6 +1,5 @@
 import { PaginatedAction } from '../../types/pagination.types';
 import { EntityRequestAction } from '../../types/request.types';
-import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 import { ActionOrchestrator, OrchestratedActionBuilders } from './action-orchestrator';
 import { getPaginationAction, getRequestAction, hasActions } from './action-orchestrator.spec.helpers';
 
@@ -50,18 +49,4 @@ describe('ActionOrchestrator', () => {
     hasActions(actionOrchestrator, ['get', 'remove', 'update', 'create', 'getMultiple', 'customAction101', 'customAction202']);
   });
 
-  it('should get entity action dispatcher', () => {
-    const actionBuilders: OrchestratedActionBuilders = {
-      get: guid => getRequestAction(),
-      remove: guid => getRequestAction(),
-      update: guid => getRequestAction(),
-      create: () => getRequestAction(),
-      getMultiple: () => getPaginationAction(),
-      customAction101: () => getPaginationAction(),
-      customAction202: guid => getRequestAction()
-    };
-    const actionOrchestrator = new ActionOrchestrator('BasePlusCustom', actionBuilders);
-    const dispatcher = actionOrchestrator.getEntityActionDispatcher(() => { });
-    expect(dispatcher instanceof EntityActionDispatcherManager).toBe(true);
-  });
 });

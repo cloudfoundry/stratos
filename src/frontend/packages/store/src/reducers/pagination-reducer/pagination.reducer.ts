@@ -27,7 +27,7 @@ import {
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import { mergeState } from '../../helpers/reducer.helper';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';

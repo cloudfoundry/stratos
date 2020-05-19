@@ -1,7 +1,7 @@
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { IEntityMetadata } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import { FavoritesConfigMapper } from '../shared/components/favorites-meta-card/favorite-config-mapper';
-import { entityCatalog } from './../../../store/src/entity-catalog/entity-catalog.service';
 
 export function isEndpointTypeFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
   return !favorite.entityId;

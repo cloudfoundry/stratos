@@ -23,6 +23,9 @@ import { UserFavorite } from '../../../../../../../store/src/types/user-favorite
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
@@ -35,7 +38,8 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
     CloudFoundryEndpointService,
-    CloudFoundryOrganizationService
+    CloudFoundryOrganizationService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class CloudFoundryOrganizationBaseComponent {

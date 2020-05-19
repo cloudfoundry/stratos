@@ -5,7 +5,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { BrowserStandardEncoder } from '../../../helper';
 import {

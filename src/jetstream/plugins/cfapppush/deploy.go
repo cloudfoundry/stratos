@@ -82,7 +82,9 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	// App ID is this is a redeploy
 	appID := echoContext.QueryParam("app")
 
+	log.Debug("UpgradeToWebSocket")
 	clientWebSocket, pingTicker, err := interfaces.UpgradeToWebSocket(echoContext)
+	log.Debug("UpgradeToWebSocket done")
 	if err != nil {
 		log.Errorf("Upgrade to websocket failed due to: %+v", err)
 		return err
@@ -197,9 +199,9 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	pushConfig.DialTimeout = dialTimeout
 
 	// Initialise Push Command
-	cfAppPush.cfPush = Constructor(pushConfig, cfAppPush.portalProxy)
+	cfPush := Constructor(pushConfig, cfAppPush.portalProxy)
 
-	err = cfAppPush.cfPush.Init(appDir, manifestFile, overrides)
+	err = cfPush.Init(appDir, manifestFile, overrides)
 	if err != nil {
 		log.Warnf("Failed to parse due to: %+v", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
@@ -208,7 +210,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	sendEvent(clientWebSocket, EVENT_PUSH_STARTED)
 
-	err = cfAppPush.cfPush.Run(cfAppPush, clientWebSocket)
+	err = cfPush.Run(cfAppPush, clientWebSocket)
 	if err != nil {
 		log.Warnf("Failed to execute due to: %+v", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_PUSH_ERROR)
@@ -479,7 +481,8 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID str
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_SESSION)
 		return nil, err
 	}
-	cnsiTokenRecord, found := cfAppPush.portalProxy.GetCNSITokenRecord(cnsiGUID, userID)
+
+	token, found := cfAppPush.portalProxy.GetCNSITokenRecord(cnsiGUID, userID)
 	if !found {
 		log.Warnf("Failed to retrieve record for CNSI %s", cnsiGUID)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI_USERTOKEN)
@@ -493,12 +496,13 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID str
 		APIEndpointURL:         cnsiRecord.APIEndpoint.String(),
 		DopplerLoggingEndpoint: cnsiRecord.DopplerLoggingEndpoint,
 		SkipSSLValidation:      cnsiRecord.SkipSSLValidation,
-		AuthToken:              cnsiTokenRecord.AuthToken,
-		RefreshToken:           cnsiTokenRecord.RefreshToken,
+		AuthToken:              token.AuthToken,
 		OrgGUID:                orgGUID,
 		OrgName:                orgName,
 		SpaceGUID:              spaceGUID,
 		SpaceName:              spaceName,
+		EndpointID:             cnsiGUID,
+		UserID:                 userID,
 	}
 
 	return config, nil

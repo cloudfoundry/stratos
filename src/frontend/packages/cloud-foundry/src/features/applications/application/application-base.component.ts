@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../core/src/shared/entity.tokens';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
 import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -14,19 +13,15 @@ export function applicationServiceFactory(
   cfId: string,
   id: string,
   store: Store<CFAppState>,
-  entityServiceFactoryInstance: EntityServiceFactory,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsHelper,
-  paginationMonitorFactory: PaginationMonitorFactory,
 ) {
   return new ApplicationService(
     cfId,
     id,
     store,
-    entityServiceFactoryInstance,
     appStateService,
     appEnvVarsService,
-    paginationMonitorFactory
   );
 }
 
@@ -74,10 +69,8 @@ export function getGuids(type?: string) {
         CF_GUID,
         APP_GUID,
         Store,
-        EntityServiceFactory,
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        PaginationMonitorFactory
       ]
     },
     {

@@ -14,6 +14,9 @@ import { getPreviousRoutingState } from '../../../../../store/src/types/routing.
 import { IOrganization, ISpace } from '../../../cf-api.types';
 import { CFUserPermissionsChecker } from '../../../cf-user-permissions.checker';
 import { CFUserPermissions } from '../../../cf-user-permissions.config';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
@@ -29,7 +32,8 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundryEndpointService,
     CloudFoundryOrganizationService,
-    CloudFoundrySpaceService
+    CloudFoundrySpaceService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class CliInfoCloudFoundryComponent implements OnInit {

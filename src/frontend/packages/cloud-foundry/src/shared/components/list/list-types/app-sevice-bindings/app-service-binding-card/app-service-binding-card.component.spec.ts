@@ -51,7 +51,7 @@ describe('AppServiceBindingCardComponent', () => {
     component.row = {
       entity: {
         app_guid: '',
-        service_instance_guid: '',
+        service_instance_guid: 'service_instance_guid',
         credentials: {},
         binding_options: {},
         gateway_name: '',

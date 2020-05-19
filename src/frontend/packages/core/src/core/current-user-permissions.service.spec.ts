@@ -6,6 +6,7 @@ import { AppState } from '../../../store/src/app-state';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../store/src/entity-catalog-test.module';
 import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
+import { AppTestModule } from '../../test-framework/core-test.helper';
 import { generateStratosEntities } from '../base-entity-types';
 import { PermissionConfig, PermissionStrings, PermissionTypes, ScopeStrings } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
@@ -236,6 +237,7 @@ describe('CurrentUserPermissionsService', () => {
           ]
         },
         createBasicStoreModule(createStoreState()),
+        AppTestModule
       ],
 
     });
@@ -246,6 +248,19 @@ describe('CurrentUserPermissionsService', () => {
     expect(service).toBeTruthy();
   });
 
+        done();
+      }),
+      first()
+    ).subscribe();
+  });
+
+  it('should allow if feature flag with cf', done => {
+    service.can(
+      [new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)],
+      'c80420ca-204b-4879-bf69-b6b7a202ad87'
+    ).pipe(
+      tap(can => {
+        expect(can).toBe(false);
 
   it('should allow if stratos admin', done => {
     service.can(new PermissionConfig(PermissionTypes.STRATOS, PermissionStrings.STRATOS_ADMIN)).pipe(

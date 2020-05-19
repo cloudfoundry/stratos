@@ -10,7 +10,6 @@ import {
 } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
@@ -86,7 +85,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         this.serviceBrokerName$ = getServiceBrokerName(
           this.serviceInstanceEntity.entity.service_plan.entity.service.entity.service_broker_guid,
           this.serviceInstanceEntity.entity.cfGuid,
-          this.entityServiceFactory
         );
       }
     }
@@ -96,7 +94,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     private store: Store<CFAppState>,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CFUserPermissionsService,
-    private entityServiceFactory: EntityServiceFactory
   ) {
     super();
   }
@@ -113,7 +110,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   cfOrgSpace: CfOrgSpaceLabelService;
   serviceBrokerName$: Observable<string>;
 
-  detach = () => {
+  private detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
       this.serviceInstanceEntity.entity.service_bindings,
       this.serviceInstanceEntity.metadata.guid,
@@ -122,13 +119,13 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     );
   }
 
-  delete = () => this.serviceActionHelperService.deleteServiceInstance(
+  private delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.name,
     this.serviceInstanceEntity.entity.cfGuid
   )
 
-  edit = () => this.serviceActionHelperService.editServiceBinding(
+  private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.cfGuid,
     null

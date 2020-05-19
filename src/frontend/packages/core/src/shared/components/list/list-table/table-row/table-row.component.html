@@ -1,5 +1,5 @@
 <div class="table-row-wrapper"
-  [ngClass]="{'table-row-wrapper__blocked': isBlocked$ | async, 'table-row-wrapper__warning': inWarningState$ | async,'table-row-wrapper__errored': inErrorState$ | async,'table-row-wrapper__highlighted': isHighlighted$ | async }">
+  [ngClass]="{'table-row-wrapper__blocked': isBlocked$ | async, 'table-row-wrapper__warning': inWarningState$ | async,'table-row-wrapper__errored': inErrorState$ | async }">
   <div *ngIf="isDeleting$ | async" class="table-row__deletion-bar-wrapper">
     <div class="table-row__deletion-bar-inner">
       <div class="table-row__deletion-bar-text">Deleting</div>
@@ -11,7 +11,7 @@
     <div class="mat-row table-row__inner">
       <mat-expansion-panel class="table-row__inner__expansion" [togglePosition]="'before'" [disabled]="!expandComponent"
         (opened)="panelOpened()" (closed)="expandedService.collapse(rowId)" [expanded]="expandedService.expanded[rowId]"
-        [hideToggle]="true">
+        [hideToggle]="true" [ngClass]="{'table-row-wrapper__highlighted': isHighlighted$ | async}">
         <mat-expansion-panel-header class="table-row__inner__expansion--header"
           [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent}"
           [collapsedHeight]="'auto'" [expandedHeight]="'auto'"

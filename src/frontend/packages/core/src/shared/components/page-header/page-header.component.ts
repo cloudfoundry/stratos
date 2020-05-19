@@ -169,7 +169,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
 
     this.user$ = this.userProfileService.userProfile$;
-    this.userProfileService.fetchUserProfile();
 
     this.username$ = this.user$.pipe(
       map(profile => {

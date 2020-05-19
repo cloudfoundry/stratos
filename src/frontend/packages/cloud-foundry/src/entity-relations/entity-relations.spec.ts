@@ -12,7 +12,8 @@ export class EntityRelationSpecHelper {
       entity: {
         name,
         spaces_url: entityRelationMissingSpacesUrl,
-        quota_definition_url: entityRelationMissingQuotaUrl
+        quota_definition_url: entityRelationMissingQuotaUrl,
+        domains: []
       },
       metadata: {
         guid,

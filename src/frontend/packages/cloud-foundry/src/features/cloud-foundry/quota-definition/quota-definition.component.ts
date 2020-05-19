@@ -4,13 +4,12 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { GetQuotaDefinition } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../cf-api.types';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CFUserPermissions } from '../../../cf-user-permissions.config';
 import { CFUserPermissionsService } from '../../../cf-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -44,13 +43,12 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   public isCf = false;
 
   constructor(
-    protected entityServiceFactory: EntityServiceFactory,
     protected store: Store<AppState>,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     activatedRoute: ActivatedRoute,
     currentUserPermissionsService: CFUserPermissionsService
   ) {
-    super(entityServiceFactory, store, activeRouteCfOrgSpace, activatedRoute);
+    super(store, activeRouteCfOrgSpace, activatedRoute);
     this.setupQuotaDefinitionObservable();
     const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
     this.canEditQuota$ = currentUserPermissionsService.can(CFUserPermissions.QUOTA_EDIT, cfGuid);
@@ -62,10 +60,7 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
     const quotaGuid$ = this.quotaGuid ? of(this.quotaGuid) : this.org$.pipe(map(org => org.entity.quota_definition_guid));
     const entityInfo$ = quotaGuid$.pipe(
       first(),
-      switchMap(quotaGuid => this.entityServiceFactory.create<APIResource<IOrgQuotaDefinition>>(
-        quotaGuid,
-        new GetQuotaDefinition(quotaGuid, this.cfGuid),
-      ).entityObs$)
+      switchMap(quotaGuid => cfEntityCatalog.quotaDefinition.store.getEntityService(quotaGuid, this.cfGuid, {}).entityObs$)
     );
 
     this.quotaDefinition$ = entityInfo$.pipe(

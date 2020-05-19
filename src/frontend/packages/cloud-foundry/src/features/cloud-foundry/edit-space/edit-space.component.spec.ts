@@ -26,7 +26,7 @@ describe('EditSpaceComponent', () => {
         generateTestCfEndpointServiceProvider(),
         TabNavService,
         CloudFoundryOrganizationService,
-        CloudFoundryUserProvidedServicesService,
+        CloudFoundryUserProvidedServicesService
       ]
     })
       .compileComponents();

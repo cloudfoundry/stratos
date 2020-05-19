@@ -117,9 +117,9 @@ export function setupCfUserRemovalTests(
     removeUsersStepper.waitUntilShown('Remove Users Stepper');
 
     // ... check button state
-    expect(removeUsersStepper.canPrevious()).toBeFalsy();
-    expect(removeUsersStepper.canCancel()).toBeTruthy();
-    expect(removeUsersStepper.canNext()).toBeTruthy();
+    expect(removeUsersStepper.canPrevious()).toBeFalsy('Previous button should not be visible');
+    expect(removeUsersStepper.canCancel()).toBeTruthy('Cancel button should be visible and enabled');
+    expect(removeUsersStepper.canNext()).toBeTruthy('Next button should be visible and enabled');
   });
 
   it('Confirm roles removal', () => {
@@ -140,15 +140,16 @@ export function setupCfUserRemovalTests(
       actionTableDate = createActionTableDate(orgTarget, spaceTarget);
     }
 
-    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate);
-    expect(removeUsersStepper.canPrevious()).toBeFalsy();
-    expect(removeUsersStepper.canCancel()).toBeTruthy();
-    expect(removeUsersStepper.canNext()).toBeTruthy();
+    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate, 'Table data did not match expected content');
+    expect(removeUsersStepper.canPrevious()).toBeFalsy('Previous button should not be visible');
+    expect(removeUsersStepper.canCancel()).toBeTruthy('Cancel button should be visible and enabled');
+    expect(removeUsersStepper.canNext()).toBeTruthy('Next button should be visible and enabled');
+
 
     // apply roles removal changes
     removeUsersStepper.next();
 
-    confirmStep.actionTable.table.waitUntilNotBusy();
+    confirmStep.actionTable.table.waitUntilNotBusy('Failed to wait for busy state');
 
     // Wait until all of the spinners have gone
     const spinners = element.all(by.tagName('mat-progress-spinner'));
@@ -163,10 +164,10 @@ export function setupCfUserRemovalTests(
       actionTableDate = createActionTableDate(orgTarget, spaceTarget, 'done');
     }
 
-    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate);
-    expect(removeUsersStepper.canPrevious()).toBeFalsy();
-    expect(removeUsersStepper.canCancel()).toBeFalsy();
-    expect(removeUsersStepper.canNext()).toBeTruthy();
+    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate, 'Table data did not match expected content');
+    expect(removeUsersStepper.canPrevious()).toBeFalsy('Previous button should not be visible');
+    expect(removeUsersStepper.canCancel()).toBeFalsy('Cancel button should not be visible//enabled');
+    expect(removeUsersStepper.canNext()).toBeTruthy('Next button should be visible and enabled');
 
     // close
     removeUsersStepper.next();

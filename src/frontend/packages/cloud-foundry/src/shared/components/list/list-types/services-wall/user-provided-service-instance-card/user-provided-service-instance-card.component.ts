@@ -98,7 +98,7 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
     super();
   }
 
-  detach = () => {
+  private detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
       this.serviceInstanceEntity.entity.service_bindings,
       this.serviceInstanceEntity.metadata.guid,
@@ -108,14 +108,14 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
     );
   }
 
-  delete = () => this.serviceActionHelperService.deleteServiceInstance(
+  private delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.name,
     this.serviceInstanceEntity.entity.cfGuid,
     true
   )
 
-  edit = () => this.serviceActionHelperService.editServiceBinding(
+  private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.cfGuid,
     null,

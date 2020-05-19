@@ -18,21 +18,16 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata } from '../../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../../../cf-api-svc.types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
-import { ServiceBindingActionBuilders } from '../../../../../entity-action-builders/service-binding.action-builders';
 
 export class AppServiceBindingDataSource extends ListDataSource<APIResource<IServiceBinding>> {
   static createGetAllServiceBindings(appGuid: string, cfGuid: string) {
+
     const paginationKey = createEntityRelationPaginationKey(serviceBindingEntityType, appGuid);
-    const serviceBindingEntity = entityCatalog
-      .getEntity<IEntityMetadata, null, ServiceBindingActionBuilders>(CF_ENDPOINT_TYPE, serviceBindingEntityType);
-    const actionBuilder = serviceBindingEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
-    const getAppServiceBindingsAction = actionBuilder(
+    return cfEntityCatalog.serviceBinding.actions.getAllForApplication(
       appGuid, cfGuid, paginationKey, {
         includeRelations: [
           createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
@@ -42,7 +37,6 @@ export class AppServiceBindingDataSource extends ListDataSource<APIResource<ISer
         ],
         populateMissing: true
       });
-    return getAppServiceBindingsAction;
   }
 
   constructor(store: Store<CFAppState>, appService: ApplicationService, listConfig?: IListConfig<APIResource<IServiceBinding>>) {

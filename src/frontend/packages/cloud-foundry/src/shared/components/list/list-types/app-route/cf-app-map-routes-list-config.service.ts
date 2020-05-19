@@ -3,9 +3,8 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { GetSpaceRoutes } from '../../../../../../../cloud-foundry/src/actions/space.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { routeEntityType, spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
+import { spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
@@ -16,7 +15,7 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { CFUserPermissionsService } from '../../../../../cf-user-permissions.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
@@ -33,13 +32,11 @@ export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServic
     currentUserPermissionsService: CFUserPermissionsService,
   ) {
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
-    const routeEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
-    const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
-    const action = actionBuilder(
+    const action = cfEntityCatalog.route.actions.getAllInSpace(
       spaceGuid,
       appService.cfGuid,
       createEntityRelationPaginationKey(spaceEntityType, spaceGuid)
-    ) as GetSpaceRoutes;
+    )
     // If parentEntitySchema is set the entity validation process will look for the space routes in the parent space entity
     // In this case, we do have them however they're missing the route-->app relationship.. which means we fetch them at a rate of one per
     // route. For spaces with hundreds of routes this isn't acceptable, so remove the link to the parent and fetch the list afresh.

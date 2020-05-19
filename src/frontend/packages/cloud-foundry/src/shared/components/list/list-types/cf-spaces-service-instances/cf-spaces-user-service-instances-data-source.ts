@@ -21,23 +21,15 @@ import {
   defaultPaginationPageSizeOptionsTable,
   IListConfig,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
-import {
-  UserProvidedServiceActionBuilder,
-} from '../../../../../entity-action-builders/user-provided-service.action-builders';
 
 export class CfSpacesUserServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(spaceEntityType, spaceGuid);
-    const userProvidedServiceEntity = entityCatalog.getEntity<any, any, UserProvidedServiceActionBuilder>(
-      CF_ENDPOINT_TYPE,
-      userProvidedServiceInstanceEntityType
-    );
-    const actionBuilder = userProvidedServiceEntity.actionOrchestrator.getActionBuilder('getAllInSpace');
-    const action = actionBuilder(cfGuid, spaceGuid, paginationKey,
+    const action = cfEntityCatalog.userProvidedService.actions.getAllInSpace(
+      cfGuid, spaceGuid, paginationKey,
       [
         createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceWithOrgEntityType),
         createEntityRelationKey(spaceEntityType, organizationEntityType),

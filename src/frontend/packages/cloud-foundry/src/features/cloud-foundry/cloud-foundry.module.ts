@@ -116,7 +116,7 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
 import {
   UserInviteConfigurationDialogComponent,
 } from './user-invites/configuration-dialog/user-invite-configuration-dialog.component';
-import { UserInviteService } from './user-invites/user-invite.service';
+import { UserInviteConfigureService, UserInviteService } from './user-invites/user-invite.service';
 import { InviteUsersCreateComponent } from './users/invite-users/invite-users-create/invite-users-create.component';
 import { InviteUsersComponent } from './users/invite-users/invite-users.component';
 import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-confirm/manage-users-confirm.component';
@@ -227,6 +227,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     // CfRolesService,
     CloudFoundryCellService,
     UserInviteService,
+    UserInviteConfigureService
   ],
   entryComponents: [
     UserInviteConfigurationDialogComponent

@@ -1,24 +1,15 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { cfEntityCatalog } from '../../../../../cloud-foundry/src/cf-entity-catalog';
+import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
-import { cfEntityFactory } from '../../../cf-entity-factory';
-import { quotaDefinitionEntityType } from '../../../cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
-import { QuotaDefinitionActionBuilder } from '../../../entity-action-builders/quota-definition.action-builders';
-import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 
 export interface QuotaFormValues {
   name: string;
@@ -37,23 +28,23 @@ export interface QuotaFormValues {
 @Component({
   selector: 'app-quota-definition-form',
   templateUrl: './quota-definition-form.component.html',
-  styleUrls: ['./quota-definition-form.component.scss']
+  styleUrls: ['./quota-definition-form.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider
+  ]
 })
 export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription: Subscription;
   cfGuid: string;
   allQuotas: string[];
-  quotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
   formGroup: FormGroup;
 
   @Input() quota: IQuotaDefinition;
 
   constructor(
-    private store: Store<CFAppState>,
-    private activatedRoute: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory,
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
   ) {
-    this.cfGuid = this.activatedRoute.snapshot.params.endpointId;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
   }
 
   ngOnInit() {
@@ -81,28 +72,14 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
 
   fetchQuotasDefinitions() {
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    const quotaDefinitionEntity =
-      entityCatalog.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
-    const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getQuotaDefinitionsAction = actionBuilder(quotaPaginationKey, this.cfGuid, {});
-    this.quotaDefinitions$ = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action: getQuotaDefinitionsAction,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          quotaPaginationKey,
-          cfEntityFactory(quotaDefinitionEntityType),
-          getQuotaDefinitionsAction.flattenPagination
-        )
-      },
-      getQuotaDefinitionsAction.flattenPagination
-    ).entities$.pipe(
-      filter(o => !!o),
-      map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allQuotas = o)
-    );
+    const quotaDefinitions$ = cfEntityCatalog.quotaDefinition.store.getPaginationService(quotaPaginationKey, this.cfGuid, {})
+      .entities$.pipe(
+        filter(o => !!o),
+        map(o => o.map(org => org.entity.name)),
+        tap((o: string[]) => this.allQuotas = o)
+      );
 
-    this.quotasSubscription = this.quotaDefinitions$.subscribe();
+    this.quotasSubscription = quotaDefinitions$.subscribe();
   }
 
   nameTakenValidator = (): ValidatorFn => {
