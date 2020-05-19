@@ -3,19 +3,19 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
-import { validateEntityRelations } from '../../../cloud-foundry/src/entity-relations/entity-relations';
-import { LoggerService } from '../../../core/src/core/logger.service';
-import { SET_PAGE_BUSY } from '../actions/pagination.actions';
+import { LoggerService } from '../../../../core/src/core/logger.service';
+import { SET_PAGE_BUSY } from '../../../../store/src/actions/pagination.actions';
 import {
   CfValidateEntitiesComplete,
   CfValidateEntitiesStart,
   EntitiesPipelineActionTypes,
-} from '../actions/request.actions';
-import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
-import { getAPIRequestDataState } from '../selectors/api.selectors';
-import { getPaginationState } from '../selectors/pagination.selectors';
-import { UpdateCfAction } from '../types/request.types';
+} from '../../../../store/src/actions/request.actions';
+import { rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
+import { getAPIRequestDataState } from '../../../../store/src/selectors/api.selectors';
+import { getPaginationState } from '../../../../store/src/selectors/pagination.selectors';
+import { UpdateCfAction } from '../../../../store/src/types/request.types';
+import { CFAppState } from '../../cf-app-state';
+import { validateEntityRelations } from '../../entity-relations/entity-relations';
 
 /**
  * Now purely looks after ad-hoc validation of an entity or list of entities
@@ -43,8 +43,6 @@ export class CfValidateEffects {
    * 5) alternatively... if we've reached here for the same space but from an api request for that space.. ensure that the routes have not
    *    been dropped because their count is over 50
    */
-  // TODO Move this into Cf - #3769...
-  // ... See `ENTITY_INFO_HANDLER` (which should also be used, in a roundabout way, in getPaginationObservables/getObservables)
   @Effect() validateEntities$ = this.actions$.pipe(
     ofType<CfValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE),
     mergeMap(action => {

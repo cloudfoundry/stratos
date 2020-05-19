@@ -11,7 +11,7 @@ import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { CFAuthAction, CFAuthResource, CfAuthUserSummary, CfAuthUserSummaryMapped, CFFeatureFlags } from './cf-auth.types';
 import { CfAuthPrinciple } from './principal';
 
-
+// TODO: RC REMOVE
 /**
  * NOTE - WIP
  * This is the port of basic cf auth from v1. It's missing a number of things

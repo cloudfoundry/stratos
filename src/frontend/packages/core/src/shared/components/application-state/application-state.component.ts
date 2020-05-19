@@ -4,6 +4,7 @@ import { map, startWith } from 'rxjs/operators';
 
 import { StratosStatus, StratosStatusMetadata } from '../../shared.types';
 
+// TODO: RC MOVE
 @Component({
   selector: 'app-application-state',
   templateUrl: './application-state.component.html',

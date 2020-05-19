@@ -7,6 +7,7 @@ export interface EntityInfo<T = any> {
   entity: T;
 }
 
+// TODO: RC move to CF
 export interface APIResource<T = any> {
   metadata: APIResourceMetadata;
   entity: T;

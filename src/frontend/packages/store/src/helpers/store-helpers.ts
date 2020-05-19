@@ -33,6 +33,7 @@ export function getFavoriteInfoObservable(store: Store<AppState>): Observable<IF
   );
 }
 
+// TODO: RC move to CF
 export const getRowMetadata = (entity: APIResource | MultiActionListEntity) => {
   if (entity instanceof MultiActionListEntity) {
     return entity.entity.metadata ? entity.entity.metadata.guid : null;

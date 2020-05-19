@@ -11,7 +11,6 @@ import { EndpointsEffect } from './effects/endpoint.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
-import { CfValidateEffects } from './effects/request.effects';
 import { RouterEffect } from './effects/router.effects';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { SnackBarEffects } from './effects/snackBar.effects';
@@ -47,7 +46,6 @@ import { AppReducersModule } from './reducers.module';
       SnackBarEffects,
       SetClientFilterEffect,
       MetricsEffect,
-      CfValidateEffects,
       UserProfileEffect,
       UsersRolesEffects,
       RecursiveDeleteEffect,

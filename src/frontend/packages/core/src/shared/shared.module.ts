@@ -151,9 +151,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     EndpointsMissingComponent,
     DialogErrorComponent,
     SshViewerComponent,
-    ApplicationStateIconPipe,
-    ApplicationStateIconComponent,
-    ApplicationStateComponent,
+    ApplicationStateIconPipe, // TODO: RC MOVE
+    ApplicationStateIconComponent,// TODO: RC MOVE
+    ApplicationStateComponent,// TODO: RC MOVE
     TileComponent,
     TileGroupComponent,
     TileGridComponent,
@@ -175,7 +175,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     AppChipsComponent,
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
-    EnvVarViewComponent,
+    EnvVarViewComponent,// TODO: RC MOVE
     RingChartComponent,
     MetricsChartComponent,
     StratosTitleComponent,
