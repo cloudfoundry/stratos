@@ -53,12 +53,18 @@ export class EntityService<T = any> {
       this.actionDispatch(this.refreshKey);
     };
 
+    const catalogEntity = entityCatalog.getEntity(this.action);
+    const entityFetchHandler = catalogEntity.getEntityFetchHandler();
+    const fetchHandler = entityFetchHandler ?
+      entityFetchHandler(store, this.action) :
+      (entity: T) => this.actionDispatch('');
+
     this.updatingSection$ = entityMonitor.updatingSection$;
     this.isDeletingEntity$ = entityMonitor.isDeletingEntity$;
     this.isFetchingEntity$ = entityMonitor.isFetchingEntity$;
     this.entityObs$ = this.getEntityObservable(
       entityMonitor,
-      this.actionDispatch,
+      fetchHandler,
     ).pipe(
       publishReplay(1),
       refCount(),
@@ -92,14 +98,15 @@ export class EntityService<T = any> {
   updatingSection$: Observable<UpdatingSection>;
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
-    actionDispatch: (key?: string) => void
+    actionDispatch: (entity: T) => void
   ): Observable<EntityInfo> => {
     const cleanEntityInfo$ = this.getCleanEntityInfoObs(entityMonitor);
+
     return entityMonitor.entityRequest$.pipe(
       withLatestFrom(entityMonitor.entity$),
       tap(([entityRequestInfo, entity]) => {
         if (actionDispatch && this.shouldCallAction(entityRequestInfo, entity)) {
-          actionDispatch();
+          actionDispatch(entity);;
         }
       }),
       first(),

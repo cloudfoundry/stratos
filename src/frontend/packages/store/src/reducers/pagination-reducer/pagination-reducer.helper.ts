@@ -1,9 +1,8 @@
-import { Action, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
-  first,
   map,
   pairwise,
   publishReplay,
@@ -13,7 +12,6 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
 import { sortStringify } from '../../../../core/src/core/utils.service';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';
@@ -158,11 +156,8 @@ function shouldFetchNonLocalList(pagination: PaginationEntityState): boolean {
   return !hasError(pagination) && !hasValidOrGettingPage(pagination);
 }
 
-function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
-  return populatePaginationFromParent(store, action).pipe(
-    map(newAction => newAction || action)
-  );
-}
+const defaultEntitiesFetchHandler = (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () =>
+  actions.forEach(action => store.dispatch(action));
 
 function getObservables<T = any>(
   store: Store<GeneralEntityAppState>,
@@ -178,6 +173,12 @@ function getObservables<T = any>(
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
 
+  const entity = entityCatalog.getEntity(arrayAction[0]);
+  const entitiesFetchHandler = entity.getEntitiesFetchHandler();
+  const fetchHandler = entitiesFetchHandler ?
+    entitiesFetchHandler(store, arrayAction) :
+    defaultEntitiesFetchHandler(store, arrayAction);
+
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
     startWith(null),
@@ -185,15 +186,13 @@ function getObservables<T = any>(
     tap(([prevPag, newPag]: [PaginationEntityState, PaginationEntityState]) => {
       if (shouldFetchLocalOrNonLocalList(isLocal, hasDispatchedOnce, newPag, prevPag)) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        combineLatest(arrayAction.map(action => safePopulatePaginationFromParent(store, action))).pipe(
-          first(),
-        ).subscribe(actions => actions.forEach(action => store.dispatch(action)));
+        fetchHandler();
       }
     }),
     map(([, newPag]) => newPag)
   );
 
-  const entitiesInfoHandlerBuilder = entityCatalog.getEntity(arrayAction[0]).getEntitiesEmitHandler();
+  const entitiesInfoHandlerBuilder = entity.getEntitiesEmitHandler();
   const actionInfoHandler = entitiesInfoHandlerBuilder ? entitiesInfoHandlerBuilder(
     paginationAction, (action) => store.dispatch(action)
   ) : () => { };

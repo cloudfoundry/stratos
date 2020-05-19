@@ -1,14 +1,14 @@
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import * as moment from 'moment';
-import { combineLatest, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 
 import { EndpointHealthCheck } from '../../core/endpoints-health-checks';
 import { metricEntityType } from '../../core/src/base-entity-schemas';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { CfValidateEntitiesStart } from '../../store/src/actions/request.actions';
-import { AppState } from '../../store/src/app-state';
+import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -162,6 +162,7 @@ import {
 } from './entity-action-builders/user-provided-service.action-builders';
 import { UserActionBuilders, userActionBuilders } from './entity-action-builders/user.action-builders';
 import { addCfQParams, addCfRelationParams } from './entity-relations/cf-entity-relations.getters';
+import { populatePaginationFromParent } from './entity-relations/entity-relations';
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
@@ -176,6 +177,11 @@ import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
 
+function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
+  return populatePaginationFromParent(store, action).pipe(
+    map(newAction => newAction || action)
+  );
+}
 
 function getPaginationCompareString(paginationEntity: PaginationEntityState) {
   if (!paginationEntity) {
@@ -301,6 +307,11 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
           )));
         }
       };
+    },
+    entitiesFetchHandler: (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => {
+      combineLatest(actions.map(action => safePopulatePaginationFromParent(store, action))).pipe(
+        first(),
+      ).subscribe(actions => actions.forEach(action => store.dispatch(action)));
     },
     paginationConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,

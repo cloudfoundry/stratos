@@ -4,7 +4,12 @@ import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../core/sr
 import { KnownKeys, NonOptionalKeys } from '../../../../core/src/core/utils.service';
 import { getFullEndpointApiUrl } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import { IRequestEntityTypeState } from '../../app-state';
-import { EntitiesInfoHandler, EntityInfoHandler } from '../../entity-request-pipeline/entity-request-pipeline.types';
+import {
+  EntitiesFetchHandler,
+  EntitiesInfoHandler,
+  EntityFetchHandler,
+  EntityInfoHandler,
+} from '../../entity-request-pipeline/entity-request-pipeline.types';
 import {
   PaginationPageIteratorConfig,
 } from '../../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
@@ -259,6 +264,14 @@ export class StratosBaseCatalogEntity<
   public getEntitiesEmitHandler(): EntitiesInfoHandler {
     return this.definition.entitiesEmitHandler;
   }
+
+  public getEntityFetchHandler(): EntityFetchHandler {
+    return this.definition.entityFetchHandler;
+  }
+
+  public getEntitiesFetchHandler(): EntitiesFetchHandler {
+    return this.definition.entitiesFetchHandler;
+  }
 }
 
 export class StratosCatalogEntity<
@@ -289,6 +302,16 @@ export class StratosCatalogEntity<
   public getEntitiesEmitHandler(): EntitiesInfoHandler {
     return this.definition.entitiesEmitHandler ||
       this.definition.endpoint ? this.definition.endpoint.entitiesEmitHandler : null
+  }
+
+  public getEntityFetchHandler(): EntityFetchHandler {
+    return this.definition.entityFetchHandler ||
+      this.definition.endpoint ? this.definition.endpoint.entityFetchHandler : null;
+  }
+
+  public getEntitiesFetchHandler(): EntitiesFetchHandler {
+    return this.definition.entitiesFetchHandler ||
+      this.definition.endpoint ? this.definition.endpoint.entitiesFetchHandler : null;
   }
 }
 

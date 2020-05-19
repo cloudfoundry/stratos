@@ -8,7 +8,9 @@ import { StratosStatus } from '../../../core/src/shared/shared.types';
 import { GeneralEntityAppState } from '../app-state';
 import {
   ApiErrorMessageHandler,
+  EntitiesFetchHandler,
   EntitiesInfoHandler,
+  EntityFetchHandler,
   EntityInfoHandler,
   PreApiRequest,
   PrePaginationApiRequest,
@@ -74,13 +76,21 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   readonly paginationConfig?: PaginationPageIteratorConfig;
   readonly tableConfig?: EntityTableConfig<any>;
   /**
-    * Hook that will fire before an entity is emitted by an entity service. This could be used, for example, entity validation
-    */
+   * Hook that will fire before an entity is emitted by an entity service. This could be used, for example, entity validation
+   */
   readonly entityEmitHandler?: EntityInfoHandler;
   /**
    * Hook that will fire before an entity is emitted by an entity service. This could be used, for example, entity validation
    */
   readonly entitiesEmitHandler?: EntitiesInfoHandler;
+  /**
+   * Hook that can override the way an entity is fetched
+   */
+  readonly entityFetchHandler?: EntityFetchHandler;
+  /**
+   * Hook that can override the way entities are fetched
+   */
+  readonly entitiesFetchHandler?: EntitiesFetchHandler;
 }
 
 

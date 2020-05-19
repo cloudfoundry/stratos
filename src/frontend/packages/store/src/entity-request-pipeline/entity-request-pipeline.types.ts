@@ -3,7 +3,7 @@ import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
-import { AppState, InternalAppState } from '../app-state';
+import { AppState, GeneralEntityAppState, InternalAppState } from '../app-state';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -130,3 +130,7 @@ export type EntitiesInfoHandler = (
 ) => (
     state: PaginationEntityState,
   ) => void;
+
+
+export type EntityFetchHandler = <T>(store: Store<GeneralEntityAppState>, action: EntityRequestAction) => (entity: T) => void;
+export type EntitiesFetchHandler = (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => void;
