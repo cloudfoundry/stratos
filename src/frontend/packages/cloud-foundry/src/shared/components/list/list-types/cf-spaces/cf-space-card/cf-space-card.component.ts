@@ -6,11 +6,9 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
-import { IApp, ISpace } from '../../../../../../../../core/src/core/cf-api.types';
-import { getStartedAppInstanceCount } from '../../../../../../../../core/src/core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { getFavoriteFromCfEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
+import { getFavoriteFromEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -21,14 +19,17 @@ import {
   MetaCardMenuItem,
 } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../core/src/shared/shared.types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
   CloudFoundryEndpointService,
@@ -80,7 +81,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.spaceGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.spaceGuid, cfEntityFactory(spaceEntityType));
     this.orgGuid = this.cfOrgService.orgGuid;
-    this.favorite = getFavoriteFromCfEntity(this.row, spaceEntityType, this.favoritesConfigMapper);
+    this.favorite = getFavoriteFromEntity(this.row, spaceEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE);
     this.cardMenu = [
       {
         label: 'Edit',

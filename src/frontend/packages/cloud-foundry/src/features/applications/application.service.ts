@@ -19,11 +19,6 @@ import {
   spaceEntityType,
   stackEntityType,
 } from '../../../../cloud-foundry/src/cf-entity-types';
-import { IApp, IAppSummary, IDomain, IOrganization, ISpace, IStack } from '../../../../core/src/core/cf-api.types';
-import {
-  ApplicationStateData,
-  ApplicationStateService,
-} from '../../../../core/src/shared/components/application-state/application-state.service';
 import { APP_GUID, CF_GUID } from '../../../../core/src/shared/entity.tokens';
 import { EntityService } from '../../../../store/src/entity-service';
 import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
@@ -34,8 +29,10 @@ import {
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import { IApp, IAppSummary, IDomain, IOrganization, ISpace, IStack } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
+import { ApplicationStateData, ApplicationStateService } from '../../shared/services/application-state.service';
 import { AppStat } from '../../store/types/app-metadata.types';
 import {
   ApplicationEnvVarsHelper,

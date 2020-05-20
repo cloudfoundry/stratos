@@ -5,10 +5,10 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
+import { AppState } from '../../../../../store/src/app-state';
 import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
@@ -148,7 +148,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     private route: ActivatedRoute,
     private tabNavService: TabNavService,
     private router: Router,

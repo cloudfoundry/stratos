@@ -4,10 +4,10 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
@@ -44,7 +44,7 @@ function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent 
 export class EndpointListHelper {
   private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     private dialog: MatDialog,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,

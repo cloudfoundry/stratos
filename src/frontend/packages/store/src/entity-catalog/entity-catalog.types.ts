@@ -1,7 +1,9 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { EndpointHealthCheck } from '../../../core/endpoints-health-checks';
 import { EndpointAuthTypeConfig } from '../../../core/src/core/extension/extension-types';
+import { FavoritesConfigMapper } from '../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { StratosStatus } from '../../../core/src/shared/shared.types';
 import { GeneralEntityAppState } from '../app-state';
 import {
@@ -14,6 +16,7 @@ import {
   PaginationPageIteratorConfig,
 } from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntitySchema } from '../helpers/entity-schema';
+import { UserFavorite } from '../types/user-favorites.types';
 
 export interface EntityCatalogEntityConfig {
   entityType: string;
@@ -97,6 +100,10 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly globalPreRequest?: PreApiRequest;
   readonly globalPrePaginationRequest?: PrePaginationApiRequest;
   readonly globalErrorMessageHandler?: ApiErrorMessageHandler;
+  readonly healthCheck?: EndpointHealthCheck;
+  readonly favoriteFromEntity?: <M extends IEntityMetadata = IEntityMetadata>(
+    entity: any, entityKey: string, favoritesConfigMapper: FavoritesConfigMapper
+  ) => UserFavorite<M>;
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }

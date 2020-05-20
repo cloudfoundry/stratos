@@ -3,32 +3,7 @@ import * as moment from 'moment';
 import { combineLatest, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import {
-  IService,
-  IServiceBinding,
-  IServiceBroker,
-  IServiceInstance,
-  IServicePlan,
-  IServicePlanVisibility,
-  IUserProvidedServiceInstance,
-} from '../../core/src/core/cf-api-svc.types';
-import {
-  CfEvent,
-  IApp,
-  IAppSummary,
-  IBuildpack,
-  ICfV2Info,
-  IDomain,
-  IFeatureFlag,
-  IOrganization,
-  IOrgQuotaDefinition,
-  IPrivateDomain,
-  IRoute,
-  ISecurityGroup,
-  ISpace,
-  ISpaceQuotaDefinition,
-  IStack,
-} from '../../core/src/core/cf-api.types';
+import { EndpointHealthCheck } from '../../core/endpoints-health-checks';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { AppState } from '../../store/src/app-state';
@@ -50,9 +25,34 @@ import { selectSessionData } from '../../store/src/reducers/auth.reducer';
 import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
 import { APIResource } from '../../store/src/types/api.types';
 import { PaginatedAction } from '../../store/src/types/pagination.types';
+import {
+  IService,
+  IServiceBinding,
+  IServiceBroker,
+  IServiceInstance,
+  IServicePlan,
+  IServicePlanVisibility,
+  IUserProvidedServiceInstance,
+} from './cf-api-svc.types';
+import {
+  CfEvent,
+  IApp,
+  IAppSummary,
+  IBuildpack,
+  ICfV2Info,
+  IDomain,
+  IFeatureFlag,
+  IOrganization,
+  IOrgQuotaDefinition,
+  IPrivateDomain,
+  IRoute,
+  ISecurityGroup,
+  ISpace,
+  ISpaceQuotaDefinition,
+  IStack,
+} from './cf-api.types';
 import { cfEntityCatalog } from './cf-entity-catalog';
 import { cfEntityFactory } from './cf-entity-factory';
-import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
 import {
   appEnvVarsEntityType,
   applicationEntityType,
@@ -89,6 +89,7 @@ import {
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
 import { CfErrorResponse, getCfError } from './cf-error-helpers';
+import { getFavoriteFromCfEntity } from './cf-favorites-helpers';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { CF_ENDPOINT_TYPE } from './cf-types';
 import {
@@ -157,6 +158,7 @@ import {
   userProvidedServiceActionBuilder,
 } from './entity-action-builders/user-provided-service.action-builders';
 import { UserActionBuilders, userActionBuilders } from './entity-action-builders/user.action-builders';
+import { addCfQParams, addCfRelationParams } from './entity-relations/cf-entity-relations.getters';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
@@ -197,6 +199,8 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     listDetailsComponent: CfEndpointDetailsComponent,
     renderPriority: 1,
+    healthCheck: new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => cfEntityCatalog.cfInfo.api.get(endpoint.guid)),
+    favoriteFromEntity: getFavoriteFromCfEntity,
     globalPreRequest: (request, action) => {
       return addCfRelationParams(request, action);
     },

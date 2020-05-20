@@ -1,7 +1,7 @@
-import { IOrganization } from '../../../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { IOrganization } from '../../cf-api.types';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 
 type entityOrgType = APIResource<IOrganization<string>>;

@@ -12,9 +12,6 @@ import {
 import {
   ApplicationStateComponent,
 } from '../../../../../../core/src/shared/components/application-state/application-state.component';
-import {
-  ApplicationStateService,
-} from '../../../../../../core/src/shared/components/application-state/application-state.service';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import {
   TableCellStatusDirective,
@@ -24,6 +21,7 @@ import { ApplicationServiceMock } from '../../../../../../core/test-framework/ap
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
+import { ApplicationStateService } from '../../../services/application-state.service';
 import { CardAppStatusComponent } from '../card-app-status/card-app-status.component';
 import { CardAppUsageComponent } from './card-app-usage.component';
 

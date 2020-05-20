@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratos/store/testing';
 import { first, tap } from 'rxjs/operators';
 
+import { IFeatureFlag } from '../../../cloud-foundry/src/cf-api.types';
 import { cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
 import { generateCFEntities } from '../../../cloud-foundry/src/cf-entity-generator';
 import { featureFlagEntityType } from '../../../cloud-foundry/src/cf-entity-types';
@@ -16,7 +17,6 @@ import { AppTestModule } from '../../test-framework/core-test.helper';
 import { endpointEntitySchema } from '../base-entity-schemas';
 import { generateStratosEntities } from '../base-entity-types';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
-import { IFeatureFlag } from './cf-api.types';
 import {
   CurrentUserPermissions,
   PermissionConfig,

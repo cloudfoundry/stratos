@@ -1,4 +1,3 @@
-import { GitSCM } from '../../../core/src/shared/data-services/scm/scm';
 import {
   EntityRequestActionConfig,
   KnownEntityActionBuilder,
@@ -7,6 +6,7 @@ import {
 } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { FetchBranchesForProject, FetchBranchForProject, FetchCommits } from '../actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../actions/github.actions';
+import { GitSCM } from '../shared/data-services/scm/scm';
 
 export interface GitRepoActionBuilders extends OrchestratedActionBuilders {
   getRepoInfo: (

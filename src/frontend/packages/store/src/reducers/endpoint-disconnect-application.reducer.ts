@@ -1,4 +1,4 @@
-import { IApp, StratosCFEntity } from '../../../core/src/core/cf-api.types';
+import { StratosCFEntity } from '../../../cloud-foundry/src/cf-api.types';
 import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';

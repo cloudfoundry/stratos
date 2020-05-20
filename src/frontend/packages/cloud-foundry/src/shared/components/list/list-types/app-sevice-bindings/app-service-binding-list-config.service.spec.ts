@@ -7,6 +7,7 @@ import {
   ApplicationEnvVarsHelper,
 } from '../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
+import { ApplicationStateService } from '../../../../services/application-state.service';
 import { AppServiceBindingListConfigService } from './app-service-binding-list-config.service';
 
 describe('AppServiceBindingListConfigService', () => {
@@ -17,7 +18,8 @@ describe('AppServiceBindingListConfigService', () => {
         generateTestApplicationServiceProvider('1', '1'),
         ApplicationEnvVarsHelper,
         DatePipe,
-        ServiceActionHelperService
+        ServiceActionHelperService,
+        ApplicationStateService,
       ],
       imports: generateCfBaseTestModules()
     });

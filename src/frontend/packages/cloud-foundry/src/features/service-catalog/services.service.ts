@@ -3,6 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import { getIdFromRoute } from '../../../../core/src/core/utils.service';
+import { EntityService } from '../../../../store/src/entity-service';
+import { APIResource } from '../../../../store/src/types/api.types';
 import {
   IService,
   IServiceBroker,
@@ -10,10 +13,7 @@ import {
   IServiceInstance,
   IServicePlan,
   IServicePlanVisibility,
-} from '../../../../core/src/core/cf-api-svc.types';
-import { getIdFromRoute } from '../../../../core/src/core/utils.service';
-import { EntityService } from '../../../../store/src/entity-service';
-import { APIResource } from '../../../../store/src/types/api.types';
+} from '../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { serviceBrokerEntityType, serviceInstancesEntityType, servicePlanVisibilityEntityType } from '../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';

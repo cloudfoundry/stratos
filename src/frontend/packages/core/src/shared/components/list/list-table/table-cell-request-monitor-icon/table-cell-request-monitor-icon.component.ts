@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { schema } from 'normalizr';
+import { getRowMetadata } from '@stratos/store';
 
-import { getRowMetadata } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { AppMonitorComponentTypes } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';

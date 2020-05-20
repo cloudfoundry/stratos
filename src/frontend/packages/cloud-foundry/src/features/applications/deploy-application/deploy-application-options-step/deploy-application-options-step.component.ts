@@ -14,9 +14,9 @@ import {
   selectSourceType,
 } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { OverrideAppDetails, SourceType } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { IDomain } from '../../../../../../core/src/core/cf-api.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import {
   ApplicationEnvVarsHelper,

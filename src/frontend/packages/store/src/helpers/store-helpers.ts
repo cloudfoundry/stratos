@@ -2,9 +2,11 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../app-state';
-import { errorFetchingFavoritesSelector, fetchingFavoritesSelector } from '../selectors/favorite-groups.selectors';
 import { IFavoritesInfo } from '../../../core/src/core/user-favorite-manager';
+import { AppState } from '../app-state';
+import { MultiActionListEntity } from '../monitors/pagination-monitor';
+import { errorFetchingFavoritesSelector, fetchingFavoritesSelector } from '../selectors/favorite-groups.selectors';
+import { APIResource } from '../types/api.types';
 
 
 export function getDashboardStateSessionId(username?: string) {
@@ -30,3 +32,10 @@ export function getFavoriteInfoObservable(store: Store<AppState>): Observable<IF
     }))
   );
 }
+
+export const getRowMetadata = (entity: APIResource | MultiActionListEntity) => {
+  if (entity instanceof MultiActionListEntity) {
+    return entity.entity.metadata ? entity.entity.metadata.guid : null;
+  }
+  return entity.metadata ? entity.metadata.guid : null;
+};

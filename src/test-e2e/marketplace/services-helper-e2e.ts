@@ -1,7 +1,7 @@
 import { browser, promise, protractor } from 'protractor';
 
+import { IServiceInstance } from '../../frontend/packages/cloud-foundry/src/cf-api-svc.types';
 import { CFResponse, createEmptyCfResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
-import { IServiceInstance } from '../../frontend/packages/core/src/core/cf-api-svc.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
 import { CFHelpers } from '../helpers/cf-helpers';

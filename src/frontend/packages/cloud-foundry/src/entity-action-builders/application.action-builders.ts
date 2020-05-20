@@ -1,4 +1,3 @@
-import { IApp } from '../../../core/src/core/cf-api.types';
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
@@ -12,6 +11,7 @@ import {
   UpdateExistingApplication,
 } from '../actions/application.actions';
 import { GetAllAppsInSpace } from '../actions/space.actions';
+import { IApp } from '../cf-api.types';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface ApplicationActionBuilders extends OrchestratedActionBuilders {

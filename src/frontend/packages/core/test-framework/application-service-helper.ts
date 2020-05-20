@@ -2,20 +2,20 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
 
+import { IApp, IAppSummary, IDomain, ISpace } from '../../cloud-foundry/src/cf-api.types';
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { ApplicationData, ApplicationService } from '../../cloud-foundry/src/features/applications/application.service';
 import {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,
 } from '../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
-import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
 import {
   ApplicationStateData,
   ApplicationStateService,
-} from '../src/shared/components/application-state/application-state.service';
+} from '../../cloud-foundry/src/shared/services/application-state.service';
+import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
+import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
+import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {

@@ -8,14 +8,12 @@ import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
 import { GetCurrentUsersRelations } from '../../../../../cloud-foundry/src/actions/permissions.actions';
-import { cfEntityCatalog } from '../../../../../cloud-foundry/src/cf-entity-catalog';
-import { CF_ENDPOINT_TYPE } from '../../../../../cloud-foundry/src/cf-types';
 import { CloseSideNav, DisableMobileNav, EnableMobileNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -137,10 +135,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       ),
       this.tabNavService.tabSubNav$
     );
-    // TODO: Move cf code out to cf module #3849
-    this.endpointsService.registerHealthCheck(
-      new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => cfEntityCatalog.cfInfo.api.get(endpoint.guid))
-    );
+
+    // Register all health checks for endpoint types that support this
+    entityCatalog.getAllEndpointTypes().forEach(epType => {
+      if (epType && epType.definition && epType.definition.healthCheck) {
+        this.endpointsService.registerHealthCheck(epType.definition.healthCheck);
+      }
+    });
+
     this.dispatchRelations();
     this.store.dispatch(new GetUserFavoritesAction());
   }

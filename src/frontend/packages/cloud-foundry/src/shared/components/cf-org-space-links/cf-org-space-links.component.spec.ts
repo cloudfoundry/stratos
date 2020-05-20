@@ -2,8 +2,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 
-import { CfOrgSpaceLabelService } from '../../../../../core/src/shared/services/cf-org-space-label.service';
 import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.service';
 import { CfOrgSpaceLinksComponent } from './cf-org-space-links.component';
 
 

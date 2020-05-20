@@ -8,6 +8,7 @@ import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { applicationEntityType } from '../../../../../cf-entity-types';
 import { ApplicationPollingService } from '../application-polling.service';
 import { ApplicationEnvVarsHelper } from '../tabs/build-tab/application-env-vars.service';
+import { ApplicationStateService } from './../../../../../shared/services/application-state.service';
 import { ApplicationPollComponent } from './application-poll.component';
 
 describe('ApplicationPollComponent', () => {
@@ -28,7 +29,8 @@ describe('ApplicationPollComponent', () => {
           new GetApplication(appId, cfId)
         ),
         generateTestApplicationServiceProvider(cfId, appId),
-        ApplicationEnvVarsHelper
+        ApplicationEnvVarsHelper,
+        ApplicationStateService,
       ],
       imports: generateCfBaseTestModules()
     })

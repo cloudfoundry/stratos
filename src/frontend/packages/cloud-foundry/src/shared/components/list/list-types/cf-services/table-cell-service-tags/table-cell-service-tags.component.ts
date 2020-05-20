@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { of } from 'rxjs';
 
-import { IService } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IService } from '../../../../../../cf-api-svc.types';
 import { ServiceTag } from '../cf-service-card/cf-service-card.component';
 
 @Component({

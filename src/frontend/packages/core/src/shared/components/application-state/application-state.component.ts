@@ -2,8 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { StratosStatus } from '../../shared.types';
-import { ApplicationStateData } from './application-state.service';
+import { StratosStatus, StratosStatusMetadata } from '../../shared.types';
 
 @Component({
   selector: 'app-application-state',
@@ -13,7 +12,7 @@ import { ApplicationStateData } from './application-state.service';
 export class ApplicationStateComponent implements OnInit {
 
   @Input()
-  public state: Observable<ApplicationStateData>;
+  public state: Observable<StratosStatusMetadata>;
 
   public status$: Observable<StratosStatus>;
 

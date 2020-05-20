@@ -3,17 +3,12 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import {
-  IOrganization,
-  IOrgQuotaDefinition,
-  ISpace,
-  ISpaceQuotaDefinition,
-} from '../../../../../core/src/core/cf-api.types';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { IOrganization, IOrgQuotaDefinition, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
