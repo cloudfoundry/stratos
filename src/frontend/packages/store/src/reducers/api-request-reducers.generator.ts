@@ -14,7 +14,7 @@ import { chainApiReducers, ExtraApiReducers, requestActions } from './api-reques
 
 const baseRequestReducer = requestReducerFactory(requestActions);
 const extraReducers = {
-  // [entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, appStatsEntityType)]: [appStatsReducer]// TODO: RC 
+  // ['entityKey']: [ reducer ]
 } as ExtraApiReducers<IRequestEntityTypeState<RequestInfoState>>;
 const chainedReducers = chainApiReducers<IRequestEntityTypeState<RequestInfoState>>(baseRequestReducer, extraReducers);
 
