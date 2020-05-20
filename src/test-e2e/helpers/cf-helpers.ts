@@ -168,6 +168,9 @@ export class CFHelpers {
 
   fetchUsers(cnsiGuid): promise.Promise<APIResource<CfUser>[]> {
     return this.cfRequestHelper.sendCfGet<CFResponse<CfUser>>(cnsiGuid, 'users').then(json => {
+      console.log('--------------------------');
+      console.log('fetch users');
+      console.log(JSON.stringify(json, null, 4));
       return json.resources;
     });
   }
