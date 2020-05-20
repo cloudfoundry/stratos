@@ -26,7 +26,6 @@ import {
 } from '../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../core/src/core/current-user-permissions.service';
 import { getIdFromRoute, pathGet } from '../../../../core/src/core/utils.service';
-import { CFFeatureFlagTypes } from '../../../../core/src/shared/components/cf-auth/cf-auth.types';
 import {
   extractActualListEntity,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
@@ -41,7 +40,7 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
-import { ISpace } from '../../cf-api.types';
+import { CFFeatureFlagTypes, ISpace } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { CFEntityConfig } from '../../cf-types';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';

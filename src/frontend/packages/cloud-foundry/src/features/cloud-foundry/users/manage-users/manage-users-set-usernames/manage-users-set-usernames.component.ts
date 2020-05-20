@@ -6,7 +6,6 @@ import { first, map, publishReplay, refCount, startWith, switchMap, take, tap } 
 
 import { PermissionConfig, PermissionTypes } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { CFFeatureFlagTypes } from '../../../../../../../core/src/shared/components/cf-auth/cf-auth.types';
 import {
   StackedInputActionConfig,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
@@ -20,6 +19,7 @@ import {
   UsersRolesSetIsSetByUsername,
   UsersRolesSetUsers,
 } from '../../../../../actions/users-roles.actions';
+import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { CfUser } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
