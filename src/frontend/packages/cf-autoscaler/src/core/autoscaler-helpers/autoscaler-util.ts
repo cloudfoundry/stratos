@@ -88,11 +88,19 @@ export class AutoscalerConstants {
     }
   };
 
-  public static getMetricUnit(metricType: string) {
+  public static getMetricUnit(metricType: string, unit?: string) {
     if (AutoscalerConstants.metricMap[metricType]) {
       return AutoscalerConstants.metricMap[metricType].unit_internal;
     } else {
-      return '';
+      return unit || '';
+    }
+  }
+
+  public static getMetricInterval(metricType: string) {
+    if (AutoscalerConstants.metricMap[metricType]) {
+      return AutoscalerConstants.metricMap[metricType].interval;
+    } else {
+      return 40;
     }
   }
 
@@ -110,6 +118,7 @@ export const PolicyAlert = {
   alertInvalidPolicyMaximumRange: 'The Maximum Instance Count must be an integer greater than the Minimum Instance Count.',
   alertInvalidPolicyInitialMaximumRange:
     'The Initial Minimum Instance Count must be an integer between Minimum Instance Count and Maximum Instance Count.',
+  alertInvalidPolicyTriggerMetricName: 'Invalid metric type name, only combination of letters, numbers and underlines "_" are allowed.',
   alertInvalidPolicyTriggerUpperThresholdRange: 'The Upper Threshold value must be an integer greater than the Lower Threshold value.',
   alertInvalidPolicyTriggerLowerThresholdRange: 'The Lower Threshold value must be an integer between 1 and (Upper Threshold-1).',
   alertInvalidPolicyTriggerThreshold100: 'The Lower/Upper Threshold value of memoryutil must be an integer below or equal to 100.',
