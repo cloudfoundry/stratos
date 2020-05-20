@@ -67,9 +67,9 @@ export class RequestHelpers {
    * @param {object?} body - the request body
    * @param {object?} formData - the form data
    */
-  sendRequest(req, options, body?: any, formData?): promise.Promise<any> {
-
-    const p = promise.defer<any>();
+  sendRequest(req, options, body?: any, formData?, promize = null, retry = 0): promise.Promise<any> {
+    const _that = this;
+    const p = promize || promise.defer<any>();
     const reqObj = req || this.newRequest();
 
     options.url = this.getHost() + '/' + options.url;
@@ -99,7 +99,13 @@ export class RequestHelpers {
       // E2E.debugLog('ERROR');
       // E2E.debugLog(e);
       E2E.debugLog('   - ERR: ' + e.statusCode + ' : ' + e.message);
-      p.reject(e);
+      if (retry < 2) {
+        retry++;
+        E2E.debugLog('   - Retrying .... ' + retry);
+        _that.sendRequest(req, options, body, formData, p, retry);
+      } else {
+        p.reject(e);
+      }
     });
 
     return p.promise;
@@ -130,33 +136,14 @@ export class RequestHelpers {
    * @description Create a session
    * @param {object} req - the request
    */
-  createSession(req, userType: ConsoleUserType, retry = 1, p = null): promise.Promise<any> {
-    const _that = this;
-
-    if (!p) {
-      p = promise.defer<any>();
-    }
-
+  createSession(req, userType: ConsoleUserType): promise.Promise<any> {
     const creds = e2e.secrets.getConsoleCredentials(userType);
     const formData = {
       username: creds.username || 'dev',
       password: creds.password || 'dev'
     };
 
-    this.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/uaa' }, null, formData)
-    .then(r => p.resolve(r))
-    .catch(e => {
-      e2e.debugLog('CreateSession failed: ' + retry);
-      if (retry < 3) {
-        e2e.sleep(2500);
-        e2e.debugLog('CreateSession retrying ... ' + (retry + 1));
-        _that.createSession(req, userType, retry + 1, p);
-      } else {
-        p.reject(e);
-      }
-    });
-
-    return p.promise;
+    return this.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/uaa' }, null, formData);
   }
 
   // /**
