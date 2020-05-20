@@ -10,6 +10,7 @@ export const appAutoscalerPolicyEntityType = 'autoscalerPolicy';
 export const appAutoscalerPolicyTriggerEntityType = 'autoscalerPolicyTrigger';
 export const appAutoscalerScalingHistoryEntityType = 'autoscalerScalingHistory';
 export const appAutoscalerAppMetricEntityType = 'autoscalerAppMetric';
+export const appAutoscalerCredentialEntityType = 'autoscalerCredential'
 
 export const AUTOSCALER_ENDPOINT_TYPE = 'autoscaler';
 
@@ -37,6 +38,12 @@ export class AutoscalerEntitySchema extends EntitySchema {
 
 entityCache[appAutoscalerInfoEntityType] = new AutoscalerEntitySchema(
   appAutoscalerInfoEntityType,
+  {},
+  { idAttribute: getAPIResourceGuid }
+);
+
+entityCache[appAutoscalerCredentialEntityType] = new AutoscalerEntitySchema(
+  appAutoscalerCredentialEntityType,
   {},
   { idAttribute: getAPIResourceGuid }
 );

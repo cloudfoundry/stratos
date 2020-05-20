@@ -88,7 +88,7 @@ describe('Autoscaler -', () => {
     });
 
     it('Check edit steps', () => {
-      expect(createPolicy.header.getTitleText()).toBe('Create AutoScaler Policy: ' + testAppName);
+      createPolicy.header.waitForTitleText('Create AutoScaler Policy: ' + testAppName)
       // Check the steps
       e2e.debugLog(`${loggingPrefix} Checking Steps`);
       createPolicy.stepper.getStepNames().then(steps => {

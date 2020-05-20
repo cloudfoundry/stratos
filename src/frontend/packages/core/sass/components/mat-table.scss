@@ -6,3 +6,26 @@ $mat-table-header-paginator-font-size: 13px;
 .mat-paginator {
   font-size: $mat-table-header-paginator-font-size;
 }
+
+// Fix right-hand margin on tables (monitor icon appears too close to edge)
+// https://github.com/cloudfoundry/stratos/issues/4234
+.stratos {
+
+  // Only put right padding between cells
+  .mat-cell, .mat-header-cell {
+    padding: 10px 10px 10px 0;
+  }
+
+  // Use margin, not padding for the left side of the first cell in the row/header/footer
+  .mat-cell:first-of-type, mat-footer-cell:first-of-type, mat-header-cell:first-of-type {
+    margin-left: 20px;
+    padding-left: 0;
+  }
+
+  // Use margin, not padding for the right side of the first cell in the row/header/footer
+  .mat-cell:last-of-type, mat-footer-cell:last-of-type, mat-header-cell:last-of-type {
+    margin-right: 20px;
+    padding-right: 0;
+  }
+
+}
