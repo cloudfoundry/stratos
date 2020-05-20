@@ -4,9 +4,6 @@ import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
-import {
-  ApplicationStateService,
-} from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import {
   getPaginationAction,
@@ -21,6 +18,7 @@ import { cfEventEntityType } from '../../../../../../cf-entity-types';
 import {
   CloudFoundryEventsListComponent,
 } from '../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
+import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { EventsTabComponent } from './events-tab.component';

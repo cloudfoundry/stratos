@@ -1,6 +1,3 @@
-import {
-  QuotaFormValues,
-} from '../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import {
   AssociateSpaceQuota,
@@ -11,6 +8,7 @@ import {
   UpdateSpaceQuotaDefinition,
 } from '../actions/quota-definitions.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import { QuotaFormValues } from '../features/cloud-foundry/quota-definition-form/quota-definition-form.component';
 
 export interface SpaceQuotaDefinitionActionBuilders extends OrchestratedActionBuilders {
   get: (

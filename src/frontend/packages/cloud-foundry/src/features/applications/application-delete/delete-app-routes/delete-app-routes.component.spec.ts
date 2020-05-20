@@ -10,6 +10,7 @@ import { applicationEntityType } from '../../../../cf-entity-types';
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationStateService } from './../../../../shared/services/application-state.service';
 import { DeleteAppRoutesComponent } from './delete-app-routes.component';
 
 describe('DeleteAppRoutesComponent', () => {
@@ -29,7 +30,8 @@ describe('DeleteAppRoutesComponent', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationEnvVarsHelper,
-        DatePipe
+        DatePipe,
+        ApplicationStateService
       ]
 
     })

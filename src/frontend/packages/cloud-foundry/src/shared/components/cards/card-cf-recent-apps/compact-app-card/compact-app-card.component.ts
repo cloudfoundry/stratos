@@ -6,12 +6,9 @@ import { map, startWith } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
-import {
-  ApplicationStateData,
-  ApplicationStateService,
-} from '../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { BREADCRUMB_URL_PARAM } from '../../../../../../../core/src/shared/components/breadcrumbs/breadcrumbs.types';
 import { StratosStatus } from '../../../../../../../core/src/shared/shared.types';
+import { ApplicationStateData, ApplicationStateService } from '../../../../services/application-state.service';
 
 
 @Component({

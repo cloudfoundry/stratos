@@ -1,7 +1,6 @@
 import { cfEntityFactory } from '../../../cloud-foundry/src/cf-entity-factory';
 import { metricEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { IOrgFavMetadata } from '../../../cloud-foundry/src/cf-metadata-types';
-import { IOrganization } from '../../../core/src/core/cf-api.types';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEntity,
@@ -116,5 +115,5 @@ function generateMetricEntity(endpointDefinition: IStratosEndpointDefinition) {
     labelPlural: 'Autoscaler Metrics',
     endpoint: endpointDefinition,
   };
-  return new StratosCatalogEntity<IOrgFavMetadata, APIResource<IOrganization>>(definition);
+  return new StratosCatalogEntity<IOrgFavMetadata, APIResource<any>>(definition);
 }

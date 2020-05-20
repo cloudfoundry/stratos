@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import {
   ChangeDetectorRef,
   Component,
@@ -13,6 +12,7 @@ import {
 } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import {
   catchError,
@@ -28,7 +28,6 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { IOrganization } from '../../../../../../../core/src/core/cf-api.types';
 import {
   ITableListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
@@ -42,6 +41,7 @@ import {
 } from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { UsersRolesFlipSetRoles, UsersRolesSetOrg } from '../../../../../actions/users-roles.actions';
+import { IOrganization } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import {
   TableCellRoleOrgSpaceComponent,
@@ -51,10 +51,10 @@ import {
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
 import { CfUser, OrgUserRoleNames } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
-import { getRowMetadata } from '../../../cf.helpers';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
 
+/* tslint:disable:max-line-length */
 
 /* tslint:enable:max-line-length */
 

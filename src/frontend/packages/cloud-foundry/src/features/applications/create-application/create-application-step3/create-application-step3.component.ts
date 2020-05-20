@@ -9,7 +9,6 @@ import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { domainEntityType, organizationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/effects/create-app-effects';
 import { CreateNewApplicationState } from '../../../../../../cloud-foundry/src/store/types/create-application.types';
-import { IDomain } from '../../../../../../core/src/core/cf-api.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import {
@@ -18,6 +17,7 @@ import {
   RequestInfoState,
 } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import { createGetApplicationAction } from '../../application.service';

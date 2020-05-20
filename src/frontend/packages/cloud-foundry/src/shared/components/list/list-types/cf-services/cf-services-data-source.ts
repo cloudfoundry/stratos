@@ -1,4 +1,5 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { serviceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -15,7 +16,6 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfServicesDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {

@@ -1,8 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  ServiceInstanceLastOpComponent,
-} from '../../../../../../../../core/src/shared/components/service-instance-last-op/service-instance-last-op.component';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -10,6 +7,7 @@ import { generateCfBaseTestModules } from '../../../../../../../test-framework/c
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
+import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import {
   TableCellServiceBindableComponent,
 } from '../../cf-services/table-cell-service-bindable/table-cell-service-bindable.component';

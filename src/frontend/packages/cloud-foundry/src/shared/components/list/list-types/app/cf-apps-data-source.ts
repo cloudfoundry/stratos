@@ -1,4 +1,5 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
@@ -27,7 +28,7 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { cfOrgSpaceFilter } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CFListDataSource } from '../../../../cf-list-data-source';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
 

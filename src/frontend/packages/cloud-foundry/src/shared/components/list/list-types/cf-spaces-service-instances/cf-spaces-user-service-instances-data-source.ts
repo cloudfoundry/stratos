@@ -1,4 +1,5 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
@@ -23,7 +24,6 @@ import {
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfSpacesUserServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {

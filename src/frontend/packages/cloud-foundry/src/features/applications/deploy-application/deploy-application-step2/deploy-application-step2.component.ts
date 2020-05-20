@@ -4,8 +4,8 @@ import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
-  combineLatest as observableCombineLatest,
   combineLatest,
+  combineLatest as observableCombineLatest,
   Observable,
   of as observableOf,
   of,
@@ -44,16 +44,15 @@ import {
   selectProjectExists,
   selectSourceType,
 } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
-import {
-  DeployApplicationState,
-  SourceType,
-} from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { GitBranch, GitCommit, GitRepo } from '../../../../../../cloud-foundry/src/store/types/git.types';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { GitSCM } from '../../../../../../core/src/shared/data-services/scm/scm';
-import { GitSCMService, GitSCMType } from '../../../../../../core/src/shared/data-services/scm/scm.service';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { GitSCM } from '../../../../shared/data-services/scm/scm';
+import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
+import { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
+import { GitBranch, GitCommit, GitRepo } from '../../../../store/types/git.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
+
+
 
 @Component({
   selector: 'app-deploy-application-step2',

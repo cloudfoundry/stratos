@@ -3,9 +3,9 @@ import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
-import { IService } from '../../../../../core/src/core/cf-api-svc.types';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IService } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 

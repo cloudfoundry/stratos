@@ -1,4 +1,5 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 
 import {
   createEntityRelationKey,
@@ -17,17 +18,16 @@ import {
   serviceBindingEntityType,
   serviceBindingNoBindingsEntityType,
 } from '../../../../../cf-entity-types';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class DetachAppsDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, serviceInstanceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(serviceBindingEntityType, serviceInstanceGuid);
     const getAppServiceBindingsAction = cfEntityCatalog.serviceBinding.actions.getAllForServiceInstance(
       serviceInstanceGuid, cfGuid, paginationKey, {
-      includeRelations: [
-        createEntityRelationKey(serviceBindingEntityType, applicationEntityType)
-      ]
-    }
+        includeRelations: [
+          createEntityRelationKey(serviceBindingEntityType, applicationEntityType)
+        ]
+      }
     );
     super({
       store,

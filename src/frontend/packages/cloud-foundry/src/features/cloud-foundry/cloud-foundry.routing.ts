@@ -6,27 +6,17 @@ import { StratosActionType } from '../../../../core/src/core/extension/extension
 import {
   PageNotFoundComponentComponent,
 } from '../../../../core/src/core/page-not-found-component/page-not-found-component.component';
-import { AddQuotaComponent } from '../../../../core/src/features/cloud-foundry/add-quota/add-quota.component';
-import {
-  AddSpaceQuotaComponent,
-} from '../../../../core/src/features/cloud-foundry/add-space-quota/add-space-quota.component';
-import { EditQuotaComponent } from '../../../../core/src/features/cloud-foundry/edit-quota/edit-quota.component';
-import {
-  EditSpaceQuotaComponent,
-} from '../../../../core/src/features/cloud-foundry/edit-space-quota/edit-space-quota.component';
-import {
-  CloudFoundryOrganizationSpaceQuotasComponent,
-} from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-space-quotas/cloud-foundry-organization-space-quotas.component';
-import {
-  CloudFoundryQuotasComponent,
-} from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
 import { AddOrganizationComponent } from './add-organization/add-organization.component';
+import { AddQuotaComponent } from './add-quota/add-quota.component';
+import { AddSpaceQuotaComponent } from './add-space-quota/add-space-quota.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
+import { EditQuotaComponent } from './edit-quota/edit-quota.component';
+import { EditSpaceQuotaComponent } from './edit-space-quota/edit-space-quota.component';
 import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { QuotaDefinitionComponent } from './quota-definition/quota-definition.component';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition/space-quota-definition.component';
@@ -47,6 +37,9 @@ import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-cells/cloud-fou
 import { CloudFoundryEventsComponent } from './tabs/cloud-foundry-events/cloud-foundry-events.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
+import {
+  CloudFoundryOrganizationSpaceQuotasComponent,
+} from './tabs/cloud-foundry-organization-space-quotas/cloud-foundry-organization-space-quotas.component';
 import {
   CloudFoundryOrganizationBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component';
@@ -89,6 +82,7 @@ import {
 import {
   CloudFoundryOrganizationsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organizations.component';
+import { CloudFoundryQuotasComponent } from './tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
 import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 import {
   CloudFoundrySecurityGroupsComponent,

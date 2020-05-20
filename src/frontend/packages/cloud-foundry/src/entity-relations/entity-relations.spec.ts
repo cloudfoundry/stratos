@@ -1,5 +1,5 @@
-import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../core/src/core/cf-api.types';
 import { APIResource } from '../../../store/src/types/api.types';
+import { IOrganization, IOrgQuotaDefinition, ISpace } from '../cf-api.types';
 
 export const entityRelationMissingSpacesUrl = 'spaces_url';
 export const entityRelationMissingQuotaGuid = 'quota_guid';

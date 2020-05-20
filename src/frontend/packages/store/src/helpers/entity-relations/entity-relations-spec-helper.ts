@@ -1,4 +1,4 @@
-import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../../core/src/core/cf-api.types';
+import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../../cloud-foundry/src/cf-api.types';
 import { APIResource } from '../../types/api.types';
 
 export const entityRelationMissingSpacesUrl = 'spaces_url';

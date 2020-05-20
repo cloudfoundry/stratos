@@ -7,8 +7,8 @@ import { ApplicationService } from '../../../../cloud-foundry/src/features/appli
 import {
   RunningInstancesComponent,
 } from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
+import { ApplicationStateService } from '../../../../cloud-foundry/src/shared/services/application-state.service';
 import { CoreModule } from '../../../../core/src/core/core.module';
-import { ApplicationStateService } from '../../../../core/src/shared/components/application-state/application-state.service';
 import {
   CopyToClipboardComponent,
 } from '../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';

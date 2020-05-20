@@ -1,10 +1,10 @@
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 
-import { IApp } from '../../../core/src/core/cf-api.types';
 import { pick } from '../../../store/src/helpers/reducer.helper';
 import { ActionMergeFunction } from '../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
+import { IApp } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { applicationEntityType, appStatsEntityType } from '../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';

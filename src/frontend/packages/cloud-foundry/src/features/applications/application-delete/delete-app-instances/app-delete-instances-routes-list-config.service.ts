@@ -9,13 +9,13 @@ import { serviceBindingEntityType } from '../../../../../../cloud-foundry/src/cf
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { IServiceBinding } from '../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IServiceBinding } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import {
   AppServiceBindingListConfigService,

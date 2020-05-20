@@ -1,4 +1,5 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { securityGroupEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -13,7 +14,6 @@ import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfSecurityGroupsDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
