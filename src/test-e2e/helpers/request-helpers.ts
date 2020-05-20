@@ -67,9 +67,7 @@ export class RequestHelpers {
    * @param {object?} body - the request body
    * @param {object?} formData - the form data
    */
-  sendRequest(req, options, body?: any, formData?, promize = null, retry = 0): promise.Promise<any> {
-    const _that = this;
-    const p = promize || promise.defer<any>();
+  sendRequest(req, options, body?: any, formData?): promise.Promise<any> {
     const reqObj = req || this.newRequest();
 
     options.url = this.getHost() + '/' + options.url;
@@ -86,10 +84,15 @@ export class RequestHelpers {
 
     E2E.debugLog('REQ: ' + options.method + ' ' + options.url);
     this.showOptions(options);
+    return this.retryRequest(reqObj, options, body, formData);
+  }
+
+  retryRequest(reqObj, options, body?: any, formData?, promize = null, retry = 0): promise.Promise<any> {
+    const _that = this;
+    const p = promize || promise.defer<any>();
 
     reqObj(options).then((response) => {
       E2E.debugLog('   + OK : ' + response.statusCode);
-
       // Get XSRF Token
       if (response.headers && response.headers['x-xsrf-token']) {
         reqObj._xsrfToken = response.headers['x-xsrf-token'];
@@ -101,8 +104,8 @@ export class RequestHelpers {
       E2E.debugLog('   - ERR: ' + e.statusCode + ' : ' + e.message);
       if (retry < 2) {
         retry++;
-        E2E.debugLog('   - Retrying .... ' + retry);
-        _that.sendRequest(req, options, body, formData, p, retry);
+        E2E.debugLog('   - Retrying ' + options.method + ' ' + options.url + ' [' + retry + ']');
+        _that.retryRequest(reqObj, options, body, formData, p, retry);
       } else {
         p.reject(e);
       }
