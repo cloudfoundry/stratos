@@ -50,11 +50,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
       columnId: 'detail', headerCell: () => 'Detail', cellComponent: TableCellEventDetailComponent, cellFlex: '6'
     },
     {
-      columnId: 'timestamp',
-      headerCell: () => 'Timestamp',
-      cellComponent: TableCellEventTimestampComponent,
-      sort: true,
-      cellFlex: '3'
+      columnId: 'timestamp', headerCell: () => 'Timestamp', cellComponent: TableCellEventTimestampComponent, sort: true, cellFlex: '3'
     },
   ];
   viewType = ListViewTypes.TABLE_ONLY;

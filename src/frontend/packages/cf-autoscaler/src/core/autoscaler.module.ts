@@ -23,6 +23,7 @@ import {
   EditAutoscalerPolicyStep4Component,
 } from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
 import { EditAutoscalerPolicyComponent } from '../features/edit-autoscaler-policy/edit-autoscaler-policy.component';
+import { EditAutoscalerCredentialComponent } from '../features/edit-autoscaler-credential/edit-autoscaler-credential.component';
 import { CardAutoscalerDefaultComponent } from '../shared/card-autoscaler-default/card-autoscaler-default.component';
 import {
   TableCellAutoscalerEventChangeIconPipe,
@@ -65,6 +66,7 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     EditAutoscalerPolicyStep2Component,
     EditAutoscalerPolicyStep3Component,
     EditAutoscalerPolicyStep4Component,
+    EditAutoscalerCredentialComponent,
     CardAutoscalerDefaultComponent,
     AppAutoscalerMetricChartCardComponent,
     AppAutoscalerComboChartComponent,

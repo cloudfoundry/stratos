@@ -235,7 +235,7 @@ const config = {
         if (resp.statusCode >= 400) {
           defer.reject('Failed to validate Github API Url. Status Code: ' + resp.statusCode);
         } else {
-          defer.fulfill('Github API Url responding');
+          defer.fulfill('Validated Github API Url successfully');
         }
       })
       .on("error", (err) => {

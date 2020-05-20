@@ -42,6 +42,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
     columnId: 'manager',
     headerCell: () => 'Manager',
     cellComponent: TableCellRoleOrgSpaceComponent,
+    class: 'app-table__cell--table-column-additional-padding',
     cellConfig: {
       role: SpaceUserRoleNames.MANAGER,
       isSpace: true
@@ -50,6 +51,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
     columnId: 'auditor',
     headerCell: () => 'Auditor',
     cellComponent: TableCellRoleOrgSpaceComponent,
+    class: 'app-table__cell--table-column-additional-padding',
     cellConfig: {
       role: SpaceUserRoleNames.AUDITOR,
       isSpace: true
@@ -58,6 +60,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
     columnId: 'developer',
     headerCell: () => 'Developer',
     cellComponent: TableCellRoleOrgSpaceComponent,
+    class: 'app-table__cell--table-column-additional-padding',
     cellConfig: {
       role: SpaceUserRoleNames.DEVELOPER,
       isSpace: true

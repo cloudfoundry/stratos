@@ -79,7 +79,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
       columnId: 'monitorState',
       cellComponent: TableCellRequestMonitorIconComponent,
       cellConfig: this.getCellConfig || defaultGetCellConfig,
-      cellFlex: '0 0 40px'
+      cellFlex: '0 0 24px'
     };
 
     this.allColumns = [...this.columns, monitorColumn];

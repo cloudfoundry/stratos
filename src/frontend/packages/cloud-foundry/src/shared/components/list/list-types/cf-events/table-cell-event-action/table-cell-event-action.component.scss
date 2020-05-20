@@ -3,6 +3,7 @@ div {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  word-break: break-word;
 
   mat-icon {
     margin-right: 10px;
