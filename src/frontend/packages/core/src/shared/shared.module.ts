@@ -22,7 +22,6 @@ import { CardProgressOverlayComponent } from './components/card-progress-overlay
 import { CardBooleanMetricComponent } from './components/cards/card-boolean-metric/card-boolean-metric.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
-import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
@@ -128,7 +127,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     PageHeaderModule,
     RouterModule,
     SteppersModule,
-    CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
   ],
