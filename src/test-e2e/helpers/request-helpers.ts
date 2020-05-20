@@ -138,10 +138,10 @@ export class RequestHelpers {
       password: creds.password || 'dev'
     };
     return this.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/uaa' }, null, formData).catch(e => {
-      console.log('***** createSession failed: ' + retry);
+      e2e.debugLog('CreateSession failed: ' + retry);
       if (retry < 3) {
         e2e.sleep(2500);
-        console.log('Retrying createSession ... ' + retry);
+        e2e.debugLog('CreateSession retrying ... ' + retry + 1);
         return _that.createSession(req, userType, retry + 1);
       } else {
         throw e;
