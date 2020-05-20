@@ -369,7 +369,7 @@ const cfListCards: Type<CardCell<any>>[] = [
     CfEndpointDetailsComponent,
     NoServicePlansComponent,
     EventMetadataComponent,
-
+    EnvVarViewComponent,
     ...cfListTableCells,
     ...cfListCards
   ],

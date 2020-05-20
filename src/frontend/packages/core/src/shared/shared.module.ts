@@ -5,7 +5,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
-import { EnvVarViewComponent } from '../../../cloud-foundry/src/shared/components/env-var-view/env-var-view.component';
 import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
 import { CoreModule } from '../core/core.module';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -316,7 +315,6 @@ import { UserPermissionDirective } from './user-permission.directive';
   ],
   entryComponents: [
     DialogConfirmComponent,
-    EnvVarViewComponent,
     SnackBarReturnComponent,
     MarkdownPreviewComponent,
   ],
