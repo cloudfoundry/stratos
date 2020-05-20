@@ -102,7 +102,7 @@ export class RequestHelpers {
       // E2E.debugLog('ERROR');
       // E2E.debugLog(e);
       E2E.debugLog('   - ERR: ' + e.statusCode + ' : ' + e.message);
-      if (retry < 2) {
+      if (e.statusCode !== 401 && retry < 2) {
         retry++;
         E2E.debugLog('   - Retrying ' + options.method + ' ' + options.url + ' [' + retry + ']');
         _that.retryRequest(reqObj, options, body, formData, p, retry);
