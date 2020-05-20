@@ -22,6 +22,10 @@ import { EntityServiceFactory } from '../../../../store/src/entity-service-facto
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  getCurrentPageRequestInfo,
+  PaginationObservables,
+} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { fetchAutoscalerInfo, isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
@@ -35,9 +39,9 @@ import {
 } from '../../store/app-autoscaler.actions';
 import {
   AppAutoscaleMetricChart,
+  AppAutoscalerEvent,
   AppAutoscalerMetricData,
   AppAutoscalerPolicyLocal,
-  AppAutoscalerScalingHistory,
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
 import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
@@ -72,10 +76,10 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   metricTypes: string[] = AutoscalerConstants.MetricTypes;
 
   appAutoscalerPolicyService: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
-  public appAutoscalerScalingHistoryService: EntityService<APIResource<AppAutoscalerScalingHistory>>;
+  public appAutoscalerScalingHistoryService: PaginationObservables<APIResource<AppAutoscalerEvent>>;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicyLocal>;
   appAutoscalerPolicySafe$: Observable<AppAutoscalerPolicyLocal>;
-  appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
+  appAutoscalerScalingHistory$: Observable<AppAutoscalerEvent[]>;
   appAutoscalerAppMetricNames$: Observable<AppAutoscaleMetricChart[]>;
 
   public showNoPolicyMessage$: Observable<boolean>;
@@ -179,15 +183,20 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       createEntityRelationPaginationKey(applicationEntityType, this.applicationService.appGuid, 'latest'),
       this.applicationService.appGuid,
       this.applicationService.cfGuid,
-      true,
+      false,
       this.paramsHistory
     );
-    this.appAutoscalerScalingHistoryService = this.entityServiceFactory.create(
-      this.applicationService.appGuid,
-      this.scalingHistoryAction
-    );
-    this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(
-      map(({ entity }) => entity && entity.entity),
+    this.appAutoscalerScalingHistoryService = getPaginationObservables({
+      store: this.store,
+      action: this.scalingHistoryAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        this.scalingHistoryAction.paginationKey,
+        this.scalingHistoryAction,
+        true
+      ),
+    }, true);
+    this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entities$.pipe(
+      map(entities => entities.map(entity => entity.entity)),
       publishReplay(1),
       refCount()
     );
@@ -197,7 +206,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.appAutoscalerPolicy$,
       this.appAutoscalerScalingHistory$
     ]).pipe(
-      map(([policy, history]) => !!policy || (!!history && history.total_results > 0)),
+      map(([policy, history]) => !!policy || (!!history && history.length > 0)),
       publishReplay(1),
       refCount()
     );
@@ -206,7 +215,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.appAutoscalerPolicy$,
       this.appAutoscalerScalingHistory$
     ]).pipe(
-      map(([policy, history]) => !policy && (!history || history.total_results === 0)),
+      map(([policy, history]) => !policy && (!history || history.length === 0)),
       publishReplay(1),
       refCount()
     );
@@ -261,7 +270,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     if (this.appAutoscalerScalingHistoryErrorSub) {
       this.appAutoscalerScalingHistoryErrorSub.unsubscribe();
     }
-    this.appAutoscalerScalingHistoryErrorSub = this.appAutoscalerScalingHistoryService.entityMonitor.entityRequest$.pipe(
+    this.appAutoscalerScalingHistoryErrorSub = this.appAutoscalerScalingHistoryService.pagination$.pipe(
+      map(pagination => getCurrentPageRequestInfo(pagination)),
       filter(request => !!request.error),
       map(request => request.message),
       distinctUntilChanged(),

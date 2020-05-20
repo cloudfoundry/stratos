@@ -9,12 +9,7 @@ import {
 import { IStratosEndpointDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
-import {
-  AppAutoscalerHealth,
-  AppAutoscalerPolicy,
-  AppAutoscalerScalingHistory,
-  AppScalingTrigger,
-} from './app-autoscaler.types';
+import { AppAutoscalerEvent, AppAutoscalerHealth, AppAutoscalerPolicy, AppScalingTrigger } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricEntityType,
   appAutoscalerCredentialEntityType,
@@ -101,7 +96,7 @@ function generateScalingEntity(endpointDefinition: IStratosEndpointDefinition) {
     schema: autoscalerEntityFactory(appAutoscalerScalingHistoryEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerScalingHistory>>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerEvent>>(definition);
 }
 
 function generateAppMetricEntity(endpointDefinition: IStratosEndpointDefinition) {

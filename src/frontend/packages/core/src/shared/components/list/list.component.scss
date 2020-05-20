@@ -85,14 +85,6 @@
         padding: 10px 10px 10px 0;
       }
 
-      &--metrics-range {
-        padding-left: 10px;
-
-        app-metrics-range-selector {
-          padding-left: 10px;
-        }
-      }
-
       &--multi-actions {
         button {
           &:first-of-type {
