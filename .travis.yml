@@ -33,39 +33,6 @@ stages:
   - Test
 jobs:
   include:
-    - stage: Lint
-      name: Frontend Lint
-      script:
-        - npm run lint
-    - name: Backend Lint
-      before_script:
-        - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-        - chmod +x ~/bin/gimme
-        - eval "$(gimme 1.13.4)"
-        - go get -u golang.org/x/lint/golint
-      script:
-        - golint src/jetstream/...
-        - ./deploy/ci/travis/update-go-report-card.sh
-    - stage: Build
-      name: Build Frontend and Backend
-      env:
-        - CI_ENV=true
-      script:
-        - "./deploy/ci/travis/e2e-build-script.sh build"
-    - stage: Test
-      name: Frontend Unit Tests
-      env:
-        - CI_ENV=true
-      script:
-        - npm run test
-        - npm run codecov
-    - name: Backend Unit Tests
-      before_script:
-        - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-        - chmod +x ~/bin/gimme
-        - eval "$(gimme 1.13.4)"
-      script:
-        - npm run test-backend
     - name: E2E Tests - Autoscaler
       before_script:
         - "./deploy/ci/travis/job-e2e-before_script.sh"
