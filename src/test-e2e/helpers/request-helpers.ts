@@ -130,23 +130,33 @@ export class RequestHelpers {
    * @description Create a session
    * @param {object} req - the request
    */
-  createSession(req, userType: ConsoleUserType, retry = 1): promise.Promise<any> {
+  createSession(req, userType: ConsoleUserType, retry = 1, p = null): promise.Promise<any> {
     const _that = this;
+
+    if (!p) {
+      p = promise.defer<any>();
+    }
+
     const creds = e2e.secrets.getConsoleCredentials(userType);
     const formData = {
       username: creds.username || 'dev',
       password: creds.password || 'dev'
     };
-    return this.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/uaa' }, null, formData).catch(e => {
+
+    this.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/uaa' }, null, formData)
+    .then(r => p.resolve(r))
+    .catch(e => {
       e2e.debugLog('CreateSession failed: ' + retry);
       if (retry < 3) {
         e2e.sleep(2500);
         e2e.debugLog('CreateSession retrying ... ' + (retry + 1));
-        return _that.createSession(req, userType, retry + 1);
+        _that.createSession(req, userType, retry + 1, p);
       } else {
-        throw e;
+        p.reject(e);
       }
-    })
+    });
+
+    return p.promise;
   }
 
   // /**
