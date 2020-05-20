@@ -9,6 +9,10 @@ echo "Checking docker version"
 
 docker version
 
+# Pull the UAA image, to save time when we run it later
+echo "Spawning docker image pull for uaa container image"
+docker pull splatform/stratos-uaa &
+
 echo "Preparing for e2e tests..."
 
 wget https://travis.capbristol.com/yaml --no-check-certificate -O ./secrets.yaml
