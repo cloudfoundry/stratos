@@ -9,10 +9,6 @@ echo "Checking docker version"
 
 docker version
 
-# Pull the UAA image, to save time when we run it later
-echo "Spawning docker image pull for uaa container image"
-docker pull splatform/stratos-uaa &
-
 echo "Preparing for e2e tests..."
 
 wget https://travis.capbristol.com/yaml --no-check-certificate -O ./secrets.yaml
@@ -44,8 +40,6 @@ fi
 
 echo "Using local deployment for e2e tests"
 # Quick deploy locally
-# Start a local UAA - this will take a few seconds to come up in the background
-docker run -d -p 8080:8080 splatform/stratos-uaa
 
 # Build if needed or use existing build for this commit
 DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -206,7 +206,7 @@ export class E2ESetup {
 
     // Extend the timeout for setup
     const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
 
     // Create the sessions neeed
     if (this.needAdminSession) {

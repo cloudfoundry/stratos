@@ -5,9 +5,6 @@ MAILCATCHER=$1
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../.. && pwd)"
 
-if [ "${MAILCATCHER}" == "true" ]; then
-  docker pull tophfr/mailcatcher &
-fi
 chmod +x ${DIRPATH}/deploy/ci/travis/run-e2e-tests.sh
 # We will install ffmpeg so we can capture a video of the display as the tests run
 # sudo apt-get update
@@ -18,6 +15,9 @@ sudo apt-get -qq update
 if [ "${MAILCATCHER}" == "true" ]; then
   docker run -d -p 1080:80 -p 1025:25 --name mail tophfr/mailcatcher
 fi
+
+# Start a local UAA - this will take a few seconds to come up in the background
+docker run -d -p 8080:8080 splatform/stratos-uaa
 
 # Check that the S3 server is available
 curl -k --max-time 20 ${AWS_ENDPOINT}
