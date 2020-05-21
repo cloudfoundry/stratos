@@ -466,6 +466,14 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 		state = fmt.Sprintf("%s/login?SSO_Message=%s", state, url.QueryEscape(msg))
 	}
 
+	if !safeSSORedirectState(state, p.Config.SSOWhiteList) {
+		err := interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"SSO Login: Disallowed redirect state",
+			"SSO Login: Disallowed redirect state")
+		return err
+	}
+
 	return c.Redirect(http.StatusTemporaryRedirect, state)
 }
 
