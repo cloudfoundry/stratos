@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgModule, ModuleWithProviders } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -90,14 +90,6 @@ function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMeta
   if (!extensionMetadata.extensionRoutes[tab]) {
     extensionMetadata.extensionRoutes[tab] = [];
   }
-
-  extensionMetadata.extensionRoutes[tab].push({
-    path: props.link,
-    component: target
-  });
-  extensionMetadata.tabs[tab].push({
-    ...props
-  });
 }
 
 function addExtensionAction(action: StratosActionType, target: any, props: StratosActionMetadata) {
@@ -119,6 +111,14 @@ export class ExtensionService {
   public metadata = extensionMetadata;
 
   constructor(private router: Router) { }
+
+  // Declare extensions - this is a trick to ensure the Angular Build Optimiser does not
+  // optimize out any extension components
+  public static declare(components: any[]): ModuleWithProviders {
+    return {
+      ngModule: ExtEmptyModule
+    };
+  }
 
   /**
    * Initialize the extensions - to be invoked in the AppModule
@@ -184,3 +184,7 @@ export function getTabsFromExtensions(tabType: StratosTabType): IPageSideNavTab[
 export function getActionsFromExtensions(actionType: StratosActionType): StratosActionMetadata[] {
   return extensionMetadata.actions[actionType] || [];
 }
+
+// Empty module used to support the registration of Extension Components
+@NgModule()
+export class ExtEmptyModule { }

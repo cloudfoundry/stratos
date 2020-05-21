@@ -47,6 +47,8 @@ import {
   AppAutoscalerComboSeriesVerticalComponent,
 } from '../shared/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-series-vertical.component';
 import { AutoscalerRoutingModule } from './autoscaler.routing';
+import { ExtensionService } from 'frontend/packages/core/src/core/extension/extension-service';
+import { AutoscalerTabExtensionComponent } from '../features/autoscaler-tab-extension/autoscaler-tab-extension.component';
 
 
 @NgModule({
@@ -56,6 +58,9 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     AutoscalerRoutingModule,
     NgxChartsModule,
     CloudFoundrySharedModule,
+    ExtensionService.declare([
+      AutoscalerTabExtensionComponent,
+    ])
   ],
   declarations: [
     AutoscalerBaseComponent,
