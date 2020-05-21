@@ -283,10 +283,7 @@ UAA configuration can be specified by providing the following configuration.
 Create a yaml file with the content below and and update according to your environment and save to a file called `uaa-config.yaml`.
 ```
 uaa:
-  url: https://uaa.cf-dev.io:2793
-  protocol: https://
-  port: 2793
-  host: uaa.cf-dev.io
+  endpoint: https://uaa.cf-dev.io:2793
   consoleClient:  cf
   consoleClientSecret: 
   consoleAdminIdentifier: cloud_controller.admin 
