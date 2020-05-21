@@ -5,14 +5,14 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { selectDeletionInfo } from '../../../../../../../store/src/selectors/api.selectors';
 import { organizationEntityType } from '../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { goToAppWall } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
@@ -26,8 +26,8 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
 export class CloudFoundryOrganizationSummaryComponent {
   appLink: () => void;
   detailsLoading$: Observable<boolean>;
-  public permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
-  public permsOrgDelete = CurrentUserPermissions.ORGANIZATION_DELETE;
+  public permsOrgEdit = CfCurrentUserPermissions.ORGANIZATION_EDIT;
+  public permsOrgDelete = CfCurrentUserPermissions.ORGANIZATION_DELETE;
 
   constructor(
     private store: Store<CFAppState>,

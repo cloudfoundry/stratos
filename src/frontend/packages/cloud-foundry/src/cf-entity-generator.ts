@@ -364,6 +364,11 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
           map(([beValue, userOverride]) => userOverride || beValue || entityTypeDefault)
         );
       },
+    },
+    userRolesInit: () => of(false), // TODO: RC implement
+    userRolesReducer: () => { // TODO: RC implement
+      console.log('HELLO WORLD');
+      return null;
     }
   };
   return [

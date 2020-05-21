@@ -28,6 +28,7 @@ import {
   REGISTER_ENDPOINTS_SUCCESS,
   UNREGISTER_ENDPOINTS_SUCCESS,
 } from '../../actions/endpoint.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { getDefaultRolesRequestState, ICurrentUserRolesState } from '../../types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../types/request.types';
 import {
@@ -73,6 +74,9 @@ export function currentUserRolesReducer(state: ICurrentUserRolesState = getDefau
     case GET_CURRENT_USER_RELATIONS:
     case GET_CURRENT_USER_RELATIONS_SUCCESS:
     case GET_CURRENT_USER_RELATIONS_FAILED:
+      // TODO: RC Comment. can cause issues if plugins have same action type names. Should use same method as 
+      // requestData in entity-catalog.module 
+      entityCatalog.getAllCurrentUserReducers();
       return {
         ...state,
         state: currentUserRolesRequestStateReducer(state.state, action.type)

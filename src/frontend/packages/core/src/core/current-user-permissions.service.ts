@@ -1,36 +1,45 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { InternalAppState } from '../../../store/src/app-state';
 import {
-  CHECKER_GROUPS,
-  CurrentUserPermissionsChecker,
+  BaseCurrentUserPermissionsChecker,
   IConfigGroup,
   IConfigGroups,
+  ICurrentUserPermissionsChecker,
+  StratosUserPermissionsChecker,
 } from './current-user-permissions.checker';
 import {
   CurrentUserPermissions,
   PermissionConfig,
   PermissionConfigLink,
-  permissionConfigs,
   PermissionConfigType,
   PermissionTypes,
 } from './current-user-permissions.config';
+import { LoggerService } from './logger.service';
 
 interface ICheckCombiner {
   checks: Observable<boolean>[];
   combineType?: '&&';
 }
 
+export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers'
+
 @Injectable()
 export class CurrentUserPermissionsService {
-  private checker: CurrentUserPermissionsChecker;
+  // private checker: StratosUserPermissionsChecker;
+  private allCheckers: ICurrentUserPermissionsChecker[];
   constructor(
-    store: Store<InternalAppState>
+    store: Store<InternalAppState>,
+    @Inject(CUSTOM_USER_PERMISSION_CHECKERS) customCheckers: ICurrentUserPermissionsChecker[],
+    private logger: LoggerService
   ) {
-    this.checker = new CurrentUserPermissionsChecker(store);
+    this.allCheckers = [
+      new StratosUserPermissionsChecker(store),
+      ...customCheckers
+    ]
   }
   /**
    * @param action The action we're going to check the user's access to.
@@ -44,81 +53,110 @@ export class CurrentUserPermissionsService {
   public can(
     action: CurrentUserPermissions | PermissionConfigType,
     endpointGuid?: string,
-    orgOrSpaceGuid?: string,
-    spaceGuid?: string
+    ...args: any[]
   ): Observable<boolean> {
-    const actionConfig = this.getConfig(typeof action === 'string' ? permissionConfigs[action] : action);
-    const obs$ = this.getCanObservable(actionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
-    return obs$ ? obs$.pipe(
-      distinctUntilChanged(),
-    ) : observableOf(false);
+    let actionConfig;
+    if (typeof action === 'string') {
+      let permConfigType = this.getPermissionConfig(action);
+      if (!permConfigType) {
+        return of(false); // Logging handled in getPermissionConfig
+      }
+      actionConfig = this.getConfig(permConfigType);
+    } else {
+      actionConfig = this.getConfig(action)
+    }
+    const obs$ = this.getCanObservable(actionConfig, endpointGuid, ...args);
+    return obs$ ?
+      obs$.pipe(distinctUntilChanged()) :
+      of(false);
   }
 
   private getCanObservable(
     actionConfig: PermissionConfig[] | PermissionConfig,
     endpointGuid: string,
-    orgOrSpaceGuid?: string,
-    spaceGuid?: string): Observable<boolean> {
+    ...args: any[]): Observable<boolean> {
     if (Array.isArray(actionConfig)) {
-      return this.getComplexPermission(actionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
+      return this.getComplexPermission(actionConfig, endpointGuid, ...args);
     } else if (actionConfig) {
-      return this.getSimplePermission(actionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
+      return this.getSimplePermission(actionConfig, endpointGuid, ...args);
     } else if (endpointGuid) {
-      return this.checker.getAdminCheck(endpointGuid);
+      return this.getFallbackPermission(endpointGuid);
     }
     return null;
   }
 
-  private getSimplePermission(actionConfig: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
-    const check$ = this.checker.getSimpleCheck(actionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
-    if (actionConfig.type === PermissionTypes.ORGANIZATION || actionConfig.type === PermissionTypes.SPACE) {
-      return this.applyAdminCheck(check$, endpointGuid);
-    }
-    return check$;
+  private getSimplePermission(actionConfig: PermissionConfig, endpointGuid: string, ...args: any[]): Observable<boolean> {
+    return this.findChecker<Observable<boolean>>(
+      (checker: ICurrentUserPermissionsChecker) => checker.getSimpleCheck(actionConfig, endpointGuid, ...args),
+      'permissions check',
+      actionConfig.type,
+      of(false)
+    )
   }
 
-  private getComplexPermission(actionConfigs: PermissionConfig[], endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
-    const groupedChecks = this.checker.groupConfigs(actionConfigs);
-    const checks = this.getChecksFromConfigGroups(groupedChecks, endpointGuid, orgOrSpaceGuid, spaceGuid);
-    return this.combineChecks(checks, endpointGuid);
+  private getComplexPermission(actionConfigs: PermissionConfig[], endpointGuid?: string, ...args: any[]) {
+    const groupedChecks = this.groupConfigs(actionConfigs);
+    const checks = this.getChecksFromConfigGroups(groupedChecks, endpointGuid, ...args);
+    return this.combineChecks(checks);
   }
 
-  private getChecksFromConfigGroups(groups: IConfigGroups, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
+  private groupConfigs(configs: PermissionConfig[]): IConfigGroups {
+    return configs.reduce((grouped, config) => {
+      const type = config.type;
+      return {
+        ...grouped,
+        [type]: [
+          ...(grouped[type] || []),
+          config
+        ]
+      };
+    }, {});
+  }
+
+  private getChecksFromConfigGroups(groups: IConfigGroups, endpointGuid?: string, ...args: any[]) {
     return Object.keys(groups).map((permission: PermissionTypes) => {
-      return this.getCheckFromConfig(groups[permission], permission, endpointGuid, orgOrSpaceGuid, spaceGuid);
+      return this.getCheckFromConfig(groups[permission], permission, endpointGuid, ...args);
     });
   }
 
   private getCheckFromConfig(
     configGroup: IConfigGroup,
-    permission: PermissionTypes | CHECKER_GROUPS,
-    endpointGuid?: string,
-    orgOrSpaceGuid?: string,
-    spaceGuid?: string
+    permission: PermissionTypes,
+    endpointGuid: string,
+    ...args: any[]
   ): ICheckCombiner {
-    switch (permission) {
-      case PermissionTypes.ENDPOINT:
-        return {
-          checks: this.checker.getInternalScopesChecks(configGroup),
-        };
-      case PermissionTypes.ENDPOINT_SCOPE:
-        return {
-          checks: this.checker.getEndpointScopesChecks(configGroup, endpointGuid),
-        };
-      case PermissionTypes.STRATOS_SCOPE:
-        return {
-          checks: this.checker.getInternalScopesChecks(configGroup),
-        };
-      case PermissionTypes.FEATURE_FLAG:
-        return {
-          checks: this.checker.getFeatureFlagChecks(configGroup, endpointGuid),
-          combineType: '&&'
-        };
-      case CHECKER_GROUPS.CF_GROUP:
-        return {
-          checks: this.checker.getCfChecks(configGroup, endpointGuid, orgOrSpaceGuid, spaceGuid)
-        };
-    }
+    return this.findChecker<ICheckCombiner>(
+      (checker: ICurrentUserPermissionsChecker) => checker.getCheckFromConfig(configGroup, permission, endpointGuid, ...args),
+      'permissions check',
+      permission,
+      {
+        checks: [of(false)]
+      }
+    )
+
+    // switch (permission) {
+    //   case PermissionTypes.ENDPOINT:
+    //     return {
+    //       checks: this.checker.getInternalScopesChecks(configGroup),
+    //     };
+    //   case PermissionTypes.ENDPOINT_SCOPE:
+    //     return {
+    //       checks: this.checker.getEndpointScopesChecks(configGroup, endpointGuid),
+    //     };
+    //   case PermissionTypes.STRATOS_SCOPE:
+    //     return {
+    //       checks: this.checker.getInternalScopesChecks(configGroup),
+    //     };
+    //   case PermissionTypes.FEATURE_FLAG:
+    //     return {
+    //       checks: this.checker.getFeatureFlagChecks(configGroup, endpointGuid),
+    //       combineType: '&&'
+    //     };
+    //   case CHECKER_GROUPS.CF_GROUP: //PermissionTypes.ORGANIZATION || config.type === PermissionTypes.SPACE
+    //     return {
+    //       checks: this.checker.getCfChecks(configGroup, endpointGuid, orgOrSpaceGuid, spaceGuid)
+    //     };
+    // }
   }
 
   private getConfig(config: PermissionConfigType, tries = 0): PermissionConfig[] | PermissionConfig {
@@ -136,39 +174,64 @@ export class CurrentUserPermissionsService {
   }
 
   private getLinkedPermissionConfig(linkConfig: PermissionConfigLink, tries = 0) {
-    return this.getConfig(permissionConfigs[linkConfig.link]);
-  }
-
-  private applyAdminCheck(check$: Observable<boolean>, endpointGuid?: string) {
-    const adminCheck$ = this.checker.getAdminChecks(endpointGuid);
-    const readOnlyCheck$ = this.checker.getReadOnlyChecks(endpointGuid);
-    return combineLatest(
-      adminCheck$,
-      readOnlyCheck$
-    ).pipe(
-      distinctUntilChanged(),
-      switchMap(([isAdmin, isReadOnly]) => {
-        if (isAdmin) {
-          return observableOf(true);
-        }
-        if (isReadOnly) {
-          return observableOf(false);
-        }
-        return check$;
-      })
-    );
+    return this.getConfig(this.getPermissionConfig(linkConfig.link), tries);
   }
 
   private combineChecks(
     checkCombiners: ICheckCombiner[],
-    endpointGuid?: string
   ) {
-    const reducedChecks = checkCombiners.map(combiner => this.checker.reduceChecks(combiner.checks, combiner.combineType));
-    const check$ = combineLatest(reducedChecks).pipe(
-      map(checks => {
-        return checks.every(check => check);
-      })
+    const reducedChecks = checkCombiners.map(combiner => BaseCurrentUserPermissionsChecker.reduceChecks(combiner.checks, combiner.combineType));
+    return combineLatest(reducedChecks).pipe(
+      map(checks => checks.every(check => check))
     );
-    return this.applyAdminCheck(check$, endpointGuid);
+  }
+
+  private getFallbackPermission(endpointGuid: string): Observable<boolean> {
+    return this.findChecker<Observable<boolean>>(
+      (checker: ICurrentUserPermissionsChecker) => checker.getFallbackPermission(endpointGuid),
+      'fallback permission',
+      'N/A',
+      of(null)
+    )
+  }
+
+  private getPermissionConfig(key: CurrentUserPermissions): PermissionConfigType {
+    return this.findChecker<PermissionConfigType>(
+      (checker: ICurrentUserPermissionsChecker) => checker.getPermissionConfig(key),
+      'permissions checker',
+      key,
+      null
+    )
+  }
+
+  /**
+   * Search through all known checkers for a single result
+   * If none are found log warning (hints at bug/misconfigure).
+   * If more than one is found log warning (hints re bug/misconfigure/devious plugin)
+   */
+  private findChecker<T>(
+    checkFn: (checker: ICurrentUserPermissionsChecker) => T,
+    checkNoun: string,
+    checkType: string,
+    failureValue: T
+  ): T {
+    const res: T[] = [];
+    for (let i = 0; i < this.allCheckers.length; i++) {
+      const checkerRes = checkFn(this.allCheckers[i]);
+      if (checkerRes) {
+        res.push(checkerRes);
+      }
+    }
+    if (res.length == 0) {
+      this.logger.warn(`Permissions: Failed to find a '${checkNoun}' for '${checkType}'. Permission Denied.`);
+      return failureValue;
+    }
+    if (res.length === 1) {
+      return res[0];
+    }
+    if (res.length > 1) {
+      this.logger.warn(`Permissions: Found too many '${checkNoun}' for '${checkType}'. Permission Denied.`);
+      return failureValue;
+    }
   }
 }

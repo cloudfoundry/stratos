@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
+import { cfCurrentUserPermissionsService } from '../../user-permissions/cf-user-permissions-checkers';
 import { CreateApplicationModule } from '../applications/create-application/create-application.module';
 import { ServiceBaseComponent } from './service-base/service-base.component';
 import { ServiceCatalogPageComponent } from './service-catalog-page/service-catalog-page.component';
@@ -34,5 +35,8 @@ import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.
   exports: [
     ServiceTabsBaseComponent,
   ],
+  providers: [
+    ...cfCurrentUserPermissionsService
+  ]
 })
 export class ServiceCatalogModule { }

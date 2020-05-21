@@ -3,7 +3,7 @@ import {
   ICfRolesState,
   IGlobalRolesState,
 } from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
-import { ScopeStrings } from '../../../../core/src/core/current-user-permissions.config';
+import { CfScopeStrings } from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
 import { VerifiedSession } from '../../actions/auth.actions';
 import { EndpointActionComplete } from '../../actions/endpoint.actions';
 import { SessionUser } from '../../types/auth.types';
@@ -84,19 +84,19 @@ function getEndpointRoles(scopes: string[], globalEndpointState: IGlobalRolesSta
     scopes
   };
   return scopes.reduce((roles, scope) => {
-    if (scope === ScopeStrings.CF_ADMIN_GROUP) {
+    if (scope === CfScopeStrings.CF_ADMIN_GROUP) {
       roles.isAdmin = true;
     }
-    if (scope === ScopeStrings.CF_READ_ONLY_ADMIN_GROUP) {
+    if (scope === CfScopeStrings.CF_READ_ONLY_ADMIN_GROUP) {
       roles.isReadOnlyAdmin = true;
     }
-    if (scope === ScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP) {
+    if (scope === CfScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP) {
       roles.isGlobalAuditor = true;
     }
-    if (scope === ScopeStrings.CF_READ_SCOPE) {
+    if (scope === CfScopeStrings.CF_READ_SCOPE) {
       roles.canRead = true;
     }
-    if (scope === ScopeStrings.CF_WRITE_SCOPE) {
+    if (scope === CfScopeStrings.CF_WRITE_SCOPE) {
       roles.canWrite = true;
     }
     return roles;

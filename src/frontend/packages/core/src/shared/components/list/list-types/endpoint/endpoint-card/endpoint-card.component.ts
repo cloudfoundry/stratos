@@ -9,7 +9,6 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { CurrentUserPermissions } from 'frontend/packages/core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/current-user-permissions.service';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
@@ -21,6 +20,7 @@ import {
 } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
+import { StratosCurrentUserPermissions } from '../../../../../../core/current-user-permissions.checker';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import {
   coreEndpointListDetailsComponents,
@@ -111,7 +111,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       this.cardMenu.push({
         label: 'Edit endpoint',
         action: () => this.editEndpoint(),
-        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
+        can: this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
       });
       this.cardMenu.push(createMetaCardMenuItemSeparator());
 

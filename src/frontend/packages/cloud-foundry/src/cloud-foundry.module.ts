@@ -41,7 +41,7 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
     CloudFoundryService,
     ServiceActionHelperService,
     LongRunningCfOperationsService,
-    CloudFoundryUserProvidedServicesService
+    CloudFoundryUserProvidedServicesService,
   ]
 })
 export class CloudFoundryPackageModule { }

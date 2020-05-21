@@ -8,6 +8,7 @@ import { ServiceCatalogModule } from '../../../../cloud-foundry/src/features/ser
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
+import { cfCurrentUserPermissionsService } from '../../user-permissions/cf-user-permissions-checkers';
 import { DetachAppsComponent } from './detach-service-instance/detach-apps/detach-apps.component';
 import { DetachServiceInstanceComponent } from './detach-service-instance/detach-service-instance.component';
 import { ServicesWallComponent } from './services-wall/services-wall.component';
@@ -27,6 +28,9 @@ import { ServicesRoutingModule } from './services.routing';
     ServicesWallComponent,
     DetachServiceInstanceComponent,
     DetachAppsComponent
+  ],
+  providers: [
+    ...cfCurrentUserPermissionsService
   ]
 })
 export class ServicesModule { }

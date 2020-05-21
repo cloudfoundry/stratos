@@ -13,7 +13,6 @@ import {
   SpaceUserRoleNames,
 } from '../../../../../cloud-foundry/src/store/types/user.types';
 import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
 import {
   selectUsersIsRemove,
@@ -22,6 +21,7 @@ import {
 } from '../../../../../store/src/selectors/users-roles.selector';
 import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 
 enum CfRoleCheckboxMode {
@@ -254,7 +254,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     // If setting an org role user must be admin or org manager.
     // If setting a space role user must be admin, org manager or space manager
     const canEditRole$ = this.isOrgRole ?
-      this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, this.orgGuid) :
+      this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, this.orgGuid) :
       canUpdateOrgSpaceRoles(
         this.userPerms,
         this.cfGuid,

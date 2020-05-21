@@ -4,17 +4,17 @@ import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { waitForCFPermissions } from '../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
+import { CfCurrentUserPermissions } from '../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
 import { AppState } from '../../../store/src/app-state';
-import { CurrentUserPermissions } from '../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../core/current-user-permissions.service';
 
 @Directive({
   selector: '[appUserPermission]'
 })
 export class UserPermissionDirective implements OnDestroy, OnInit {
-
+  // TODO: move
   @Input()
-  public appUserPermission: CurrentUserPermissions;
+  public appUserPermission: CfCurrentUserPermissions;
 
   @Input()
   public appUserPermissionEndpointGuid: string;

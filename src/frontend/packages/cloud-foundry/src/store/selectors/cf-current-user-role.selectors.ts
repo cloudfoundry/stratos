@@ -1,16 +1,13 @@
 import { compose } from '@ngrx/store';
 
+import { PermissionValues } from '../../../../core/src/core/current-user-permissions.config';
 import {
-  PermissionStrings,
-  PermissionValues,
-  ScopeStrings,
-} from '../../../../core/src/core/current-user-permissions.config';
-import {
-  selectCurrentUserCFGlobalHasScopes,
+  selectCurrentUserGlobalHasScopes,
   selectCurrentUserRequestState,
   selectCurrentUserRolesState,
 } from '../../../../store/src/selectors/current-user-role.selectors';
 import { ICurrentUserRolesState } from '../../../../store/src/types/current-user-roles.types';
+import { CfPermissionStrings, CfScopeStrings } from '../../user-permissions/cf-user-permissions-checkers';
 import {
   IAllCfRolesState,
   ICfRolesState,
@@ -19,7 +16,7 @@ import {
   ISpacesRoleState,
 } from '../types/cf-current-user-roles.types';
 
-const selectSpaceWithRoleFromOrg = (role: PermissionStrings, orgId: string) => (state: ICfRolesState) => {
+const selectSpaceWithRoleFromOrg = (role: CfPermissionStrings, orgId: string) => (state: ICfRolesState) => {
   if (!state) {
     return 'all';
   }
@@ -101,8 +98,8 @@ export const getCurrentUserCFEndpointScopesState = (endpointGuid: string) => com
 
 // Has endpoint scopes
 // ============================
-export const getCurrentUserCFEndpointHasScope = (endpointGuid: string, scope: ScopeStrings) => compose(
-  selectCurrentUserCFGlobalHasScopes(scope),
+export const getCurrentUserCFEndpointHasScope = (endpointGuid: string, scope: CfScopeStrings) => compose(
+  selectCurrentUserGlobalHasScopes(scope),
   getCurrentUserCFEndpointScopesState(endpointGuid)
 );
 // ============================
@@ -142,7 +139,7 @@ export const getCurrentUserCFOrgRolesState = (endpointGuid: string, orgId: strin
 // Get an array of space guid that have a particular role
 // anf from a particular org
 // ============================
-export const getSpacesFromOrgWithRole = (endpointGuid: string, orgId: string, role: PermissionStrings) => compose(
+export const getSpacesFromOrgWithRole = (endpointGuid: string, orgId: string, role: CfPermissionStrings) => compose(
   selectSpaceWithRoleFromOrg(role, orgId),
   getCurrentUserCFEndpointRolesState(endpointGuid)
 );

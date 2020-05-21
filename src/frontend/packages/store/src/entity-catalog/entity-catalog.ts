@@ -200,6 +200,15 @@ class EntityCatalog {
       return allEntityReducers;
     }, {} as ExtraApiReducers<IRequestEntityTypeState<any>>);
   }
+
+  public getAllCurrentUserReducers() {
+    const endpoints = this.getAllEndpointTypes();
+    endpoints.forEach(endpoint => {
+      if (endpoint.definition.userRolesReducer) {
+        console.log(endpoint.type) // TODO: RC
+      }
+    })
+  }
 }
 
 // Only to be used for tests

@@ -17,7 +17,6 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { CurrentUserPermissionsChecker } from '../../../../../../core/src/core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import {
@@ -35,6 +34,7 @@ import { CfUserService } from '../../../../shared/data-services/cf-user.service'
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
+import { CfUserPermissionsChecker } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
 
 @Injectable()
@@ -63,7 +63,7 @@ export class CfRolesService {
             orgOrSpace.metadata.guid,
             orgOrSpace.entity.cfGuid,
             isOrg ? orgOrSpace.metadata.guid : (orgOrSpace as APIResource<ISpace>).entity.organization_guid,
-            isOrg ? CurrentUserPermissionsChecker.ALL_SPACES : orgOrSpace.metadata.guid,
+            isOrg ? CfUserPermissionsChecker.ALL_SPACES : orgOrSpace.metadata.guid,
           ))));
       }),
       // Filter out orgs than the current user cannot edit

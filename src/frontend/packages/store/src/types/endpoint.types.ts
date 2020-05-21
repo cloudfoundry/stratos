@@ -1,4 +1,4 @@
-import { ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
+import { StratosScopeStrings } from '../../../core/src/core/current-user-permissions.checker';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { MetricsAPITargets, MetricsStratosInfo } from '../actions/metrics-api.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
@@ -68,7 +68,7 @@ export interface EndpointUser {
   guid: string;
   name: string;
   admin: boolean;
-  scopes?: ScopeStrings[];
+  scopes?: StratosScopeStrings[]; // TODO: RC
 }
 
 export interface EndpointState {

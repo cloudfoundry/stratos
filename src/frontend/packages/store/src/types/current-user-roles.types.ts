@@ -1,5 +1,5 @@
 import { IAllCfRolesState, ICfRolesState } from '../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
-import { ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
+import { StratosScopeStrings } from '../../../core/src/core/current-user-permissions.checker';
 
 export interface RolesRequestState {
   initialised: boolean;
@@ -37,7 +37,7 @@ export function getDefaultEndpointRoles(): ICfRolesState {
 
 export interface IStratosRolesState {
   isAdmin: boolean;
-  scopes: ScopeStrings[];
+  scopes: StratosScopeStrings[];
 }
 
 export interface ICurrentUserRolesState {

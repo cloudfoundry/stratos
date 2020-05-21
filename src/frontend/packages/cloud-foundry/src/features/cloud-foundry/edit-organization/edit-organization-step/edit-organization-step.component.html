@@ -8,10 +8,11 @@
     </mat-form-field>
     <mat-form-field>
       <mat-select class="form-control" formControlName="quotaDefinition" placeholder="Quota Definition">
-        <mat-option *ngFor="let quota of quotaDefinitions$ | async" [value]="quota.metadata.guid">{{ quota.entity.name }}</mat-option>
+        <mat-option *ngFor="let quota of quotaDefinitions$ | async" [value]="quota.metadata.guid">
+          {{ quota.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
-    <!-- See permission `CurrentUserPermissions.ORGANIZATION_SUSPEND` -->
+    <!-- See permission `cfCurrentUserPermissions.ORGANIZATION_SUSPEND` -->
     <!-- <div class="edit-org__stepper-form__ssh">
       <div>
         Change Organization Status

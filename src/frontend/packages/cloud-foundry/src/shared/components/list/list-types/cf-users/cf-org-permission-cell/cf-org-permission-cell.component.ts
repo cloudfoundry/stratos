@@ -11,7 +11,6 @@ import {
   IUserPermissionInOrg,
   OrgUserRoleNames,
 } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
@@ -21,6 +20,7 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getOrgRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 
@@ -98,6 +98,6 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
   }
 
   public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
-    this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
+    this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
 
 }
