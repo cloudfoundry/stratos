@@ -99,8 +99,6 @@ export class RequestHelpers {
       }
       p.fulfill(response.body);
     }).catch((e) => {
-      // E2E.debugLog('ERROR');
-      // E2E.debugLog(e);
       E2E.debugLog('   - ERR: ' + e.statusCode + ' : ' + e.message);
       if (e.statusCode !== 401 && retry < 2) {
         retry++;
