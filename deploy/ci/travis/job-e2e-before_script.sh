@@ -5,6 +5,9 @@ MAILCATCHER=$1
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../.. && pwd)"
 
+if [ "${MAILCATCHER}" == "true" ]; then
+  docker pull tophfr/mailcatcher &
+fi
 chmod +x ${DIRPATH}/deploy/ci/travis/run-e2e-tests.sh
 # We will install ffmpeg so we can capture a video of the display as the tests run
 # sudo apt-get update
