@@ -20,9 +20,9 @@ helm repo add stratos https://cloudfoundry.github.io/stratos
 Check the repository was successfully added by searching for the `console`, for example:
 
 ```
-helm search console
+helm search repo console
 NAME               	CHART VERSION   APP VERSION	DESCRIPTION                                  
-stratos/console    	3.1.0           3.1.0      	A Helm chart for deploying Stratos UI Console
+stratos/console    	3.2.0           3.2.0      	A Helm chart for deploying Stratos UI Console
 ```
 
 > Note: Version numbers will depend on the version of Stratos available from the Helm repository
