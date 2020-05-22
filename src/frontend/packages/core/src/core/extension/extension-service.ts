@@ -90,6 +90,14 @@ function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMeta
   if (!extensionMetadata.extensionRoutes[tab]) {
     extensionMetadata.extensionRoutes[tab] = [];
   }
+
+  extensionMetadata.extensionRoutes[tab].push({
+    path: props.link,
+    component: target
+  });
+  extensionMetadata.tabs[tab].push({
+    ...props
+  });  
 }
 
 function addExtensionAction(action: StratosActionType, target: any, props: StratosActionMetadata) {
@@ -105,7 +113,9 @@ function addExtensionAction(action: StratosActionType, target: any, props: Strat
 }
 
 // Injectable Extension Service
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class ExtensionService {
 
   public metadata = extensionMetadata;

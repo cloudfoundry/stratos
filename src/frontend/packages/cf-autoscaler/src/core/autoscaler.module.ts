@@ -58,9 +58,6 @@ import { AutoscalerTabExtensionComponent } from '../features/autoscaler-tab-exte
     AutoscalerRoutingModule,
     NgxChartsModule,
     CloudFoundrySharedModule,
-    ExtensionService.declare([
-      AutoscalerTabExtensionComponent,
-    ])
   ],
   declarations: [
     AutoscalerBaseComponent,
