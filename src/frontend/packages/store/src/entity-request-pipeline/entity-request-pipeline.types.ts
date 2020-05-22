@@ -132,5 +132,6 @@ export type EntitiesInfoHandler = (
   ) => void;
 
 
-export type EntityFetchHandler = <T>(store: Store<GeneralEntityAppState>, action: EntityRequestAction) => (entity: T) => void;
+export type EntityFetch<T = any> = (entity: T) => void;
+export type EntityFetchHandler<T = any> = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => EntityFetch<T>;
 export type EntitiesFetchHandler = (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => void;
