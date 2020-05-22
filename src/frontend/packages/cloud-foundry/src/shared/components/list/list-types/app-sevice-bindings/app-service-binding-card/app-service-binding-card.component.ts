@@ -20,12 +20,6 @@ import {
   IServiceInstance,
   IUserProvidedServiceInstance,
 } from '../../../../../../cf-api-svc.types';
-import {
-  IService,
-  IServiceBinding,
-  IServiceInstance,
-  IUserProvidedServiceInstance,
-} from '../../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { serviceBindingEntityType } from '../../../../../../cf-entity-types';
