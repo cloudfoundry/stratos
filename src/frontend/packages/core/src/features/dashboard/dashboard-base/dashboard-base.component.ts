@@ -150,6 +150,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   ngOnDestroy() {
     this.mobileSub.unsubscribe();
     this.closeSub.unsubscribe();
+    this.sidePanelService.unsetContainer();
   }
 
   isNoMarginView(route: ActivatedRouteSnapshot): boolean {
