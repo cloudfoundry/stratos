@@ -107,7 +107,7 @@ function migrateExtensions() {
 
   sed -i '' "s/imports: \[/imports: \[ StratosComponentsModule,/" ${EXT_DIR}/src/custom.module.ts
 
-  echo "import { StratosComponentsModule } from '@stratos/shared';" | cat - ${EXT_DIR}/src/custom.module.ts > ${EXT_DIR}/temp.ts
+  echo "import { StratosComponentsModule } from '@stratosui/shared';" | cat - ${EXT_DIR}/src/custom.module.ts > ${EXT_DIR}/temp.ts
   mv -f ${EXT_DIR}/temp.ts ${EXT_DIR}/src/custom.module.ts
 
   if [ -f ${EXT_DIR}/src/custom-routing.module.ts ]; then
