@@ -27,10 +27,13 @@ export class IndexHtmlHandler {
       const css = this.config.themePackageJson.stratos.theme.loadingCss;
       const html = this.config.themePackageJson.stratos.theme.loadingHtml;
 
+      if (css || html) {
+        console.log('Applying custom loading screen/theme to the main index.html page');
+      }
+
       if (css) {
         const cssFile = path.resolve(this.config.themePackageFolder, css);
         if (fs.existsSync(cssFile)) {
-          console.log('css file exists');
           const loadingCss = fs.readFileSync(cssFile, 'utf8');
           src = src.replace(/\/\*\* @@LOADING_CSS@@ \*\*\//g, loadingCss);
         }
@@ -57,8 +60,8 @@ interface TargetOptions {
 // Transform the index.html
 const indexTransform = (options: TargetOptions, content: string) => {
 
-  // Get the Stratos config
-  const sConfig = new StratosConfig(__dirname, this.options);
+  // Get the Stratos config - don't log a second time
+  const sConfig = new StratosConfig(__dirname, this.options, false);
 
   const handler = new IndexHtmlHandler(sConfig);
   const modified = handler.apply(content);

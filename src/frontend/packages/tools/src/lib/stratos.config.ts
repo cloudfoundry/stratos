@@ -75,9 +75,12 @@ export class StratosConfig {
   // Extra files for webpack to watch
   public watches: string[] = [];
 
-  constructor(dir: string, options?: any) {
+  private loggingEnabled = true;
+
+  constructor(dir: string, options?: any, loggingEnabled = true) {
     this.angularJsonFile = this.findFileOrFolderInChain(dir, 'angular.json');
     this.angularJson = JSON.parse(fs.readFileSync(this.angularJsonFile, 'utf8').toString());
+    this.loggingEnabled = loggingEnabled;
 
     // The Stratos config file is optional - allows overriding default behaviour
     this.stratosConfig = {};
@@ -87,14 +90,14 @@ export class StratosConfig {
       if (fs.existsSync(stratosYamlFile)) {
         try {
           this.stratosConfig = yaml.safeLoad(fs.readFileSync(stratosYamlFile, 'utf8'));
-          console.log(this.stratosConfig);
-          console.log('Read stratos.yml okay from: ' + stratosYamlFile);
+          this.log(this.stratosConfig);
+          this.log('Read stratos.yml okay from: ' + stratosYamlFile);
           this.watches.push(stratosYamlFile);
         } catch (e) {
-          console.log(e);
+          this.log(e);
         }
       } else {
-        console.log('No stratos.yml file found');
+        this.log('No stratos.yml file found');
       }
     }
 
@@ -113,7 +116,7 @@ export class StratosConfig {
     this.scanLocalPackages();
 
     this.gitMetadata = new GitMetadata(path.dirname(this.angularJsonFile));
-    console.log(this.gitMetadata);
+    this.log(this.gitMetadata);
 
     this.newProjectRoot = this.angularJson.newProjectRoot;
 
@@ -147,8 +150,8 @@ export class StratosConfig {
     // Add all local packages as well
     this.addUnique(deps, Object.keys(this.resolve));
 
-    console.log('-----');
-    console.log(deps);
+    this.log('-----');
+    this.log(deps);
 
     deps.forEach(dep => {
         // TODO: Look for overrides to the default location in node_modules
@@ -160,9 +163,9 @@ export class StratosConfig {
     this.extensions = this.determineExtensions();
 
     if (this.extensions.length === 0) {
-      console.log('Compiling without any extensions');
+      this.log('Compiling without any extensions');
     } else {
-      console.log('Compiling with these extensions:');
+      this.log('Compiling with these extensions:');
       this.extensions.forEach(ext => console.log( ' + ' + ext));
     }
 
@@ -172,7 +175,7 @@ export class StratosConfig {
       this.themePackageFolder = path.dirname(themePkgFile);
       this.themePackageJson = JSON.parse(fs.readFileSync(themePkgFile, 'utf8'));
     } else {
-      console.log('Could not find package.json for the theme');
+      this.log('Could not find package.json for the theme');
     }
   }
 
@@ -188,6 +191,12 @@ export class StratosConfig {
     return pkg;
   }
 
+  private log(msg: any) {
+    if (this.loggingEnabled) {
+      console.log(msg);
+    }
+  }
+
   // Scan for local packages in the source tree
   private scanLocalPackages() {
 
@@ -197,7 +206,7 @@ export class StratosConfig {
       .map(dirent => path.join(source, dirent.name));
 
     getDirectories(this.angularJson.newProjectRoot).forEach(dir => {
-      console.log(dir);
+      this.log(dir);
       const pkg = this.loadPackageFile(dir);
       if (pkg && pkg.name) {
         // Make a note of the package name and the local folder for it
@@ -326,10 +335,10 @@ export class StratosConfig {
               importPath: path.join(packagePath, refParts[0])
             };
             this.themedPackages.push(themingConfig);
-            console.log('Found themed package: ' + name + '(' + pkg.stratos.theming + ')');
+            this.log('Found themed package: ' + name + '(' + pkg.stratos.theming + ')');
             // console.log(themingConfig);
           } else {
-            console.log('Invalid theming reference: ' + pkg.stratos.theming);
+            this.log('Invalid theming reference: ' + pkg.stratos.theming);
           }
         }
 

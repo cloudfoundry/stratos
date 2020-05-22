@@ -9,7 +9,7 @@ class StratosBuilder {
 
   public run() {
 
-    console.log(this.webpackConfig);
+    // console.log(this.webpackConfig);
 
     // Read in the Stratos config file if present (and do so config initialization)
     const sConfig = new StratosConfig(__dirname, this.options);
@@ -27,7 +27,7 @@ class StratosBuilder {
     ext.apply(this.webpackConfig, sConfig, this.options);
 
     // Add plugin to watch additional files if needed
-    //sConfig.addWatches(this.webpackConfig);
+    // sConfig.addWatches(this.webpackConfig);
   }
 }
 
