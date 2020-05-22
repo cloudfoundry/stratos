@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 import { of } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 

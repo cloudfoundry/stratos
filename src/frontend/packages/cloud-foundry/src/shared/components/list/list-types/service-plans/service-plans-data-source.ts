@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
@@ -18,13 +18,11 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { IServicePlan } from '../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 
 export class ServicePlansDataSource extends ListDataSource<APIResource<IServicePlan>> {
   constructor(

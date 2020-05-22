@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import {
   catchError,
