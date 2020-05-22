@@ -176,6 +176,7 @@ import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
+import { cfUserRolesFetch } from './user-permissions/cf-user-roles-fetch';
 
 function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
   return populatePaginationFromParent(store, action).pipe(
@@ -365,7 +366,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
         );
       },
     },
-    userRolesInit: () => of(false), // TODO: RC implement
+    userRolesFetch: cfUserRolesFetch, // TODO: RC implement
     userRolesReducer: () => { // TODO: RC implement
       console.log('HELLO WORLD');
       return null;

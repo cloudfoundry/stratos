@@ -1,7 +1,8 @@
-import { HttpRequest } from '@angular/common/http';
+import { HttpClient, HttpRequest } from '@angular/common/http';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { LoggerService } from '../../../core/src/core/logger.service';
 import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, GeneralEntityAppState, InternalAppState } from '../app-state';
 import {
@@ -132,5 +133,13 @@ export type EntitiesInfoHandler = (
   ) => void;
 
 
-export type EntityFetchHandler = <T>(store: Store<GeneralEntityAppState>, action: EntityRequestAction) => (entity: T) => void;
+export type EntityFetch<T = any> = (entity: T) => void;
+export type EntityFetchHandler<T = any> = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => EntityFetch<T>;
 export type EntitiesFetchHandler = (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => void;
+
+export type EntityUserRolesFetch = (
+  endpointIds: string[],
+  store: Store<AppState>,
+  logService: LoggerService,
+  httpClient: HttpClient
+) => Observable<boolean>;

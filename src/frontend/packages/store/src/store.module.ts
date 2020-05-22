@@ -10,6 +10,7 @@ import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { EndpointsEffect } from './effects/endpoint.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { PaginationEffects } from './effects/pagination.effects';
+import { PermissionsEffects } from './effects/permissions.effect';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
 import { RouterEffect } from './effects/router.effects';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
@@ -47,7 +48,8 @@ import { AppReducersModule } from './reducers.module';
       UserProfileEffect,
       UsersRolesEffects,
       RecursiveDeleteEffect,
-      UserFavoritesEffect
+      UserFavoritesEffect,
+      PermissionsEffects
     ])
   ]
 })

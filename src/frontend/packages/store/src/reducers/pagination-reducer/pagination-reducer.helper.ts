@@ -192,8 +192,8 @@ function getObservables<T = any>(
     map(([, newPag]) => newPag)
   );
 
-  const entitiesInfoHandlerBuilder = entity.getEntitiesEmitHandler();
-  const actionInfoHandler = entitiesInfoHandlerBuilder ? entitiesInfoHandlerBuilder(
+  const entitiesEmitHandlerBuilder = entity.getEntitiesEmitHandler();
+  const actionEmitHandler = entitiesEmitHandlerBuilder ? entitiesEmitHandlerBuilder(
     paginationAction, (action) => store.dispatch(action)
   ) : () => { };
 
@@ -206,7 +206,7 @@ function getObservables<T = any>(
         filter(([, pagination]) => !!pagination && isPageReady(pagination, isLocal)),
         publishReplay(1),
         refCount(),
-        tap(([, pagination]) => actionInfoHandler(pagination)),
+        tap(([, pagination]) => actionEmitHandler(pagination)),
         switchMap(() => paginationMonitor.currentPage$),
       );
 

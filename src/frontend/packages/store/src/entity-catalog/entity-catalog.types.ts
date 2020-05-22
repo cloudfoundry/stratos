@@ -12,6 +12,7 @@ import {
   EntitiesInfoHandler,
   EntityFetchHandler,
   EntityInfoHandler,
+  EntityUserRolesFetch,
   PreApiRequest,
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
@@ -130,7 +131,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly favoriteFromEntity?: <M extends IEntityMetadata = IEntityMetadata>(
     entity: any, entityKey: string, favoritesConfigMapper: FavoritesConfigMapper
   ) => UserFavorite<M>;
-  readonly userRolesInit?: () => Observable<boolean> // TODO: RC Comment
+  readonly userRolesFetch?: EntityUserRolesFetch // TODO: RC Comment
   readonly userRolesReducer?: () => ICurrentUserRolesState // TODO: RC Comment
 }
 

@@ -1,8 +1,8 @@
+import { HttpRequest } from '@angular/common/http';
 import { Action } from '@ngrx/store';
 
 import { APIResource } from '../../../store/src/types/api.types';
 import { organizationEntityType, spaceEntityType } from '../cf-entity-types';
-import { HttpRequest } from '@angular/common/http';
 
 export const GET_AUDITED_ORG_CURRENT_USER_RELATIONS = '[Current User] Get audited org Relations';
 export const GET_AUDITED_ORG_CURRENT_USER_RELATIONS_SUCCESS = '[Current User] Get audited org Relations success';
@@ -40,10 +40,12 @@ export const GET_CURRENT_USER_RELATIONS = '[Current User] Get relations';
 export const GET_CURRENT_USER_RELATIONS_SUCCESS = '[Current User] Get relations success';
 export const GET_CURRENT_USER_RELATIONS_FAILED = '[Current User] Get relations failed';
 
+// TODO: RC MOVE
 export const GET_CURRENT_USER_CF_RELATIONS = '[Current User] Get CF relations';
 export const GET_CURRENT_USER_CF_RELATIONS_SUCCESS = '[Current User] Get CF relations success';
 export const GET_CURRENT_USER_CF_RELATIONS_FAILED = '[Current User] Get CF relations failed';
 
+// TODO: RC RENAME ALL THIS
 export class GetCurrentUsersRelations implements Action {
   type = GET_CURRENT_USER_RELATIONS;
 }

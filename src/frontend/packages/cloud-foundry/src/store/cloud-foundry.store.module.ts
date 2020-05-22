@@ -9,8 +9,8 @@ import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
 import { GithubEffects } from './effects/github.effects';
-import { PermissionEffects, PermissionsEffects } from './effects/permissions.effect';
 import { CfValidateEffects } from './effects/request.effects';
+import { PermissionEffects } from './effects/roles.effects';
 import { RouteEffect } from './effects/route.effects';
 import { ServiceInstanceEffects } from './effects/service-instance.effects';
 import { UpdateAppEffects } from './effects/update-app-effects';
@@ -25,7 +25,6 @@ import { UpdateAppEffects } from './effects/update-app-effects';
       GithubEffects,
       CloudFoundryEffects,
       RouteEffect,
-      PermissionsEffects,
       PermissionEffects,
       ServiceInstanceEffects,
       AppEffects,
