@@ -1,11 +1,14 @@
-import { Component, OnInit, Input, ChangeDetectorRef, NgZone, ComponentFactoryResolver, ViewChild, Injector } from '@angular/core';
-import { StratosCatalogEntity } from '../../../../../../store/src/entity-catalog/entity-catalog-entity';
-import { ListComponent } from '../list.component';
-import { ListConfig, ListViewTypes } from '../list.component.types';
-import { ListHostDirective } from './list-host.directive';
-import { CatalogEntityDrivenListDataSource } from './entity-catalog-datasource';
-import { Store } from '@ngrx/store';
+import { Component, ComponentFactoryResolver, Injector, Input, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+
+import {
+  StratosCatalogEntity,
+} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { ListComponent } from '../list.component';
+import { ListConfig } from '../list.component.types';
+import { CatalogEntityDrivenListDataSource } from './entity-catalog-datasource';
+import { ListHostDirective } from './list-host.directive';
 
 @Component({
   selector: 'app-simple-list',

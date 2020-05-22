@@ -1,4 +1,4 @@
-import { IApp } from '../../../core/src/core/cf-api.types';
+import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
 import {
@@ -11,10 +11,29 @@ import {
   UpdateExistingApplication,
 } from '../actions/application.actions';
 import { GetAllAppsInSpace } from '../actions/space.actions';
+import { IApp } from '../cf-api.types';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
-import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 
-export interface ApplicationActionBuilders extends CFOrchestratedActionBuilders {
+export interface ApplicationActionBuilders extends OrchestratedActionBuilders {
+  get: (
+    guid,
+    endpointGuid,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+  ) => GetApplication;
+  remove: (guid: string, endpointGuid: string) => DeleteApplication;
+  create: (id: string, endpointGuid: string, application: IApp) => CreateNewApplication;
+  update: (
+    guid: string,
+    endpointGuid: string,
+    updatedApplication: UpdateApplication,
+    existingApplication?: IApp,
+    updateEntities?: AppMetadataTypes[]
+  ) => UpdateExistingApplication;
+  getMultiple: (
+    endpointGuid: string,
+    paginationKey?: string,
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+  ) => GetAllApplications;
   restage: (guid: string, endpointGuid: string) => RestageApplication;
   assignRoute: (endpointGuid: string, routeGuid: string, applicationGuid: string) => AssignRouteToApplication;
   getAllInSpace: (
@@ -44,7 +63,7 @@ export const applicationActionBuilder: ApplicationActionBuilders = {
   ) => new UpdateExistingApplication(guid, endpointGuid, updatedApplication, existingApplication, updateEntities),
   getMultiple: (
     endpointGuid: string,
-    paginationKey: string,
+    paginationKey?: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllApplications(paginationKey, endpointGuid, includeRelations, populateMissing),
   restage: (guid: string, endpointGuid: string) => new RestageApplication(guid, endpointGuid),

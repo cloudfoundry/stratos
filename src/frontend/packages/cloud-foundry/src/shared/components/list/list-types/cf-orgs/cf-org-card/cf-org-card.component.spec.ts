@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
-import { testSessionData } from '@stratosui/store/testing';
+import { testSessionData } from '@stratos/store/testing';
 
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
@@ -84,7 +84,8 @@ describe('CfOrgCardComponent', () => {
                 billing_managers_url: '/v2/organizations/a63027a8-e160-4e71-ad59-6675aa94a886/billing_managers',
                 auditors_url: '/v2/organizations/a63027a8-e160-4e71-ad59-6675aa94a886/auditors',
                 app_events_url: '/v2/organizations/a63027a8-e160-4e71-ad59-6675aa94a886/app_events',
-                space_quota_definitions_url: '/v2/organizations/a63027a8-e160-4e71-ad59-6675aa94a886/space_quota_definitions'
+                space_quota_definitions_url: '/v2/organizations/a63027a8-e160-4e71-ad59-6675aa94a886/space_quota_definitions',
+                domains: []
               }
             },
             developers_url: '/v2/spaces/d87ba175-51ec-4cc9-916c-bee26d00e498/developers',

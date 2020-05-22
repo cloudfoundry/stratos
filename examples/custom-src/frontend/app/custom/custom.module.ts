@@ -8,6 +8,7 @@ import { AcmeLoginComponent } from './acme-login/acme-login.component';
 import { AcmeSupportInfoComponent } from './acme-support-info/acme-support-info.component';
 import { AppActionExtensionComponent } from './app-action-extension/app-action-extension.component';
 import { AppTabExtensionComponent } from './app-tab-extension/app-tab-extension.component';
+import { ExtensionService } from '../core/extension/extension-service';
 
 const AcmeCustomizations: CustomizationsMetadata = {
   copyright: '&copy; 2018 ACME Corp',
@@ -20,6 +21,10 @@ const AcmeCustomizations: CustomizationsMetadata = {
     CoreModule,
     SharedModule,
     MDAppModule,
+    ExtensionService.declare([
+      AppTabExtensionComponent,
+      AppActionExtensionComponent,
+    ])
   ],
   declarations: [
     AcmeLoginComponent,

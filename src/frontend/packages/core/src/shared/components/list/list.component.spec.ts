@@ -2,7 +2,7 @@ import { ChangeDetectorRef, NgZone } from '@angular/core';
 import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
@@ -15,7 +15,6 @@ import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../shared.module';
-import { ApplicationStateService } from '../application-state/application-state.service';
 import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
@@ -123,7 +122,7 @@ describe('ListComponent', () => {
       TestBed.configureTestingModule({
         providers: [
           { provide: ListConfig, useClass: EndpointsListConfigService },
-          ApplicationStateService,
+          // ApplicationStateService,
           PaginationMonitorFactory,
           EntityMonitorFactory,
           EndpointListHelper

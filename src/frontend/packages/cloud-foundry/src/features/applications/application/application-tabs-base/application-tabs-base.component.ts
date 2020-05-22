@@ -6,7 +6,6 @@ import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/o
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
-import { IApp, IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
@@ -17,20 +16,16 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../../../core/src/core/extension/extension-service';
-import { getFavoriteFromCfEntity } from '../../../../../../core/src/core/user-favorite-helpers';
+import { getFavoriteFromEntity } from '../../../../../../core/src/core/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import {
-  ApplicationStateData,
-} from '../../../../../../core/src/shared/components/application-state/application-state.service';
 import {
   FavoritesConfigMapper,
 } from '../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { IHeaderBreadcrumb } from '../../../../../../core/src/shared/components/page-header/page-header.types';
-import { GitSCMService, GitSCMType } from '../../../../../../core/src/shared/data-services/scm/scm.service';
 import { ENTITY_SERVICE } from '../../../../../../core/src/shared/entity.tokens';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../../../../store/src/entity-service';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
@@ -38,7 +33,10 @@ import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
+import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
+import { ApplicationStateData } from '../../../../shared/services/application-state.service';
 import { ApplicationService } from '../../application.service';
 import { ApplicationPollingService } from './application-polling.service';
 
@@ -54,7 +52,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public favorite$ = this.applicationService.app$.pipe(
     filter(app => !!app),
-    map(app => getFavoriteFromCfEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.favoritesConfigMapper))
+    map(app => getFavoriteFromEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE))
   );
 
   isBusyUpdating$: Observable<{ updating: boolean }>;

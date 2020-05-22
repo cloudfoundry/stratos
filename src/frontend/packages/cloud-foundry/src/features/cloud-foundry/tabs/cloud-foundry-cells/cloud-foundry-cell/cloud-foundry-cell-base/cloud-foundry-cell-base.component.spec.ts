@@ -18,8 +18,14 @@ describe('CloudFoundryCellBaseComponent', () => {
       imports: generateCfBaseTestModules(),
       providers: [
         CloudFoundryEndpointService,
-        CloudFoundryCellService,
-        ActiveRouteCfOrgSpace,
+        CloudFoundryCellService, {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: 'cfGuid',
+            orgGuid: 'orgGuid',
+            spaceGuid: 'spaceGuid'
+          }
+        },
         TabNavService,
         CfUserService
       ]

@@ -6,11 +6,9 @@ import { map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createUserRoleInOrg } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
-import { IApp, IOrganization } from '../../../../../../../../core/src/core/cf-api.types';
-import { getStartedAppInstanceCount } from '../../../../../../../../core/src/core/cf.helpers';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { getFavoriteFromCfEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
+import { getFavoriteFromEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -28,7 +26,9 @@ import { PaginationMonitorFactory } from '../../../../../../../../store/src/moni
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { IApp, IOrganization } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
+import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
   CloudFoundryEndpointService,
@@ -38,6 +38,7 @@ import {
   createOrgQuotaDefinition,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
+import { CF_ENDPOINT_TYPE } from './../../../../../../cf-types';
 
 
 @Component({
@@ -101,7 +102,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       refCount()
     );
 
-    this.favorite = getFavoriteFromCfEntity(this.row, organizationEntityType, this.favoritesConfigMapper);
+    this.favorite = getFavoriteFromEntity(this.row, organizationEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE);
 
     const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrgViaAllApps(this.row) : observableOf(null))

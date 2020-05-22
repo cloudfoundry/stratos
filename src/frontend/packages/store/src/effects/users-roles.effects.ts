@@ -20,7 +20,7 @@ import { CfUserService } from '../../../cloud-foundry/src/shared/data-services/c
 import { OrgUserRoleNames } from '../../../cloud-foundry/src/store/types/user.types';
 import { CfRoleChange, UsersRolesState } from '../../../cloud-foundry/src/store/types/users-roles.types';
 import { ResetPagination } from '../actions/pagination.actions';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { ActionState } from '../reducers/api-request-reducer/types';
 import { selectSessionData } from '../reducers/auth.reducer';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
@@ -35,7 +35,7 @@ export class UsersRolesEffects {
   constructor(
     private actions$: Actions,
     private store: Store<CFAppState>,
-    private cfUserService: CfUserService
+    private cfUserService: CfUserService,
   ) { }
 
   @Effect() clearEntityUpdates$ = this.actions$.pipe(
@@ -230,10 +230,9 @@ export class UsersRolesEffects {
 
   private createActionObs(action: ChangeUserRole): Observable<any> {
     return entityCatalog.getEntity(action)
-      .getEntityMonitor(
-        this.store,
-        action.guid
-      ).getUpdatingSection(action.updatingKey).pipe(
+      .store
+      .getEntityMonitor(action.guid)
+      .getUpdatingSection(action.updatingKey).pipe(
         pairwise(),
         filter(([oldUpdate, newUpdate]) => !!oldUpdate.busy && !newUpdate.busy),
         map(([, newUpdate]) => newUpdate),

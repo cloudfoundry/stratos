@@ -5,11 +5,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
-import { EntityMonitorFactory } from '../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
 import { CoreModule } from '../core/core.module';
-import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
@@ -17,7 +14,6 @@ import {
 } from './components/application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
-import { ApplicationStateService } from './components/application-state/application-state.service';
 import { BlurDirective } from './components/blur.directive';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
@@ -45,7 +41,6 @@ import { FavoritesGlobalListComponent } from './components/favorites-global-list
 import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
-import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
@@ -115,14 +110,12 @@ import {
 } from './components/upload-progress-indicator/upload-progress-indicator.component';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
-import { GitSCMService } from './data-services/scm/scm.service';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
@@ -189,7 +182,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     IntroScreenComponent,
     EnumerateComponent,
     UploadProgressIndicatorComponent,
-    GithubCommitAuthorComponent,
     UserProfileBannerComponent,
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
@@ -211,8 +203,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    AppNameUniqueDirective,
-    AppNameUniqueDirective,
     EndpointCardComponent,
     SimpleUsageChartComponent,
     PageSubNavComponent,
@@ -288,7 +278,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     UserProfileBannerComponent,
     EnumerateComponent,
     UploadProgressIndicatorComponent,
-    GithubCommitAuthorComponent,
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
     UserPermissionDirective,
@@ -312,12 +301,10 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    AppNameUniqueDirective,
     SimpleUsageChartComponent,
     EntitySummaryTitleComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    AppNameUniqueDirective,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     JsonViewerComponent,
@@ -333,20 +320,12 @@ import { UserPermissionDirective } from './user-permission.directive';
   ],
   providers: [
     ListConfig,
-    ApplicationStateService,
     EndpointListHelper,
     EndpointsListConfigService,
-    // CfUserService,
     ConfirmationDialogService,
-    EntityMonitorFactory,
-    PaginationMonitorFactory,
-    // CloudFoundryService,
     InternalEventMonitorFactory,
-    // ServiceActionHelperService,
     MetricsRangeSelectorService,
-    GitSCMService,
     LongRunningOperationsService,
-    CloudFoundryUserProvidedServicesService
   ]
 })
 export class SharedModule { }

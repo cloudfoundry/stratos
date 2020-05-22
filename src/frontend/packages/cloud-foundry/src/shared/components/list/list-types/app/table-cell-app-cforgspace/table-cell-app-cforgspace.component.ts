@@ -2,8 +2,8 @@ import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { IApp, ISpace } from '../../../../../../../../core/src/core/cf-api.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 
 @Component({

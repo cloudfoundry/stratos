@@ -1,4 +1,4 @@
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
+import { AppState } from '../../../store/src/app-state';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 
 
@@ -16,7 +16,13 @@ export enum StratosStatus {
   BUSY = 'busy'
 }
 
-export type PartialAppState = Partial<CFAppState>;
+export interface StratosStatusMetadata {
+  label: string;
+  subLabel?: string;
+  indicator: StratosStatus;
+}
 
-export type PickAppState = keyof CFAppState;
+export type PartialAppState = Partial<AppState>;
+
+export type PickAppState = keyof AppState;
 

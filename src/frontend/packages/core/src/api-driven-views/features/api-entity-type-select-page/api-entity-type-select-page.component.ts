@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { ApiEntityType } from '../../api-drive-views.types';
-import { TabNavService } from '../../../../tab-nav.service';
 import { Store } from '@ngrx/store';
-import { GeneralAppState } from '../../../../../store/src/app-state';
-import { connectedEndpointsOfTypesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
-import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { TabNavItem } from '../../../../tab-nav.types';
+import { map } from 'rxjs/operators';
+
+import { GeneralAppState } from '../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { connectedEndpointsOfTypesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import { TabNavService } from '../../../../tab-nav.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 
 @Component({

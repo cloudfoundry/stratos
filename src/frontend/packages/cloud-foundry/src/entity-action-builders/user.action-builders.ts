@@ -1,10 +1,10 @@
+import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAllOrgUsers } from '../actions/organization.actions';
 import { GetAllSpaceUsers } from '../actions/space.actions';
 import { GetAllUsersAsAdmin, GetUser } from '../actions/users.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
-import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 
-export interface UserActionBuilders extends CFOrchestratedActionBuilders {
+export interface UserActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string
@@ -56,5 +56,4 @@ export const userActionBuilders: UserActionBuilders = {
     isAdmin: boolean,
     includeRelations?: string[]
   ) => new GetAllSpaceUsers(guid, paginationKey, endpointGuid, isAdmin, includeRelations),
-
 };

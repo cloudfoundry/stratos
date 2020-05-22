@@ -1,28 +1,27 @@
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
+import { map } from 'rxjs/internal/operators/map';
 
+import { IApp, IAppSummary, IDomain, ISpace } from '../../cloud-foundry/src/cf-api.types';
 import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { ApplicationData, ApplicationService } from '../../cloud-foundry/src/features/applications/application.service';
 import {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,
 } from '../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
-import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { IApp, IAppSummary, IDomain, ISpace } from '../src/core/cf-api.types';
-import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
-} from '../src/shared/components/application-state/application-state.service';
-import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
+} from '../../cloud-foundry/src/shared/services/application-state.service';
+import { AppStat } from '../../cloud-foundry/src/store/types/app-metadata.types';
+import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
+import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
     metadata: {
       created_at: '',
-      guid: '',
+      guid: 'mockEntityGuid',
       updated_at: '',
       url: ''
     },
@@ -37,42 +36,43 @@ export class ApplicationServiceMock {
   appGuid = ApplicationServiceMock.appGuid;
   application$: Observable<ApplicationData> = observableOf(({
     cf: {
-      guid: 'mockCfGuid'
+      guid: this.cfGuid
     },
     app: {
-      metadata: {},
-      entity: {
+      metadata: {
+        guid: this.appGuid
       },
-      entityRequestInfo: {} as RequestInfoState
-    } as EntityInfo,
+      entity: {
+        space_guid: 'mockSpaceGuid',
+        cfGuid: this.cfGuid
+      } as IApp,
+    } as APIResource<IApp>,
     stack: {
       entity: {
       },
     },
     fetching: false
   } as ApplicationData));
-  app$: Observable<EntityInfo<APIResource<IApp>>> = observableOf({
-    entity: { entity: {} }
-  } as EntityInfo<APIResource<IApp>>);
-  appSummary$: Observable<EntityInfo<IAppSummary>> = observableOf({
+  app$: Observable<EntityInfo<APIResource<IApp>>> = this.application$.pipe(
+    map(appData => {
+      return {
+        entity: appData.app,
+        entityRequestInfo: {
+
+        } as RequestInfoState
+      }
+    })
+  );
+  appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>> = observableOf({
     entityRequestInfo: { fetching: false }
-  } as EntityInfo<IAppSummary>);
+  } as EntityInfo<APIResource<IAppSummary>>);
   appStats$: Observable<AppStat[]> = observableOf(new Array<AppStat>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
     observableOf({ deploySource: { type: 'github', timestamp: 0, commit: '' }, deployOverrides: null });
   isFetchingApp$: Observable<boolean> = observableOf(false);
   isFetchingEnvVars$: Observable<boolean> = observableOf(false);
   isUpdatingEnvVars$: Observable<boolean> = observableOf(false);
-  waitForAppEntity$: Observable<EntityInfo> = observableOf({
-    entity: createEntity({
-      space: {
-        metadata: {},
-        entity: {
-          domains: []
-        }
-      }
-    })
-  } as EntityInfo);
+  waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>> = this.app$;
   appEnvVars = {
     entities$: observableOf(new Array<APIResource<any>>())
   };
@@ -91,28 +91,22 @@ export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: 
     provide: ApplicationService,
     useFactory: (
       store: Store<CFAppState>,
-      entityServiceFactory: EntityServiceFactory,
       applicationStateService: ApplicationStateService,
       applicationEnvVarsService: ApplicationEnvVarsHelper,
-      paginationMonitorFactory: PaginationMonitorFactory,
     ) => {
       const appService = new ApplicationService(
         cfGuid,
         appGuid,
         store,
-        entityServiceFactory,
         applicationStateService,
         applicationEnvVarsService,
-        paginationMonitorFactory
       );
       return appService;
     },
     deps: [
       Store,
-      EntityServiceFactory,
       ApplicationStateService,
       ApplicationEnvVarsHelper,
-      PaginationMonitorFactory
     ]
   };
 }

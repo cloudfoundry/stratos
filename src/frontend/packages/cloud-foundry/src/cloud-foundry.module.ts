@@ -15,11 +15,12 @@ import { ApplicationsModule } from './features/applications/applications.module'
 import { CloudFoundryModule } from './features/cloud-foundry/cloud-foundry.module';
 import { ServiceCatalogModule } from './features/service-catalog/service-catalog.module';
 import { ServicesModule } from './features/services/services.module';
-import { CloudFoundryComponentsModule } from './shared/components/components.module';
+import { CloudFoundrySharedModule } from './shared/cf-shared.module';
 import { CfUserService } from './shared/data-services/cf-user.service';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
+import { CloudFoundryUserProvidedServicesService } from './shared/services/cloud-foundry-user-provided-services.service';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
 
 function shouldValidate(action: ICFAction, isValidated: boolean, entityInfo: RequestInfoState) {
@@ -71,7 +72,7 @@ function infoValidator(action: ICFAction, dispatcher) {
     ServicesModule,
     CloudFoundryStoreModule,
     // FIXME: Ensure that anything lazy loaded is not included here - #3675
-    CloudFoundryComponentsModule,
+    CloudFoundrySharedModule,
     // FIXME: Move cf effects into cf module - #3675
     // EffectsModule.for Root([
     //   PermissionsEffects,
@@ -83,7 +84,8 @@ function infoValidator(action: ICFAction, dispatcher) {
     CfUserService,
     CloudFoundryService,
     ServiceActionHelperService,
-    LongRunningCfOperationsService
+    LongRunningCfOperationsService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class CloudFoundryPackageModule { }

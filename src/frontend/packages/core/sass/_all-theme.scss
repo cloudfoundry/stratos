@@ -66,6 +66,7 @@
 @import '../../cloud-foundry/src/features/applications/application-wall/application-wall.component.theme';
 @import '../../core/src/features/error-page/error-page/error-page.component.theme';
 @import '../../core/src/features/endpoints/backup-restore/restore-endpoints/restore-endpoints.component.theme';
+@import '../../core/src/features/metrics/metrics/metrics.component.theme';
 // Creates the app theme and applies it to the application
 // $theme = Angular Material Theme
 // $nav-theme - Colors for the Side Nav (optional)
@@ -136,4 +137,6 @@
   @include code-block-theme($theme, $app-theme);
   @include copy-to-clipboard-theme($theme, $app-theme);
   @include app-user-avatar-theme($theme, $app-theme);
+  @include restore-endpoints-theme($theme, $app-theme);
+  @include metrics-component-theme($theme, $app-theme);
 }

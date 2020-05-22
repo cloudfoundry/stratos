@@ -17,6 +17,10 @@
     }
   }
 
+  .list-component__header-card {
+    padding-left: 20px;
+  }
+
   &__cards {
     .list-component__header-card {
       margin-bottom: 20px;
@@ -79,14 +83,6 @@
 
       &--text {
         padding: 10px 10px 10px 0;
-      }
-
-      &--metrics-range {
-        padding-left: 10px;
-
-        app-metrics-range-selector {
-          padding-left: 10px;
-        }
       }
 
       &--multi-actions {

@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
-import { IFeatureFlag } from '../../../../../../../../core/src/core/cf-api.types';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { IFeatureFlag } from '../../../../../../cf-api.types';
 
 @Component({
   selector: 'app-table-cell-feature-flag-state',

@@ -10,14 +10,14 @@ const until = protractor.ExpectedConditions;
  */
 export class Component {
 
-  public static waitUntilShown(elm): promise.Promise<void> {
+  public static waitUntilShown(elm, failMsg?: string): promise.Promise<void> {
     const comp = new Component(elm);
-    return comp.waitUntilShown();
+    return comp.waitUntilShown(failMsg);
   }
 
-  public static waitUntilNotShown(elm): promise.Promise<void> {
+  public static waitUntilNotShown(elm, failMsg?: string): promise.Promise<void> {
     const comp = new Component(elm);
-    return comp.waitUntilNotShown();
+    return comp.waitUntilNotShown(failMsg);
   }
 
   public static scrollIntoView(elm: ElementFinder): promise.Promise<void> {
@@ -47,7 +47,7 @@ export class Component {
     return browser.wait(until.presenceOf(this.locator), waitDuration, elementDescription + ' taking too long to appear in the DOM')
       .then(() => browser.wait(until.visibilityOf(this.locator), waitDuration, elementDescription + ' not visible timing out'))
       // Slight delay for animations
-      .then(() => browser.driver.sleep(100));
+      .then(() => browser.driver.sleep(250));
   }
 
   waitUntilNotShown(description = 'Element'): promise.Promise<void> {
@@ -56,6 +56,14 @@ export class Component {
 
   scrollIntoView(): promise.Promise<void> {
     return Component.scrollIntoView(this.locator);
+  }
+
+  scrollToTop(): promise.Promise<any> {
+    return new E2EHelpers().scrollToTop();
+  }
+
+  scrollToBottom(): promise.Promise<any> {
+    return new E2EHelpers().scrollToBottom();
   }
 
   protected hasClass(cls, element = this.locator): promise.Promise<boolean> {

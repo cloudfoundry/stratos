@@ -1,3 +1,15 @@
+import { IRequestEntityTypeState } from '../../store/src/app-state';
+import { APIResource } from '../../store/src/types/api.types';
+import { BaseEntityValues } from '../../store/src/types/entity.types';
+import {
+  IService,
+  IServiceBinding,
+  IServiceBroker,
+  IServiceInstance,
+  IServicePlan,
+  IServicePlanVisibility,
+  IUserProvidedServiceInstance,
+} from './cf-api-svc.types';
 import {
   IApp,
   IAppSummary,
@@ -11,19 +23,7 @@ import {
   ISpace,
   ISpaceQuotaDefinition,
   IStack,
-} from '../../core/src/core/cf-api.types';
-import { IRequestEntityTypeState } from '../../store/src/app-state';
-import { APIResource } from '../../store/src/types/api.types';
-import { BaseEntityValues } from '../../store/src/types/entity.types';
-import {
-  IService,
-  IServiceBinding,
-  IServiceBroker,
-  IServiceInstance,
-  IServicePlan,
-  IServicePlanVisibility,
-  IUserProvidedServiceInstance,
-} from './cf-api-svc.types';
+} from './cf-api.types';
 import { AppStats } from './store/types/app-metadata.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';

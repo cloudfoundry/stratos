@@ -87,6 +87,12 @@ mat-header-cell {
         word-break: break-all;
       }
     }
+
+    &--table-column-additional-padding {
+      app-table-cell {
+        padding-left: 15px;
+      }
+    }
   }
 
   &__row {

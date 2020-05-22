@@ -59,7 +59,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   constructor(
     private store: Store<CFAppState>,
     private cfGuid: string,
-    private cfUserService: CfUserService,
+    cfUserService: CfUserService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory

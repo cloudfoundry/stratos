@@ -5,7 +5,7 @@ import {
   EntityCatalogTestModuleManualStore,
   TEST_CATALOGUE_ENTITIES,
 } from '../../../store/src/entity-catalog-test.module';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { environment } from '../../../core/src/environments/environment';
 import {

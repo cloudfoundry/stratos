@@ -31,7 +31,7 @@ function initMetricData(metricName: string): AppAutoscalerMetricDataLocal {
       colorTarget: []
     },
     markline: [],
-    unit: AutoscalerConstants.metricMap[metricName].unit_internal,
+    unit: AutoscalerConstants.getMetricUnit(metricName),
     chartMaxValue: 0,
   };
 }
@@ -228,8 +228,8 @@ function getMetricBasicInfo(
   let maxCount = 1;
   let preTimestamp = 0;
   let maxValue = -1;
-  const unit = AutoscalerConstants.metricMap[metricName].unit_internal;
-  intervalMap[AutoscalerConstants.metricMap[metricName].interval] = 1;
+  let unit = AutoscalerConstants.getMetricUnit(metricName);
+  intervalMap[AutoscalerConstants.getMetricInterval(metricName)] = 1;
   const resultInterval = source.reduce((interval, item) => {
     maxValue = Math.max(Number(item.value), maxValue);
     const thisTimestamp = Math.round(item.timestamp / AutoscalerConstants.S2NS);
@@ -240,9 +240,9 @@ function getMetricBasicInfo(
       maxCount = intervalMap[currentInterval];
     }
     preTimestamp = thisTimestamp;
-    // unit = item.unit === '' ? unit : item.unit;
+    unit = item.unit || unit;
     return interval;
-  }, AutoscalerConstants.metricMap[metricName].interval);
+  }, AutoscalerConstants.getMetricInterval(metricName));
   return {
     interval: resultInterval,
     unit,

@@ -21,9 +21,6 @@ import {
 import {
   TableCellEndpointStatusComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import {
-  TableCellCommitAuthorComponent,
-} from '../../list-types/github-commits/table-cell-commit-author/table-cell-commit-author.component';
 import { TableCellCustom } from '../../list.types';
 import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
@@ -52,7 +49,6 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellEndpointNameComponent,
   TableCellBooleanIndicatorComponent,
   TableCellRadioComponent,
-  TableCellCommitAuthorComponent,
   TableCellRequestMonitorIconComponent,
   TableCellFavoriteComponent,
   TableCellEndpointDetailsComponent,

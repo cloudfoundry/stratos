@@ -1,15 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, pairwise } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { selectCfRequestInfo } from '../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
@@ -54,7 +50,6 @@ export class CsiModeService {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private store: Store<CFAppState>
   ) {
     const serviceId = getIdFromRoute(activatedRoute, 'serviceId');
     const serviceInstanceId = getIdFromRoute(activatedRoute, 'serviceInstanceId');
@@ -136,19 +131,14 @@ export class CsiModeService {
   public createApplicationServiceBinding(serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: object) {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-    const servceBindingEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
-    const actionBuilder = servceBindingEntity.actionOrchestrator.getActionBuilder('create');
-    const createServiceBindingAction = actionBuilder(
+    return cfEntityCatalog.serviceBinding.api.create<RequestInfoState>(
       guid,
       cfGuid,
       { applicationGuid: appGuid, serviceInstanceGuid, params }
-    );
-    this.store.dispatch(createServiceBindingAction);
-
-    return this.store.select(selectCfRequestInfo(serviceBindingEntityType, guid)).pipe(
-      filter(s => {
-        return s && !s.creating;
-      }),
+    ).pipe(
+      pairwise(),
+      filter(([oldS, newS]) => oldS.creating && !newS.creating),
+      map(([, newS]) => newS),
       map(req => {
         if (req.error) {
           return { success: false, message: `Failed to create service instance binding: ${req.message}` };

@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { CloudFoundryComponentsModule } from '../../shared/components/components.module';
+import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
 import { CreateApplicationModule } from '../applications/create-application/create-application.module';
 import { ServiceBaseComponent } from './service-base/service-base.component';
 import { ServiceCatalogPageComponent } from './service-catalog-page/service-catalog-page.component';
@@ -20,7 +20,7 @@ import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.
     ServiceCatalogRoutingModule,
     CoreModule,
     CreateApplicationModule,
-    CloudFoundryComponentsModule,
+    CloudFoundrySharedModule,
   ],
   declarations: [
     ServiceCatalogPageComponent,

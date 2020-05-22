@@ -1,11 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
-import { testSessionData } from '@stratosui/store/testing';
+import { testSessionData } from '@stratos/store/testing';
 
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
 import { VerifiedSession } from '../../../../../../../../store/src/actions/auth.actions';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
@@ -20,6 +17,9 @@ import {
   CloudFoundryOrganizationService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../services/cloud-foundry-user-provided-services.service';
 import { CfSpaceCardComponent } from './cf-space-card.component';
 
 describe('CfSpaceCardComponent', () => {

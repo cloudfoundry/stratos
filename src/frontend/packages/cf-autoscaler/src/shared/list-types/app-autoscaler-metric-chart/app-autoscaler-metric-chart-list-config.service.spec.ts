@@ -1,15 +1,15 @@
 import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
-import { createEmptyStoreModule } from '@stratosui/store/testing';
+import { createEmptyStoreModule } from '@stratos/store/testing';
 
 import {
   ApplicationEnvVarsHelper,
 } from '../../../../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import {
-  ApplicationStateService,
-} from '../../../../../core/src/shared/components/application-state/application-state.service';
+import { ApplicationStateService } from '../../../../../cloud-foundry/src/shared/services/application-state.service';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
 import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
+import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
+import { EntityCatalogHelper } from '../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
@@ -30,6 +30,7 @@ describe('AppAutoscalerMetricChartListConfigService', () => {
         DatePipe,
         EntityServiceFactory,
         EntityMonitorFactory,
+        EntityCatalogHelper,
         ApplicationStateService,
         PaginationMonitorFactory,
         MetricsRangeSelectorService
@@ -37,6 +38,7 @@ describe('AppAutoscalerMetricChartListConfigService', () => {
       imports: [
         CfAutoscalerTestingModule,
         createEmptyStoreModule(),
+        AppTestModule
       ]
     });
   });

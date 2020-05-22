@@ -2,7 +2,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
-import { CfEvent } from '../../../../../../../core/src/core/cf-api.types';
 import { arraysEqual } from '../../../../../../../core/src/core/utils.service';
 import {
   valueOrCommonFalsy,
@@ -16,6 +15,7 @@ import {
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { CfEvent } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { QParam, QParamJoiners } from '../../../../q-param';
 import { CfEventsDataSource } from './cf-events-data-source';
@@ -50,11 +50,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
       columnId: 'detail', headerCell: () => 'Detail', cellComponent: TableCellEventDetailComponent, cellFlex: '6'
     },
     {
-      columnId: 'timestamp',
-      headerCell: () => 'Timestamp',
-      cellComponent: TableCellEventTimestampComponent,
-      sort: true,
-      cellFlex: '3'
+      columnId: 'timestamp', headerCell: () => 'Timestamp', cellComponent: TableCellEventTimestampComponent, sort: true, cellFlex: '3'
     },
   ];
   viewType = ListViewTypes.TABLE_ONLY;
