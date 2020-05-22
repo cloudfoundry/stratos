@@ -13,6 +13,7 @@ import {
   EntityFetchHandler,
   EntityInfoHandler,
   EntityUserRolesFetch,
+  EntityUserRolesReducer,
   PreApiRequest,
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
@@ -21,7 +22,6 @@ import {
   PaginationPageIteratorConfig,
 } from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntitySchema } from '../helpers/entity-schema';
-import { ICurrentUserRolesState } from '../types/current-user-roles.types';
 import { UserFavorite } from '../types/user-favorites.types';
 
 export interface EntityCatalogEntityConfig {
@@ -95,8 +95,6 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   readonly entitiesFetchHandler?: EntitiesFetchHandler;
 }
 
-
-
 /**
  * Static information describing a stratos endpoint.
  *
@@ -132,7 +130,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
     entity: any, entityKey: string, favoritesConfigMapper: FavoritesConfigMapper
   ) => UserFavorite<M>;
   readonly userRolesFetch?: EntityUserRolesFetch // TODO: RC Comment
-  readonly userRolesReducer?: () => ICurrentUserRolesState // TODO: RC Comment
+  readonly userRolesReducer?: EntityUserRolesReducer // TODO: RC Comment
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }

@@ -7,26 +7,22 @@ import {
 import { combineLatest as observableCombineLatest, combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import {
-  UsersRolesActions,
-  UsersRolesClearUpdateState,
-  UsersRolesExecuteChanges,
-} from '../../../cloud-foundry/src/actions/users-roles.actions';
-import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../../../cloud-foundry/src/actions/users.actions';
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../cloud-foundry/src/cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
-import { CfUserService } from '../../../cloud-foundry/src/shared/data-services/cf-user.service';
-import { OrgUserRoleNames } from '../../../cloud-foundry/src/store/types/user.types';
-import { CfRoleChange, UsersRolesState } from '../../../cloud-foundry/src/store/types/users-roles.types';
-import { ResetPagination } from '../actions/pagination.actions';
-import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { ActionState } from '../reducers/api-request-reducer/types';
-import { selectSessionData } from '../reducers/auth.reducer';
+import { ResetPagination } from '../../../../store/src/actions/pagination.actions';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
+import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
+import { selectSessionData } from '../../../../store/src/reducers/auth.reducer';
+import { SessionDataEndpoint } from '../../../../store/src/types/auth.types';
+import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { ICFAction, UpdateCfAction } from '../../../../store/src/types/request.types';
+import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../../actions/users-roles.actions';
+import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../../actions/users.actions';
+import { CFAppState } from '../../cf-app-state';
+import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { CfUserService } from '../../shared/data-services/cf-user.service';
 import { selectUsersRoles } from '../selectors/users-roles.selector';
-import { SessionDataEndpoint } from '../types/auth.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { ICFAction, UpdateCfAction } from '../types/request.types';
+import { OrgUserRoleNames } from '../types/user.types';
+import { CfRoleChange, UsersRolesState } from '../types/users-roles.types';
 
 
 @Injectable()

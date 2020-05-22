@@ -5,14 +5,14 @@ import { Action, Store } from '@ngrx/store';
 import { combineLatest, of as observableOf, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
+import { LoggerService } from '../../../core/src/core/logger.service';
+import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
 import {
   GET_CURRENT_USER_RELATIONS,
   GET_CURRENT_USER_RELATIONS_FAILED,
   GET_CURRENT_USER_RELATIONS_SUCCESS,
   GetCurrentUsersRelations,
-} from '../../../cloud-foundry/src/actions/permissions.actions';
-import { LoggerService } from '../../../core/src/core/logger.service';
-import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
+} from '../actions/permissions.actions';
 import { AppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 

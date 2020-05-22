@@ -143,3 +143,5 @@ export type EntityUserRolesFetch = (
   logService: LoggerService,
   httpClient: HttpClient
 ) => Observable<boolean>;
+
+export type EntityUserRolesReducer = <T>(state: T, action: Action) => T;

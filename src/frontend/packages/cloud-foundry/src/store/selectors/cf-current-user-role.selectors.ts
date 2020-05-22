@@ -3,7 +3,6 @@ import { compose } from '@ngrx/store';
 import { PermissionValues } from '../../../../core/src/core/current-user-permissions.config';
 import {
   selectCurrentUserGlobalHasScopes,
-  selectCurrentUserRequestState,
   selectCurrentUserRolesState,
 } from '../../../../store/src/selectors/current-user-role.selectors';
 import { ICurrentUserRolesState } from '../../../../store/src/types/current-user-roles.types';
@@ -15,6 +14,9 @@ import {
   IOrgsRoleState,
   ISpacesRoleState,
 } from '../types/cf-current-user-roles.types';
+
+
+export const selectCurrentUserRequestState = (state: ICurrentUserRolesState | ICfRolesState) => state.state;
 
 const selectSpaceWithRoleFromOrg = (role: CfPermissionStrings, orgId: string) => (state: ICfRolesState) => {
   if (!state) {

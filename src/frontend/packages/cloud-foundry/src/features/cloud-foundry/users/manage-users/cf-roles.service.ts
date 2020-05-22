@@ -19,11 +19,6 @@ import {
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import {
-  selectUsersRolesCf,
-  selectUsersRolesPicked,
-  selectUsersRolesRoles,
-} from '../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
 import { IOrganization, ISpace } from '../../../../cf-api.types';
@@ -32,6 +27,11 @@ import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-types';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
+import {
+  selectUsersRolesCf,
+  selectUsersRolesPicked,
+  selectUsersRolesRoles,
+} from '../../../../store/selectors/users-roles.selector';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { CfUserPermissionsChecker } from '../../../../user-permissions/cf-user-permissions-checkers';

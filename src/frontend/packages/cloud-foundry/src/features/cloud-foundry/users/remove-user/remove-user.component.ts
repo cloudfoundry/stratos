@@ -8,7 +8,6 @@ import { CurrentUserPermissionsService } from '../../../../../../core/src/core/c
 import { LoggerService } from '../../../../../../core/src/core/logger.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../../store/src/app-state';
-import { selectUsersRoles } from '../../../../../../store/src/selectors/users-roles.selector';
 import {
   UsersRolesClear,
   UsersRolesExecuteChanges,
@@ -16,6 +15,7 @@ import {
   UsersRolesSetUsers,
 } from '../../../../actions/users-roles.actions';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
+import { selectUsersRoles } from '../../../../store/selectors/users-roles.selector';
 import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace } from '../../../../store/types/user.types';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';

@@ -21,7 +21,7 @@ export class PermissionEffects {
     ofType<GetUserRelations>(GET_CURRENT_USER_RELATION),
     map(action => {
       return fetchCfUserRole(this.store, action, this.httpClient).pipe(
-        map((success) => ({ type: action.actions[1] }))
+        map((success) => ({ type: action.actions[1] })) // TODO: RC FIX error handling
       );
     })
   );

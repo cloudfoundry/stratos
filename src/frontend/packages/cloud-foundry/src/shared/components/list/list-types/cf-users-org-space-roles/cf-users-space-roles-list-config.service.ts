@@ -8,9 +8,9 @@ import { CurrentUserPermissionsService } from '../../../../../../../core/src/cor
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { selectUsersRolesRoles } from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ISpace } from '../../../../../cf-api.types';
+import { selectUsersRolesRoles } from '../../../../../store/selectors/users-roles.selector';
 import { CfUsersSpaceRolesDataSourceService } from './cf-users-space-roles-data-source.service';
 import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role/table-cell-org-space-role.component';
 

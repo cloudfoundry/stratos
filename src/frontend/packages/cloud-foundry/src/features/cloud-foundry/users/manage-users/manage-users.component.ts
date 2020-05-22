@@ -5,10 +5,10 @@ import { Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { selectUsersRoles, selectUsersRolesPicked } from '../../../../../../store/src/selectors/users-roles.selector';
 import { UsersRolesClear, UsersRolesExecuteChanges, UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
+import { selectUsersRoles, selectUsersRolesPicked } from '../../../../store/selectors/users-roles.selector';
 import { CfUser } from '../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';

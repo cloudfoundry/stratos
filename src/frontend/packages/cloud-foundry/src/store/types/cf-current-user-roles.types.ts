@@ -40,5 +40,5 @@ export interface ICfRolesState {
 }
 
 export interface IAllCfRolesState {
-  [guid: string]: ICfRolesState;
+  [guid: string]: ICfRolesState
 }

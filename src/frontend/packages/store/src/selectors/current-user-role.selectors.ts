@@ -1,6 +1,5 @@
 import { compose } from '@ngrx/store';
 
-import { ICfRolesState } from '../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
 import { StratosScopeStrings } from '../../../core/src/core/current-user-permissions.checker';
 import { PermissionValues, ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
 import { CurrentUserRolesAppState } from '../app-state';
@@ -17,12 +16,7 @@ const selectCurrentUserStratosRoles = (role: PermissionValues) => (state: Omit<I
 };
 
 // TODO: RC tidy
-// export const selectEntityWithRole = (role: PermissionStrings, type: RoleEntities) => (state: ICfRolesState) => {
-//   const entityType = state[type];
-//   return Object.keys(entityType).filter(entity => entityType[entity][role]);
-// };
 
-export const selectCurrentUserRequestState = (state: ICurrentUserRolesState | ICfRolesState) => state.state;
 
 export const selectCurrentUserGlobalHasScopes = (scope: ScopeStrings) => (scopes: ScopeStrings[]) => scopes.includes(scope);
 const selectCurrentUserStratosScopesState = (state: IStratosRolesState) => state.scopes;

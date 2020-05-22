@@ -14,13 +14,13 @@ import {
 } from '../../../../../cloud-foundry/src/store/types/user.types';
 import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
+import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
+import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import {
   selectUsersIsRemove,
   selectUsersIsSetByUsername,
   selectUsersRolesPicked,
-} from '../../../../../store/src/selectors/users-roles.selector';
-import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
-import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+} from '../../../store/selectors/users-roles.selector';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 

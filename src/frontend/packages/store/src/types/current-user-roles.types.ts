@@ -1,4 +1,3 @@
-import { IAllCfRolesState, ICfRolesState } from '../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
 import { StratosScopeStrings } from '../../../core/src/core/current-user-permissions.checker';
 
 export interface RolesRequestState {
@@ -15,33 +14,15 @@ export function getDefaultRolesRequestState(): RolesRequestState {
   };
 }
 
-export function getDefaultEndpointRoles(): ICfRolesState {
-  return {
-    global: {
-      isAdmin: false,
-      isReadOnlyAdmin: false,
-      isGlobalAuditor: false,
-      canRead: false,
-      canWrite: false,
-      scopes: []
-    },
-    spaces: {
-
-    },
-    organizations: {
-
-    },
-    state: getDefaultRolesRequestState()
-  };
-}
-
 export interface IStratosRolesState {
   isAdmin: boolean;
   scopes: StratosScopeStrings[];
 }
 
-export interface ICurrentUserRolesState {
+export interface ICurrentUserRolesState<T = any> {
   internal: IStratosRolesState;
-  cf: IAllCfRolesState;
+  endpoints: {
+    [endpointType: string]: T // T could be different types, but it makes it nicer when using for an single endpoint type 
+  }
   state: RolesRequestState;
 }

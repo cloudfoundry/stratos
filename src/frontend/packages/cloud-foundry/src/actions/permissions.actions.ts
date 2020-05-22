@@ -36,19 +36,13 @@ export const GET_CURRENT_USER_RELATION = '[Current User] Get relation';
 export const GET_CURRENT_USER_RELATION_SUCCESS = '[Current User] Get relation success';
 export const GET_CURRENT_USER_RELATION_FAILED = '[Current User] Get relation failed';
 
-export const GET_CURRENT_USER_RELATIONS = '[Current User] Get relations';
-export const GET_CURRENT_USER_RELATIONS_SUCCESS = '[Current User] Get relations success';
-export const GET_CURRENT_USER_RELATIONS_FAILED = '[Current User] Get relations failed';
 
-// TODO: RC MOVE
 export const GET_CURRENT_USER_CF_RELATIONS = '[Current User] Get CF relations';
 export const GET_CURRENT_USER_CF_RELATIONS_SUCCESS = '[Current User] Get CF relations success';
 export const GET_CURRENT_USER_CF_RELATIONS_FAILED = '[Current User] Get CF relations failed';
 
 // TODO: RC RENAME ALL THIS
-export class GetCurrentUsersRelations implements Action {
-  type = GET_CURRENT_USER_RELATIONS;
-}
+
 
 export enum UserRelationTypes {
   AUDITED_ORGANIZATIONS = 'audited_organizations',

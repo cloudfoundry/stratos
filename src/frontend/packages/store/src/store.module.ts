@@ -19,7 +19,6 @@ import { SystemEffects } from './effects/system.effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
-import { UsersRolesEffects } from './effects/users-roles.effects';
 import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-client.service';
 import { AppReducersModule } from './reducers.module';
 
@@ -46,7 +45,6 @@ import { AppReducersModule } from './reducers.module';
       SetClientFilterEffect,
       MetricsEffect,
       UserProfileEffect,
-      UsersRolesEffects,
       RecursiveDeleteEffect,
       UserFavoritesEffect,
       PermissionsEffects

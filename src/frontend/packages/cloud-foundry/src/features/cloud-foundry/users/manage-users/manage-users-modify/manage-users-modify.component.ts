@@ -32,13 +32,6 @@ import {
   ITableListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  selectUsersIsRemove,
-  selectUsersIsSetByUsername,
-  selectUsersRolesOrgGuid,
-  selectUsersRolesPicked,
-  selectUsersRolesRoles,
-} from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { UsersRolesFlipSetRoles, UsersRolesSetOrg } from '../../../../../actions/users-roles.actions';
 import { IOrganization } from '../../../../../cf-api.types';
@@ -49,6 +42,13 @@ import {
 import {
   TableCellSelectOrgComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
+import {
+  selectUsersIsRemove,
+  selectUsersIsSetByUsername,
+  selectUsersRolesOrgGuid,
+  selectUsersRolesPicked,
+  selectUsersRolesRoles,
+} from '../../../../../store/selectors/users-roles.selector';
 import { CfUser, OrgUserRoleNames } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';

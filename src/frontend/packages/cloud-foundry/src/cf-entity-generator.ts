@@ -165,6 +165,7 @@ import { populatePaginationFromParent } from './entity-relations/entity-relation
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
+import { currentCfUserRolesReducer } from './store/reducers/current-user-roles-reducer/current-user-roles.reducer';
 import { endpointDisconnectRemoveEntitiesReducer } from './store/reducers/endpoint-disconnect-application.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
@@ -367,10 +368,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
       },
     },
     userRolesFetch: cfUserRolesFetch, // TODO: RC implement
-    userRolesReducer: () => { // TODO: RC implement
-      console.log('HELLO WORLD');
-      return null;
-    }
+    userRolesReducer: currentCfUserRolesReducer
   };
   return [
     generateCfEndpointEntity(endpointDefinition),

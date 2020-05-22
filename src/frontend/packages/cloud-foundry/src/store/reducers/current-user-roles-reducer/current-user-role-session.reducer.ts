@@ -1,14 +1,10 @@
-import {
-  IAllCfRolesState,
-  ICfRolesState,
-  IGlobalRolesState,
-} from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
-import { CfScopeStrings } from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
-import { VerifiedSession } from '../../actions/auth.actions';
-import { EndpointActionComplete } from '../../actions/endpoint.actions';
-import { SessionUser } from '../../types/auth.types';
-import { getDefaultEndpointRoles, ICurrentUserRolesState } from '../../types/current-user-roles.types';
-import { EndpointUser, INewlyConnectedEndpointInfo } from '../../types/endpoint.types';
+import { VerifiedSession } from '../../../../../store/src/actions/auth.actions';
+import { EndpointActionComplete } from '../../../../../store/src/actions/endpoint.actions';
+import { SessionUser } from '../../../../../store/src/types/auth.types';
+import { EndpointUser, INewlyConnectedEndpointInfo } from '../../../../../store/src/types/endpoint.types';
+import { CfScopeStrings } from '../../../user-permissions/cf-user-permissions-checkers';
+import { IAllCfRolesState, ICfRolesState, IGlobalRolesState } from '../../types/cf-current-user-roles.types';
+import { getDefaultEndpointRoles } from '../../types/current-user-roles.types';
 
 interface PartialEndpoint {
   user: EndpointUser | SessionUser;
@@ -16,18 +12,18 @@ interface PartialEndpoint {
 }
 
 export function roleInfoFromSessionReducer(
-  state: ICurrentUserRolesState,
+  state: IAllCfRolesState,
   action: VerifiedSession
-): ICurrentUserRolesState {
+): IAllCfRolesState {
   const { user, endpoints } = action.sessionData;
-  const cfRoles = propagateEndpointsAdminPermissions(state.cf, Object.values(endpoints.cf));
+  const cfRoles = propagateEndpointsAdminPermissions(state, Object.values(endpoints.cf));
   return applyInternalScopes(state, cfRoles, user);
 }
 
 export function updateNewlyConnectedEndpoint(
-  state: ICurrentUserRolesState,
+  state: IAllCfRolesState,
   action: EndpointActionComplete
-): ICurrentUserRolesState {
+): IAllCfRolesState {
   if (action.endpointType !== 'cf') {
     return state;
   }
@@ -42,7 +38,8 @@ export function updateNewlyConnectedEndpoint(
   };
 }
 
-function applyInternalScopes(state: ICurrentUserRolesState, cfRoles: IAllCfRolesState, user?: SessionUser | EndpointUser) {
+// TODO: RC huh
+function applyInternalScopes(state: IAllCfRolesState, cfRoles: IAllCfRolesState, user?: SessionUser | EndpointUser) {
   const internalRoles = { ...state.internal };
   if (user) {
     internalRoles.scopes = user.scopes || [];
