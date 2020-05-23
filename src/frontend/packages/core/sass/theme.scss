@@ -24,7 +24,7 @@ $theme: map-get($stratos-theme, theme);
   body.stratos {
     .dark-theme {
       @include angular-material-theme($dark-theme);
-      @include app-theme($stratos-dark-theme);
+      @include app-theme($dark-stratos-theme);
     }
   }
 }
