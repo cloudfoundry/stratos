@@ -1,5 +1,5 @@
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
 
 const GIT_METADATA_FILE = '.stratos-git-metadata.json';
 
@@ -12,6 +12,8 @@ export class GitMetadata {
   public project: string;
   public branch: string;
   public commit: string;
+
+  public exists = false;
 
   constructor(dir: string) {
 
@@ -26,6 +28,7 @@ export class GitMetadata {
       this.project = gitMetadata.project;
       this.branch = gitMetadata.branch;
       this.commit = gitMetadata.commit;
+      this.exists = true;
     }
   }
 

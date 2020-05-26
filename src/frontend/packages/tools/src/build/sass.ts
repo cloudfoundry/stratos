@@ -1,7 +1,5 @@
-
-import * as path from 'path';
-
 import { StratosConfig } from './../lib/stratos.config';
+
 
 export class SassHandler {
 
@@ -24,13 +22,14 @@ export class SassHandler {
 
   private getThemingForPackages(c: StratosConfig): string {
     let contents = '';
-    c.themedPackages.forEach(themingConfig => {
+    const themedPackages = c.getThemedPackages();
+    themedPackages.forEach(themingConfig => {
       contents += `@import '${themingConfig.importPath}';\n`;
     });
 
     contents += '\n@mixin apply-theme($stratos-theme) {\n';
 
-    c.themedPackages.forEach(themingConfig => {
+    themedPackages.forEach(themingConfig => {
       contents += `  @include ${themingConfig.mixin}($stratos-theme);\n`;
     });
 
@@ -43,7 +42,7 @@ export class SassHandler {
     const that = this;
     return (url, resourcePath) => {
       // console.log('Custom import: ' + url + ' from ' + resourcePath);
-      let result = url;
+      const result = url;
       if (url === '~@stratosui/theme/extensions') {
         // Generate SCSS to appy theming to the packages that need to be themed
         return {
@@ -70,13 +69,12 @@ export class SassHandler {
         }
         const pkgPath = pkgParts.join('/');
         // See if we can resolve the package name
-        if (config.resolve[pkgName]) {
+        const knownPath = config.getKnownPackagePath(pkgName);
+        if (knownPath) {
           // console.log('GOT OVERRIDE: ' + config.resolve[pkgName]);
           // Should be a directory
-          result = config.resolve[pkgName] + '/_' + pkgPath + '.scss';
-          result = path.resolve(result);
           return {
-            file: result
+            file: knownPath + '/_' + pkgPath + '.scss'
           };
         }
       }

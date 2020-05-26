@@ -1,6 +1,5 @@
-import * as path from 'path';
 import * as fs from 'fs';
-
+import * as path from 'path';
 import { NormalModuleReplacementPlugin } from 'webpack';
 
 import { StratosConfig } from './../lib/stratos.config';
@@ -32,7 +31,7 @@ export class ExtensionsHandler {
       imports: []
     };
 
-    config.extensions.forEach(e => {
+    config.getExtensions().forEach(e => {
       let modules = e.module;
       moduleImports.imports.push(e.module);
       if (e.routingModule) {
