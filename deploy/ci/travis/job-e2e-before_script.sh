@@ -17,8 +17,10 @@ if [ "${MAILCATCHER}" == "true" ]; then
 fi
 
 # Check that the S3 server is available
-curl -k --max-time 20 ${AWS_ENDPOINT}
-if [ $? -ne 0 ]; then
-  echo "Can not contact S3 Server"
-  exit 1
+if [ -n "${AWS_ENDPOINT}" ]; then
+  curl -k --max-time 20 ${AWS_ENDPOINT}
+  if [ $? -ne 0 ]; then
+    echo "Can not contact S3 Server"
+    exit 1
+  fi
 fi
