@@ -11,6 +11,9 @@ import {
   AutoscalerScaleHistoryPageComponent,
 } from '../features/autoscaler-scale-history-page/autoscaler-scale-history-page.component';
 import {
+  EditAutoscalerCredentialComponent,
+} from '../features/edit-autoscaler-credential/edit-autoscaler-credential.component';
+import {
   EditAutoscalerPolicyStep1Component,
 } from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
 import {
@@ -23,7 +26,6 @@ import {
   EditAutoscalerPolicyStep4Component,
 } from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
 import { EditAutoscalerPolicyComponent } from '../features/edit-autoscaler-policy/edit-autoscaler-policy.component';
-import { EditAutoscalerCredentialComponent } from '../features/edit-autoscaler-credential/edit-autoscaler-credential.component';
 import { CardAutoscalerDefaultComponent } from '../shared/card-autoscaler-default/card-autoscaler-default.component';
 import {
   TableCellAutoscalerEventChangeIconPipe,
@@ -47,8 +49,6 @@ import {
   AppAutoscalerComboSeriesVerticalComponent,
 } from '../shared/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-series-vertical.component';
 import { AutoscalerRoutingModule } from './autoscaler.routing';
-import { ExtensionService } from 'frontend/packages/core/src/core/extension/extension-service';
-import { AutoscalerTabExtensionComponent } from '../features/autoscaler-tab-extension/autoscaler-tab-extension.component';
 
 
 @NgModule({
