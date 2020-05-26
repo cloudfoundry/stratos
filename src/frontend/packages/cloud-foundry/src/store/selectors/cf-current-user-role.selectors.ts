@@ -6,6 +6,7 @@ import {
   selectCurrentUserRolesState,
 } from '../../../../store/src/selectors/current-user-role.selectors';
 import { ICurrentUserRolesState } from '../../../../store/src/types/current-user-roles.types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { CfPermissionStrings, CfScopeStrings } from '../../user-permissions/cf-user-permissions-checkers';
 import {
   IAllCfRolesState,
@@ -37,7 +38,7 @@ const selectSpaceWithRoleFromOrg = (role: CfPermissionStrings, orgId: string) =>
   }, []);
 };
 
-export const selectCurrentUserCFRolesState = (state: ICurrentUserRolesState) => state.cf;
+export const selectCurrentUserCFRolesState = (state: ICurrentUserRolesState) => state.endpoints[CF_ENDPOINT_TYPE];
 export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) =>
   (state: IAllCfRolesState) => state ? state[endpointGuid] : null;
 
@@ -61,8 +62,12 @@ export const getCurrentUserCFRolesState = compose(
 // Specific endpoint roles
 // ============================
 export const getCurrentUserCFEndpointRolesState = (endpointGuid: string) => compose(
+  (a) => {
+    console.log('3: ', a)
+    return a;
+  },
   selectCurrentUserCFEndpointRolesState(endpointGuid),
-  getCurrentUserCFRolesState
+  getCurrentUserCFRolesState,
 );
 // ============================
 

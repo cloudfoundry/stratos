@@ -2,7 +2,7 @@ import { EndpointActionComplete } from '../../../../../store/src/actions/endpoin
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
 import { IAllCfRolesState } from '../../types/cf-current-user-roles.types';
-import { getDefaultEndpointRoles } from '../../types/current-user-roles.types';
+import { getDefaultEndpointRoles } from './current-user-base-cf-role.reducer';
 
 export function removeEndpointRoles(state: IAllCfRolesState, action: EndpointActionComplete) {
   const cfState = {
@@ -13,8 +13,7 @@ export function removeEndpointRoles(state: IAllCfRolesState, action: EndpointAct
   }
   delete cfState[action.guid];
   return {
-    ...state,
-    cf: cfState
+    ...cfState,
   };
 }
 
@@ -29,10 +28,7 @@ export function addEndpoint(state: IAllCfRolesState, action: EndpointActionCompl
   };
 
   cfState[guid] = getDefaultEndpointRoles();
-  return {
-    ...state,
-    cf: cfState
-  };
+  return cfState;
 }
 
 export function removeSpaceRoles(state: IAllCfRolesState, action: APISuccessOrFailedAction) {

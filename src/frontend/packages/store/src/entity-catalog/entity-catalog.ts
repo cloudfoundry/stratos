@@ -213,7 +213,13 @@ class EntityCatalog {
         const newState = endpoint.definition.userRolesReducer(state.endpoints[endpoint.type], action);
         oneChanged = oneChanged || !!newState;
         if (!!newState) {
-          state.endpoints[endpoint.type] = newState;
+          state = {
+            ...state,
+            endpoints: {
+              ...state.endpoints,
+              [endpoint.type]: newState
+            }
+          }
         }
       }
     })

@@ -4,8 +4,9 @@ import { SessionUser } from '../../../../../store/src/types/auth.types';
 import { EndpointUser, INewlyConnectedEndpointInfo } from '../../../../../store/src/types/endpoint.types';
 import { CfScopeStrings } from '../../../user-permissions/cf-user-permissions-checkers';
 import { IAllCfRolesState, ICfRolesState, IGlobalRolesState } from '../../types/cf-current-user-roles.types';
-import { getDefaultEndpointRoles } from '../../types/current-user-roles.types';
+import { getDefaultEndpointRoles } from './current-user-base-cf-role.reducer';
 
+// TODO: RC used
 interface PartialEndpoint {
   user: EndpointUser | SessionUser;
   guid: string;
@@ -15,44 +16,28 @@ export function roleInfoFromSessionReducer(
   state: IAllCfRolesState,
   action: VerifiedSession
 ): IAllCfRolesState {
-  const { user, endpoints } = action.sessionData;
-  const cfRoles = propagateEndpointsAdminPermissions(state, Object.values(endpoints.cf));
-  return applyInternalScopes(state, cfRoles, user);
+  const { endpoints } = action.sessionData;
+  return propagateEndpointsAdminPermissions(state, Object.values(endpoints.cf));
 }
 
 export function updateNewlyConnectedEndpoint(
   state: IAllCfRolesState,
   action: EndpointActionComplete
 ): IAllCfRolesState {
+  // TODO: RC have at start
   if (action.endpointType !== 'cf') {
     return state;
   }
   const endpoint = action.endpoint as INewlyConnectedEndpointInfo;
-  const cfRoles = propagateEndpointsAdminPermissions(state.cf, [{
+  const cfRoles = propagateEndpointsAdminPermissions(state, [{
     user: endpoint.user,
     guid: action.guid
   }]);
   return {
-    ...state,
-    cf: cfRoles
+    ...cfRoles,
   };
 }
 
-// TODO: RC huh
-function applyInternalScopes(state: IAllCfRolesState, cfRoles: IAllCfRolesState, user?: SessionUser | EndpointUser) {
-  const internalRoles = { ...state.internal };
-  if (user) {
-    internalRoles.scopes = user.scopes || [];
-    // The admin scope is configurable - so look at the flag provided by the backend
-    internalRoles.isAdmin = user.admin;
-  }
-
-  return {
-    ...state,
-    cf: cfRoles,
-    internal: internalRoles
-  };
-}
 
 function propagateEndpointsAdminPermissions(
   cfState: IAllCfRolesState,

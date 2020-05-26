@@ -1,16 +1,15 @@
-import { ICurrentUserRolesState } from '../../../../../store/src/types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
 import { ChangeUserRole } from '../../../actions/users.actions';
 import { CfPermissionStrings } from '../../../user-permissions/cf-user-permissions-checkers';
-import { ICfRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/cf-current-user-roles.types';
+import { IAllCfRolesState, ICfRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/cf-current-user-roles.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/user.types';
 import { defaultUserOrgRoleState } from './current-user-roles-org.reducer';
 import { defaultUserSpaceRoleState } from './current-user-roles-space.reducer';
 
 export function updateAfterRoleChange(
-  state: ICurrentUserRolesState,
+  state: IAllCfRolesState,
   isAdd: boolean,
-  action: APISuccessOrFailedAction): ICurrentUserRolesState {
+  action: APISuccessOrFailedAction): IAllCfRolesState {
   const changePerm = action.apiAction as ChangeUserRole;
   if (!changePerm.updateConnectedUser) {
     // We haven't changed the user connected to this cf or the connected user is an admin. No need to update the permission roles
@@ -19,7 +18,7 @@ export function updateAfterRoleChange(
 
   const entityType = changePerm.isSpace ? 'spaces' : 'organizations';
 
-  const cf = state.cf[changePerm.endpointGuid];
+  const cf = state[changePerm.endpointGuid];
   const entity = cf[entityType][changePerm.entityGuid] || createEmptyState(changePerm.isSpace, changePerm.orgGuid);
   const permissionType = userRoleNameToPermissionName(changePerm.permissionTypeKey);
 
@@ -73,7 +72,7 @@ function userRoleNameToPermissionName(roleName: OrgUserRoleNames | SpaceUserRole
 }
 
 function handleOrgRoleChange(
-  state: ICurrentUserRolesState,
+  state: IAllCfRolesState,
   endpointGuid: string,
   cf: ICfRolesState,
   orgGuid: string,
@@ -95,7 +94,7 @@ function handleOrgRoleChange(
  * Update the space role AND org space guids list
  */
 function handleSpaceRoleChange(
-  state: ICurrentUserRolesState,
+  state: IAllCfRolesState,
   endpointGuid: string,
   cf: ICfRolesState,
   orgGuid: string,
@@ -135,14 +134,11 @@ function handleSpaceRoleChange(
   });
 }
 
-function spreadState(state: ICurrentUserRolesState, cfGuid: string, cf: ICfRolesState): ICurrentUserRolesState {
+function spreadState(state: IAllCfRolesState, cfGuid: string, cf: ICfRolesState): IAllCfRolesState {
   return {
     ...state,
-    cf: {
-      ...state.cf,
-      [cfGuid]: {
-        ...cf
-      }
+    [cfGuid]: {
+      ...cf
     }
   };
 }

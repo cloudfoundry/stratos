@@ -1,6 +1,5 @@
 import { RolesRequestState } from '../../../../store/src/types/current-user-roles.types';
 
-
 export enum RoleEntities {
   ORGS = 'organizations',
   SPACES = 'spaces'

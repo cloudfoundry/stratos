@@ -1,8 +1,5 @@
-import {
-  GetCurrentUserRelationsComplete,
-  UserRelationTypes,
-} from '../../../../cloud-foundry/src/actions/permissions.actions';
-import { APIResource } from '../../types/api.types';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../../actions/permissions.actions';
 
 export interface IKeyedByIDObject<T> {
   [id: string]: T;

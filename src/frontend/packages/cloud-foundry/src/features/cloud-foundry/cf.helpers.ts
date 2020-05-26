@@ -288,10 +288,12 @@ export function canUpdateOrgRoles(
 
 export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Observable<ICfRolesState> {
   return store.select<ICfRolesState>(getCurrentUserCFEndpointRolesState(cfGuid)).pipe(
+    tap(a => console.log('Waiting: ', a)),
     filter(cf => cf && cf.state.initialised),
     first(),
     publishReplay(1),
     refCount(),
+    tap(a => console.log('Result: ', a)),
   );
 }
 

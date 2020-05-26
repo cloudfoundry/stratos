@@ -1,11 +1,13 @@
 import { Action } from '@ngrx/store';
 
+import { SESSION_VERIFIED, VerifiedSession } from '../../actions/auth.actions';
 import {
   GET_CURRENT_USER_RELATIONS,
   GET_CURRENT_USER_RELATIONS_FAILED,
   GET_CURRENT_USER_RELATIONS_SUCCESS,
 } from '../../actions/permissions.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { SessionUser } from '../../types/auth.types';
 import {
   getDefaultRolesRequestState,
   ICurrentUserRolesState,
@@ -22,30 +24,32 @@ const getDefaultState = () => ({
 });
 
 export function currentUserRolesReducer(state: ICurrentUserRolesState = getDefaultState(), action: Action): ICurrentUserRolesState {
+  const stateAfterStratosChanges = coreCurrentUserRolesReducer(state, action);
+  // TODO: RC Comment. can cause issues if plugins have same action type names. Should use same method as 
+  // requestData in entity-catalog.module 
+  return entityCatalog.getAllCurrentUserReducers(stateAfterStratosChanges, action);
+}
+
+function coreCurrentUserRolesReducer(state: ICurrentUserRolesState, action: Action): ICurrentUserRolesState {
   switch (action.type) {
-    case GET_CURRENT_USER_RELATIONS:// TODO: RC NOT CF!!!!!!!!!!!! but has in
+    case GET_CURRENT_USER_RELATIONS:
       return {
         ...state,
         state: currentUserRolesRequestStateReducer(state.state, RolesRequestStateStage.START)
       };
-    case GET_CURRENT_USER_RELATIONS_SUCCESS:// TODO: RC NOT CF!!!!!!!!!!!! but has in
+    case GET_CURRENT_USER_RELATIONS_SUCCESS:
       return {
         ...state,
         state: currentUserRolesRequestStateReducer(state.state, RolesRequestStateStage.SUCCESS)
       };
-    case GET_CURRENT_USER_RELATIONS_FAILED:// TODO: RC NOT CF!!!!!!!!!!!! but has in
+    case GET_CURRENT_USER_RELATIONS_FAILED:
       return {
         ...state,
         state: currentUserRolesRequestStateReducer(state.state, RolesRequestStateStage.FAILURE)
       };
-    default: {
-      // TODO: RC Comment. can cause issues if plugins have same action type names. Should use same method as 
-      // requestData in entity-catalog.module 
-      return {
-        ...state,
-        ...entityCatalog.getAllCurrentUserReducers(state, action)
-      };
-    }
+    case SESSION_VERIFIED:
+      const svAction = action as VerifiedSession
+      return applyInternalScopes(state, svAction.sessionData.user);
   }
   return state;
 }
@@ -77,4 +81,18 @@ export function currentUserRolesRequestStateReducer(state: RolesRequestState = g
         error: true
       };
   }
+}
+
+function applyInternalScopes(state: ICurrentUserRolesState, user: SessionUser): ICurrentUserRolesState {
+  const internalRoles = { ...state.internal };
+  if (user) {
+    internalRoles.scopes = user.scopes || [];
+    // The admin scope is configurable - so look at the flag provided by the backend
+    internalRoles.isAdmin = user.admin;
+  }
+
+  return {
+    ...state,
+    internal: internalRoles
+  };
 }

@@ -144,4 +144,4 @@ export type EntityUserRolesFetch = (
   httpClient: HttpClient
 ) => Observable<boolean>;
 
-export type EntityUserRolesReducer = <T>(state: T, action: Action) => T;
+export type EntityUserRolesReducer<T = any> = (state: T, action: Action) => T;

@@ -205,6 +205,7 @@ import { ServicePlanPriceComponent } from './components/service-plan-price/servi
 import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
 import { GitSCMService } from './data-services/scm/scm.service';
 import { AppNameUniqueDirective } from './directives/app-name-unique.directive/app-name-unique.directive';
+import { CfUserPermissionDirective } from './directives/user-permission/user-permission.directive';
 import { ApplicationStateService } from './services/application-state.service';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 
@@ -322,7 +323,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     AppNameUniqueDirective,
     ApplicationInstanceChartComponent,
     GithubCommitAuthorComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+    CfUserPermissionDirective
   ],
   exports: [
     ServiceIconComponent,
@@ -364,7 +366,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     AppNameUniqueDirective,
     ApplicationInstanceChartComponent,
     GithubCommitAuthorComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+    CfUserPermissionDirective
   ],
   entryComponents: [
     CfEndpointDetailsComponent,

@@ -22,7 +22,8 @@ export interface IStratosRolesState {
 export interface ICurrentUserRolesState<T = any> {
   internal: IStratosRolesState;
   endpoints: {
-    [endpointType: string]: T // T could be different types, but it makes it nicer when using for an single endpoint type 
+    // T could be different in each endpoint type, however supplying a type makes it nicer to use when looking at a specific type
+    [endpointType: string]: T
   }
   state: RolesRequestState;
 }

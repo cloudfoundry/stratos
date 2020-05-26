@@ -29,6 +29,7 @@ import {
 import { cfEntityCatalog } from '../cf-entity-catalog';
 import { CFResponse } from '../store/types/cf-api.types';
 
+// TODO: RC 
 // map(cfEndpoints =>
 //   Object
 //     .entries(cfEndpoints)
@@ -55,7 +56,7 @@ export const cfUserRolesFetch: EntityUserRolesFetch = (
       const isAllAdmins = cfEndpoints.every(endpoint => !!endpoint.user.admin);
       // If all endpoints are connected as admin, there's no permissions to fetch. So only update the permission state to initialised
       if (isAllAdmins) {
-        cfEndpoints.map(endpoint => new GetUserCfRelations(endpoint.guid, GET_CURRENT_USER_CF_RELATIONS_SUCCESS))
+        cfEndpoints.forEach(endpoint => store.dispatch(new GetUserCfRelations(endpoint.guid, GET_CURRENT_USER_CF_RELATIONS_SUCCESS)))
       } else {
         // If some endpoints are not connected as admin, go out and fetch the current user's specific roles
         const flagsAndRoleRequests = dispatchRoleRequests(cfEndpoints, store, logService, httpClient);

@@ -10,10 +10,6 @@ import {
 } from '../../../../../store/src/actions/endpoint.actions';
 import { EntityUserRolesReducer } from '../../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import {
-  roleInfoFromSessionReducer,
-  updateNewlyConnectedEndpoint,
-} from '../../../../../store/src/reducers/current-user-roles-reducer/current-user-role-session.reducer';
-import {
   currentUserRolesRequestStateReducer,
   RolesRequestStateStage,
 } from '../../../../../store/src/reducers/current-user-roles-reducer/current-user-roles.reducer';
@@ -31,24 +27,21 @@ import { DELETE_SPACE_SUCCESS } from '../../../actions/space.actions';
 import { ADD_ROLE_SUCCESS, REMOVE_ROLE_SUCCESS } from '../../../actions/users.actions';
 import { IAllCfRolesState } from '../../types/cf-current-user-roles.types';
 import { currentUserBaseCFRolesReducer } from './current-user-base-cf-role.reducer';
+import { roleInfoFromSessionReducer, updateNewlyConnectedEndpoint } from './current-user-role-session.reducer';
 import { updateAfterRoleChange } from './current-user-roles-changed.reducers';
 import { addEndpoint, removeEndpointRoles, removeOrgRoles, removeSpaceRoles } from './current-user-roles-clear.reducers';
 
-// TODO: RC TUESDAY HERE
-
-
-// TODO: RC go through each, where are they?
-// TODO: RC RENAME
-export const currentCfUserRolesReducer: EntityUserRolesReducer = <IAllCfRolesState>(
+// TODO: RC TUESDAY HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// TODO: RC RENAME file
+// TODO: RC check each type, abort if not anything to do with cf
+export const currentCfUserRolesReducer: EntityUserRolesReducer<IAllCfRolesState> = (
   state: IAllCfRolesState,
   action: Action
 ): IAllCfRolesState => {
   switch (action.type) {
     case GET_CURRENT_USER_RELATION_SUCCESS: // TODO: RC  CF Only. VS GET_CURRENT_USER_CF_RELATIONS
-      return {
-        ...state,
-        cf: currentUserBaseCFRolesReducer(state, action as GetCurrentUserRelationsComplete)
-      };
+      const gcursAction = action as GetCurrentUserRelationsComplete
+      return currentUserBaseCFRolesReducer(state, gcursAction);
     case SESSION_VERIFIED:// TODO: RC  CF Only
       return roleInfoFromSessionReducer(state, action as VerifiedSession);
     case REGISTER_ENDPOINTS_SUCCESS:// TODO: RC  CF Only
@@ -69,10 +62,7 @@ export const currentCfUserRolesReducer: EntityUserRolesReducer = <IAllCfRolesSta
     case GET_CURRENT_USER_CF_RELATIONS:// TODO: RC  CF Only
     case GET_CURRENT_USER_CF_RELATIONS_SUCCESS:
     case GET_CURRENT_USER_CF_RELATIONS_FAILED:
-      return {
-        ...state,
-        cf: currentUserCfRolesRequestStateReducer(state.cf, action as GetUserCfRelations)
-      };
+      return currentUserCfRolesRequestStateReducer(state, action as GetUserCfRelations);
   }
   return null;
 }

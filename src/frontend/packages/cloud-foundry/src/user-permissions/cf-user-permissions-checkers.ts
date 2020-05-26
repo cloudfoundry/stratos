@@ -45,7 +45,7 @@ export const cfCurrentUserPermissionsService = [
 //   a: '1',
 //   b: '2',
 // }
-
+// TODO: RC of type PermissionTypes
 export enum CfCurrentUserPermissions {
   APPLICATION_VIEW = 'view.application',
   APPLICATION_EDIT = 'edit.application',
