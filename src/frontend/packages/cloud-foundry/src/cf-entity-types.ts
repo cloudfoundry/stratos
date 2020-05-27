@@ -53,7 +53,6 @@ export const securityGroupEntityType = 'securityGroup';
 export const featureFlagEntityType = 'featureFlag';
 export const privateDomainsEntityType = 'private_domains';
 export const spaceQuotaEntityType = 'space_quota_definition';
-export const metricEntityType = 'metrics';
 export const servicePlanVisibilityEntityType = 'servicePlanVisibility';
 export const serviceBrokerEntityType = 'serviceBroker';
 export const userProvidedServiceInstanceEntityType = 'userProvidedServiceInstance';

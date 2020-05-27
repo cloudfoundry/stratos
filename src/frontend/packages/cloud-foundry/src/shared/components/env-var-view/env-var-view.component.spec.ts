@@ -1,9 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
-import { CodeBlockComponent } from '../code-block/code-block.component';
-import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
+import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
+import {
+  CopyToClipboardComponent,
+} from '../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
+import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
 import { EnvVarViewComponent } from './env-var-view.component';
 
 describe('EnvVarViewComponent', () => {

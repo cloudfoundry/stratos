@@ -18,7 +18,7 @@ import {
 } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { UptimePipe } from '../../../../../../core/src/shared/pipes/uptime.pipe';
-import { ApplicationServiceMock } from '../../../../../../core/test-framework/application-service-helper';
+import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';

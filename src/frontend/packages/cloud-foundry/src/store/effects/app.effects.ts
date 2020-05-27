@@ -3,17 +3,16 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
 
-import { ASSIGN_ROUTE_SUCCESS } from '../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
-import { cfEntityCatalog } from '../../../cloud-foundry/src/cf-entity-catalog';
+import { endpointHasMetrics } from '../../../../core/src/features/endpoints/endpoint-helpers';
+import { EndpointOnlyAppState } from '../../../../store/src/app-state';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { ASSIGN_ROUTE_SUCCESS } from '../../actions/application-service-routes.actions';
+import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
+import { cfEntityCatalog } from '../../cf-entity-catalog';
 import {
   createAppInstancesMetricAction,
-} from '../../../cloud-foundry/src/shared/components/list/list-types/app-instance/cf-app-instances-config.service';
-import { endpointHasMetrics } from '../../../core/src/features/endpoints/endpoint-helpers';
-import { EndpointOnlyAppState } from '../app-state';
-import { APISuccessOrFailedAction } from '../types/request.types';
+} from '../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
 
-// TODO: Move this file to cf package - #3769
 @Injectable()
 export class AppEffects {
 

@@ -6,10 +6,10 @@ import { createEmptyStoreModule } from '@stratosui/store/testing';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationServiceMock } from '../../../../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../../core/tab-nav.service';
-import { ApplicationServiceMock } from '../../../../../../../core/test-framework/application-service-helper';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-series-vertical.component';
 
 describe('AppAutoscalerComboSeriesVerticalComponent', () => {

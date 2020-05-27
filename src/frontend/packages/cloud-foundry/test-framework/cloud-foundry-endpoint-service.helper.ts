@@ -8,7 +8,6 @@ import { testSCFEndpointGuid } from '@stratosui/store/testing';
 import { CoreModule } from '../../core/src/core/core.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
 import { AppTestModule } from '../../core/test-framework/core-test.helper';
-import { CfUserServiceTestProvider } from '../../core/test-framework/user-service-helper';
 import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
@@ -25,6 +24,7 @@ import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-
 import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
 import { createUserRoleInOrg } from '../src/store/types/user.types';
+import { CfUserServiceTestProvider } from './user-service-helper';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,

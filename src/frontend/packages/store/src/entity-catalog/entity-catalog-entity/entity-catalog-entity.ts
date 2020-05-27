@@ -5,6 +5,12 @@ import { KnownKeys, NonOptionalKeys } from '../../../../core/src/core/utils.serv
 import { getFullEndpointApiUrl } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import { IRequestEntityTypeState } from '../../app-state';
 import {
+  EntitiesFetchHandler,
+  EntitiesInfoHandler,
+  EntityFetchHandler,
+  EntityInfoHandler,
+} from '../../entity-request-pipeline/entity-request-pipeline.types';
+import {
   PaginationPageIteratorConfig,
 } from '../../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../entity-request-pipeline/pipeline.types';
@@ -128,8 +134,8 @@ export class StratosBaseCatalogEntity<
       }
       return newSchema;
     }, {
-      default: entitySchemas.default
-    });
+        default: entitySchemas.default
+      });
   }
 
   private getEndpointType(definition: IStratosBaseEntityDefinition) {
@@ -250,6 +256,22 @@ export class StratosBaseCatalogEntity<
       this.definition.paginationConfig :
       null;
   }
+
+  public getEntityEmitHandler(): EntityInfoHandler {
+    return this.definition.entityEmitHandler;
+  }
+
+  public getEntitiesEmitHandler(): EntitiesInfoHandler {
+    return this.definition.entitiesEmitHandler;
+  }
+
+  public getEntityFetchHandler(): EntityFetchHandler {
+    return this.definition.entityFetchHandler;
+  }
+
+  public getEntitiesFetchHandler(): EntitiesFetchHandler {
+    return this.definition.entitiesFetchHandler;
+  }
 }
 
 export class StratosCatalogEntity<
@@ -270,6 +292,26 @@ export class StratosCatalogEntity<
     return this.definition.paginationConfig ?
       this.definition.paginationConfig :
       this.definition.endpoint ? this.definition.endpoint.paginationConfig : null;
+  }
+
+  public getEntityEmitHandler(): EntityInfoHandler {
+    return this.definition.entityEmitHandler ||
+      this.definition.endpoint ? this.definition.endpoint.entityEmitHandler : null;
+  }
+
+  public getEntitiesEmitHandler(): EntitiesInfoHandler {
+    return this.definition.entitiesEmitHandler ||
+      this.definition.endpoint ? this.definition.endpoint.entitiesEmitHandler : null
+  }
+
+  public getEntityFetchHandler(): EntityFetchHandler {
+    return this.definition.entityFetchHandler ||
+      this.definition.endpoint ? this.definition.endpoint.entityFetchHandler : null;
+  }
+
+  public getEntitiesFetchHandler(): EntitiesFetchHandler {
+    return this.definition.entitiesFetchHandler ||
+      this.definition.endpoint ? this.definition.endpoint.entitiesFetchHandler : null;
   }
 }
 

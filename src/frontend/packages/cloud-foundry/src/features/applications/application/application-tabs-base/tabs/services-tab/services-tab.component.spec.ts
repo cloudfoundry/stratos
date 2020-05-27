@@ -1,11 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  generateTestApplicationServiceProvider,
-} from '../../../../../../../../core/test-framework/application-service-helper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
 import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServiceActionHelperService } from '../../../../../../shared/data-services/service-action-helper.service';
 import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
