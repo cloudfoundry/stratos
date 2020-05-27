@@ -1,15 +1,14 @@
 import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { AppState } from '../../../../../store/src/app-state';
 import { waitForCFPermissions } from '../../../features/cloud-foundry/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 // TODO: RC test
-// TODO: RC filename
 @Directive({
   selector: '[appCfUserPermission]'
 })
@@ -37,7 +36,6 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
 
   public ngOnInit() {
     this.canSub = this.waitForEndpointPermissions(this.appCfUserPermissionEndpointGuid).pipe(
-      tap(console.log),
       switchMap(() => this.currentUserPermissionsService.can(
         this.appCfUserPermission,
         this.appCfUserPermissionEndpointGuid,

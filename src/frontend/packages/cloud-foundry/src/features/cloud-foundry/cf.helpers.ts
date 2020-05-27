@@ -10,17 +10,9 @@ import {
   getCurrentUserCFEndpointRolesState,
 } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
 import { ICfRolesState } from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
-import {
-  CfUser,
-  CfUserRoleParams,
-  OrgUserRoleNames,
-  SpaceUserRoleNames,
-  UserRoleInOrg,
-  UserRoleInSpace,
-} from '../../../../cloud-foundry/src/store/types/user.types';
 import { UserRoleLabels } from '../../../../cloud-foundry/src/store/types/users-roles.types';
-import { PermissionConfig } from '../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../core/src/core/current-user-permissions.service';
+import { PermissionConfig } from '../../../../core/src/core/permissions/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
 import { getIdFromRoute, pathGet } from '../../../../core/src/core/utils.service';
 import {
   extractActualListEntity,
@@ -39,6 +31,14 @@ import { IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc
 import { CFFeatureFlagTypes, ISpace } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { CFEntityConfig } from '../../cf-types';
+import {
+  CfUser,
+  CfUserRoleParams,
+  OrgUserRoleNames,
+  SpaceUserRoleNames,
+  UserRoleInOrg,
+  UserRoleInSpace,
+} from '../../store/types/cf-user.types';
 import { CfCurrentUserPermissions, CfPermissionTypes } from '../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
 

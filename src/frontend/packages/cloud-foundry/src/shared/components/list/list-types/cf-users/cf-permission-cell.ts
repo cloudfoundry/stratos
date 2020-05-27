@@ -4,7 +4,6 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import { UserRoleLabels } from '../../../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { AppChip } from '../../../../../../../core/src/shared/components/chips/chips.component';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
@@ -13,6 +12,7 @@ import { TableCellCustom } from '../../../../../../../core/src/shared/components
 import { selectSessionData } from '../../../../../../../store/src/reducers/auth.reducer';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CfUser } from '../../../../../store/types/cf-user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 
 

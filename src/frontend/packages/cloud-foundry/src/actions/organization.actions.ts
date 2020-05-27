@@ -19,7 +19,7 @@ import {
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
-import { createDefaultUserRelations } from './users.actions';
+import { createDefaultCfUserRelations } from './users.actions';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
 export const GET_ORGANIZATION_SUCCESS = '[Organization] Get one success';
@@ -231,7 +231,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     public paginationKey: string,
     public endpointGuid: string,
     public isAdmin: boolean,
-    public includeRelations: string[] = createDefaultUserRelations()) {
+    public includeRelations: string[] = createDefaultCfUserRelations()) {
     super();
     this.options = new HttpRequest(
       'GET',

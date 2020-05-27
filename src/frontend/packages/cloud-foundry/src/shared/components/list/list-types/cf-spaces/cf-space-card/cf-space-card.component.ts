@@ -6,7 +6,9 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { getFavoriteFromEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';

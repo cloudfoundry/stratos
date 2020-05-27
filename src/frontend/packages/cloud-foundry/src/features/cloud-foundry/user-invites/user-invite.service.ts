@@ -6,7 +6,7 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';

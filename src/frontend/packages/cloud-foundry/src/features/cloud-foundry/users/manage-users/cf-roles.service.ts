@@ -17,7 +17,7 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
@@ -26,13 +26,13 @@ import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-types';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
+import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/cf-users-roles.reducer';
 import {
-  selectUsersRolesCf,
-  selectUsersRolesPicked,
-  selectUsersRolesRoles,
-} from '../../../../store/selectors/users-roles.selector';
-import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';
+  selectCfUsersRolesCf,
+  selectCfUsersRolesPicked,
+  selectCfUsersRolesRoles,
+} from '../../../../store/selectors/cf-users-roles.selector';
+import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/cf-user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { CfUserPermissionsChecker } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
@@ -91,15 +91,15 @@ export class CfRolesService {
     private cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
   ) {
-    this.existingRoles$ = this.store.select(selectUsersRolesPicked).pipe(
-      combineLatestOperators(this.store.select(selectUsersRolesCf)),
+    this.existingRoles$ = this.store.select(selectCfUsersRolesPicked).pipe(
+      combineLatestOperators(this.store.select(selectCfUsersRolesCf)),
       filter(([users, cfGuid]) => !!cfGuid),
       switchMap(([users, cfGuid]) => this.populateRoles(cfGuid, users)),
       distinctUntilChanged(),
       publishReplay(1),
       refCount()
     );
-    this.newRoles$ = this.store.select(selectUsersRolesRoles).pipe(
+    this.newRoles$ = this.store.select(selectCfUsersRolesRoles).pipe(
       distinctUntilChanged(),
       publishReplay(1),
       refCount()
@@ -169,7 +169,7 @@ export class CfRolesService {
     return this.existingRoles$.pipe(
       combineLatestOperators(
         this.newRoles$,
-        this.store.select(selectUsersRolesPicked),
+        this.store.select(selectCfUsersRolesPicked),
       ),
       first(),
       map(([existingRoles, newRoles, pickedUsers]) => {

@@ -1,20 +1,20 @@
 import { APIResource } from '../../../../../store/src/types/api.types';
-import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../../actions/permissions.actions';
+import { CfUserRelationTypes, GetCurrentCfUserRelationsComplete } from '../../../actions/permissions.actions';
 
-export interface IKeyedByIDObject<T> {
+interface IKeyedByIDObject<T> {
   [id: string]: T;
 }
 
-export type roleFinalReducer<T, Y = any> = (
+type roleFinalReducer<T, Y = any> = (
   state: T,
-  relationType: UserRelationTypes,
+  relationType: CfUserRelationTypes,
   userHasRelation: boolean,
   data?: APIResource<Y>
 ) => T;
 
-export function addNewRoles<T>(
+export function addNewCfRoles<T>(
   state: IKeyedByIDObject<T>,
-  action: GetCurrentUserRelationsComplete,
+  action: GetCurrentCfUserRelationsComplete,
   reducer: roleFinalReducer<T>
 ) {
   return action.data.reduce((config, data) => {
@@ -29,9 +29,9 @@ export function addNewRoles<T>(
   }, { newState: { ...state }, addedIds: [] });
 }
 
-export function removeOldRoles<T>(
+export function removeOldCfRoles<T>(
   state: IKeyedByIDObject<T>,
-  action: GetCurrentUserRelationsComplete,
+  action: GetCurrentCfUserRelationsComplete,
   newIds: string[],
   reducer: roleFinalReducer<T>
 ) {

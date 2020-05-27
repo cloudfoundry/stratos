@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import {
   CfSpaceQuotasListConfigService,

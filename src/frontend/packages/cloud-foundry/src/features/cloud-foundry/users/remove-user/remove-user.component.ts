@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, startWith } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { LoggerService } from '../../../../../../core/src/core/logger.service';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../../store/src/app-state';
 import {
@@ -15,8 +15,8 @@ import {
   UsersRolesSetUsers,
 } from '../../../../actions/users-roles.actions';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { selectUsersRoles } from '../../../../store/selectors/users-roles.selector';
-import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace } from '../../../../store/types/user.types';
+import { selectCfUsersRoles } from '../../../../store/selectors/cf-users-roles.selector';
+import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace } from '../../../../store/types/cf-user.types';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -71,7 +71,7 @@ export class RemoveUserComponent implements OnDestroy {
       return;
     }
 
-    const cfGuid$ = this.store.select(selectUsersRoles).pipe(
+    const cfGuid$ = this.store.select(selectCfUsersRoles).pipe(
       combineLatest(this.singleUser$),
       first()
     );

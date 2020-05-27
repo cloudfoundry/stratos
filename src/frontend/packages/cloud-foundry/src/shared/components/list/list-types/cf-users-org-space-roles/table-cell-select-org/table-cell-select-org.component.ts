@@ -10,7 +10,7 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
-import { selectUsersRolesOrgGuid } from '../../../../../../store/selectors/users-roles.selector';
+import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-users-roles.selector';
 
 @Component({
   selector: 'app-table-cell-select-org',
@@ -43,7 +43,7 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
         map(orgs => orgs && orgs.length === 1 ? orgs[0] : null)
       );
     }
-    this.orgGuidChangedSub = this.store.select(selectUsersRolesOrgGuid).subscribe(orgGuid => {
+    this.orgGuidChangedSub = this.store.select(selectCfUsersRolesOrgGuid).subscribe(orgGuid => {
       this.selectedOrgGuid = orgGuid;
     });
   }

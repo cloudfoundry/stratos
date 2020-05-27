@@ -9,7 +9,7 @@ import { serviceBindingEntityType } from '../../../../../../cloud-foundry/src/cf
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';

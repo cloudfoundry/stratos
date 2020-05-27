@@ -1,16 +1,14 @@
 import { Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
-import { InternalAppState } from '../../../store/src/app-state';
-import {
-  BaseCurrentUserPermissionsChecker,
-  IConfigGroup,
-  IConfigGroups,
-  ICurrentUserPermissionsChecker,
-  StratosUserPermissionsChecker,
-} from './current-user-permissions.checker';
+import { InternalAppState } from '../../../../store/src/app-state';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
+import { selectEntity } from '../../../../store/src/selectors/api.selectors';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { ENDPOINT_TYPE, STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
+import { LoggerService } from '../logger.service';
 import {
   CurrentUserPermissions,
   PermissionConfig,
@@ -18,12 +16,15 @@ import {
   PermissionConfigType,
   PermissionTypes,
 } from './current-user-permissions.config';
-import { LoggerService } from './logger.service';
+import {
+  BaseCurrentUserPermissionsChecker,
+  IConfigGroup,
+  IConfigGroups,
+  ICurrentUserPermissionsChecker,
+  IPermissionCheckCombiner,
+  StratosUserPermissionsChecker,
+} from './stratos-user-permissions.checker';
 
-interface ICheckCombiner {
-  checks: Observable<boolean>[];
-  combineType?: '&&';
-}
 
 export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers'
 
@@ -32,7 +33,7 @@ export class CurrentUserPermissionsService {
   // private checker: StratosUserPermissionsChecker;
   private allCheckers: ICurrentUserPermissionsChecker[];
   constructor(
-    store: Store<InternalAppState>,
+    private store: Store<InternalAppState>,
     @Inject(CUSTOM_USER_PERMISSION_CHECKERS) customCheckers: ICurrentUserPermissionsChecker[],
     private logger: LoggerService
   ) {
@@ -80,7 +81,13 @@ export class CurrentUserPermissionsService {
     } else if (actionConfig) {
       return this.getSimplePermission(actionConfig, endpointGuid, ...args);
     } else if (endpointGuid) {
-      return this.getFallbackPermission(endpointGuid);
+      const key = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, ENDPOINT_TYPE);
+      return this.store.select(selectEntity<EndpointModel>(key, endpointGuid)).pipe(
+        switchMap(endpoint => endpoint ?
+          this.getFallbackPermission(endpointGuid, endpoint.cnsi_type) :
+          of(false)
+        )
+      );
     }
     return null;
   }
@@ -124,39 +131,15 @@ export class CurrentUserPermissionsService {
     permission: PermissionTypes,
     endpointGuid: string,
     ...args: any[]
-  ): ICheckCombiner {
-    return this.findChecker<ICheckCombiner>(
-      (checker: ICurrentUserPermissionsChecker) => checker.getCheckFromConfig(configGroup, permission, endpointGuid, ...args),
+  ): IPermissionCheckCombiner {
+    return this.findChecker<IPermissionCheckCombiner>(
+      (checker: ICurrentUserPermissionsChecker) => checker.getComplexCheck(configGroup, permission, endpointGuid, ...args),
       'permissions check',
       permission,
       {
         checks: [of(false)]
       }
     )
-
-    // switch (permission) {
-    //   case PermissionTypes.ENDPOINT:
-    //     return {
-    //       checks: this.checker.getInternalScopesChecks(configGroup),
-    //     };
-    //   case PermissionTypes.ENDPOINT_SCOPE:
-    //     return {
-    //       checks: this.checker.getEndpointScopesChecks(configGroup, endpointGuid),
-    //     };
-    //   case PermissionTypes.STRATOS_SCOPE:
-    //     return {
-    //       checks: this.checker.getInternalScopesChecks(configGroup),
-    //     };
-    //   case PermissionTypes.FEATURE_FLAG:
-    //     return {
-    //       checks: this.checker.getFeatureFlagChecks(configGroup, endpointGuid),
-    //       combineType: '&&'
-    //     };
-    //   case CHECKER_GROUPS.CF_GROUP: //PermissionTypes.ORGANIZATION || config.type === PermissionTypes.SPACE
-    //     return {
-    //       checks: this.checker.getCfChecks(configGroup, endpointGuid, orgOrSpaceGuid, spaceGuid)
-    //     };
-    // }
   }
 
   private getConfig(config: PermissionConfigType, tries = 0): PermissionConfig[] | PermissionConfig {
@@ -178,7 +161,7 @@ export class CurrentUserPermissionsService {
   }
 
   private combineChecks(
-    checkCombiners: ICheckCombiner[],
+    checkCombiners: IPermissionCheckCombiner[],
   ) {
     const reducedChecks = checkCombiners.map(combiner => BaseCurrentUserPermissionsChecker.reduceChecks(combiner.checks, combiner.combineType));
     return combineLatest(reducedChecks).pipe(
@@ -186,9 +169,9 @@ export class CurrentUserPermissionsService {
     );
   }
 
-  private getFallbackPermission(endpointGuid: string): Observable<boolean> {
+  private getFallbackPermission(endpointGuid: string, endpointType: string): Observable<boolean> {
     return this.findChecker<Observable<boolean>>(
-      (checker: ICurrentUserPermissionsChecker) => checker.getFallbackPermission(endpointGuid),
+      (checker: ICurrentUserPermissionsChecker) => checker.getFallbackCheck(endpointGuid, endpointType),
       'fallback permission',
       'N/A',
       of(null)

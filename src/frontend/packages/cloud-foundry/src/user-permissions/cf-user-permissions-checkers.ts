@@ -3,26 +3,27 @@ import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import {
-  BaseCurrentUserPermissionsChecker,
-  ICheckCombiner,
-  IConfigGroup,
-  ICurrentUserPermissionsChecker,
-} from '../../../core/src/core/current-user-permissions.checker';
-import {
   IPermissionConfigs,
   PermissionConfig,
   PermissionConfigLink,
   PermissionTypes,
   PermissionValues,
-} from '../../../core/src/core/current-user-permissions.config';
+} from '../../../core/src/core/permissions/current-user-permissions.config';
 import {
   CurrentUserPermissionsService,
   CUSTOM_USER_PERMISSION_CHECKERS,
-} from '../../../core/src/core/current-user-permissions.service';
+} from '../../../core/src/core/permissions/current-user-permissions.service';
+import {
+  BaseCurrentUserPermissionsChecker,
+  IConfigGroup,
+  ICurrentUserPermissionsChecker,
+  IPermissionCheckCombiner,
+} from '../../../core/src/core/permissions/stratos-user-permissions.checker';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
 import { connectedEndpointsSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../cf-api.types';
 import { cfEntityCatalog } from '../cf-entity-catalog';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import {
   getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
@@ -39,13 +40,6 @@ export const cfCurrentUserPermissionsService = [
   CurrentUserPermissionsService,
 ]
 
-// TODO: RC
-// type Enum<E> = Record<string, E>;
-// export const cfCurrentUserPermissions2: Enum<string> = {
-//   a: '1',
-//   b: '2',
-// }
-// TODO: RC of type PermissionTypes
 export enum CfCurrentUserPermissions {
   APPLICATION_VIEW = 'view.application',
   APPLICATION_EDIT = 'edit.application',
@@ -424,13 +418,13 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     return this.store.select(getCurrentUserCFEndpointRolesState(endpointGuid));
   }
 
-  public getCheckFromConfig(
+  public getComplexCheck(
     configGroup: IConfigGroup,
     permission: CfPermissionTypes,
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     spaceGuid?: string
-  ): ICheckCombiner {
+  ): IPermissionCheckCombiner {
     const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid)
     if (checkCombiner) {
       checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid))
@@ -444,12 +438,8 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     spaceGuid?: string
-  ): ICheckCombiner {
+  ): IPermissionCheckCombiner {
     switch (permission) {
-      // case cfPermissionTypes.ENDPOINT:
-      //   return {
-      //     checks: this.getInternalScopesChecks(configGroup), // TODO: RC not right??
-      //   };
       case CfPermissionTypes.ENDPOINT_SCOPE:
         return {
           checks: this.getEndpointScopesChecks(configGroup, endpointGuid),
@@ -470,8 +460,8 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     }
   }
 
-  public getFallbackPermission(endpointGuid: string) {
-    return this.getCfAdminCheck(endpointGuid);
+  public getFallbackCheck(endpointGuid: string, endpointType: string) {
+    return endpointType === CF_ENDPOINT_TYPE ? this.getCfAdminCheck(endpointGuid) : null;
   };
 
 }

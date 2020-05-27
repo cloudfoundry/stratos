@@ -209,15 +209,14 @@ class EntityCatalog {
     let oneChanged = false;
     endpoints.forEach(endpoint => {
       if (endpoint.definition.userRolesReducer) {
-        // TODO: RC does this churn?
-        const newState = endpoint.definition.userRolesReducer(state.endpoints[endpoint.type], action);
-        oneChanged = oneChanged || !!newState;
-        if (!!newState) {
+        const endpointState = endpoint.definition.userRolesReducer(state.endpoints[endpoint.type], action);
+        oneChanged = oneChanged || !!endpointState;
+        if (!!endpointState) {
           state = {
             ...state,
             endpoints: {
               ...state.endpoints,
-              [endpoint.type]: newState
+              [endpoint.type]: endpointState
             }
           }
         }

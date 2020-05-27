@@ -53,13 +53,6 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
   styleUrls: ['./build-tab.component.scss'],
   providers: [
     ApplicationMonitorService,
-    // TODO: RC 
-    // {
-    //   provide: CUSTOM_USER_PERMISSION_CHECKERS,
-    //   useFactory: (store: Store<GeneralEntityAppState>) => [new CfUserPermissionsChecker(store)],
-    //   deps: [Store]
-    // },
-    // CurrentUserPermissionsService
   ]
 })
 export class BuildTabComponent implements OnInit {

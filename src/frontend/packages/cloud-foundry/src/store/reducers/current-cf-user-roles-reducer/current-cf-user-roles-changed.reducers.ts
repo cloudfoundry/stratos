@@ -1,16 +1,16 @@
 import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
-import { ChangeUserRole } from '../../../actions/users.actions';
+import { ChangeCfUserRole } from '../../../actions/users.actions';
 import { CfPermissionStrings } from '../../../user-permissions/cf-user-permissions-checkers';
 import { IAllCfRolesState, ICfRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/cf-current-user-roles.types';
-import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/user.types';
-import { defaultUserOrgRoleState } from './current-user-roles-org.reducer';
-import { defaultUserSpaceRoleState } from './current-user-roles-space.reducer';
+import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/cf-user.types';
+import { defaultCfUserOrgRoleState } from './current-cf-user-roles-org.reducer';
+import { defaultCfUserSpaceRoleState } from './current-cf-user-roles-space.reducer';
 
-export function updateAfterRoleChange(
+export function updateAfterCfRoleChange(
   state: IAllCfRolesState,
   isAdd: boolean,
   action: APISuccessOrFailedAction): IAllCfRolesState {
-  const changePerm = action.apiAction as ChangeUserRole;
+  const changePerm = action.apiAction as ChangeCfUserRole;
   if (!changePerm.updateConnectedUser) {
     // We haven't changed the user connected to this cf or the connected user is an admin. No need to update the permission roles
     return state;
@@ -45,10 +45,10 @@ export function updateAfterRoleChange(
 
 function createEmptyState(isSpace: boolean, orgId?: string): ISpaceRoleState | IOrgRoleState {
   return isSpace ? {
-    ...defaultUserSpaceRoleState,
+    ...defaultCfUserSpaceRoleState,
     orgId
   } : {
-      ...defaultUserOrgRoleState,
+      ...defaultCfUserOrgRoleState,
     };
 }
 

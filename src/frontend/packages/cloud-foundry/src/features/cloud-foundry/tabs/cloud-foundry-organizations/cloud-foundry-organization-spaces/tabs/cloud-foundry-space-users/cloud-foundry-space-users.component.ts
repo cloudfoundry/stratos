@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { CFAppState } from 'frontend/packages/cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/permissions/current-user-permissions.service';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 

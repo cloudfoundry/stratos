@@ -4,7 +4,7 @@ import { mergeMap } from 'rxjs/operators';
 
 import { WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
 import { AppMetadataTypes } from '../../actions/app-metadata.actions';
-import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
+import { CF_APP_UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class UpdateAppEffects {
   }
 
   @Effect() UpdateAppInStore$ = this.actions$.pipe(
-    ofType<WrapperRequestActionSuccess>(UPDATE_SUCCESS),
+    ofType<WrapperRequestActionSuccess>(CF_APP_UPDATE_SUCCESS),
     mergeMap((action: WrapperRequestActionSuccess) => {
       const updateAction = action.apiAction as UpdateExistingApplication;
       const updateEntities = updateAction.updateEntities || [AppMetadataTypes.ENV_VARS, AppMetadataTypes.STATS, AppMetadataTypes.SUMMARY];

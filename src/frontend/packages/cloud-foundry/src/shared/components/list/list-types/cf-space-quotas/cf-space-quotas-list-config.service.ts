@@ -3,7 +3,9 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';

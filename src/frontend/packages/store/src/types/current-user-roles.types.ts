@@ -1,4 +1,4 @@
-import { StratosScopeStrings } from '../../../core/src/core/current-user-permissions.checker';
+import { StratosScopeStrings } from '../../../core/src/core/permissions/stratos-user-permissions.checker';
 
 export interface RolesRequestState {
   initialised: boolean;

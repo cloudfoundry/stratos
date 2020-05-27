@@ -18,7 +18,6 @@ import { delay, first, map, tap } from 'rxjs/operators';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState } from '../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { StratosCurrentUserPermissions } from '../../../core/current-user-permissions.checker';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
@@ -26,6 +25,7 @@ import {
   StratosActionMetadata,
   StratosActionType,
 } from '../../../core/extension/extension-service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import {

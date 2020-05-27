@@ -14,9 +14,9 @@ import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
-import { StratosCurrentUserPermissions } from '../../../../../core/current-user-permissions.checker';
-import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { LoggerService } from '../../../../../core/logger.service';
+import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';

@@ -5,8 +5,8 @@ import { Subscription } from 'rxjs';
 import { first, map, take, tap } from 'rxjs/operators';
 
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../../../store/src/types/user-profile.types';
-import { StratosCurrentUserPermissions } from '../../../core/current-user-permissions.checker';
-import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 

@@ -4,8 +4,10 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { first, map, publishReplay, refCount, startWith, switchMap, take, tap } from 'rxjs/operators';
 
-import { PermissionConfig } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import { PermissionConfig } from '../../../../../../../core/src/core/permissions/current-user-permissions.config';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import {
   StackedInputActionConfig,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
@@ -21,7 +23,7 @@ import {
 } from '../../../../../actions/users-roles.actions';
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
-import { CfUser } from '../../../../../store/types/user.types';
+import { CfUser } from '../../../../../store/types/cf-user.types';
 import { CfPermissionTypes } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { waitForCFPermissions } from '../../../cf.helpers';

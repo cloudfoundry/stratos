@@ -18,28 +18,16 @@ import { selectPaginationState } from '../../../store/src/selectors/pagination.s
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
 import { BasePaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
 import {
-  GET_CURRENT_USER_CF_RELATIONS,
-  GET_CURRENT_USER_CF_RELATIONS_FAILED,
-  GET_CURRENT_USER_CF_RELATIONS_SUCCESS,
-  GetCurrentUserRelationsComplete,
-  GetUserCfRelations,
-  GetUserRelations,
-  UserRelationTypes,
+  CfUserRelationTypes,
+  GET_CURRENT_CF_USER_RELATIONS,
+  GET_CURRENT_CF_USER_RELATIONS_FAILED,
+  GET_CURRENT_CF_USER_RELATIONS_SUCCESS,
+  GetCfUserRelations,
+  GetCurrentCfUserRelations,
+  GetCurrentCfUserRelationsComplete,
 } from '../actions/permissions.actions';
 import { cfEntityCatalog } from '../cf-entity-catalog';
 import { CFResponse } from '../store/types/cf-api.types';
-
-// TODO: RC 
-// map(cfEndpoints =>
-//   Object
-//     .entries(cfEndpoints)
-//     .filter(([id, endpoint]) => {
-//       const validId = endpointIds.length === 0 || endpointIds.find(endpointId => endpointId === id);
-//       const isAdmin = endpoint.user.admin;
-//       return validId && !isAdmin
-//     })
-//     .map(([, endpoint]) => endpoint)
-// ),
 
 export const cfUserRolesFetch: EntityUserRolesFetch = (
   endpointIds: string[],
@@ -56,7 +44,7 @@ export const cfUserRolesFetch: EntityUserRolesFetch = (
       const isAllAdmins = cfEndpoints.every(endpoint => !!endpoint.user.admin);
       // If all endpoints are connected as admin, there's no permissions to fetch. So only update the permission state to initialised
       if (isAllAdmins) {
-        cfEndpoints.forEach(endpoint => store.dispatch(new GetUserCfRelations(endpoint.guid, GET_CURRENT_USER_CF_RELATIONS_SUCCESS)))
+        cfEndpoints.forEach(endpoint => store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_SUCCESS)))
       } else {
         // If some endpoints are not connected as admin, go out and fetch the current user's specific roles
         const flagsAndRoleRequests = dispatchRoleRequests(cfEndpoints, store, logService, httpClient);
@@ -92,10 +80,10 @@ function dispatchRoleRequests(
     if (endpoint.user.admin) {
       // We don't need permissions for admin users (they can do everything)
       requests[endpoint.guid] = [of(true)];
-      store.dispatch(new GetUserCfRelations(endpoint.guid, GET_CURRENT_USER_CF_RELATIONS_SUCCESS));
+      store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_SUCCESS));
     } else {
       // START fetching cf roles for current user
-      store.dispatch(new GetUserCfRelations(endpoint.guid, GET_CURRENT_USER_CF_RELATIONS));
+      store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS));
 
       // Dispatch feature flags fetch actions
       const ffAction = cfEntityCatalog.featureFlag.actions.getMultiple(endpoint.guid)
@@ -109,14 +97,14 @@ function dispatchRoleRequests(
       combineLatest(requests[endpoint.guid]).pipe(
         first(),
         tap(succeeds => {
-          store.dispatch(new GetUserCfRelations(
+          store.dispatch(new GetCfUserRelations(
             endpoint.guid,
-            succeeds.every(succeeded => !!succeeded) ? GET_CURRENT_USER_CF_RELATIONS_SUCCESS : GET_CURRENT_USER_CF_RELATIONS_FAILED)
+            succeeds.every(succeeded => !!succeeded) ? GET_CURRENT_CF_USER_RELATIONS_SUCCESS : GET_CURRENT_CF_USER_RELATIONS_FAILED)
           );
         }),
         catchError(err => {
           logService.warn('Failed to fetch current user permissions for a cf: ', err);
-          store.dispatch(new GetUserCfRelations(endpoint.guid, GET_CURRENT_USER_CF_RELATIONS_FAILED));
+          store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_FAILED));
           return of(err);
         })
       ).subscribe();
@@ -135,8 +123,8 @@ function handleCfRequests(requests: CfsRequestState): Observable<boolean>[] {
 }
 
 function fetchCfUserRoles(endpoint: IEndpointConnectionInfo, store: Store<AppState>, httpClient: HttpClient): Observable<boolean>[] {
-  return Object.values(UserRelationTypes).map((type: UserRelationTypes) => {
-    const relAction = new GetUserRelations(endpoint.userGuid, type, endpoint.guid);
+  return Object.values(CfUserRelationTypes).map((type: CfUserRelationTypes) => {
+    const relAction = new GetCurrentCfUserRelations(endpoint.userGuid, type, endpoint.guid);
     return fetchCfUserRole(store, relAction, httpClient);
   });
 }
@@ -162,7 +150,7 @@ class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements P
   public clearResults = (res: CFResponse) => of(res);
 }
 
-export function fetchCfUserRole(store: Store<AppState>, action: GetUserRelations, httpClient: HttpClient): Observable<boolean> {
+export function fetchCfUserRole(store: Store<AppState>, action: GetCurrentCfUserRelations, httpClient: HttpClient): Observable<boolean> {
   const url = `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`;
   const params = {
     headers: {
@@ -183,7 +171,7 @@ export function fetchCfUserRole(store: Store<AppState>, action: GetUserRelations
     new PermissionFlattener(httpClient, url, params)
   ).pipe(
     map(data => {
-      store.dispatch(new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data.resources));
+      store.dispatch(new GetCurrentCfUserRelationsComplete(action.relationType, action.endpointGuid, data.resources));
       return true;
     }),
     first(),

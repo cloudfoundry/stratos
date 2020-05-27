@@ -9,7 +9,9 @@ import { ActiveRouteCfOrgSpace } from '../../../../../../../cloud-foundry/src/fe
 import {
   BaseCfListConfig,
 } from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/base-cf/base-cf-list-config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';

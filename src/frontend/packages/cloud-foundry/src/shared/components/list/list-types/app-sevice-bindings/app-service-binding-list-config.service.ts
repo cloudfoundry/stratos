@@ -4,7 +4,9 @@ import { Store } from '@ngrx/store';
 import { switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import {
   DataFunctionDefinition,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';

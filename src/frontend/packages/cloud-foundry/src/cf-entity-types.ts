@@ -25,8 +25,8 @@ import {
   IStack,
 } from './cf-api.types';
 import { AppStats } from './store/types/app-metadata.types';
+import { CfUser } from './store/types/cf-user.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
-import { CfUser } from './store/types/user.types';
 
 export const applicationEntityType = 'application';
 export const stackEntityType = 'stack';

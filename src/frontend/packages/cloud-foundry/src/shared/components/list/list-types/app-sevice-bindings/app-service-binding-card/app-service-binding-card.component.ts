@@ -4,7 +4,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
   MetaCardMenuItem,

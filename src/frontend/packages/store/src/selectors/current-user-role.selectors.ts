@@ -1,7 +1,7 @@
 import { compose } from '@ngrx/store';
 
-import { StratosScopeStrings } from '../../../core/src/core/current-user-permissions.checker';
-import { PermissionValues, ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
+import { PermissionValues, ScopeStrings } from '../../../core/src/core/permissions/current-user-permissions.config';
+import { StratosScopeStrings } from '../../../core/src/core/permissions/stratos-user-permissions.checker';
 import { CurrentUserRolesAppState } from '../app-state';
 import { ICurrentUserRolesState, IStratosRolesState } from '../types/current-user-roles.types';
 
@@ -14,9 +14,6 @@ const selectCurrentUserStratosRoles = (role: PermissionValues) => (state: Omit<I
   // Note - should not cover `scopes`
   return state[role] || false;
 };
-
-// TODO: RC tidy
-
 
 export const selectCurrentUserGlobalHasScopes = (scope: ScopeStrings) => (scopes: ScopeStrings[]) => scopes.includes(scope);
 const selectCurrentUserStratosScopesState = (state: IStratosRolesState) => state.scopes;
@@ -42,17 +39,8 @@ export const getCurrentUserStratosRole = (role: PermissionValues) => compose(
 // ============================
 export const getCurrentUserStratosHasScope = (scope: StratosScopeStrings) => compose(
   selectCurrentUserGlobalHasScopes(scope),
-  selectCurrentUserStratosScopesState, // TODO: RC cf stuff shouldn't be
+  selectCurrentUserStratosScopesState,
   getCurrentUserStratosRolesState
 );
-// ============================
-
-
-// Top level request state
-// ============================
-// export const getCurrentUserRequestState = compose(
-//   selectCurrentUserRequestState,
-//   selectCurrentUserRolesState
-// );
 // ============================
 

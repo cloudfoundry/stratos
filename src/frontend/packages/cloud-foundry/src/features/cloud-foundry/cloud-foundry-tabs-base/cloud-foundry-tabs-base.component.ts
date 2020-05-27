@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import {
   getActionsFromExtensions,
@@ -11,6 +10,7 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../../core/src/core/extension/extension-service';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { FavoritesConfigMapper } from '../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';

@@ -1,23 +1,27 @@
 import { EndpointActionComplete } from '../../../../../store/src/actions/endpoint.actions';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { IAllCfRolesState } from '../../types/cf-current-user-roles.types';
-import { getDefaultEndpointRoles } from './current-user-base-cf-role.reducer';
+import { getDefaultCfEndpointRoles } from './current-cf-user-base-cf-role.reducer';
 
-export function removeEndpointRoles(state: IAllCfRolesState, action: EndpointActionComplete) {
+export function removeEndpointCfRoles(state: IAllCfRolesState, action: EndpointActionComplete) {
+  if (!state[action.guid]) {
+    return state;
+  }
   const cfState = {
     ...state
   };
-  if (!cfState[action.guid]) {
-    return state;
-  }
   delete cfState[action.guid];
   return {
     ...cfState,
   };
 }
 
-export function addEndpoint(state: IAllCfRolesState, action: EndpointActionComplete) {
+export function addCfEndpoint(state: IAllCfRolesState, action: EndpointActionComplete) {
+  if (action.endpointType !== CF_ENDPOINT_TYPE) {
+    return state;
+  }
   const endpoint = action.endpoint as EndpointModel;
   const guid = endpoint.guid;
   if (state[guid]) {
@@ -27,14 +31,14 @@ export function addEndpoint(state: IAllCfRolesState, action: EndpointActionCompl
     ...state
   };
 
-  cfState[guid] = getDefaultEndpointRoles();
+  cfState[guid] = getDefaultCfEndpointRoles();
   return cfState;
 }
 
-export function removeSpaceRoles(state: IAllCfRolesState, action: APISuccessOrFailedAction) {
+export function removeCfSpaceRoles(state: IAllCfRolesState, action: APISuccessOrFailedAction) {
   const { endpointGuid, guid } = action.apiAction;
-  const removedOrgOrSpaceState = removeOrgOrSpaceRoles(state, endpointGuid as string, guid, 'spaces'); // TODO: RC HUH
-  return removeSpaceIdFromOrg(state, endpointGuid as string, guid);
+  const removedOrgOrSpaceState = removeOrgOrSpaceRoles(state, endpointGuid as string, guid, 'spaces');
+  return removeSpaceIdFromOrg(removedOrgOrSpaceState, endpointGuid as string, guid);
 }
 
 function removeSpaceIdFromOrg(state: IAllCfRolesState, endpointGuid: string, spaceGuid: string) {
@@ -58,7 +62,7 @@ function removeSpaceIdFromOrg(state: IAllCfRolesState, endpointGuid: string, spa
   };
 }
 
-export function removeOrgRoles(state: IAllCfRolesState, action: APISuccessOrFailedAction) {
+export function removeCfOrgRoles(state: IAllCfRolesState, action: APISuccessOrFailedAction) {
   const { endpointGuid, guid } = action.apiAction;
   if (!state[endpointGuid as string].organizations[guid]) {
     return state;

@@ -1,14 +1,13 @@
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { getDefaultRolesRequestState } from '../../../../../store/src/types/current-user-roles.types';
-import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../../actions/permissions.actions';
+import { CfUserRelationTypes, GetCurrentCfUserRelationsComplete } from '../../../actions/permissions.actions';
 import { ISpace } from '../../../cf-api.types';
 import { IAllCfRolesState, ICfRolesState, IOrgsRoleState } from '../../types/cf-current-user-roles.types';
-import { createOrgRoleStateState } from './current-user-roles-org.reducer';
-import { currentUserOrgRolesReducer } from './current-user-roles-orgs.reducer';
-import { currentUserSpaceRolesReducer } from './current-user-roles-spaces.reducer';
+import { createCfOrgRoleStateState } from './current-cf-user-roles-org.reducer';
+import { currentCfUserOrgRolesReducer } from './current-cf-user-roles-orgs.reducer';
+import { currentCfUserSpaceRolesReducer } from './current-cf-user-roles-spaces.reducer';
 
-// TODO: RC RENAME
-export function getDefaultEndpointRoles(): ICfRolesState {
+export function getDefaultCfEndpointRoles(): ICfRolesState {
   return {
     global: {
       isAdmin: false,
@@ -28,11 +27,11 @@ export function getDefaultEndpointRoles(): ICfRolesState {
   };
 }
 
-export function currentUserBaseCFRolesReducer(state: IAllCfRolesState = {}, action: GetCurrentUserRelationsComplete): IAllCfRolesState {
+export function currentUserBaseCFRolesReducer(state: IAllCfRolesState = {}, action: GetCurrentCfUserRelationsComplete): IAllCfRolesState {
   if (!state[action.endpointGuid]) {
     state = {
       ...state,
-      [action.endpointGuid]: getDefaultEndpointRoles()
+      [action.endpointGuid]: getDefaultCfEndpointRoles()
     };
   }
   return {
@@ -42,18 +41,18 @@ export function currentUserBaseCFRolesReducer(state: IAllCfRolesState = {}, acti
 }
 
 function currentUserCFRolesReducer(
-  state: ICfRolesState = getDefaultEndpointRoles(),
-  action: GetCurrentUserRelationsComplete): ICfRolesState {
+  state: ICfRolesState = getDefaultCfEndpointRoles(),
+  action: GetCurrentCfUserRelationsComplete): ICfRolesState {
   if (isOrgRelation(action.relationType)) {
     return {
       ...state,
-      organizations: currentUserOrgRolesReducer(state.organizations, action)
+      organizations: currentCfUserOrgRolesReducer(state.organizations, action)
     };
   }
   if (isSpaceRelation(action.relationType)) {
     return {
       ...state,
-      spaces: currentUserSpaceRolesReducer(state.spaces, action),
+      spaces: currentCfUserSpaceRolesReducer(state.spaces, action),
       organizations: assignSpaceToOrg(state.organizations, action.data)
     };
   }
@@ -63,7 +62,7 @@ function currentUserCFRolesReducer(
 function assignSpaceToOrg(organizations: IOrgsRoleState = {}, spaces: APIResource<ISpace>[]): IOrgsRoleState {
   return spaces.reduce((newOrganizations: IOrgsRoleState, space) => {
     const orgGuid = space.entity.organization_guid;
-    const org = newOrganizations[orgGuid] || createOrgRoleStateState();
+    const org = newOrganizations[orgGuid] || createCfOrgRoleStateState();
     const spaceGuids = org.spaceGuids || [];
     if (spaceGuids.includes(space.metadata.guid)) {
       return newOrganizations;
@@ -82,15 +81,15 @@ function assignSpaceToOrg(organizations: IOrgsRoleState = {}, spaces: APIResourc
 }
 
 
-function isOrgRelation(relationType: UserRelationTypes) {
-  return relationType === UserRelationTypes.AUDITED_ORGANIZATIONS ||
-    relationType === UserRelationTypes.BILLING_MANAGED_ORGANIZATION ||
-    relationType === UserRelationTypes.MANAGED_ORGANIZATION ||
-    relationType === UserRelationTypes.ORGANIZATIONS;
+function isOrgRelation(relationType: CfUserRelationTypes) {
+  return relationType === CfUserRelationTypes.AUDITED_ORGANIZATIONS ||
+    relationType === CfUserRelationTypes.BILLING_MANAGED_ORGANIZATION ||
+    relationType === CfUserRelationTypes.MANAGED_ORGANIZATION ||
+    relationType === CfUserRelationTypes.ORGANIZATIONS;
 }
 
-function isSpaceRelation(relationType: UserRelationTypes) {
-  return relationType === UserRelationTypes.AUDITED_SPACES ||
-    relationType === UserRelationTypes.MANAGED_SPACES ||
-    relationType === UserRelationTypes.SPACES;
+function isSpaceRelation(relationType: CfUserRelationTypes) {
+  return relationType === CfUserRelationTypes.AUDITED_SPACES ||
+    relationType === CfUserRelationTypes.MANAGED_SPACES ||
+    relationType === CfUserRelationTypes.SPACES;
 }

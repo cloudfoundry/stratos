@@ -1,51 +1,50 @@
 import { compose } from '@ngrx/store';
 
 import { CFAppState } from '../../cf-app-state';
-import { IUserPermissionInOrg } from '../types/user.types';
+import { IUserPermissionInOrg } from '../types/cf-user.types';
 import { UsersRolesState } from '../types/users-roles.types';
 
-// TODO: RC
-export const selectUsersRoles = (state: CFAppState): UsersRolesState => state.manageUsersRoles;
+export const selectCfUsersRoles = (state: CFAppState): UsersRolesState => state.manageUsersRoles;
 
 const selectUsers = (usersRoles: UsersRolesState) => usersRoles.users;
-export const selectUsersRolesPicked = compose(
+export const selectCfUsersRolesPicked = compose(
   selectUsers,
-  selectUsersRoles
+  selectCfUsersRoles
 );
 
 const selectNewRoles = (usersRoles: UsersRolesState) => usersRoles.newRoles;
-export const selectUsersRolesRoles = compose(
+export const selectCfUsersRolesRoles = compose(
   selectNewRoles,
-  selectUsersRoles
+  selectCfUsersRoles
 );
 
 const selectCfGuid = (usersRoles: UsersRolesState) => usersRoles.cfGuid;
-export const selectUsersRolesCf = compose(
+export const selectCfUsersRolesCf = compose(
   selectCfGuid,
-  selectUsersRoles
+  selectCfUsersRoles
 );
 
 const selectChanged = (usersRoles: UsersRolesState) => usersRoles.changedRoles;
-export const selectUsersRolesChangedRoles = compose(
+export const selectCfUsersRolesChangedRoles = compose(
   selectChanged,
-  selectUsersRoles
+  selectCfUsersRoles
 );
 
 const selectNewRoleOrgGuid = (newRoles: IUserPermissionInOrg) => newRoles.orgGuid;
-export const selectUsersRolesOrgGuid = compose(
+export const selectCfUsersRolesOrgGuid = compose(
   selectNewRoleOrgGuid,
   selectNewRoles,
-  selectUsersRoles
+  selectCfUsersRoles
 );
 
 const isRemove = (usersRoles: UsersRolesState) => usersRoles.isRemove;
-export const selectUsersIsRemove = compose(
+export const selectCfUsersIsRemove = compose(
   isRemove,
-  selectUsersRoles
+  selectCfUsersRoles
 );
 
 const isSetByUsername = (usersRoles: UsersRolesState) => usersRoles.isSetByUsername;
-export const selectUsersIsSetByUsername = compose(
+export const selectCfUsersIsSetByUsername = compose(
   isSetByUsername,
-  selectUsersRoles
+  selectCfUsersRoles
 );

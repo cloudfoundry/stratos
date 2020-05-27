@@ -2,11 +2,11 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import { GeneralEntityAppState } from '../../../store/src/app-state';
+import { GeneralEntityAppState } from '../../../../store/src/app-state';
 import {
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
-} from '../../../store/src/selectors/current-user-role.selectors';
+} from '../../../../store/src/selectors/current-user-role.selectors';
 import {
   IPermissionConfigs,
   PermissionConfig,
@@ -22,30 +22,46 @@ export interface IConfigGroups {
 
 export type IConfigGroup = PermissionConfig[];
 
-// TODO: RC name
-export interface ICheckCombiner {
+export type IPermissionCheckCombineTypes = '||' | '&&';
+
+export interface IPermissionCheckCombiner {
   checks: Observable<boolean>[];
-  combineType?: '&&';
+  combineType?: IPermissionCheckCombineTypes;
 }
 export interface ICurrentUserPermissionsChecker {
-  // TODO: RC comments
+  /**
+   * For the given permission action find the checker configuration that will determine if the user can or cannot do the action
+   * If this is not supported by the the checker null is returned. If another checker also lays claim to the same string the check will
+   * always return denied
+   */
   getPermissionConfig: (action: string) => PermissionConfigType
+  /**
+   * Simple checks are used when the permission config contains a single thing to check
+   */
   getSimpleCheck: (
     permissionConfig: PermissionConfig,
     endpointGuid?: string,
     ...args: any
   ) => Observable<boolean>;
-  getCheckFromConfig: (
+  /**
+   * Used when the permission config contains multiple things to check
+   */
+  getComplexCheck: (
     configGroup: IConfigGroup,
     permission: PermissionTypes,
     ...args: any[]
-  ) => ICheckCombiner;
-  getFallbackPermission: (
-    endpointGuid: string
+  ) => IPermissionCheckCombiner;
+  /**
+   * If no checker provides simple
+   */
+  getFallbackCheck: (
+    endpointGuid: string,
+    endpointType: string
   ) => Observable<boolean>;
 }
+
 export abstract class BaseCurrentUserPermissionsChecker {
-  public static reduceChecks(checks: Observable<boolean>[], type: '||' | '&&' = '||') {
+  public static reduceChecks(checks: Observable<boolean>[], type: IPermissionCheckCombineTypes = '||') {
     const func = type === '||' ? 'some' : 'every';
     if (!checks || !checks.length) {
       return observableOf(true);
@@ -62,9 +78,8 @@ export enum StratosCurrentUserPermissions {
   PASSWORD_CHANGE = 'change-password',
 }
 
-// TODO: RC filename
 export enum StratosPermissionStrings {
-  _GLOBAL_ = 'global', // TODO: RC
+  _GLOBAL_ = 'global',
   STRATOS_ADMIN = 'isAdmin'
 }
 
@@ -137,11 +152,11 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
     return this.check(StratosPermissionTypes.STRATOS_SCOPE, permission);
   }
 
-  public getCheckFromConfig(
+  public getComplexCheck(
     configGroup: IConfigGroup,
     permission: PermissionTypes,
     ...args: any[]
-  ): ICheckCombiner {
+  ): IPermissionCheckCombiner {
     switch (permission) {
       case StratosPermissionTypes.STRATOS_SCOPE:
         return {
@@ -149,7 +164,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
         };
     }
   }
-  public getFallbackPermission(endpointGuid: string): Observable<boolean> {
+  public getFallbackCheck(endpointGuid: string, endpointType: string): Observable<boolean> {
     return null;
   };
 

@@ -5,7 +5,9 @@ import { publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { GetAppRoutes } from '../../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';

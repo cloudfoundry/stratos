@@ -1,5 +1,5 @@
-import { StratosScopeStrings } from '../../../core/src/core/current-user-permissions.checker';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
+import { StratosScopeStrings } from '../../../core/src/core/permissions/stratos-user-permissions.checker';
 import { MetricsAPITargets, MetricsStratosInfo } from '../actions/metrics-api.actions';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
@@ -68,7 +68,7 @@ export interface EndpointUser {
   guid: string;
   name: string;
   admin: boolean;
-  scopes?: StratosScopeStrings[]; // TODO: RC
+  scopes?: StratosScopeStrings[];
 }
 
 export interface EndpointState {

@@ -3,7 +3,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';

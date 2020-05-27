@@ -15,13 +15,13 @@ import { SessionDataEndpoint } from '../../../../store/src/types/auth.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { ICFAction, UpdateCfAction } from '../../../../store/src/types/request.types';
 import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../../actions/users-roles.actions';
-import { AddUserRole, ChangeUserRole, RemoveUserRole } from '../../actions/users.actions';
+import { AddCfUserRole, ChangeCfUserRole, RemoveCfUserRole } from '../../actions/users.actions';
 import { CFAppState } from '../../cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { CfUserService } from '../../shared/data-services/cf-user.service';
-import { selectUsersRoles } from '../selectors/users-roles.selector';
-import { OrgUserRoleNames } from '../types/user.types';
+import { selectCfUsersRoles } from '../selectors/cf-users-roles.selector';
+import { OrgUserRoleNames } from '../types/cf-user.types';
 import { CfRoleChange, UsersRolesState } from '../types/users-roles.types';
 
 
@@ -43,7 +43,7 @@ export class UsersRolesEffects {
           guid: change.spaceGuid ? change.spaceGuid : change.orgGuid,
           endpointType: CF_ENDPOINT_TYPE,
           entityType: change.spaceGuid ? spaceEntityType : organizationEntityType,
-          updatingKey: ChangeUserRole.generateUpdatingKey(change.role, change.userGuid),
+          updatingKey: ChangeCfUserRole.generateUpdatingKey(change.role, change.userGuid),
           options: null,
           actions: [],
           type: ''
@@ -57,7 +57,7 @@ export class UsersRolesEffects {
   @Effect() executeUsersRolesChange$ = this.actions$.pipe(
     ofType<UsersRolesExecuteChanges>(UsersRolesActions.ExecuteChanges),
     withLatestFrom(
-      this.store.select(selectUsersRoles),
+      this.store.select(selectCfUsersRoles),
       this.store.select(selectSessionData())
     ),
     mergeMap(([action, usersRoles, sessionData]) => {
@@ -196,11 +196,11 @@ export class UsersRolesEffects {
     change: CfRoleChange,
     username: string,
     usernameOrigin: string
-  ): ChangeUserRole {
+  ): ChangeCfUserRole {
     const isSpace = !!change.spaceGuid;
     const entityGuid = isSpace ? change.spaceGuid : change.orgGuid;
     return change.add ?
-      new AddUserRole(
+      new AddCfUserRole(
         cfGuid,
         change.userGuid,
         entityGuid,
@@ -211,7 +211,7 @@ export class UsersRolesEffects {
         username,
         usernameOrigin
       ) :
-      new RemoveUserRole(
+      new RemoveCfUserRole(
         cfGuid,
         change.userGuid,
         entityGuid,
@@ -224,7 +224,7 @@ export class UsersRolesEffects {
       );
   }
 
-  private createActionObs(action: ChangeUserRole): Observable<any> {
+  private createActionObs(action: ChangeCfUserRole): Observable<any> {
     return entityCatalog.getEntity(action)
       .store
       .getEntityMonitor(action.guid)

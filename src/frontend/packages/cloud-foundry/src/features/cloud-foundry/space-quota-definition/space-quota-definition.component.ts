@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';

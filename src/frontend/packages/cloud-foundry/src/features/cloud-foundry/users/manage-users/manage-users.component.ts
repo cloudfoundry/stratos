@@ -8,8 +8,8 @@ import { StepOnNextFunction } from '../../../../../../core/src/shared/components
 import { UsersRolesClear, UsersRolesExecuteChanges, UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { selectUsersRoles, selectUsersRolesPicked } from '../../../../store/selectors/users-roles.selector';
-import { CfUser } from '../../../../store/types/user.types';
+import { selectCfUsersRoles, selectCfUsersRolesPicked } from '../../../../store/selectors/cf-users-roles.selector';
+import { CfUser } from '../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from './cf-roles.service';
@@ -55,7 +55,7 @@ export class UsersRolesComponent implements OnDestroy {
           first()
         );
       } else {
-        this.initialUsers$ = this.store.select(selectUsersRolesPicked).pipe(first());
+        this.initialUsers$ = this.store.select(selectCfUsersRolesPicked).pipe(first());
       }
 
       this.singleUser$ = this.initialUsers$.pipe(
@@ -65,7 +65,7 @@ export class UsersRolesComponent implements OnDestroy {
       );
 
       // Ensure that when we arrive here directly the store is set up with all it needs
-      this.store.select(selectUsersRoles).pipe(
+      this.store.select(selectCfUsersRoles).pipe(
         combineLatest(this.initialUsers$),
         first()
       ).subscribe(([usersRoles, users]) => {

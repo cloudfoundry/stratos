@@ -4,7 +4,9 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
   MetaCardMenuItem,

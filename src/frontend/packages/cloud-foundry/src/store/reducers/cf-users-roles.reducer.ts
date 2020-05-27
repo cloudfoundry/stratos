@@ -16,7 +16,7 @@ import {
   IUserPermissionInOrg,
   IUserPermissionInSpace,
   OrgUserRoleNames,
-} from '../types/user.types';
+} from '../types/cf-user.types';
 import { UsersRolesState } from '../types/users-roles.types';
 
 export function createDefaultOrgRoles(orgGuid: string, orgName: string): IUserPermissionInOrg {
@@ -53,7 +53,7 @@ const defaultState: UsersRolesState = {
   changedRoles: []
 };
 
-export function UsersRolesReducer(state: UsersRolesState = defaultState, action: Action): UsersRolesState {
+export function cfUsersRolesReducer(state: UsersRolesState = defaultState, action: Action): UsersRolesState {
   switch (action.type) {
     case UsersRolesActions.SetUsers:
       const setUsersAction = action as UsersRolesSetUsers;

@@ -25,8 +25,6 @@ const getDefaultState = () => ({
 
 export function currentUserRolesReducer(state: ICurrentUserRolesState = getDefaultState(), action: Action): ICurrentUserRolesState {
   const stateAfterStratosChanges = coreCurrentUserRolesReducer(state, action);
-  // TODO: RC Comment. can cause issues if plugins have same action type names. Should use same method as 
-  // requestData in entity-catalog.module 
   return entityCatalog.getAllCurrentUserReducers(stateAfterStratosChanges, action);
 }
 

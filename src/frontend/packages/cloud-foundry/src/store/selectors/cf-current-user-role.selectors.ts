@@ -1,6 +1,6 @@
 import { compose } from '@ngrx/store';
 
-import { PermissionValues } from '../../../../core/src/core/current-user-permissions.config';
+import { PermissionValues } from '../../../../core/src/core/permissions/current-user-permissions.config';
 import {
   selectCurrentUserGlobalHasScopes,
   selectCurrentUserRolesState,
@@ -62,10 +62,6 @@ export const getCurrentUserCFRolesState = compose(
 // Specific endpoint roles
 // ============================
 export const getCurrentUserCFEndpointRolesState = (endpointGuid: string) => compose(
-  (a) => {
-    console.log('3: ', a)
-    return a;
-  },
   selectCurrentUserCFEndpointRolesState(endpointGuid),
   getCurrentUserCFRolesState,
 );

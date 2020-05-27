@@ -1,17 +1,21 @@
 import {
-  GetCurrentUserRelationsComplete,
-  UserRelationTypes,
+  CfUserRelationTypes,
+  GetCurrentCfUserRelationsComplete,
 } from '../../../../cloud-foundry/src/actions/permissions.actions';
 import {
   createOrgRoleStateState,
-} from '../../../../cloud-foundry/src/store/reducers/current-user-roles-reducer/current-user-roles-org.reducer';
+} from '../../../../cloud-foundry/src/store/reducers/current-cf-user-roles-reducer/current-user-roles-org.reducer';
 import {
   ICfRolesState,
   IOrgRoleState,
   ISpaceRoleState,
   RoleEntities,
 } from '../../../../cloud-foundry/src/store/types/cf-current-user-roles.types';
-import { getDefaultEndpointRoles, ICurrentUserRolesState, getDefaultRolesRequestState } from '../../types/current-user-roles.types';
+import {
+  getDefaultEndpointRoles,
+  getDefaultRolesRequestState,
+  ICurrentUserRolesState,
+} from '../../types/current-user-roles.types';
 import { currentUserRolesReducer } from './current-user-roles.reducer';
 
 const testOrgGuid = 'org-1';
@@ -19,16 +23,16 @@ const testSpaceGuid = 'space-1';
 const generalGuid = 'guid-123';
 const testCFEndpointGuid = 'cf-1';
 
-function getSpaceAction(type: UserRelationTypes, orgGuid: string = testOrgGuid, spaceGuid: string = testSpaceGuid) {
-  return new GetCurrentUserRelationsComplete(
+function getSpaceAction(type: CfUserRelationTypes, orgGuid: string = testOrgGuid, spaceGuid: string = testSpaceGuid) {
+  return new GetCurrentCfUserRelationsComplete(
     type,
     testCFEndpointGuid,
     [{ metadata: { guid: spaceGuid, created_at: '1', updated_at: '1', url: '1' }, entity: { organization_guid: orgGuid } }]
   );
 }
 
-function getOrgAction(type: UserRelationTypes, orgGuid: string = testOrgGuid) {
-  return new GetCurrentUserRelationsComplete(
+function getOrgAction(type: CfUserRelationTypes, orgGuid: string = testOrgGuid) {
+  return new GetCurrentCfUserRelationsComplete(
     type,
     testCFEndpointGuid,
     [{ metadata: { guid: orgGuid, created_at: '1', updated_at: '1', url: '1' }, entity: {} }]
@@ -82,7 +86,7 @@ describe('currentUserReducer', () => {
     expect(state).toEqual(expectedState);
   });
   it('should add org manager role to org', () => {
-    const state = currentUserRolesReducer(undefined, getOrgAction(UserRelationTypes.MANAGED_ORGANIZATION));
+    const state = currentUserRolesReducer(undefined, getOrgAction(CfUserRelationTypes.MANAGED_ORGANIZATION));
     const cfPermissions = state.cf[testCFEndpointGuid];
     expect(cfPermissions).toEqual(getState(RoleEntities.ORGS, [], {
       isManager: true,
@@ -93,7 +97,7 @@ describe('currentUserReducer', () => {
     }));
   });
   it('should add org auditor role to org', () => {
-    const state = currentUserRolesReducer(undefined, getOrgAction(UserRelationTypes.AUDITED_ORGANIZATIONS));
+    const state = currentUserRolesReducer(undefined, getOrgAction(CfUserRelationTypes.AUDITED_ORGANIZATIONS));
     const cfPermissions = state.cf[testCFEndpointGuid];
     expect(cfPermissions).toEqual(getState(RoleEntities.ORGS, [], {
       isManager: false,
@@ -104,7 +108,7 @@ describe('currentUserReducer', () => {
     }));
   });
   it('should add org billing manager role to org', () => {
-    const state = currentUserRolesReducer(undefined, getOrgAction(UserRelationTypes.BILLING_MANAGED_ORGANIZATION));
+    const state = currentUserRolesReducer(undefined, getOrgAction(CfUserRelationTypes.BILLING_MANAGED_ORGANIZATION));
     const cfPermissions = state.cf[testCFEndpointGuid];
     expect(cfPermissions).toEqual(getState(RoleEntities.ORGS, [], {
       isManager: false,
@@ -115,7 +119,7 @@ describe('currentUserReducer', () => {
     }));
   });
   it('should add org user role to org', () => {
-    const state = currentUserRolesReducer(undefined, getOrgAction(UserRelationTypes.ORGANIZATIONS));
+    const state = currentUserRolesReducer(undefined, getOrgAction(CfUserRelationTypes.ORGANIZATIONS));
     const cfPermissions = state.cf[testCFEndpointGuid];
     expect(cfPermissions).toEqual(getState(RoleEntities.ORGS, [], {
       isManager: false,
@@ -127,8 +131,8 @@ describe('currentUserReducer', () => {
   });
 
   it('should retain other org roles', () => {
-    let state = currentUserRolesReducer(undefined, getOrgAction(UserRelationTypes.ORGANIZATIONS));
-    state = currentUserRolesReducer(state, getOrgAction(UserRelationTypes.AUDITED_ORGANIZATIONS, generalGuid));
+    let state = currentUserRolesReducer(undefined, getOrgAction(CfUserRelationTypes.ORGANIZATIONS));
+    state = currentUserRolesReducer(state, getOrgAction(CfUserRelationTypes.AUDITED_ORGANIZATIONS, generalGuid));
     const cfPermissions = state.cf[testCFEndpointGuid];
     const toEqual = getState(RoleEntities.ORGS, [{
       guid: testOrgGuid,
@@ -154,8 +158,8 @@ describe('currentUserReducer', () => {
   });
 
   it('should retain other space roles', () => {
-    let state = currentUserRolesReducer(undefined, getSpaceAction(UserRelationTypes.SPACES));
-    state = currentUserRolesReducer(state, getSpaceAction(UserRelationTypes.MANAGED_SPACES, generalGuid, generalGuid));
+    let state = currentUserRolesReducer(undefined, getSpaceAction(CfUserRelationTypes.SPACES));
+    state = currentUserRolesReducer(state, getSpaceAction(CfUserRelationTypes.MANAGED_SPACES, generalGuid, generalGuid));
     const cfPermissions = state.cf[testCFEndpointGuid];
     const toEqual = getState(RoleEntities.SPACES, [{
       guid: testSpaceGuid,
@@ -204,10 +208,10 @@ describe('currentUserReducer', () => {
   });
 
   it('should retain other space and org roles', () => {
-    let state = currentUserRolesReducer(undefined, getSpaceAction(UserRelationTypes.SPACES));
-    state = currentUserRolesReducer(state, getSpaceAction(UserRelationTypes.MANAGED_SPACES, generalGuid, generalGuid));
-    state = currentUserRolesReducer(state, getOrgAction(UserRelationTypes.ORGANIZATIONS));
-    state = currentUserRolesReducer(state, getOrgAction(UserRelationTypes.AUDITED_ORGANIZATIONS, generalGuid));
+    let state = currentUserRolesReducer(undefined, getSpaceAction(CfUserRelationTypes.SPACES));
+    state = currentUserRolesReducer(state, getSpaceAction(CfUserRelationTypes.MANAGED_SPACES, generalGuid, generalGuid));
+    state = currentUserRolesReducer(state, getOrgAction(CfUserRelationTypes.ORGANIZATIONS));
+    state = currentUserRolesReducer(state, getOrgAction(CfUserRelationTypes.AUDITED_ORGANIZATIONS, generalGuid));
     const cfPermissions = state.cf[testCFEndpointGuid];
 
 

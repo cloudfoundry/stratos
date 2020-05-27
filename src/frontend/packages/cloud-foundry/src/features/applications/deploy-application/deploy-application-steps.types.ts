@@ -5,8 +5,8 @@ import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { PermissionConfig } from '../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
+import { PermissionConfig } from '../../../../../core/src/core/permissions/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { CFFeatureFlagTypes } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';

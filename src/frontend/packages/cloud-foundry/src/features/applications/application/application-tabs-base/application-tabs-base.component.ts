@@ -6,7 +6,6 @@ import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/o
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import {
   getActionsFromExtensions,
@@ -15,6 +14,7 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../../../core/src/core/extension/extension-service';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { getFavoriteFromEntity } from '../../../../../../core/src/core/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
