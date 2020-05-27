@@ -209,18 +209,18 @@ export class Packages {
     }
 
     // If we don't have any explicit includes, then include it
-    if (!this.config.stratosConfig.extensions) {
+    if (!this.config.stratosConfig.packages) {
       return true;
     }
 
     // Use the include set if one is specified
-    if (this.config.stratosConfig.extensions.include) {
-      return this.config.stratosConfig.extensions.include.includes(pkg.name);
+    if (this.config.stratosConfig.packages.include) {
+      return this.config.stratosConfig.packages.include.includes(pkg.name);
     }
 
     // Remove any excluded extensions
-    if (this.config.stratosConfig.extensions.exclude) {
-      return !this.config.stratosConfig.extensions.exclude.includes(pkg.name);
+    if (this.config.stratosConfig.packages.exclude) {
+      return !this.config.stratosConfig.packages.exclude.includes(pkg.name);
     }
 
     return true;

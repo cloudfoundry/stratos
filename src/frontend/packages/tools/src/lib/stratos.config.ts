@@ -62,7 +62,15 @@ export class StratosConfig implements Logger {
           this.log(e);
         }
       } else {
-        this.log('No stratos.yaml file found');
+        this.log('Using default configuration');
+
+        // Default config excludes the example packages
+        this.stratosConfig.packages = {
+          exclude: [
+            '@example/theme',
+            '@example/extensions'
+          ]
+        };
       }
     }
 
@@ -91,20 +99,6 @@ export class StratosConfig implements Logger {
     this.packages.scan(this.packageJson);
 
     this.log('Using theme ' + this.packages.theme.name);
-
-    // Always copy the assets fromt the default theme first
-    // If a custom theme is then used, it does not have to provide all of the images
-    // just those that it wishes to change
-    // this.addUnique(pkgs, '@stratosui/theme');
-
-    // // Add the specifief theme in
-    // this.addUnique(pkgs, this.theme);
-
-    // // Add theme - Note: Dont' need to do this - we will look for code and assets
-    // // separately
-    // this.addUnique(pkgs, this.packageJson.name);
-    // console.log('Here are the dependencies we will use to look for Stratos packages:')
-    // console.log(deps);
 
     const extensions = this.getExtensions();
 
