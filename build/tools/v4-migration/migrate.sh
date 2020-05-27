@@ -20,6 +20,9 @@ function migrateTitle() {
   if [ -f "${CUSTOM}/stratos.yaml" ]; then
     DATA=$(cat "${CUSTOM}/stratos.yaml")
 
+    # Make sure we have a Stratos.yaml file
+    touch ${STRATOS_YML}
+
     TITLE=$(grep -o 'title: .*' ${CUSTOM}/stratos.yaml)
     sed -i.bak -e '/^title:/d' ${STRATOS_YML}
     echo -e "${TITLE}" >> ${STRATOS_YML}
