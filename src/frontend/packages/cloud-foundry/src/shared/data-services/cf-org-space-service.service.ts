@@ -1,6 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { endpointsCfEntitiesConnectedSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -35,6 +34,7 @@ import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pa
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
+import { endpointsCfEntitiesConnectedSelector } from '../../store/selectors/cloud-foundry.selector';
 import { QParam, QParamJoiners } from '../q-param';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {

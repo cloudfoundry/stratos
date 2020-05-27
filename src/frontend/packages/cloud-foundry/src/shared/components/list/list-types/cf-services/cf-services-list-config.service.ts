@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { endpointsCfEntitiesConnectedSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
@@ -15,6 +14,7 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { haveMultiConnectedCfs } from '../../../../../features/cloud-foundry/cf.helpers';
+import { endpointsCfEntitiesConnectedSelector } from '../../../../../store/selectors/cloud-foundry.selector';
 import { CfOrgSpaceItem, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CfServiceCardComponent } from './cf-service-card/cf-service-card.component';
 import { CfServicesDataSource } from './cf-services-data-source';

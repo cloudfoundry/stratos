@@ -13,7 +13,6 @@ import {
   PaginationFlattener,
 } from '../../../store/src/helpers/paginated-request-helpers';
 import { ActionState } from '../../../store/src/reducers/api-request-reducer/types';
-import { endpointsCfEntitiesConnectedSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
 import { EndpointModel } from '../../../store/src/types/endpoint.types';
 import { BasePaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
@@ -27,6 +26,7 @@ import {
   GetCurrentCfUserRelationsComplete,
 } from '../actions/permissions.actions';
 import { cfEntityCatalog } from '../cf-entity-catalog';
+import { endpointsCfEntitiesConnectedSelector } from '../store/selectors/cloud-foundry.selector';
 import { CFResponse } from '../store/types/cf-api.types';
 
 export const cfUserRolesFetch: EntityUserRolesFetch = (
