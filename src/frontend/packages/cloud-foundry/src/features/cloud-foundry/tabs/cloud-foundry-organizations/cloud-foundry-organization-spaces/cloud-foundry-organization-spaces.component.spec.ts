@@ -7,7 +7,7 @@ import {
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
-} from '../../../../../../../core/test-framework/cloud-foundry-organization.service.mock';
+} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CloudFoundryOrganizationSpacesComponent } from './cloud-foundry-organization-spaces.component';
 

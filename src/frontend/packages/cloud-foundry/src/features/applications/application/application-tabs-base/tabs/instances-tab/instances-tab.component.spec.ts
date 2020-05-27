@@ -6,8 +6,8 @@ import { testSCFEndpointGuid } from '@stratos/store/testing';
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { CF_GUID } from '../../../../../../../../core/src/shared/entity.tokens';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { ApplicationServiceMock } from '../../../../../../../../core/test-framework/application-service-helper';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
+import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 import {
   generateCfStoreModules,
   generateTestCfEndpointServiceProvider,

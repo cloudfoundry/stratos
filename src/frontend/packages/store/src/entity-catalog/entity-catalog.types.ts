@@ -8,6 +8,10 @@ import { StratosStatus } from '../../../core/src/shared/shared.types';
 import { GeneralEntityAppState } from '../app-state';
 import {
   ApiErrorMessageHandler,
+  EntitiesFetchHandler,
+  EntitiesInfoHandler,
+  EntityFetchHandler,
+  EntityInfoHandler,
   PreApiRequest,
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
@@ -71,6 +75,22 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
   readonly paginationConfig?: PaginationPageIteratorConfig;
   readonly tableConfig?: EntityTableConfig<any>;
+  /**
+   * Hook that will fire before an entity is emitted by an entity service. This could be used, for example, entity validation
+   */
+  readonly entityEmitHandler?: EntityInfoHandler;
+  /**
+   * Hook that will fire before an entity is emitted by an entity service. This could be used, for example, entity validation
+   */
+  readonly entitiesEmitHandler?: EntitiesInfoHandler;
+  /**
+   * Hook that can override the way an entity is fetched
+   */
+  readonly entityFetchHandler?: EntityFetchHandler;
+  /**
+   * Hook that can override the way entities are fetched
+   */
+  readonly entitiesFetchHandler?: EntitiesFetchHandler;
 }
 
 
@@ -92,11 +112,16 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly urlValidationRegexString?: string;
   readonly authTypes: EndpointAuthTypeConfig[];
   readonly subTypes?: Omit<IStratosEndpointDefinition, 'schema' | 'subTypes'>[];
-  // Allows an entity to manipulate the data that is returned from an api request before it makes it into the store.
-  // This will be used for all entities with this endpoint type.
+
+  /**
+   * Allows an entity to manipulate the data that is returned from an api request before it makes it into the store.
+   * This will be used for all entities with this endpoint type.
+   */
   readonly globalSuccessfulRequestDataMapper?: SuccessfulApiResponseDataMapper;
-  // Allows an entity to manipulate the request object before it's sent.
-  // This will be used for all entities with this endpoint type unless the entity has it's own prerequest config.
+  /**
+   * Allows an entity to manipulate the request object before it's sent.
+   * This will be used for all entities with this endpoint type unless the entity has it's own prerequest config.
+   */
   readonly globalPreRequest?: PreApiRequest;
   readonly globalPrePaginationRequest?: PrePaginationApiRequest;
   readonly globalErrorMessageHandler?: ApiErrorMessageHandler;

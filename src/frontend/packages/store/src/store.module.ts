@@ -4,7 +4,6 @@ import { EffectsModule } from '@ngrx/effects';
 
 import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
-import { AppEffects } from './effects/app.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { DashboardEffect } from './effects/dashboard.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
@@ -12,13 +11,11 @@ import { EndpointsEffect } from './effects/endpoint.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
-import { CfValidateEffects } from './effects/request.effects';
 import { RouterEffect } from './effects/router.effects';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { SnackBarEffects } from './effects/snackBar.effects';
 import { SystemEffects } from './effects/system.effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
-import { UpdateAppEffects } from './effects/update-app-effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
@@ -40,7 +37,6 @@ import { AppReducersModule } from './reducers.module';
       AuthEffect,
       UAASetupEffect,
       EndpointsEffect,
-      UpdateAppEffects,
       PaginationEffects,
       ActionHistoryEffect,
       RouterEffect,
@@ -48,11 +44,9 @@ import { AppReducersModule } from './reducers.module';
       SnackBarEffects,
       SetClientFilterEffect,
       MetricsEffect,
-      CfValidateEffects,
       UserProfileEffect,
       UsersRolesEffects,
       RecursiveDeleteEffect,
-      AppEffects,
       UserFavoritesEffect
     ])
   ]

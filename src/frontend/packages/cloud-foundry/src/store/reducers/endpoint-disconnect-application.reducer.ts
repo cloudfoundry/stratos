@@ -1,7 +1,11 @@
-import { StratosCFEntity } from '../../../cloud-foundry/src/cf-api.types';
-import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
-import { IRequestEntityTypeState } from '../app-state';
-import { APIResource } from '../types/api.types';
+import {
+  DISCONNECT_ENDPOINTS_SUCCESS,
+  DisconnectEndpoint,
+  UNREGISTER_ENDPOINTS_SUCCESS,
+} from '../../../../store/src/actions/endpoint.actions';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { StratosCFEntity } from '../../cf-api.types';
 
 // #3704 - These can be removed after this ticket is completed
 export function endpointDisconnectRemoveEntitiesReducer() {

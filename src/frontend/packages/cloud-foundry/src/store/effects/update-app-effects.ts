@@ -2,12 +2,10 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
-import { AppMetadataTypes } from '../../../cloud-foundry/src/actions/app-metadata.actions';
-import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../../cloud-foundry/src/actions/application.actions';
-import { cfEntityCatalog } from '../../../cloud-foundry/src/cf-entity-catalog';
-import { WrapperRequestActionSuccess } from '../types/request.types';
-
-
+import { WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
+import { AppMetadataTypes } from '../../actions/app-metadata.actions';
+import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
+import { cfEntityCatalog } from '../../cf-entity-catalog';
 
 @Injectable()
 export class UpdateAppEffects {
@@ -45,6 +43,7 @@ export class UpdateAppEffects {
             break;
         }
       });
+
       return actions;
     }));
 }

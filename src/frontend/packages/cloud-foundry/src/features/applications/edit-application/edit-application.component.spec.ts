@@ -9,11 +9,11 @@ import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-fact
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
+import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
 import {
   ApplicationServiceMock,
   generateTestApplicationServiceProvider,
-} from '../../../../../core/test-framework/application-service-helper';
-import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
+} from '../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { applicationEntityType } from '../../../cf-entity-types';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';

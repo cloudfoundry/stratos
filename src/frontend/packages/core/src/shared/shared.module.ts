@@ -21,7 +21,6 @@ import { CardProgressOverlayComponent } from './components/card-progress-overlay
 import { CardBooleanMetricComponent } from './components/cards/card-boolean-metric/card-boolean-metric.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
-import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
@@ -35,7 +34,6 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { EntitySummaryTitleComponent } from './components/entity-summary-title/entity-summary-title.component';
 import { EnumerateComponent } from './components/enumerate/enumerate.component';
-import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { FavoritesEntityListComponent } from './components/favorites-entity-list/favorites-entity-list.component';
 import { FavoritesGlobalListComponent } from './components/favorites-global-list/favorites-global-list.component';
 import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
@@ -128,7 +126,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     PageHeaderModule,
     RouterModule,
     SteppersModule,
-    CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
   ],
@@ -175,7 +172,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     AppChipsComponent,
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
-    EnvVarViewComponent,
     RingChartComponent,
     MetricsChartComponent,
     StratosTitleComponent,
@@ -271,7 +267,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     AppChipsComponent,
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
-    EnvVarViewComponent,
     MetricsChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
@@ -320,7 +315,6 @@ import { UserPermissionDirective } from './user-permission.directive';
   ],
   entryComponents: [
     DialogConfirmComponent,
-    EnvVarViewComponent,
     SnackBarReturnComponent,
     MarkdownPreviewComponent,
   ],

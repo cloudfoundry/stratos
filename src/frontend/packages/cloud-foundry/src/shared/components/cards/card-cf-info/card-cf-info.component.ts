@@ -1,12 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ICfV2Info } from 'frontend/packages/cloud-foundry/src/cf-api.types';
 import { APIResource, EntityInfo } from 'frontend/packages/store/src/types/api.types';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 import { fetchAutoscalerInfo } from '../../../../../../cf-autoscaler/src/core/autoscaler-helpers/autoscaler-available';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
+import { ICfV2Info } from '../../../../cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
   UserInviteConfigurationDialogComponent,

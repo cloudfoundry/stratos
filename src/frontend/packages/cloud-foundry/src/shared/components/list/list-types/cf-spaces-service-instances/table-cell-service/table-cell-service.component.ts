@@ -11,8 +11,6 @@ import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 
-// TODO: Move CF code to CF Module #3769
-
 @Component({
   selector: 'app-table-cell-service',
   templateUrl: './table-cell-service.component.html',

@@ -1,6 +1,7 @@
 import { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/api.selectors';
+import { metricEntityType } from '../../../core/src/base-entity-schemas';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 
 export const appAutoscalerInfoEntityType = 'autoscalerInfo';
@@ -73,6 +74,9 @@ entityCache[appAutoscalerAppMetricEntityType] = new AutoscalerEntitySchema(
   {},
   { idAttribute: getAPIResourceGuid }
 );
+
+const MetricSchema = new AutoscalerEntitySchema(metricEntityType);
+entityCache[metricEntityType] = MetricSchema;
 
 export function autoscalerEntityFactory(key: string): EntitySchema {
   const entity = entityCache[key];
