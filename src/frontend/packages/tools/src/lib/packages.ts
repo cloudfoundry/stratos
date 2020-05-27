@@ -139,7 +139,7 @@ export class Packages {
     }
 
     this.log('Packages:');
-    this.packages.forEach(pkg => this.log('  ' + pkg.name));
+    this.packages.forEach(pkg => this.log(` + ${pkg.name}`));
   }
 
   public addPackage(pkgName, isLocal = false) {

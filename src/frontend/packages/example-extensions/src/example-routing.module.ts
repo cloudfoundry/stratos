@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 
 const customRoutes: Routes = [{
   path: 'example',
@@ -18,4 +18,4 @@ const customRoutes: Routes = [{
   ],
   declarations: []
 })
-export class CustomRoutingModule { }
+export class ExampleRoutingModule { }

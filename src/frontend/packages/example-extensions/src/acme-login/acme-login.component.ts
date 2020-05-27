@@ -1,10 +1,7 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { Store } from '@ngrx/store';
-
-import { AppState } from '../../../../store/src/app-state';
-import { CustomizationService, CustomizationsMetadata } from '../../core/customizations.types';
-import { StratosLoginComponent } from '../../core/extension/extension-service';
-import { LoginPageComponent } from '../../features/login/login-page/login-page.component';
+import { CustomizationService, CustomizationsMetadata, LoginPageComponent, StratosLoginComponent } from '@stratosui/core';
+import { AppState } from '@stratosui/store';
 
 @StratosLoginComponent()
 @Component({

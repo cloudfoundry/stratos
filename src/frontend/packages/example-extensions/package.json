@@ -1,0 +1,8 @@
+{
+  "name": "@example/extensions",
+  "version": "0.0.1",
+  "stratos": {
+    "module": "ExampleModule",
+    "routingModule": "ExampleRoutingModule"
+  }
+}

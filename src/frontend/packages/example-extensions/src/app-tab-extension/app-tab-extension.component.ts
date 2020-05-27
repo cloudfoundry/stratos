@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
-import { StratosTab, StratosTabType } from '../../core/extension/extension-service';
+import { StratosTab, StratosTabType } from '@stratosui/core';
 
 @StratosTab({
   icon: 'extension',

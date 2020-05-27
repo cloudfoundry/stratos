@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { StratosTab, StratosTabType, StratosAction, StratosActionType } from '../../core/extension/extension-service';
+import { StratosAction, StratosActionType } from '@stratosui/core';
 
 @StratosAction({
   type: StratosActionType.Applications,
