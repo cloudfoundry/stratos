@@ -24,7 +24,7 @@ export class NoContentMessageComponent implements AfterViewInit {
 
   @Input() mode: string;
 
-  @ViewChild('toolBarLinkElement', { static: false }) toolBarLinkElement: ElementRef;
+  @ViewChild('toolBarLinkElement') toolBarLinkElement: ElementRef;
 
   constructor(private renderer: Renderer2) { }
 

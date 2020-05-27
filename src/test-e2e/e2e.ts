@@ -204,6 +204,10 @@ export class E2ESetup {
   private doSetup() {
     const p = promise.fulfilled(true);
 
+    // Extend the timeout for setup
+    const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
+
     // Create the sessions neeed
     if (this.needAdminSession) {
       p.then(() => this.createSession(this.adminReq, ConsoleUserType.admin));
@@ -216,6 +220,9 @@ export class E2ESetup {
     this.setupOps.forEach(op => {
       p.then(() => protractor.promise.controlFlow().execute(() => op.bind(this)()));
     });
+
+    // Reset timeout
+    p.then(() => protractor.promise.controlFlow().execute(() => jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout));
 
     return promise;
   }

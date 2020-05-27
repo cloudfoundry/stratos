@@ -103,7 +103,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
       map(route => {
         return {
           url: route && route.state ? route.state.url : defaultBackLink,
-          queryParams: route && route.state.queryParams ? route.state.queryParams : {}
+          queryParams: route && route.state && route.state.queryParams ? route.state.queryParams : {}
         };
       })
     );

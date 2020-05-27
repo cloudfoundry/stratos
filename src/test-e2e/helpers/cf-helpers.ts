@@ -52,8 +52,8 @@ export class CFHelpers {
     return this.fetchUsers(cnsiGuid).then(users => {
       const testUser = this.findUser(users, endpoint.creds.nonAdmin.username);
       const testAdminUser = this.findUser(users, endpoint.creds.admin.username);
-      expect(testUser).toBeDefined();
-      expect(testAdminUser).toBeDefined();
+      expect(testUser).toBeDefined('Could not find test user');
+      expect(testAdminUser).toBeDefined('Could not find test admin user');
       CFHelpers.cachedNonAdminGuid = testUser.metadata.guid;
       CFHelpers.cachedAdminGuid = testAdminUser.metadata.guid;
     });

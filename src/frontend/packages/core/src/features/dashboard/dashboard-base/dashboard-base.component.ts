@@ -1,7 +1,7 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
-import { MatDrawer } from '@angular/material';
+import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -47,9 +47,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
   sideNaveMode = 'side';
 
-  @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer: ViewContainerRef;
+  @ViewChild('previewPanelContainer', { read: ViewContainerRef }) previewPanelContainer: ViewContainerRef;
 
-  @ViewChild('content', { static: false }) public content;
+  @ViewChild('content') public content;
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -96,7 +96,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       .subscribe(isMobile => isMobile ? this.store.dispatch(new EnableMobileNav()) : this.store.dispatch(new DisableMobileNav()));
   }
 
-  @ViewChild('sidenav', { static: false }) set sidenav(drawer: MatDrawer) {
+  @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
     this.drawer = drawer;
     if (!this.closeSub) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatCheckboxChange } from '@angular/material';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subject } from 'rxjs';
 import { first, map } from 'rxjs/operators';
