@@ -17,9 +17,6 @@ export class ExtensionsHandler {
     const dir = path.dirname(options.main);
     const overrideFile = path.resolve(path.join(dir, './_custom-import.module.ts'));
 
-    // console.log('-------');
-    // console.log(overrideFile);
-
     fs.writeFileSync(overrideFile, '// This file is auto-generated - DO NOT EDIT\n\n');
     fs.appendFileSync(overrideFile, 'import { NgModule } from \'@angular/core\';\n');
 
