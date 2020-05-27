@@ -65,6 +65,9 @@ const isDirectory = source => lstatSync(source).isDirectory();
 const getDirectories = source =>
   readdirSync(source).map(name => join(source, name)).filter(isDirectory);
 
+// Default theme to use
+export const DEFAULT_THEME = '@stratosui/theme';
+
 export class Packages {
 
   public packages: PackageInfo[] = [];
@@ -72,9 +75,11 @@ export class Packages {
 
   public pkgReadMap: Map<string, PackageInfo> = new Map<string, PackageInfo>();
 
+  public theme: PackageInfo;
+
   public logger: Logger;
 
-  constructor(public config: StratosConfig,public nodeModulesFolder: string, public localPackagesFolder) { }
+  constructor(public config: StratosConfig, public nodeModulesFolder: string, public localPackagesFolder) { }
 
   public setLogger(logger: Logger) {
     this.logger = logger;
@@ -86,6 +91,7 @@ export class Packages {
     }
   }
 
+  // Look for packages
   public scan(packageJson: any) {
     this.pkgReadMap = new Map<string, PackageInfo>();
 
@@ -111,6 +117,29 @@ export class Packages {
 
       this.addPackage(pkgDir, true);
     });
+
+    // Figure out the theme
+    if (!this.config.stratosConfig.theme) {
+      // Theme was not set, so find the first theme that is not the default theme
+      const theme = this.packages.find(pkg => pkg.theme && pkg.name !== DEFAULT_THEME)
+      if (!theme) {
+        this.theme = this.packageMap[DEFAULT_THEME];
+      } else {
+        this.theme = theme;
+      }
+    } else {
+      this.theme = this.packageMap[this.config.stratosConfig.theme];
+    }
+
+    // Ensure that the theme is last in the list, so that its resources are copied last
+    const index = this.packages.findIndex(pkg => pkg.name === this.theme.name);
+    if (index > -1) {
+      const items = this.packages.splice(index, 1);
+      this.packages.push(items[0]);
+    }
+
+    this.log('Packages:');
+    this.packages.forEach(pkg => this.log('  ' + pkg.name));
   }
 
   public addPackage(pkgName, isLocal = false) {
@@ -175,7 +204,9 @@ export class Packages {
   private includePackage(pkg: PackageJson): boolean {
 
     // Must be a stratos package
-    if (pkg.name)
+    if (!pkg.stratos) {
+      return false;
+    }
 
     // If we don't have any explicit includes, then include it
     if (!this.config.stratosConfig.extensions) {

@@ -50,13 +50,14 @@ export class SassHandler {
         };
       } else if (url === '~@stratosui/theme') {
         // console.log('================================================');
-        // console.log(config.theme);
-        // console.log('Got theme reference - using theme: ' + config.resolvePackage(config.theme, '_index.scss'));
+        // console.log('Theme: ' + config.getTheme().name);
+        // console.log('Got theme reference - using theme: ' + config.resolvePackage(config.getTheme().name, '_index.scss'));
         // console.log('================================================');
         return {
-          file: config.resolvePackage(config.theme, '_index.scss')
+          file: config.resolvePackage(config.getTheme().name, '_index.scss')
         };
       } else if (url.indexOf('~') === 0) {
+        // console.log('Looking for ' + url);
         // See if we have an override
         const pkg = url.substr(1);
         const pkgParts = pkg.split('/');
@@ -71,7 +72,7 @@ export class SassHandler {
         // See if we can resolve the package name
         const knownPath = config.getKnownPackagePath(pkgName);
         if (knownPath) {
-          // console.log('GOT OVERRIDE: ' + config.resolve[pkgName]);
+          // console.log('GOT OVERRIDE: ' + knownPath + '/_' + pkgPath + '.scss');
           // Should be a directory
           return {
             file: knownPath + '/_' + pkgPath + '.scss'
@@ -79,7 +80,7 @@ export class SassHandler {
         }
       }
 
-      // console.log('Leaving as is: ' + path.relative(resourcePath, url));
+      // console.log('Leaving as is: ' + url);
 
       // We could not resolve, so leave to the default resolver
       return null;

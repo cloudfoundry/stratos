@@ -23,28 +23,37 @@ export class IndexHtmlHandler {
     src = src.replace(/@@stratos_build_date@@/g, new Date().toString() );
 
     // Loading view (provided by theme)
-    if (this.config.themePackageJson.stratos && this.config.themePackageJson.stratos.theme) {
-      const css = this.config.themePackageJson.stratos.theme.loadingCss;
-      const html = this.config.themePackageJson.stratos.theme.loadingHtml;
 
-      if (css || html) {
-        console.log('Applying custom loading screen/theme to the main index.html page');
+    let loadingTheme = this.config.getTheme();
+    const hasTheme = loadingTheme.stratos && loadingTheme.theme;
+
+    // Custom loading indicator should default to the loading screen in the default theme, if custom theme does not have one
+    if (!hasTheme || hasTheme && !loadingTheme.json.stratos.theme.loadingCss) {
+      loadingTheme = this.config.getDefaultTheme();
+    }
+
+    const themePackageJson = loadingTheme.json;
+    const themePackageFolder = loadingTheme.dir;
+    const css = themePackageJson.stratos.theme.loadingCss;
+    const html = themePackageJson.stratos.theme.loadingHtml;
+
+    if (css || html) {
+      console.log('Applying custom loading screen/theme to the main index.html page');
+    }
+
+    if (css) {
+      const cssFile = path.resolve(themePackageFolder, css);
+      if (fs.existsSync(cssFile)) {
+        const loadingCss = fs.readFileSync(cssFile, 'utf8');
+        src = src.replace(/\/\*\* @@LOADING_CSS@@ \*\*\//g, loadingCss);
       }
+    }
 
-      if (css) {
-        const cssFile = path.resolve(this.config.themePackageFolder, css);
-        if (fs.existsSync(cssFile)) {
-          const loadingCss = fs.readFileSync(cssFile, 'utf8');
-          src = src.replace(/\/\*\* @@LOADING_CSS@@ \*\*\//g, loadingCss);
-        }
-      }
-
-      if (html) {
-        const htmlFile = path.resolve(this.config.themePackageFolder, html);
-        if (fs.existsSync(htmlFile)) {
-          const loadingHtml = fs.readFileSync(htmlFile, 'utf8');
-          src = src.replace(/<!-- @@LOADING_HTML@@ -->/g, loadingHtml);
-        }
+    if (html) {
+      const htmlFile = path.resolve(themePackageFolder, html);
+      if (fs.existsSync(htmlFile)) {
+        const loadingHtml = fs.readFileSync(htmlFile, 'utf8');
+        src = src.replace(/<!-- @@LOADING_HTML@@ -->/g, loadingHtml);
       }
     }
     return src;

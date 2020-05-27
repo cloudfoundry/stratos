@@ -11,7 +11,7 @@ STRATOS="`cd "${DIR}/../../..";pwd`"
 CUSTOM="${STRATOS}/examples/custom-src"
 TEMPLATES=${DIR}/templates
 
-STRATOS_YML=${STRATOS}/stratos.yml
+STRATOS_YML=${STRATOS}/stratos.yaml
 PKGS=${STRATOS}/src/frontend/packages
 
 echo $CUSTOM

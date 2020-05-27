@@ -4,13 +4,7 @@ import * as path from 'path';
 
 import { GitMetadata } from './git.metadata';
 import { Logger } from './log';
-import { AssetConfig, ExtensionMetadata, Packages, ThemingConfig } from './packages';
-
-// Default theme to use
-// Assests are always copied from this theme
-// Then, if a different theme is being used, its assets
-// are overlayed on top
-const DEFAULT_THEME = '@stratosui/theme';
+import { AssetConfig, DEFAULT_THEME, ExtensionMetadata, PackageInfo, Packages, ThemingConfig } from './packages';
 
 /**
  * Represents the startos.yaml file or the defaults if not found
@@ -18,9 +12,6 @@ const DEFAULT_THEME = '@stratosui/theme';
  */
 
 export class StratosConfig implements Logger {
-
-  // Theme to use - defualts to this value:
-  public theme = DEFAULT_THEME;
 
   // File paths to a few files we need access to
   public packageJsonFile: string;
@@ -32,10 +23,6 @@ export class StratosConfig implements Logger {
 
   // package.json contents
   public packageJson: any;
-
-  // theme package.json contents;
-  public themePackageJson: any;
-  public themePackageFolder: string;
 
   // newProjectRoot from the angular.json file
   // Used as the directory to check for local packages
@@ -53,6 +40,7 @@ export class StratosConfig implements Logger {
   private loggingEnabled = true;
 
   private packages: Packages;
+
 
   constructor(dir: string, options?: any, loggingEnabled = true) {
     this.angularJsonFile = this.findFileOrFolderInChain(dir, 'angular.json');
@@ -78,9 +66,6 @@ export class StratosConfig implements Logger {
       }
     }
 
-    // Set theme to use, or use default
-    this.theme = this.stratosConfig.theme || DEFAULT_THEME;
-
     const mainDir = options ? path.dirname(options.main) : dir;
 
     this.packageJsonFile = this.findFileOrFolderInChain(mainDir, 'package.json');
@@ -105,6 +90,7 @@ export class StratosConfig implements Logger {
     this.packages.setLogger(this);
     this.packages.scan(this.packageJson);
 
+    this.log('Using theme ' + this.packages.theme.name);
 
     // Always copy the assets fromt the default theme first
     // If a custom theme is then used, it does not have to provide all of the images
@@ -128,21 +114,20 @@ export class StratosConfig implements Logger {
       this.log('Building with these extensions:');
       extensions.forEach(ext => console.log( ' + ' + ext));
     }
-
-    // Get the package info for the theme
-    const themePkgFile = this.resolvePackage(this.theme, 'package.json');
-    if (themePkgFile && fs.existsSync(themePkgFile)) {
-      this.themePackageFolder = path.dirname(themePkgFile);
-      this.themePackageJson = JSON.parse(fs.readFileSync(themePkgFile, 'utf8'));
-    } else {
-      this.log('Could not find package.json for the theme');
-    }
   }
 
   public log(msg: any) {
     if (this.loggingEnabled) {
       console.log(msg);
     }
+  }
+
+  public getTheme(): PackageInfo {
+    return this.packages.theme;
+  }
+
+  public getDefaultTheme(): PackageInfo {
+    return this.packages.packageMap[DEFAULT_THEME];
   }
 
   public getExtensions(): ExtensionMetadata[] {
@@ -173,7 +158,7 @@ export class StratosConfig implements Logger {
   }
 
   public getKnownPackagePath(pkg: string): string {
-    const p = this.packages.packages[pkg];
+    const p = this.packages.packageMap[pkg];
     if (p) {
       let packagePath = p.dir;
       if (!path.isAbsolute(packagePath)) {

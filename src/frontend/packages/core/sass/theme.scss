@@ -9,6 +9,14 @@ $stratos-dark-theme-supported: false !default;
 // Themes - stratos-theme() function must be supplied by the theme
 $stratos-themes: stratos-theme();
 
+// stratos-theme() can return a single theme rather than a map of default and dark themes
+@if not map-has-key($stratos-themes, 'default') {
+  $tmp: $stratos-themes;
+  $stratos-themes: (
+    default: $tmp
+  )
+}
+
 // Import any custom scss that the theme defines
 @import '~@stratosui/theme/extensions';
 
