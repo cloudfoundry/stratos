@@ -1,9 +1,10 @@
 import { compose } from '@ngrx/store';
 
-import { PermissionValues, ScopeStrings } from '../../../core/src/core/permissions/current-user-permissions.config';
+import { PermissionValues } from '../../../core/src/core/permissions/current-user-permissions.config';
 import { StratosScopeStrings } from '../../../core/src/core/permissions/stratos-user-permissions.checker';
 import { CurrentUserRolesAppState } from '../app-state';
 import { ICurrentUserRolesState, IStratosRolesState } from '../types/current-user-roles.types';
+import { UserScopeStrings } from '../types/endpoint.types';
 
 
 export const selectCurrentUserRolesState = (state: CurrentUserRolesAppState) => state.currentUserRoles;
@@ -15,7 +16,7 @@ const selectCurrentUserStratosRoles = (role: PermissionValues) => (state: Omit<I
   return state[role] || false;
 };
 
-export const selectCurrentUserGlobalHasScopes = (scope: ScopeStrings) => (scopes: ScopeStrings[]) => scopes.includes(scope);
+export const selectCurrentUserGlobalHasScopes = (scope: UserScopeStrings) => (scopes: UserScopeStrings[]) => scopes.includes(scope);
 const selectCurrentUserStratosScopesState = (state: IStratosRolesState) => state.scopes;
 
 

@@ -63,12 +63,14 @@ export interface EndpointModel {
 
 export const SystemSharedUserGuid = '00000000-1111-2222-3333-444444444444';
 
+export type UserScopeStrings = string | StratosScopeStrings;
+
 // Metadata for the user connected to an endpoint
 export interface EndpointUser {
   guid: string;
   name: string;
   admin: boolean;
-  scopes?: StratosScopeStrings[];
+  scopes?: UserScopeStrings[];
 }
 
 export interface EndpointState {

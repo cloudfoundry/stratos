@@ -5,6 +5,7 @@ import { TabNavService } from '../../../../../core/tab-nav.service';
 import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { ApplicationWallComponent } from './application-wall.component';
 
 describe('ApplicationWallComponent', () => {
@@ -15,7 +16,8 @@ describe('ApplicationWallComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         ApplicationWallComponent,
-        CfEndpointsMissingComponent
+        CfEndpointsMissingComponent,
+        CfUserPermissionDirective
       ],
       imports: generateCfBaseTestModules(),
       providers: [

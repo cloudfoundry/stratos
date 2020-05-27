@@ -1,4 +1,4 @@
-import { StratosScopeStrings } from '../../../core/src/core/permissions/stratos-user-permissions.checker';
+import { UserScopeStrings } from './endpoint.types';
 
 export interface RolesRequestState {
   initialised: boolean;
@@ -16,7 +16,7 @@ export function getDefaultRolesRequestState(): RolesRequestState {
 
 export interface IStratosRolesState {
   isAdmin: boolean;
-  scopes: StratosScopeStrings[];
+  scopes: UserScopeStrings[];
 }
 
 export interface ICurrentUserRolesState<T = any> {

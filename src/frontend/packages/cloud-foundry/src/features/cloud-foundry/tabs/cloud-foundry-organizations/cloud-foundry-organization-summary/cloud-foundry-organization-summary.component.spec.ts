@@ -17,6 +17,7 @@ import {
 import {
   CompactAppCardComponent,
 } from '../../../../../shared/components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
+import { CfUserPermissionDirective } from '../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CloudFoundryOrganizationSummaryComponent } from './cloud-foundry-organization-summary.component';
 
@@ -30,7 +31,8 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
         CloudFoundryOrganizationSummaryComponent,
         CardCfOrgUserDetailsComponent,
         CardCfRecentAppsComponent,
-        CompactAppCardComponent
+        CompactAppCardComponent,
+        CfUserPermissionDirective
       ],
       imports: generateCfBaseTestModules(),
       providers: [
