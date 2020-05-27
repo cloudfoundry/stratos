@@ -24,8 +24,6 @@ import { IApp } from '../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { createEntityRelationKey } from '../../../../../entity-relations/entity-relations.types';
 
-// TODO: Move file to CF package (#3769)
-
 export interface CfCellApp {
   metric: IMetricApplication;
   appGuid: string;

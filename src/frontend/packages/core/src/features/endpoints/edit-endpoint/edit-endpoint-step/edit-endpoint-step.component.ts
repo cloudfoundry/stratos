@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, pairwise } from 'rxjs/operators';
+import { filter, first, map, pairwise, switchMap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
@@ -124,29 +124,36 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   }
 
   onNext: StepOnNextFunction = () => {
-    const action = new UpdateEndpoint(
-      this.endpointID,
-      this.editEndpoint.value.name,
-      this.editEndpoint.value.skipSSL,
-      this.editEndpoint.value.setClientInfo,
-      this.editEndpoint.value.clientID,
-      this.editEndpoint.value.clientSecret,
-      this.editEndpoint.value.allowSSO,
-    );
+    return this.endpoint$.pipe(
+      first(),
+      switchMap(endpoint => {
+        const action = new UpdateEndpoint(
+          endpoint.cnsi_type,
+          this.endpointID,
+          this.editEndpoint.value.name,
+          this.editEndpoint.value.skipSSL,
+          this.editEndpoint.value.setClientInfo,
+          this.editEndpoint.value.clientID,
+          this.editEndpoint.value.clientSecret,
+          this.editEndpoint.value.allowSSO,
+        );
 
-    this.store.dispatch(action);
-    return this.store.select(selectUpdateInfo('stratosEndpoint', this.endpointID, 'updating')).pipe(
-      pairwise(),
-      filter(([oldV, newV]) => oldV.busy && !newV.busy),
-      map(([, newV]) => newV),
-      map(o => {
-        return {
-          success: !o.error,
-          message: o.message,
-          redirect: !o.error
-        };
+        this.store.dispatch(action);
+
+        return this.store.select(selectUpdateInfo('stratosEndpoint', this.endpointID, 'updating')).pipe(
+          pairwise(),
+          filter(([oldV, newV]) => oldV.busy && !newV.busy),
+          map(([, newV]) => newV),
+          map(o => {
+            return {
+              success: !o.error,
+              message: o.message,
+              redirect: !o.error
+            };
+          })
+        )
       })
-    );
+    )
   }
 
   ngOnDestroy(): void {

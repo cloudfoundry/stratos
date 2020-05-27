@@ -14,7 +14,7 @@ plugins:
   markdownlint:
     enabled: true
   scss-lint:
-    enabled: true
+    enabled: false
 exclude_patterns:
 - "config/"
 - "db/"

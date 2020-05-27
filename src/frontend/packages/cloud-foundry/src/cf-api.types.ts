@@ -2,8 +2,6 @@ import { APIResource } from '../../store/src/types/api.types';
 import { IService, IServiceBinding } from './cf-api-svc.types';
 import { CfUser } from './store/types/user.types';
 
-// TODO: Move file to CF package (#3769)
-
 export interface StratosCFEntity {
   cfGuid: string;
 }
@@ -366,4 +364,21 @@ export interface CfEvent {
   metadata: { [name: string]: any };
   space_guid?: string;
   organization_guid?: string;
+}
+
+export enum CFFeatureFlagTypes {
+  user_org_creation = 'user_org_creation',
+  private_domain_creation = 'private_domain_creation',
+  app_bits_upload = 'app_bits_upload',
+  app_scaling = 'app_scaling',
+  route_creation = 'route_creation',
+  service_instance_creation = 'service_instance_creation',
+  diego_docker = 'diego_docker',
+  set_roles_by_username = 'set_roles_by_username',
+  unset_roles_by_username = 'unset_roles_by_username',
+  task_creation = 'task_creation',
+  env_var_visibility = 'env_var_visibility',
+  space_scoped_private_broker_creation = 'space_scoped_private_broker_creation',
+  space_developer_env_var_visibility = 'space_developer_env_var_visibility',
+  service_instance_sharing = 'service_instance_sharing',
 }

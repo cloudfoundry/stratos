@@ -7,7 +7,6 @@ import { filter, first, map, switchMap } from 'rxjs/operators';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { EnvVarViewComponent } from '../../../../../../../../core/src/shared/components/env-var-view/env-var-view.component';
 import {
   MetaCardMenuItem,
 } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
@@ -33,6 +32,7 @@ import {
 } from '../../../../../../features/service-catalog/services-helper';
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 
 
 interface EnvVarData {

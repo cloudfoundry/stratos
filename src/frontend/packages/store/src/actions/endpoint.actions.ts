@@ -1,6 +1,5 @@
 import { Action } from '@ngrx/store';
 
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { endpointSchemaKey } from '../helpers/entity-factory';
@@ -45,7 +44,7 @@ export class EndpointActionComplete implements Action {
 
 export class EndpointAction implements Action {
   type: string;
-  endpointType: EndpointType = CF_ENDPOINT_TYPE;
+  endpointType: EndpointType;
 }
 
 // Different Auth Type support for connecting to Endpoints
@@ -150,6 +149,7 @@ export class UpdateEndpoint extends EndpointAction {
   type = UPDATE_ENDPOINT;
 
   constructor(
+    public endpointType: EndpointType,
     public id: string,
     public name: string,
     public skipSSL: boolean,

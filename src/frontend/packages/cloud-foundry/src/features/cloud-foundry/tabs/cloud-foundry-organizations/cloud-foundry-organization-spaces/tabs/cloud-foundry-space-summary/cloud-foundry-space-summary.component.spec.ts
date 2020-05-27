@@ -2,12 +2,10 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../../../../core/tab-nav.service';
 import {
-  CloudFoundrySpaceServiceMock,
-} from '../../../../../../../../../core/test-framework/cloud-foundry-space.service.mock';
-import {
   generateActiveRouteCfOrgSpaceMock,
   generateCfBaseTestModules,
 } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundrySpaceServiceMock } from '../../../../../../../../test-framework/cloud-foundry-space.service.mock';
 import {
   CardCfRecentAppsComponent,
 } from '../../../../../../../shared/components/cards/card-cf-recent-apps/card-cf-recent-apps.component';

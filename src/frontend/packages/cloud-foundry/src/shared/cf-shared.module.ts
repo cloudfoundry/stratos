@@ -53,6 +53,7 @@ import { CloudFoundryEventsListComponent } from './components/cloud-foundry-even
 import {
   CreateApplicationStep1Component,
 } from './components/create-application/create-application-step1/create-application-step1.component';
+import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import {
   TableCellCfCellComponent,
@@ -320,6 +321,7 @@ const cfListCards: Type<CardCell<any>>[] = [
     AppNameUniqueDirective,
     ApplicationInstanceChartComponent,
     GithubCommitAuthorComponent,
+    EnvVarViewComponent
   ],
   exports: [
     ServiceIconComponent,
@@ -361,12 +363,13 @@ const cfListCards: Type<CardCell<any>>[] = [
     AppNameUniqueDirective,
     ApplicationInstanceChartComponent,
     GithubCommitAuthorComponent,
+    EnvVarViewComponent
   ],
   entryComponents: [
     CfEndpointDetailsComponent,
     NoServicePlansComponent,
     EventMetadataComponent,
-
+    EnvVarViewComponent,
     ...cfListTableCells,
     ...cfListCards
   ],

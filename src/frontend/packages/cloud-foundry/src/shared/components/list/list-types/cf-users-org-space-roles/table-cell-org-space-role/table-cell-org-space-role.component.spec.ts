@@ -3,11 +3,11 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { CfUserServiceTestProvider } from '../../../../../../../../core/test-framework/user-service-helper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CfUserServiceTestProvider } from '../../../../../../../test-framework/user-service-helper';
 import { ISpace } from '../../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';

@@ -15,10 +15,10 @@ import {
 import {
   RunningInstancesComponent,
 } from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
+import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../core/tab-nav.service';
-import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-default/card-autoscaler-default.component';
 import { AutoscalerTabExtensionComponent } from './autoscaler-tab-extension.component';
