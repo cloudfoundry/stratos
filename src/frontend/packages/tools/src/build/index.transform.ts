@@ -37,9 +37,9 @@ export class IndexHtmlHandler {
     const css = themePackageJson.stratos.theme.loadingCss;
     const html = themePackageJson.stratos.theme.loadingHtml;
 
-    if (css || html) {
-      console.log('Applying custom loading screen/theme to the main index.html page');
-    }
+    // if (css || html) {
+    //   console.log('Applying custom loading screen/theme to the main index.html page');
+    // }
 
     if (css) {
       const cssFile = path.resolve(themePackageFolder, css);

@@ -157,19 +157,6 @@ export class StratosConfig implements Logger {
     return path.dirname(this.nodeModulesFile);
   }
 
-  public getKnownPackagePath(pkg: string): string {
-    const p = this.packages.packageMap[pkg];
-    if (p) {
-      let packagePath = p.dir;
-      if (!path.isAbsolute(packagePath)) {
-        packagePath = path.resolve(packagePath);
-      }
-      return packagePath;
-    }
-
-    return null;
-  }
-
   // Go up the directory hierarchy and look for the named file or folder
   private findFileOrFolderInChain(dir: string, name: string): string {
     const parent = path.dirname(dir);
@@ -185,8 +172,22 @@ export class StratosConfig implements Logger {
     return this.findFileOrFolderInChain(parent, name);
   }
 
+  // Resolve a known package or return null if not a known package
+  public resolveKnownPackage(pkg: string): string {
+    const p = this.packages.packageMap[pkg];
+    if (p) {
+      let packagePath = p.dir;
+      if (!path.isAbsolute(packagePath)) {
+        packagePath = path.resolve(packagePath);
+      }
+      return packagePath;
+    }
+
+    return null;
+  }
+
   // Resolve a package to a directory to a file path, if name is given
-  public resolvePackage(pkg, name) {
+  public resolvePackage(pkg: string, name?: string) {
     let packagePath;
     const pkgInfo = this.packages.packageMap[pkg];
     if (pkgInfo) {
