@@ -5,14 +5,14 @@ import { BaseTestModules } from '../../../../../core/test-framework/core-test.he
 
 
 @Component({
-  template: `<input type="text" appUserPermission>`
+  template: `<input type="text" appCfUserPermission>`
 })
 class TestUserPermissionComponent {
 }
 
 class MockTemplateRef { }
 
-describe('UserPermissionDirective', () => {
+describe('CfUserPermissionDirective', () => {
   let component: TestUserPermissionComponent;
   let fixture: ComponentFixture<TestUserPermissionComponent>;
   beforeEach(() => {

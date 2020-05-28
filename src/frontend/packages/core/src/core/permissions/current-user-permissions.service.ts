@@ -30,7 +30,6 @@ export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers'
 
 @Injectable()
 export class CurrentUserPermissionsService {
-  // private checker: StratosUserPermissionsChecker;
   private allCheckers: ICurrentUserPermissionsChecker[];
   constructor(
     private store: Store<InternalAppState>,
