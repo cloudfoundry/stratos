@@ -11,7 +11,7 @@ export interface SessionUser {
   admin: boolean;
   guid: string;
   name: string;
-  scopes: StratosScopeStrings[]; // TODO: RC test
+  scopes: StratosScopeStrings[];
 }
 export interface PluginConfig {
   userInvitationsEnabled: 'true' | 'false';

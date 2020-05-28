@@ -33,7 +33,7 @@ export function successEntityHandler(
     if (Array.isArray(action.clearPaginationEntityKeys)) {
       // If clearPaginationEntityKeys is an array then clear the pagination sections regardless of removeEntityOnDelete
       action.clearPaginationEntityKeys.forEach(key => {
-        const entityConfig = entityCatalog.getEntity(action.endpointType, key); // TODO: RC test
+        const entityConfig = entityCatalog.getEntity(action.endpointType, key);
         actionDispatcher(new ClearPaginationOfType(entityConfig.getSchema()));
       });
     }

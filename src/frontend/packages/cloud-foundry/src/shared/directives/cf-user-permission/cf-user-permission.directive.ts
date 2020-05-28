@@ -8,7 +8,6 @@ import { AppState } from '../../../../../store/src/app-state';
 import { waitForCFPermissions } from '../../../features/cloud-foundry/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
-// TODO: RC test
 @Directive({
   selector: '[appCfUserPermission]'
 })

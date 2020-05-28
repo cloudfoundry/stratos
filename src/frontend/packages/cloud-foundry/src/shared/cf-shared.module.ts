@@ -381,7 +381,7 @@ const cfListCards: Type<CardCell<any>>[] = [
     ApplicationStateService,
     GitSCMService,
     CloudFoundryUserProvidedServicesService,
-    ...cfCurrentUserPermissionsService // TODO: RC Review: bring in via endpoint, force checkers to supply type (to fetch via endpoint)
+    ...cfCurrentUserPermissionsService
   ]
 })
 export class CloudFoundrySharedModule { }
