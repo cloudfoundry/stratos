@@ -20,9 +20,9 @@ helm repo add stratos https://cloudfoundry.github.io/stratos
 Check the repository was successfully added by searching for the `console`, for example:
 
 ```
-helm search console
+helm search repo console
 NAME               	CHART VERSION   APP VERSION	DESCRIPTION                                  
-stratos/console    	3.1.0           3.1.0      	A Helm chart for deploying Stratos UI Console
+stratos/console    	3.2.0           3.2.0      	A Helm chart for deploying Stratos UI Console
 ```
 
 > Note: Version numbers will depend on the version of Stratos available from the Helm repository
@@ -283,10 +283,7 @@ UAA configuration can be specified by providing the following configuration.
 Create a yaml file with the content below and and update according to your environment and save to a file called `uaa-config.yaml`.
 ```
 uaa:
-  url: https://uaa.cf-dev.io:2793
-  protocol: https://
-  port: 2793
-  host: uaa.cf-dev.io
+  endpoint: https://uaa.cf-dev.io:2793
   consoleClient:  cf
   consoleClientSecret: 
   consoleAdminIdentifier: cloud_controller.admin 
