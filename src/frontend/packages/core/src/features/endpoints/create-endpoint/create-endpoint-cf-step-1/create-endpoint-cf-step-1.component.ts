@@ -44,11 +44,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   @ViewChild('nameField', { static: true }) nameField: NgModel;
   @ViewChild('urlField', { static: true }) urlField: NgModel;
   @ViewChild('skipSllField', { static: true }) skipSllField: NgModel;
-  @ViewChild('ssoAllowedField', { static: false }) ssoAllowedField: NgModel;
+  @ViewChild('ssoAllowedField') ssoAllowedField: NgModel;
 
   // Optional Client ID and Client Secret
-  @ViewChild('clientIDField', { static: false }) clientIDField: NgModel;
-  @ViewChild('clientSecretField', { static: false }) clientSecretField: NgModel;
+  @ViewChild('clientIDField') clientIDField: NgModel;
+  @ViewChild('clientSecretField') clientSecretField: NgModel;
 
   urlValidation: string;
 

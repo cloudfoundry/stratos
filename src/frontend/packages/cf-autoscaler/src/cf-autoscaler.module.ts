@@ -14,6 +14,7 @@ import { AutoscalerModule } from './core/autoscaler.module';
 import { AutoscalerTabExtensionComponent } from './features/autoscaler-tab-extension/autoscaler-tab-extension.component';
 import { generateASEntities } from './store/autoscaler-entity-generator';
 import { AutoscalerEffects } from './store/autoscaler.effects';
+import { ExtensionService } from 'frontend/packages/core/src/core/extension/extension-service';
 
 // FIXME Work out why we need this and remove it.
 const customRoutes: Routes = [
@@ -44,6 +45,9 @@ const customRoutes: Routes = [
     EntityCatalogModule.forFeature(generateASEntities),
     EffectsModule.forFeature([
       AutoscalerEffects
+    ]),
+    ExtensionService.declare([
+      AutoscalerTabExtensionComponent,
     ])
   ],
   declarations: [

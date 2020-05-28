@@ -1,4 +1,4 @@
-import { browser, promise } from 'protractor';
+import { browser, promise, ElementArrayFinder, Locator } from 'protractor';
 import { ElementFinder, protractor } from 'protractor/built';
 
 import { E2EHelpers } from '../helpers/e2e-helpers';
@@ -10,8 +10,14 @@ const until = protractor.ExpectedConditions;
  */
 export class Component {
 
+  public static waitUntilShown(elm, failMsg?: string): promise.Promise<void> {
+    const comp = new Component(elm);
+    return comp.waitUntilShown(failMsg);
+  }
+
   public static waitUntilNotShown(elm, failMsg?: string): promise.Promise<void> {
-    return browser.wait(until.invisibilityOf(elm), 5000, failMsg);
+    const comp = new Component(elm);
+    return comp.waitUntilNotShown(failMsg);
   }
 
   public static scrollIntoView(elm: ElementFinder): promise.Promise<void> {
@@ -19,6 +25,10 @@ export class Component {
   }
 
   constructor(protected locator: ElementFinder) { }
+
+  all(allLocator: Locator): ElementArrayFinder {
+    return this.locator.all(allLocator);
+  }
 
   getComponent(): ElementFinder {
     return this.locator;
