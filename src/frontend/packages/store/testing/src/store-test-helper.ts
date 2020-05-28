@@ -250,7 +250,7 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
         '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
           fetching: false,
           updating: {
-            _root_: {
+            [rootUpdatingKey]: {
               busy: false,
               error: false,
               message: ''
