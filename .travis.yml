@@ -20,6 +20,7 @@ branches:
     - master
     - v2-master
     - e2e-tests
+    - v3.2.1
 cache:
   directories:
     - "$HOME/.npm"
