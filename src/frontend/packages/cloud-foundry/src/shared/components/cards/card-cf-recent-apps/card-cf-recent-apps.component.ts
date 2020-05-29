@@ -8,8 +8,8 @@ import {
   appDataSort,
   CloudFoundryEndpointService,
 } from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { IApp } from '../../../../../../core/src/core/cf-api.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IApp } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 
 const RECENT_ITEMS_COUNT = 10;

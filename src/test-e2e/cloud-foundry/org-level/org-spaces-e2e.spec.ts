@@ -1,6 +1,6 @@
 import { browser, promise } from 'protractor';
 
-import { IOrganization } from '../../../frontend/packages/core/src/core/cf-api.types';
+import { IOrganization } from '../../../frontend/packages/cloud-foundry/src/cf-api.types';
 import { APIResource } from '../../../frontend/packages/store/src/types/api.types';
 import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';

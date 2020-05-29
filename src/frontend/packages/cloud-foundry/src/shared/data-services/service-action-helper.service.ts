@@ -5,7 +5,6 @@ import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { serviceInstancesEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
-import { IServiceBinding } from '../../../../core/src/core/cf-api-svc.types';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { RouterNav, RouterQueryParams } from '../../../../store/src/actions/router.actions';
@@ -13,6 +12,7 @@ import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/
 import { EntityService } from '../../../../store/src/entity-service';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../store/src/types/api.types';
+import { IServiceBinding } from '../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import {

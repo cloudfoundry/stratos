@@ -10,7 +10,6 @@ import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-en
 import {
   ServiceActionHelperService,
 } from '../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
-import { IServiceBinding } from '../../../../../core/src/core/cf-api-svc.types';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -18,6 +17,7 @@ import { ITableColumn } from '../../../../../core/src/shared/components/list/lis
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IServiceBinding } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 

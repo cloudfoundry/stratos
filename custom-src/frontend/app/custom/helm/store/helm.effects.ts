@@ -2,21 +2,21 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from 'frontend/packages/store/src/actions/endpoint.actions';
-import { AppState } from 'frontend/packages/store/src/app-state';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
-import { NormalizedResponse } from 'frontend/packages/store/src/types/api.types';
+import { Observable } from 'rxjs';
+import { catchError, flatMap, mergeMap } from 'rxjs/operators';
+
+import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../../../../../store/src/actions/endpoint.actions';
+import { ClearPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { ApiRequestTypes } from '../../../../../store/src/reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import {
   EntityRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
-} from 'frontend/packages/store/src/types/request.types';
-import { Observable } from 'rxjs';
-import { catchError, flatMap, mergeMap } from 'rxjs/operators';
-
-import { ClearPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
-import { ApiRequestTypes } from '../../../../../store/src/reducers/api-request-reducer/request-helpers';
+} from '../../../../../store/src/types/request.types';
 import { environment } from '../../../environments/environment';
 import { isJetstreamError } from '../../../jetstream.helpers';
 import { helmEntityCatalog } from '../helm-entity-catalog';

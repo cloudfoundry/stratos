@@ -1,4 +1,9 @@
 import {
+  StratosBaseCatalogEntity,
+  StratosCatalogEndpointEntity,
+} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { APIResource } from '../../store/src/types/api.types';
+import {
   IService,
   IServiceBinding,
   IServiceBroker,
@@ -6,7 +11,7 @@ import {
   IServicePlan,
   IServicePlanVisibility,
   IUserProvidedServiceInstance,
-} from '../../core/src/core/cf-api-svc.types';
+} from './cf-api-svc.types';
 import {
   CfEvent,
   IApp,
@@ -23,12 +28,7 @@ import {
   ISpace,
   ISpaceQuotaDefinition,
   IStack,
-} from '../../core/src/core/cf-api.types';
-import {
-  StratosBaseCatalogEntity,
-  StratosCatalogEndpointEntity,
-} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { APIResource } from '../../store/src/types/api.types';
+} from './cf-api.types';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { AppEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { AppStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';

@@ -7,7 +7,7 @@ import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/ope
 import { SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { PermissionConfig, PermissionTypes } from '../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
-import { CFFeatureFlagTypes } from '../../../../../core/src/shared/components/cf-auth/cf-auth.types';
+import { CFFeatureFlagTypes } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 

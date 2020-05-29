@@ -1,4 +1,3 @@
-import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import {
   DeleteOrganization,
@@ -6,6 +5,7 @@ import {
   GetOrganization,
   UpdateOrganization,
 } from '../actions/organization.actions';
+import { IUpdateOrganization } from '../cf-api.types';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface OrganizationActionBuilders extends OrchestratedActionBuilders {

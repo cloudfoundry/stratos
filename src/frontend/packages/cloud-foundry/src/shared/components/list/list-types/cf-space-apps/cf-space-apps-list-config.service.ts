@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ISpaceFavMetadata } from '../../../../../../../cloud-foundry/src/cf-metadata-types';
-import { IApp } from '../../../../../../../core/src/core/cf-api.types';
 import {
   createTableColumnFavorite,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-favorite/table-cell-favorite.component';
@@ -18,6 +17,7 @@ import {
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
+import { IApp } from '../../../../../cf-api.types';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { TableCellAppNameComponent } from '../app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../app/table-cell-app-status/table-cell-app-status.component';

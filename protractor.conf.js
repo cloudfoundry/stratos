@@ -170,6 +170,10 @@ const config = {
     print: function () {}
   },
   params: secrets,
+  plugins: [{
+    package: 'protractor-console',
+    logLevels: ['info', 'warning', 'severe']
+  }],  
   onPrepare() {
     // https://webdriver.io/docs/api/chromium.html#setnetworkconditions
     // browser.driver.setNetworkConditions({
@@ -178,6 +182,11 @@ const config = {
     //   download_throughput: 500 * 1024 * 1024, // Maximal aggregated download throughput.
     //   upload_throughput: 500 * 1024 * 1024 // Maximal aggregated upload throughput.
     // });
+
+    // Ensuer base URL does NOT end with a /
+    if (browser.baseUrl.endsWith('/')) {
+      browser.baseUrl = browser.baseUrl.substr(0, browser.baseUrl.length -1);
+    }
 
     skipPlugin.install(jasmine);
     require('ts-node').register({
@@ -194,7 +203,10 @@ const config = {
     }).getJasmine2Reporter());
     jasmine.getEnv().addReporter(new SpecReporter({
       spec: {
-        displayStacktrace: true,
+        displayStacktrace: 'raw',
+      },
+      summary: {
+        displayStacktrace: 'raw',
       },
       customProcessors: specReporterCustomProcessors
     }));
@@ -235,7 +247,7 @@ const config = {
         if (resp.statusCode >= 400) {
           defer.reject('Failed to validate Github API Url. Status Code: ' + resp.statusCode);
         } else {
-          defer.fulfill('Github API Url responding');
+          defer.fulfill('Validated Github API Url successfully');
         }
       })
       .on("error", (err) => {
@@ -249,6 +261,7 @@ const config = {
 if (process.env['STRATOS_E2E_BASE_URL']) {
   config.baseUrl = process.env['STRATOS_E2E_BASE_URL'];
 }
+
 exports.config = config
 // Should we run e2e tests in headless Chrome?
 const headless = secrets.headless || process.env['STRATOS_E2E_HEADLESS'];

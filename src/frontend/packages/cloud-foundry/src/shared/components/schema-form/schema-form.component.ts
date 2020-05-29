@@ -3,7 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { JsonPointer } from 'stratos-angular6-json-schema-form';
+import { JsonPointer } from '@cfstratos/ajsf-core';
 
 import { safeStringToObj } from '../../../../../core/src/core/utils.service';
 import { isValidJsonValidator } from '../../../../../core/src/shared/form-validators';

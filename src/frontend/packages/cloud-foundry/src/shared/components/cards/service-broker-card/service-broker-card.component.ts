@@ -3,9 +3,9 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { IServiceBroker } from '../../../../../../core/src/core/cf-api-svc.types';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IServiceBroker } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 
 @Component({

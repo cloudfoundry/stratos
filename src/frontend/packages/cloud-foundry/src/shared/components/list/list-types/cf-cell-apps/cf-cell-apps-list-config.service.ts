@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { IApp, ISpace } from '../../../../../../../core/src/core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { IApp, ISpace } from '../../../../../cf-api.types';
 import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';

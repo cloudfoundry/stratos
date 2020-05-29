@@ -17,7 +17,6 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../../core/src/core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
@@ -28,6 +27,7 @@ import {
 } from '../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
+import { IOrganization, ISpace } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-types';

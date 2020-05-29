@@ -10,16 +10,16 @@ import { EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES } from '../
 import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import {
-  entityRelationMissingQuotaGuid,
-  entityRelationMissingQuotaUrl,
-  entityRelationMissingSpacesUrl,
-  EntityRelationSpecHelper,
-} from '../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
-import {
   EntityRequestAction,
   RequestEntityLocation,
   WrapperRequestActionSuccess,
 } from '../../../store/src/types/request.types';
+import {
+  entityRelationMissingQuotaGuid,
+  entityRelationMissingQuotaUrl,
+  entityRelationMissingSpacesUrl,
+  EntityRelationSpecHelper,
+} from '../../test-framework/entity-relations-spec-helper';
 import { GetOrganization } from '../actions/organization.actions';
 import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { CFAppState } from '../cf-app-state';

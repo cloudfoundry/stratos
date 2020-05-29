@@ -5,16 +5,16 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
-import { GitBranch, GitCommit, GitRepo } from '../../../../../../../../cloud-foundry/src/store/types/git.types';
-import {
-  GithubCommitsListConfigServiceAppTab,
-} from '../../../../../../../../core/src/shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
-import { GitSCMService, GitSCMType } from '../../../../../../../../core/src/shared/data-services/scm/scm.service';
 import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { CFAppState } from '../../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { GitMeta } from '../../../../../../entity-action-builders/git-action-builder';
+import {
+  GithubCommitsListConfigServiceAppTab,
+} from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
+import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
+import { GitBranch, GitCommit, GitRepo } from '../../../../../../store/types/git.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 

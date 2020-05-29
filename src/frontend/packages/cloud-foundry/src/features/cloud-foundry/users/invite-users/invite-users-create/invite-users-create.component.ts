@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
 import {
   StackedInputActionResult,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
@@ -14,6 +13,7 @@ import {
 import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { IOrganization, ISpace } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfUserEntityType } from '../../../../../cf-entity-types';
@@ -52,12 +52,12 @@ export class InviteUsersCreateComponent implements OnInit {
         label: UserRoleLabels.space.short[SpaceUserRoleNames.AUDITOR],
         value: UserInviteSendSpaceRoles.auditor,
       }, {
-      label: UserRoleLabels.space.short[SpaceUserRoleNames.DEVELOPER],
-      value: UserInviteSendSpaceRoles.developer,
-    }, {
-      label: UserRoleLabels.space.short[SpaceUserRoleNames.MANAGER],
-      value: UserInviteSendSpaceRoles.manager,
-    });
+        label: UserRoleLabels.space.short[SpaceUserRoleNames.DEVELOPER],
+        value: UserInviteSendSpaceRoles.developer,
+      }, {
+        label: UserRoleLabels.space.short[SpaceUserRoleNames.MANAGER],
+        value: UserInviteSendSpaceRoles.manager,
+      });
   }
 
   stateOut(users: StackedInputActionsUpdate) {

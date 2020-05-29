@@ -1,8 +1,33 @@
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import * as moment from 'moment';
-import { combineLatest, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 
+import { EndpointHealthCheck } from '../../core/endpoints-health-checks';
+import { metricEntityType } from '../../core/src/base-entity-schemas';
+import { urlValidationExpression } from '../../core/src/core/utils.service';
+import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
+import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
+import {
+  StratosBaseCatalogEntity,
+  StratosCatalogEndpointEntity,
+  StratosCatalogEntity,
+} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import {
+  IStratosEntityDefinition,
+  StratosEndpointExtensionDefinition,
+} from '../../store/src/entity-catalog/entity-catalog.types';
+import {
+  JetstreamError,
+} from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
+import { ActionDispatcher, JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import { EntitySchema } from '../../store/src/helpers/entity-schema';
+import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
+import { selectSessionData } from '../../store/src/reducers/auth.reducer';
+import { APIResource, EntityInfo } from '../../store/src/types/api.types';
+import { PaginatedAction, PaginationEntityState } from '../../store/src/types/pagination.types';
+import { ICFAction } from '../../store/src/types/request.types';
+import { CfValidateEntitiesStart } from './actions/relations-actions';
 import {
   IService,
   IServiceBinding,
@@ -11,7 +36,7 @@ import {
   IServicePlan,
   IServicePlanVisibility,
   IUserProvidedServiceInstance,
-} from '../../core/src/core/cf-api-svc.types';
+} from './cf-api-svc.types';
 import {
   CfEvent,
   IApp,
@@ -28,31 +53,9 @@ import {
   ISpace,
   ISpaceQuotaDefinition,
   IStack,
-} from '../../core/src/core/cf-api.types';
-import { urlValidationExpression } from '../../core/src/core/utils.service';
-import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
-import { AppState } from '../../store/src/app-state';
-import {
-  StratosBaseCatalogEntity,
-  StratosCatalogEndpointEntity,
-  StratosCatalogEntity,
-} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import {
-  IStratosEntityDefinition,
-  StratosEndpointExtensionDefinition,
-} from '../../store/src/entity-catalog/entity-catalog.types';
-import {
-  JetstreamError,
-} from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
-import { JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
-import { EntitySchema } from '../../store/src/helpers/entity-schema';
-import { selectSessionData } from '../../store/src/reducers/auth.reducer';
-import { endpointDisconnectRemoveEntitiesReducer } from '../../store/src/reducers/endpoint-disconnect-application.reducer';
-import { APIResource } from '../../store/src/types/api.types';
-import { PaginatedAction } from '../../store/src/types/pagination.types';
+} from './cf-api.types';
 import { cfEntityCatalog } from './cf-entity-catalog';
 import { cfEntityFactory } from './cf-entity-factory';
-import { addCfQParams, addCfRelationParams } from './cf-entity-relations.getters';
 import {
   appEnvVarsEntityType,
   applicationEntityType,
@@ -67,7 +70,6 @@ import {
   gitBranchesEntityType,
   gitCommitEntityType,
   gitRepoEntityType,
-  metricEntityType,
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
@@ -89,6 +91,7 @@ import {
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
 import { CfErrorResponse, getCfError } from './cf-error-helpers';
+import { getFavoriteFromCfEntity } from './cf-favorites-helpers';
 import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
 import { CF_ENDPOINT_TYPE } from './cf-types';
 import {
@@ -157,8 +160,12 @@ import {
   userProvidedServiceActionBuilder,
 } from './entity-action-builders/user-provided-service.action-builders';
 import { UserActionBuilders, userActionBuilders } from './entity-action-builders/user.action-builders';
+import { addCfQParams, addCfRelationParams } from './entity-relations/cf-entity-relations.getters';
+import { populatePaginationFromParent } from './entity-relations/entity-relations';
+import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
+import { endpointDisconnectRemoveEntitiesReducer } from './store/reducers/endpoint-disconnect-application.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
 import { routeReducer, updateAppSummaryRoutesReducer } from './store/reducers/routes.reducer';
@@ -169,6 +176,47 @@ import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { CfUser } from './store/types/user.types';
+
+function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
+  return populatePaginationFromParent(store, action).pipe(
+    map(newAction => newAction || action)
+  );
+}
+
+function getPaginationCompareString(paginationEntity: PaginationEntityState) {
+  if (!paginationEntity) {
+    return '';
+  }
+  let params = '';
+  if (paginationEntity.params) {
+    params = JSON.stringify(paginationEntity.params);
+  }
+  // paginationEntity.totalResults included to ensure we cover the 'ResetPagination' case, for instance after AddParam
+  return paginationEntity.totalResults + paginationEntity.currentPage + params + paginationEntity.pageCount;
+}
+
+function shouldValidate(action: ICFAction, isValidated: boolean, entityInfo: RequestInfoState) {
+  // Validate if..
+  // 1) The action is the correct type
+  const parentAction = isEntityInlineParentAction(action);
+  if (!parentAction) {
+    return false;
+  }
+  // 2) We have basic request info
+  // 3) The action states it should not be skipped
+  // 4) It's already been validated
+  // 5) There are actual relations to validate
+  if (!entityInfo || action.skipValidation || isValidated || parentAction.includeRelations.length === 0) {
+    return false;
+  }
+  // 6) The entity isn't in the process of being updated
+  return !entityInfo.fetching &&
+    !entityInfo.error &&
+    !entityInfo.deleting.busy &&
+    !entityInfo.deleting.deleted &&
+    // This is required to ensure that we don't continue trying to fetch missing relations when we're already fetching missing relations
+    !Object.keys(entityInfo.updating).find(key => entityInfo.updating[key].busy);
+}
 
 export interface CFBasePipelineRequestActionMeta {
   /**
@@ -197,6 +245,8 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     listDetailsComponent: CfEndpointDetailsComponent,
     renderPriority: 1,
+    healthCheck: new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => cfEntityCatalog.cfInfo.api.get(endpoint.guid)),
+    favoriteFromEntity: getFavoriteFromCfEntity,
     globalPreRequest: (request, action) => {
       return addCfRelationParams(request, action);
     },
@@ -229,6 +279,39 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
         message += `\n${getCfError(error.jetstreamErrorResponse)}`;
         return message;
       }, 'Multiple Cloud Foundry Errors. ');
+    },
+    entityEmitHandler: (action: ICFAction, dispatcher: ActionDispatcher) => {
+      let validated = false;
+      return (entityInfo: EntityInfo) => {
+        if (!entityInfo || entityInfo.entity) {
+          if (shouldValidate(action, validated, entityInfo.entityRequestInfo)) {
+            validated = true;
+            dispatcher(new CfValidateEntitiesStart(
+              action,
+              [action.guid]
+            ));
+          }
+        }
+      };
+    },
+    entitiesEmitHandler: (action: PaginatedAction | PaginatedAction[], dispatcher: ActionDispatcher) => {
+      let lastValidationFootprint: string;
+      const arrayAction = Array.isArray(action) ? action : [action];
+      return (state: PaginationEntityState) => {
+        const newValidationFootprint = getPaginationCompareString(state);
+        if (lastValidationFootprint !== newValidationFootprint) {
+          lastValidationFootprint = newValidationFootprint;
+          arrayAction.forEach(action => dispatcher(new CfValidateEntitiesStart(
+            action,
+            state.ids[action.__forcedPageNumber__ || state.currentPage]
+          )));
+        }
+      };
+    },
+    entitiesFetchHandler: (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => {
+      combineLatest(actions.map(action => safePopulatePaginationFromParent(store, action))).pipe(
+        first(),
+      ).subscribe(actions => actions.forEach(action => store.dispatch(action)));
     },
     paginationConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,

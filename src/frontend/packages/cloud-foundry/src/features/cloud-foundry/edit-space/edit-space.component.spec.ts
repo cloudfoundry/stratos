@@ -1,13 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organization.service';
 import { EditSpaceStepComponent } from './edit-space-step/edit-space-step.component';

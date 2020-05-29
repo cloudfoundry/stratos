@@ -60,11 +60,11 @@ export class MetricsEffect {
             errObservable.message,
             action,
             'fetch', {
-              endpointIds: [action.endpointGuid],
-              url: errObservable.url || fullUrl,
-              eventCode: errObservable.status ? errObservable.status + '' : '500',
-              message: 'Metric request error',
-            }
+            endpointIds: [action.endpointGuid],
+            url: errObservable.url || fullUrl,
+            eventCode: errObservable.status ? errObservable.status + '' : '500',
+            message: 'Metric request error',
+          }
           )
         ];
       }));

@@ -1,4 +1,5 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 
 import {
   ListDataSource,
@@ -9,7 +10,6 @@ import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfEventEntityType } from '../../../../../cf-entity-types';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { QParam, QParamJoiners } from '../../../../q-param';
 
 export class CfEventsDataSource extends ListDataSource<APIResource> {

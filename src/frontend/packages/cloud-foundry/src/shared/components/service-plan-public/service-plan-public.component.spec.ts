@@ -1,14 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
+import { EntityService } from '../../../../../store/src/entity-service';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import * as servicesHelpers from '../../../features/service-catalog/services-helper';
 import { ServicesService } from '../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../features/service-catalog/services.service.mock';
 import { ServicePlanPublicComponent } from './service-plan-public.component';
-import { EntityService } from '../../../../../store/src/entity-service';
 
 const getCfService = {
   waitForEntity$: {
@@ -69,24 +69,20 @@ describe('ServicePlanPublicComponent', () => {
   it('should display if service plan is reachable', () => {
     const planAccessibility$ = of(StratosStatus.WARNING);
     const s0 = spyOn(servicesHelpers, 'getServicePlanAccessibilityCardStatus').and.returnValue(planAccessibility$);
-    const s1 = spyOn(servicesHelpers, 'getCfService').and.returnValue(getCfService);
     component.servicePlan = servicesService.servicePlan;
     fixture.detectChanges();
 
     expect(s0).toHaveBeenCalled();
-    expect(s1).toHaveBeenCalled();
     expect(element.textContent).toContain('Service Plan has limited visibility');
   });
 
   it('should display if service plan is not reachable', () => {
     const planAccessibility$ = of(StratosStatus.ERROR);
     const s0 = spyOn(servicesHelpers, 'getServicePlanAccessibilityCardStatus').and.returnValue(planAccessibility$);
-    const s1 = spyOn(servicesHelpers, 'getCfService').and.returnValue(getCfService);
     component.servicePlan = servicesService.servicePlan;
     fixture.detectChanges();
 
     expect(s0).toHaveBeenCalled();
-    expect(s1).toHaveBeenCalled();
     expect(element.textContent).toContain('Service Plan has no visibility');
   });
 });

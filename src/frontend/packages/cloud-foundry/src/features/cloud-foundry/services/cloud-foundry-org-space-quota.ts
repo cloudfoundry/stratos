@@ -1,12 +1,12 @@
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { IApp, IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { truthyIncludingZero } from '../../../../../core/src/core/utils.service';
 import { determineCardStatus } from '../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IApp, IOrganization, ISpace } from '../../../cf-api.types';
 import { CFEntityConfig } from '../../../cf-types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 

@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CfEvent } from '../../../../../../../../core/src/core/cf-api.types';
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { ValuesPipe } from '../../../../../../../../core/src/shared/pipes/values.pipe';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { CfEvent } from '../../../../../../cf-api.types';
 import { EventMetadataComponent } from '../event-metadata/event-metadata.component';
 import { TableCellEventDetailComponent } from './table-cell-event-detail.component';
 

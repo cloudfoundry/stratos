@@ -4,22 +4,21 @@ import { MatDialog } from '@angular/material/dialog';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import {
-  IService,
-  IServiceBinding,
-  IServiceInstance,
-  IUserProvidedServiceInstance,
-} from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { EnvVarViewComponent } from '../../../../../../../../core/src/shared/components/env-var-view/env-var-view.component';
 import {
   MetaCardMenuItem,
 } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import {
+  IService,
+  IServiceBinding,
+  IServiceInstance,
+  IUserProvidedServiceInstance,
+} from '../../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { serviceBindingEntityType } from '../../../../../../cf-entity-types';
@@ -33,6 +32,7 @@ import {
 } from '../../../../../../features/service-catalog/services-helper';
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 
 
 interface EnvVarData {

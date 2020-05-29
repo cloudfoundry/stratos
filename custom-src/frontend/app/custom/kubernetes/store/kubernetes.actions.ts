@@ -1,4 +1,4 @@
-import { SortDirection } from '@angular/material';
+import { SortDirection } from '@angular/material/sort';
 import { getActions } from 'frontend/packages/store/src/actions/action.helper';
 import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
 

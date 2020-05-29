@@ -64,12 +64,12 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @Input() component: EndpointListDetailsComponent;
   private endpointDetails: ViewContainerRef;
-  @ViewChild('endpointDetails', { read: ViewContainerRef, static: false }) set content(content: ViewContainerRef) {
+  @ViewChild('endpointDetails', { read: ViewContainerRef }) set content(content: ViewContainerRef) {
     this.endpointDetails = content;
     this.updateInnerComponent();
   }
 
-  @ViewChild('copyToClipboard', { static: false }) copyToClipboard: CopyToClipboardComponent;
+  @ViewChild('copyToClipboard') copyToClipboard: CopyToClipboardComponent;
 
   private pRow: EndpointModel;
   @Input('row')

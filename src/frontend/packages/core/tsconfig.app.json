@@ -3,11 +3,11 @@
   "compilerOptions": {
     "outDir": "../../../../out-tsc"
   },
-  "exclude": [
-    "./src/test.ts",
-    "**/*.spec.ts",
-    "**/*.spec.helpers.ts",
-    "**/node_modules/**",
-    "./test-framework/**"
+  "files": [
+    "src/main.ts",
+    "src/polyfills.ts"
+  ],
+  "include": [
+    "src/frontend/packages/**/*.d.ts"
   ]
 }
