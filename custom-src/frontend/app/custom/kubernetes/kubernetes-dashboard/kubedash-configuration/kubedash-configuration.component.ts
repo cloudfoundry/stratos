@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
