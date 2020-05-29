@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { ApplicationService } from '../../../cloud-foundry/src/features/applications/application.service';
-import { CloudFoundryComponentsModule } from '../../../cloud-foundry/src/shared/components/components.module';
+import { CloudFoundrySharedModule } from '../../../cloud-foundry/src/shared/cf-shared.module';
 import { CoreModule } from '../../../core/src/core/core.module';
 import { SharedModule } from '../../../core/src/shared/shared.module';
 import { AutoscalerBaseComponent } from '../features/autoscaler-base.component';
@@ -10,6 +10,9 @@ import { AutoscalerMetricPageComponent } from '../features/autoscaler-metric-pag
 import {
   AutoscalerScaleHistoryPageComponent,
 } from '../features/autoscaler-scale-history-page/autoscaler-scale-history-page.component';
+import {
+  EditAutoscalerCredentialComponent,
+} from '../features/edit-autoscaler-credential/edit-autoscaler-credential.component';
 import {
   EditAutoscalerPolicyStep1Component,
 } from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
@@ -54,7 +57,7 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     SharedModule,
     AutoscalerRoutingModule,
     NgxChartsModule,
-    CloudFoundryComponentsModule,
+    CloudFoundrySharedModule,
   ],
   declarations: [
     AutoscalerBaseComponent,
@@ -65,6 +68,7 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     EditAutoscalerPolicyStep2Component,
     EditAutoscalerPolicyStep3Component,
     EditAutoscalerPolicyStep4Component,
+    EditAutoscalerCredentialComponent,
     CardAutoscalerDefaultComponent,
     AppAutoscalerMetricChartCardComponent,
     AppAutoscalerComboChartComponent,

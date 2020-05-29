@@ -1,11 +1,11 @@
 import { Observable } from 'rxjs';
 
 import { organizationEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
-import { IApp, IOrganization } from '../../../../../core/src/core/cf-api.types';
-import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../../../core/src/core/cf.helpers';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IApp, IOrganization } from '../../../cf-api.types';
+import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { OrgSpaceQuotaHelper } from './cloud-foundry-org-space-quota';
 

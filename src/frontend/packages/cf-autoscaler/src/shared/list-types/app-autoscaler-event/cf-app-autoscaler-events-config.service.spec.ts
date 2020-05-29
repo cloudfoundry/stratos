@@ -9,9 +9,11 @@ import { GetApplication } from '../../../../../cloud-foundry/src/actions/applica
 import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { ApplicationsModule } from '../../../../../cloud-foundry/src/features/applications/applications.module';
+import {
+  generateTestApplicationServiceProvider,
+} from '../../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { generateTestApplicationServiceProvider } from '../../../../../core/test-framework/application-service-helper';
 import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
 import { EntityCatalogHelper } from '../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';

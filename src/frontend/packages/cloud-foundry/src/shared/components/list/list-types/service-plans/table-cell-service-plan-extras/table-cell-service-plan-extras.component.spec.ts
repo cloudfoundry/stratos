@@ -2,11 +2,9 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import {
-  ApplicationStateService,
-} from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ApplicationStateService } from '../../../../../services/application-state.service';
 import { TableCellAServicePlanExtrasComponent } from './table-cell-service-plan-extras.component';
 
 describe('TableCellAServicePlanExtrasComponent', () => {

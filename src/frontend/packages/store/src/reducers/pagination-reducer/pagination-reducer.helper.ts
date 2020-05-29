@@ -1,9 +1,8 @@
-import { Action, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
-  first,
   map,
   pairwise,
   publishReplay,
@@ -13,10 +12,8 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { populatePaginationFromParent } from '../../../../cloud-foundry/src/entity-relations/entity-relations';
 import { sortStringify } from '../../../../core/src/core/utils.service';
 import { SetInitialParams } from '../../actions/pagination.actions';
-import { CfValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationMonitor } from '../../monitors/pagination-monitor';
@@ -43,7 +40,7 @@ export function removeEmptyParams(params: PaginationParam) {
 export function getActionType(action) {
   return action.type;
 }
-// FIXME: Add typings, shouldbe done with #1477
+// FIXME: Add typings, should be done with #1477
 export function getAction(action): PaginatedAction {
   if (!action) {
     return null;
@@ -51,7 +48,7 @@ export function getAction(action): PaginatedAction {
   return action.apiAction ? action.apiAction : action;
 }
 
-// FIXME: Add typings, shouldbe done with #1477
+// FIXME: Add typings, should be done with #1477
 function getEntityConfigFromAction(action): PaginatedAction {
   if (action && action.entityConfig) {
     return action.entityConfig;
@@ -59,7 +56,7 @@ function getEntityConfigFromAction(action): PaginatedAction {
   return getAction(action);
 }
 
-// FIXME: Add typings, shouldbe done with #1477
+// FIXME: Add typings, should be done with #1477
 export function getActionPaginationEntityKey(action): string {
   const apiAction = getAction(action);
   const entityConfig = apiAction.proxyPaginationEntityConfig || getEntityConfigFromAction(action);
@@ -76,7 +73,7 @@ export const getPaginationObservables = <T = any, Y extends AppState = AppState>
   { store, action, paginationMonitor }: {
     store: Store<Y>,
     action: PaginatedAction | PaginatedAction[],
-    paginationMonitor: PaginationMonitor
+    paginationMonitor: PaginationMonitor,
   },
   isLocal = false
 ): PaginationObservables<T> => {
@@ -159,11 +156,8 @@ function shouldFetchNonLocalList(pagination: PaginationEntityState): boolean {
   return !hasError(pagination) && !hasValidOrGettingPage(pagination);
 }
 
-function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
-  return populatePaginationFromParent(store, action).pipe(
-    map(newAction => newAction || action)
-  );
-}
+const defaultEntitiesFetchHandler = (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () =>
+  actions.forEach(action => store.dispatch(action));
 
 function getObservables<T = any>(
   store: Store<GeneralEntityAppState>,
@@ -171,13 +165,19 @@ function getObservables<T = any>(
   paginationKey: string,
   paginationAction: PaginatedAction | PaginatedAction[],
   paginationMonitor: PaginationMonitor,
-  isLocal = false
+  isLocal = false,
 )
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
   const arrayAction = Array.isArray(paginationAction) ? paginationAction : [paginationAction];
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
+
+  const entity = entityCatalog.getEntity(arrayAction[0]);
+  const entitiesFetchHandler = entity.getEntitiesFetchHandler();
+  const fetchHandler = entitiesFetchHandler ?
+    entitiesFetchHandler(store, arrayAction) :
+    defaultEntitiesFetchHandler(store, arrayAction);
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
@@ -186,38 +186,27 @@ function getObservables<T = any>(
     tap(([prevPag, newPag]: [PaginationEntityState, PaginationEntityState]) => {
       if (shouldFetchLocalOrNonLocalList(isLocal, hasDispatchedOnce, newPag, prevPag)) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        combineLatest(arrayAction.map(action => safePopulatePaginationFromParent(store, action))).pipe(
-          first(),
-        ).subscribe(actions => actions.forEach(action => store.dispatch(action)));
+        fetchHandler();
       }
     }),
     map(([, newPag]) => newPag)
   );
 
-  let lastValidationFootprint: string;
+  const entitiesEmitHandlerBuilder = entity.getEntitiesEmitHandler();
+  const actionEmitHandler = entitiesEmitHandlerBuilder ? entitiesEmitHandlerBuilder(
+    paginationAction, (action) => store.dispatch(action)
+  ) : () => { };
+
   const entities$: Observable<T[]> =
     combineLatest(
       store.select(selectEntities(entityKey)),
       fetchPagination$,
     )
       .pipe(
-        filter(([, pagination]) => {
-          return !!pagination && isPageReady(pagination, isLocal);
-        }),
+        filter(([, pagination]) => !!pagination && isPageReady(pagination, isLocal)),
         publishReplay(1),
         refCount(),
-        tap(([, pagination]) => {
-          const newValidationFootprint = getPaginationCompareString(pagination);
-          if (lastValidationFootprint !== newValidationFootprint) {
-            lastValidationFootprint = newValidationFootprint;
-            // FIXME: Move cf - #3675
-            // This should use something similar to ENTITY_INFO_HANDLER or come from entity itself
-            arrayAction.forEach(action => store.dispatch(new CfValidateEntitiesStart(
-              action,
-              pagination.ids[action.__forcedPageNumber__ || pagination.currentPage]
-            )));
-          }
-        }),
+        tap(([, pagination]) => actionEmitHandler(pagination)),
         switchMap(() => paginationMonitor.currentPage$),
       );
 
@@ -239,18 +228,6 @@ function getObservables<T = any>(
     ),
     fetchingEntities$: paginationMonitor.fetchingCurrentPage$
   };
-}
-
-function getPaginationCompareString(paginationEntity: PaginationEntityState) {
-  if (!paginationEntity) {
-    return '';
-  }
-  let params = '';
-  if (paginationEntity.params) {
-    params = JSON.stringify(paginationEntity.params);
-  }
-  // paginationEntity.totalResults included to ensure we cover the 'ResetPagination' case, for instance after AddParam
-  return paginationEntity.totalResults + paginationEntity.currentPage + params + paginationEntity.pageCount;
 }
 
 export function isPageReady(pagination: PaginationEntityState, isLocal = false) {

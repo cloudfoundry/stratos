@@ -40,9 +40,9 @@ import {
 import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
-import { IApp, ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IApp, ISpace } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -176,8 +176,8 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     return cfEntityCatalog.application.store.getEntityService(
       appId,
       cfId, {
-      includeRelations: [createEntityRelationKey(applicationEntityType, spaceEntityType)]
-    }
+        includeRelations: [createEntityRelationKey(applicationEntityType, spaceEntityType)]
+      }
     ).waitForEntity$.pipe(
       filter(p => !!p),
       tap(app => {

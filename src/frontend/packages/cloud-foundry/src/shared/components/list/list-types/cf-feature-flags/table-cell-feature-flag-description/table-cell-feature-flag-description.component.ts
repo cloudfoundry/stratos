@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { TableCellCustom } from 'frontend/packages/core/src/shared/components/list/list.types';
-import { IFeatureFlag } from 'frontend/packages/core/src/core/cf-api.types';
+
+import { IFeatureFlag } from '../../../../../../cf-api.types';
 import { FeatureFlagDescriptions } from '../cf-feature-flags-data-source';
 
 @Component({

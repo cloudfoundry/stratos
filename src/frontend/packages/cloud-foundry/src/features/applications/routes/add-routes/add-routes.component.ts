@@ -8,7 +8,6 @@ import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { domainEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
-import { IDomain } from '../../../../../../core/src/core/cf-api.types';
 import {
   StepOnNextFunction,
   StepOnNextResult,
@@ -16,6 +15,7 @@ import {
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { ActionState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
 

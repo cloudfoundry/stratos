@@ -16,7 +16,6 @@ import {
   UserRoleInOrg,
   UserRoleInSpace,
 } from '../../../../cloud-foundry/src/store/types/user.types';
-import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import {
   LocalPaginationHelpers,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
@@ -32,6 +31,7 @@ import {
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';

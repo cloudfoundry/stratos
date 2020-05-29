@@ -5,10 +5,10 @@ import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { ISpace } from '../../../../../../core/src/core/cf-api.types';
 import { PermissionStrings } from '../../../../../../core/src/core/current-user-permissions.config';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { SetCFDetails } from '../../../../actions/create-applications-page.actions';
+import { ISpace } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
 import { getSpacesFromOrgWithRole } from '../../../../store/selectors/cf-current-user-role.selectors';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';

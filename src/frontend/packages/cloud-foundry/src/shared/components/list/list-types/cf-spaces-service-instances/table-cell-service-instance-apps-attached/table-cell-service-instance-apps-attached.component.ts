@@ -2,10 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { IServiceInstance } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import {
   applicationEntityType,
   serviceBindingEntityType,

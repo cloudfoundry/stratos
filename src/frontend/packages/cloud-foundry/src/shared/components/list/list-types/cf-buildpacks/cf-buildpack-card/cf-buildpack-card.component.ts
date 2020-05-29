@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 
-import { IBuildpack } from '../../../../../../../../core/src/core/cf-api.types';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IBuildpack } from '../../../../../../cf-api.types';
 
 @Component({
   selector: 'app-cf-buildpack-card',

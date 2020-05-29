@@ -1,9 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from 'stratos-angular6-json-schema-form';
+import { MaterialDesignFrameworkModule } from '@cfstratos/ajsf-material';
 
-import {
-  AppNameUniqueDirective,
-} from '../../../../../../core/src/shared/app-name-unique.directive/app-name-unique.directive';
 import {
   ApplicationStateIconComponent,
 } from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -15,6 +12,9 @@ import {
 } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
+import {
+  CopyToClipboardComponent,
+} from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import {
   MetaCardComponent,
@@ -37,16 +37,17 @@ import {
 } from '../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
 import { PageHeaderModule } from '../../../../../../core/src/shared/components/page-header/page-header.module';
 import { SteppersModule } from '../../../../../../core/src/shared/components/stepper/steppers.module';
+import { TabNavService } from '../../../../../../core/tab-nav.service';
 import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { TabNavService } from '../../../../../../core/tab-nav.service';
 import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
 import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
+import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { CfOrgSpaceLinksComponent } from '../../cf-org-space-links/cf-org-space-links.component';
 import {
   CreateApplicationStep1Component,
@@ -79,7 +80,6 @@ import {
   SpecifyUserProvidedDetailsComponent,
 } from '../specify-user-provided-details/specify-user-provided-details.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
-import { CopyToClipboardComponent } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;

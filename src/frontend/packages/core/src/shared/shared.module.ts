@@ -5,12 +5,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
-import {
-  ApplicationInstanceChartComponent,
-} from '../../../cloud-foundry/src/features/applications/application/application-instance-chart/application-instance-chart.component';
 import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
 import { CoreModule } from '../core/core.module';
-import { AppNameUniqueDirective } from './app-name-unique.directive/app-name-unique.directive';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
@@ -18,7 +14,6 @@ import {
 } from './components/application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
-import { ApplicationStateService } from './components/application-state/application-state.service';
 import { BlurDirective } from './components/blur.directive';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
@@ -26,7 +21,6 @@ import { CardProgressOverlayComponent } from './components/card-progress-overlay
 import { CardBooleanMetricComponent } from './components/cards/card-boolean-metric/card-boolean-metric.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
-import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
@@ -40,13 +34,11 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { EntitySummaryTitleComponent } from './components/entity-summary-title/entity-summary-title.component';
 import { EnumerateComponent } from './components/enumerate/enumerate.component';
-import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { FavoritesEntityListComponent } from './components/favorites-entity-list/favorites-entity-list.component';
 import { FavoritesGlobalListComponent } from './components/favorites-global-list/favorites-global-list.component';
 import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
-import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
@@ -116,7 +108,6 @@ import {
 } from './components/upload-progress-indicator/upload-progress-indicator.component';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
-import { GitSCMService } from './data-services/scm/scm.service';
 import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { PercentagePipe } from './pipes/percentage.pipe';
@@ -135,7 +126,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     PageHeaderModule,
     RouterModule,
     SteppersModule,
-    CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
   ],
@@ -182,15 +172,12 @@ import { UserPermissionDirective } from './user-permission.directive';
     AppChipsComponent,
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
-    EnvVarViewComponent,
     RingChartComponent,
     MetricsChartComponent,
-    ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
     EnumerateComponent,
     UploadProgressIndicatorComponent,
-    GithubCommitAuthorComponent,
     UserProfileBannerComponent,
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
@@ -212,8 +199,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    AppNameUniqueDirective,
-    AppNameUniqueDirective,
     EndpointCardComponent,
     SimpleUsageChartComponent,
     PageSubNavComponent,
@@ -282,15 +267,12 @@ import { UserPermissionDirective } from './user-permission.directive';
     AppChipsComponent,
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
-    EnvVarViewComponent,
     MetricsChartComponent,
-    ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
     UserProfileBannerComponent,
     EnumerateComponent,
     UploadProgressIndicatorComponent,
-    GithubCommitAuthorComponent,
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
     UserPermissionDirective,
@@ -314,12 +296,10 @@ import { UserPermissionDirective } from './user-permission.directive';
     TileSelectorComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    AppNameUniqueDirective,
     SimpleUsageChartComponent,
     EntitySummaryTitleComponent,
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
-    AppNameUniqueDirective,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     JsonViewerComponent,
@@ -335,20 +315,17 @@ import { UserPermissionDirective } from './user-permission.directive';
   ],
   entryComponents: [
     DialogConfirmComponent,
-    EnvVarViewComponent,
     SnackBarReturnComponent,
     MarkdownPreviewComponent,
   ],
   providers: [
     ListConfig,
-    ApplicationStateService,
     EndpointListHelper,
     EndpointsListConfigService,
     ConfirmationDialogService,
     InternalEventMonitorFactory,
     MetricsRangeSelectorService,
-    GitSCMService,
-    LongRunningOperationsService
+    LongRunningOperationsService,
   ]
 })
 export class SharedModule { }

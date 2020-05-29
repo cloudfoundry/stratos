@@ -7,10 +7,10 @@ import { filter, first, map, tap } from 'rxjs/operators';
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { ISpaceQuotaDefinition } from '../../../../core/src/core/cf-api.types';
 import { StepOnNextResult } from '../../../../core/src/shared/components/stepper/step/step.component';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../store/src/types/api.types';
+import { ISpaceQuotaDefinition } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
 
@@ -35,8 +35,8 @@ export class AddEditSpaceStepBase {
       this.orgGuid,
       this.cfGuid,
       getPaginationKey(organizationEntityType, this.orgGuid), {
-      flatten: true,
-    }
+        flatten: true,
+      }
     ).entities$.pipe(
       filter(spaces => !!spaces),
       map(spaces => spaces.map(space => space.entity.name)),

@@ -6,9 +6,9 @@ import {
   getServicePlanAccessibilityCardStatus,
 } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { ServicesService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { IServiceBroker, IServicePlan } from '../../../../../core/src/core/cf-api-svc.types';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IServiceBroker, IServicePlan } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 
 @Component({

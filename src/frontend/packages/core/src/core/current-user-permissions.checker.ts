@@ -2,6 +2,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
+import { CFFeatureFlagTypes, IFeatureFlag } from '../../../cloud-foundry/src/cf-api.types';
 import { cfEntityCatalog } from '../../../cloud-foundry/src/cf-entity-catalog';
 import {
   getCurrentUserCFEndpointHasScope,
@@ -19,8 +20,6 @@ import {
   getCurrentUserStratosRole,
 } from '../../../store/src/selectors/current-user-role.selectors';
 import { connectedEndpointsSelector } from '../../../store/src/selectors/endpoint.selectors';
-import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
-import { IFeatureFlag } from './cf-api.types';
 import {
   PermissionConfig,
   PermissionStrings,
