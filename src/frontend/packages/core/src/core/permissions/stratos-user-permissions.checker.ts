@@ -41,16 +41,16 @@ export interface ICurrentUserPermissionsChecker {
   getSimpleCheck: (
     permissionConfig: PermissionConfig,
     endpointGuid?: string,
-    ...args: any
+    ...args: any[]
   ) => Observable<boolean>;
   /**
    * Used when the permission config contains multiple things to check
    */
   getComplexCheck: (
-    configGroup: IConfigGroup,
+    permissionConfig: PermissionConfig[],
     permission: PermissionTypes,
     ...args: any[]
-  ) => IPermissionCheckCombiner;
+  ) => IPermissionCheckCombiner[];
   /**
    * If no checker provides simple
    */
@@ -153,19 +153,37 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
   }
 
   public getComplexCheck(
-    configGroup: IConfigGroup,
-    permission: PermissionTypes,
+    permissionConfig: PermissionConfig[],
     ...args: any[]
-  ): IPermissionCheckCombiner {
-    switch (permission) {
-      case StratosPermissionTypes.STRATOS_SCOPE:
-        return {
-          checks: this.getInternalScopesChecks(configGroup),
-        };
-    }
+  ): IPermissionCheckCombiner[] {
+    const groupedChecks = this.groupConfigs(permissionConfig);
+    const res = Object.keys(groupedChecks).map((permission: PermissionTypes) => {
+      const configGroup = groupedChecks[permission];
+      switch (permission) {
+        case StratosPermissionTypes.STRATOS_SCOPE:
+          return {
+            checks: this.getInternalScopesChecks(configGroup),
+          };
+      }
+    })
+    // Checker must handle all configs
+    return res.every(check => !!check) ? res : null;
   }
   public getFallbackCheck(endpointGuid: string, endpointType: string): Observable<boolean> {
     return null;
   };
+
+  private groupConfigs(configs: PermissionConfig[]): IConfigGroups {
+    return configs.reduce((grouped, config) => {
+      const type = config.type;
+      return {
+        ...grouped,
+        [type]: [
+          ...(grouped[type] || []),
+          config
+        ]
+      };
+    }, {});
+  }
 
 }

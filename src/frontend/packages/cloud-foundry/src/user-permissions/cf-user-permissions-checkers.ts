@@ -16,6 +16,7 @@ import {
 import {
   BaseCurrentUserPermissionsChecker,
   IConfigGroup,
+  IConfigGroups,
   ICurrentUserPermissionsChecker,
   IPermissionCheckCombiner,
 } from '../../../core/src/core/permissions/stratos-user-permissions.checker';
@@ -96,6 +97,10 @@ export enum CfPermissionTypes {
   ENDPOINT = 'endpoint',
   ENDPOINT_SCOPE = 'endpoint-scope',
   FEATURE_FLAG = 'feature-flag',
+}
+
+enum CHECKER_GROUPS {
+  CF_GROUP = '__CF_TYPE__'
 }
 
 // For each set permissions are checked by permission types of ENDPOINT, ENDPOINT_SCOPE, STRATOS_SCOPE, FEATURE_FLAG or a random bag.
@@ -197,7 +202,6 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     if (type === CfPermissionTypes.ENDPOINT) {
       return this.store.select(getCurrentUserCFGlobalState(endpointGuid, permission));
     }
-
     return this.getCfEndpointState(endpointGuid).pipe(
       filter(state => !!state),
       map(state => {
@@ -419,22 +423,47 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
   public getComplexCheck(
-    configGroup: IConfigGroup,
-    permission: CfPermissionTypes,
+    permissionConfigs: PermissionConfig[],
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     spaceGuid?: string
-  ): IPermissionCheckCombiner {
-    const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid)
-    if (checkCombiner) {
-      checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid))
-    }
-    return checkCombiner;
+  ): IPermissionCheckCombiner[] {
+    const groupedChecks = this.groupConfigs(permissionConfigs);
+    return Object.keys(groupedChecks).map((permission: PermissionTypes) => {
+      const configGroup = groupedChecks[permission];
+      const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid)
+      if (checkCombiner) {
+        checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid))
+      }
+      return checkCombiner;
+    });
   }
+
+
+  private groupConfigs(configs: PermissionConfig[]): IConfigGroups {
+    return configs.reduce((grouped, config) => {
+      const type = this.getGroupType(config);
+      return {
+        ...grouped,
+        [type]: [
+          ...(grouped[type] || []),
+          config
+        ]
+      };
+    }, {});
+  }
+
+  private getGroupType(config: PermissionConfig) {
+    if (config.type === CfPermissionTypes.ORGANIZATION || config.type === CfPermissionTypes.SPACE) {
+      return CHECKER_GROUPS.CF_GROUP;
+    }
+    return config.type;
+  }
+
 
   private getBaseCheckFromConfig(
     configGroup: IConfigGroup,
-    permission: CfPermissionTypes,
+    permission: CfPermissionTypes | CHECKER_GROUPS | string,
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     spaceGuid?: string
@@ -449,11 +478,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
           checks: this.getFeatureFlagChecks(configGroup, endpointGuid),
           combineType: '&&'
         };
-      case CfPermissionTypes.ORGANIZATION:
-        return {
-          checks: this.getCfChecks(configGroup, endpointGuid, orgOrSpaceGuid, spaceGuid)
-        };
-      case CfPermissionTypes.SPACE:
+      case CHECKER_GROUPS.CF_GROUP:
         return {
           checks: this.getCfChecks(configGroup, endpointGuid, orgOrSpaceGuid, spaceGuid)
         };

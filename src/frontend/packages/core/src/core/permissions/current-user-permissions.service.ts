@@ -14,12 +14,9 @@ import {
   PermissionConfig,
   PermissionConfigLink,
   PermissionConfigType,
-  PermissionTypes,
 } from './current-user-permissions.config';
 import {
   BaseCurrentUserPermissionsChecker,
-  IConfigGroup,
-  IConfigGroups,
   ICurrentUserPermissionsChecker,
   IPermissionCheckCombiner,
   StratosUserPermissionsChecker,
@@ -100,44 +97,23 @@ export class CurrentUserPermissionsService {
     )
   }
 
-  private getComplexPermission(actionConfigs: PermissionConfig[], endpointGuid?: string, ...args: any[]) {
-    const groupedChecks = this.groupConfigs(actionConfigs);
-    const checks = this.getChecksFromConfigGroups(groupedChecks, endpointGuid, ...args);
+  private getComplexPermission(permissionConfig: PermissionConfig[], endpointGuid?: string, ...args: any[]) {
+    const checks = this.getComplexChecks(permissionConfig, endpointGuid, ...args);
     return this.combineChecks(checks);
   }
 
-  private groupConfigs(configs: PermissionConfig[]): IConfigGroups {
-    return configs.reduce((grouped, config) => {
-      const type = config.type;
-      return {
-        ...grouped,
-        [type]: [
-          ...(grouped[type] || []),
-          config
-        ]
-      };
-    }, {});
-  }
-
-  private getChecksFromConfigGroups(groups: IConfigGroups, endpointGuid?: string, ...args: any[]) {
-    return Object.keys(groups).map((permission: PermissionTypes) => {
-      return this.getCheckFromConfig(groups[permission], permission, endpointGuid, ...args);
-    });
-  }
-
-  private getCheckFromConfig(
-    configGroup: IConfigGroup,
-    permission: PermissionTypes,
+  private getComplexChecks(
+    permissionConfig: PermissionConfig[],
     endpointGuid: string,
     ...args: any[]
-  ): IPermissionCheckCombiner {
-    return this.findChecker<IPermissionCheckCombiner>(
-      (checker: ICurrentUserPermissionsChecker) => checker.getComplexCheck(configGroup, permission, endpointGuid, ...args),
-      'permissions check',
-      permission,
-      {
+  ): IPermissionCheckCombiner[] {
+    return this.findChecker<IPermissionCheckCombiner[]>(
+      (checker: ICurrentUserPermissionsChecker) => checker.getComplexCheck(permissionConfig, endpointGuid, ...args),
+      'complex permissions check',
+      'a group',
+      [{
         checks: [of(false)]
-      }
+      }]
     )
   }
 
