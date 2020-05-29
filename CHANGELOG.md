@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.2.1
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.2.0...3.2.1)
+
+This release contains a number of fixes:
+
+**Fixes:**
+
+- User Button Misaligned [\#4316](https://github.com/cloudfoundry/stratos/issues/4316)
+
+
 ## 3.2.0
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.1.0...3.2.0)
