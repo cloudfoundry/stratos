@@ -7,7 +7,7 @@ import { AppState } from '../../src/app-state';
 import { entityCatalog } from '../../src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../src/entity-catalog/entity-catalog.types';
 import { appReducers } from '../../src/reducers.module';
-import { getDefaultRequestState } from '../../src/reducers/api-request-reducer/types';
+import { getDefaultRequestState, rootUpdatingKey } from '../../src/reducers/api-request-reducer/types';
 import { getDefaultPaginationEntityState } from '../../src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
 import { NormalizedResponse } from '../../src/types/api.types';
 import { SessionData, SessionDataEndpoint } from '../../src/types/auth.types';
