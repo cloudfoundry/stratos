@@ -435,14 +435,11 @@ func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord
 // We use a single callback so this can be whitelisted in the client
 func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 	state := c.QueryParam("state")
-	if len(state) == 0 {
-		err := interfaces.NewHTTPShadowError(
-			http.StatusUnauthorized,
-			"SSO Login: State parameter missing",
-			"SSO Login: State parameter missing")
-		return err
-	}
 
+	stateErr := validateSSORedirectState(state, p.Config.SSOWhiteList)
+	if stateErr != nil {
+		return stateErr
+	}
 	// We use the same callback URL for both UAA and endpoint login
 	// Check if it is an endpoint login and dens to the right handler
 	endpointGUID := c.QueryParam("guid")
@@ -465,6 +462,7 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 		}
 		state = fmt.Sprintf("%s/login?SSO_Message=%s", state, url.QueryEscape(msg))
 	}
+
 
 	return c.Redirect(http.StatusTemporaryRedirect, state)
 }
@@ -519,15 +517,25 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 	}
 
 	state := c.QueryParam("state")
+	stateErr := validateSSORedirectState(state, p.Config.SSOWhiteList)
+	if stateErr != nil {
+		return stateErr
+	}
+
+	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.AuthorizationEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, state, "")))
+	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
+	return nil
+}
+
+func validateSSORedirectState(state string, whiteListStr string) error {
 	if len(state) == 0 {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
-			"SSO Login: Redirect state parameter missing",
-			"SSO Login: Redirect state parameter missing")
+			"SSO Login: State parameter missing",
+			"SSO Login: State parameter missing")
 		return err
 	}
-
-	if !safeSSORedirectState(state, p.Config.SSOWhiteList) {
+	if !safeSSORedirectState(state,whiteListStr) {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"SSO Login: Disallowed redirect state",
@@ -535,8 +543,6 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 		return err
 	}
 
-	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.AuthorizationEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, state, "")))
-	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 	return nil
 }
 
