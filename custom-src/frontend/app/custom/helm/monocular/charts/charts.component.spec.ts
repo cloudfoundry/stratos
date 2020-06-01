@@ -2,7 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { of } from 'rxjs';
 
 import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
 import { LoggerService } from '../../../../core/logger.service';
@@ -17,14 +19,13 @@ import { MenuService } from '../shared/services/menu.service';
 import { ReposService } from '../shared/services/repos.service';
 import { ChartsComponent } from './charts.component';
 
-// import { HeaderBarComponent } from '../header-bar/header-bar.component';
-// import { SeoService } from '../shared/services/seo.service';
-describe('Component: Charts', () => {
+describe('ChartsComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         HttpClientTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        RouterTestingModule
       ],
       declarations: [
         ChartsComponent,
@@ -32,16 +33,23 @@ describe('Component: Charts', () => {
         ChartItemComponent,
         LoaderComponent,
         PanelComponent,
-        // HeaderBarComponent
       ],
       providers: [
         HttpClient,
         ConfigService,
         MenuService,
         { provide: ChartsService, useValue: new MockChartService() },
-        // { provide: SeoService },
-        { provide: ActivatedRoute },
-        { provide: Router },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {},
+              queryParams: {}
+            },
+            queryParams: of({}),
+            params: of({})
+          }
+        },
         ReposService,
         LoggerService
       ],

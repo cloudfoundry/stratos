@@ -38,22 +38,6 @@ export const KubernetesBaseTestModules = [
   RouterTestingModule,
   CoreModule,
   createBasicStoreModule(),
-  // createBasicStoreModule({
-  //   auth: {
-  //     error: false,
-  //     errorResponse: {},
-  //     loggedIn: false,
-  //     loggingIn: false,
-  //     sessionData: {
-  //       config: {},
-  //       plugins: null,
-  //       sessionExpiresOn: 0,
-  //       valid: false,
-  //     },
-  //     user: null,
-  //     verifying: false,
-  //   },
-  // }),
   NoopAnimationsModule,
   HttpClientModule,
   SharedModule,
