@@ -94,6 +94,9 @@ export class EntityService<T = any> {
     this.waitForEntity$ = this.entityObs$.pipe(
       filter((ent) => {
         const { entityRequestInfo, entity } = ent;
+        // Note - isEntityAvailable does not block on updating, decision taken to ensure we show entity as soon as possible.
+        // This means, in the cf world, entities will be emitted here that are still in the validation process and as such may be missing
+        // required relations
         return this.isEntityAvailable(entity, entityRequestInfo);
       }),
       publishReplay(1),
