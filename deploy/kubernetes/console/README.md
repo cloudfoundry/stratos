@@ -155,10 +155,8 @@ helm repo update
 To update an instance, the following assumes your instance is called `my-console`:
 
 ```
-helm upgrade my-console stratos/console --recreate-pods
+helm upgrade my-console stratos/console
 ```
-
-> Note: You *must* use the `--recreate-pods` flag when upgrading
 
 After the upgrade, perform a `helm list` to ensure your console is the latest version.
 
