@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatRadioChange } from '@angular/material/radio';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { first, map, publishReplay, refCount, startWith, switchMap, take } from 'rxjs/operators';
+import { first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { PermissionConfig, PermissionTypes } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
@@ -83,18 +83,18 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
       refCount()
     );
 
-    this.blocked$ = combineLatest([this.canAdd$, this.canRemove$]).pipe(
-      map(([canAdd, canRemove]) => {
-        // Set initial value
-        if (canAdd && canRemove || canAdd) {
-          this.setIsRemove({ source: null, value: false });
-        } else {
-          this.setIsRemove({ source: null, value: true });
-        }
-        return false;
-      }),
+    const canAddRemove = combineLatest([this.canAdd$, this.canRemove$]);
+
+    // Set starting value of add/remove radio button
+    canAddRemove.pipe(first()).subscribe(([canAdd]) => this.setIsRemove({ source: null, value: !canAdd }))
+
+    // Block content until we know the add/remove state
+    this.blocked$ = canAddRemove.pipe(
+      map(() => false),
+      first(),
       startWith(true),
-      take(2)
+      publishReplay(1),
+      refCount(),
     );
 
   }
