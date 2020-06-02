@@ -10,14 +10,14 @@ export function isEndpointTypeFavorite(favorite: UserFavorite<IFavoriteMetadata>
 // Uses the endpoint definition to get the helper that can look up an entitty
 export function getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata>(
   entity,
-  entityKey: string,
+  entityType: string,
   favoritesConfigMapper: FavoritesConfigMapper,
-  entityType: string
+  endpointType: string
 ): UserFavorite<T> {
   // Use entity catalog to get favorite for the given endpoint type
-  const endpoint = entityCatalog.getEndpoint(entityType);
+  const endpoint = entityCatalog.getEndpoint(endpointType);
   if (endpoint && endpoint.definition && endpoint.definition.favoriteFromEntity) {
-    return endpoint.definition.favoriteFromEntity(entity, entityKey, favoritesConfigMapper);
+    return endpoint.definition.favoriteFromEntity(entity, entityType, favoritesConfigMapper);
   }
 
   return null;

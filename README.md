@@ -1,6 +1,6 @@
 # Stratos
 
-<a href="https://travis-ci.org/cloudfoundry/stratos/branches"><img src="https://travis-ci.org/cloudfoundry/stratos.svg?branch=master"></a>&nbsp;<a style="padding-left: 4px" href="https://codeclimate.com/github/cloudfoundry/stratos/maintainability"><img src="https://api.codeclimate.com/v1/badges/61af8b605f385e894632/maintainability" /></a>
+<a href="https://travis-ci.com/cloudfoundry/stratos/branches"><img src="https://travis-ci.com/cloudfoundry/stratos.svg?branch=master"></a>&nbsp;<a style="padding-left: 4px" href="https://codeclimate.com/github/cloudfoundry/stratos/maintainability"><img src="https://api.codeclimate.com/v1/badges/61af8b605f385e894632/maintainability" /></a>
 <a href="https://goreportcard.com/report/github.com/cloudfoundry/stratos"><img src="https://goreportcard.com/badge/github.com/cloudfoundry-incubator/stratos"/></a>
 <a href="https://codecov.io/gh/cloudfoundry/stratos/branch/master"><img src="https://codecov.io/gh/cloudfoundry/stratos/branch/graph/badge.svg"/></a>
 [![GitHub release](https://img.shields.io/github/release/cloudfoundry/stratos.svg)](https://github.com/cloudfoundry/stratos/releases/latest)

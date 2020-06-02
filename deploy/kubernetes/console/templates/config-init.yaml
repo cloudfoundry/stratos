@@ -102,6 +102,8 @@ spec:
 {{- end }}
       containers:
       - env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         - name: "STRATOS_VOLUME_MIGRATION"
           value: "true"
         - name: "IS_UPGRADE"
