@@ -122,6 +122,11 @@ export class SshViewerComponent implements OnInit, OnDestroy {
             for (const c of data.split(' ')) {
               this.xterm.write(String.fromCharCode(parseInt(c, 16)));
             }
+          } else {
+            console.log('Error')
+            const eMsg = this.errorMessage;
+            //this.disconnect();
+            this.errorMessage = eMsg;
           }
         },
         (err) => {
@@ -145,6 +150,11 @@ export class SshViewerComponent implements OnInit, OnDestroy {
         let title = '';
         for (let i = 4; i < chars.length - 1; i++) {
           title += String.fromCharCode(parseInt(chars[i], 16));
+        }
+        if (title.length > 0 && title.charAt(0) === '!') {
+          this.errorMessage = title.substr(1);
+          console.log(this.errorMessage);
+          return true;
         }
         this.message = title;
       }

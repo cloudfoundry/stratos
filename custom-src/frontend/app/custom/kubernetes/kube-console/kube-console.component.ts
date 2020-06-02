@@ -98,8 +98,9 @@ export class KubeConsoleComponent implements OnInit {
         tap(() => this.connectionStatus.next(1)),
         switchMap(getResponse => getResponse(this.sshInput)),
         catchError((e: Error) => {
+          console.log(e.message);
           if (e.message !== normalClosureMessage) {
-            this.errorMessage = 'Error connecting to web socket';
+            this.errorMessage = 'Error launching Kubernetes Terminal';
           }
           return [];
         }));

@@ -1,7 +1,7 @@
 <div class="ssh-viewer">
   <div class="ssh-viewer__overlay" *ngIf="!message && (errorMessage || !isConnected)">
     <div class="ssh-viewer__error" *ngIf="errorMessage">
-      Error occurred establishing SSH connection
+      {{ errorMessage || 'Error occurred establishing SSH connection' }}
     </div>
     <div class="ssh-viewer__disconnected" *ngIf="!errorMessage && !isConnected && !isConnecting">
         Disconnected

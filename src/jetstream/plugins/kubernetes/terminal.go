@@ -2,34 +2,33 @@ package kubernetes
 
 import (
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"fmt"
-	"crypto/tls"
+
 	//"encoding/base64"
 	"encoding/json"
 	"net"
 	"net/http"
-	"time"
 	"strings"
-	//"io/ioutil"
-	//yaml "gopkg.in/yaml.v2"
+	"time"
 
-	uuid "github.com/satori/go.uuid"
 	"github.com/labstack/echo"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	restclient "k8s.io/client-go/rest"
-	//"k8s.io/kubernetes/pkg/client/unversioned/remotecommand"
+
 	"github.com/gorilla/websocket"
-	"k8s.io/client-go/kubernetes"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	"k8s.io/client-go/tools/remotecommand"	
 	scheme "k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/remotecommand"
 )
 
 const (
@@ -47,13 +46,13 @@ var upgrader = websocket.Upgrader{
 
 // PodCreationData stores the clients and names used ot create pod and secret
 type PodCreationData struct {
-	ClientSet *kubernetes.Clientset
-	Config *restclient.Config
-	Namespace string
-	PodClient corev1.PodInterface
+	ClientSet    *kubernetes.Clientset
+	Config       *restclient.Config
+	Namespace    string
+	PodClient    corev1.PodInterface
 	SecretClient corev1.SecretInterface
-	PodName string
-	SecretName string
+	PodName      string
+	SecretName   string
 }
 
 // KeyCode - JSON object that is passed from the front-end to notify of a key press or a term resize
@@ -63,7 +62,7 @@ type KeyCode struct {
 	Rows int    `json:"rows"`
 }
 
-type TermianlSize struct {
+type terminalSize struct {
 	Width  uint16
 	Height uint16
 }
@@ -73,7 +72,24 @@ const (
 	writeWait = 10 * time.Second
 )
 
-func (k *KubernetesSpecification) KubeConsole(c echo.Context) error {
+// Determine if we Kube Terminal is supported
+// TODO
+// Check namespace
+// Check we have secret for pod creation/deletion
+// Image for the terminal
+
+// Environment variables that we expect to see
+// STRATOS_KUBERNETES_NAMESPACE
+// STRATOS_KUBERNETES_TERMINAL_IMAGE
+
+// For development, you can overide the token to use with the Kubernetes API, with:
+// STRATOS_KUBERNETES_API_TOKEN
+
+// Start periodic routing to clean up pods that are orphaned
+// TODO
+
+// KubeTerminal handles web-socket request to launch a Kubernetes Terminal
+func (k *KubernetesSpecification) KubeTerminal(c echo.Context) error {
 
 	c.Response().Status = 500
 
@@ -120,6 +136,9 @@ func (k *KubernetesSpecification) KubeConsole(c echo.Context) error {
 		log.Error("ERROR creating secret or pod")
 		log.Info(err)
 		k.cleanupPodAndSecret(podData)
+
+		// Send error message
+		sendProgressMessage(ws, "!"+err.Error())
 		return err
 	}
 
@@ -143,44 +162,45 @@ func (k *KubernetesSpecification) KubeConsole(c echo.Context) error {
 	// 	return errors.New("Could not get config for this auth type")
 	// }
 
+	// req, err := http.NewRequest("POST", target, nil)
+	// if err != nil {
+	// 	k.cleanupPodAndSecret(podData)
+	// 	return errors.New("Could not create new HTTP request")
+	// }
 
-	req, err := http.NewRequest("POST", target, nil)
-	if err != nil {
-		k.cleanupPodAndSecret(podData)		
-		return errors.New("Could not create new HTTP request")
-	}
-	
-	// Set auth header so we log in if needed
-	if len(tokenRec.AuthToken) > 0 {
-		//req.Header.Add("Authorization", "Bearer "+tokenRec.AuthToken)
-		log.Info("Setting auth header")
-	}
+	// // TODO: Check response code
+	// log.Info(re)
 
-	//req.Header.Add("Accept", "*/*")
-
-	log.Info("Config")
-	log.Info("Making request")
-	log.Info(req)
+	// // Set auth header so we log in if needed
+	// if len(tokenRec.AuthToken) > 0 {
+	// 	//req.Header.Add("Authorization", "Bearer "+tokenRec.AuthToken)
+	// 	log.Info("Setting auth header")
+	// }
 
 	// endpointRequest := &interfaces.CNSIRequest{
 	// 	GUID: endpointGUID,
 	// }
 
+	// TODO: Make generic
+
+	// What is the token for ???
 	kubeAuthToken := &auth.KubeCertificate{}
 	err = json.NewDecoder(strings.NewReader(tokenRec.AuthToken)).Decode(kubeAuthToken)
 	if err != nil {
-		k.cleanupPodAndSecret(podData)		
+		k.cleanupPodAndSecret(podData)
 		return err
 	}
 	cert, err := kubeAuthToken.GetCerticate()
 	if err != nil {
-		k.cleanupPodAndSecret(podData)		
+		k.cleanupPodAndSecret(podData)
 		return err
 	}
 	dial := (&net.Dialer{
 		Timeout:   time.Duration(30) * time.Second,
 		KeepAlive: 30 * time.Second,
 	}).Dial
+
+	// TODO: Not sure about the cert here? I don't think we need this like it is - wonder why I did that?
 
 	sslTransport := &http.Transport{
 		Proxy:               http.ProxyFromEnvironment,
@@ -193,10 +213,11 @@ func (k *KubernetesSpecification) KubeConsole(c echo.Context) error {
 		MaxIdleConnsPerHost: 6, // (default is 2)
 	}
 
-	kubeCertClient := http.Client{}
-	kubeCertClient.Transport = sslTransport
-	kubeCertClient.Timeout = time.Duration(30) * time.Second
+	kubeHTTPClient := http.Client{}
+	kubeHTTPClient.Transport = sslTransport
+	kubeHTTPClient.Timeout = time.Duration(30) * time.Second
 
+	// This dialer does not use the kubeHttpClient  - is it unused?
 	dialer := &websocket.Dialer{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
@@ -204,7 +225,7 @@ func (k *KubernetesSpecification) KubeConsole(c echo.Context) error {
 		},
 	}
 
-	if strings.HasPrefix(target ,"https://") {
+	if strings.HasPrefix(target, "https://") {
 		target = "wss://" + target[8:]
 	} else {
 		target = "ws://" + target[7:]
@@ -217,48 +238,18 @@ func (k *KubernetesSpecification) KubeConsole(c echo.Context) error {
 		defer wsConn.Close()
 	}
 
-	// log.Info(err)
-	// log.Info(res)
-	// log.Info(wsConn)
+	// Check res
+	log.Warn("== Status ===========================================")
+	log.Info(res.Status)
+	log.Info(res.StatusCode)
 
-	// if kubeAuthToken.Token != "" {
-	// 	req.Header.Set("Authorization", "bearer "+kubeAuthToken.Token)
-	// }
-
-	//res, err := kubeCertClient.Do(req)
-
-
-	kubeCertClient.CloseIdleConnections()
-
-	//var res *http.Response
-
-	// var client http.Client
-	// client = p.GetHttpClientForRequest(req, cnsiRecord.SkipSSLValidation)
-	// res, err = client.Do(req)
-
-	// Find the auth provider for the auth type - default to oauthflow
-	// authHandler := p.GetAuthProvider(tokenRec.AuthType)
-	// if authHandler.Handler != nil {
-	// 	res, err = authHandler.Handler(endpointRequest, req)
-	// } else {
-	// 	res, err = p.DoOAuthFlowRequest(endpointRequest, req)
-	// }
-	log.Error(err)
-//	log.Error(res)
+	kubeHTTPClient.CloseIdleConnections()
 
 	if err != nil {
-		log.Error("Failed to make request")
 		k.cleanupPodAndSecret(podData)
 		return errors.New("Could not make request")
 	}
 
-	log.Error("=== Made request to exec endpoint OK")
-	log.Error(res)
-
-	// Websockets next
-	//log.Info(wsConn)
-
-	//done := make(chan struct{})
 	stdoutDone := make(chan struct{})
 	go pumpStdout(ws, wsConn, stdoutDone)
 
@@ -266,9 +257,8 @@ func (k *KubernetesSpecification) KubeConsole(c echo.Context) error {
 	for {
 		_, r, err := ws.ReadMessage()
 		if err != nil {
-			log.Error("Error reading message from web socket")
-			log.Warnf("%v+", err)
-			k.cleanupPodAndSecret(podData)			
+			log.Errorf("Kubernetes terminal: error reading message from web socket: %+v", err)
+			k.cleanupPodAndSecret(podData)
 			return err
 		}
 
@@ -276,36 +266,26 @@ func (k *KubernetesSpecification) KubeConsole(c echo.Context) error {
 		json.Unmarshal(r, &res)
 
 		if res.Cols == 0 {
-
-
 			slice := make([]byte, 1)
 			slice[0] = 0
 			slice = append(slice, []byte(res.Key)...)
 			wsConn.WriteMessage(websocket.TextMessage, slice)
 		} else {
-			// Terminal resize request
-			// if err := windowChange(session, res.Rows, res.Cols); err != nil {
-			// 	log.Error("Can not resize the PTY")
-			// }
-			log.Error("Terminal resize receieved")
-
-			size := TermianlSize{
-				Width: uint16(res.Cols),
+			size := terminalSize{
+				Width:  uint16(res.Cols),
 				Height: uint16(res.Rows),
 			}
 			j, _ := json.Marshal(size)
-			log.Info(j)
-
 			resizeStream := []byte{4}
 			slice := append(resizeStream, j...)
-			log.Info(slice)
 			wsConn.WriteMessage(websocket.TextMessage, slice)
 		}
 	}
 
 	// Cleanup
-	log.Info("*** Cleaning up.... ***")
+	log.Debug("Kubernetes Terminal is cleaning up")
 
+	// This is unreachable????
 	return k.cleanupPodAndSecret(podData)
 }
 
@@ -321,7 +301,7 @@ func pumpStdout(ws *websocket.Conn, source *websocket.Conn, done chan struct{}) 
 		ws.SetWriteDeadline(time.Now().Add(writeWait))
 		bytes := fmt.Sprintf("% x\n", r[1:])
 		if err := ws.WriteMessage(websocket.TextMessage, []byte(bytes)); err != nil {
-			log.Error("App SSH Failed to write nessage")
+			log.Error("Kubernetes Terimnal failed to write nessage")
 			ws.Close()
 			break
 		}
@@ -343,7 +323,7 @@ func (k *KubernetesSpecification) createPod(c echo.Context, cnsiRecord interface
 
 	result.Config = config
 
-	kubeConfig, err := k.GetKubeConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRecord)
+	kubeConfig, err := k.GetKubeConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRecord, namespace)
 	if err != nil {
 		return result, errors.New("Can not get Kubernetes config for specified endpoint")
 	}
@@ -360,11 +340,11 @@ func (k *KubernetesSpecification) createPod(c echo.Context, cnsiRecord interface
 	// Create the secret
 	secretSpec := &v1.Secret{
 		TypeMeta: metav1.TypeMeta{
-			Kind: "secret",
+			Kind:       "secret",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: secretName,
+			Name:      secretName,
 			Namespace: namespace,
 		},
 		Type: "Opaque",
@@ -373,7 +353,7 @@ func (k *KubernetesSpecification) createPod(c echo.Context, cnsiRecord interface
 	secretSpec.Data = make(map[string][]byte)
 	secretSpec.Data["kubeconfig"] = []byte(kubeConfig)
 	secretSpec.Data["history"] = []byte(history)
-	
+
 	// Get Helm repository script if we have Helm repositories
 	helmSetup := getHelmRepoSetupScript(k.portalProxy)
 	if len(helmSetup) > 0 {
@@ -395,11 +375,11 @@ func (k *KubernetesSpecification) createPod(c echo.Context, cnsiRecord interface
 
 	podSpec := &v1.Pod{
 		TypeMeta: metav1.TypeMeta{
-			Kind: "pod",
+			Kind:       "pod",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: podName,
+			Name:      podName,
 			Namespace: namespace,
 		},
 	}
@@ -407,7 +387,7 @@ func (k *KubernetesSpecification) createPod(c echo.Context, cnsiRecord interface
 	podSpec.ObjectMeta.Annotations = make(map[string]string)
 
 	// Record the session ID
-	session, err :=k.portalProxy.GetSession(c)
+	session, err := k.portalProxy.GetSession(c)
 	if err == nil {
 		podSpec.ObjectMeta.Annotations["stratos-session"] = session.ID
 		log.Infof("Session ID: %s", session.ID)
@@ -435,7 +415,7 @@ func (k *KubernetesSpecification) createPod(c echo.Context, cnsiRecord interface
 	volumesSpec[0].Secret = &v1.SecretVolumeSource{
 		SecretName: secretName,
 	}
-	podSpec.Spec.Volumes = volumesSpec	
+	podSpec.Spec.Volumes = volumesSpec
 
 	// Create a new pod
 	pod, err := podClient.Create(podSpec)
@@ -446,7 +426,7 @@ func (k *KubernetesSpecification) createPod(c echo.Context, cnsiRecord interface
 	result.PodClient = podClient
 	result.PodName = podName
 
-	sendProgressMessage(ws, "Waiting for Kubernetes Console to start up ...")
+	sendProgressMessage(ws, "Waiting for Kubernetes Terminal to start up ...")
 
 	statusOptions := metav1.GetOptions{}
 
@@ -518,6 +498,7 @@ func sendProgressMessage(ws *websocket.Conn, progressMsg string) {
 	}
 }
 
+// Not used?
 func captureBashHistory(podData *PodCreationData) error {
 
 	log.Warn("**** Trying to capture bash history from pod ****")
@@ -530,14 +511,13 @@ func captureBashHistory(podData *PodCreationData) error {
 	//cmd := []string{"bash", "-c", "\"cat $HISTFILE\""}
 	cmd := []string{"cat", "/root/.bash_history"}
 
-
-	req := podData.ClientSet.Core().RESTClient().Post().
+	req := podData.ClientSet.CoreV1().RESTClient().Post().
 		Resource("pods").
 		Name(podData.PodName).
 		Namespace(podData.Namespace).
 		SubResource("exec").
 		Param("container", consoleContainerName)
-			
+
 	req.VersionedParams(&v1.PodExecOptions{
 		Container: consoleContainerName,
 		Command:   cmd,
@@ -546,7 +526,7 @@ func captureBashHistory(podData *PodCreationData) error {
 		Stderr:    false,
 		TTY:       true,
 	}, scheme.ParameterCodec)
-	
+
 	var stdout bytes.Buffer
 	//err := execute("POST", req.URL(), nil, nil, &stdout, nil, false)
 
@@ -561,10 +541,10 @@ func captureBashHistory(podData *PodCreationData) error {
 
 	err = exec.Stream(remotecommand.StreamOptions{
 		//SupportedProtocols: remotecommandserver.SupportedStreamingProtocols,
-		Stdin:              nil,
-		Stdout:             &stdout,
-		Stderr:             nil,
-		Tty:                true,
+		Stdin:  nil,
+		Stdout: &stdout,
+		Stderr: nil,
+		Tty:    true,
 	})
 
 	log.Error("Get Bash History")
@@ -572,11 +552,11 @@ func captureBashHistory(podData *PodCreationData) error {
 	log.Error(stdout.String())
 
 	history = stdout.String()
-	
-		// if options.PreserveWhitespace {
-		// 	return stdout.String(), stderr.String(), err
-		// }
-		// return strings.TrimSpace(stdout.String()), strings.TrimSpace(stderr.String()), err	
+
+	// if options.PreserveWhitespace {
+	// 	return stdout.String(), stderr.String(), err
+	// }
+	// return strings.TrimSpace(stdout.String()), strings.TrimSpace(stderr.String()), err
 
 	return nil
 }

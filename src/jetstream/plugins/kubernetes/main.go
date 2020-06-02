@@ -14,12 +14,15 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/terminal"
 )
 
 // KubernetesSpecification is the endpoint that adds Kubernetes support to the backend
 type KubernetesSpecification struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
+	kubeTerminal *terminal.KubeTerminal
 }
 
 type KubeStatus struct {
@@ -53,8 +56,10 @@ const (
 	kubeDashboardPluginConfigSetting = "kubeDashboardEnabled"
 )
 
+// Init creates a new instance of the Kubernetes plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
-	return &KubernetesSpecification{portalProxy: portalProxy, endpointType: kubeEndpointType}, nil
+	kubeTerminal := terminal.NewKubeTerminal(portalProxy)
+	return &KubernetesSpecification{portalProxy: portalProxy, endpointType: kubeEndpointType, kubeTerminal: kubeTerminal}, nil
 }
 
 func (c *KubernetesSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
@@ -160,7 +165,7 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name", c.GetRelease)
 
 	// Kube Terminal
-	echoGroup.GET("/kubeconsole/:guid", c.KubeConsole)
+	echoGroup.GET("/kubeconsole/:guid", c.KubeTerminal)
 
 }
 

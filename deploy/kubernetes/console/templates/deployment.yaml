@@ -71,6 +71,10 @@ spec:
         env:
         - name: STRATOS_HELM_RELEASE
           value: "{{ .Release.Name }}"
+        - name: STRATOS_KUBERNETES_NAMESPACE
+          value: "{{ .Release.Namespace }}"
+        - name: STRATOS_KUBERNETES_TERMINAL_IMAGE
+          value: "{{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-kube-terminal:{{.Values.consoleVersion}}"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
