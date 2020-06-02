@@ -6,8 +6,8 @@ import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/c
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { CFFeatureFlagTypes } from '../../../../../../../../../core/src/shared/components/cf-auth/cf-auth.types';
 import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
+import { CFFeatureFlagTypes } from '../../../../../../../cf-api.types';
 import {
   CfSpaceUsersListConfigService,
 } from '../../../../../../../shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service';

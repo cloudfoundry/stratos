@@ -1,5 +1,5 @@
-import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../core/src/core/cf-api.types';
 import { APIResource } from '../../../store/src/types/api.types';
+import { IOrganization, IOrgQuotaDefinition, ISpace } from '../cf-api.types';
 
 export const entityRelationMissingSpacesUrl = 'spaces_url';
 export const entityRelationMissingQuotaGuid = 'quota_guid';
@@ -12,7 +12,8 @@ export class EntityRelationSpecHelper {
       entity: {
         name,
         spaces_url: entityRelationMissingSpacesUrl,
-        quota_definition_url: entityRelationMissingQuotaUrl
+        quota_definition_url: entityRelationMissingQuotaUrl,
+        domains: []
       },
       metadata: {
         guid,

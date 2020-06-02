@@ -1,6 +1,7 @@
 import { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/api.selectors';
+import { metricEntityType } from '../../../core/src/base-entity-schemas';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 
 export const appAutoscalerInfoEntityType = 'autoscalerInfo';
@@ -9,6 +10,7 @@ export const appAutoscalerPolicyEntityType = 'autoscalerPolicy';
 export const appAutoscalerPolicyTriggerEntityType = 'autoscalerPolicyTrigger';
 export const appAutoscalerScalingHistoryEntityType = 'autoscalerScalingHistory';
 export const appAutoscalerAppMetricEntityType = 'autoscalerAppMetric';
+export const appAutoscalerCredentialEntityType = 'autoscalerCredential'
 
 export const AUTOSCALER_ENDPOINT_TYPE = 'autoscaler';
 
@@ -40,6 +42,12 @@ entityCache[appAutoscalerInfoEntityType] = new AutoscalerEntitySchema(
   { idAttribute: getAPIResourceGuid }
 );
 
+entityCache[appAutoscalerCredentialEntityType] = new AutoscalerEntitySchema(
+  appAutoscalerCredentialEntityType,
+  {},
+  { idAttribute: getAPIResourceGuid }
+);
+
 entityCache[appAutoscalerPolicyEntityType] = new AutoscalerEntitySchema(
   appAutoscalerPolicyEntityType,
   {},
@@ -66,6 +74,9 @@ entityCache[appAutoscalerAppMetricEntityType] = new AutoscalerEntitySchema(
   {},
   { idAttribute: getAPIResourceGuid }
 );
+
+const MetricSchema = new AutoscalerEntitySchema(metricEntityType);
+entityCache[metricEntityType] = MetricSchema;
 
 export function autoscalerEntityFactory(key: string): EntitySchema {
   const entity = entityCache[key];

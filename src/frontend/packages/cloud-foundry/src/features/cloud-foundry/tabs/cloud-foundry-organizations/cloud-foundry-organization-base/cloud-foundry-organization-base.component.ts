@@ -11,7 +11,7 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../../../../core/src/core/extension/extension-service';
-import { getFavoriteFromCfEntity } from '../../../../../../../core/src/core/user-favorite-helpers';
+import { getFavoriteFromEntity } from '../../../../../../../core/src/core/user-favorite-helpers';
 import { environment } from '../../../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import {
@@ -21,7 +21,11 @@ import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/componen
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
@@ -34,7 +38,8 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
     CloudFoundryEndpointService,
-    CloudFoundryOrganizationService
+    CloudFoundryOrganizationService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class CloudFoundryOrganizationBaseComponent {
@@ -92,7 +97,7 @@ export class CloudFoundryOrganizationBaseComponent {
     this.schema = cfEntityFactory(organizationEntityType);
     this.favorite$ = cfOrgService.org$.pipe(
       first(),
-      map(org => getFavoriteFromCfEntity<IOrgFavMetadata>(org.entity, organizationEntityType, favoritesConfigMapper))
+      map(org => getFavoriteFromEntity<IOrgFavMetadata>(org.entity, organizationEntityType, favoritesConfigMapper, CF_ENDPOINT_TYPE))
     );
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),

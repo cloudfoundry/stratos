@@ -86,7 +86,7 @@ src/backend/*/vendor/
 .v8flags*
 
 *.bak
-./secrets.yaml
+/secrets.yaml
 build/dev_config.json
 e2e-reports/
 .stratos-git-metadata.json

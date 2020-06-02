@@ -1,13 +1,11 @@
 import { Action } from '@ngrx/store';
-import { appStatsEntityType } from '../../../cloud-foundry/src/cf-entity-types';
+
 import { IRequestEntityTypeState } from '../app-state';
 import { IRequestState } from '../types/entity.types';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
 import { RequestInfoState } from './api-request-reducer/types';
 import { chainApiReducers, ExtraApiReducers, requestActions } from './api-request-reducers.generator.helpers';
-import { appStatsReducer } from '../../../cloud-foundry/src/store/reducers/app-stats-request.reducer';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
-import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
+
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -16,7 +14,7 @@ import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 
 const baseRequestReducer = requestReducerFactory(requestActions);
 const extraReducers = {
-  [entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, appStatsEntityType)]: [appStatsReducer]
+  // ['entityKey']: [ reducer ]
 } as ExtraApiReducers<IRequestEntityTypeState<RequestInfoState>>;
 const chainedReducers = chainApiReducers<IRequestEntityTypeState<RequestInfoState>>(baseRequestReducer, extraReducers);
 

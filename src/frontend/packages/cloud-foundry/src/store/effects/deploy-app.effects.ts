@@ -6,7 +6,7 @@ import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/src/core/logger.service';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import {
@@ -18,10 +18,12 @@ import {
 import {
   CHECK_PROJECT_EXISTS,
   CheckProjectExists,
+  FETCH_BRANCH_FOR_PROJECT,
   FETCH_BRANCHES_FOR_PROJECT,
   FETCH_COMMIT,
   FETCH_COMMITS,
   FetchBranchesForProject,
+  FetchBranchForProject,
   FetchCommit,
   FetchCommits,
   ProjectDoesntExist,
@@ -123,6 +125,38 @@ export class DeployAppEffects {
     }));
 
   @Effect()
+  fetchBranch$ = this.actions$.pipe(
+    ofType<FetchBranchForProject>(FETCH_BRANCH_FOR_PROJECT),
+    mergeMap(action => {
+      const actionType = 'fetch';
+      const apiAction = {
+        entityType: gitBranchesEntityType,
+        endpointType: CF_ENDPOINT_TYPE,
+        type: action.type,
+        guid: action.guid
+      };
+      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      return action.scm.getBranch(this.httpClient, action.projectName, action.branchName).pipe(
+        mergeMap(branch => {
+          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
+          const mappedData: NormalizedResponse = {
+            entities: { [entityKey]: {} },
+            result: []
+          };
+          branch.projectId = action.projectName;
+          branch.entityId = action.guid;
+          mappedData.entities[entityKey][action.guid] = branch;
+          mappedData.result.push(action.guid);
+          return [
+            new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+          ];
+        }),
+        catchError(err => [
+          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err, this.logger), apiAction, actionType)
+        ]));
+    }));
+
+  @Effect()
   fetchCommit$ = this.actions$.pipe(
     ofType<FetchCommit>(FETCH_COMMIT),
     mergeMap(action => {
@@ -182,7 +216,7 @@ export class DeployAppEffects {
     }));
 
   addCommit(entityKey: string, mappedData: NormalizedResponse, scmType: string, projectName: string, commit: GitCommit) {
-    const id = scmType + '-' + projectName + '-' + commit.sha;
+    const id = scmType + '-' + projectName + '-' + commit.sha; // FIXME: get from action, see #4245
     mappedData.entities[entityKey][id] = commit;
     // mappedData.entities[entityKey][id] = {
     //   entity: commit,

@@ -8,14 +8,17 @@ import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/sr
 import { FetchApplicationMetricsAction } from '../../../../../../../cloud-foundry/src/actions/cf-metrics.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { UtilsService } from '../../../../../../../core/src/core/utils.service';
-import { CfCellHelper } from '../../../../../../../core/src/features/cloud-foundry/cf-cell.helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
   getIntegerFieldSortFunction,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListAction, IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import {
+  IListAction,
+  IListConfig,
+  ListViewTypes,
+} from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
@@ -23,12 +26,12 @@ import { PaginationMonitorFactory } from '../../../../../../../store/src/monitor
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
+import { CfCellHelper } from '../../../../../features/cloud-foundry/cf-cell.helpers';
 import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
 
-// TODO: Move file to CF package (#3769)
 export function createAppInstancesMetricAction(appGuid: string, cfGuid: string): FetchApplicationMetricsAction {
   return new FetchApplicationMetricsAction(
     appGuid,

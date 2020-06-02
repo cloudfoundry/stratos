@@ -1,10 +1,10 @@
+import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAppServiceBindings } from '../actions/application-service-routes.actions';
 import { CreateServiceBinding, DeleteServiceBinding, FetchAllServiceBindings } from '../actions/service-bindings.actions';
 import { ListServiceBindingsForInstance } from '../actions/service-instances.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
-import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 
-export interface ServiceBindingActionBuilders extends CFOrchestratedActionBuilders {
+export interface ServiceBindingActionBuilders extends OrchestratedActionBuilders {
   create: (
     id: string,
     endpointGuid: string,
@@ -54,7 +54,7 @@ export const serviceBindingActionBuilders: ServiceBindingActionBuilders = {
   getMultiple: (
     endpointGuid,
     paginationKey,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {},
   ) => new FetchAllServiceBindings(
     endpointGuid,
     paginationKey,

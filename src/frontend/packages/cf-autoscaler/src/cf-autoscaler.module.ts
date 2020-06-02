@@ -5,15 +5,16 @@ import { EffectsModule } from '@ngrx/effects';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { of } from 'rxjs';
 
-import { CloudFoundryComponentsModule } from '../../cloud-foundry/src/shared/components/components.module';
+import { CloudFoundrySharedModule } from '../../cloud-foundry/src/shared/cf-shared.module';
 import { CoreModule } from '../../core/src/core/core.module';
-import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
+import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { AutoscalerModule } from './core/autoscaler.module';
 import { AutoscalerTabExtensionComponent } from './features/autoscaler-tab-extension/autoscaler-tab-extension.component';
 import { generateASEntities } from './store/autoscaler-entity-generator';
 import { AutoscalerEffects } from './store/autoscaler.effects';
+import { ExtensionService } from 'frontend/packages/core/src/core/extension/extension-service';
 
 // FIXME Work out why we need this and remove it.
 const customRoutes: Routes = [
@@ -38,12 +39,15 @@ const customRoutes: Routes = [
     SharedModule,
     MDAppModule,
     NgxChartsModule,
-    CloudFoundryComponentsModule,
+    CloudFoundrySharedModule,
     AutoscalerModule,
     RouterModule.forRoot(customRoutes),
     EntityCatalogModule.forFeature(generateASEntities),
     EffectsModule.forFeature([
       AutoscalerEffects
+    ]),
+    ExtensionService.declare([
+      AutoscalerTabExtensionComponent,
     ])
   ],
   declarations: [

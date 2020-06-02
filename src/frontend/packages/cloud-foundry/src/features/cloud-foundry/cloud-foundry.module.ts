@@ -3,40 +3,8 @@ import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
-import { AddQuotaComponent } from '../../../../core/src/features/cloud-foundry/add-quota/add-quota.component';
-import {
-  CreateQuotaStepComponent,
-} from '../../../../core/src/features/cloud-foundry/add-quota/create-quota-step/create-quota-step.component';
-import {
-  AddSpaceQuotaComponent,
-} from '../../../../core/src/features/cloud-foundry/add-space-quota/add-space-quota.component';
-import {
-  CreateSpaceQuotaStepComponent,
-} from '../../../../core/src/features/cloud-foundry/add-space-quota/create-space-quota-step/create-space-quota-step.component';
-import {
-  EditQuotaStepComponent,
-} from '../../../../core/src/features/cloud-foundry/edit-quota/edit-quota-step/edit-quota-step.component';
-import { EditQuotaComponent } from '../../../../core/src/features/cloud-foundry/edit-quota/edit-quota.component';
-import {
-  EditSpaceQuotaStepComponent,
-} from '../../../../core/src/features/cloud-foundry/edit-space-quota/edit-space-quota-step/edit-space-quota-step.component';
-import {
-  EditSpaceQuotaComponent,
-} from '../../../../core/src/features/cloud-foundry/edit-space-quota/edit-space-quota.component';
-import {
-  QuotaDefinitionFormComponent,
-} from '../../../../core/src/features/cloud-foundry/quota-definition-form/quota-definition-form.component';
-import {
-  SpaceQuotaDefinitionFormComponent,
-} from '../../../../core/src/features/cloud-foundry/space-quota-definition-form/space-quota-definition-form.component';
-import {
-  CloudFoundryOrganizationSpaceQuotasComponent,
-} from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-organizations/cloud-foundry-organization-space-quotas/cloud-foundry-organization-space-quotas.component';
-import {
-  CloudFoundryQuotasComponent,
-} from '../../../../core/src/features/cloud-foundry/tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { CloudFoundryComponentsModule } from '../../shared/components/components.module';
+import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
 import {
   CFEndpointsListConfigService,
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
@@ -44,6 +12,10 @@ import { AddOrganizationComponent } from './add-organization/add-organization.co
 import {
   CreateOrganizationStepComponent,
 } from './add-organization/create-organization-step/create-organization-step.component';
+import { AddQuotaComponent } from './add-quota/add-quota.component';
+import { CreateQuotaStepComponent } from './add-quota/create-quota-step/create-quota-step.component';
+import { AddSpaceQuotaComponent } from './add-space-quota/add-space-quota.component';
+import { CreateSpaceQuotaStepComponent } from './add-space-quota/create-space-quota-step/create-space-quota-step.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
@@ -54,11 +26,17 @@ import { CloudFoundryRoutingModule } from './cloud-foundry.routing';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
 import { EditOrganizationStepComponent } from './edit-organization/edit-organization-step/edit-organization-step.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
+import { EditQuotaStepComponent } from './edit-quota/edit-quota-step/edit-quota-step.component';
+import { EditQuotaComponent } from './edit-quota/edit-quota.component';
+import { EditSpaceQuotaStepComponent } from './edit-space-quota/edit-space-quota-step/edit-space-quota-step.component';
+import { EditSpaceQuotaComponent } from './edit-space-quota/edit-space-quota.component';
 import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-step.component';
 import { EditSpaceComponent } from './edit-space/edit-space.component';
+import { QuotaDefinitionFormComponent } from './quota-definition-form/quota-definition-form.component';
 import { QuotaDefinitionComponent } from './quota-definition/quota-definition.component';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
+import { SpaceQuotaDefinitionFormComponent } from './space-quota-definition-form/space-quota-definition-form.component';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition/space-quota-definition.component';
 import { CfAdminAddUserWarningComponent } from './tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
@@ -79,6 +57,9 @@ import { CloudFoundryCellsComponent } from './tabs/cloud-foundry-cells/cloud-fou
 import { CloudFoundryEventsComponent } from './tabs/cloud-foundry-events/cloud-foundry-events.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
+import {
+  CloudFoundryOrganizationSpaceQuotasComponent,
+} from './tabs/cloud-foundry-organization-space-quotas/cloud-foundry-organization-space-quotas.component';
 import {
   CloudFoundryInviteUserLinkComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-invite-user-link/cloud-foundry-invite-user-link.component';
@@ -124,6 +105,7 @@ import {
 import {
   CloudFoundryOrganizationsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organizations.component';
+import { CloudFoundryQuotasComponent } from './tabs/cloud-foundry-quotas/cloud-foundry-quotas.component';
 import { CloudFoundryRoutesComponent } from './tabs/cloud-foundry-routes/cloud-foundry-routes.component';
 import {
   CloudFoundrySecurityGroupsComponent,
@@ -134,7 +116,7 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
 import {
   UserInviteConfigurationDialogComponent,
 } from './user-invites/configuration-dialog/user-invite-configuration-dialog.component';
-import { UserInviteService } from './user-invites/user-invite.service';
+import { UserInviteConfigureService, UserInviteService } from './user-invites/user-invite.service';
 import { InviteUsersCreateComponent } from './users/invite-users/invite-users-create/invite-users-create.component';
 import { InviteUsersComponent } from './users/invite-users/invite-users.component';
 import { UsersRolesConfirmComponent } from './users/manage-users/manage-users-confirm/manage-users-confirm.component';
@@ -158,7 +140,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CloudFoundryRoutingModule,
     RouterModule,
     NgxChartsModule,
-    CloudFoundryComponentsModule
+    CloudFoundrySharedModule
   ],
   declarations: [
     CloudFoundryBaseComponent,
@@ -245,6 +227,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     // CfRolesService,
     CloudFoundryCellService,
     UserInviteService,
+    UserInviteConfigureService
   ],
   entryComponents: [
     UserInviteConfigurationDialogComponent

@@ -1,4 +1,5 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -10,7 +11,6 @@ import { ListConfig } from '../../../../../../../core/src/shared/components/list
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { UserListUsersVisible, userListUserVisibleKey } from './cf-user-list-helpers';
 
 function createUserVisibilityFilter(userHasRoles: (user: CfUser) => boolean):

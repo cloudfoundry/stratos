@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { getServicePlanName } from '../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { ServicesService } from '../../../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { IServicePlan } from '../../../../../../../core/src/core/cf-api-svc.types';
 import {
   IListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
@@ -17,6 +16,7 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { IServicePlan } from '../../../../../cf-api-svc.types';
 import { ServicePlansDataSource } from './service-plans-data-source';
 import {
   TableCellAServicePlanExtrasComponent,

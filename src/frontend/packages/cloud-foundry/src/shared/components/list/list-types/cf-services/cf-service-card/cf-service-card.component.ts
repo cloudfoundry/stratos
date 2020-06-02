@@ -3,14 +3,14 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { IService, IServiceExtra } from '../../../../../../../../core/src/core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/services/cf-org-space-label.service';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 import { getServiceBrokerName, getServiceName } from '../../../../../../features/service-catalog/services-helper';
+import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
 export interface ServiceTag {
   value: string;
@@ -50,7 +50,6 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
         this.serviceBrokerName$ = getServiceBrokerName(
           this.serviceEntity.entity.service_broker_guid,
           this.serviceEntity.entity.cfGuid,
-          this.entityServiceFactory
         );
       }
     }
@@ -58,7 +57,6 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
 
   constructor(
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory
   ) {
     super();
   }

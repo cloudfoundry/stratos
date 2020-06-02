@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { LoggerService } from 'frontend/packages/core/src/core/logger.service';
 import { IPageSideNavTab } from 'frontend/packages/core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { AppState } from 'frontend/packages/store/src/app-state';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
 import { PaginatedAction } from 'frontend/packages/store/src/types/pagination.types';
 import { EntityRequestAction, WrapperRequestActionSuccess } from 'frontend/packages/store/src/types/request.types';
 import { Observable, Subject, Subscription } from 'rxjs';

@@ -7,7 +7,7 @@ import { testSCFEndpointGuid } from '@stratos/store/testing';
 
 import { CoreModule } from '../../core/src/core/core.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
-import { CfUserServiceTestProvider } from '../../core/test-framework/user-service-helper';
+import { AppTestModule } from '../../core/test-framework/core-test.helper';
 import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
@@ -16,11 +16,15 @@ import { CFAppState } from '../src/cf-app-state';
 import { CloudFoundryTestingModule } from '../src/cloud-foundry-test.module';
 import { ActiveRouteCfOrgSpace } from '../src/features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { UserInviteService } from '../src/features/cloud-foundry/user-invites/user-invite.service';
+import {
+  UserInviteConfigureService,
+  UserInviteService,
+} from '../src/features/cloud-foundry/user-invites/user-invite.service';
 import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
 import { createUserRoleInOrg } from '../src/store/types/user.types';
+import { CfUserServiceTestProvider } from './user-service-helper';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -74,6 +78,7 @@ export function generateTestCfEndpointServiceProvider(guid = testSCFEndpointGuid
     CfUserServiceTestProvider,
     CloudFoundryEndpointService,
     UserInviteService,
+    UserInviteConfigureService,
     HttpClient,
     HttpHandler
   ];
@@ -92,16 +97,14 @@ export function generateTestCfUserServiceProvider(guid = testSCFEndpointGuid) {
     useFactory: (
       store: Store<CFAppState>,
       paginationMonitorFactory: PaginationMonitorFactory,
-      entityServiceFactory: EntityServiceFactory
     ) => {
       return new CfUserService(
         store,
         paginationMonitorFactory,
         { cfGuid: guid, orgGuid: guid, spaceGuid: guid },
-        entityServiceFactory,
       );
     },
-    deps: [Store, PaginationMonitorFactory, EntityServiceFactory, HttpClient]
+    deps: [Store, PaginationMonitorFactory, HttpClient]
   };
 }
 
@@ -176,7 +179,8 @@ export function generateCfStoreModules() {
     StoreModule.forRoot(
       appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } },
       // Do not include initial store here, it's properties will be ignored as they won't have corresponding reducers in appReducers
-    )
+    ),
+    AppTestModule
   ];
 }
 
@@ -193,6 +197,6 @@ export function generateCfBaseTestModulesNoShared() {
 export function generateCfBaseTestModules() {
   return [
     ...generateCfBaseTestModulesNoShared(),
-    SharedModule
+    SharedModule,
   ];
 }

@@ -4,7 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '../../../../store/src/entity-catalog.module';
-import { entityCatalog, TestEntityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog, TestEntityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { createBasicStoreModule } from '../../../../store/testing/public-api';
 import { generateStratosEntities } from '../../base-entity-types';
 import { CoreModule } from '../../core/core.module';
@@ -38,22 +38,6 @@ export const KubernetesBaseTestModules = [
   RouterTestingModule,
   CoreModule,
   createBasicStoreModule(),
-  // createBasicStoreModule({
-  //   auth: {
-  //     error: false,
-  //     errorResponse: {},
-  //     loggedIn: false,
-  //     loggingIn: false,
-  //     sessionData: {
-  //       config: {},
-  //       plugins: null,
-  //       sessionExpiresOn: 0,
-  //       valid: false,
-  //     },
-  //     user: null,
-  //     verifying: false,
-  //   },
-  // }),
   NoopAnimationsModule,
   HttpClientModule,
   SharedModule,

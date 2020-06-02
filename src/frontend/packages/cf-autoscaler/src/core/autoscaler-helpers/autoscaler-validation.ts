@@ -133,3 +133,8 @@ export function getThresholdMax(policyTriggers: AppScalingRule[], metricType: st
     return Number.MAX_VALUE;
   }
 }
+
+export function inValidMetricType(metricType: string) {
+  const metricTypePattern = new RegExp('^[a-zA-Z0-9_]+$');
+  return !metricTypePattern.test(metricType);
+}

@@ -5,6 +5,7 @@ import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { ToggleUserFavoriteAction } from '../../../store/src/actions/user-favourites-actions/toggle-user-favorite-action';
 import { GeneralEntityAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { endpointEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
 import {
   errorFetchingFavoritesSelector,
@@ -19,7 +20,6 @@ import {
   FavoritesConfigMapper,
   TFavoriteMapperFunction,
 } from '../shared/components/favorites-meta-card/favorite-config-mapper';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { LoggerService } from './logger.service';
 
 export interface IFavoriteEntity {

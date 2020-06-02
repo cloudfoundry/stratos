@@ -11,14 +11,14 @@ import {
   IUserPermissionInOrg,
   OrgUserRoleNames,
 } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
-import { IOrganization } from '../../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IOrganization } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getOrgRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
@@ -36,7 +36,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
     public store: Store<CFAppState>,
     cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
-    confirmDialog: ConfirmationDialogService
+    confirmDialog: ConfirmationDialogService,
   ) {
     super(store, confirmDialog, cfUserService);
     this.chipsConfig$ = combineLatest(
@@ -74,8 +74,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
         guid: orgPerms.orgGuid,
         username: row.entity.username,
         userGuid: row.metadata.guid,
-        busy: catalogEntity.getEntityMonitor(
-          this.store,
+        busy: catalogEntity.store.getEntityMonitor(
           orgPerms.orgGuid
         )
           .getUpdatingSection(updatingKey).pipe(

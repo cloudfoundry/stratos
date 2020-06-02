@@ -51,7 +51,7 @@ import {
 } from '../../../../../store/src/actions/list.actions';
 import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pagination.actions';
 import { GeneralAppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
@@ -116,7 +116,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   pPaginator: MatPaginator;
   private filterString: string;
 
-  @ViewChild(MatPaginator, { static: false }) set setPaginator(paginator: MatPaginator) {
+  @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator || this.paginationWidgetToStore) {
       return;
     }
@@ -143,7 +143,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     });
   }
 
-  @ViewChild('filter', { static: false }) set setFilter(filterValue: NgModel) {
+  @ViewChild('filter') set setFilter(filterValue: NgModel) {
     if (!filterValue || this.filterWidgetToStore) {
       return;
     }
@@ -230,7 +230,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     private store: Store<GeneralAppState>,
     private cd: ChangeDetectorRef,
     @Optional() public config: ListConfig<T>,
-    private ngZone: NgZone
+    private ngZone: NgZone,
   ) { }
 
   ngOnInit() {
@@ -690,8 +690,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         return observableOf(getDefaultRowState());
       }
       const catalogEntity = entityCatalog.getEntity(entityConfig);
-      const entityMonitor = catalogEntity.getEntityMonitor(
-        this.store,
+      const entityMonitor = catalogEntity.store.getEntityMonitor(
         dataSource.getRowUniqueId(row),
         {
           schemaKey: entityConfig.schemaKey

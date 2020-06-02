@@ -2,7 +2,7 @@ import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-} from '../../../../store/src/entity-catalog/entity-catalog-entity';
+} from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
 import {

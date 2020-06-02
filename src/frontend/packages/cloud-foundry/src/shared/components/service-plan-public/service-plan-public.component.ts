@@ -3,15 +3,13 @@ import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import {
-  getCfService,
-  getServiceBroker,
   getServicePlanAccessibilityCardStatus,
 } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { ServicesService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { IServiceBroker, IServicePlan } from '../../../../../core/src/core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IServiceBroker, IServicePlan } from '../../../cf-api-svc.types';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
 
 @Component({
   selector: 'app-service-plan-public',
@@ -35,7 +33,7 @@ export class ServicePlanPublicComponent {
     }
     this.planAccessibility$ = getServicePlanAccessibilityCardStatus(
       servicePlan,
-      this.servicesService.getServicePlanVisibilities(),
+      this.servicesService.servicePlanVisibilities$,
       this.getServiceBroker(servicePlan.entity.service_guid, servicePlan.entity.cfGuid)
     );
     this.planAccessibilityMessage$ = this.planAccessibility$.pipe(
@@ -51,13 +49,12 @@ export class ServicePlanPublicComponent {
 
   constructor(
     private servicesService: ServicesService,
-    private entityServiceFactory: EntityServiceFactory
   ) {
   }
 
   private getServiceBroker(serviceGuid: string, cfGuid: string): Observable<APIResource<IServiceBroker>> {
-    return getCfService(serviceGuid, cfGuid, this.entityServiceFactory).waitForEntity$.pipe(
-      map(service => getServiceBroker(service.entity.entity.service_broker_guid, cfGuid, this.entityServiceFactory)),
+    return cfEntityCatalog.service.store.getEntityService(serviceGuid, cfGuid, {}).waitForEntity$.pipe(
+      map(service => cfEntityCatalog.serviceBroker.store.getEntityService(service.entity.entity.service_broker_guid, cfGuid, {})),
       switchMap(serviceService => serviceService.waitForEntity$),
       map(entity => entity.entity)
     );

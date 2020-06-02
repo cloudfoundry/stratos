@@ -2,14 +2,14 @@ import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { featureFlagEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { IFeatureFlag } from '../../../../../../../core/src/core/cf-api.types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
+import { IFeatureFlag } from '../../../../../cf-api.types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { createCfFeatureFlagFetchAction } from './cf-feature-flags-data-source.helpers';
 
 export const FeatureFlagDescriptions = {
   user_org_creation: 'Any user can create an organization',
@@ -35,7 +35,7 @@ export class CfFeatureFlagsDataSource extends ListDataSource<IFeatureFlag> {
   static descriptionColumnId = 'description';
 
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<IFeatureFlag>) {
-    const action = createCfFeatureFlagFetchAction(cfGuid);
+    const action = cfEntityCatalog.featureFlag.actions.getMultiple(cfGuid);
     super({
       store,
       action,

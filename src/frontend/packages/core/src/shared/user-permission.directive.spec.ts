@@ -1,15 +1,14 @@
 import { Component, TemplateRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../test-framework/core-test.helper';
+import { BaseTestModules, generateBaseTestStoreModules } from '../../test-framework/core-test.helper';
+import { UserPermissionDirective } from './user-permission.directive';
 
 @Component({
-  template: `<input type="text" appUserPermission>`
+  template: `<input type="text" *appUserPermission="">`
 })
 class TestUserPermissionComponent {
 }
-
-class MockTemplateRef { }
 
 describe('UserPermissionDirective', () => {
   let component: TestUserPermissionComponent;
@@ -18,9 +17,6 @@ describe('UserPermissionDirective', () => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules
-      ],
-      providers: [
-        { provide: TemplateRef, useClass: MockTemplateRef },
       ],
       declarations: [TestUserPermissionComponent]
     });

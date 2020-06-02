@@ -1,13 +1,13 @@
 import { Validators } from '@angular/forms';
 
-import { metricEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-} from '../../../../store/src/entity-catalog/entity-catalog-entity';
+} from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
+import { metricEntityType } from '../../base-entity-schemas';
 import { EndpointAuthTypeConfig, EndpointType } from '../../core/extension/extension-types';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {

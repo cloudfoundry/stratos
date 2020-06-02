@@ -16,15 +16,19 @@ import { ConfirmationDialogConfig } from '../../../../core/src/shared/components
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/app-state';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  getCurrentPageRequestInfo,
+  PaginationObservables,
+} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
+import { fetchAutoscalerInfo, isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import {
   AutoscalerPaginationParams,
@@ -34,9 +38,10 @@ import {
   GetAppAutoscalerScalingHistoryAction,
 } from '../../store/app-autoscaler.actions';
 import {
+  AppAutoscaleMetricChart,
+  AppAutoscalerEvent,
   AppAutoscalerMetricData,
   AppAutoscalerPolicyLocal,
-  AppAutoscalerScalingHistory,
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
 import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
@@ -62,6 +67,8 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
 })
 export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
+  canManageCredentials$: Observable<boolean>;
+
   scalingRuleColumns: string[] = ['metric', 'condition', 'action'];
   specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max'];
   recurringScheduleColumns: string[] = ['effect', 'repeat', 'from', 'to', 'init', 'min', 'max'];
@@ -69,11 +76,11 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   metricTypes: string[] = AutoscalerConstants.MetricTypes;
 
   appAutoscalerPolicyService: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
-  public appAutoscalerScalingHistoryService: EntityService<APIResource<AppAutoscalerScalingHistory>>;
+  public appAutoscalerScalingHistoryService: PaginationObservables<APIResource<AppAutoscalerEvent>>;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicyLocal>;
   appAutoscalerPolicySafe$: Observable<AppAutoscalerPolicyLocal>;
-  appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
-  appAutoscalerAppMetricNames$: Observable<string[]>;
+  appAutoscalerScalingHistory$: Observable<AppAutoscalerEvent[]>;
+  appAutoscalerAppMetricNames$: Observable<AppAutoscaleMetricChart[]>;
 
   public showNoPolicyMessage$: Observable<boolean>;
   public showAutoscalerHistory$: Observable<boolean>;
@@ -127,6 +134,22 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+
+    this.canManageCredentials$ = fetchAutoscalerInfo(
+      this.applicationService.cfGuid,
+      this.entityServiceFactory
+    ).pipe(
+      filter(info => !!info && !!info.entity && !!info.entity.entity),
+      map(info => {
+        const build = info.entity.entity.build;
+        const buildParts = build.split('.');
+        if (buildParts.length < 0) {
+          return false;
+        }
+        return Number.parseInt(buildParts[0]) >= 3
+      })
+    )
+
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
       new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
@@ -146,22 +169,34 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.loadLatestMetricsUponPolicy();
 
     this.appAutoscalerAppMetricNames$ = this.appAutoscalerPolicySafe$.pipe(
-      map(entity => Object.keys(entity.scaling_rules_map)),
+      map(entity => Object.keys(entity.scaling_rules_map).map((name) => {
+        const unit = entity.scaling_rules_map[name].upper[0] && entity.scaling_rules_map[name].upper[0].unit
+          || entity.scaling_rules_map[name].lower[0] && entity.scaling_rules_map[name].lower[0].unit;
+        return {
+          name,
+          unit,
+        };
+      })),
     );
 
     this.scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
       createEntityRelationPaginationKey(applicationEntityType, this.applicationService.appGuid, 'latest'),
       this.applicationService.appGuid,
       this.applicationService.cfGuid,
-      true,
+      false,
       this.paramsHistory
     );
-    this.appAutoscalerScalingHistoryService = this.entityServiceFactory.create(
-      this.applicationService.appGuid,
-      this.scalingHistoryAction
-    );
-    this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(
-      map(({ entity }) => entity && entity.entity),
+    this.appAutoscalerScalingHistoryService = getPaginationObservables({
+      store: this.store,
+      action: this.scalingHistoryAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        this.scalingHistoryAction.paginationKey,
+        this.scalingHistoryAction,
+        true
+      ),
+    }, true);
+    this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entities$.pipe(
+      map(entities => entities.map(entity => entity.entity)),
       publishReplay(1),
       refCount()
     );
@@ -171,7 +206,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.appAutoscalerPolicy$,
       this.appAutoscalerScalingHistory$
     ]).pipe(
-      map(([policy, history]) => !!policy || (!!history && history.total_results > 0)),
+      map(([policy, history]) => !!policy || (!!history && history.length > 0)),
       publishReplay(1),
       refCount()
     );
@@ -180,7 +215,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.appAutoscalerPolicy$,
       this.appAutoscalerScalingHistory$
     ]).pipe(
-      map(([policy, history]) => !policy && (!history || history.total_results === 0)),
+      map(([policy, history]) => !policy && (!history || history.length === 0)),
       publishReplay(1),
       refCount()
     );
@@ -235,7 +270,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     if (this.appAutoscalerScalingHistoryErrorSub) {
       this.appAutoscalerScalingHistoryErrorSub.unsubscribe();
     }
-    this.appAutoscalerScalingHistoryErrorSub = this.appAutoscalerScalingHistoryService.entityMonitor.entityRequest$.pipe(
+    this.appAutoscalerScalingHistoryErrorSub = this.appAutoscalerScalingHistoryService.pagination$.pipe(
+      map(pagination => getCurrentPageRequestInfo(pagination)),
       filter(request => !!request.error),
       map(request => request.message),
       distinctUntilChanged(),
@@ -320,8 +356,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.store.dispatch(this.scalingHistoryAction);
   }
 
-  getMetricUnit(metricType: string) {
-    return AutoscalerConstants.getMetricUnit(metricType);
+  getMetricUnit(metricType: string, unit?: string) {
+    return AutoscalerConstants.getMetricUnit(metricType, unit);
+  }
+
+  manageCredentialPage = () => {
+    this.store.dispatch(new RouterNav({
+      path: [
+        'autoscaler',
+        this.applicationService.cfGuid,
+        this.applicationService.appGuid,
+        'edit-autoscaler-credential'
+      ]
+    }));
   }
 
 }

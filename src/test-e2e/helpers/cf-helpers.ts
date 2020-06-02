@@ -1,7 +1,5 @@
 import { browser, promise } from 'protractor';
 
-import { CFResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
-import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/user.types';
 import {
   IApp,
   IDomain,
@@ -10,7 +8,9 @@ import {
   IRoute,
   ISpace,
   ISpaceQuotaDefinition,
-} from '../../frontend/packages/core/src/core/cf-api.types';
+} from '../../frontend/packages/cloud-foundry/src/cf-api.types';
+import { CFResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
+import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/user.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { ApplicationPageSummaryTab } from '../application/po/application-page-summary.po';
 import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
@@ -54,8 +54,8 @@ export class CFHelpers {
       expect(users.length).toBeGreaterThanOrEqual(2, `Less than two users detected`);
       const testUser = this.findUser(users, endpoint.creds.nonAdmin.username);
       const testAdminUser = this.findUser(users, endpoint.creds.admin.username);
-      expect(testUser).toBeDefined(`Unable to find the non admin user '${endpoint.creds.nonAdmin.username}'`);
-      expect(testAdminUser).toBeDefined(`Unable to find the admin user '${endpoint.creds.admin.username}'`);
+      expect(testUser).toBeDefined('Could not find test user');
+      expect(testAdminUser).toBeDefined('Could not find test admin user');
       CFHelpers.cachedNonAdminGuid = testUser.metadata.guid;
       CFHelpers.cachedAdminGuid = testAdminUser.metadata.guid;
     });

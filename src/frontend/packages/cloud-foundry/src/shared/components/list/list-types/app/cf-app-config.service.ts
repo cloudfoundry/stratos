@@ -6,7 +6,6 @@ import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { IApp } from '../../../../../../../core/src/core/cf-api.types';
 import { UtilsService } from '../../../../../../../core/src/core/utils.service';
 import {
   createTableColumnFavorite,
@@ -21,6 +20,7 @@ import {
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
+import { IApp } from '../../../../../cf-api.types';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CardAppComponent } from './card/card-app.component';
 import { CfAppsDataSource } from './cf-apps-data-source';

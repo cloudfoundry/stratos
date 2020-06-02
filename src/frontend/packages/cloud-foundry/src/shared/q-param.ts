@@ -23,7 +23,7 @@ export class QParam {
       return new QParam(
         qParamComponents[0],
         qParamComponents[1],
-        qParamComponents[2]
+        QParamJoiners[qParamComponents[2]]
       );
     }
     return null;
