@@ -25,7 +25,7 @@ export function createMetaCardMenuItemSeparator() {
   return {
     label: '-',
     separator: true,
-    action: () => {}
+    action: () => { }
   };
 }
 
@@ -79,7 +79,7 @@ export class MetaCardComponent implements OnDestroy {
           first(),
           tap(entity => this.favorite = getFavoriteFromEntity(
             entity,
-            entityConfig.schema.key,
+            entityConfig.schema.entityType,
             this.favoritesConfigMapper,
             entityConfig.schema.endpointType
           ))
