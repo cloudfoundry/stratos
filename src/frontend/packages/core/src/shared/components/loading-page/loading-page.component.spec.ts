@@ -1,12 +1,12 @@
 import { async, ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { of } from 'rxjs';
 
 import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '@stratos/store/testing';
-import { MDAppModule } from '../../../core/md.module';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
+import { MDAppModule } from '../../../core/md.module';
 import { SharedModule } from '../../shared.module';
 import { LoadingPageComponent } from './loading-page.component';
 

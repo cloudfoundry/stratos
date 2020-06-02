@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { APIResource } from '../../../../../../../store/src/types/api.types';

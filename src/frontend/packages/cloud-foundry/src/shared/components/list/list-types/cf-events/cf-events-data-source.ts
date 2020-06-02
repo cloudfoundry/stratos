@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 
 import {
   ListDataSource,
@@ -29,7 +29,7 @@ export class CfEventsDataSource extends ListDataSource<APIResource> {
       actee
     );
 
-    const action = cfEntityCatalog.event.actions.getMultiple(cfGuid, paginationKey)
+    const action = cfEntityCatalog.event.actions.getMultiple(cfGuid, paginationKey);
 
     action.initialParams.q = CfEventsDataSource.createInitialQParams(
       orgGuid,

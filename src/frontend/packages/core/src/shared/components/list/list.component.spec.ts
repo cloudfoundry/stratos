@@ -2,7 +2,7 @@ import { ChangeDetectorRef, NgZone } from '@angular/core';
 import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
-import { createBasicStoreModule } from '@stratos/store/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 

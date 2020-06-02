@@ -3,7 +3,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store, StoreModule } from '@ngrx/store';
-import { testSCFEndpointGuid } from '@stratos/store/testing';
+import { testSCFEndpointGuid } from '@stratosui/store/testing';
 
 import { CoreModule } from '../../core/src/core/core.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
