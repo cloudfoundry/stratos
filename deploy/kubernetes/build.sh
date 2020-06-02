@@ -221,11 +221,6 @@ fi
 
 log "-- Building Helm Chart"
 
-# Apply any chart customizations added by a fork
-if [ "${HAS_CUSTOM_BUILD}" == "true" ]; then
-  custom_helm_build
-fi
-
 # Don't change the chart in the repo, copy it and modify it locally
 
 SRC_HELM_CHART_PATH="${STRATOS_PATH}/deploy/kubernetes/console"
