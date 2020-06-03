@@ -7,7 +7,6 @@ import (
 
 	//"encoding/base64"
 	"encoding/json"
-	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -109,31 +108,6 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	// API Endpoint to SSH/exec into a container
 	target := fmt.Sprintf("%s/api/v1/namespaces/%s/pods/%s/exec?command=/bin/bash&stdin=true&stderr=true&stdout=true&tty=true", k.APIServer, k.Namespace, podData.PodName)
 
-	// TODO: Check use of kubeHTTPClient
-
-	dial := (&net.Dialer{
-		Timeout:   time.Duration(30) * time.Second,
-		KeepAlive: 30 * time.Second,
-	}).Dial
-
-	// TODO: Not sure about the cert here? I don't think we need this like it is - wonder why I did that?
-
-	sslTransport := &http.Transport{
-		Proxy:               http.ProxyFromEnvironment,
-		Dial:                dial,
-		TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-			//Certificates:       []tls.Certificate{cert},
-		},
-		MaxIdleConnsPerHost: 6, // (default is 2)
-	}
-
-	kubeHTTPClient := http.Client{}
-	kubeHTTPClient.Transport = sslTransport
-	kubeHTTPClient.Timeout = time.Duration(30) * time.Second
-
-
 	// This dialer does not use the kubeHttpClient  - is it unused?
 	dialer := &websocket.Dialer{
 		TLSClientConfig: &tls.Config{
@@ -150,13 +124,11 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 
 	header := &http.Header{}
 	header.Add("Authorization", fmt.Sprintf("Bearer %s", string(k.Token)))
-	wsConn, res, err := dialer.Dial(target, *header)
+	wsConn, _, err := dialer.Dial(target, *header)
 
 	if err == nil {
 		defer wsConn.Close()
 	}
-
-	kubeHTTPClient.CloseIdleConnections()
 
 	if err != nil {
 		k.cleanupPodAndSecret(podData)

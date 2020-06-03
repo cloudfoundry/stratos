@@ -3,7 +3,6 @@ package terminal
 import (
 	"fmt"
 	"io/ioutil"
-	"regexp"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/api"
@@ -13,10 +12,11 @@ import (
 )
 
 const (
-	//serviceAccountTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-	serviceAccountTokenFile = "./token"
+	serviceAccountTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 	serviceHostEnvVar = "KUBERNETES_SERVICE_HOST"
 	servicePortEnvVar = "KUBERNETES_SERVICE_PORT"
+	// For dev - read token from env var
+	serviceTokenEnvVar = "KUBE_TERMINAL_SERVICE_ACCOUNT_TOKEN"
 
 	stratosRoleLabel = "stratos-role"
 	stratosKubeTerminalRole = "kube-terminal"
@@ -37,7 +37,6 @@ type KubeTerminal struct {
 
 // NewKubeTerminal checks that the environment is set up to support the Kube Terminal
 func NewKubeTerminal(p interfaces.PortalProxy) *KubeTerminal {
-
 	kt := &KubeTerminal{
 		PortalProxy: p,
 	}
@@ -64,20 +63,16 @@ func NewKubeTerminal(p interfaces.PortalProxy) *KubeTerminal {
 	// Read the Service Account Token
 	token, err := ioutil.ReadFile(serviceAccountTokenFile)
 	if err != nil {
-		log.Warnf("Unable to load Service Account token. %v", err)
-		return nil
+		// Check env var
+		tkn, found := p.Env().Lookup(serviceTokenEnvVar)
+		if !found {
+			log.Warnf("Unable to load Service Account token. %v", err)
+			return nil
+		}
+		token = []byte(tkn)
 	}
 
 	kt.Token = token
-
-	version := "v1.15+"
-
-	reg, err := regexp.Compile("[^0-9\\.]+")
-	if err == nil {
-		version = reg.ReplaceAllString(version, "")
-	}
-
-	log.Info(version)	
 
 	log.Debug("Kubernetes Terminal configured")
 	return kt
