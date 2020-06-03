@@ -22,8 +22,8 @@ export class EntityMonitorFactory {
     entityConfig: EntityCatalogEntityConfig,
     startWithNull = true
   ): EntityMonitor<T> {
-    const { endpointType, entityType } = entityConfig;
-    const cacheKey = id + endpointType + entityType;
+    const { endpointType, entityType, schemaKey, subType } = entityConfig;
+    const cacheKey = id + endpointType + entityType + schemaKey + subType;
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey];
     } else {

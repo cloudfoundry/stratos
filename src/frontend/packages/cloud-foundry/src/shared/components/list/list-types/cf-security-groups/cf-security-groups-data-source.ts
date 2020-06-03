@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { securityGroupEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -18,7 +18,7 @@ import { cfEntityFactory } from '../../../../../cf-entity-factory';
 export class CfSecurityGroupsDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
-    const action = cfEntityCatalog.securityGroup.actions.getMultiple(cfGuid, paginationKey, {})
+    const action = cfEntityCatalog.securityGroup.actions.getMultiple(cfGuid, paginationKey, {});
     super({
       store,
       action,

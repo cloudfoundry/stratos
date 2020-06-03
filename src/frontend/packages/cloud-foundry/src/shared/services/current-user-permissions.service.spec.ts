@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratos/store/testing';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
 import { first, tap } from 'rxjs/operators';
 
 import { CFFeatureFlagTypes, IFeatureFlag } from '../../../../cloud-foundry/src/cf-api.types';
