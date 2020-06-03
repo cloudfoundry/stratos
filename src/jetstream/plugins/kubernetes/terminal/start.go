@@ -127,7 +127,9 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 
 	if err != nil {
 		k.cleanupPodAndSecret(podData)
-		return errors.New("Could not make request")
+		log.Warn("Kube Terminal: Could not connect to pod")
+		// No point returning an error - we've already upgraded to web sockets, so we can't use the HTTP response now
+		return nil
 	}
 
 	stdoutDone := make(chan bool)
@@ -154,7 +156,9 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 			}
 			log.Warn("Kube Terminal cleaning up ....")
 			k.cleanupPodAndSecret(podData)
-			return err
+
+			// No point returning an error - we've already upgraded to web sockets, so we can't use the HTTP response now
+			return nil
 		}
 
 		res := KeyCode{}
