@@ -37,7 +37,7 @@ import {
 } from './current-cf-user-roles-clear.reducers';
 
 export const currentCfUserRolesReducer: EntityUserRolesReducer<IAllCfRolesState> = (
-  state: IAllCfRolesState,
+  state: IAllCfRolesState = {},
   action: Action
 ): IAllCfRolesState => {
   switch (action.type) {
