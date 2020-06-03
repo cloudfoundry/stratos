@@ -25,7 +25,7 @@ export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
       [],
       false,
       false
-    )
+    );
     super({
       store,
       action,

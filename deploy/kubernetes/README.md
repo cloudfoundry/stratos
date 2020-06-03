@@ -220,7 +220,7 @@ $ helm repo update
 To update an instance, the following assumes your instance is called `my-console`, and overrides have been specified in a file called `overrides.yaml`.
 
 ```
-$ helm upgrade -f overrides.yaml my-console stratos/console --recreate-pods
+$ helm upgrade -f overrides.yaml my-console stratos/console
 ```
 
 After the upgrade, perform a `helm list` to ensure your console is the latest version.

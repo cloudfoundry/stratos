@@ -78,4 +78,8 @@ export class GitHubSCM implements GitSCM {
     );
   }
 
+  public convertCommit(projectName: string, commit: any): GitCommit {
+    return commit;
+  }
+
 }
