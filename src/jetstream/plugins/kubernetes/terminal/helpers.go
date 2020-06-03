@@ -1,8 +1,10 @@
 package terminal
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -49,7 +51,7 @@ func (k *KubeTerminal) getClients() (corev1.PodInterface, corev1.SecretInterface
 }
 
 // Create a pod for a user to run the Kube terminal
-func (k *KubeTerminal) createPod(c echo.Context, kubeConfig string, ws *websocket.Conn) (*PodCreationData, error) {
+func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string, ws *websocket.Conn) (*PodCreationData, error) {
 	// Unique ID for the secret and pod name
 	id := uuid.NewV4().String()
 	id = strings.ReplaceAll(id, "-", "")
@@ -135,6 +137,12 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig string, ws *websocke
 	containerSpec[0].Image = k.Image
 	containerSpec[0].ImagePullPolicy = "Always"
 	containerSpec[0].VolumeMounts = volumeMountsSpec
+
+	// Add env var for kube version
+	containerSpec[0].Env = make([]v1.EnvVar, 1)
+	containerSpec[0].Env[0].Name = "K8S_VERSION"
+	containerSpec[0].Env[0].Value = kubeVersion
+	
 	podSpec.Spec.Containers = containerSpec
 
 	volumesSpec := make([]v1.Volume, 1)
@@ -162,7 +170,6 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig string, ws *websocke
 	for {
 		status, err := podClient.Get(pod.Name, statusOptions)
 		if err == nil && status.Status.Phase == "Running" {
-			log.Error("Pod is ready !")
 			break;
 		}
 
@@ -230,4 +237,33 @@ func sendProgressMessage(ws *websocket.Conn, progressMsg string) {
 	if err := ws.WriteMessage(websocket.TextMessage, []byte(bytes)); err != nil {
 		log.Error("Could not send message to client to indicate terminal is starting")
 	}
+}
+
+func (k *KubeTerminal) getKubeVersion(endpointID, userID string) (string, error) {
+
+	response, err := k.PortalProxy.DoProxySingleRequest(endpointID, userID, "GET", "/api/v1/nodes", nil, nil)
+	if err != nil || response.StatusCode != 200 {
+		return "", errors.New("Could not fetch node list")
+	}
+
+	var nodes v1.NodeList
+	err = json.Unmarshal(response.Response, &nodes)
+	if err != nil {
+		return "", errors.New("Could not unmarshal node list")
+	}
+
+	if len(nodes.Items) > 0 {
+		version := nodes.Items[0].Status.NodeInfo.KubeletVersion
+		reg, err := regexp.Compile("[^0-9\\.]+")
+    if err == nil {
+			version = reg.ReplaceAllString(version, "")
+		}
+		parts := strings.Split(version, ".")
+		if len(parts) > 1 {
+			v := fmt.Sprintf("%s.%s", parts[0], parts[1])
+			return v, nil
+		}
+	}
+
+	return "", errors.New("Can not get Kubernetes version")
 }

@@ -3,6 +3,7 @@ package terminal
 import (
 	"fmt"
 	"io/ioutil"
+	"regexp"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/api"
@@ -68,6 +69,15 @@ func NewKubeTerminal(p interfaces.PortalProxy) *KubeTerminal {
 	}
 
 	kt.Token = token
+
+	version := "v1.15+"
+
+	reg, err := regexp.Compile("[^0-9\\.]+")
+	if err == nil {
+		version = reg.ReplaceAllString(version, "")
+	}
+
+	log.Info(version)	
 
 	log.Debug("Kubernetes Terminal configured")
 	return kt

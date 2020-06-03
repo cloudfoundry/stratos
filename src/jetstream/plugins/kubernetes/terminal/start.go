@@ -45,33 +45,14 @@ const (
 	writeWait = 10 * time.Second
 )
 
-
-// Determine if we Kube Terminal is supported
-// TODO
-// Check namespace
-// Check we have secret for pod creation/deletion
-// Image for the terminal
-
-// Environment variables that we expect to see
-// STRATOS_KUBERNETES_NAMESPACE
-// STRATOS_KUBERNETES_TERMINAL_IMAGE
-
-// For development, you can overide the token to use with the Kubernetes API, with:
-// STRATOS_KUBERNETES_API_TOKEN
-
-// Start periodic routing to clean up pods that are orphaned
-// TODO
-
 // Start handles web-socket request to launch a Kubernetes Terminal
 func (k *KubeTerminal) Start(c echo.Context) error {
 
 	var p = k.PortalProxy
 
-	c.Response().Status = 500
+	//c.Response().Status = 500
 
-	log.Info("Kube Terminal backend request")
-
-	// TODO: We will need these ??
+	log.Debug("Kube Terminal backend request")
 
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
@@ -91,9 +72,11 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	kubeConfig, err := k.Kube.GetKubeConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRecord, "")
 	if err != nil {
 		return errors.New("Can not get Kubernetes config for specified endpoint")
-	}	
+	}
 
-	// TODO: Refresh auth token
+	// Determine the Kubernetes version
+	version, _ := k.getKubeVersion(endpointGUID, userGUID)
+	log.Debugf("Kubernetes Version: %s", version)
 
 	// Upgrade the web socket for the incoming request
 	ws, pingTicker, err := interfaces.UpgradeToWebSocket(c)
@@ -109,14 +92,13 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	// Send a message to say that we are creating the pod
 	sendProgressMessage(ws, "Launching Kubernetes Terminal ... one moment please")
 
-	podData, err := k.createPod(c, kubeConfig, ws)
+	podData, err := k.createPod(c, kubeConfig, version, ws)
 
 	// Clear progress message
 	sendProgressMessage(ws, "")
 
 	if err != nil {
-		log.Error("ERROR creating secret or pod")
-		log.Info(err)
+		log.Errorf("Kubernetes Terminal: Error creating secret or pod: %+v", err)
 		k.cleanupPodAndSecret(podData)
 
 		// Send error message
@@ -126,7 +108,6 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 
 	// API Endpoint to SSH/exec into a container
 	target := fmt.Sprintf("%s/api/v1/namespaces/%s/pods/%s/exec?command=/bin/bash&stdin=true&stderr=true&stdout=true&tty=true", k.APIServer, k.Namespace, podData.PodName)
-
 
 	// TODO: Check use of kubeHTTPClient
 
@@ -174,11 +155,6 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	if err == nil {
 		defer wsConn.Close()
 	}
-
-	// Check res
-	log.Warn("== Status ===========================================")
-	log.Info(res.Status)
-	log.Info(res.StatusCode)
 
 	kubeHTTPClient.CloseIdleConnections()
 
