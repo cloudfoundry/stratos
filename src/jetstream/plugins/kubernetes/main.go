@@ -59,7 +59,9 @@ const (
 // Init creates a new instance of the Kubernetes plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
 	kubeTerminal := terminal.NewKubeTerminal(portalProxy)
-	return &KubernetesSpecification{portalProxy: portalProxy, endpointType: kubeEndpointType, kubeTerminal: kubeTerminal}, nil
+	kube := &KubernetesSpecification{portalProxy: portalProxy, endpointType: kubeEndpointType, kubeTerminal: kubeTerminal}
+	kubeTerminal.Kube = kube
+	return kube, nil
 }
 
 func (c *KubernetesSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
@@ -136,6 +138,9 @@ func (c *KubernetesSpecification) Init() error {
 	// Kube dashboard is enabled by Tech Preview mode
 	c.portalProxy.GetConfig().PluginConfig[kubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
 
+	// Kick off the cleanup of any old kube terminal pods
+	c.kubeTerminal.StartCleanup()
+
 	return nil
 }
 
@@ -165,7 +170,7 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name", c.GetRelease)
 
 	// Kube Terminal
-	echoGroup.GET("/kubeconsole/:guid", c.KubeTerminal)
+	echoGroup.GET("/kubeconsole/:guid", c.kubeTerminal.Start)
 
 }
 

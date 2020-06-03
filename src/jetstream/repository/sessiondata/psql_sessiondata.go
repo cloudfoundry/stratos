@@ -3,6 +3,8 @@ package sessiondata
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -16,11 +18,14 @@ var insertSessionDataValue = `INSERT INTO session_data (session, groupName, name
 
 var deleteSessionGroupData = `DELETE FROM session_data WHERE session=$1 AND groupName=$2`
 
-// Expire data for sessions that not longer exist
+// Expire data for sessions that no longer exist
 var expireSessionData = `UPDATE session_data SET expired=true WHERE session NOT IN (SELECT id from sessions)`
 
 // Delete data for sessions that no longer exist
 var deleteSessionData = `DELETE FROM session_data WHERE expired=true AND keep_on_expire=false`
+
+// Check if a session valid
+var isValidSession = `SELECT id, expires_on from sessions WHERE id=$1`
 
 // SessionDataRepository is a RDB-backed Session Data repository
 type SessionDataRepository struct {
@@ -40,6 +45,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	deleteSessionGroupData = datastore.ModifySQLStatement(deleteSessionGroupData, databaseProvider)
 	expireSessionData = datastore.ModifySQLStatement(expireSessionData, databaseProvider)
 	deleteSessionData = datastore.ModifySQLStatement(deleteSessionData, databaseProvider)
+	isValidSession = datastore.ModifySQLStatement(isValidSession, databaseProvider)
 }
 
 // GetValues returns all values from the config table as a map
@@ -99,4 +105,28 @@ func (c *SessionDataRepository) SetValues(session, group string, values map[stri
 	}
 
 	return nil
+}
+
+// IsValidSession - Determines if the given session ID is still valid (has not expired)
+func (c *SessionDataRepository) IsValidSession(session int) (bool, error) {
+	var (
+		id     string
+		expiry time.Time
+	)
+
+	err := c.db.QueryRow(isValidSession, strconv.Itoa(session)).Scan(&id, &expiry)
+
+	switch {
+	case err == sql.ErrNoRows:
+		// No record with this ID - session does not exist
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("Error trying to find Session record: %v", err)
+	default:
+		// do nothing
+	}
+
+	// Check if the session has expired
+	now := time.Now()
+	return expiry.After(now), nil
 }
