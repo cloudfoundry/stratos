@@ -11,6 +11,7 @@ import {
 } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { EntityInfo, NormalizedResponse } from '../types/api.types';
+import { EndpointUser } from '../types/endpoint.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';
 import { JetstreamError } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
@@ -137,8 +138,13 @@ export type EntityFetch<T = any> = (entity: T) => void;
 export type EntityFetchHandler<T = any> = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => EntityFetch<T>;
 export type EntitiesFetchHandler = (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => void;
 
+export interface EntityUserRolesEndpoint {
+  user?: EndpointUser;
+  guid?: string;
+}
+
 export type EntityUserRolesFetch = (
-  endpointIds: string[],
+  endpoints: string[] | EntityUserRolesEndpoint[],
   store: Store<AppState>,
   logService: LoggerService,
   httpClient: HttpClient

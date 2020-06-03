@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { combineLatest, of as observableOf, of } from 'rxjs';
+import { combineLatest, EMPTY, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../../core/src/core/logger.service';
@@ -15,6 +15,7 @@ import {
 } from '../actions/permissions.actions';
 import { AppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { EntityUserRolesEndpoint } from '../entity-request-pipeline/entity-request-pipeline.types';
 
 const successAction: Action = { type: GET_CURRENT_USER_RELATIONS_SUCCESS };
 const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };
@@ -44,7 +45,7 @@ export class PermissionsEffects {
     }),
     catchError(err => {
       this.logService.warn('Failed to fetch current user permissions: ', err);
-      return observableOf([failedAction]);
+      return of(failedAction);
     })
   );
 
@@ -54,11 +55,19 @@ export class PermissionsEffects {
     switchMap(action => {
       const endpointType = entityCatalog.getEndpoint(action.endpointType)
       if (!endpointType.definition.userRolesFetch) {
-        return of([]);
+        return EMPTY;
       }
-      return endpointType.definition.userRolesFetch([action.guid], this.store, this.logService, this.httpClient).pipe(
-        map(() => [])
+      const endpoint: EntityUserRolesEndpoint = {
+        guid: action.guid,
+        user: action.endpoint.user
+      }
+      return endpointType.definition.userRolesFetch([endpoint], this.store, this.logService, this.httpClient).pipe(
+        map(succeeded => succeeded ? successAction : failedAction)
       );
+    }),
+    catchError(err => {
+      this.logService.warn('Failed to fetch current user permissions after endpoint connected: ', err);
+      return of(failedAction);
     })
   );
 }

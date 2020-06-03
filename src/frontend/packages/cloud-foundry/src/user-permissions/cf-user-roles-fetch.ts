@@ -6,7 +6,10 @@ import { catchError, first, map, pairwise, share, skipWhile, switchMap, tap } fr
 import { LoggerService } from '../../../core/src/core/logger.service';
 import { AppState } from '../../../store/src/app-state';
 import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
-import { EntityUserRolesFetch } from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import {
+  EntityUserRolesEndpoint,
+  EntityUserRolesFetch,
+} from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import {
   BaseHttpClientFetcher,
   flattenPagination,
@@ -14,7 +17,6 @@ import {
 } from '../../../store/src/helpers/paginated-request-helpers';
 import { ActionState } from '../../../store/src/reducers/api-request-reducer/types';
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
-import { EndpointModel } from '../../../store/src/types/endpoint.types';
 import { BasePaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
 import {
   CfUserRelationTypes,
@@ -29,18 +31,29 @@ import { cfEntityCatalog } from '../cf-entity-catalog';
 import { endpointsCfEntitiesConnectedSelector } from '../store/selectors/cloud-foundry.selector';
 import { CFResponse } from '../store/types/cf-api.types';
 
+const createEndpointArray = (store: Store<AppState>, endpoints: string[] | EntityUserRolesEndpoint[]): Observable<EntityUserRolesEndpoint[]> => {
+  // If there's no endpoints get all from store. Alternatively fetch specific endpoint id's from store
+  if (!endpoints || !endpoints.length || typeof (endpoints[0]) === 'string') {
+    const endpointIds = endpoints as string[];
+    return store.select(endpointsCfEntitiesConnectedSelector).pipe(
+      first(),
+      map(cfEndpoints => endpointIds.length === 0 ?
+        Object.values(cfEndpoints) :
+        Object.values(cfEndpoints).filter(cfEndpoint => endpointIds.find(endpointId => endpointId === cfEndpoint.guid))
+      ),
+    );
+  }
+  return of(endpoints as EntityUserRolesEndpoint[]);
+}
+
 export const cfUserRolesFetch: EntityUserRolesFetch = (
-  endpointIds: string[],
+  endpoints: string[] | EntityUserRolesEndpoint[],
   store: Store<AppState>,
   logService: LoggerService,
   httpClient: HttpClient
 ) => {
-  return store.select(endpointsCfEntitiesConnectedSelector).pipe(
-    first(),
-    map(cfEndpoints => endpointIds.length === 0 ?
-      Object.values(cfEndpoints) :
-      Object.values(cfEndpoints).filter(cfEndpoint => endpointIds.find(endpointId => endpointId === cfEndpoint.guid))),
-    switchMap((cfEndpoints: EndpointModel[]) => {
+  return createEndpointArray(store, endpoints).pipe(
+    switchMap((cfEndpoints: EntityUserRolesEndpoint[]) => {
       const isAllAdmins = cfEndpoints.every(endpoint => !!endpoint.user.admin);
       // If all endpoints are connected as admin, there's no permissions to fetch. So only update the permission state to initialised
       if (isAllAdmins) {
@@ -68,7 +81,7 @@ interface IEndpointConnectionInfo {
 }
 
 function dispatchRoleRequests(
-  endpoints: EndpointModel[],
+  endpoints: EntityUserRolesEndpoint[],
   store: Store<AppState>,
   logService: LoggerService,
   httpClient: HttpClient
