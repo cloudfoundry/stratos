@@ -232,7 +232,7 @@ export class StratosBaseCatalogEntity<
     const requestTypeLabel = typeof actionOrActionBuilderKey === 'string' ?
       actionOrActionBuilderKey :
       this.getTypeFromAction(actionOrActionBuilderKey) || requestType;
-    return `@stratosui/${this.entityKey}/${requestTypeLabel}/${actionString}`;
+    return `@stratos/${this.entityKey}/${requestTypeLabel}/${actionString}`;
   }
 
   public getRequestAction(
