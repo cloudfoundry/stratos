@@ -12,4 +12,8 @@
   value: "mongodb://{{ .Release.Name }}-fdbdoclayer:27016"
 - name: SYNC_SERVER_URL
   value: "http://{{ .Release.Name }}-chartsync:8080"
+- name: STRATOS_KUBERNETES_NAMESPACE
+  value: "{{ .Release.Namespace }}"  
+- name: STRATOS_KUBERNETES_TERMINAL_IMAGE
+  value: "{{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-kube-terminal:{{.Values.consoleVersion}}"
 {{- end }}

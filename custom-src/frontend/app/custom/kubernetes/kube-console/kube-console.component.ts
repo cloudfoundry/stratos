@@ -2,9 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NEVER, Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
-import { catchError, tap, switchMap } from 'rxjs/operators';
+import { catchError, tap, switchMap, map } from 'rxjs/operators';
 
-import { IApp } from '../../../core/cf-api.types';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { SshViewerComponent } from '../../../shared/components/ssh-viewer/ssh-viewer.component';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
@@ -42,31 +41,13 @@ export class KubeConsoleComponent implements OnInit {
 
   public errorMessage: string;
 
-  public sshRoute: string;
-
   public connected: boolean;
 
   public kubeSummaryLink: string;
 
-  private connection: Subscription;
-
-  public instanceId: string;
-
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
   @ViewChild('sshViewer', { static: false }) sshViewer: SshViewerComponent;
-
-  private getBreadcrumbs(
-    application: IApp,
-  ) {
-    return [
-      {
-        breadcrumbs: [
-          { value: application.name, routerLink: `/kubernetes/${application.cfGuid}/${application.guid}/instances` }
-        ]
-      },
-    ];
-  }
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
@@ -75,9 +56,7 @@ export class KubeConsoleComponent implements OnInit {
   ngOnInit() {
     this.connectionStatus.next(0);
     const guid = this.kubeEndpointService.baseKube.guid;
-    this.kubeSummaryLink = (
-      `/kubernetes/${guid}/summary`
-    );
+    this.kubeSummaryLink = `/kubernetes/${guid}/summary`;
 
     if (!guid) {
       this.messages = NEVER;
@@ -90,25 +69,27 @@ export class KubeConsoleComponent implements OnInit {
         `${protocol}://${host}/pp/v1/kubeconsole/${guid}`
       );
       this.sshInput = new Subject<string>();
-      const connection = websocketConnect(
-        streamUrl
-      );
+      const connection = websocketConnect(streamUrl);
 
       this.messages = connection.pipe(
         tap(() => this.connectionStatus.next(1)),
         switchMap(getResponse => getResponse(this.sshInput)),
         catchError((e: Error) => {
-          console.log(e.message);
-          if (e.message !== normalClosureMessage) {
+          if (e.message !== normalClosureMessage && !this.sshViewer.isConnected) {
             this.errorMessage = 'Error launching Kubernetes Terminal';
           }
           return [];
         }));
 
-      // this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
-      //   map(app => this.getBreadcrumbs(app.entity.entity)),
-      //   first()
-      // );
+      // Breadcrumbs
+      this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
+        map(endpoint => ([{
+          breadcrumbs: [
+            { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+          ]
+        }])
+        )
+      );
     }
   }
 }

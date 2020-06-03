@@ -11,27 +11,31 @@ echo ""
 echo -e "${CYAN}Kubernetes Terminal${RESET}"
 echo ""
 
-# Unpack helm comand
-gunzip /stratos/helm.gz
+# Only do these on first run
+if [ ! -f "/root/.stratos/firstrun" ]; then
+  # Unpack helm comand
+  gunzip /stratos/helm.gz
 
-# Need to choose appropriate kubectl version
-pushd /stratos > /dev/null
-# Default to the newwest version that we have
-USE=$(ls kubectl_* | sort -r | head -n1)
-popd > /dev/null
+  # Need to choose appropriate kubectl version
+  pushd /stratos > /dev/null
+  # Default to the newwest version that we have
+  USE=$(ls kubectl_* | sort -r | head -n1)
+  popd > /dev/null
 
-# If env var KUBERNETES_VERSION is set, then use it (major.minor only)
-if [ -n "${KUBERNETES_VERSION}" ]; then
-  VERSION="kubectl_${KUBERNETES_VERSION}.gz"
-  if [ -f "/stratos/${VERSION}" ]; then
-    USE=${VERSION}
+  # If env var K8S_VERSION is set, then use it (major.minor only)
+  if [ -n "${K8S_VERSION}" ]; then
+    VERSION="kubectl_${K8S_VERSION}.gz"
+    if [ -f "/stratos/${VERSION}" ]; then
+      USE=${VERSION}
+    fi
   fi
+
+  gunzip /stratos/${USE}
+  VER=${USE::-3}
+  mv /stratos/${VER} /stratos/kubectl
+  chmod +x /stratos/kubectl
 fi
 
-gunzip /stratos/${USE}
-VER=${USE::-3}
-mv /stratos/${VER} /stratos/kubectl
-chmod +x /stratos/kubectl
 export PATH=/stratos:$PATH
 
 export KUBECONFIG=/root/.stratos/kubeconfig
@@ -43,15 +47,17 @@ source <(helm completion bash)
 
 #helm repo remove stable > /dev/null
 
-if [ -f "/root/.stratos/helm-setup" ]; then
-  echo "Setting up Helm repositories ..."
-  source  "/root/.stratos/helm-setup" > /dev/null
-  helm repo update 2>&1 > /dev/null
-  echo ""
-fi
+if [ ! -f "/root/.stratos/firstrun" ]; then
+  if [ -f "/root/.stratos/helm-setup" ]; then
+    echo "Setting up Helm repositories ..."
+    source  "/root/.stratos/helm-setup" > /dev/null
+    helm repo update 2>&1 > /dev/null
+    echo ""
+  fi
 
-if [ -f "/root/.stratos/history" ]; then
-  cat /root/.stratos/history > /root/.bash_history
+  if [ -f "/root/.stratos/history" ]; then
+    cat /root/.stratos/history > /root/.bash_history
+  fi
 fi
 
 # Make Bash append rather than overwrite the history on disk:
@@ -60,6 +66,11 @@ shopt -s histappend
 PROMPT_COMMAND='history -a'
 # Don't put duplicate lines in the history.
 export HISTCONTROL=ignoredups
+
+touch /root/.stratos/firstrun
+
+# Remove any env vars matching KUBERNETES
+unset `compgen -A variable | grep KUBERNETES`
 
 echo "Ready"
 echo ""

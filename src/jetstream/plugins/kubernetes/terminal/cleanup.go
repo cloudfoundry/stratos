@@ -10,21 +10,18 @@ import (
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Wait time in minutes after intiial wait
+// Wait time in minutes after random intiial wait
 const waitPeriod = 10
 
-// StartCleanup starts a backgrdound routine to cleanup orphaned pods
+// StartCleanup starts a background routine to cleanup orphaned pods
 func (k *KubeTerminal) StartCleanup() {
 	go k.cleanup()
 }
 
 func (k *KubeTerminal) cleanup() {
 	// Use a random initial wait before cleaning up
-	// If we had moer backends, this helps to ensure they are not all trying to cleanup at the same time
+	// If we had more than one backend, this helps to ensure they are not all trying to cleanup at the same time
 	wait := rand.Intn(30)
-
-	// Testing
-	wait = 0
 	for {
 		time.Sleep(time.Duration(wait) * time.Minute)
 		log.Debug("Cleaning up stale Kubernetes Terminal pods and secrets ...")

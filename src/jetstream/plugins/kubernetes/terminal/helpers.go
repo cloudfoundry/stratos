@@ -58,9 +58,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	// Names for the secret and pod
 	secretName := fmt.Sprintf("terminal-%s", id)
 	podName := secretName
-
 	podClient, secretClient, err := k.getClients()
-
 	result := &PodCreationData{}
 	result.Namespace = k.Namespace
 
@@ -88,7 +86,6 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 
 	secretSpec.Data = make(map[string][]byte)
 	secretSpec.Data["kubeconfig"] = []byte(kubeConfig)
-	//secretSpec.Data["history"] = []byte(history)
 
 	// Get Helm repository script if we have Helm repositories
 	helmSetup := getHelmRepoSetupScript(k.PortalProxy)
@@ -98,7 +95,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 
 	_, err = secretClient.Create(secretSpec)
 	if err != nil {
-		log.Warn("Unable to create Secret")
+		log.Warnf("Kubernetes Terminal: Unable to create Secret: %+v", err)
 		return result, err
 	}
 
@@ -155,6 +152,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	// Create a new pod
 	pod, err := podClient.Create(podSpec)
 	if err != nil {
+		log.Warnf("Kubernetes Terminal: Unable to create Pod: %+v", err)
 		// Secret will get cleaned up by caller
 		return result, err
 	}
@@ -210,7 +208,6 @@ func (k *KubeTerminal) cleanupPodAndSecret(podData *PodCreationData) error {
 	return nil
 }
 
-
 func getHelmRepoSetupScript(portalProxy interfaces.PortalProxy) string {
 	str := ""
 
@@ -240,7 +237,6 @@ func sendProgressMessage(ws *websocket.Conn, progressMsg string) {
 }
 
 func (k *KubeTerminal) getKubeVersion(endpointID, userID string) (string, error) {
-
 	response, err := k.PortalProxy.DoProxySingleRequest(endpointID, userID, "GET", "/api/v1/nodes", nil, nil)
 	if err != nil || response.StatusCode != 200 {
 		return "", errors.New("Could not fetch node list")
@@ -253,6 +249,7 @@ func (k *KubeTerminal) getKubeVersion(endpointID, userID string) (string, error)
 	}
 
 	if len(nodes.Items) > 0 {
+		// Get the version number - remove any 'v' perfix or '+' suffix
 		version := nodes.Items[0].Status.NodeInfo.KubeletVersion
 		reg, err := regexp.Compile("[^0-9\\.]+")
     if err == nil {

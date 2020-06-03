@@ -46,23 +46,18 @@ const (
 
 // Start handles web-socket request to launch a Kubernetes Terminal
 func (k *KubeTerminal) Start(c echo.Context) error {
-
-	var p = k.PortalProxy
-
-	//c.Response().Status = 500
-
-	log.Debug("Kube Terminal backend request")
+	log.Debug("Kube Terminal start request")
 
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
 
-	cnsiRecord, err := p.GetCNSIRecord(endpointGUID)
+	cnsiRecord, err := k.PortalProxy.GetCNSIRecord(endpointGUID)
 	if err != nil {
 		return errors.New("Could not get endpoint information")
 	}
 
 	// Get token for this user
-	tokenRecord, ok := p.GetCNSITokenRecord(endpointGUID, userGUID)
+	tokenRecord, ok := k.PortalProxy.GetCNSITokenRecord(endpointGUID, userGUID)
 	if !ok {
 		return errors.New("Could not get token")
 	}
@@ -138,6 +133,12 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	stdoutDone := make(chan bool)
 	go pumpStdout(ws, wsConn, stdoutDone)
 
+	// If the downstream connection is closed, close the other web socket as well
+	ws.SetCloseHandler(func (code int, text string) error {
+		wsConn.Close()
+		return nil
+	})
+
 	// Read the input from the web socket and pipe it to the SSH client
 	for {
 		_, r, err := ws.ReadMessage()
@@ -151,6 +152,7 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 			if !closed {
 				log.Errorf("Kubernetes terminal: error reading message from web socket: %+v", err)
 			}
+			log.Warn("Kube Terminal cleaning up ....")
 			k.cleanupPodAndSecret(podData)
 			return err
 		}
@@ -176,9 +178,8 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	}
 
 	// Cleanup
-	log.Debug("Kubernetes Terminal is cleaning up")
+	log.Error("Kubernetes Terminal is cleaning up")
 
-	// This is unreachable????
 	return k.cleanupPodAndSecret(podData)
 }
 
@@ -187,15 +188,13 @@ func pumpStdout(ws *websocket.Conn, source *websocket.Conn, done chan bool) {
 		_, r, err := source.ReadMessage()
 		if err != nil {
 			// Close
-			ws.Close()
 			done <- true
 			break
 		}
 		ws.SetWriteDeadline(time.Now().Add(writeWait))
 		bytes := fmt.Sprintf("% x\n", r[1:])
 		if err := ws.WriteMessage(websocket.TextMessage, []byte(bytes)); err != nil {
-			log.Errorf("Kubernetes Terimnal failed to write nessage: %+v", err)
-			ws.Close()
+			log.Errorf("Kubernetes Terminal failed to write message: %+v", err)
 			break
 		}
 	}
