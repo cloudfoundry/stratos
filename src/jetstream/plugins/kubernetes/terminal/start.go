@@ -154,7 +154,7 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 			if !closed {
 				log.Errorf("Kubernetes terminal: error reading message from web socket: %+v", err)
 			}
-			log.Warn("Kube Terminal cleaning up ....")
+			log.Debug("Kube Terminal cleaning up ....")
 			k.cleanupPodAndSecret(podData)
 
 			// No point returning an error - we've already upgraded to web sockets, so we can't use the HTTP response now
