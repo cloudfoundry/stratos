@@ -1,3 +1,4 @@
+import { HttpClientModule } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
@@ -7,12 +8,11 @@ import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../core/tab-nav.service';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfUserServiceTestProvider } from '../../../../../../core/test-framework/user-service-helper';
+import { CfUserServiceTestProvider } from '../../../../../test-framework/user-service-helper';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CfRolesService } from '../manage-users//cf-roles.service';
 import { UsersRolesConfirmComponent } from '../manage-users/manage-users-confirm/manage-users-confirm.component';
 import { RemoveUserComponent } from './remove-user.component';
-import { HttpClientModule } from '@angular/common/http';
 
 describe('RemoveUserComponent', () => {
   let component: RemoveUserComponent;

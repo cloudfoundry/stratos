@@ -1,19 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { testSCFEndpoint, testSCFEndpointGuid } from '@stratos/store/testing';
 
 import { endpointEntitySchema } from '../../../../../core/src/base-entity-schemas';
+import { TabNavService } from '../../../../../core/tab-nav.service';
 import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
 import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { TabNavService } from '../../../../../core/tab-nav.service';
-import { testSCFEndpoint, testSCFEndpointGuid } from '@stratos/store/testing';
-import { EntityRelationSpecHelper } from '../../../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
 import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import { WrapperRequestActionSuccess } from '../../../../../store/src/types/request.types';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityRelationSpecHelper } from '../../../../test-framework/entity-relations-spec-helper';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { organizationEntityType, spaceEntityType } from '../../../cf-entity-types';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition.component';

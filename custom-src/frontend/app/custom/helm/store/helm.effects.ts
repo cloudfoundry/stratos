@@ -2,9 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
+import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from 'frontend/packages/store/src/actions/endpoint.actions';
 import { ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
 import { AppState } from 'frontend/packages/store/src/app-state';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
 import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from 'frontend/packages/store/src/types/api.types';
 import {
@@ -13,11 +14,12 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from 'frontend/packages/store/src/types/request.types';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { isJetstreamError } from '../../../jetstream.helpers';
+import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 import {
   GET_HELM_VERSIONS,
   GET_MONOCULAR_CHARTS,
@@ -27,8 +29,6 @@ import {
   HelmInstall,
 } from './helm.actions';
 import { HelmVersion } from './helm.types';
-import { GetAllEndpointsSuccess, GET_ENDPOINTS_SUCCESS } from 'frontend/packages/store/src/actions/endpoint.actions';
-import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 
 @Injectable()
 export class HelmEffects {

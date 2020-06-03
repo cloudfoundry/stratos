@@ -1,8 +1,13 @@
 <app-page-header>
   <h1>Endpoints</h1>
   <div class="page-header-right">
-    <button id="stratos-add-endpoint" *appUserPermission="canRegisterEndpoint" mat-icon-button [routerLink]="'/endpoints/new/'">
+    <button id="stratos-add-endpoint" *appUserPermission="canRegisterEndpoint" mat-icon-button
+      [routerLink]="'/endpoints/new/'" matTooltip="Register Endpoint">
       <mat-icon>add</mat-icon>
+    </button>
+    <button id="stratos-add-endpoint" *appUserPermission="canRegisterEndpoint" mat-icon-button
+      [routerLink]="'/endpoints/backup-restore'" matTooltip="Backup/Restore Endpoints">
+      <mat-icon>settings_backup_restore</mat-icon>
     </button>
   </div>
 </app-page-header>

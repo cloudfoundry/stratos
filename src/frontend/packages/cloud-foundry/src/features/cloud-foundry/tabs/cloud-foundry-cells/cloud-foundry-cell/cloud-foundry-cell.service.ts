@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { CfCellHelper } from '../../../../../../../core/src/features/cloud-foundry/cf-cell.helpers';
 import { MetricsConfig } from '../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import {
@@ -17,6 +16,7 @@ import { PaginationMonitorFactory } from '../../../../../../../store/src/monitor
 import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFCellMetricsAction } from '../../../../../actions/cf-metrics.actions';
+import { CfCellHelper } from '../../../cf-cell.helpers';
 import { ActiveRouteCfCell } from '../../../cf-page.types';
 
 

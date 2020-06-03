@@ -1,10 +1,10 @@
 <div class="usernames" *ngIf="!(blocked$ | async)">
   <div class="usernames__addRemove">
     <mat-radio-group [value]="(canRemove$ | async) && (canAdd$ | async)" (change)="setIsRemove($event)">
-      <mat-radio-button [disabled]="!(canAdd$ | async)" [value]="true" [checked]="!(canRemove$ | async)">
+      <mat-radio-button [disabled]="!(canAdd$ | async)" [value]="true">
         Add Roles{{(canAdd$ | async) ? '' : ' (Disabled via feature flag)'}}
       </mat-radio-button>
-      <mat-radio-button [disabled]="!(canRemove$ | async)" [value]="false" [checked]="!(canAdd$ | async)">
+      <mat-radio-button [disabled]="!(canRemove$ | async)" [value]="false">
         Remove Roles{{(canRemove$ | async) ? '' : ' (Disabled via feature flag)'}}</mat-radio-button>
     </mat-radio-group>
   </div>

@@ -2,15 +2,15 @@ import { Component, ViewChild } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
+import { createBasicStoreModule } from '@stratos/store/testing';
 import { Observable, of } from 'rxjs';
 
 import { EntitySchema } from '../../../../../../../../store/src/helpers/entity-schema';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { CoreTestingModule } from '../../../../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '@stratos/store/testing';
 import * as favoriteHelpers from '../../../../../../core/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { SharedModule } from '../../../../../shared.module';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
@@ -152,7 +152,7 @@ describe('MetaCardComponent', () => {
 
   it('should set favorite from entityConfig if not set', () => {
     spyOn(favoritesConfigMapper, 'getPrettyTypeName').and.returnValue('prettyName');
-    spyOn(favoriteHelpers, 'getFavoriteFromCfEntity').and.returnValue(favorite);
+    spyOn(favoriteHelpers, 'getFavoriteFromEntity').and.returnValue(favorite);
     component.entityConfig = entityConfig;
     fixture.detectChanges();
 

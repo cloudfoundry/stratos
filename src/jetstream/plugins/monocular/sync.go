@@ -68,7 +68,7 @@ func (m *Monocular) Sync(action interfaces.EndpointAction, endpoint *interfaces.
 		Status: "Pending",
 		Busy:   true,
 	}
-	m.portalProxy.UpdateEndointMetadata(endpoint.GUID, marshalSyncMetadata(metadata))
+	m.portalProxy.UpdateEndpointMetadata(endpoint.GUID, marshalSyncMetadata(metadata))
 
 	// Add the job to the queue to be processed
 	job := SyncJob{
@@ -127,7 +127,7 @@ func (m *Monocular) processSyncRequests() {
 				Status: "Synchronizing",
 				Busy:   true,
 			}
-			m.portalProxy.UpdateEndointMetadata(job.Endpoint.GUID, marshalSyncMetadata(metadata))
+			m.portalProxy.UpdateEndpointMetadata(job.Endpoint.GUID, marshalSyncMetadata(metadata))
 			syncURL := fmt.Sprintf("%s%s/sync/%s", m.SyncServiceURL, chartRepoPathPrefix, job.Endpoint.Name)
 
 			//Hit the sync server container endpoint to trigger a sync for given repo
@@ -228,7 +228,7 @@ func marshalSyncMetadata(metadata SyncMetadata) string {
 }
 
 func (m *Monocular) updateMetadata(endpoint string, metadata SyncMetadata) {
-	err := m.portalProxy.UpdateEndointMetadata(endpoint, marshalSyncMetadata(metadata))
+	err := m.portalProxy.UpdateEndpointMetadata(endpoint, marshalSyncMetadata(metadata))
 	if err != nil {
 		log.Errorf("Failed to update endpoint metadata: %v+", err)
 	}

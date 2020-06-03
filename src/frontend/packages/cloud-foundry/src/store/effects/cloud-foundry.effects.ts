@@ -1,15 +1,19 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
+import { environment } from '../../../../core/src/environments/environment.prod';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
+import { NormalizedResponse } from '../../../../store/src/types/api.types';
+import {
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
+} from '../../../../store/src/types/request.types';
 import { GET_CF_INFO, GetCFInfo } from '../../actions/cloud-foundry.actions';
 import { CFAppState } from '../../cf-app-state';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { environment } from '../../../../core/src/environments/environment.prod';
-import { NormalizedResponse } from '../../../../store/src/types/api.types';
-import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
-import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class CloudFoundryEffects {
@@ -29,7 +33,7 @@ export class CloudFoundryEffects {
       const cfInfoKey = catalogEntity.entityKey;
       this.store.dispatch(new StartRequestAction(action, actionType));
       const requestArgs = {
-        headers: { 'x-cap-cnsi-list': action.cfGuid }
+        headers: { 'x-cap-cnsi-list': action.guid }
       };
       const url = `/pp/${this.proxyAPIVersion}/proxy/v2/info`;
       return this.http
@@ -40,7 +44,7 @@ export class CloudFoundryEffects {
               entities: { [cfInfoKey]: {} },
               result: []
             } as NormalizedResponse;
-            const id = action.cfGuid;
+            const id = action.guid;
 
             mappedData.entities[cfInfoKey][id] = {
               entity: info[id],
@@ -53,7 +57,7 @@ export class CloudFoundryEffects {
           }),
           catchError(error => [
             new WrapperRequestActionFailed(error.message, action, actionType, {
-              endpointIds: [action.cfGuid],
+              endpointIds: [action.guid],
               url: error.url || url,
               eventCode: error.status ? error.status + '' : '500',
               message: 'Cloud Foundry Info request error',

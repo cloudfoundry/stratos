@@ -68,9 +68,9 @@ function log() {
 }
 
 COMPARE_REPO=${REPO}
-QUERY="repo:${REPO}+milestone:3.1.0+state:closed"
+QUERY="repo:${REPO}+milestone:${MILESTONE}+state:closed"
 if [ -n "${FORK}" ]; then
-  FORK_QUERY="repo:${FORK}+milestone:3.1.0+state:closed"
+  FORK_QUERY="repo:${FORK}+milestone:${MILESTONE}+state:closed"
   COMPARE_REPO=${FORK}
 fi
 

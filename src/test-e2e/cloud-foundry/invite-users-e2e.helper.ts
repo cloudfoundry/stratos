@@ -164,7 +164,13 @@ export function setupInviteUserTests(
       inviteUserStepper.snackBar.waitForMessage('Failed to invite one or more users. Please address per user message and try again');
       expect(stackedActions.isInputSuccess(0)).toBe(true);
       expect(stackedActions.isInputSuccess(1)).toBe(false);
-      expect(stackedActions.getInputMessage(1)).toBe(`${slightlyValidEmail} is invalid email.`);
+
+      // Check message - flexibility on old and newer UAA
+      stackedActions.getInputMessage(1).then(msg => {
+        const okay = msg === `${slightlyValidEmail} is invalid email.` || msg === 'No authentication provider found.';
+        expect(okay).toBeTruthy('Error message is not as expected');
+      });
+
       // Clear state
       inviteUserStepper.cancel();
       usersTable.inviteUser();

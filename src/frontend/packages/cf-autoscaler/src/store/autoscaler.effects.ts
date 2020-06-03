@@ -6,10 +6,10 @@ import { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
 import { environment } from '../../../core/src/environments/environment';
 import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState } from '../../../store/src/app-state';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import {
   resultPerPageParam,
@@ -39,6 +39,8 @@ import {
   AutoscalerQuery,
   CREATE_APP_AUTOSCALER_POLICY,
   CreateAppAutoscalerPolicyAction,
+  DELETE_APP_AUTOSCALER_CREDENTIAL,
+  DeleteAppAutoscalerCredentialAction,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
@@ -48,10 +50,13 @@ import {
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerPolicyTriggerAction,
   GetAppAutoscalerScalingHistoryAction,
+  UPDATE_APP_AUTOSCALER_CREDENTIAL,
   UPDATE_APP_AUTOSCALER_POLICY,
+  UpdateAppAutoscalerCredentialAction,
   UpdateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
 import {
+  AppAutoscalerCredential,
   AppAutoscalerEvent,
   AppAutoscalerFetchPolicyFailedResponse,
   AppAutoscalerMetricData,
@@ -207,6 +212,61 @@ export class AutoscalerEffects {
     ofType<GetAppAutoscalerPolicyTriggerAction>(APP_AUTOSCALER_POLICY_TRIGGER),
     mergeMap(action => this.fetchPolicy(new GetAppAutoscalerPolicyAction(action.guid, action.endpointGuid), action))
   );
+
+  @Effect()
+  updateAppAutoscalerCredential$ = this.actions$.pipe(
+    ofType<UpdateAppAutoscalerCredentialAction>(UPDATE_APP_AUTOSCALER_CREDENTIAL),
+    mergeMap(action => {
+      const actionType = 'update';
+      this.store.dispatch(new StartRequestAction(action, actionType));
+      return this.http.put<AppAutoscalerCredential>(
+        `${commonPrefix}/apps/${action.guid}/credential`,
+        action.credential,
+        {
+          headers: this.addHeaders(action.endpointGuid)
+        }).pipe(
+          mergeMap(response => {
+            const credentialInfo = response;
+            const entity = entityCatalog.getEntity(action);
+            const mappedData = {
+              entities: { [entity.entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(entity.entityKey, mappedData, action.guid, credentialInfo);
+            return [
+              new WrapperRequestActionSuccess(mappedData, action, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('update credential', err), action, actionType)
+          ]));
+    }));
+
+  @Effect()
+  deleteAppAutoscalerCredential$ = this.actions$.pipe(
+    ofType<DeleteAppAutoscalerCredentialAction>(DELETE_APP_AUTOSCALER_CREDENTIAL),
+    mergeMap(action => {
+      const actionType = 'delete';
+      this.store.dispatch(new StartRequestAction(action, actionType));
+      return this.http
+        .delete(`${commonPrefix}/apps/${action.guid}/credential`, {
+          headers: this.addHeaders(action.endpointGuid)
+        }).pipe(
+          mergeMap(response => {
+            const entity = entityCatalog.getEntity(action);
+            const mappedData = {
+              entities: { [entity.entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(entity.entityKey, mappedData, action.guid, { enabled: false });
+            return [
+              new WrapperRequestActionSuccess(mappedData, action, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createAutoscalerErrorMessage('delete credential', err), action, actionType)
+          ]));
+    }));
 
   @Effect()
   fetchAppAutoscalerScalingHistory$ = this.actions$.pipe(

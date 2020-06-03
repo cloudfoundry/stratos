@@ -5,21 +5,21 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, ReplaySubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { serviceBindingEntityType, serviceInstancesEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
+import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import {
   ServiceActionHelperService,
 } from '../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
-import { IServiceBinding, IServiceInstance } from '../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IServiceBinding } from '../../../cf-api-svc.types';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 
 @Component({
   selector: 'app-detach-service-instance',
@@ -61,24 +61,14 @@ export class DetachServiceInstanceComponent {
     private store: Store<CFAppState>,
     private datePipe: DatePipe,
     private serviceActionHelperService: ServiceActionHelperService,
-    private activatedRoute: ActivatedRoute,
-    private entityServiceFactory: EntityServiceFactory
+    activatedRoute: ActivatedRoute,
   ) {
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
     const serviceInstanceId = activatedRoute.snapshot.params.serviceInstanceId;
-
-    const serviceIntanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
-    const actionBuilder = serviceIntanceEntity.actionOrchestrator.getActionBuilder('get');
-    const getServiceInstanceAction = actionBuilder(serviceInstanceId, this.cfGuid);
-    const serviceBindingEntityService = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
-      serviceInstanceId,
-      getServiceInstanceAction
-    );
-    this.title$ = serviceBindingEntityService.waitForEntity$.pipe(
+    this.title$ = cfEntityCatalog.serviceInstance.store.getEntityService(serviceInstanceId, this.cfGuid).waitForEntity$.pipe(
       filter(o => !!o && !!o.entity),
       map(o => `Unbind apps from '${o.entity.entity.name}'`),
     );
-
   }
 
   getId = (el: APIResource) => el.metadata.guid;

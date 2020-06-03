@@ -2,29 +2,22 @@ import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
 
-import { ISpace } from '../../../core/src/core/cf-api.types';
-import {
-  EntityCatalogTestModuleManualStore,
-  TEST_CATALOGUE_ENTITIES,
-} from '../../../store/src/entity-catalog-test.module';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
-import {
-  createBasicStoreModule,
-  createEntityStoreState,
-  TestStoreEntity,
-} from '@stratos/store/testing';
 import { RequestTypes } from '../../../store/src/actions/request.actions';
 import { AppState } from '../../../store/src/app-state';
-import { EntityRelationSpecHelper } from '../../../store/src/helpers/entity-relations/entity-relations-spec-helper';
+import { EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES } from '../../../store/src/entity-catalog-test.module';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../store/src/types/api.types';
 import { WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../cf-types';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '../../../store/testing/public-api';
+import { EntityRelationSpecHelper } from '../../test-framework/entity-relations-spec-helper';
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
+import { ISpace } from '../cf-api.types';
 import { CFAppState } from '../cf-app-state';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { generateCFEntities } from '../cf-entity-generator';
 import { organizationEntityType, spaceEntityType } from '../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { populatePaginationFromParent } from './entity-relations';
 
 

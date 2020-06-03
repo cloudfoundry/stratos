@@ -13,6 +13,7 @@ import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
+import { Injectable } from "@angular/core";
 import { CardCell } from './list.types';
 
 export enum ListViewTypes {
@@ -151,6 +152,7 @@ export interface IListMultiFilterConfigItem {
 export const defaultPaginationPageSizeOptionsCards = [defaultClientPaginationPageSize, 30, 80];
 export const defaultPaginationPageSizeOptionsTable = [defaultClientPaginationPageSize, 20, 80];
 
+@Injectable()
 export class ListConfig<T> implements IListConfig<T> {
   isLocal = false;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;

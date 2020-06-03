@@ -31,7 +31,7 @@ export const endpointOfTypeSelector = (endpointType: string) => compose(
 );
 
 // TODO: Move this #3769
-export const cfEndpointEntitiesSelector = endpointOfType('cf');
+const cfEndpointEntitiesSelector = endpointOfType('cf');
 
 const getConnectedEndpoints = (endpoints: IRequestEntityTypeState<EndpointModel>) =>
   Object.values(endpoints || {}).reduce((connected, endpoint) => {

@@ -1,20 +1,24 @@
-import { ActivatedRoute } from '@angular/router';
 import { Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, first, pairwise, startWith } from 'rxjs/operators';
-import { EndpointModel } from './../../../../../../store/src/types/endpoint.types';
-import { UpdateEndpoint } from './../../../../../../store/src/actions/endpoint.actions';
-import { IStratosEndpointDefinition, EntityCatalogSchemas } from './../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { entityCatalog } from './../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { endpointEntitiesSelector } from './../../../../../../store/src/selectors/endpoint.selectors';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { filter, first, map, pairwise, switchMap } from 'rxjs/operators';
+
+import { AppState } from '../../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
-import { safeUnsubscribe, getIdFromRoute } from './../../../../core/utils.service';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
+import { UpdateEndpoint } from './../../../../../../store/src/actions/endpoint.actions';
+import {
+  EntityCatalogSchemas,
+  IStratosEndpointDefinition,
+} from './../../../../../../store/src/entity-catalog/entity-catalog.types';
+import { endpointEntitiesSelector } from './../../../../../../store/src/selectors/endpoint.selectors';
+import { EndpointModel } from './../../../../../../store/src/types/endpoint.types';
+import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
-import { CFAppState } from 'frontend/packages/cloud-foundry/src/cf-app-state';
 
 interface EndpointModelMap {
   [id: string]: EndpointModel;
@@ -42,7 +46,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   setClientInfo = false;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     activatedRoute: ActivatedRoute,
   ) {
     this.editEndpoint = new FormGroup({
@@ -78,7 +82,10 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     );
 
     // Fill the form in with the endpoint data
-    this.endpoint$.pipe(first()).subscribe(endpoint => {
+    this.endpoint$.pipe(
+      filter(ep => !!ep),
+      first()
+    ).subscribe(endpoint => {
       this.setAdvancedFields(endpoint);
       this.editEndpoint.setValue({
         name: endpoint.name,
@@ -117,29 +124,36 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   }
 
   onNext: StepOnNextFunction = () => {
-    const action = new UpdateEndpoint(
-      this.endpointID,
-      this.editEndpoint.value.name,
-      this.editEndpoint.value.skipSSL,
-      this.editEndpoint.value.setClientInfo,
-      this.editEndpoint.value.clientID,
-      this.editEndpoint.value.clientSecret,
-      this.editEndpoint.value.allowSSO,
-    );
+    return this.endpoint$.pipe(
+      first(),
+      switchMap(endpoint => {
+        const action = new UpdateEndpoint(
+          endpoint.cnsi_type,
+          this.endpointID,
+          this.editEndpoint.value.name,
+          this.editEndpoint.value.skipSSL,
+          this.editEndpoint.value.setClientInfo,
+          this.editEndpoint.value.clientID,
+          this.editEndpoint.value.clientSecret,
+          this.editEndpoint.value.allowSSO,
+        );
 
-    this.store.dispatch(action);
-    return this.store.select(selectUpdateInfo('stratosEndpoint', this.endpointID, 'updating')).pipe(
-      pairwise(),
-      filter(([oldV, newV]) => oldV.busy && !newV.busy),
-      map(([, newV]) => newV),
-      map(o => {
-        return {
-          success: !o.error,
-          message: o.message,
-          redirect: !o.error
-        };
+        this.store.dispatch(action);
+
+        return this.store.select(selectUpdateInfo('stratosEndpoint', this.endpointID, 'updating')).pipe(
+          pairwise(),
+          filter(([oldV, newV]) => oldV.busy && !newV.busy),
+          map(([, newV]) => newV),
+          map(o => {
+            return {
+              success: !o.error,
+              message: o.message,
+              redirect: !o.error
+            };
+          })
+        )
       })
-    );
+    )
   }
 
   ngOnDestroy(): void {
@@ -148,9 +162,10 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
 
   // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
   setAdvancedFields(endpoint: any) {
-    this.showAdvancedFields = endpoint.cnsi_type === 'cf';
+    const isCloudFoundry = endpoint && endpoint.cnsi_type === 'cf';
+    this.showAdvancedFields = isCloudFoundry;
     // Only allow SSL if the endpoint type is Cloud Foundry
-    this.endpointTypeSupportsSSO = endpoint.cnsi_type === 'cf';
+    this.endpointTypeSupportsSSO = isCloudFoundry;
   }
 
 }

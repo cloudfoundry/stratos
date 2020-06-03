@@ -2,15 +2,15 @@ import { HttpRequest } from '@angular/common/http';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
+import { AppState, GeneralEntityAppState, InternalAppState } from '../app-state';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
-} from '../entity-catalog/entity-catalog-entity';
-import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
-import { AppState, InternalAppState } from '../app-state';
+} from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
-import { NormalizedResponse } from '../types/api.types';
-import { PaginatedAction } from '../types/pagination.types';
+import { EntityInfo, NormalizedResponse } from '../types/api.types';
+import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';
 import { JetstreamError } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { PipelineHttpClient } from './pipline-http-client.service';
@@ -121,3 +121,17 @@ export interface BasePipelineConfig<T extends AppState = InternalAppState, Y ext
 export interface PagedJetstreamResponse<T = any> {
   [endpointId: string]: T[] | JetStreamErrorResponse[];
 }
+
+export type EntityInfoHandler = (action: EntityRequestAction, actionDispatcher: ActionDispatcher) => (entityInfo: EntityInfo) => void;
+
+export type EntitiesInfoHandler = (
+  action: PaginatedAction | PaginatedAction[],
+  actionDispatcher: ActionDispatcher,
+) => (
+    state: PaginationEntityState,
+  ) => void;
+
+
+export type EntityFetch<T = any> = (entity: T) => void;
+export type EntityFetchHandler<T = any> = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => EntityFetch<T>;
+export type EntitiesFetchHandler = (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => void;

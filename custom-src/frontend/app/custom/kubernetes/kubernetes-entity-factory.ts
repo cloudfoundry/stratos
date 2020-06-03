@@ -1,8 +1,8 @@
 import { Schema, schema } from 'normalizr';
 
-import { metricEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { getAPIResourceGuid } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { metricEntityType } from '../../base-entity-schemas';
 import { getKubeAPIResourceGuid } from './store/kube.selectors';
 import { KubernetesApp } from './store/kube.types';
 

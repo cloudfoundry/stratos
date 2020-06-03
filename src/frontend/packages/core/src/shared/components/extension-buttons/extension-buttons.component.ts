@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { AppState } from '../../../../../store/src/app-state';
 import {
   getActionsFromExtensions,
   StratosActionMetadata,
@@ -21,7 +21,7 @@ export class ExtensionButtonsComponent implements OnInit {
   @Input() type: StratosActionType;
 
   constructor(
-    private store: Store<CFAppState>
+    private store: Store<AppState>
   ) { }
 
   ngOnInit() {

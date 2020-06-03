@@ -6,7 +6,7 @@ import { first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
@@ -138,8 +138,11 @@ export class EndpointsService implements CanActivate {
       map(ep => {
         return Object.values(ep)
           .filter(endpoint => {
+            if (endpoint.cnsi_type !== type) {
+              return;
+            }
             const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
-            return endpoint.cnsi_type === type && (epType.unConnectable || endpoint.connectionStatus === 'connected');
+            return epType.unConnectable || endpoint.connectionStatus === 'connected';
           });
       })
     );

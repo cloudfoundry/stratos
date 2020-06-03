@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { getRowMetadata } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';

@@ -5,8 +5,8 @@ import { map, switchMap } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { CFFeatureFlagTypes } from '../../../../../../../core/src/shared/components/cf-auth/cf-auth.types';
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import {
   CfOrgUsersListConfigService,

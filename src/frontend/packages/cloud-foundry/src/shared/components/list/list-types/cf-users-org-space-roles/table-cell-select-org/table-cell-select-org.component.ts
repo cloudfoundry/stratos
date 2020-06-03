@@ -5,10 +5,10 @@ import { first, map } from 'rxjs/operators';
 
 import { UsersRolesSetOrg } from '../../../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { IOrganization } from '../../../../../../../../core/src/core/cf-api.types';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { selectUsersRolesOrgGuid } from '../../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IOrganization } from '../../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 

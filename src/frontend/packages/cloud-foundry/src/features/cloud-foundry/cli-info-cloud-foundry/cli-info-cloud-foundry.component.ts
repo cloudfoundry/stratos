@@ -5,7 +5,6 @@ import { first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { CFAppCLIInfoContext } from '../../../../../cloud-foundry/src/shared/components/cli-info/cli-info.component';
-import { IOrganization, ISpace } from '../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/src/core/current-user-permissions.checker';
 import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { getFullEndpointApiUrl } from '../../../../../core/src/features/endpoints/endpoint-helpers';
@@ -14,6 +13,10 @@ import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
+import { IOrganization, ISpace } from '../../../cf-api.types';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
@@ -29,7 +32,8 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundryEndpointService,
     CloudFoundryOrganizationService,
-    CloudFoundrySpaceService
+    CloudFoundrySpaceService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class CliInfoCloudFoundryComponent implements OnInit {
@@ -99,7 +103,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
       map(route => {
         return {
           url: route && route.state ? route.state.url : defaultBackLink,
-          queryParams: route && route.state.queryParams ? route.state.queryParams : {}
+          queryParams: route && route.state && route.state.queryParams ? route.state.queryParams : {}
         };
       })
     );

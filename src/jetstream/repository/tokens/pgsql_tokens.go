@@ -43,6 +43,10 @@ var findCNSITokenConnected = `SELECT token_guid, auth_token, refresh_token, toke
 										FROM tokens
 										WHERE cnsi_guid = $1 AND (user_guid = $2 OR user_guid = $3) AND token_type = 'cnsi' AND disconnected = '0'`
 
+var findAllCNSIToken = `SELECT user_guid, token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
+										FROM tokens
+										WHERE cnsi_guid = $1 AND token_type = 'cnsi'`
+
 var countCNSITokens = `SELECT COUNT(*)
 											FROM tokens
 											WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
@@ -82,6 +86,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	updateAuthToken = datastore.ModifySQLStatement(updateAuthToken, databaseProvider)
 	findCNSIToken = datastore.ModifySQLStatement(findCNSIToken, databaseProvider)
 	findCNSITokenConnected = datastore.ModifySQLStatement(findCNSITokenConnected, databaseProvider)
+	findAllCNSIToken = datastore.ModifySQLStatement(findAllCNSIToken, databaseProvider)
 	countCNSITokens = datastore.ModifySQLStatement(countCNSITokens, databaseProvider)
 	insertCNSIToken = datastore.ModifySQLStatement(insertCNSIToken, databaseProvider)
 	updateCNSIToken = datastore.ModifySQLStatement(updateCNSIToken, databaseProvider)
@@ -321,6 +326,96 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 func (p *PgsqlTokenRepository) FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
 	log.Debug("FindCNSITokenIncludeDisconnected")
 	return p.findCNSIToken(cnsiGUID, userGUID, encryptionKey, true)
+}
+
+func (p *PgsqlTokenRepository) FindAllCNSITokenBackup(cnsiGUID string, encryptionKey []byte) ([]interfaces.BackupTokenRecord, error) {
+	log.Debug("FindAllCNSITokenBackup")
+	if cnsiGUID == "" {
+		msg := "Unable to find CNSI Token without a valid CNSI GUID."
+		log.Debug(msg)
+		return make([]interfaces.BackupTokenRecord, 0), errors.New(msg)
+	}
+
+	var rows *sql.Rows
+	var err error
+	rows, err = p.db.Query(findAllCNSIToken, cnsiGUID)
+	if err != nil {
+		msg := "Unable to Find All CNSI tokens: %v"
+		if err == sql.ErrNoRows {
+			log.Debugf(msg, err)
+		} else {
+			log.Errorf(msg, err)
+		}
+		return make([]interfaces.BackupTokenRecord, 0), fmt.Errorf(msg, err)
+	}
+
+	defer rows.Close()
+
+	btrs := make([]interfaces.BackupTokenRecord, 0)
+	for rows.Next() {
+		// temp vars to retrieve db data
+		var (
+			userGUID               string
+			tokenGUID              sql.NullString
+			ciphertextAuthToken    []byte
+			ciphertextRefreshToken []byte
+			tokenExpiry            sql.NullInt64
+			disconnected           bool
+			authType               string
+			metadata               sql.NullString
+			tokenUserGUID          sql.NullString
+			linkedTokenGUID        sql.NullString
+		)
+		err = rows.Scan(&userGUID, &tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to scan CNSI records: %v", err)
+		}
+
+		log.Debug("Decrypting Auth Token")
+		plaintextAuthToken, err := crypto.DecryptToken(encryptionKey, ciphertextAuthToken)
+		if err != nil {
+			return make([]interfaces.BackupTokenRecord, 0), err
+		}
+
+		log.Debug("Decrypting Refresh Token")
+		plaintextRefreshToken, err := crypto.DecryptToken(encryptionKey, ciphertextRefreshToken)
+		if err != nil {
+			return make([]interfaces.BackupTokenRecord, 0), err
+		}
+
+		// Build a new TokenRecord based on the decrypted tokens
+		tr := new(interfaces.TokenRecord)
+		if tokenGUID.Valid {
+			tr.TokenGUID = tokenGUID.String
+		}
+		tr.AuthToken = plaintextAuthToken
+		tr.RefreshToken = plaintextRefreshToken
+		if tokenExpiry.Valid {
+			tr.TokenExpiry = tokenExpiry.Int64
+		}
+		tr.Disconnected = disconnected
+		tr.AuthType = authType
+		if metadata.Valid {
+			tr.Metadata = metadata.String
+		}
+		if tokenUserGUID.Valid {
+			tr.SystemShared = tokenUserGUID.String == SystemSharedUserGuid
+		}
+		if linkedTokenGUID.Valid {
+			tr.LinkedGUID = linkedTokenGUID.String
+		}
+
+		btr := new(interfaces.BackupTokenRecord)
+		btr.TokenRecord = *tr
+		btr.EndpointGUID = cnsiGUID
+		btr.TokenType = "cnsi"
+		btr.UserGUID = userGUID
+
+		btrs = append(btrs, *btr)
+
+	}
+
+	return btrs, nil
 }
 
 func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte, includeDisconnected bool) (interfaces.TokenRecord, error) {

@@ -12,6 +12,9 @@ import {
   CfSpaceEventsConfigService,
 } from '../../../../../../../shared/components/list/list-types/cf-events/types/cf-space-events-config.service';
 import { CfUserService } from '../../../../../../../shared/data-services/cf-user.service';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
@@ -36,7 +39,8 @@ describe('CloudFoundrySpaceEventsComponent', () => {
         CloudFoundrySpaceService,
         CfUserService,
         CloudFoundryEndpointService,
-        CloudFoundryOrganizationService
+        CloudFoundryOrganizationService,
+        CloudFoundryUserProvidedServicesService
       ],
       imports: [...CFBaseTestModules]
     })

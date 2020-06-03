@@ -5,16 +5,11 @@ import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { IFeatureFlag } from '../../../../../core/src/core/cf-api.types';
 import { PermissionConfig, PermissionTypes } from '../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
-import { CFFeatureFlagTypes } from '../../../../../core/src/shared/components/cf-auth/cf-auth.types';
-import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { CFFeatureFlagTypes } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
-import {
-  createCfFeatureFlagFetchAction,
-} from '../../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
 
 export enum DEPLOY_TYPES_IDS {
   GITLAB = 'gitlab',
@@ -103,20 +98,7 @@ export class ApplicationDeploySourceTypes {
       // We don't want to return until we have a trusted response (there's a `startsWith(false)` in the `.can`), otherwise we return false
       // then, if different, send the actual response (this leads to flashing misleading info in ux)
       // So fetch the feature flags for the cf, which is the blocker, first before checking if we `.can`
-      const action = createCfFeatureFlagFetchAction(cfId);
-      const fetchedFeatureFlags$ = getPaginationObservables<IFeatureFlag>(
-        {
-          store: this.store,
-          action,
-          paginationMonitor: new PaginationMonitor<IFeatureFlag>(
-            this.store,
-            action.paginationKey,
-            action,
-            true
-          )
-        },
-        true
-      ).entities$.pipe(
+      const fetchedFeatureFlags$ = cfEntityCatalog.featureFlag.store.getPaginationService(cfId).entities$.pipe(
         map(entities => !!entities),
         filter(hasEntities => hasEntities),
         first(),

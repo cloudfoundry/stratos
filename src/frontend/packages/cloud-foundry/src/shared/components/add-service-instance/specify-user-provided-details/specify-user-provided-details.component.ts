@@ -8,13 +8,9 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import {
-  IUserProvidedServiceInstanceData,
-  UpdateUserProvidedServiceInstance,
-} from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
+import { IUserProvidedServiceInstanceData } from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
-  appEnvVarsEntityType,
   serviceBindingEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-types';
@@ -22,20 +18,15 @@ import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/ent
 import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
-import { IUserProvidedServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
 import { safeUnsubscribe, urlValidationExpression } from '../../../../../../core/src/core/utils.service';
 import { environment } from '../../../../../../core/src/environments/environment';
-import {
-  AppNameUniqueChecking,
-} from '../../../../../../core/src/shared/app-name-unique.directive/app-name-unique.directive';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { isValidJsonValidator } from '../../../../../../core/src/shared/form-validators';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
+import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
+import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -292,12 +283,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
             return { success: false, message: `Failed to create service instance binding: ${req.message}` };
           } else {
             // Refetch env vars for app, since they have been changed by CF
-            const appEnvVarsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-            const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
-            const getAppEnvVarsAction = actionBuilder(data.bindAppGuid, data.cfGuid);
-            this.store.dispatch(
-              getAppEnvVarsAction
-            );
+            cfEntityCatalog.appEnvVar.api.getMultiple(data.bindAppGuid, data.cfGuid)
             return { success: true, redirect: true };
           }
         })
@@ -312,9 +298,9 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       updateData
     ).pipe(
       map(er => ({
-        success: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error,
-        redirect: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error,
-        message: `Failed to update service instance: ${er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].message}`
+        success: !er.error,
+        redirect: !er.error,
+        message: `Failed to update service instance: ${er.message}`
       }))
     );
   }

@@ -27,8 +27,14 @@ describe('CloudFoundryCellsComponent', () => {
             cellId: 'cellId'
           }),
         },
-        CloudFoundryEndpointService,
-        ActiveRouteCfOrgSpace,
+        CloudFoundryEndpointService, {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: 'cfGuid',
+            orgGuid: 'orgGuid',
+            spaceGuid: 'spaceGuid'
+          }
+        },
         CfUserService
       ],
     })

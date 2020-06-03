@@ -18,11 +18,12 @@ import {
   LocalPaginationHelpers,
 } from '../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 import { AppState, GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
-import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { EntitySchema } from '../helpers/entity-schema';
 import { ActionState, ListActionState } from '../reducers/api-request-reducer/types';
+import { getCurrentPageRequestInfo } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { getAPIRequestDataState, selectEntities } from '../selectors/api.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { PaginationEntityState } from '../types/pagination.types';
@@ -48,6 +49,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
    * Emits the current page of entities.
    */
   public currentPage$: Observable<T[]>;
+  public currentPageState$: Observable<ListActionState>;
   /**
    * Emits a boolean stating if the current page is fetching or not.
    */
@@ -121,19 +123,14 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
   private getCurrentPageRequestInfo(
     pagination: PaginationEntityState,
   ): ActionState {
-    if (
-      !pagination ||
-      !pagination.pageRequests ||
-      !pagination.pageRequests[pagination.currentPage]
-    ) {
-      return {
+    return getCurrentPageRequestInfo(
+      pagination,
+      {
         busy: true,
         error: false,
         message: '',
-      };
-    } else {
-      return pagination.pageRequests[pagination.currentPage];
-    }
+      }
+    );
   }
 
   // ### Initialization methods.
@@ -158,6 +155,9 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       this.currentPage$ = this.createPageObservable(this.pagination$, schema);
     }
     this.currentPageError$ = this.createErrorObservable(this.pagination$);
+    this.currentPageState$ = this.pagination$.pipe(
+      map(pagination => this.getCurrentPageRequestInfo(pagination))
+    );
   }
 
   private createPaginationObservable(
@@ -239,6 +239,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       distinctUntilChanged(),
       // Improve efficiency
       observeOn(asapScheduler),
+      filter(pagination => this.hasPage(pagination) && !LocalPaginationHelpers.isPaginationMaxed(pagination)),
       combineLatestOperator(entityObservable$),
       withLatestFrom(allEntitiesObservable$),
       map(([[pagination], allEntities]) => {

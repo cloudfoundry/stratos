@@ -1,16 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../../../core/tab-nav.service';
-import {
-  generateCfBaseTestModules,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellBaseComponent } from './cloud-foundry-cell-base.component';
 
-// TODO: Fix after metrics has been sorted - STRAT-152
-xdescribe('CloudFoundryCellBaseComponent', () => {
+describe('CloudFoundryCellBaseComponent', () => {
   let component: CloudFoundryCellBaseComponent;
   let fixture: ComponentFixture<CloudFoundryCellBaseComponent>;
 
@@ -20,9 +18,16 @@ xdescribe('CloudFoundryCellBaseComponent', () => {
       imports: generateCfBaseTestModules(),
       providers: [
         CloudFoundryEndpointService,
-        CloudFoundryCellService,
-        ActiveRouteCfOrgSpace,
-        TabNavService
+        CloudFoundryCellService, {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: 'cfGuid',
+            orgGuid: 'orgGuid',
+            spaceGuid: 'spaceGuid'
+          }
+        },
+        TabNavService,
+        CfUserService
       ]
     })
       .compileComponents();

@@ -15,8 +15,10 @@ import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { StratosCatalogEndpointEntity } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
+import {
+  StratosCatalogEndpointEntity,
+} from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
@@ -62,12 +64,12 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @Input() component: EndpointListDetailsComponent;
   private endpointDetails: ViewContainerRef;
-  @ViewChild('endpointDetails', { read: ViewContainerRef, static: false }) set content(content: ViewContainerRef) {
+  @ViewChild('endpointDetails', { read: ViewContainerRef }) set content(content: ViewContainerRef) {
     this.endpointDetails = content;
     this.updateInnerComponent();
   }
 
-  @ViewChild('copyToClipboard', { static: false }) copyToClipboard: CopyToClipboardComponent;
+  @ViewChild('copyToClipboard') copyToClipboard: CopyToClipboardComponent;
 
   private pRow: EndpointModel;
   @Input('row')

@@ -3,9 +3,6 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import {
   StackedInputActionResult,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
@@ -16,9 +13,11 @@ import {
 import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
 import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE, CFEntityConfig } from '../../../../../cf-types';
+import { IOrganization, ISpace } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
-import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
+import { cfUserEntityType } from '../../../../../cf-entity-types';
+import { CFEntityConfig } from '../../../../../cf-types';
 import { SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -45,7 +44,6 @@ export class InviteUsersCreateComponent implements OnInit {
   constructor(
     private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private entityServiceFactory: EntityServiceFactory,
     private userInviteService: UserInviteService
   ) {
     this.valid$ = this.stepValid.asObservable();
@@ -69,29 +67,17 @@ export class InviteUsersCreateComponent implements OnInit {
 
   ngOnInit() {
     this.isSpace = !!this.activeRouteCfOrgSpace.spaceGuid;
-    const orgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
-    const getOrgActionBuilder = orgEntity.actionOrchestrator.getActionBuilder('get');
-    const getOrgAction = getOrgActionBuilder(
+    this.org$ = cfEntityCatalog.org.store.getEntityService(
       this.activeRouteCfOrgSpace.orgGuid,
       this.activeRouteCfOrgSpace.cfGuid,
       { includeRelations: [], populateMissing: false }
-    );
-    this.org$ = this.entityServiceFactory.create<APIResource<IOrganization>>(
-      this.activeRouteCfOrgSpace.orgGuid,
-      getOrgAction
     ).waitForEntity$.pipe(
       map(entity => entity.entity)
     );
-    const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
-    const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
-    const getSpaceAction = actionBuilder(
+    this.space$ = this.isSpace ? cfEntityCatalog.space.store.getEntityService(
       this.activeRouteCfOrgSpace.spaceGuid,
       this.activeRouteCfOrgSpace.cfGuid,
       { includeRelations: [], populateMissing: false }
-    );
-    this.space$ = this.isSpace ? this.entityServiceFactory.create<APIResource<ISpace>>(
-      this.activeRouteCfOrgSpace.spaceGuid,
-      getSpaceAction
     ).waitForEntity$.pipe(
       map(entity => entity.entity)
     ) : observableOf(null);

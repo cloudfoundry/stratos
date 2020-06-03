@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { selectEntity } from '../../../../../../../store/src/selectors/api.selectors';
 import { BooleanIndicatorType } from '../../../../../shared/components/boolean-indicator/boolean-indicator.component';
 import { ITableListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source-types';

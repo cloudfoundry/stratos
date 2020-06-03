@@ -4,7 +4,6 @@ import { BehaviorSubject, of as observableOf } from 'rxjs';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { IUserProvidedServiceInstance } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
@@ -12,11 +11,12 @@ import {
   MetaCardMenuItem,
 } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/services/cf-org-space-label.service';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IUserProvidedServiceInstance } from '../../../../../../cf-api-svc.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
 
 @Component({
@@ -98,7 +98,7 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
     super();
   }
 
-  detach = () => {
+  private detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
       this.serviceInstanceEntity.entity.service_bindings,
       this.serviceInstanceEntity.metadata.guid,
@@ -108,14 +108,14 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
     );
   }
 
-  delete = () => this.serviceActionHelperService.deleteServiceInstance(
+  private delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.name,
     this.serviceInstanceEntity.entity.cfGuid,
     true
   )
 
-  edit = () => this.serviceActionHelperService.editServiceBinding(
+  private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.cfGuid,
     null,

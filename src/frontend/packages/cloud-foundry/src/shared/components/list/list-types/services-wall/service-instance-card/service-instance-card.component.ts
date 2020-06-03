@@ -4,7 +4,6 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { IServiceInstance } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
@@ -12,10 +11,9 @@ import {
   MetaCardMenuItem,
 } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/services/cf-org-space-label.service';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import {
   getServiceBrokerName,
@@ -24,6 +22,7 @@ import {
   getServiceSummaryUrl,
 } from '../../../../../../features/service-catalog/services-helper';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
 @Component({
   selector: 'app-service-instance-card',
@@ -86,7 +85,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         this.serviceBrokerName$ = getServiceBrokerName(
           this.serviceInstanceEntity.entity.service_plan.entity.service.entity.service_broker_guid,
           this.serviceInstanceEntity.entity.cfGuid,
-          this.entityServiceFactory
         );
       }
     }
@@ -96,7 +94,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     private store: Store<CFAppState>,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    private entityServiceFactory: EntityServiceFactory
   ) {
     super();
   }
@@ -113,7 +110,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   cfOrgSpace: CfOrgSpaceLabelService;
   serviceBrokerName$: Observable<string>;
 
-  detach = () => {
+  private detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
       this.serviceInstanceEntity.entity.service_bindings,
       this.serviceInstanceEntity.metadata.guid,
@@ -122,13 +119,13 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     );
   }
 
-  delete = () => this.serviceActionHelperService.deleteServiceInstance(
+  private delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.name,
     this.serviceInstanceEntity.entity.cfGuid
   )
 
-  edit = () => this.serviceActionHelperService.editServiceBinding(
+  private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.cfGuid,
     null

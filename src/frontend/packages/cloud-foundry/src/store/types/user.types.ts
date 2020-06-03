@@ -1,5 +1,5 @@
-import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { APIResource } from '../../../../store/src/types/api.types';
+import { IOrganization, ISpace } from '../../cf-api.types';
 
 export function getDefaultCfUserMissingRoles(): CfUserMissingRoles {
   return {

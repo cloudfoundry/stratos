@@ -1,5 +1,6 @@
-import { RoutingHistory, defaultRoutingState } from '../types/routing.type';
-import { RouterNavigationAction, ROUTER_NAVIGATION } from '@ngrx/router-store';
+import { ROUTER_NAVIGATION, RouterNavigationAction } from '@ngrx/router-store';
+
+import { defaultRoutingState, RoutingHistory } from '../types/routing.type';
 
 export interface RouterRedirect {
   path: string;
@@ -20,11 +21,17 @@ export function routingReducer(state: RoutingHistory = defaultRoutingState, acti
         return state;
       }
 
+      // This changed in Angular 9 - state no longer embdedded
+      // This deduplicated the rotuerState
+      // We will keep it as before
       return {
         // ATM don't track change of route history
         // history: state.history.concat([action.payload.event]),
         previousState: state.currentState ? state.currentState : null,
-        currentState: action.payload.event
+        currentState: {
+          ...action.payload.event,
+          state: action.payload.routerState
+        }
       };
 
     default:

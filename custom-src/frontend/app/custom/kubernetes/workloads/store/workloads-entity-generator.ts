@@ -1,10 +1,10 @@
-import {
-  StratosBaseCatalogEntity,
-  StratosCatalogEntity,
-} from 'frontend/packages/store/src/entity-catalog/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
 import { IFavoriteMetadata } from 'frontend/packages/store/src/types/user-favorites.types';
 
+import {
+  StratosBaseCatalogEntity,
+  StratosCatalogEntity,
+} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { kubernetesEntityFactory } from '../../kubernetes-entity-factory';
 import { HelmRelease, HelmReleaseGraph, HelmReleaseResource } from '../workload.types';
 import { helmReleaseEntityKey, helmReleaseGraphEntityType, helmReleaseResourceEntityType } from './workloads-entity-factory';

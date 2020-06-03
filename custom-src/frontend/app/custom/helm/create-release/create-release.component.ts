@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatTextareaAutosize } from '@angular/material';
+import { MatTextareaAutosize } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { PaginationMonitorFactory } from 'frontend/packages/store/src/monitors/pagination-monitor.factory';
@@ -10,7 +10,7 @@ import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rx
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
@@ -64,7 +64,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private httpClient: HttpClient,
     private confirmDialog: ConfirmationDialogService,
-    private pmf: PaginationMonitorFactory
+    private pmf: PaginationMonitorFactory,
+    private emf: EntityMonitorFactory
   ) {
     const chart = this.route.snapshot.params;
     this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
@@ -238,9 +239,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       this.details.controls.endpoint.value);
     this.store.dispatch(action);
 
-    const namespaceEntityConfig = entityCatalog.getEntity(action);
-    const monitor = namespaceEntityConfig.getEntityMonitor(this.store, action.guid);
-    return monitor.entityRequest$.pipe(
+    return this.emf.create(action.guid, action).entityRequest$.pipe(
       pairwise(),
       filter(([oldVal, newVal]) => oldVal.creating && !newVal.creating),
       map(([, newVal]) => newVal),
@@ -271,10 +270,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     const action = new HelmInstall(values);
     this.store.dispatch(action);
 
-    const releaseEntityConfig = entityCatalog.getEntity(action);
-
     // Wait for result of request
-    return releaseEntityConfig.getEntityMonitor(this.store, action.guid).entityRequest$.pipe(
+    return this.emf.create(action.guid, action).entityRequest$.pipe(
       filter(state => !!state),
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.creating && !newVal.creating)),

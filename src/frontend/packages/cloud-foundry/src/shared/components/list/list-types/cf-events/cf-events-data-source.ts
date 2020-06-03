@@ -1,18 +1,15 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratos/store';
 
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata } from '../../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../cf-app-state';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfEventEntityType } from '../../../../../cf-entity-types';
-import { CfEventActionBuilders } from '../../../../../entity-action-builders/cf-event.action-builders';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { QParam, QParamJoiners } from '../../../../q-param';
 
 export class CfEventsDataSource extends ListDataSource<APIResource> {
@@ -25,18 +22,14 @@ export class CfEventsDataSource extends ListDataSource<APIResource> {
     spaceGuid?: string,
     actee?: string,
   ) {
-    const appEventEntity = entityCatalog.getEntity<IEntityMetadata, any, CfEventActionBuilders>(
-      CF_ENDPOINT_TYPE,
-      cfEventEntityType
-    );
-    const actionBuilder = appEventEntity.actionOrchestrator.getActionBuilder('getMultiple');
     const paginationKey = CfEventsDataSource.createPaginationKey(
       cfGuid,
       orgGuid,
       spaceGuid,
       actee
     );
-    const action = actionBuilder(cfGuid, paginationKey);
+
+    const action = cfEntityCatalog.event.actions.getMultiple(cfGuid, paginationKey)
 
     action.initialParams.q = CfEventsDataSource.createInitialQParams(
       orgGuid,

@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 
-import { IRule, IRuleType, ISpace } from '../../../../../../../../core/src/core/cf-api.types';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IRule, IRuleType, ISpace } from '../../../../../../cf-api.types';
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';

@@ -1,5 +1,5 @@
 import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-event-metadata',

@@ -83,7 +83,7 @@ export function autoscalerTransformMapToArray(oldPolicy: AppAutoscalerPolicyLoca
     instance_max_count: oldPolicy.instance_max_count
   };
   const scalingRules: AppScalingRule[] = oldPolicy.scaling_rules_form.map((trigger) => {
-    return {
+    const newTrigger: AppScalingRule = {
       adjustment: trigger.adjustment,
       breach_duration_secs: trigger.breach_duration_secs,
       cool_down_secs: trigger.breach_duration_secs,
@@ -91,6 +91,10 @@ export function autoscalerTransformMapToArray(oldPolicy: AppAutoscalerPolicyLoca
       operator: trigger.operator,
       threshold: trigger.threshold
     };
+    if (AutoscalerConstants.getMetricUnit(trigger.metric_type) === '' && trigger.unit && trigger.unit !== '') {
+      newTrigger.unit = trigger.unit;
+    }
+    return newTrigger;
   });
   if (scalingRules.length > 0) {
     newPolicy.scaling_rules = scalingRules;

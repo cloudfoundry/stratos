@@ -2,9 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { GetAppStatsAction } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { AppStat } from '../../../store/types/app-metadata.types';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
 
 @Component({
   selector: 'app-running-instances',
@@ -19,16 +17,8 @@ export class RunningInstancesComponent implements OnInit {
   // Observable on the running instances count for the application
   public runningInstances$: Observable<number>;
 
-  constructor(private paginationMonitorFactory: PaginationMonitorFactory) { }
-
   ngOnInit() {
-    const dummyAction = new GetAppStatsAction(this.appGuid, this.cfGuid);
-    const paginationMonitor = this.paginationMonitorFactory.create<AppStat>(
-      dummyAction.paginationKey,
-      dummyAction,
-      dummyAction.flattenPagination
-    );
-    this.runningInstances$ = paginationMonitor.currentPage$.pipe(
+    this.runningInstances$ = cfEntityCatalog.appStats.store.getPaginationMonitor(this.appGuid, this.cfGuid).currentPage$.pipe(
       map(appInstancesPages => {
         const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
         return allInstances.filter(stat => stat.state === 'RUNNING').length;

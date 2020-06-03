@@ -21,7 +21,7 @@ const customRoutes: Routes = [
   },
   {
     path: 'kubernetes',
-    loadChildren: './kubernetes/kubernetes.module#KubernetesModule',
+    loadChildren: () => import('./kubernetes/kubernetes.module').then(m => m.KubernetesModule),
     data: {
       stratosNavigation: {
         text: 'Kubernetes',
@@ -34,7 +34,7 @@ const customRoutes: Routes = [
   },
   {
     path: 'monocular',
-    loadChildren: './helm/helm.module#HelmModule',
+    loadChildren: () => import('./helm/helm.module').then(m => m.HelmModule),
     data: {
       reuseRoute: true,
       stratosNavigation: {
