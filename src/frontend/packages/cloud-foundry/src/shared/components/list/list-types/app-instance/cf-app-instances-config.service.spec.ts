@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { testSCFEndpointGuid } from '@stratos/store/testing';
+import { testSCFEndpointGuid } from '@stratosui/store/testing';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { CF_GUID } from '../../../../../../../core/src/shared/entity.tokens';

@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from '@stratos/store/testing';
+import { createEmptyStoreModule } from '@stratosui/store/testing';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { ApplicationServiceMock } from '../../../../../cloud-foundry/test-framework/application-service-helper';
