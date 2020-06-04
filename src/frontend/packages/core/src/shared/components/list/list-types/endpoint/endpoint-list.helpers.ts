@@ -124,7 +124,6 @@ export class EndpointListHelper {
       },
       {
         action: (item) => {
-          console.log(item);
           const routerLink = `/endpoints/edit/${item.guid}`;
           this.store.dispatch(new RouterNav({ path: routerLink }));
         },
