@@ -66,7 +66,7 @@ export class KubeConsoleComponent implements OnInit {
       const host = window.location.host;
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       const streamUrl = (
-        `${protocol}://${host}/pp/v1/kubeconsole/${guid}`
+        `${protocol}://${host}/pp/v1/kubeterminal/${guid}`
       );
       this.sshInput = new Subject<string>();
       const connection = websocketConnect(streamUrl);

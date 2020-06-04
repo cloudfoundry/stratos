@@ -52,8 +52,10 @@ const (
 	kubeEndpointType    = "k8s"
 	defaultKubeClientID = "K8S_CLIENT"
 
-	// kubeDashboardPluginConfigSetting is config value send back to the client to indicate if the kube dashboard can be navigated to
+	// kubeDashboardPluginConfigSetting is config value sent back to the client to indicate if the kube dashboard ie enabled
 	kubeDashboardPluginConfigSetting = "kubeDashboardEnabled"
+	// kubeTerminalPluginConfigSetting is config value sent back to the client to indicate if the kube terminal is enabled
+	kubeTerminalPluginConfigSetting ="kubeTerminalEnabled"
 )
 
 // Init creates a new instance of the Kubernetes plugin
@@ -138,6 +140,10 @@ func (c *KubernetesSpecification) Init() error {
 	// Kube dashboard is enabled by Tech Preview mode
 	c.portalProxy.GetConfig().PluginConfig[kubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
 
+	// Kube terminal is enabled by Tech Preview mode
+	c.portalProxy.GetConfig().PluginConfig[kubeTerminalPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
+
+
 	// Kick off the cleanup of any old kube terminal pods
 	c.kubeTerminal.StartCleanup()
 
@@ -170,8 +176,7 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name", c.GetRelease)
 
 	// Kube Terminal
-	echoGroup.GET("/kubeconsole/:guid", c.kubeTerminal.Start)
-
+	echoGroup.GET("/kubeterminal/:guid", c.kubeTerminal.Start)
 }
 
 func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
