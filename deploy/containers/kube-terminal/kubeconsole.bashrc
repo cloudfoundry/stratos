@@ -12,7 +12,7 @@ echo -e "${CYAN}Kubernetes Terminal${RESET}"
 echo ""
 
 # Only do these on first run
-if [ ! -f "/root/.stratos/firstrun" ]; then
+if [ ! -f "/stratos/.firstrun" ]; then
   # Unpack helm comand
   gunzip /stratos/helm.gz
 
@@ -38,7 +38,7 @@ fi
 
 export PATH=/stratos:$PATH
 
-export KUBECONFIG=/root/.stratos/kubeconfig
+export KUBECONFIG=${HOME}/.stratos/kubeconfig
 export PS1="\033[92mstratos>\033[0m"
 alias k=kubectl
 
@@ -47,16 +47,16 @@ source <(helm completion bash)
 
 #helm repo remove stable > /dev/null
 
-if [ ! -f "/root/.stratos/firstrun" ]; then
-  if [ -f "/root/.stratos/helm-setup" ]; then
+if [ ! -f "/stratos/.firstrun" ]; then
+  if [ -f "${HOME}/.stratos/helm-setup" ]; then
     echo "Setting up Helm repositories ..."
-    source  "/root/.stratos/helm-setup" > /dev/null
+    source  "${HOME}/.stratos/helm-setup" > /dev/null
     helm repo update 2>&1 > /dev/null
     echo ""
   fi
 
-  if [ -f "/root/.stratos/history" ]; then
-    cat /root/.stratos/history > /root/.bash_history
+  if [ -f "${HOME}/.stratos/history" ]; then
+    cat ${HOME}/.stratos/history > ${HOME}/.bash_history
   fi
 fi
 
@@ -67,7 +67,7 @@ PROMPT_COMMAND='history -a'
 # Don't put duplicate lines in the history.
 export HISTCONTROL=ignoredups
 
-touch /root/.stratos/firstrun
+touch "/stratos/.firstrun"
 
 # Remove any env vars matching KUBERNETES
 unset `compgen -A variable | grep KUBERNETES`

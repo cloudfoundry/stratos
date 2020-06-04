@@ -2,8 +2,6 @@ FROM splatform/stratos-bk-build-base:leap15_1 as terminal-builder
 USER root
 WORKDIR /root
 
-#RUN zypper in -y tar
-
 # Kubectl versions
 RUN curl -L -o kubectl_1.18 https://storage.googleapis.com/kubernetes-release/release/v1.18.2/bin/linux/amd64/kubectl
 RUN curl -L -o kubectl_1.17 https://storage.googleapis.com/kubernetes-release/release/v1.17.5/bin/linux/amd64/kubectl
@@ -34,7 +32,23 @@ RUN mkdir /stratos
 COPY --from=terminal-builder /root/helm.gz /stratos/helm.gz
 COPY --from=terminal-builder /root/kubectl* /stratos/
 
-ADD ./kubeconsole.bashrc /root/.bashrc
-WORKDIR /root
+# Run as user 'stratos'
+RUN useradd -ms /bin/bash stratos -K MAIL_DIR=/dev/null
+
+RUN chown -R stratos /stratos && \
+    chgrp -R users /stratos
+
+# Remove a few packages
+RUN zypper rm -y diffutils shadow util-linux fillup python3 openssl bind-utils kmod \
+    python3-base python-rpm-macros pkg-config hostname GeoIP-data
+
+# Remove zypper
+RUN zypper rm -y dirmngr && \
+    rm -rf /usr/bin/rpm*
+
+USER stratos
+WORKDIR /home/stratos
+
+ADD ./kubeconsole.bashrc /home/stratos/.bashrc
 
 CMD exec /bin/bash -c "trap : TERM INT; sleep infinity & wait"

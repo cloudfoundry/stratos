@@ -126,7 +126,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	
 	volumeMountsSpec := make([]v1.VolumeMount, 1)
 	volumeMountsSpec[0].Name = "kubeconfig"
-	volumeMountsSpec[0].MountPath = "/root/.stratos"
+	volumeMountsSpec[0].MountPath = "/home/stratos/.stratos"
 	volumeMountsSpec[0].ReadOnly = true
 
 	containerSpec := make([]v1.Container, 1)
