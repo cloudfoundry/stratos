@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -14,12 +15,14 @@ import { selectSessionData } from '../../../../store/src/reducers/auth.reducer';
 import { SessionDataEndpoint } from '../../../../store/src/types/auth.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { ICFAction, UpdateCfAction } from '../../../../store/src/types/request.types';
+import { GET_CURRENT_CF_USER_RELATION, GetCurrentCfUserRelations } from '../../actions/permissions.actions';
 import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../../actions/users-roles.actions';
 import { AddCfUserRole, ChangeCfUserRole, RemoveCfUserRole } from '../../actions/users.actions';
 import { CFAppState } from '../../cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { CfUserService } from '../../shared/data-services/cf-user.service';
+import { fetchCfUserRole } from '../../user-permissions/cf-user-roles-fetch';
 import { selectCfUsersRoles } from '../selectors/cf-users-roles.selector';
 import { OrgUserRoleNames } from '../types/cf-user.types';
 import { CfRoleChange, UsersRolesState } from '../types/users-roles.types';
@@ -29,10 +32,21 @@ import { CfRoleChange, UsersRolesState } from '../types/users-roles.types';
 export class UsersRolesEffects {
 
   constructor(
+    private httpClient: HttpClient,
     private actions$: Actions,
     private store: Store<CFAppState>,
     private cfUserService: CfUserService,
   ) { }
+
+  @Effect() getCurrentUsersPermissions$ = this.actions$.pipe(
+    ofType<GetCurrentCfUserRelations>(GET_CURRENT_CF_USER_RELATION),
+    map(action => {
+      return fetchCfUserRole(this.store, action, this.httpClient).pipe(
+        map(() => ({ type: action.actions[1] })),
+        catchError(() => [{ type: action.actions[2] }])
+      );
+    })
+  );
 
   @Effect() clearEntityUpdates$ = this.actions$.pipe(
     ofType<UsersRolesClearUpdateState>(UsersRolesActions.ClearUpdateState),

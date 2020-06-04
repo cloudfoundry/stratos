@@ -19,8 +19,8 @@ import {
   BaseCurrentUserPermissionsChecker,
   ICurrentUserPermissionsChecker,
   IPermissionCheckCombiner,
-  StratosUserPermissionsChecker,
-} from './stratos-user-permissions.checker';
+} from './current-user-permissions.types';
+import { StratosUserPermissionsChecker } from './stratos-user-permissions.checker';
 
 
 export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers'

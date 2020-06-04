@@ -11,10 +11,11 @@ import {
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { connectedEndpointsOfTypesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { haveMultiConnectedCfs } from '../../../../../features/cloud-foundry/cf.helpers';
-import { endpointsCfEntitiesConnectedSelector } from '../../../../../store/selectors/cloud-foundry.selector';
 import { CfOrgSpaceItem, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CfServiceCardComponent } from './cf-service-card/cf-service-card.component';
 import { CfServicesDataSource } from './cf-services-data-source';
@@ -38,7 +39,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   ) {
     this.dataSource = new CfServicesDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
     this.cf = {
-      list$: this.store.select(endpointsCfEntitiesConnectedSelector).pipe(
+      list$: this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
         first(),
         map(endpoints => Object.values(endpoints))
       ),

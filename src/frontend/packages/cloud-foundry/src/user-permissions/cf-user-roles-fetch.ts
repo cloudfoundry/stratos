@@ -16,6 +16,7 @@ import {
   PaginationFlattener,
 } from '../../../store/src/helpers/paginated-request-helpers';
 import { ActionState } from '../../../store/src/reducers/api-request-reducer/types';
+import { connectedEndpointsOfTypesSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
 import { BasePaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
 import {
@@ -28,14 +29,14 @@ import {
   GetCurrentCfUserRelationsComplete,
 } from '../actions/permissions.actions';
 import { cfEntityCatalog } from '../cf-entity-catalog';
-import { endpointsCfEntitiesConnectedSelector } from '../store/selectors/cloud-foundry.selector';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { CFResponse } from '../store/types/cf-api.types';
 
 const createEndpointArray = (store: Store<AppState>, endpoints: string[] | EntityUserRolesEndpoint[]): Observable<EntityUserRolesEndpoint[]> => {
   // If there's no endpoints get all from store. Alternatively fetch specific endpoint id's from store
   if (!endpoints || !endpoints.length || typeof (endpoints[0]) === 'string') {
     const endpointIds = endpoints as string[];
-    return store.select(endpointsCfEntitiesConnectedSelector).pipe(
+    return store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
       first(),
       map(cfEndpoints => endpointIds.length === 0 ?
         Object.values(cfEndpoints) :

@@ -19,7 +19,7 @@ import {
   IConfigGroups,
   ICurrentUserPermissionsChecker,
   IPermissionCheckCombiner,
-} from '../../../core/src/core/permissions/stratos-user-permissions.checker';
+} from '../../../core/src/core/permissions/current-user-permissions.types';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
 import { connectedEndpointsSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../cf-api.types';
@@ -397,7 +397,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
 
   private getAllEndpointGuids() {
     return this.store.select(connectedEndpointsSelector).pipe(
-      map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf').map(endpoint => endpoint.guid))
+      map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === CF_ENDPOINT_TYPE).map(endpoint => endpoint.guid))
     );
   }
 

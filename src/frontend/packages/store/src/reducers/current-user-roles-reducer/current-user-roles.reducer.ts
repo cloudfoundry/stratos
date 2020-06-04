@@ -24,8 +24,8 @@ const getDefaultState = () => ({
 });
 
 export function currentUserRolesReducer(state: ICurrentUserRolesState = getDefaultState(), action: Action): ICurrentUserRolesState {
-  const stateAfterStratosChanges = coreCurrentUserRolesReducer(state, action);
-  return entityCatalog.getAllCurrentUserReducers(stateAfterStratosChanges, action);
+  const stateAfterCoreChanges = coreCurrentUserRolesReducer(state, action);
+  return entityCatalog.getAllCurrentUserReducers(stateAfterCoreChanges, action);
 }
 
 function coreCurrentUserRolesReducer(state: ICurrentUserRolesState, action: Action): ICurrentUserRolesState {

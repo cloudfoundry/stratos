@@ -19,11 +19,10 @@ export interface IStratosRolesState {
   scopes: UserScopeStrings[];
 }
 
-export interface ICurrentUserRolesState<T = any> {
+export interface ICurrentUserRolesState {
   internal: IStratosRolesState;
   endpoints: {
-    // T could be different in each endpoint type, however supplying a type makes it nicer to use when looking at a specific type
-    [endpointType: string]: T
+    [endpointType: string]: any
   }
   state: RolesRequestState;
 }
