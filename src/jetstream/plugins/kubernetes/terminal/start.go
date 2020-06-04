@@ -192,6 +192,7 @@ func pumpStdout(ws *websocket.Conn, source *websocket.Conn, done chan bool) {
 		_, r, err := source.ReadMessage()
 		if err != nil {
 			// Close
+			ws.Close()
 			done <- true
 			break
 		}
@@ -199,6 +200,7 @@ func pumpStdout(ws *websocket.Conn, source *websocket.Conn, done chan bool) {
 		bytes := fmt.Sprintf("% x\n", r[1:])
 		if err := ws.WriteMessage(websocket.TextMessage, []byte(bytes)); err != nil {
 			log.Errorf("Kubernetes Terminal failed to write message: %+v", err)
+			ws.Close()
 			break
 		}
 	}
