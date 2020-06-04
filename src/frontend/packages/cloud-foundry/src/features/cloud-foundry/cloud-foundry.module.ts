@@ -8,7 +8,6 @@ import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
 import {
   CFEndpointsListConfigService,
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
-import { cfCurrentUserPermissionsService } from '../../user-permissions/cf-user-permissions-checkers';
 import { AddOrganizationComponent } from './add-organization/add-organization.component';
 import {
   CreateOrganizationStepComponent,
@@ -229,7 +228,6 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CloudFoundryCellService,
     UserInviteService,
     UserInviteConfigureService,
-    ...cfCurrentUserPermissionsService
   ],
   entryComponents: [
     UserInviteConfigurationDialogComponent

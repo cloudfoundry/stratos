@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 
-import { cfCurrentUserPermissionsService } from '../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
 import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AppEffects } from './effects/app.effects';
@@ -31,9 +30,6 @@ import { UsersRolesEffects } from './effects/users-roles.effects';
       CfValidateEffects,
       UsersRolesEffects
     ])
-  ],
-  providers: [
-    ...cfCurrentUserPermissionsService
   ]
 })
 export class CloudFoundryStoreModule { }

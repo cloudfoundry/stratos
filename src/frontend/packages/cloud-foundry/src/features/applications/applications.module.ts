@@ -4,7 +4,6 @@ import { NgModule } from '@angular/core';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
-import { cfCurrentUserPermissionsService } from '../../user-permissions/cf-user-permissions-checkers';
 import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
 import {
   DeleteAppServiceInstancesComponent,
@@ -78,7 +77,6 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
     ApplicationMonitorService,
     DatePipe,
     ApplicationDeploySourceTypes,
-    ...cfCurrentUserPermissionsService
   ]
 })
 export class ApplicationsModule { }

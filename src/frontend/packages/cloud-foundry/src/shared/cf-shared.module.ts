@@ -8,7 +8,6 @@ import { SharedModule } from '../../../core/src/shared/shared.module';
 import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
-import { cfCurrentUserPermissionsService } from '../user-permissions/cf-user-permissions-checkers';
 import {
   AddServiceInstanceBaseStepComponent,
 } from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
@@ -380,8 +379,7 @@ const cfListCards: Type<CardCell<any>>[] = [
   providers: [
     ApplicationStateService,
     GitSCMService,
-    CloudFoundryUserProvidedServicesService,
-    ...cfCurrentUserPermissionsService
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class CloudFoundrySharedModule { }

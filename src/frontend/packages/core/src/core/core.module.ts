@@ -29,10 +29,6 @@ import { MDAppModule } from './md.module';
 import { NotSetupGuardService } from './not-setup-guard.service';
 import { PageHeaderService } from './page-header-service/page-header.service';
 import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
-import {
-  CurrentUserPermissionsService,
-  CUSTOM_USER_PERMISSION_CHECKERS,
-} from './permissions/current-user-permissions.service';
 import { SafeImgPipe } from './safe-img.pipe';
 import { StatefulIconComponent } from './stateful-icon/stateful-icon.component';
 import { TruncatePipe } from './truncate.pipe';
@@ -88,11 +84,6 @@ import { WindowRef } from './window-ref/window-ref.service';
     PaginationMonitorFactory,
     UserProfileService,
     EntityServiceFactory,
-    {
-      provide: CUSTOM_USER_PERMISSION_CHECKERS,
-      useValue: []
-    },
-    CurrentUserPermissionsService,
     {
       provide: APP_TITLE,
       useFactory: appTitleFactory,
