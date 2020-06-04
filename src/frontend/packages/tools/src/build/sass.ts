@@ -1,10 +1,16 @@
 import { StratosConfig } from './../lib/stratos.config';
 
-
+/**
+ * Sass Handler
+ *
+ * Provides some custom resolution of sass files so that the theming
+ * is applied to components and that the chosen theme is used.
+ */
 export class SassHandler {
 
   constructor() { }
 
+  //  Set options on the Webpack sass-loader plugin to use us as a custom importer
   public apply(webpackConfig: any, config: StratosConfig) {
     // Find the node-saas plugin and add a custom import resolver
     webpackConfig.module.rules.forEach(rule => {
@@ -20,29 +26,9 @@ export class SassHandler {
     });
   }
 
-  private getThemingForPackages(c: StratosConfig): string {
-    let contents = '';
-    const themedPackages = c.getThemedPackages();
-    themedPackages.forEach(themingConfig => {
-      contents += `@import '${themingConfig.importPath}';\n`;
-    });
-
-    contents += '\n@mixin apply-theme($stratos-theme) {\n';
-
-    themedPackages.forEach(themingConfig => {
-      contents += `  @include ${themingConfig.mixin}($stratos-theme);\n`;
-    });
-
-    contents += '}\n';
-
-    return contents;
-  }
-
   private customSassImport(config: StratosConfig) {
     const that = this;
     return (url, resourcePath) => {
-      // console.log('Custom import: ' + url + ' from ' + resourcePath);
-      const result = url;
       if (url === '~@stratosui/theme/extensions') {
         // Generate SCSS to appy theming to the packages that need to be themed
         return {
@@ -53,7 +39,6 @@ export class SassHandler {
           file: config.resolvePackage(config.getTheme().name, '_index.scss')
         };
       } else if (url.indexOf('~') === 0) {
-        // console.log('Looking for ' + url);
         // See if we have an override
         const pkg = url.substr(1);
         const pkgParts = pkg.split('/');
@@ -77,6 +62,22 @@ export class SassHandler {
       // We could not resolve, so leave to the default resolver
       return null;
     };
+  }
+
+  private getThemingForPackages(c: StratosConfig): string {
+    let contents = '';
+    const themedPackages = c.getThemedPackages();
+    themedPackages.forEach(themingConfig => {
+      contents += `@import '${themingConfig.importPath}';\n`;
+    });
+
+    contents += '\n@mixin apply-theme($stratos-theme) {\n';
+    themedPackages.forEach(themingConfig => {
+      contents += `  @include ${themingConfig.mixin}($stratos-theme);\n`;
+    });
+    contents += '}\n';
+
+    return contents;
   }
 
 }

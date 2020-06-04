@@ -4,43 +4,40 @@ import * as path from 'path';
 import { Logger } from './log';
 import { StratosConfig } from './stratos.config';
 
-const { lstatSync, readdirSync } = require('fs');
-const { join } = require('path');
+// Helper for packages
 
-export interface PackageBuildInfo {
-  command: string;
-  args: string[];
-}
-
+// A set of info for a package
 export interface PackageInfo {
   name: string;
   dir: string;
   stratos: boolean;
   json: any;
-  build: PackageBuildInfo;
   ignore: boolean;
   extension?: ExtensionMetadata;
   theme: boolean;
-  theming?: ThemingConfig;
-  assets: AssetConfig[];
+  theming?: ThemingMetadata;
+  assets: AssetMetadata[];
 }
 
+// Basic info for the package.json file that we need
 export interface PackageJson {
   name: string;
   stratos?: StratosPakageMetadata;
-  scripts: {[key:string]: string};
+  scripts: {[key: string]: string};
 }
 
+// Custom stratos metadata that can be in the package.json file
 export interface StratosPakageMetadata {
   module?: string;
   routingModule?: string;
   ignore?: boolean;
   theme?: boolean;
   theming?: string;
-  assets?: {[src:string]: string};
+  assets?: {[src: string]: string};
 }
 
-export interface ThemingConfig {
+// Theming metadata
+export interface ThemingMetadata {
   ref: string;
   package: string;
   scss: string;
@@ -48,6 +45,7 @@ export interface ThemingConfig {
   importPath: string;
 }
 
+// Extension metadata
 export interface ExtensionMetadata {
   package: string;
   module: string;
@@ -55,15 +53,17 @@ export interface ExtensionMetadata {
   themeable?: boolean;
 }
 
-export interface AssetConfig {
-  from: string,
-  to: string,
-  force: boolean
+// Assets metadata
+export interface AssetMetadata {
+  from: string;
+  to: string;
+  force: boolean;
 }
 
-const isDirectory = source => lstatSync(source).isDirectory();
+// Helpers for getting list of dirs in a dir
+const isDirectory = source => fs.lstatSync(source).isDirectory();
 const getDirectories = source =>
-  readdirSync(source).map(name => join(source, name)).filter(isDirectory);
+  fs.readdirSync(source).map(name => path.join(source, name)).filter(isDirectory);
 
 // Default theme to use
 export const DEFAULT_THEME = '@stratosui/theme';
@@ -104,7 +104,7 @@ export class Packages {
     // Read all dependencies
     if (packageJson.dependencies) {
       Object.keys(packageJson.dependencies).forEach(dep => {
-        this.addPackage(dep)
+        this.addPackage(dep);
       });
     }
 
@@ -121,7 +121,7 @@ export class Packages {
     // Figure out the theme
     if (!this.config.stratosConfig.theme) {
       // Theme was not set, so find the first theme that is not the default theme
-      const theme = this.packages.find(pkg => pkg.theme && pkg.name !== DEFAULT_THEME)
+      const theme = this.packages.find(pkg => pkg.theme && pkg.name !== DEFAULT_THEME);
       if (!theme) {
         this.theme = this.packageMap[DEFAULT_THEME];
       } else {
@@ -175,7 +175,7 @@ export class Packages {
     if (fs.existsSync(pkgFile)) {
       try {
         pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8').toString());
-      } catch(e) {}
+      } catch (e) {}
     }
     return pkg;
   }
@@ -228,13 +228,11 @@ export class Packages {
 
   // Process the package file and look for Stratos metadata
   private processPackage(pkg: PackageJson, folder: string): PackageInfo {
-
     const info: PackageInfo = {
       name: pkg.name,
       dir: folder,
       stratos: !!pkg.stratos,
       json: pkg,
-      build: this.getBuildCommand(pkg),
       ignore: pkg.stratos ? pkg.stratos.ignore || false : false,
       theme: pkg.stratos && pkg.stratos.theme,
       theming: this.getThemingConfig(pkg, folder),
@@ -254,11 +252,11 @@ export class Packages {
   }
 
   // Get any theming metadata - this allows a package to theme its own components using the theme
-  private getThemingConfig(pkg: PackageJson, packagePath: string): ThemingConfig {
+  private getThemingConfig(pkg: PackageJson, packagePath: string): ThemingMetadata {
     if (pkg.stratos && pkg.stratos.theming) {
       const refParts = pkg.stratos.theming.split('#');
       if (refParts.length === 2) {
-        const themingConfig: ThemingConfig = {
+        const themingConfig: ThemingMetadata = {
           ref: pkg.stratos.theming,
           package: pkg.name,
           scss: refParts[0],
@@ -276,8 +274,8 @@ export class Packages {
   }
 
   // Get any assets that the package has
-  private getAssets(pkg: PackageJson, packagePath: string): AssetConfig[] {
-    const assets: AssetConfig[] = [];
+  private getAssets(pkg: PackageJson, packagePath: string): AssetMetadata[] {
+    const assets: AssetMetadata[] = [];
     // Check for assets
     if (pkg.stratos && pkg.stratos.assets) {
       Object.keys(pkg.stratos.assets).forEach(src => {
@@ -293,38 +291,4 @@ export class Packages {
     return assets.length ? assets : null;
   }
 
-  private getBuildCommand(pkg: PackageJson): PackageBuildInfo {
-    if (pkg.scripts && pkg.scripts.build) {
-      return {
-        command: 'npm',
-        args: [ 'run', 'build' ]
-      };
-    } else {
-      // Look for a matching project in the angular.json file
-      if (this.config.angularJson) {
-        let ngBuild = false;
-        let ngBuildProject = pkg.name;
-        // First match on full name
-        ngBuild = !!this.config.angularJson.projects[ngBuildProject];
-        if (!ngBuild) {
-          // Now try matching on the name without the scope
-          const parts = pkg.name.split('/');
-          ngBuildProject = parts[1];
-          if (parts.length === 2) {
-            ngBuild = !!this.config.angularJson.projects[ngBuildProject];
-          }
-        }
-
-        if (ngBuild) {
-          // Need to verify that
-          return {
-            command: 'ng',
-            args: [ 'build', '--project=' + ngBuildProject]
-          };
-        }
-      }
-    }
-
-    return null;
-  }
 }

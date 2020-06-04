@@ -6,6 +6,15 @@ import { StratosConfig } from './../lib/stratos.config';
 
 const importModuleRegex = /src\/frontend\/packages\/core\/src\/custom-import.module.ts/;
 
+/**
+ * Generates the file _custom-import.module.ts containing the code to import
+ * the extensions modules discovered from the packages being included.
+ *
+ * This also adds a module replacement into the build process, so that this generated file
+ * is used instead of the default one in the repository, which does not import
+ * any extensions.
+ */
+
 export class ExtensionsHandler {
 
   constructor() {}

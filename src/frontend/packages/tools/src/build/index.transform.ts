@@ -3,6 +3,12 @@ import * as path from 'path';
 
 import { StratosConfig } from '../lib/stratos.config';
 
+/**
+ * Transforms the index.html file
+ *
+ * Adds in the Git metadata
+ * Adds in the custom loader from the theme, if there is one
+ */
 export class IndexHtmlHandler {
 
   constructor(public config: StratosConfig) {}
@@ -36,10 +42,6 @@ export class IndexHtmlHandler {
     const themePackageFolder = loadingTheme.dir;
     const css = themePackageJson.stratos.theme.loadingCss;
     const html = themePackageJson.stratos.theme.loadingHtml;
-
-    // if (css || html) {
-    //   console.log('Applying custom loading screen/theme to the main index.html page');
-    // }
 
     if (css) {
       const cssFile = path.resolve(themePackageFolder, css);
