@@ -55,17 +55,13 @@ if [ -n "${https_proxy:-}" -o -n "${HTTPS_PROXY:-}" ]; then
 fi
 
 # Check if we can squash
-echo "checking"
-CAN_SQUASH=$(docker info 2>&1 | grep "Experimental: true" | cat)
-echo "check"
+CAN_SQUASH=$(docker info 2>&1 | grep "Experimental: true" -c | cat)
 if [ "${CAN_SQUASH}" == "1" ]; then
   BUILD_ARGS="${BUILD_ARGS} --squash"
   echo "Images will be squashed"
 else
   echo "Images will NOT be squashed"
 fi
-
-echo "OK"
 
 # Use correct sed command for Mac
 SED="sed -r"

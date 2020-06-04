@@ -169,10 +169,9 @@ function patchDockerfile {
   if [ "${DOCKER_REG_DEFAULTS}" == "false" ]; then
     sed -i.bak "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   fi
-  sed -i.bak "s/opensuse/${BASE_IMAGE_TAG}/g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
+  sed -i.bak "s/leap15_1/${BASE_IMAGE_TAG}/g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   popd > /dev/null 2>&1
 }
-
 
 #
 # MAIN -------------------------------------------------------------------------------------------
@@ -218,6 +217,8 @@ if [ "${CHART_ONLY}" == "false" ]; then
     custom_image_build
   fi
 fi
+
+custom_image_build
 
 log "-- Building Helm Chart"
 
