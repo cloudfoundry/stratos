@@ -17,8 +17,6 @@ import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoi
 export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
   public endpointAddress$: Observable<any>;
 
-  public clipboardValue = '';
-
   constructor(private entityServiceFactory: EntityServiceFactory) {
     super();
   }
@@ -29,10 +27,7 @@ export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointM
     const id = row['endpointId'] || row['guid'];
     this.endpointAddress$ = this.entityServiceFactory.create(id, new GetAllEndpoints()).waitForEntity$.pipe(
       map(data => data.entity),
-      map((data: any) => {
-        this.clipboardValue = getFullEndpointApiUrl(data);
-        return this.clipboardValue;
-      })
+      map((data: any) => getFullEndpointApiUrl(data))
     );
   }
 }
