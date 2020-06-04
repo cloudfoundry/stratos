@@ -54,7 +54,6 @@ export class StratosConfig implements Logger {
           this.stratosConfig = yaml.safeLoad(fs.readFileSync(stratosYamlFile, 'utf8'));
           // this.log(this.stratosConfig);
           this.log('Read stratos.yaml okay from: ' + stratosYamlFile);
-          this.watches.push(stratosYamlFile);
         } catch (e) {
           this.log(e);
         }
@@ -197,3 +196,4 @@ export class StratosConfig implements Logger {
     }
     return packagePath;
   }
+}
