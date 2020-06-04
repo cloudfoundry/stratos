@@ -9,7 +9,6 @@ import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/en
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
 import { FavoritesConfigMapper } from '../../../favorites-meta-card/favorite-config-mapper';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
@@ -17,6 +16,7 @@ import { IListAction, IListConfig, ListViewTypes } from '../../list.component.ty
 import { EndpointCardComponent } from './endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './endpoint-list.helpers';
 import { EndpointsDataSource } from './endpoints-data-source';
+import { TableCellEndpointAddressComponent } from './table-cell-endpoint-address/table-cell-endpoint-address.component';
 import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details/table-cell-endpoint-details.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
@@ -71,9 +71,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     {
       columnId: 'address',
       headerCell: () => 'Address',
-      cellDefinition: {
-        getValue: getFullEndpointApiUrl
-      },
+      cellComponent: TableCellEndpointAddressComponent,
       sort: {
         type: 'sort',
         orderKey: 'address',

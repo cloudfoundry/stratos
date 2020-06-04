@@ -5,6 +5,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
+import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
@@ -120,6 +121,16 @@ export class EndpointListHelper {
         label: 'Unregister',
         description: 'Remove the endpoint',
         createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
+      },
+      {
+        action: (item) => {
+          console.log(item);
+          const routerLink = `/endpoints/edit/${item.guid}`;
+          this.store.dispatch(new RouterNav({ path: routerLink }));
+        },
+        label: 'Edit endpoint',
+        description: 'Edit the endpoint',
+        createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
       }
     ];
   }
@@ -151,8 +162,8 @@ export class EndpointListHelper {
       });
   }
 
-  createEndpointDetails(listDetailsComponent: any, container: ViewContainerRef, componentFactoryResolver: ComponentFactoryResolver):
-    EndpointDetailsContainerRefs {
+createEndpointDetails(listDetailsComponent: any, container: ViewContainerRef, componentFactoryResolver: ComponentFactoryResolver):
+EndpointDetailsContainerRefs {
     const componentFactory = componentFactoryResolver.resolveComponentFactory<EndpointListDetailsComponent>(listDetailsComponent);
     const componentRef = container.createComponent<EndpointListDetailsComponent>(componentFactory);
     const component = isEndpointListDetailsComponent(componentRef.instance);
@@ -168,7 +179,7 @@ export class EndpointListHelper {
     return refs;
   }
 
-  destroyEndpointDetails(refs: EndpointDetailsContainerRefs) {
+destroyEndpointDetails(refs: EndpointDetailsContainerRefs) {
     if (refs.componentRef && refs.componentRef.destroy) {
       refs.componentRef.destroy();
     }
