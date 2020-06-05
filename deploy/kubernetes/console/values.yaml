@@ -8,7 +8,7 @@ dockerRegistrySecret: regsecret
 #noProxy: localhost
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
-imagePullPolicy: IfNotPresent
+imagePullPolicy: Always
 
 console:
   cookieDomain:
