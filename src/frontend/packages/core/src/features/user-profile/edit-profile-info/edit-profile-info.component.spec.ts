@@ -7,6 +7,7 @@ import { createBasicStoreModule } from '@stratosui/store/testing';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { EditProfileInfoComponent } from './edit-profile-info.component';
@@ -27,7 +28,7 @@ describe('EditProfileInfoComponent', () => {
         CoreTestingModule,
         createBasicStoreModule()
       ],
-      providers: [UserProfileService, TabNavService],
+      providers: [UserProfileService, TabNavService, CurrentUserPermissionsService],
     })
       .compileComponents();
   });

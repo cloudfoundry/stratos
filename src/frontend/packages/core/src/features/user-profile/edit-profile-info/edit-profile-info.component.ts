@@ -5,8 +5,8 @@ import { Subscription } from 'rxjs';
 import { first, map, take, tap } from 'rxjs/operators';
 
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../../../store/src/types/user-profile.types';
-import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 
@@ -53,7 +53,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
 
   // Only allow password change if user has the 'password.write' group
-  public canChangePassword = this.currentUserPermissionsService.can(CurrentUserPermissions.PASSWORD_CHANGE);
+  public canChangePassword = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.PASSWORD_CHANGE);
 
   public passwordRequired = false;
 

@@ -278,7 +278,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     UserPermissionDirective,
     BooleanIndicatorComponent,
     TableComponent,
-    UserPermissionDirective,
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
     DateTimeComponent,

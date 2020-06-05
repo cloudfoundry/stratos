@@ -46,7 +46,7 @@ import {
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
 import { getAPIResourceGuid } from './store/selectors/api.selectors';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/user.types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/cf-user.types';
 
 const entityCache: {
   [key: string]: EntitySchema

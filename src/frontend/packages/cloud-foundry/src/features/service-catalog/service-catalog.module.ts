@@ -33,6 +33,6 @@ import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.
   ],
   exports: [
     ServiceTabsBaseComponent,
-  ],
+  ]
 })
 export class ServiceCatalogModule { }

@@ -6,12 +6,12 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { GetSystemInfo } from '../../../../../store/src/actions/system.actions';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { waitForCFPermissions } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
@@ -162,7 +162,7 @@ export class UserInviteService {
       switchMap(() => combineLatest(
         this.configured$,
         this.currentUserPermissionsService.can(
-          CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
+          CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
           cfGuid,
           orgGuid,
           spaceGuid

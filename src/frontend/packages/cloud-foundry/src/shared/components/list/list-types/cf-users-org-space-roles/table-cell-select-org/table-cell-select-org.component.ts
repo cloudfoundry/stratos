@@ -6,11 +6,11 @@ import { first, map } from 'rxjs/operators';
 import { UsersRolesSetOrg } from '../../../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { selectUsersRolesOrgGuid } from '../../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-users-roles.selector';
 
 @Component({
   selector: 'app-table-cell-select-org',
@@ -43,7 +43,7 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
         map(orgs => orgs && orgs.length === 1 ? orgs[0] : null)
       );
     }
-    this.orgGuidChangedSub = this.store.select(selectUsersRolesOrgGuid).subscribe(orgGuid => {
+    this.orgGuidChangedSub = this.store.select(selectCfUsersRolesOrgGuid).subscribe(orgGuid => {
       this.selectedOrgGuid = orgGuid;
     });
   }

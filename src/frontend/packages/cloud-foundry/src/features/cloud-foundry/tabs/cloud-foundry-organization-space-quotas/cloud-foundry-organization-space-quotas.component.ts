@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import {
   CfSpaceQuotasListConfigService,
 } from '../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-list-config.service';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
@@ -30,6 +30,6 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
     currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     const { cfGuid, orgGuid } = this.activeRouteCfOrgSpace;
-    this.canAddQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_CREATE, cfGuid, orgGuid);
+    this.canAddQuota$ = currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_CREATE, cfGuid, orgGuid);
   }
 }

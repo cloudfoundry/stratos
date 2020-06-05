@@ -4,12 +4,14 @@ import { Store } from '@ngrx/store';
 import { publishReplay, refCount } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
 import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
 
@@ -28,7 +30,7 @@ export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase imple
     currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     const canEditAppsInSpace = currentUserPermissionsService.can(
-      CurrentUserPermissions.APPLICATION_EDIT,
+      CfCurrentUserPermissions.APPLICATION_EDIT,
       cfSpaceService.cfGuid,
       cfSpaceService.spaceGuid
     ).pipe(

@@ -14,7 +14,7 @@ import { GetSpace } from '../../actions/space.actions';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../store/types/user.types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../store/types/cf-user.types';
 import {
   createEntityRelationPaginationKey,
   ValidateEntityResult,

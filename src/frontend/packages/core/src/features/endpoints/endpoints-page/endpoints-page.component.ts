@@ -18,7 +18,6 @@ import { delay, first, map, tap } from 'rxjs/operators';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState } from '../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
@@ -26,6 +25,7 @@ import {
   StratosActionMetadata,
   StratosActionType,
 } from '../../../core/extension/extension-service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import {
@@ -43,7 +43,7 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
   }, EndpointListHelper]
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
-  public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
+  public canRegisterEndpoint = StratosCurrentUserPermissions.ENDPOINT_REGISTER;
   private healthCheckTimeout: number;
 
   @ViewChild('customNoEndpoints', { read: ViewContainerRef, static: true }) customNoEndpointsContainer;

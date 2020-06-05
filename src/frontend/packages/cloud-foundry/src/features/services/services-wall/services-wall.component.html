@@ -2,7 +2,7 @@
   <h1>Services</h1>
   <div class="page-header-right">
     <ng-container *ngIf="(haveConnectedCf$ | async)">
-      <ng-container *appUserPermission="canCreateServiceInstance">
+      <ng-container *appCfUserPermission="canCreateServiceInstance">
         <button mat-icon-button [routerLink]="'/services/new/'">
           <mat-icon>add</mat-icon>
         </button>
@@ -12,15 +12,19 @@
 </app-page-header>
 <app-cf-endpoints-missing></app-cf-endpoints-missing>
 <ng-template #noEntriesForCurrentFilter>
-  <app-no-content-message iconFont="stratos-icons" icon="service" [firstLine]="'There are no services instances for the current filter'" [secondLine]="{
+  <app-no-content-message iconFont="stratos-icons" icon="service"
+    [firstLine]="'There are no services instances for the current filter'" [secondLine]="{
   text: ''
 }"></app-no-content-message>
 </ng-template>
 
 <ng-template #noEntries>
-  <app-no-content-message iconFont="stratos-icons" icon="service" [firstLine]="'There are no services instances'" [secondLine]="{
+  <app-no-content-message iconFont="stratos-icons" icon="service" [firstLine]="'There are no services instances'"
+    [secondLine]="{
   text: ''
 }"></app-no-content-message>
 </ng-template>
 
-<app-list class="services-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter" *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)"></app-list>
+<app-list class="services-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
+  *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">
+</app-list>

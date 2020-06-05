@@ -17,6 +17,9 @@ import {
 } from '../../../../../../../shared/components/cards/card-cf-space-details/card-cf-space-details.component';
 import { CfUserService } from '../../../../../../../shared/data-services/cf-user.service';
 import {
+  CfUserPermissionDirective,
+} from '../../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
+import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
@@ -30,7 +33,13 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundrySpaceSummaryComponent, CardCfSpaceDetailsComponent, CardCfRecentAppsComponent, CompactAppCardComponent],
+      declarations: [
+        CloudFoundrySpaceSummaryComponent,
+        CardCfSpaceDetailsComponent,
+        CardCfRecentAppsComponent,
+        CompactAppCardComponent,
+        CfUserPermissionDirective
+      ],
       imports: generateCfBaseTestModules(),
       providers: [
         generateActiveRouteCfOrgSpaceMock(),

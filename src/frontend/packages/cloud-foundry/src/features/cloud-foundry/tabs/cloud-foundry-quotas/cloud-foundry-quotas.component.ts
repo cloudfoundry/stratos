@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import {
   CfQuotasListConfigService,
 } from '../../../../shared/components/list/list-types/cf-quotas/cf-quotas-list-config.service';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 @Component({
@@ -27,6 +27,6 @@ export class CloudFoundryQuotasComponent {
     public cfEndpointService: CloudFoundryEndpointService,
     currentUserPermissionsService: CurrentUserPermissionsService
   ) {
-    this.canAddQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.QUOTA_CREATE, this.cfEndpointService.cfGuid);
+    this.canAddQuota$ = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_CREATE, this.cfEndpointService.cfGuid);
   }
 }

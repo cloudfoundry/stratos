@@ -4,8 +4,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
   MetaCardMenuItem,
@@ -31,6 +32,7 @@ import {
   getServiceSummaryUrl,
 } from '../../../../../../features/service-catalog/services-helper';
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
+import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 
@@ -77,7 +79,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
         action: this.edit,
         can: this.appService.waitForAppEntity$.pipe(
           switchMap(app => this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            CfCurrentUserPermissions.SERVICE_BINDING_EDIT,
             this.appService.cfGuid,
             app.entity.entity.space_guid
           )))
@@ -87,7 +89,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
         action: this.detach,
         can: this.appService.waitForAppEntity$.pipe(
           switchMap(app => this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            CfCurrentUserPermissions.SERVICE_BINDING_EDIT,
             this.appService.cfGuid,
             app.entity.entity.space_guid
           )))

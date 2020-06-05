@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { endpointsCfEntitiesConnectedSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
@@ -12,7 +11,9 @@ import {
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
+import { connectedEndpointsOfTypesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { haveMultiConnectedCfs } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfOrgSpaceItem, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
@@ -38,7 +39,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   ) {
     this.dataSource = new CfServicesDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
     this.cf = {
-      list$: this.store.select(endpointsCfEntitiesConnectedSelector).pipe(
+      list$: this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
         first(),
         map(endpoints => Object.values(endpoints))
       ),
