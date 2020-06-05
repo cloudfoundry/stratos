@@ -60,9 +60,6 @@ import { EndpointCardComponent } from './components/list/list-types/endpoint/end
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
 import {
-  TableCellEndpointAddressComponent,
-} from './components/list/list-types/endpoint/table-cell-endpoint-address/table-cell-endpoint-address.component';
-import {
   TableCellEndpointNameComponent,
 } from './components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { ListComponent } from './components/list/list.component';
@@ -223,7 +220,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     TableCellSidePanelComponent,
     CardProgressOverlayComponent,
     MaxListMessageComponent,
-    TableCellEndpointAddressComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
