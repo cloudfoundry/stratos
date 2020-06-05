@@ -1,0 +1,5 @@
+<div class="endpoint-address-cell" *ngIf="endpointAddress$ | async as address">
+  <div>{{ address }}</div>
+  <app-copy-to-clipboard class="endpoint-address-cell__copy" [compact]="true" [text]="address" tooltip="Copy to clipboard" [showSuccessText]="false">
+  </app-copy-to-clipboard>
+</div>

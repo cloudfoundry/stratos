@@ -20,7 +20,6 @@ import {
 } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
-import { StratosCurrentUserPermissions } from '../../../../../../core/permissions/stratos-user-permissions.checker';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import {
   coreEndpointListDetailsComponents,
@@ -107,15 +106,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         can: endpointAction.createVisible(this.rowObs)
       }));
 
-      // Add edit
-      this.cardMenu.push({
-        label: 'Edit endpoint',
-        action: () => this.editEndpoint(),
-        can: this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
-      });
-      this.cardMenu.push(createMetaCardMenuItemSeparator());
-
       // Add a copy address to clipboard
+      this.cardMenu.push(createMetaCardMenuItemSeparator());
       this.cardMenu.push({
         label: 'Copy address to Clipboard',
         action: () => this.copyToClipboard.copyToClipboard(),

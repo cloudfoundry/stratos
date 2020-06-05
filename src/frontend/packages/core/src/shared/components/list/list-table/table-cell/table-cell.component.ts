@@ -13,6 +13,9 @@ import { MultiActionListEntity } from '../../../../../../../store/src/monitors/p
 import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
+  TableCellEndpointAddressComponent,
+} from '../../list-types/endpoint/table-cell-endpoint-address/table-cell-endpoint-address.component';
+import {
   TableCellEndpointDetailsComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-details/table-cell-endpoint-details.component';
 import {
@@ -55,6 +58,7 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellSidePanelComponent,
   TableCellIconComponent,
   TableCellExpanderComponent,
+  TableCellEndpointAddressComponent,
   ...coreEndpointListDetailsComponents
 ];
 

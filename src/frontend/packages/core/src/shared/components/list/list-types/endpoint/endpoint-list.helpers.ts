@@ -5,6 +5,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
+import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
@@ -119,6 +120,15 @@ export class EndpointListHelper {
         },
         label: 'Unregister',
         description: 'Remove the endpoint',
+        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
+      },
+      {
+        action: (item) => {
+          const routerLink = `/endpoints/edit/${item.guid}`;
+          this.store.dispatch(new RouterNav({ path: routerLink }));
+        },
+        label: 'Edit endpoint',
+        description: 'Edit the endpoint',
         createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
       }
     ];
