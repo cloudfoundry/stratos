@@ -6,6 +6,8 @@ const GIT_METADATA_FILE = '.stratos-git-metadata.json';
 /**
  * Represents the Git Metadata read from the metadata file or the
  * environment variables.
+ *
+ * This is embedded in the index.html file for diagnostic purposes
  */
 export class GitMetadata {
 

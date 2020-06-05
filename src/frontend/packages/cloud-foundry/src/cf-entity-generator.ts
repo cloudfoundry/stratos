@@ -118,6 +118,7 @@ import {
   GitCommitActionBuilders,
   gitCommitActionBuilders,
   GitCommitActionBuildersConfig,
+  GitMeta,
   GitRepoActionBuilders,
   gitRepoActionBuilders,
 } from './entity-action-builders/git-action-builder';
@@ -899,8 +900,9 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
     endpoint: endpointDefinition,
     nonJetstreamRequest: true,
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
+      const metadata = (action.metadata as GitMeta[])[0];
       return {
-        ...data,
+        ...metadata.scm.convertCommit(metadata.projectName, data),
         guid: action.guid
       };
     },

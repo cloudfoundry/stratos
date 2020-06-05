@@ -20,7 +20,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 export class CfServicesDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey);
-    const getServicesAction = cfEntityCatalog.service.actions.getMultiple(endpointGuid, paginationKey, {})
+    const getServicesAction = cfEntityCatalog.service.actions.getMultiple(endpointGuid, paginationKey, {});
     super({
       store,
       action: getServicesAction,

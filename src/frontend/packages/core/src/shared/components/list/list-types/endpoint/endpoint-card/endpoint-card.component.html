@@ -19,7 +19,8 @@
           -->
         </div>
       </div>
-      <app-copy-to-clipboard #copyToClipboard class="endpoint-card__hidden" [text]="address" tooltip="Copy to clipboard" [showSuccessText]="false"></app-copy-to-clipboard>
+      <app-copy-to-clipboard #copyToClipboard class="endpoint-card__hidden" [text]="address" tooltip="Copy to clipboard"
+        [showSuccessText]="false"></app-copy-to-clipboard>
     </div>
   </app-meta-card-title>
   <app-meta-card-item>
@@ -43,7 +44,7 @@
       </div>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="hasDetails">
+  <app-meta-card-item [hidden]="!hasDetails">
     <app-meta-card-key>Details</app-meta-card-key>
     <app-meta-card-value>
       <div #endpointDetails></div>

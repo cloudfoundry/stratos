@@ -3,15 +3,19 @@ import { AssetsHandler } from './assets';
 import { ExtensionsHandler } from './extensions';
 import { SassHandler } from './sass';
 
+/**
+ * Webpack customizations for Stratos
+ *
+ * The runBuilder function is exported and used as the function to apply
+ * customizations to the Webpack configuration
+ */
+
 class StratosBuilder {
 
   constructor(public webpackConfig, public options) { }
 
   public run() {
-
-    // console.log(this.webpackConfig);
-
-    // Read in the Stratos config file if present (and do so config initialization)
+  // Read in the Stratos config file if present (and do so config initialization)
     const sConfig = new StratosConfig(__dirname, this.options);
 
     // Sass handler for themes and themable packages
@@ -25,9 +29,6 @@ class StratosBuilder {
     // Extensions (code)
     const ext = new ExtensionsHandler();
     ext.apply(this.webpackConfig, sConfig, this.options);
-
-    // Add plugin to watch additional files if needed
-    // sConfig.addWatches(this.webpackConfig);
   }
 }
 

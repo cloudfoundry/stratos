@@ -4,11 +4,12 @@ import * as path from 'path';
 
 import { GitMetadata } from './git.metadata';
 import { Logger } from './log';
-import { AssetConfig, DEFAULT_THEME, ExtensionMetadata, PackageInfo, Packages, ThemingConfig } from './packages';
+import { AssetMetadata, DEFAULT_THEME, ExtensionMetadata, PackageInfo, Packages, ThemingMetadata } from './packages';
 
 /**
- * Represents the startos.yaml file or the defaults if not found
- * Also includes related cofnig such as node_modules dirpath and angular.json file path
+ * Represents the stratos.yaml file or the defaults if not found
+ *
+ * Also includes related config such as node_modules dirpath and angular.json file path
  */
 
 export class StratosConfig implements Logger {
@@ -34,13 +35,9 @@ export class StratosConfig implements Logger {
   // Git Metadata
   public gitMetadata: GitMetadata;
 
-  // Extra files for webpack to watch
-  public watches: string[] = [];
-
   private loggingEnabled = true;
 
   private packages: Packages;
-
 
   constructor(dir: string, options?: any, loggingEnabled = true) {
     this.angularJsonFile = this.findFileOrFolderInChain(dir, 'angular.json');
@@ -57,7 +54,6 @@ export class StratosConfig implements Logger {
           this.stratosConfig = yaml.safeLoad(fs.readFileSync(stratosYamlFile, 'utf8'));
           // this.log(this.stratosConfig);
           this.log('Read stratos.yaml okay from: ' + stratosYamlFile);
-          this.watches.push(stratosYamlFile);
         } catch (e) {
           this.log(e);
         }
@@ -128,8 +124,8 @@ export class StratosConfig implements Logger {
     return this.packages.packages.filter(p => !!p.extension).map(pkg => pkg.extension);
   }
 
-  public getAssets(): AssetConfig[] {
-    const assets: AssetConfig[] = [];
+  public getAssets(): AssetMetadata[] {
+    const assets: AssetMetadata[] = [];
     this.packages.packages.forEach(pkg => {
       if (pkg.assets) {
         assets.push(...pkg.assets);
@@ -139,7 +135,7 @@ export class StratosConfig implements Logger {
     return assets;
   }
 
-  public getThemedPackages(): ThemingConfig[] {
+  public getThemedPackages(): ThemingMetadata[] {
     return this.packages.packages.filter(p => !!p.theming).map(pkg => pkg.theming);
   }
 
@@ -200,13 +196,4 @@ export class StratosConfig implements Logger {
     }
     return packagePath;
   }
-
-  // public addWatches(webpackConfig: any) {
-  //   if (this.watches.length> 0) {
-  //     const watchPlugin = new ExtraWatchWebpackPlugin({
-  //       files: this.watches,
-  //     });
-  //     webpackConfig.plugins = webpackConfig.plugins.concat([watchPlugin]);
-  //   }
-  // }
 }
