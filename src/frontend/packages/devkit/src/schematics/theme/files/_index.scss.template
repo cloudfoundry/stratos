@@ -1,0 +1,12 @@
+@import '~@stratosui/theme/helper';
+
+@import './sass/mat-colors';
+@import './sass/custom';
+
+@function stratos-theme() {
+  $theme-primary: mat-palette($mat-blue);
+  $theme-warn: mat-palette($mat-red);
+  $stratos-theme: mat-light-theme($theme-primary, $theme-primary, $theme-warn);
+  $theme: stratos-theme-helper($stratos-theme);
+  @return $theme
+}

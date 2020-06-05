@@ -1,0 +1,1 @@
+A theme is a type of project that provides a UI theme for Stratos.

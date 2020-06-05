@@ -9,9 +9,13 @@ echo $DIST
 echo $DIR
 tsc
 if [ $? -eq 0 ]; then
-  echo "Copying json files"
+  echo "Copying supporting files"
+  # cp $DIR/package.json $DIST
+  # cp $DIR/src/schematics/*.json $DIST/schematics/
+  # cp $DIR/src/schematics/theme/*.json $DIST/schematics/theme
+  # cp $DIR/src/builders/*.json $DIST/builders/
+
   cp $DIR/package.json $DIST
-  cp $DIR/src/schematics/*.json $DIST/schematics/
-  cp $DIR/src/builders/*.json $DIST/builders/
+  rsync -r --exclude=*.ts ${DIR}/src/ ${DIST}/
 fi
 

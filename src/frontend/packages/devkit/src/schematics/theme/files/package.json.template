@@ -1,17 +1,18 @@
 {
-  "name": "@example/theme",
+  "name": "<%= dasherize(packageName) %>",
   "version": "0.0.1",
-  "stratos": {
+  "stratos": {<% if(!!includeAssets) { %>
     "assets": {
       "assets/core": "core/assets",
       "assets/favicon.ico": "favicon.ico"
-    },
+    }<% if(!!includeLoader) { %>,<% } %><% } %><% if(!!includeLoader) { %>
     "theme":{
       "loadingCss": "loader/loading.css",
       "loadingHtml": "loader/loading.html"
-    }
+    }<% } %>
   },
   "peerDependencies": {
-    "@stratosui/theme": "0.0.1"
+    "@stratosui/theme": "^<%= startosLatestVersion %>"
   }
 }
+
