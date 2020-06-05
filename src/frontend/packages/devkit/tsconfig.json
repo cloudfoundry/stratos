@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "../../../../dist/tools",
+    "outDir": "../../../../dist/devkit",
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",

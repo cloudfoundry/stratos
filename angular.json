@@ -94,7 +94,21 @@
           }
         }
       }
+    },
+    "theme": {
+      "root": "src/frontend/packages/theme/",
+      "sourceRoot": "",
+      "projectType": "library",
+      "architect": {
+        "build": {
+          "builder": "./dist/devkit:stratos-theme",
+          "options": {
+            "outputPath": "dist/theme"
+          }
+        }
+      }
     },    
+
     "core": {
       "root": "src/frontend/packages/core/",
       "sourceRoot": "src/frontend/packages/core",

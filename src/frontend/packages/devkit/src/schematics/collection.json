@@ -1,0 +1,9 @@
+{
+  "$schema": "@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "theme": {
+      "factory": "./theme/index#theme",
+      "description": "Stratos Theme"
+    }
+  }
+}

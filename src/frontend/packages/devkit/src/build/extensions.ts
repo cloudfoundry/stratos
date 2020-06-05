@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { NormalModuleReplacementPlugin } from 'webpack';
 
-import { StratosConfig } from './../lib/stratos.config';
+import { StratosConfig } from '../lib/stratos.config';
 
 const importModuleRegex = /src\/frontend\/packages\/core\/src\/custom-import.module.ts/;
 

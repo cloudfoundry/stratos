@@ -1,4 +1,4 @@
-import { StratosConfig } from './../lib/stratos.config';
+import { StratosConfig } from '../lib/stratos.config';
 
 /**
  * Sass Handler

@@ -38,8 +38,8 @@
     "climate": "codeclimate analyze $(git diff --name-only master)",
     "gate-check": "npm run lint && npm run test-headless",
     "store-git-metadata": "gulp store-git-metadata",
-    "postinstall": "gulp dev-setup && npm run build-tools",
-    "build-tools": "cd src/frontend/packages/tools && npm run build"
+    "postinstall": "gulp dev-setup && npm run build-devkit",
+    "build-devkit": "cd src/frontend/packages/devkit && npm run build"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -93,8 +93,10 @@
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "^9.1.0",
+    "@angular-devkit/architect": "^0.901.7",
     "@angular-devkit/build-angular": "~0.901.5",
     "@angular-devkit/build-ng-packagr": "~0.901.5",
+    "@angular-devkit/core": "^9.1.7",
     "@angular-devkit/schematics": "^9.1.5",
     "@angular/cli": "^9.1.5",
     "@angular/compiler-cli": "^9.1.6",

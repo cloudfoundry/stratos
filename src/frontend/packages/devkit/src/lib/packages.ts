@@ -79,6 +79,19 @@ export class Packages {
 
   public logger: Logger;
 
+
+  // Try and find and load a package.json file in the specified folder
+  public static loadPackageFile(dir: string) {
+    const pkgFile = path.join(dir, 'package.json');
+    let pkg = null;
+    if (fs.existsSync(pkgFile)) {
+      try {
+        pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8').toString());
+      } catch(e) {}
+    }
+    return pkg;
+  }
+
   constructor(public config: StratosConfig, public nodeModulesFolder: string, public localPackagesFolder) { }
 
   public setLogger(logger: Logger) {
@@ -154,7 +167,7 @@ export class Packages {
     }
 
     // Read the package file
-    const pkgFile = this.loadPackageFile(pkgDir);
+    const pkgFile = Packages.loadPackageFile(pkgDir);
     if (pkgFile !== null) {
       // Check to see if we should include this package
       if (this.includePackage(pkgFile))  {
@@ -166,18 +179,6 @@ export class Packages {
         this.add(pkg);
       }
     }
-  }
-
-  // Try and find and load a package.json file in the specified folder
-  public loadPackageFile(dir: string) {
-    const pkgFile = path.join(dir, 'package.json');
-    let pkg = null;
-    if (fs.existsSync(pkgFile)) {
-      try {
-        pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8').toString());
-      } catch (e) {}
-    }
-    return pkg;
   }
 
   private add(item: PackageInfo) {
