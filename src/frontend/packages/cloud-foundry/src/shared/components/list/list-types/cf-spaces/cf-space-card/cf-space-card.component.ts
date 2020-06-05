@@ -6,8 +6,9 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { getFavoriteFromEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
@@ -39,6 +40,7 @@ import {
   createSpaceQuotaDefinition,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-quota';
+import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 
 @Component({
@@ -87,7 +89,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
         label: 'Edit',
         action: this.edit,
         can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SPACE_EDIT,
+          CfCurrentUserPermissions.SPACE_EDIT,
           this.cfEndpointService.cfGuid,
           this.orgGuid,
           this.spaceGuid
@@ -97,7 +99,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
         label: 'Delete',
         action: this.delete,
         can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SPACE_DELETE,
+          CfCurrentUserPermissions.SPACE_DELETE,
           this.cfEndpointService.cfGuid,
           this.orgGuid
         )

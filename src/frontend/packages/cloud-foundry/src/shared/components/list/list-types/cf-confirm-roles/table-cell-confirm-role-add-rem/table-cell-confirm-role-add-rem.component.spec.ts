@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OrgUserRoleNames } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import { OrgUserRoleNames } from '../../../../../../store/types/cf-user.types';
 import { TableCellConfirmRoleAddRemComponent } from './table-cell-confirm-role-add-rem.component';
 
 describe('TableCellConfirmRoleAddRemComponent', () => {

@@ -1,16 +1,20 @@
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/src/cf-types';
+import { Action } from '@ngrx/store';
+
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../../actions/pagination.actions';
 import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { WrapperRequestActionSuccess } from '../../types/request.types';
+import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
+import { EntityRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
+import { PipelineResult } from '../entity-request-pipeline.types';
+
 
 export function successEntityHandler(
-  actionDispatcher,
+  actionDispatcher: (actionToDispatch: Action) => void,
   catalogEntity: StratosBaseCatalogEntity,
-  requestType,
-  action,
-  result,
+  requestType: ApiRequestTypes,
+  action: EntityRequestAction,
+  result: PipelineResult,
   recursivelyDeleting = false
 ) {
   const entityAction = catalogEntity.getRequestAction('success', action, requestType, result.response);
@@ -29,7 +33,7 @@ export function successEntityHandler(
     if (Array.isArray(action.clearPaginationEntityKeys)) {
       // If clearPaginationEntityKeys is an array then clear the pagination sections regardless of removeEntityOnDelete
       action.clearPaginationEntityKeys.forEach(key => {
-        const entityConfig = entityCatalog.getEntity(CF_ENDPOINT_TYPE, key);
+        const entityConfig = entityCatalog.getEntity(action.endpointType, key);
         actionDispatcher(new ClearPaginationOfType(entityConfig.getSchema()));
       });
     }

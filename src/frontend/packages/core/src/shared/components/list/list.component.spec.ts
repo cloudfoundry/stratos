@@ -14,6 +14,7 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../shared.module';
 import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
@@ -125,7 +126,8 @@ describe('ListComponent', () => {
           // ApplicationStateService,
           PaginationMonitorFactory,
           EntityMonitorFactory,
-          EndpointListHelper
+          EndpointListHelper,
+          CurrentUserPermissionsService
         ],
         imports: [
           CoreModule,

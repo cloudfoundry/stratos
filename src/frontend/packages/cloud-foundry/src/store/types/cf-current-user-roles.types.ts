@@ -1,6 +1,5 @@
 import { RolesRequestState } from '../../../../store/src/types/current-user-roles.types';
 
-
 export enum RoleEntities {
   ORGS = 'organizations',
   SPACES = 'spaces'
@@ -40,5 +39,5 @@ export interface ICfRolesState {
 }
 
 export interface IAllCfRolesState {
-  [guid: string]: ICfRolesState;
+  [guid: string]: ICfRolesState
 }

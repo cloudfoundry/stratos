@@ -9,7 +9,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/permissions/current-user-permissions.service';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';

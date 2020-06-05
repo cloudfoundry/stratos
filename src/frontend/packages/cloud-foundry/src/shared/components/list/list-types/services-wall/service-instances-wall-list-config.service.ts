@@ -10,7 +10,9 @@ import {
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import {
   CardMultiActionComponents,
 } from '../../../../../../../core/src/shared/components/list/list-cards/card.component.types';

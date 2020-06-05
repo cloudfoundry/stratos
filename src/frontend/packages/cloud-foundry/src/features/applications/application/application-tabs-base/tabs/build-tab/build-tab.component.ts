@@ -7,7 +7,6 @@ import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith
 import { AppMetadataTypes } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { UpdateExistingApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
 import { getFullEndpointApiUrl } from '../../../../../../../../core/src/features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -19,6 +18,7 @@ import { APIResource, EntityInfo } from '../../../../../../../../store/src/types
 import { IAppSummary } from '../../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
+import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
@@ -57,7 +57,7 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
 })
 export class BuildTabComponent implements OnInit {
   public isBusyUpdating$: Observable<{ updating: boolean }>;
-  public manageAppPermission = CurrentUserPermissions.APPLICATION_MANAGE;
+  public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
   constructor(
     public applicationService: ApplicationService,
     private scmService: GitSCMService,

@@ -1,6 +1,6 @@
 <app-page-sub-nav>
   <button mat-button name="add-space"
-    *appUserPermission="permsSpaceCreate;endpointGuid:cfEndpointService.cfGuid;organizationGuid:cfOrgService.orgGuid"
+    *appCfUserPermission="permsSpaceCreate;endpointGuid:cfEndpointService.cfGuid;organizationGuid:cfOrgService.orgGuid"
     routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/add-space"
     matTooltip="Create Space">
     <span class="create-button-contents">

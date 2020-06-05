@@ -3,7 +3,9 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';

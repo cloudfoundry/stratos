@@ -61,8 +61,8 @@ import { StackActionBuilders } from './entity-action-builders/stack-action-build
 import { UserProvidedServiceActionBuilder } from './entity-action-builders/user-provided-service.action-builders';
 import { UserActionBuilders } from './entity-action-builders/user.action-builders';
 import { AppStat } from './store/types/app-metadata.types';
+import { CfUser } from './store/types/cf-user.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
-import { CfUser } from './store/types/user.types';
 
 /**
  * A strongly typed collection of Cloud Foundry Catalog Entities.
