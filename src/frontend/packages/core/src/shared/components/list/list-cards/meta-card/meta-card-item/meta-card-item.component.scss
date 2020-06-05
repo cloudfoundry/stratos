@@ -58,3 +58,14 @@
     }
   }
 }
+
+.meta-card-item-multiline {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  min-height: 30px;
+  padding: 7px 0 2px;
+  .meta-card-item__value {
+    white-space: unset;
+  }
+}
