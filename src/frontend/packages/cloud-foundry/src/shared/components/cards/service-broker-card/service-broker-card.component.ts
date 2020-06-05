@@ -7,7 +7,6 @@ import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServiceBroker } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 
 @Component({
   selector: 'app-service-broker-card',
