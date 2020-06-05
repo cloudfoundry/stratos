@@ -12,9 +12,9 @@
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
             "customWebpackConfig": {
-              "path": "./dist-tools/build/main.js"
+              "path": "./dist/tools/build/main.js"
             },
-            "indexTransform": "./dist-tools/build/index.transform.js",
+            "indexTransform": "./dist/tools/build/index.transform.js",
             "preserveSymlinks": true,
             "outputPath": "dist",
             "index": "src/frontend/packages/core/src/index.html",
