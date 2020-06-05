@@ -7,7 +7,6 @@ import {
 } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { ServicesService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBroker, IServicePlan } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
