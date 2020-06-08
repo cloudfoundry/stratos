@@ -113,7 +113,6 @@ function cleanup {
   echo "-- Cleaning up ${STRATOS_PATH}"
   rm -rf ${STRATOS_PATH}/dist
   rm -rf ${STRATOS_PATH}/node_modules
-  rm -rf ${STRATOS_PATH}/bower_components
   echo
   echo "-- Cleaning up ${STRATOS_PATH}/deploy/containers/nginx/dist"
   rm -rf ${STRATOS_PATH}/deploy/containers/nginx/dist

@@ -12,6 +12,22 @@ __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 printf "${BOLD}${CYAN}Generating ${YELLOW}imagelist.txt${RESET}\n"
 echo ""
 
+STRATOS_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd ../../ && pwd )"
+
+# Add any customizations
+function addCustomizations() {
+
+  if [ -f "${STRATOS_FOLDER}/custom-src/deploy/kubernetes/imagelist.txt" ];then
+    echo "Including custom imagelist contents"
+    cat "${STRATOS_FOLDER}/custom-src/deploy/kubernetes/imagelist.txt" >> ./imagelist.txt
+
+    # Update version number
+    VERSION=$(grep -Po 'consoleVersion: \K(.*)' ./values.yaml)
+    echo "Image Version: ${VERSION}"
+    sed -i 's/_VERSION_/'"${VERSION}"'/g' imagelist.txt
+  fi
+}
+
 
 CHART_FOLDER=${1}
 
@@ -37,6 +53,10 @@ ls -alR
 echo ""
 
 helm template -f ${__DIRNAME}/imagelist.values.yaml ${CHART_FOLDER} | grep "image:" | grep --extended --only-matching '([^"/[:space:]]+/)?[^"/[:space:]]+/[^:[:space:]]+:[a-zA-Z0-9\._-]+' | sort | uniq | awk -F'/' '{print $2}' > imagelist.txt
+
+# Add any customizations
+addCustomizations
+
 popd > /dev/null
 
 printf "${CYAN}"

@@ -183,7 +183,9 @@ popd > /dev/null 2>&1
 echo "Base path: ${STRATOS_PATH}"
 
 # cleanup output, intermediate artifacts
-cleanup
+if [ "${CHART_ONLY}" == "false" ]; then
+  cleanup
+fi
 
 # Clean any old patched docker files left if previously errored
 # rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.patched
@@ -217,8 +219,6 @@ if [ "${CHART_ONLY}" == "false" ]; then
     custom_image_build
   fi
 fi
-
-custom_image_build
 
 log "-- Building Helm Chart"
 
