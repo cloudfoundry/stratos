@@ -24,7 +24,9 @@ export function fetchEntityTree(action: EntityInlineParentAction, fromCache = tr
   entityTreeCache[cacheKey] = entityTree;
   // Calc max depth and exclude not needed
   entityTree.rootRelation.childRelations = parseEntityTree(entityTree, entityTree.rootRelation, action.includeRelations);
-  return entityTree;
+  return {
+    ...entityTree
+  };
 }
 
 function createEntityTree(entity: EntitySchema, isArray: boolean) {

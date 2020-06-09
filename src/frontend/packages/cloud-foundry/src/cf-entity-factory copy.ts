@@ -45,7 +45,6 @@ import {
   stackEntityType,
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
-import { createEntityRelationKey } from './entity-relations/entity-relations.types';
 import { getAPIResourceGuid } from './store/selectors/api.selectors';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/cf-user.types';
 
@@ -98,24 +97,6 @@ const DomainSchema = new CFEntitySchema(domainEntityType, {}, {
 });
 entityCache[domainEntityType] = DomainSchema;
 
-
-// Relations
-export const allowedRelations = [
-  createEntityRelationKey(applicationEntityType, spaceEntityType),
-  createEntityRelationKey(domainEntityType, organizationEntityType),
-  createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
-  createEntityRelationKey(routeEntityType, spaceEntityType),
-  createEntityRelationKey(routeEntityType, domainEntityType),
-  createEntityRelationKey(spaceEntityType, organizationEntityType),
-  createEntityRelationKey(spaceEntityType, spaceQuotaEntityType),
-  createEntityRelationKey(spaceQuotaEntityType, organizationEntityType),
-  createEntityRelationKey(serviceBrokerEntityType, spaceEntityType),
-  createEntityRelationKey(serviceEntityType, serviceBrokerEntityType),
-  createEntityRelationKey(servicePlanEntityType, serviceEntityType),
-  createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
-]
-
-// Only Keep Links
 const ServiceSchema = new CFEntitySchema(serviceEntityType, {
   entity: {
     service_plans: [new CFEntitySchema(servicePlanEntityType, {}, { idAttribute: getAPIResourceGuid })]
@@ -176,15 +157,6 @@ const ServiceInstancesSchema = new CFServiceInstanceEntitySchema({
   }
 });
 entityCache[serviceInstancesEntityType] = ServiceInstancesSchema;
-
-
-
-
-
-
-
-
-
 
 const BuildpackSchema = new CFEntitySchema(buildpackEntityType, {}, { idAttribute: getAPIResourceGuid });
 entityCache[buildpackEntityType] = BuildpackSchema;
@@ -386,7 +358,7 @@ const UserProvidedServiceInstanceSchema = new CFEntitySchema(userProvidedService
 entityCache[userProvidedServiceInstanceEntityType] = UserProvidedServiceInstanceSchema;
 
 
-export function cfEntityFactory(key: string): EntitySchema {
+export function cfEntityFactoryOrig(key: string): EntitySchema {
   const entity = entityCache[key];
   if (!entity) {
     throw new Error(`Unknown entity schema type: ${key}`);

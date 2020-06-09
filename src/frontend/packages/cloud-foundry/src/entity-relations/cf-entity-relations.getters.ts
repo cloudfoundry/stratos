@@ -10,6 +10,7 @@ import {
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
 import { isPaginatedAction, PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
+import { allowedRelations } from '../cf-entity-factory';
 import { QParam } from '../shared/q-param';
 import { listEntityRelations } from './entity-relations';
 import { EntityInlineParentAction, isEntityInlineParentAction } from './entity-relations.types';
@@ -44,13 +45,21 @@ export function addCfRelationParams(request: HttpRequest<any>, action: EntityReq
   if (!entityInlineParent) {
     return request;
   }
+
+  // TODO: RC Reflects extents of new 'relations' param
+  entityInlineParent.includeRelations = entityInlineParent.includeRelations.filter(rel => {
+    return allowedRelations.find(allowedRel => allowedRel === rel);
+  })
+
   const paginationAction = isPaginatedAction(action);
   const relationInfo = paginationAction ?
     getEntityRelationsForPaginationRequest(paginationAction as EntityInlineParentAction & PaginatedAction) :
     getEntityRelationsForEntityRequest(entityInlineParent as EntityInlineParentAction & EntityRequestAction);
   const update = {};
   if (relationInfo.maxDepth > 0) {
-    update['inline-relations-depth'] = (relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth) + '';
+    // TODO: RC Max depth can only be one
+    update['inline-relations-depth'] = 1;
+    // update['inline-relations-depth'] = (relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth) + '';
   }
   if (relationInfo.relations.length) {
     update['include-relations'] = relationInfo.relations.join(',');
