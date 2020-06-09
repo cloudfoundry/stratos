@@ -1,8 +1,20 @@
 # Change Log
 
+## 3.2.1
+
+[Full Changelog](https://github.com/SUSE/stratos/compare/3.2.0...3.2.1)
+
+**Improvements:**
+
+- Apply SSO whitelist to additional places [\#4318](https://github.com/cloudfoundry/stratos/issues/4318)
+
+**Fixes:**
+
+- User Button Misaligned [\#4316](https://github.com/cloudfoundry/stratos/issues/4316)
+
 ## 3.2.0
 
-[Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.1.0...3.2.0)
+[Full Changelog](https://github.com/SUSE/stratos/compare/3.1.0...3.2.0)
 
 This release contains a number of fixes and improvements:
 
