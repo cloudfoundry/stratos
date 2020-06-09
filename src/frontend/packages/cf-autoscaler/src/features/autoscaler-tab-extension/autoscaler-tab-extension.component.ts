@@ -3,14 +3,16 @@ import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/s
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
+import { CfCurrentUserPermissions } from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
+import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
@@ -113,6 +115,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     'order-direction': 'desc'
   };
 
+  public canEditSpace$: Observable<boolean>;
+
   ngOnDestroy(): void {
     if (this.appAutoscalerPolicySnackBarRef) {
       this.appAutoscalerPolicySnackBarRef.dismiss();
@@ -131,6 +135,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     private appAutoscalerPolicySnackBar: MatSnackBar,
     private appAutoscalerScalingHistorySnackBar: MatSnackBar,
     private confirmDialog: ConfirmationDialogService,
+    private cups: CurrentUserPermissionsService
   ) { }
 
   ngOnInit() {
@@ -219,6 +224,18 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       publishReplay(1),
       refCount()
     );
+
+    this.canEditSpace$ = combineLatest(
+      this.applicationService.appOrg$,
+      this.applicationService.appSpace$
+    ).pipe(
+      switchMap(([org, space]) => this.cups.can(
+        CfCurrentUserPermissions.SPACE_EDIT,
+        this.applicationService.cfGuid,
+        org.metadata.guid,
+        space.metadata.guid
+      ))
+    )
   }
 
   getAppMetric(metricName: string, trigger: AppScalingTrigger, params: AutoscalerPaginationParams) {
