@@ -149,12 +149,12 @@
           </mat-card-content>
         </mat-card>
       </app-tile>
-      <app-tile id="app-build-tab-deployment-info">
+      <app-tile id="app-build-tab-deployment-info" *ngIf="(deploySource$ | async) as deploySource">
         <mat-card>
           <mat-card-header>
             <mat-card-title>Deployment Info</mat-card-title>
           </mat-card-header>
-          <mat-card-content *ngIf="(deploySource$ | async) as deploySource; else notDeployedFromStratos">
+          <mat-card-content>
             <span [ngSwitch]="deploySource.type">
               <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
                 <div matTooltip="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}"
@@ -183,9 +183,6 @@
               </app-metadata-item>
             </span>
           </mat-card-content>
-          <ng-template #notDeployedFromStratos>
-            <mat-card-content>None</mat-card-content>
-          </ng-template>
         </mat-card>
       </app-tile>
     </app-tile-group>
