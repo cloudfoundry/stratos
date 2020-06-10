@@ -18,7 +18,7 @@ import { ConfirmationDialogService } from '../../../../../../core/src/shared/com
 import { AppTestModule } from '../../../../../../core/test-framework/core-test.helper';
 import {
   EntityCatalogHelper,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity/entity-catalog.service';
+} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { CfAutoscalerTestingModule } from '../../../../cf-autoscaler-testing.module';
@@ -26,8 +26,6 @@ import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-c
 import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
 
-/* tslint:disable:max-line-length */
-/* tslint:enable:max-line-length */
 
 describe('AppAutoscalerMetricChartCardComponent', () => {
   let component: AppAutoscalerMetricChartCardComponent;

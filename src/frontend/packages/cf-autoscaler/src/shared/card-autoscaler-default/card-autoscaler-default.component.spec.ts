@@ -15,9 +15,7 @@ import {
 } from '../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { AppTestModule } from '../../../../core/test-framework/core-test.helper';
-import {
-  EntityCatalogHelper,
-} from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity/entity-catalog.service';
+import { EntityCatalogHelper } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';

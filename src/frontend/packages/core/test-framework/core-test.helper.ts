@@ -5,9 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 import { createBasicStoreModule } from '@stratos/store/testing';
 
-import {
-  EntityCatalogHelper,
-} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity/entity-catalog.service';
+import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
 import { appReducers } from '../../store/src/reducers.module';
 import { CoreModule } from '../src/core/core.module';

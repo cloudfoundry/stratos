@@ -16,9 +16,7 @@ import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
 import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
-import {
-  EntityCatalogHelper,
-} from '../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity/entity-catalog.service';
+import { EntityCatalogHelper } from '../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
