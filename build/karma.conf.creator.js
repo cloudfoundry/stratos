@@ -27,7 +27,13 @@ module.exports = function (project) {
       coverageIstanbulReporter: {
         dir: path.join(repoRoot, 'coverage', project),
         reports: ['html', 'lcovonly', 'json'],
-        fixWebpackSourcePaths: true
+        fixWebpackSourcePaths: true,
+        'report-config': {
+          json: {
+            // Collate all coverage-final files into a single dir for nyc to combine (it can't pick them out from `coverage`)
+            file: path.join('..', 'nyc', project + '-coverage-final.json')
+          }
+        },
       },
       reporters: ['spec', 'kjhtml', 'stratos'],
       specReporter: {
