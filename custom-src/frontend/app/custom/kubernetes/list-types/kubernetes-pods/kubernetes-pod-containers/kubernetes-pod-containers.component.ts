@@ -1,11 +1,9 @@
 import { TitleCasePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../../store/src/app-state';
 import { BooleanIndicatorType } from '../../../../../shared/components/boolean-indicator/boolean-indicator.component';
 import { ITableListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import {
@@ -55,7 +53,6 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
   }
 
   constructor(
-    private store: Store<AppState>,
     private titleCase: TitleCasePipe,
   ) {
     super();
