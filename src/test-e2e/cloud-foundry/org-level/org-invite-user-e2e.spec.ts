@@ -1,5 +1,5 @@
 import { E2EConfigCloudFoundry } from '../../e2e.types';
-import { CFHelpers } from '../../helpers/cf-helpers';
+import { CFHelpers } from '../../helpers/cf-e2e-helpers';
 import { CFPage } from '../../po/cf-page.po';
 import { SideNavMenuItem } from '../../po/side-nav.po';
 import { setupInviteUserTests } from '../invite-users-e2e.helper';
