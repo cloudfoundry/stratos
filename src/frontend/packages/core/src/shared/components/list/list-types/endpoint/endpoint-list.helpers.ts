@@ -4,18 +4,18 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { LoggerService } from '../../../../../core/logger.service';
 import {
   ConnectEndpointDialogComponent,
@@ -44,7 +44,7 @@ function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent 
 export class EndpointListHelper {
   private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     private dialog: MatDialog,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
@@ -98,7 +98,7 @@ export class EndpointListHelper {
         description: '',
         createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => {
           const endpoint = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
-          const ep = endpoint ? endpoint.definition : {unConnectable: false};
+          const ep = endpoint ? endpoint.definition : { unConnectable: false };
           return !ep.unConnectable && row.connectionStatus === 'disconnected';
         }))
       },

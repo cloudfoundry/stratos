@@ -7,7 +7,6 @@ import { UsersRolesSetUsers } from '../../../../../../../cloud-foundry/src/actio
 import { GetAllUsersAsAdmin } from '../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
-import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../../../core/src/core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
@@ -19,10 +18,11 @@ import {
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { IOrganization, ISpace } from '../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import {
   canUpdateOrgSpaceRoles,

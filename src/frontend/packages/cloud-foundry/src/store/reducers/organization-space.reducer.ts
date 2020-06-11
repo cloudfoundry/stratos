@@ -1,15 +1,10 @@
-import {
-  CREATE_SPACE_SUCCESS,
-  CreateSpace,
-  DELETE_SPACE_SUCCESS,
-  DeleteSpace,
-} from '../../actions/space.actions';
-import { spaceEntityType } from '../../cf-entity-types';
-import { getCFEntityKey } from '../../cf-entity-helpers';
-import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { CREATE_SPACE_SUCCESS, CreateSpace, DELETE_SPACE_SUCCESS, DeleteSpace } from '../../actions/space.actions';
+import { IOrganization, ISpace } from '../../cf-api.types';
+import { getCFEntityKey } from '../../cf-entity-helpers';
+import { spaceEntityType } from '../../cf-entity-types';
 
 type entityOrgType = APIResource<IOrganization<string>>;
 // Note - This reducer will be updated when we address general deletion of entities within inline lists (not paginated lists)

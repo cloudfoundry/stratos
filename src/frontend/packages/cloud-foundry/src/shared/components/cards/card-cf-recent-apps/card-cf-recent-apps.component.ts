@@ -8,11 +8,9 @@ import {
   appDataSort,
   CloudFoundryEndpointService,
 } from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { IApp } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { appStatsEntityType } from '../../../../cf-entity-types';
+import { IApp } from '../../../../cf-api.types';
+import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 
 const RECENT_ITEMS_COUNT = 10;
 
@@ -45,10 +43,7 @@ export class CardCfRecentAppsComponent implements OnInit {
   private fetchAppStats(recentApps: APIResource<IApp>[]) {
     recentApps.forEach(app => {
       if (app.entity.state === 'STARTED') {
-        const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
-        const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
-        const getAppStatsAction = actionBuilder(app.metadata.guid, this.cfEndpointService.cfGuid);
-        this.store.dispatch(getAppStatsAction);
+        cfEntityCatalog.appStats.api.getMultiple(app.metadata.guid, this.cfEndpointService.cfGuid);
       }
     });
   }

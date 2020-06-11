@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { CfOrgSpaceLabelService } from '../../../../../core/src/shared/services/cf-org-space-label.service';
+import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.service';
 
 @Component({
   selector: 'app-cf-org-space-links',

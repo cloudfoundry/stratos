@@ -6,7 +6,7 @@ import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { UserInviteService } from '../user-invite.service';
+import { UserInviteConfigureService } from '../user-invite.service';
 
 
 @Component({
@@ -42,7 +42,7 @@ export class UserInviteConfigurationDialogComponent {
     public fb: FormBuilder,
     public dialogRef: MatDialogRef<UserInviteConfigurationDialogComponent>,
     public snackBar: MatSnackBar,
-    public userInviteService: UserInviteService,
+    public userInviteConfigureService: UserInviteConfigureService,
     @Inject(MAT_DIALOG_DATA) public data: {
       guid: string
     }
@@ -54,7 +54,7 @@ export class UserInviteConfigurationDialogComponent {
   }
 
   submit() {
-    this.userInviteService.configure(
+    this.userInviteConfigureService.configure(
       this.data.guid,
       this.endpointForm.value.clientID,
       this.endpointForm.value.clientSecret)

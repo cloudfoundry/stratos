@@ -1,13 +1,13 @@
-import { CF_ENDPOINT_TYPE } from '../../../../cloud-foundry/src/cf-types';
-import { cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { getCFEntityKey } from '../../../../cloud-foundry/src/cf-entity-helpers';
-import { CFEntitySchema } from '../../../../cloud-foundry/src/cf-entity-schema-types';
-import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
+import { HttpRequest } from '@angular/common/http';
+
+import { ENDPOINT_TYPE, endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
 import { RequestTypes } from '../../actions/request.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { EntityCatalogHelpers } from '../../entity-catalog/entity-catalog.helper';
+import { EntitySchema } from '../../helpers/entity-schema';
 import { PaginatedAction } from '../../types/pagination.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../../types/request.types';
 import { createPaginationReducer } from './pagination.reducer';
-import { HttpRequest } from '@angular/common/http';
 
 function getReducer() {
   return createPaginationReducer([
@@ -20,9 +20,9 @@ function getReducer() {
 class MockPagAction implements PaginatedAction {
   actions = ['ONE', 'TWO', 'THREE'];
   options = new HttpRequest('GET', 'fake123');
-  entity = cfEntityFactory(applicationEntityType);
-  entityType = applicationEntityType;
-  endpointType = CF_ENDPOINT_TYPE;
+  entity = endpointEntitySchema;
+  entityType = ENDPOINT_TYPE;
+  endpointType = STRATOS_ENDPOINT_TYPE;
   paginationKey = 'PaginationKey';
   type = RequestTypes.START;
 }
@@ -61,7 +61,7 @@ describe('PaginationReducer', () => {
     const apiAction = new MockPagAction();
     apiAction.paginationKey = 'PaginationKey';
 
-    const entityKey = getCFEntityKey(apiAction.entityType);
+    const entityKey = entityCatalog.getEntityKey(apiAction);
 
     const startApiAction = new StartRequestAction(apiAction, 'fetch');
     const newState = paginationReducer(
@@ -90,7 +90,7 @@ describe('PaginationReducer', () => {
               error: false,
               message: '',
               maxed: false,
-              baseEntityConfig: { entityType: applicationEntityType, endpointType: CF_ENDPOINT_TYPE, schemaKey: undefined },
+              baseEntityConfig: { entityType: apiAction.entityType, endpointType: apiAction.endpointType, schemaKey: undefined },
               entityConfig: null
             }
           },
@@ -112,8 +112,9 @@ describe('PaginationReducer', () => {
 
     const paginationReducer = getReducer();
 
+    const endpointType = 'EndpointType'
     const entityType = 'EntityKey';
-    const entityKey = getCFEntityKey(entityType);
+    const entityKey = EntityCatalogHelpers.buildEntityKey(entityType, endpointType);
     const paginationKey = 'PaginationKey';
 
     const successApiAction = new WrapperRequestActionSuccess(
@@ -125,11 +126,11 @@ describe('PaginationReducer', () => {
         ]
       },
       {
-        endpointType: CF_ENDPOINT_TYPE,
+        endpointType,
         entityType,
         paginationKey,
         type: 'type',
-        entity: {} as CFEntitySchema,
+        entity: {} as EntitySchema,
         options: new HttpRequest('GET', 'fake'),
         actions: []
       },
@@ -181,19 +182,20 @@ describe('PaginationReducer', () => {
 
     const paginationReducer = getReducer();
 
+    const endpointType = 'EndpointType'
     const entityType = 'EntityKey';
-    const entityKey = getCFEntityKey(entityType);
+    const entityKey = EntityCatalogHelpers.buildEntityKey(entityType, endpointType);
     const paginationKey = 'PaginationKey';
     const message = 'Failed';
 
     const failedApiAction = new WrapperRequestActionFailed(
       message,
       {
-        endpointType: CF_ENDPOINT_TYPE,
+        endpointType,
         entityType,
         paginationKey,
         type: 'type',
-        entity: {} as CFEntitySchema,
+        entity: {} as EntitySchema,
         actions: []
       },
       'fetch'

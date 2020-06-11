@@ -4,12 +4,9 @@ import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  ApplicationStateData,
-  ApplicationStateService,
-} from '../../../../../../../../core/src/shared/components/application-state/application-state.service';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
+import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
 
 @Component({
   selector: 'app-table-cell-app-status',
@@ -45,7 +42,6 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
   ngOnInit() {
     const applicationState = this.appStateService.get(this.row.entity, null);
     this.fetchAppState$ = ApplicationService.getApplicationState(
-      this.store,
       this.appStateService,
       this.row.entity,
       this.row.metadata.guid,

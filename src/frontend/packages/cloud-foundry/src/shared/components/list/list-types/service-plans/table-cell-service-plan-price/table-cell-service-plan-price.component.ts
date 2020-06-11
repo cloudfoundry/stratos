@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 
-import { IServicePlan } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IServicePlan } from '../../../../../../cf-api-svc.types';
 import { canShowServicePlanCosts } from '../../../../../../features/service-catalog/services-helper';
 
 @Component({

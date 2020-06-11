@@ -8,7 +8,7 @@ import { environment } from '../../../core/src/environments/environment';
 import { SetInitialParams } from '../../../store/src/actions/pagination.actions';
 import { APIResponse } from '../../../store/src/actions/request.actions';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { isEntityBlocked } from '../../../store/src/entity-service';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { pick } from '../../../store/src/helpers/reducer.helper';
@@ -24,7 +24,6 @@ import {
 } from '../../../store/src/types/request.types';
 import { FetchRelationAction, FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { EntityTreeRelation } from './entity-relation-tree';
-import { createValidationPaginationWatcher } from './entity-relation-tree.helpers';
 import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
 import {
@@ -141,6 +140,16 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
     'fetch',
     childEntitiesAsArray.length,
     1
+  );
+}
+
+function createValidationPaginationWatcher(store, paramPaginationAction: PaginatedAction):
+  Observable<ValidateResultFetchingState> {
+  return store.select(selectPaginationState(entityCatalog.getEntityKey(paramPaginationAction), paramPaginationAction.paginationKey)).pipe(
+    map((paginationState: PaginationEntityState) => {
+      const pageRequest = paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
+      return { fetching: pageRequest ? pageRequest.busy : true };
+    })
   );
 }
 

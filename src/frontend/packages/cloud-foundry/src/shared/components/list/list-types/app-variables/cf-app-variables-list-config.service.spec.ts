@@ -4,8 +4,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { generateTestApplicationServiceProvider } from '../../../../../../../core/test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../../../core/test-framework/entity-service.helper';
+import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { GetApplication } from '../../../../../actions/application.actions';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';

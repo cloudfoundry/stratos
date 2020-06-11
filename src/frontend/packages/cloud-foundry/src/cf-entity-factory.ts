@@ -1,3 +1,4 @@
+import { metricEntityType } from '../../core/src/base-entity-schemas';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { APIResource } from '../../store/src/types/api.types';
 import {
@@ -24,7 +25,6 @@ import {
   gitBranchesEntityType,
   gitCommitEntityType,
   gitRepoEntityType,
-  metricEntityType,
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
@@ -124,9 +124,10 @@ const ServiceBindingsSchema = new CFServiceBindingEntitySchema({
     app: new CFApplicationEntitySchema(),
     service_instance: new CFServiceInstanceEntitySchema({
       entity: {
-        service_bindings: [new CFEntitySchema(serviceBindingEntityType, {
-          app: new CFApplicationEntitySchema(),
-        }, { idAttribute: getAPIResourceGuid })],
+        service_bindings: [
+          new CFEntitySchema(serviceBindingEntityType, {
+            app: new CFApplicationEntitySchema(),
+          }, { idAttribute: getAPIResourceGuid })],
         service: new CFEntitySchema(serviceEntityType, {}, { idAttribute: getAPIResourceGuid }),
         service_plan: ServicePlanSchema,
       },

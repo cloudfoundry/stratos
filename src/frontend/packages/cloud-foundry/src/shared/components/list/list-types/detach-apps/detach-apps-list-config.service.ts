@@ -3,11 +3,11 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { IServiceBinding } from '../../../../../../../core/src/core/cf-api-svc.types';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { DetachAppsDataSource } from './detach-apps-data-source';
 
@@ -26,7 +26,7 @@ export class DetachAppsListConfigService implements IListConfig<APIResource> {
     columnId: 'appName',
     headerCell: () => 'App Name',
     cellDefinition: {
-      getValue: (row: APIResource) => `${row.entity.app.entity.name}`
+      valuePath: 'entity.app.entity.name'
     },
     sort: {
       type: 'sort',
@@ -46,8 +46,7 @@ export class DetachAppsListConfigService implements IListConfig<APIResource> {
     },
   }];
 
-  constructor(private store: Store<CFAppState>, private activatedRoute: ActivatedRoute, private datePipe: DatePipe) {
-
+  constructor(private store: Store<CFAppState>, activatedRoute: ActivatedRoute, private datePipe: DatePipe) {
     const { serviceInstanceId, endpointId } = activatedRoute.snapshot.params;
     this.dataSource = new DetachAppsDataSource(endpointId, serviceInstanceId, this.store, this);
   }

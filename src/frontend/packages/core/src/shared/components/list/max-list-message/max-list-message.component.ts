@@ -4,7 +4,7 @@ import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import {
   PaginationPageIteratorConfig,

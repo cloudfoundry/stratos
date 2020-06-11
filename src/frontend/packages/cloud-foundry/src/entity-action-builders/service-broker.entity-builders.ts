@@ -2,7 +2,20 @@ import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/ac
 import { GetServiceBroker, GetServiceBrokers } from '../actions/service-broker.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
-export const serviceBrokerActionBuilders = {
+export interface ServiceBrokerActionBuilders extends OrchestratedActionBuilders {
+  get: (
+    guid,
+    endpointGuid,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+  ) => GetServiceBroker;
+  getMultiple: (
+    endpointGuid,
+    paginationKey,
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+  ) => GetServiceBrokers;
+}
+
+export const serviceBrokerActionBuilders: ServiceBrokerActionBuilders = {
   get: (
     guid,
     endpointGuid,
@@ -18,4 +31,4 @@ export const serviceBrokerActionBuilders = {
     paginationKey,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServiceBrokers(endpointGuid, paginationKey, includeRelations, populateMissing)
-} as OrchestratedActionBuilders;
+};

@@ -1,21 +1,17 @@
-import { Inject, Optional } from '@angular/core';
 import { compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from './app-state';
-import { ActionDispatcher } from './entity-request-pipeline/entity-request-pipeline.types';
+import { entityCatalog } from './entity-catalog/entity-catalog';
+import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
+import { EntityFetch, EntityFetchHandler } from './entity-request-pipeline/entity-request-pipeline.types';
+import { EntityMonitor } from './monitors/entity-monitor';
 import { RequestInfoState, UpdatingSection } from './reducers/api-request-reducer/types';
-import { getEntityUpdateSections, getUpdateSectionById } from './selectors/api.selectors';
+import { getEntityUpdateSections, getUpdateSectionById, selectEntity } from './selectors/api.selectors';
 import { EntityInfo } from './types/api.types';
 import { EntityRequestAction } from './types/request.types';
-import { EntityMonitor } from './monitors/entity-monitor';
-import { entityCatalog } from './entity-catalog/entity-catalog.service';
-import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
-
-export const ENTITY_INFO_HANDLER = '__ENTITY_INFO_HANDLER__';
-
-export type EntityInfoHandler = (action: EntityRequestAction, actionDispatcher: ActionDispatcher) => (entityInfo: EntityInfo) => void;
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   if (!entityRequestInfo) {
@@ -25,19 +21,36 @@ export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
     entityRequestInfo.error ||
     entityRequestInfo.deleting.busy ||
     entityRequestInfo.deleting.deleted;
-  // TODO: RC test removal of updating._root_.busy
 }
 
-const dispatcherFactory = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => (updatingKey?: string) => {
-  if (updatingKey) {
-    store.dispatch({
+type ActionDispatcher<T> = (updatingKey?: string, fetchEntity?: boolean) => EntityFetch<T>;
+const dispatcherFactory = <T>(
+  store: Store<GeneralEntityAppState>,
+  action: EntityRequestAction,
+  catalogEntity: StratosBaseCatalogEntity,
+
+): ActionDispatcher<T> =>
+  (updatingKey?: string, fetchEntity?: boolean) => {
+    // If we're dispatching the action in the updating world ensure the key is set
+    const updatedAction = {
       ...action,
       updatingKey
-    });
-  } else {
-    store.dispatch(action);
-  }
-};
+    }
+
+    // Do we have a fetch handler defined by the endpoint/entity?
+    const entityFetchHandler: EntityFetchHandler<T> = catalogEntity.getEntityFetchHandler()
+    const fetchHandler = entityFetchHandler ?
+      entityFetchHandler(store, updatedAction) :
+      (entity: T) => store.dispatch(updatedAction);
+
+    // Fetch handler requires the entity, this may be missing or stale to update if required
+    return fetchEntity ? (entity: T) => {
+      // Entity may be null or stale
+      store.select(selectEntity<T>(catalogEntity.entityKey, action.guid)).pipe(first()).subscribe(entity => fetchHandler(entity))
+      fetchHandler(entity)
+    } : fetchHandler;
+  };
+
 
 /**
  * Designed to be used in a service factory provider
@@ -48,16 +61,22 @@ export class EntityService<T = any> {
     store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
     actionOrConfig: EntityRequestAction | EntityActionBuilderEntityConfig,
-    @Optional() @Inject(ENTITY_INFO_HANDLER) entityInfoHandlerBuilder?: EntityInfoHandler
   ) {
     this.action = this.getAction(actionOrConfig);
-    const actionInfoHandler = entityInfoHandlerBuilder ? entityInfoHandlerBuilder(
+    const catalogEntity = entityCatalog.getEntity(this.action);
+
+    // Setup Fetch Handler
+    this.actionDispatch = dispatcherFactory<T>(store, this.action, catalogEntity);
+
+    // Setup Emit Handler
+    const entityEmitHandlerBuilder = catalogEntity.getEntityEmitHandler();
+    const entityEmitHandler = entityEmitHandlerBuilder ? entityEmitHandlerBuilder(
       this.action, (action) => store.dispatch(action)
     ) : () => { };
-    this.actionDispatch = dispatcherFactory(store, this.action);
+
 
     this.updateEntity = () => {
-      this.actionDispatch(this.refreshKey);
+      this.actionDispatch(this.refreshKey, true)(null);
     };
 
     this.updatingSection$ = entityMonitor.updatingSection$;
@@ -65,11 +84,11 @@ export class EntityService<T = any> {
     this.isFetchingEntity$ = entityMonitor.isFetchingEntity$;
     this.entityObs$ = this.getEntityObservable(
       entityMonitor,
-      this.actionDispatch,
+      this.actionDispatch(),
     ).pipe(
       publishReplay(1),
       refCount(),
-      tap(actionInfoHandler)
+      tap(entityEmitHandler)
     );
 
     this.waitForEntity$ = this.entityObs$.pipe(
@@ -84,7 +103,7 @@ export class EntityService<T = any> {
 
   refreshKey = 'updating';
 
-  private actionDispatch: (key: string) => void;
+  private actionDispatch: ActionDispatcher<T>;
 
   updateEntity: () => void;
 
@@ -99,14 +118,15 @@ export class EntityService<T = any> {
   updatingSection$: Observable<UpdatingSection>;
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
-    actionDispatch: (key?: string) => void
+    actionDispatch: EntityFetch<T>
   ): Observable<EntityInfo> => {
     const cleanEntityInfo$ = this.getCleanEntityInfoObs(entityMonitor);
+
     return entityMonitor.entityRequest$.pipe(
       withLatestFrom(entityMonitor.entity$),
       tap(([entityRequestInfo, entity]) => {
-        if (actionDispatch && this.shouldCallAction(entityRequestInfo, entity)) {
-          actionDispatch();
+        if (this.shouldCallAction(entityRequestInfo, entity)) {
+          actionDispatch(entity);
         }
       }),
       first(),
@@ -163,9 +183,13 @@ export class EntityService<T = any> {
    * @param updateKey - The store updating key for the poll
    */
   poll(interval = 10000, updateKey = this.refreshKey) {
-    return this.entityMonitor.poll(interval, () => this.actionDispatch(updateKey), compose(
-      getUpdateSectionById(updateKey),
-      getEntityUpdateSections
-    ));
+    return this.entityMonitor.poll(
+      interval,
+      () => this.actionDispatch(updateKey, true)(null),
+      compose(
+        getUpdateSectionById(updateKey),
+        getEntityUpdateSections
+      )
+    );
   }
 }

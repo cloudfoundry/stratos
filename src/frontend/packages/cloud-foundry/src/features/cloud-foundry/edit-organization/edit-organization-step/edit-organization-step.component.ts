@@ -2,27 +2,26 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, take, tap } from 'rxjs/operators';
+import { filter, map, pairwise, take, tap } from 'rxjs/operators';
 
-import { UpdateOrganization } from '../../../../../../cloud-foundry/src/actions/organization.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, quotaDefinitionEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
+import { organizationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { IOrganization, IOrgQuotaDefinition } from '../../../../../../core/src/core/cf-api.types';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
+import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectRequestInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
+import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../cf-entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { QuotaDefinitionActionBuilder } from '../../../../entity-action-builders/quota-definition.action-builders';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
@@ -38,7 +37,8 @@ const enum OrgStatus {
   styleUrls: ['./edit-organization-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
-    CloudFoundryOrganizationService
+    CloudFoundryOrganizationService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
@@ -115,23 +115,8 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
 
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
-    const quotaDefinitionEntity = entityCatalog.getEntity<IEntityMetadata, any, QuotaDefinitionActionBuilder>(
-      CF_ENDPOINT_TYPE,
-      quotaDefinitionEntityType
-    );
-    const actionBuilder = quotaDefinitionEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getQuotaDefinitionsAction = actionBuilder(quotaPaginationKey, this.cfGuid);
-    this.quotaDefinitions$ = getPaginationObservables<APIResource<IOrgQuotaDefinition>>(
-      {
-        store: this.store,
-        action: getQuotaDefinitionsAction,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          quotaPaginationKey,
-          cfEntityFactory(quotaDefinitionEntityType),
-          action.flattenPagination
-        )
-      },
-      action.flattenPagination
+    this.quotaDefinitions$ = cfEntityCatalog.quotaDefinition.store.getPaginationService(
+      quotaPaginationKey, this.cfGuid, { includeRelations: [] }
     ).entities$.pipe(
       filter(o => !!o),
     );
@@ -147,17 +132,14 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   submit: StepOnNextFunction = () => {
-    const action = new UpdateOrganization(this.orgGuid, this.cfGuid, {
+    return cfEntityCatalog.org.api.update<ActionState>(this.orgGuid, this.cfGuid, {
       name: this.editOrgName.value.orgName,
       quota_definition_guid: this.editOrgName.value.quotaDefinition,
       status: this.status ? OrgStatus.ACTIVE : OrgStatus.SUSPENDED
-    });
-    this.store.dispatch(action);
-
-    // Update action
-    return this.store.select(selectRequestInfo(action, this.orgGuid)).pipe(
-      filter(o => !!o && !o.updating[UpdateOrganization.UpdateExistingOrg].busy),
-      map(o => o.updating[UpdateOrganization.UpdateExistingOrg]),
+    }).pipe(
+      pairwise(),
+      filter(([oldS, newS]) => oldS.busy && !newS.busy),
+      map(([, newS]) => newS),
       map(o => ({
         success: !o.error,
         redirect: !o.error,

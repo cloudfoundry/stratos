@@ -10,8 +10,10 @@ import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/a
 import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
-import { StratosCatalogEndpointEntity } from '../../../../../../store/src/entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
+import {
+  StratosCatalogEndpointEntity,
+} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
@@ -42,11 +44,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   @ViewChild('nameField', { static: true }) nameField: NgModel;
   @ViewChild('urlField', { static: true }) urlField: NgModel;
   @ViewChild('skipSllField', { static: true }) skipSllField: NgModel;
-  @ViewChild('ssoAllowedField', { static: false }) ssoAllowedField: NgModel;
+  @ViewChild('ssoAllowedField') ssoAllowedField: NgModel;
 
   // Optional Client ID and Client Secret
-  @ViewChild('clientIDField', { static: false }) clientIDField: NgModel;
-  @ViewChild('clientSecretField', { static: false }) clientSecretField: NgModel;
+  @ViewChild('clientIDField') clientIDField: NgModel;
+  @ViewChild('clientSecretField') clientSecretField: NgModel;
 
   urlValidation: string;
 

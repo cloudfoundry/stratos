@@ -1,17 +1,20 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ICfV2Info } from 'frontend/packages/core/src/core/cf-api.types';
 import { APIResource, EntityInfo } from 'frontend/packages/store/src/types/api.types';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 import { fetchAutoscalerInfo } from '../../../../../../cf-autoscaler/src/core/autoscaler-helpers/autoscaler-available';
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
+import { ICfV2Info } from '../../../../cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
   UserInviteConfigurationDialogComponent,
 } from '../../../../features/cloud-foundry/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
-import { UserInviteService } from '../../../../features/cloud-foundry/user-invites/user-invite.service';
+import {
+  UserInviteConfigureService,
+  UserInviteService,
+} from '../../../../features/cloud-foundry/user-invites/user-invite.service';
 
 
 @Component({
@@ -27,6 +30,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public userInviteService: UserInviteService,
+    public userInviteConfigureService: UserInviteConfigureService,
     private dialog: MatDialog,
     private esf: EntityServiceFactory
   ) { }
@@ -72,9 +76,6 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
       if (metadata.description) {
         return metadata.description + (metadata.build ? ` (${metadata.build})` : '');
       }
-      if (metadata.support === 'pcfdev@pivotal.io') {
-        return 'PCF Dev';
-      }
     }
     return '-';
   }
@@ -88,6 +89,6 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   }
 
   deConfigureUserInvites() {
-    this.userInviteService.unconfigure(this.cfEndpointService.cfGuid);
+    this.userInviteConfigureService.unconfigure(this.cfEndpointService.cfGuid);
   }
 }

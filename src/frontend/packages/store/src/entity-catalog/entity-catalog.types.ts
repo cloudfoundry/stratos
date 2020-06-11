@@ -1,12 +1,17 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { EndpointHealthCheck } from '../../../core/endpoints-health-checks';
 import { EndpointAuthTypeConfig } from '../../../core/src/core/extension/extension-types';
-import { Omit } from '../../../core/src/core/utils.service';
+import { FavoritesConfigMapper } from '../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { StratosStatus } from '../../../core/src/shared/shared.types';
 import { GeneralEntityAppState } from '../app-state';
 import {
   ApiErrorMessageHandler,
+  EntitiesFetchHandler,
+  EntitiesInfoHandler,
+  EntityFetchHandler,
+  EntityInfoHandler,
   PreApiRequest,
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
@@ -15,6 +20,7 @@ import {
   PaginationPageIteratorConfig,
 } from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntitySchema } from '../helpers/entity-schema';
+import { UserFavorite } from '../types/user-favorites.types';
 
 export interface EntityCatalogEntityConfig {
   entityType: string;
@@ -69,6 +75,22 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
   readonly paginationConfig?: PaginationPageIteratorConfig;
   readonly tableConfig?: EntityTableConfig<any>;
+  /**
+   * Hook that will fire before an entity is emitted by an entity service. This could be used, for example, entity validation
+   */
+  readonly entityEmitHandler?: EntityInfoHandler;
+  /**
+   * Hook that will fire before an entity is emitted by an entity service. This could be used, for example, entity validation
+   */
+  readonly entitiesEmitHandler?: EntitiesInfoHandler;
+  /**
+   * Hook that can override the way an entity is fetched
+   */
+  readonly entityFetchHandler?: EntityFetchHandler;
+  /**
+   * Hook that can override the way entities are fetched
+   */
+  readonly entitiesFetchHandler?: EntitiesFetchHandler;
 }
 
 
@@ -90,14 +112,23 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly urlValidationRegexString?: string;
   readonly authTypes: EndpointAuthTypeConfig[];
   readonly subTypes?: Omit<IStratosEndpointDefinition, 'schema' | 'subTypes'>[];
-  // Allows an entity to manipulate the data that is returned from an api request before it makes it into the store.
-  // This will be used for all entities with this endpoint type.
+
+  /**
+   * Allows an entity to manipulate the data that is returned from an api request before it makes it into the store.
+   * This will be used for all entities with this endpoint type.
+   */
   readonly globalSuccessfulRequestDataMapper?: SuccessfulApiResponseDataMapper;
-  // Allows an entity to manipulate the request object before it's sent.
-  // This will be used for all entities with this endpoint type unless the entity has it's own prerequest config.
+  /**
+   * Allows an entity to manipulate the request object before it's sent.
+   * This will be used for all entities with this endpoint type unless the entity has it's own prerequest config.
+   */
   readonly globalPreRequest?: PreApiRequest;
   readonly globalPrePaginationRequest?: PrePaginationApiRequest;
   readonly globalErrorMessageHandler?: ApiErrorMessageHandler;
+  readonly healthCheck?: EndpointHealthCheck;
+  readonly favoriteFromEntity?: <M extends IEntityMetadata = IEntityMetadata>(
+    entity: any, entityKey: string, favoritesConfigMapper: FavoritesConfigMapper
+  ) => UserFavorite<M>;
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }

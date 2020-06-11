@@ -1,8 +1,8 @@
-import { NgModule } from '@angular/core';
+import { NgModule, Injectable } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
-import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
+import { RouterStateSerializer, StoreRouterConnectingModule, DefaultRouterStateSerializer } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
@@ -14,8 +14,9 @@ import {
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
-import { EntityActionDispatcher } from '../../store/src/entity-catalog/action-dispatcher/action-dispatcher';
-import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
+import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
+import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
 import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
 import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
@@ -59,6 +60,7 @@ export interface RouterStateUrl {
   params: Params;
   queryParams: Params;
 }
+@Injectable()
 export class CustomRouterStateSerializer
   implements RouterStateSerializer<RouterStateUrl> {
   serialize(routerState: RouterStateSnapshot): RouterStateUrl {
@@ -99,7 +101,7 @@ export class CustomRouterStateSerializer
     LoginModule,
     HomeModule,
     DashboardModule,
-    StoreRouterConnectingModule.forRoot(), // Create action for router navigation
+    StoreRouterConnectingModule.forRoot({ serializer: DefaultRouterStateSerializer }), // Create action for router navigation
     AboutModule,
     CustomImportModule,
     XSRFModule,
@@ -125,8 +127,10 @@ export class AppModule {
     eventService: GlobalEventService,
     private userFavoriteManager: UserFavoriteManager,
     private favoritesConfigMapper: FavoritesConfigMapper,
+    ech: EntityCatalogHelper
   ) {
-    EntityActionDispatcher.initialize(this.store);
+    EntityCatalogHelpers.SetEntityCatalogHelper(ech);
+
     eventService.addEventConfig<boolean>({
       eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.timeoutSession),
       message: 'Timeout session is disabled - this is considered a security risk.',

@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { SafeResourceUrl } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, interval, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
@@ -17,7 +18,6 @@ import {
 } from '../../../../shared/components/simple-usage-chart/simple-usage-chart.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { GetKubernetesNamespaces, GetKubernetesNodes, GetKubernetesPods } from '../../store/kubernetes.actions';
-import { Router } from '@angular/router';
 
 interface IValueLabels {
   usedLabel?: string;

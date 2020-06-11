@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -100,7 +100,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   enableTextFilter = true;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,

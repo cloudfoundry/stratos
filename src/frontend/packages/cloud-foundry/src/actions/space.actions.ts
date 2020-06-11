@@ -1,9 +1,9 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
-import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
+import { IUpdateSpace } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
@@ -62,6 +62,7 @@ export class GetSpace extends CFStartAction implements ICFAction, EntityInlinePa
     GET_SPACE_FAILED
   ];
   entity = [cfEntityFactory(spaceEntityType)];
+  schemaKey = ''; // Required by builder
   entityType = spaceEntityType;
   options: HttpRequest<any>;
 }

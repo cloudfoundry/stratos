@@ -1,8 +1,10 @@
+import { e2e } from './../e2e';
 import { browser, by, element, promise } from 'protractor';
 import { ElementArrayFinder, ElementFinder, protractor } from 'protractor/built';
 import { Key } from 'selenium-webdriver';
 
 import { Component } from './component.po';
+import { P } from '@angular/cdk/keycodes';
 
 const until = protractor.ExpectedConditions;
 
@@ -20,9 +22,9 @@ export interface FormItem {
   checked: boolean;
   type: string;
   class: string;
-  sendKeys: Function;
-  clear: Function;
-  click: Function;
+  sendKeys: (text) => void;
+  clear: () => void;
+  click: () => void;
   tag: string;
   valid: string;
   error: string;
@@ -133,6 +135,15 @@ export class FormComponent extends Component {
       tag: elm.getTagName(),
       id: elm.getAttribute('id'),
       multiple: elm.getAttribute('multiple'),
+    };
+  }
+
+  quickMapField(elm: ElementFinder, index: number): FormItem | any {
+    return {
+      index,
+      name: elm.getAttribute('name'),
+      text: elm.getText(),
+      click: elm.click,
     };
   }
 
@@ -259,6 +270,13 @@ export class FormComponent extends Component {
               ctrl.sendKeys(Key.ESCAPE);
               break;
             }
+
+            // Options are presented in a .mat-select-panel
+            // Open the selector
+            ctrl.click();
+            const selectMenu = new Component(element(by.css('.mat-select-panel')));
+            selectMenu.waitUntilShown();
+            // Filter down so that the item we want appears in the list
             let strValue = value as string;
             // Handle spaces in text. (sendKeys sends space bar.. which closes drop down)
             // Bonus - Sending string without space works... up until last character...which deselects desired option and selects top option
@@ -266,11 +284,17 @@ export class FormComponent extends Component {
             if (containsSpace >= 0) {
               strValue = strValue.slice(0, containsSpace);
             }
-            ctrl.click();
             ctrl.sendKeys(strValue);
-            ctrl.sendKeys(Key.RETURN);
+            selectMenu.all(by.tagName('mat-option')).map(this.quickMapField).then(options => {
+              const opt: any = options.find((option: FormItem) => option.text === value);
+              if (opt) {
+                opt.click();
+                selectMenu.waitUntilNotShown();
+              }
+            });
+
             if (!expectFailure) {
-              expect(this.getText(field)).toBe(value, `Failed to set field '${field}' with '${strValue}'`);
+              expect(this.getText(field)).toBe(value, `Failed to set field '${field}' with '${value}'`);
             } else {
               expect(this.getText(field)).not.toBe(value);
             }

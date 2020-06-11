@@ -5,19 +5,12 @@ import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { IServiceInstance } from '../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  TableCellServiceLastOpComponent,
-} from '../../../../../../../core/src/shared/components/list/list-types/cf-spaces-service-instances/table-cell-service-last-op/table-cell-service-last-op.component';
-import {
-  TableCellServiceComponent,
-} from '../../../../../../../core/src/shared/components/list/list-types/cf-spaces-service-instances/table-cell-service/table-cell-service.component';
 import {
   defaultPaginationPageSizeOptionsTable,
   IListAction,
@@ -26,6 +19,7 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { IServiceInstance } from '../../../../../cf-api-svc.types';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { CANCEL_ORG_ID_PARAM, CANCEL_SPACE_ID_PARAM } from '../../../add-service-instance/csi-mode.service';
 import {
@@ -38,6 +32,10 @@ import {
 import {
   TableCellServiceInstanceTagsComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
+import {
+  TableCellServiceLastOpComponent,
+} from '../cf-spaces-service-instances/table-cell-service-last-op/table-cell-service-last-op.component';
+import { TableCellServiceComponent } from '../cf-spaces-service-instances/table-cell-service/table-cell-service.component';
 
 interface CanCache {
   [spaceGuid: string]: Observable<boolean>;
@@ -149,7 +147,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
 
   private listActionEdit: IListAction<APIResource> = {
     action: (item: APIResource<IServiceInstance>) =>
-      this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid, {
+      this.serviceActionHelperService.startEditServiceBindingStepper(item.metadata.guid, item.entity.cfGuid, {
         [CANCEL_SPACE_ID_PARAM]: item.entity.space_guid,
         [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid
       }),

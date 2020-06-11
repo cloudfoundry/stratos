@@ -1,4 +1,4 @@
-import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
+import { CFFeatureFlagTypes } from '../../../cloud-foundry/src/cf-api.types';
 
 export enum CurrentUserPermissions {
   APPLICATION_VIEW = 'view.application',

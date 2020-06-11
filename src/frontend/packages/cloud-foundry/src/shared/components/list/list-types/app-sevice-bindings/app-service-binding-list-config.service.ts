@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { IServiceBinding } from '../../../../../../../core/src/core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
 import {
@@ -20,6 +19,7 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GetAppServiceBindings } from '../../../../../actions/application-service-routes.actions';
+import { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { isServiceInstance, isUserProvidedServiceInstance } from '../../../../../features/cloud-foundry/cf.helpers';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
@@ -55,7 +55,8 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
 
   private listActionEdit: IListAction<APIResource<IServiceBinding>> = {
     action: (item) => {
-      this.serviceActionHelperService.editServiceBinding(
+      // FIXME: If the user cancels stepper this leaks #4295
+      this.serviceActionHelperService.startEditServiceBindingStepper(
         item.entity.service_instance_guid,
         this.appService.cfGuid,
         { appId: this.appService.appGuid },

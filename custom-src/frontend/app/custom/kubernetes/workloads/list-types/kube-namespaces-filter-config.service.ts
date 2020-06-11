@@ -3,10 +3,7 @@ import { Store } from '@ngrx/store';
 import { safeUnsubscribe } from 'frontend/packages/core/src/core/utils.service';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { PaginationMonitorFactory } from 'frontend/packages/store/src/monitors/pagination-monitor.factory';
-import {
-  getCurrentPageRequestInfo,
-  getPaginationObservables,
-} from 'frontend/packages/store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { getPaginationObservables } from 'frontend/packages/store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { connectedEndpointsOfTypesSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { EndpointModel } from 'frontend/packages/store/src/types/endpoint.types';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
@@ -22,6 +19,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
+import { getCurrentPageRequestInfo } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { KUBERNETES_ENDPOINT_TYPE, kubernetesEntityFactory } from '../../kubernetes-entity-factory';
 import { KubernetesNamespace } from '../../store/kube.types';
 import { GetKubernetesNamespaces } from '../../store/kubernetes.actions';

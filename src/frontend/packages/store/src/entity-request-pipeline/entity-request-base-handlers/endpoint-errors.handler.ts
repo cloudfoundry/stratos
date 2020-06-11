@@ -1,5 +1,5 @@
 import { SendEventAction } from '../../actions/internal-events.actions';
-import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { endpointSchemaKey } from '../../helpers/entity-factory';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { InternalEventSeverity, InternalEventStateMetadata } from '../../types/internal-events.types';

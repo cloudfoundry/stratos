@@ -17,7 +17,6 @@ import {
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import {
   ListPaginationMultiFilterChange,
@@ -26,18 +25,16 @@ import {
   valueOrCommonFalsy,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
-import {
-  getCurrentPageRequestInfo,
-  getPaginationObservables,
-} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { getCurrentPageRequestInfo } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
+import { IOrganization, ISpace } from '../../cf-api.types';
+import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { QParam, QParamJoiners } from '../q-param';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {
@@ -304,15 +301,12 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createPaginationAction() {
-    const organizationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
-    const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getAllOrganizationsAction = actionBuilder(null, CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, {
+    return cfEntityCatalog.org.actions.getMultiple(null, CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, {
       includeRelations: [
         createEntityRelationKey(organizationEntityType, spaceEntityType),
       ],
       populateMissing: true
     });
-    return getAllOrganizationsAction;
   }
 
   public getEndpointOrgs(endpointGuid: string) {

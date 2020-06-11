@@ -3,11 +3,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import {
-  generateCfBaseTestModules,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../../../services/cloud-foundry-user-provided-services.service';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { UserProvidedServiceInstanceCardComponent } from './user-provided-service-instance-card.component';
 
@@ -25,6 +26,7 @@ describe('UserProvidedServiceInstanceCardComponent', () => {
         EntityMonitorFactory,
         PaginationMonitorFactory,
         ServiceActionHelperService,
+        CloudFoundryUserProvidedServicesService,
       ]
     })
       .compileComponents();
