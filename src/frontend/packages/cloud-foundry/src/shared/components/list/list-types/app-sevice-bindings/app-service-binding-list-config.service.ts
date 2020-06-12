@@ -19,7 +19,6 @@ import {
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GetAppServiceBindings } from '../../../../../actions/application-service-routes.actions';
 import { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { isServiceInstance, isUserProvidedServiceInstance } from '../../../../../features/cloud-foundry/cf.helpers';
@@ -57,17 +56,12 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
 
   private listActionEdit: IListAction<APIResource<IServiceBinding>> = {
     action: (item) => {
-      // FIXME: If the user cancels stepper this leaks #4295
       this.serviceActionHelperService.startEditServiceBindingStepper(
         item.entity.service_instance_guid,
         this.appService.cfGuid,
         { appId: this.appService.appGuid },
         !!isUserProvidedServiceInstance(item.entity.service_instance.entity)
-      ).subscribe(res => {
-        if (!res.error) {
-          this.store.dispatch(new GetAppServiceBindings(this.appService.appGuid, this.appService.cfGuid));
-        }
-      });
+      );
     },
     label: 'Edit',
     createVisible: () => this.appService.waitForAppEntity$.pipe(
