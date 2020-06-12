@@ -71,11 +71,10 @@ export class HelmReleaseHelperService {
 
   public fetchReleaseResources(): Observable<HelmReleaseResource> {
     // Get helm release
-    return workloadsEntityCatalog.resource.store.getPaginationMonitor(
-      this.endpointGuid,
-      null,
-      { releaseTitle: this.releaseTitle }
-    ).currentPage$.pipe(
+    const action = workloadsEntityCatalog.resource.actions.get(this.releaseTitle, this.endpointGuid)
+    return workloadsEntityCatalog.resource.store.getEntityMonitor(
+      action.guid
+    ).entity$.pipe(
       filter(resources => !!resources)
     );
   }

@@ -104,11 +104,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           prefix = messageObj.data;
         } else if (messageObj.kind === 'Pods') {
           const pods: KubernetesPod[] = messageObj.data || [];
-          const podsWithInfo: KubernetesPod[] = pods.map(pod => {
-            const res = KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod);
-            res.metadata.kubeId = this.helmReleaseHelper.endpointGuid;
-            return res;
-          });
+          const podsWithInfo: KubernetesPod[] = pods.map(pod => KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod));
           const releasePodsAction = kubeEntityCatalog.pod.actions.getInWorkload(
             this.helmReleaseHelper.endpointGuid,
             this.helmReleaseHelper.releaseTitle
@@ -127,7 +123,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           // Store ALL resources for the release
           manifest.forEach(resource => {
             if (resource.kind === 'Service' && prefix) {
-              resource.metadata.kubeId = this.helmReleaseHelper.endpointGuid;
               svcs.push(resource);
             }
           });
@@ -170,7 +165,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
 
   private populateList(action: KubePaginationAction, resources: any) {
     const entity = entityCatalog.getEntity(action);
-    const entityKey = entity.entityKey;
     const newResources = {};
     resources.forEach(resource => {
       const newResource: HelmReleasePod | HelmReleaseService = {
@@ -179,12 +173,14 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
         ...resource
       };
       newResource.metadata.kubeId = action.kubeGuid;
-      const entityId = entity.getSchema(action.schemaKey).getId(resource)
+      // The service entity from manifest is missing this, but apply here to ensure any others are caught
+      newResource.metadata.namespace = this.helmReleaseHelper.namespace;
+      const entityId = action.entity[0].getId(resource)
       newResources[entityId] = newResource;
     });
 
     const releasePods = {
-      entities: { [entityKey]: newResources },
+      entities: { [entity.entityKey]: newResources },
       result: Object.keys(newResources)
     };
     const successWrapper = new WrapperRequestActionSuccess(releasePods, action, 'fetch', releasePods.result.length, 1);

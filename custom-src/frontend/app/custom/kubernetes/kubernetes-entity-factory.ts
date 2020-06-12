@@ -21,7 +21,6 @@ export const kubernetesNamespacesEntityType = 'kubernetesNamespace';
 export const kubernetesServicesEntityType = 'kubernetesService';
 export const kubernetesStatefulSetsEntityType = 'kubernetesStatefulSet';
 export const kubernetesDeploymentsEntityType = 'kubernetesDeployment';
-export const kubernetesAppsEntityType = 'kubernetesApp';
 export const kubernetesDashboardEntityType = 'kubernetesDashboard';
 
 export const getKubeAppId = (object: KubernetesApp) => object.name;
@@ -55,12 +54,6 @@ entityCache[kubernetesEntityType] = new KubernetesEntitySchema(
   kubernetesEntityType,
   {},
   { idAttribute: getAPIResourceGuid }
-);
-
-entityCache[kubernetesAppsEntityType] = new KubernetesEntitySchema(
-  kubernetesAppsEntityType,
-  {},
-  { idAttribute: getKubeAppId }
 );
 
 entityCache[kubernetesStatefulSetsEntityType] = new KubernetesEntitySchema(

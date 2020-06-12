@@ -23,7 +23,6 @@ import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth
 import { kubeEntityCatalog } from './kubernetes-entity-catalog';
 import {
   KUBERNETES_ENDPOINT_TYPE,
-  kubernetesAppsEntityType,
   kubernetesDashboardEntityType,
   kubernetesDeploymentsEntityType,
   kubernetesEntityFactory,
@@ -34,8 +33,6 @@ import {
   kubernetesStatefulSetsEntityType,
 } from './kubernetes-entity-factory';
 import {
-  KubeAppActionBuilders,
-  kubeAppActionBuilders,
   KubeDashboardActionBuilders,
   kubeDashboardActionBuilders,
   KubeDeploymentActionBuilders,
@@ -52,7 +49,6 @@ import {
   kubeStatefulSetsActionBuilders,
 } from './store/action-builders/kube.action-builders';
 import {
-  KubernetesApp,
   KubernetesDeployment,
   KubernetesNamespace,
   KubernetesNode,
@@ -161,7 +157,6 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
   };
   return [
     generateEndpointEntity(endpointDefinition),
-    generateAppEntity(endpointDefinition),
     generateStatefulSetsEntity(endpointDefinition),
     generatePodsEntity(endpointDefinition),
     generateDeploymentsEntity(endpointDefinition),
@@ -180,18 +175,6 @@ function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefi
     metadata => `/kubernetes/${metadata.guid}`
   );
   return kubeEntityCatalog.endpoint;
-}
-
-function generateAppEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition: IStratosEntityDefinition = {
-    type: kubernetesAppsEntityType,
-    schema: kubernetesEntityFactory(kubernetesAppsEntityType),
-    endpoint: endpointDefinition,
-  };
-  kubeEntityCatalog.app = new StratosCatalogEntity<IFavoriteMetadata, KubernetesApp, KubeAppActionBuilders>(definition, {
-    actionBuilders: kubeAppActionBuilders
-  });
-  return kubeEntityCatalog.app;
 }
 
 function generateStatefulSetsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {

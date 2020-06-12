@@ -4,7 +4,6 @@ import {
 } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
 import {
-  KubeAppActionBuilders,
   KubeDashboardActionBuilders,
   KubeDeploymentActionBuilders,
   KubeNamespaceActionBuilders,
@@ -14,7 +13,6 @@ import {
   KubeStatefulSetsActionBuilders,
 } from './store/action-builders/kube.action-builders';
 import {
-  KubernetesApp,
   KubernetesDeployment,
   KubernetesNamespace,
   KubernetesNode,
@@ -29,7 +27,6 @@ import {
  */
 export class KubeEntityCatalog {
   public endpoint: StratosCatalogEndpointEntity;
-  public app: StratosCatalogEntity<IFavoriteMetadata, KubernetesApp, KubeAppActionBuilders>;
   public statefulSet: StratosCatalogEntity<IFavoriteMetadata, KubernetesStatefulSet, KubeStatefulSetsActionBuilders>;
   public pod: StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubePodActionBuilders>;
   public deployment: StratosCatalogEntity<IFavoriteMetadata, KubernetesDeployment, KubeDeploymentActionBuilders>;

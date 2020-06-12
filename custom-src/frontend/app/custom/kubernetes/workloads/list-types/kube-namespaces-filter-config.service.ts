@@ -36,7 +36,6 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
   public kube: KubernetesNamespacesFilterItem<EndpointModel>;
   public namespace: KubernetesNamespacesFilterItem<KubernetesNamespace>;
 
-  // private isLoading$: Observable<boolean>;
   private subs: Subscription[] = [];
 
   private allNamespaces = this.getNamespacesObservable();
@@ -50,7 +49,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
     this.kube = this.createKube();
     this.namespace = this.createNamespace();
 
-    // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
+    // Start watching the namespace plus automatically setting values only when we actually have values to auto select
     this.namespace.list$.pipe(first()).subscribe(() => this.setupAutoSelectors());
   }
 

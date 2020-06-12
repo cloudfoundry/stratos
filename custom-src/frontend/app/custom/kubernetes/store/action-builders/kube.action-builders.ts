@@ -20,13 +20,6 @@ import {
   KubeHealthCheck,
 } from '../kubernetes.actions';
 
-export interface KubeAppActionBuilders extends OrchestratedActionBuilders {
-
-}
-
-export const kubeAppActionBuilders: KubeAppActionBuilders = {
-}
-
 export interface KubeStatefulSetsActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (
     kubeGuid: string,

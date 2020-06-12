@@ -4,7 +4,7 @@ import { WorkloadGraphBuilders, WorkloadReleaseBuilders, WorkloadResourceBuilder
 import { HelmRelease, HelmReleaseGraph, HelmReleaseResource } from './workload.types';
 
 /**
- * A strongly typed collection of Kube Catalog Entities.
+ * A strongly typed collection of Workload Catalog Entities.
  * This can be used to access functionality exposed by each specific type, such as get, update, delete, etc
  */
 export class WorkloadsEntityCatalog {
@@ -14,7 +14,7 @@ export class WorkloadsEntityCatalog {
 }
 
 /**
- * A strongly typed collection of Kube Catalog Entities.
+ * A strongly typed collection of Workload Catalog Entities.
  * This can be used to access functionality exposed by each specific type, such as get, update, delete, etc
  */
 export const workloadsEntityCatalog: WorkloadsEntityCatalog = new WorkloadsEntityCatalog();

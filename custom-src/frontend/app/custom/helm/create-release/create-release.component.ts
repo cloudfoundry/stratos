@@ -3,12 +3,9 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTextareaAutosize } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -60,10 +57,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     public endpointsService: EndpointsService,
-    private store: Store<AppState>,
     private httpClient: HttpClient,
     private confirmDialog: ConfirmationDialogService,
-    private emf: EntityMonitorFactory
   ) {
     const chart = this.route.snapshot.params;
     this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
