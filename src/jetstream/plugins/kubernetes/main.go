@@ -55,14 +55,16 @@ const (
 	// kubeDashboardPluginConfigSetting is config value sent back to the client to indicate if the kube dashboard ie enabled
 	kubeDashboardPluginConfigSetting = "kubeDashboardEnabled"
 	// kubeTerminalPluginConfigSetting is config value sent back to the client to indicate if the kube terminal is enabled
-	kubeTerminalPluginConfigSetting ="kubeTerminalEnabled"
+	kubeTerminalPluginConfigSetting = "kubeTerminalEnabled"
 )
 
 // Init creates a new instance of the Kubernetes plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
 	kubeTerminal := terminal.NewKubeTerminal(portalProxy)
 	kube := &KubernetesSpecification{portalProxy: portalProxy, endpointType: kubeEndpointType, kubeTerminal: kubeTerminal}
-	kubeTerminal.Kube = kube
+	if kubeTerminal != nil {
+		kubeTerminal.Kube = kube
+	}
 	return kube, nil
 }
 
@@ -142,7 +144,6 @@ func (c *KubernetesSpecification) Init() error {
 
 	// Kube terminal is enabled by Tech Preview mode
 	c.portalProxy.GetConfig().PluginConfig[kubeTerminalPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
-
 
 	// Kick off the cleanup of any old kube terminal pods
 	c.kubeTerminal.StartCleanup()
