@@ -9,7 +9,7 @@ import { RouterNav } from 'frontend/packages/store/src/actions/router.actions';
 import { HideSnackBar, ShowSnackBar } from 'frontend/packages/store/src/actions/snackBar.actions';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import { endpointsEntityRequestDataSelector } from '../../../../../../../../store/src/selectors/endpoint.selectors';
 import { HelmReleaseChartData, HelmReleaseResource } from '../../../workload.types';
@@ -103,7 +103,15 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       startWith(true)
     );
 
-    this.chartData$ = this.helmReleaseHelper.fetchReleaseChartStats();
+    this.chartData$ = this.helmReleaseHelper.fetchReleaseChartStats().pipe(
+      distinctUntilChanged(),
+      map(chartData => ({
+        ...chartData,
+        containersChartData: chartData.containersChartData.sort((a, b) => a.name.localeCompare(b.name)),
+        podsChartData: chartData.podsChartData.sort((a, b) => a.name.localeCompare(b.name))
+      })
+      )
+    );
 
     this.resources$ = this.helmReleaseHelper.fetchReleaseGraph().pipe(
       map((graph: any) => {

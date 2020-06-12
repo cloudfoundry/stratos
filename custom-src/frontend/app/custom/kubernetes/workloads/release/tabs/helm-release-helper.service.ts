@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
-import { KubernetesPod } from '../../../store/kube.types';
+import { ContainerStateCollection, KubernetesPod } from '../../../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../../store/workloads-entity-factory';
 import {
   HelmRelease,
@@ -85,7 +85,7 @@ export class HelmReleaseHelperService {
       this.releaseTitle
     ).currentPage$.pipe(
       filter(pods => !!pods),
-      map(this.mapPods)
+      map(pods => this.mapPods(pods))
     );
   }
 
@@ -110,11 +110,13 @@ export class HelmReleaseHelperService {
       } else {
         podPhases[status]++;
       }
+
       if (pod.status.containerStatuses) {
         pod.status.containerStatuses.forEach(containerStatus => {
-          if (containerStatus.state.running) {
+          const isReady = this.isContainerReady(containerStatus.state);
+          if (isReady === true) {
             containers.ready.value++;
-          } else {
+          } else if (isReady === false) {
             containers.notReady.value++;
           }
         });
@@ -128,5 +130,18 @@ export class HelmReleaseHelperService {
       })),
       containersChartData: Object.values(containers)
     };
+  }
+
+  private isContainerReady(state: ContainerStateCollection = {}): Boolean {
+    console.log(state);
+    if (state.running) {
+      return true;
+    } else if (!!state.waiting) {
+      return false;
+    } else if (!!state.terminated) {
+      // Assume a failed state is not ready (covers completed init states), discard success state
+      return state.terminated.exitCode === 0 ? null : false
+    }
+    return false;
   }
 }
