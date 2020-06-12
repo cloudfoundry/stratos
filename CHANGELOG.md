@@ -2,7 +2,7 @@
 
 ## 3.2.1
 
-[Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.2.0...3.2.1)
+[Full Changelog](https://github.com/SUSE/stratos/compare/3.2.0...3.2.1)
 
 **Improvements:**
 
@@ -14,7 +14,7 @@
 
 ## 3.2.0
 
-[Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.1.0...3.2.0)
+[Full Changelog](https://github.com/SUSE/stratos/compare/3.1.0...3.2.0)
 
 This release contains a number of fixes and improvements:
 
