@@ -136,7 +136,6 @@ function createService(
 function init(
   setup: E2ESetup,
   serviceName: string,
-  spaceScoped = false
 ) {
   const defaultCf = e2e.secrets.getDefaultCFEndpoint();
   const endpointGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
@@ -147,8 +146,8 @@ function init(
     const service = response.resources.find(e => e.entity.label === serviceName);
     const serviceGuid = service.metadata.guid;
     servicesHelperE2E.setCreateServiceInstance(
-      new CreateMarketplaceServiceInstance('/marketplace/' + endpointGuid + '/' + serviceGuid +
-        '/create?isSpaceScoped=' + (spaceScoped ? 'true' : 'false')));
+      new CreateMarketplaceServiceInstance('/marketplace/' + endpointGuid + '/' + serviceGuid + '/create')
+    );
     const marketplaceSummaryPage = new MarketplaceSummaryPage(endpointGuid, serviceGuid);
     return { servicesHelper: servicesHelperE2E, summaryPage: marketplaceSummaryPage };
   });
