@@ -36,11 +36,16 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   public containersChartData = [];
 
   private successChartColor = '#4DD3A7';
+  private completedChartColour = '#7aa3e5';
 
   public podChartColors = [
     {
       name: 'Running',
       value: this.successChartColor
+    },
+    {
+      name: 'Completed',
+      value: this.completedChartColour
     },
   ];
 

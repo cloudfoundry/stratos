@@ -1,6 +1,7 @@
 <div class="app-ring-chart">
   <div class="pie">
-    <ngx-charts-pie-chart [customColors]="customColors" [view]="[120,120]" [animations]="true" [doughnut]="true" [results]="data" [gradient]="false">
+    <ngx-charts-pie-chart [customColors]="customColors" [view]="[120,120]" [animations]="true" [doughnut]="true"
+      [results]="data" [gradient]="false">
     </ngx-charts-pie-chart>
   </div>
   <div class="legend">
@@ -8,7 +9,9 @@
       <div class="total-value" ngx-charts-count-up [countTo]="getTotal()"></div>
       <div class="total-label">{{ label }}</div>
     </div>
-    <ngx-charts-advanced-legend [data]="data" [label]="label" [colors]="colors" [animations]="true" [valueFormatting]="valueFormatting" [labelFormatting]="nameFormatting" [percentageFormatting]="percentageFormatting" (select)="onClick($event)" (activate)="onActivate($event)"
+    <ngx-charts-advanced-legend [data]="data" [label]="label" [colors]="colors" [animations]="true"
+      [valueFormatting]="valueFormatting" [labelFormatting]="nameFormatting"
+      [percentageFormatting]="percentageFormatting" (select)="onClick($event)" (activate)="onActivate($event)"
       (deactivate)="onDeactivate($event)">
     </ngx-charts-advanced-legend>
   </div>
