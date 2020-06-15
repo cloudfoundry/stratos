@@ -186,10 +186,13 @@ export class CsiModeService {
       // - good catch all
       // - doesn't work that well for marketplace/service create instance --> success (should go to marketplace/service/instance)
       // - if user has refreshed on stepper (previous url was login) use the old cancelUrl best-guess value
-      const previousNavigation = router.getCurrentNavigation().previousNavigation || { finalUrl: '' };
-      const previousUrl = previousNavigation.finalUrl.toString();
-      if (previousUrl !== '/login') {
-        this.cancelUrl = previousUrl;
+      const currentNavigation = router.getCurrentNavigation();
+      if (currentNavigation &&
+        currentNavigation.previousNavigation &&
+        currentNavigation.previousNavigation.finalUrl &&
+        currentNavigation.previousNavigation.finalUrl.toString() !== '/login'
+      ) {
+        this.cancelUrl = currentNavigation.previousNavigation.finalUrl.toString();
       }
     }
   }
