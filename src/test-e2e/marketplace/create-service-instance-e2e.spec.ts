@@ -29,10 +29,8 @@ describe('Create Service Instance', () => {
     createServiceInstance.waitForPage();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
-  });
-
-  it('- should reach create service instance page', () => {
     expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
+
   });
 
   describe('Long running tests - ', () => {

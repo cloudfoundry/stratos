@@ -27,10 +27,6 @@ describe('Create Service Instance of Space Scoped Service', () => {
     createServiceInstance.waitForPage();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
-  });
-
-
-  it('- should reach create service instance page', () => {
     expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
   });
 

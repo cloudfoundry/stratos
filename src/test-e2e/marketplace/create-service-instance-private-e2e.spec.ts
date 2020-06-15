@@ -28,9 +28,6 @@ describe('Create Service Instance of Private Service', () => {
     createServiceInstance.navigateTo();
     createServiceInstance.waitForPage();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
-  });
-
-  it('- should reach create service instance page', () => {
     expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
   });
 

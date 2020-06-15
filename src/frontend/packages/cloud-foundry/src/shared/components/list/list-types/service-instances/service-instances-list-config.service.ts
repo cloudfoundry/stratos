@@ -6,6 +6,7 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
+import { ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
@@ -19,6 +20,13 @@ import { ServiceInstancesDataSource } from './service-instances-data-source';
  */
 @Injectable()
 export class ServiceInstancesListConfigService extends CfServiceInstancesListConfigBase {
+
+  enableTextFilter = true;
+  text: ITableText = {
+    title: null,
+    filter: 'Search by name',
+    noEntries: 'There are no service instances',
+  };
 
   constructor(
     store: Store<CFAppState>,

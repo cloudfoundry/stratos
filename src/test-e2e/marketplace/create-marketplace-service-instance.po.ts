@@ -11,4 +11,12 @@ export class CreateMarketplaceServiceInstance extends Page {
     this.stepper = new CreateServiceInstanceStepper();
   }
 
+  isActivePage() {
+    return super.isActivePage(true);
+  }
+
+  waitForPage() {
+    return super.waitForPage(undefined, true);
+  }
+
 }

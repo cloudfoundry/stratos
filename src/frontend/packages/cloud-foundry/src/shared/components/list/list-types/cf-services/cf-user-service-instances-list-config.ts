@@ -65,7 +65,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
   protected serviceInstanceColumns: ITableColumn<APIResource<IUserProvidedServiceInstance>>[] = [
     {
       columnId: 'name',
-      headerCell: () => 'Service Instance',
+      headerCell: () => 'Name',
       cellDefinition: {
         getValue: (row) => `${row.entity.name}`
       },
