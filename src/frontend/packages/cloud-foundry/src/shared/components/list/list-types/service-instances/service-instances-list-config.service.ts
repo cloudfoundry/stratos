@@ -26,7 +26,13 @@ export class ServiceInstancesListConfigService extends CfServiceInstancesListCon
     datePipe: DatePipe,
     currentUserPermissionsService: CurrentUserPermissionsService,
     serviceActionHelperService: ServiceActionHelperService) {
-    super(store, datePipe, currentUserPermissionsService, serviceActionHelperService);
+    super(
+      store,
+      datePipe,
+      currentUserPermissionsService,
+      serviceActionHelperService,
+      `/marketplace/${servicesService.cfGuid}/${servicesService.serviceGuid}/instances`
+    );
     // Remove 'Service' column
     this.serviceInstanceColumns.splice(1, 1);
     this.dataSource = new ServiceInstancesDataSource(servicesService.cfGuid, servicesService.serviceGuid, store, this);

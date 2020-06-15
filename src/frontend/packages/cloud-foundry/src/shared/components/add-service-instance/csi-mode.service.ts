@@ -19,10 +19,24 @@ export const enum CreateServiceFormMode {
   BindServiceInstance = 'bind-service-instance',
 }
 
-export const CANCEL_SPACE_ID_PARAM = 'space-guid';
-export const CANCEL_ORG_ID_PARAM = 'org-guid';
-export const CANCEL_USER_PROVIDED = 'up';
+/**
+ * Where should the user be taken on cancel (and success). If not supplied will fall back on previous location and then deduced from
+ * params
+ */
 export const CSI_CANCEL_URL = 'cancel'
+
+/**
+ * Used when `CSI_CANCEL_URL` is not supplied
+ */
+export const CANCEL_SPACE_ID_PARAM = 'space-guid';
+/**
+ * Used when `CSI_CANCEL_URL` is not supplied
+ */
+export const CANCEL_ORG_ID_PARAM = 'org-guid';
+/**
+ * Used when `CSI_CANCEL_URL` is not supplied
+ */
+export const CANCEL_USER_PROVIDED = 'up';
 
 interface ViewDetail {
   showSelectCf: boolean;
@@ -45,6 +59,9 @@ export class CsiModeService {
 
   private mode: string;
   public viewDetail: ViewDetail;
+  /**
+   * Where should the user be taken on cancel (and success). Taken from url param, previous location or deduced
+   */
   public cancelUrl: string;
   // This property is only used when launching the Create Service Instance Wizard from the Marketplace
   spaceScopedDetails: SpaceScopedService = { isSpaceScoped: false };
@@ -169,7 +186,8 @@ export class CsiModeService {
       // - good catch all
       // - doesn't work that well for marketplace/service create instance --> success (should go to marketplace/service/instance)
       // - if user has refreshed on stepper (previous url was login) use the old cancelUrl best-guess value
-      const previousUrl = router.getCurrentNavigation().previousNavigation.finalUrl.toString();
+      const previousNavigation = router.getCurrentNavigation().previousNavigation || { finalUrl: '' };
+      const previousUrl = previousNavigation.finalUrl.toString();
       if (previousUrl !== '/login') {
         this.cancelUrl = previousUrl;
       }

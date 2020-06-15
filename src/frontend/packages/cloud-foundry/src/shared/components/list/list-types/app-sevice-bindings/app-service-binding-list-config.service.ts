@@ -24,6 +24,7 @@ import { ApplicationService } from '../../../../../features/applications/applica
 import { isServiceInstance, isUserProvidedServiceInstance } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
+import { CSI_CANCEL_URL } from '../../../add-service-instance/csi-mode.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import {
   TableCellServiceInstanceTagsComponent,
@@ -59,7 +60,10 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
       this.serviceActionHelperService.startEditServiceBindingStepper(
         item.entity.service_instance_guid,
         this.appService.cfGuid,
-        { appId: this.appService.appGuid },
+        {
+          appId: this.appService.appGuid,
+          [CSI_CANCEL_URL]: `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/services`
+        },
         !!isUserProvidedServiceInstance(item.entity.service_instance.entity)
       );
     },
