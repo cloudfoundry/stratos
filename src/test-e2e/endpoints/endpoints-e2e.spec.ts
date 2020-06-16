@@ -1,20 +1,14 @@
 import { browser } from 'protractor';
 
-import { ApplicationsPage } from '../applications/applications.po';
-import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { MenuComponent } from '../po/menu.po';
 import { SideNavMenuItem } from '../po/side-nav.po';
 import { SnackBarPo } from '../po/snackbar.po';
-import { ServicesPage } from '../services/services.po';
 import { EndpointsPage } from './endpoints.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
-  const applications = new ApplicationsPage();
-  const services = new ServicesPage();
-  const cloudFoundry = new CfTopLevelPage();
 
   describe('Workflow on log in (admin/non-admin + no endpoints/some endpoints) -', () => {
     describe('As Admin -', () => {
@@ -67,19 +61,8 @@ describe('Endpoints', () => {
           expect(endpointsPage.isActivePage()).toBeTruthy();
         });
 
-        it('Should show application wall with \'no clusters\' message', () => {
-          endpointsPage.sideNav.goto(SideNavMenuItem.Applications);
-          expect(applications.hasNoCloudFoundryMessage()).toBeTruthy();
-        });
-
-        it('Should show services view with \'no clusters\' message', () => {
-          endpointsPage.sideNav.goto(SideNavMenuItem.Services);
-          expect(services.hasNoCloudFoundryMessage()).toBeTruthy();
-        });
-
-        it('Should show Cloud Foundry view with \'no clusters\' message', () => {
-          endpointsPage.sideNav.goto(SideNavMenuItem.CloudFoundry);
-          expect(cloudFoundry.hasNoCloudFoundryMessage()).toBeTruthy();
+        it('No CF side nav when no CF connected', () => {
+          expect(endpointsPage.sideNav.isMenuItemPresent(SideNavMenuItem.CloudFoundry)).toBeFalsy();
         });
 
       });

@@ -53,7 +53,7 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
       const hasEndpoint = data.findIndex(i => i.url === endp.url || i.url === endp.cfEndpoint) !== -1;
       if (!hasEndpoint) {
         const catalogEndpoint = entityCatalog.getEndpoint(endp.type, '');
-        if (catalogEndpoint) { // Provider metadata could give k8 endpoint
+        if (catalogEndpoint) { // Provider metadata could give unknown endpoint
           data.push({
             known: false,
             name: '<Unregistered Endpoint>',

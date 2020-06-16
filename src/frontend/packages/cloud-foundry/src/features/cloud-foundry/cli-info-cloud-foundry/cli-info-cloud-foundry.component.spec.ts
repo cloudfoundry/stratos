@@ -13,7 +13,6 @@ import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry.component';
 
 describe('CliInfoCloudFoundryComponent', () => {
@@ -30,7 +29,6 @@ describe('CliInfoCloudFoundryComponent', () => {
       ],
       imports: generateCfBaseTestModules(),
       providers: [
-        CloudFoundryEndpointService,
         generateTestCfEndpointServiceProvider(),
         ActiveRouteCfOrgSpace,
         ApplicationStateService,

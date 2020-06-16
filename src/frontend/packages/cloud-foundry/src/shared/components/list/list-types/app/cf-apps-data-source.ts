@@ -5,7 +5,6 @@ import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllApplications } from '../../../../../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   organizationEntityType,
@@ -31,6 +30,7 @@ import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfOrgSpaceFilter } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CFListDataSource } from '../../../../cf-list-data-source';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 
 export class CfAppsDataSource extends CFListDataSource<APIResource> {
 

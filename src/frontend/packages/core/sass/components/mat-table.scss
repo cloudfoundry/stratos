@@ -16,10 +16,18 @@ $mat-table-header-paginator-font-size: 13px;
     padding: 10px 10px 10px 0;
   }
 
-  // Use margin, not padding for the left side of the first cell in the row/header/footer
-  .mat-cell:first-of-type, mat-footer-cell:first-of-type, mat-header-cell:first-of-type {
-    margin-left: 20px;
-    padding-left: 0;
+  .app-table {
+    // Use margin, not padding for the left side of the first cell in the row/header/footer
+    .mat-cell:first-of-type, mat-footer-cell:first-of-type, mat-header-cell:first-of-type {
+      margin-left: 20px;
+      padding-left: 0;
+    }
+    .has-expanded-row {
+      // Override the margin-left from above, there's a lot of white space going on
+      .mat-cell:first-of-type, mat-footer-cell:first-of-type, mat-header-cell:first-of-type {
+        margin-left: 10px;
+      }
+    }
   }
 
   // Use margin, not padding for the right side of the first cell in the row/header/footer

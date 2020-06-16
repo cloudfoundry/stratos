@@ -54,6 +54,11 @@ export class Component {
     return browser.wait(until.invisibilityOf(this.locator), 20000, description);
   }
 
+  waitForText(text: string, elementDescription = 'Element', waitDuration = 5000) {
+    return browser.wait(until.textToBePresentInElement(this.getComponent(), text), waitDuration,
+      `${elementDescription} with text '${text}' taking too long to appear in the DOM`);
+  }
+
   scrollIntoView(): promise.Promise<void> {
     return Component.scrollIntoView(this.locator);
   }

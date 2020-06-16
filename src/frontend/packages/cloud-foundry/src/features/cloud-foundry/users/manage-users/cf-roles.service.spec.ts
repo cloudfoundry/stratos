@@ -8,8 +8,6 @@ import { CloudFoundryModule } from '../../cloud-foundry.module';
 import { CfRolesService } from './cf-roles.service';
 import { HttpClientModule } from '@angular/common/http';
 
-
-
 describe('CfRolesService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({

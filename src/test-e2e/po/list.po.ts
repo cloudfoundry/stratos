@@ -33,6 +33,11 @@ export class ListTableComponent extends Component {
     return this.getRows().get(row).all(by.css('.app-table__cell')).get(column);
   }
 
+  waitForCellText(row: number, column: number, text: string) {
+    const component = new Component(this.getCell(row, column));
+    return component.waitForText(text);
+  }
+
   findRowByCellContent(content) {
     const cell = this.locator.all(by.css('.app-table__cell')).filter(elem =>
       elem.getText().then(text => text === content)
