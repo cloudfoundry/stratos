@@ -11,6 +11,8 @@ import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 
+
+
 export interface IPageSideNavTab extends StratosTabMetadata {
   hidden$?: Observable<boolean>;
 }
@@ -27,13 +29,10 @@ export class PageSideNavComponent implements OnInit {
     if (!tabs || (this.pTabs && tabs.length === this.pTabs.length)) {
       return;
     }
-    this.pTabs = tabs.map(tab => {
-      const hidden = (tab.hidden ? tab.hidden(this.store, this.esf, this.activatedRoute, this.cups) : of(false))
-      return {
-        ...tab,
-        hidden$: tab.hidden$ || hidden
-      }
-    });
+    this.pTabs = tabs.map(tab => ({
+      ...tab,
+      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.store, this.esf, this.activatedRoute, this.cups) : of(false))
+    }));
   }
   get tabs(): IPageSideNavTab[] {
     return this.pTabs;

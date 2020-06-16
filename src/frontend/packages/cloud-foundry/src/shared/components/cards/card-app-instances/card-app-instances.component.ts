@@ -30,7 +30,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   status$: Observable<StratosStatus>;
 
-  public canEditSpace$: Observable<boolean>;
+  public canEditApp$: Observable<boolean>;
 
   constructor(
     public appService: ApplicationService,
@@ -42,12 +42,13 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     this.status$ = this.appService.applicationState$.pipe(
       map(state => state.indicator)
     );
-    this.canEditSpace$ = combineLatest(
+    this.canEditApp$ = combineLatest(
       appService.appOrg$,
       appService.appSpace$
     ).pipe(
-      switchMap(([org, space]) => cups.can(CfCurrentUserPermissions.SPACE_EDIT, appService.cfGuid, org.metadata.guid, space.metadata.guid))
-    )
+      switchMap(([org, space]) =>
+        cups.can(CfCurrentUserPermissions.APPLICATION_EDIT, appService.cfGuid, org.metadata.guid, space.metadata.guid)
+      ))
 
   }
 

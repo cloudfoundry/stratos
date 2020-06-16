@@ -15,7 +15,7 @@
       </mat-form-field>
     </form>
   </mat-card-content>
-  <ng-container *ngIf="canEditSpace$ | async">
+  <ng-container *ngIf="canEditApp$ | async">
     <mat-card-actions *ngIf="showActions && (appService.applicationRunning$ | async) && !isEditing"
       class="card-app-instances__actions">
       <button (click)="edit()" mat-icon-button [disabled]="appService.isUpdatingApp$ | async">

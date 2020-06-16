@@ -73,7 +73,7 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
       populateMissing: true
     })
 
-    const canEditSpace$ = appEntService.waitForEntity$.pipe(
+    const canEditApp$ = appEntService.waitForEntity$.pipe(
       switchMap(app => cups.can(
         CfCurrentUserPermissions.APPLICATION_EDIT,
         endpointGuid,
@@ -84,7 +84,7 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
 
     const autoscalerEnabled = isAutoscalerEnabled(endpointGuid, esf);
 
-    return canEditSpace$.pipe(
+    return canEditApp$.pipe(
       switchMap(canEditSpace => canEditSpace ? autoscalerEnabled : of(false)),
       map(can => !can)
     )
@@ -163,8 +163,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private appAutoscalerPolicySnackBar: MatSnackBar,
     private appAutoscalerScalingHistorySnackBar: MatSnackBar,
-    private confirmDialog: ConfirmationDialogService,
-    private cups: CurrentUserPermissionsService
+    private confirmDialog: ConfirmationDialogService
   ) { }
 
   ngOnInit() {
