@@ -162,7 +162,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     },
     label: 'Terminate',
     description: ``, // Description depends on console user permission
-    createVisible: () => this.canEditSpace$
+    createVisible: () => this.canEditApp$
   };
 
   private listActionSsh: IListAction<any> = {
@@ -187,7 +187,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
           })
         );
       })),
-    createVisible: () => this.canEditSpace$
+    createVisible: () => this.canEditApp$
   };
 
   private singleActions = [
@@ -195,7 +195,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     this.listActionSsh,
   ];
 
-  private canEditSpace$: Observable<boolean>;
+  private canEditApp$: Observable<boolean>;
 
   constructor(
     private store: Store<CFAppState>,
@@ -229,11 +229,13 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       this,
     );
 
-    this.canEditSpace$ = combineLatestObs(
+    this.canEditApp$ = combineLatestObs(
       appService.appOrg$,
       appService.appSpace$
     ).pipe(
-      switchMap(([org, space]) => cups.can(CfCurrentUserPermissions.SPACE_EDIT, appService.cfGuid, org.metadata.guid, space.metadata.guid))
+      switchMap(([org, space]) =>
+        cups.can(CfCurrentUserPermissions.APPLICATION_EDIT, appService.cfGuid, org.metadata.guid, space.metadata.guid)
+      )
     )
   }
 

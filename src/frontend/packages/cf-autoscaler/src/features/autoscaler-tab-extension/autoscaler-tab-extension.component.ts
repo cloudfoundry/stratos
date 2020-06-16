@@ -2,11 +2,19 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
-import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { cfEntityCatalog } from '../../../../cloud-foundry/src/cf-entity-catalog';
+import {
+  applicationEntityType,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
@@ -54,9 +62,32 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
   link: 'autoscale',
   icon: 'meter',
   iconFont: 'stratos-icons',
-  hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => {
+  hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute, cups: CurrentUserPermissionsService) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
-    return isAutoscalerEnabled(endpointGuid, esf).pipe(map(enabled => !enabled));
+    const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
+    const appEntService = cfEntityCatalog.application.store.getEntityService(appGuid, endpointGuid, {
+      includeRelations: [
+        createEntityRelationKey(applicationEntityType, spaceEntityType),
+        createEntityRelationKey(spaceEntityType, organizationEntityType),
+      ],
+      populateMissing: true
+    })
+
+    const canEditApp$ = appEntService.waitForEntity$.pipe(
+      switchMap(app => cups.can(
+        CfCurrentUserPermissions.APPLICATION_EDIT,
+        endpointGuid,
+        app.entity.entity.space.entity.organization_guid,
+        app.entity.entity.space.metadata.guid
+      )),
+    )
+
+    const autoscalerEnabled = isAutoscalerEnabled(endpointGuid, esf);
+
+    return canEditApp$.pipe(
+      switchMap(canEditSpace => canEditSpace ? autoscalerEnabled : of(false)),
+      map(can => !can)
+    )
   }
 })
 @Component({
@@ -115,8 +146,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     'order-direction': 'desc'
   };
 
-  public canEditSpace$: Observable<boolean>;
-
   ngOnDestroy(): void {
     if (this.appAutoscalerPolicySnackBarRef) {
       this.appAutoscalerPolicySnackBarRef.dismiss();
@@ -134,8 +163,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private appAutoscalerPolicySnackBar: MatSnackBar,
     private appAutoscalerScalingHistorySnackBar: MatSnackBar,
-    private confirmDialog: ConfirmationDialogService,
-    private cups: CurrentUserPermissionsService
+    private confirmDialog: ConfirmationDialogService
   ) { }
 
   ngOnInit() {
@@ -224,18 +252,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       publishReplay(1),
       refCount()
     );
-
-    this.canEditSpace$ = combineLatest(
-      this.applicationService.appOrg$,
-      this.applicationService.appSpace$
-    ).pipe(
-      switchMap(([org, space]) => this.cups.can(
-        CfCurrentUserPermissions.SPACE_EDIT,
-        this.applicationService.cfGuid,
-        org.metadata.guid,
-        space.metadata.guid
-      ))
-    )
   }
 
   getAppMetric(metricName: string, trigger: AppScalingTrigger, params: AutoscalerPaginationParams) {
