@@ -133,7 +133,6 @@ export class HelmReleaseHelperService {
   }
 
   private isContainerReady(state: ContainerStateCollection = {}): Boolean {
-    console.log(state);
     if (state.running) {
       return true;
     } else if (!!state.waiting) {

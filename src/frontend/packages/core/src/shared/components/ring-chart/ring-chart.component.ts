@@ -1,5 +1,5 @@
-import { Component, Input, OnChanges, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { AdvancedLegendComponent, ColorHelper } from '@swimlane/ngx-charts';
+import { Component, Input, OnChanges, OnInit, ViewEncapsulation } from '@angular/core';
+import { ColorHelper } from '@swimlane/ngx-charts';
 
 @Component({
   selector: 'app-ring-chart',
@@ -23,10 +23,6 @@ export class RingChartComponent implements OnInit, OnChanges {
   @Input() valueFormatting: (value: number) => any = value => value;
   @Input() nameFormatting: (value: string) => any = label => label;
   @Input() percentageFormatting: (value: number) => any = percentage => percentage;
-
-  @ViewChild(AdvancedLegendComponent) lineSeriesComponent: AdvancedLegendComponent;
-
-  constructor() { }
 
   ngOnInit() {
     if (!this.data) {
