@@ -102,7 +102,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     return [
       {
         columnId: 'name',
-        headerCell: () => 'Service Instances',
+        headerCell: () => 'Name',
         cellDefinition: {
           getValue: (row) => row.entity.service_instance.entity.name
         },

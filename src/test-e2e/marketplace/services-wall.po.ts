@@ -44,6 +44,10 @@ export class ServicesWallPage extends Page {
     }));
   }
 
+  isActivePage() {
+    return super.isActivePage(true);
+  }
+
   waitForPage() {
     return super.waitForPage(undefined, true);
   }

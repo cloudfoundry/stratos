@@ -28,7 +28,7 @@ describe('Create Service Instance of Private Service', () => {
     createServiceInstance.navigateTo();
     createServiceInstance.waitForPage();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
-    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
+    createMarketplaceServiceInstance.waitForPage();
   });
 
   describe('Long running tests - ', () => {
@@ -36,6 +36,8 @@ describe('Create Service Instance of Private Service', () => {
     extendE2ETestTime(timeout);
 
     it('- should be able to to create a service instance', () => {
+      expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
+
       serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
 
       servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.privateService.name, serviceInstanceName, false);
@@ -48,6 +50,7 @@ describe('Create Service Instance of Private Service', () => {
   });
 
   it('- should return user to Service summary when cancelled on CFOrgSpace selection', () => {
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
@@ -58,6 +61,7 @@ describe('Create Service Instance of Private Service', () => {
   });
 
   it('- should return user to Service summary when cancelled on Service selection', () => {
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
@@ -74,6 +78,7 @@ describe('Create Service Instance of Private Service', () => {
   });
 
   it('- should not show service plan if wrong org/space are selected', () => {
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace(e2e.secrets.getDefaultCFEndpoint().services.privateService.invalidOrgName,

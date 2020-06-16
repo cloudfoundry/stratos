@@ -9,7 +9,7 @@ import { MarketplaceSummaryPage } from './marketplace-summary.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
 
-fdescribe('Service Instance from Marketplace', () => {
+describe('Service Instance from Marketplace', () => {
   let setup: E2ESetup;
   const servicesWall = new ServicesWallPage();
   let servicesInstances: MarketplaceInstancesPage;
@@ -24,7 +24,7 @@ fdescribe('Service Instance from Marketplace', () => {
       .getInfo();
   });
 
-  fdescribe('Create Public Service Instance', () => {
+  describe('Create Public Service Instance', () => {
     let servicesHelperE2E: ServicesHelperE2E;
     let marketplaceSummaryPage: MarketplaceSummaryPage;
     const serviceName = e2e.secrets.getDefaultCFEndpoint().services.publicService.name;
@@ -116,6 +116,7 @@ fdescribe('Service Instance from Marketplace', () => {
       servicesHelperE2E.createService(serviceName, serviceInstanceName, true);
 
       servicesInstances.waitForPage();
+      servicesInstances.list.header.setSearchText(serviceInstanceName);
       servicesInstances.list.table.findRow('name', serviceInstanceName, true);
     });
   }

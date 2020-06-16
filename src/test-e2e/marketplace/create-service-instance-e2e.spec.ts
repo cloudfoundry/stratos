@@ -29,8 +29,7 @@ describe('Create Service Instance', () => {
     createServiceInstance.waitForPage();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
-    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
-
+    createMarketplaceServiceInstance.waitForPage();
   });
 
   describe('Long running tests - ', () => {
@@ -38,6 +37,8 @@ describe('Create Service Instance', () => {
     extendE2ETestTime(timeout);
 
     it('- should be able to create a service instance', () => {
+      expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
+
       serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
 
       servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName);
@@ -49,16 +50,17 @@ describe('Create Service Instance', () => {
   });
 
   it('- should return user to Service summary when cancelled on CFOrgSpace selection', () => {
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
     createMarketplaceServiceInstance.stepper.cancel();
 
     servicesWall.waitForPage();
-
   });
 
   it('- should return user to Service summary when cancelled on Service selection', () => {
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
@@ -75,6 +77,7 @@ describe('Create Service Instance', () => {
   });
 
   it('- should return user to Service summary when cancelled on App binding selection', () => {
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
 
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
@@ -95,6 +98,8 @@ describe('Create Service Instance', () => {
   });
 
   it('- should return user to Service summary when cancelled on service instance details', () => {
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
+
     // Select CF/Org/Space
     servicesHelperE2E.setCfOrgSpace();
     createMarketplaceServiceInstance.stepper.next();
