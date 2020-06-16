@@ -96,10 +96,9 @@ export class KubernetesPodExpandedStatusHelper {
           reason = state.waiting.reason;
         } else if (!!state.terminated) {
           reason = state.terminated.reason;
-        } else if (!!state.terminated) {
-          if (state.terminated.signal !== 0) {
+          if (!!state.terminated.signal && state.terminated.signal !== 0) {
             reason = `Signal:${state.terminated.signal}`;
-          } else {
+          } else if (!!state.terminated.exitCode && state.terminated.exitCode !== 0) {
             reason = `ExitCode:${state.terminated.exitCode}`;
           }
         } else if (!!container.ready && !!state.running) {
