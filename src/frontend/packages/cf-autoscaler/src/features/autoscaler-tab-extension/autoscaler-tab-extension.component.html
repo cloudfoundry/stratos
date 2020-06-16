@@ -1,4 +1,4 @@
-<app-page-sub-nav *ngIf="canEditSpace$ | async">
+<app-page-sub-nav>
   <ng-container *ngIf="appAutoscalerPolicy$ | async as policy; else noPolicy">
     <button mat-button name="edit" (click)="updatePolicyPage()" class="nav-button-with-text">
       <span class="nav-button-with-text__span">
@@ -235,7 +235,7 @@
       </app-tile>
     </app-tile-group>
     <app-no-content-message *ngIf="showNoPolicyMessage$ | async" [icon]="'meter'" [iconFont]="'stratos-icons'"
-      [firstLine]="noPolicyMessageFirstLine" [secondLine]="(canEditSpace$ | async) ? noPolicyMessageSecondLine : ''">
+      [firstLine]="noPolicyMessageFirstLine" [secondLine]="noPolicyMessageSecondLine">
     </app-no-content-message>
   </app-tile-grid>
 </div>

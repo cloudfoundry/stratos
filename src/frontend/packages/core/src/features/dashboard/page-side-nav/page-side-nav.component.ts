@@ -4,10 +4,11 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 
 import { AppState } from '../../../../../store/src/app-state';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { TabNavService } from '../../../../tab-nav.service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 
 export interface IPageSideNavTab extends StratosTabMetadata {
@@ -26,10 +27,13 @@ export class PageSideNavComponent implements OnInit {
     if (!tabs || (this.pTabs && tabs.length === this.pTabs.length)) {
       return;
     }
-    this.pTabs = tabs.map(tab => ({
-      ...tab,
-      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.store, this.esf, this.activatedRoute) : of(false))
-    }));
+    this.pTabs = tabs.map(tab => {
+      const hidden = (tab.hidden ? tab.hidden(this.store, this.esf, this.activatedRoute, this.cups) : of(false))
+      return {
+        ...tab,
+        hidden$: tab.hidden$ || hidden
+      }
+    });
   }
   get tabs(): IPageSideNavTab[] {
     return this.pTabs;
@@ -45,6 +49,7 @@ export class PageSideNavComponent implements OnInit {
     private store: Store<AppState>,
     private esf: EntityServiceFactory,
     private activatedRoute: ActivatedRoute,
+    private cups: CurrentUserPermissionsService
   ) {
     this.isMobile$ = this.store.select(selectIsMobile);
   }
