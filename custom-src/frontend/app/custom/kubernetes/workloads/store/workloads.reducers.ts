@@ -40,7 +40,7 @@ const createDefaultHelmRelease = (
   version: null
 })
 export function helmReleaseEntityReducer() {
-  return (state: IRequestEntityTypeState<HelmRelease>, action: Action) => {
+  return (state: IRequestEntityTypeState<HelmRelease>, action: Action): IRequestEntityTypeState<HelmRelease> => {
     switch (action.type) {
       case UPDATE_HELM_RELEASE_MANIFEST_ERROR:
         const updateErrorAction = action as UpdateHelmReleaseManifestError;
@@ -54,7 +54,7 @@ export function helmReleaseEntityReducer() {
           return {
             ...state,
             [updateErrorAction.guid]: {
-              ...[updateErrorAction.guid],
+              ...state[updateErrorAction.guid],
               manifestError: updateErrorAction.manifestError
             }
           }
