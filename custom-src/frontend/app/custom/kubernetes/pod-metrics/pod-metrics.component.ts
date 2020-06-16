@@ -1,12 +1,8 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../store/src/types/metric.types';
@@ -18,12 +14,13 @@ import {
   getMetricsChartConfigBuilder,
 } from '../../../shared/components/metrics-chart/metrics.component.helpers';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
+import { formatAxisCPUTime, formatCPUTime } from '../kubernetes-metrics.helpers';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
 import { KubernetesPod } from '../store/kube.types';
-import { FetchKubernetesMetricsAction, GetKubernetesPod } from '../store/kubernetes.actions';
-import { formatCPUTime, formatAxisCPUTime } from '../kubernetes-metrics.helpers';
+import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
 
 @Component({
   selector: 'app-pod-metrics',
@@ -58,8 +55,6 @@ export class PodMetricsComponent {
 
   constructor(
     public activatedRoute: ActivatedRoute,
-    public store: Store<AppState>,
-    public entityServiceFactory: EntityServiceFactory,
     public kubeEndpointService: KubernetesEndpointService
   ) {
     this.podName = activatedRoute.snapshot.params.podName;
@@ -166,9 +161,8 @@ export class PodMetricsComponent {
         }];
       })
     );
-    this.podEntity$ = this.entityServiceFactory.create<KubernetesPod>(
-      this.podName,
-      new GetKubernetesPod(this.podName, this.namespaceName, this.kubeEndpointService.kubeGuid),
-    ).entityObs$;
+    this.podEntity$ = kubeEntityCatalog.pod.store.getEntityService(this.podName, this.kubeEndpointService.kubeGuid, {
+      namespace: this.namespaceName
+    }).entityObs$;
   }
 }

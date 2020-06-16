@@ -4,8 +4,7 @@ import { PaginationEntityState } from '../../../../../store/src//types/paginatio
 import { AppState } from '../../../../../store/src/app-state';
 import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../shared/components/list/list.component.types';
-import { getMonocularChartId, helmEntityFactory, monocularChartsEntityType } from '../helm-entity-factory';
-import { GetMonocularCharts } from '../store/helm.actions';
+import { helmEntityCatalog } from '../helm-entity-catalog';
 import { MonocularChart } from '../store/helm.types';
 
 export class MonocularChartsDataSource extends ListDataSource<MonocularChart> {
@@ -14,12 +13,12 @@ export class MonocularChartsDataSource extends ListDataSource<MonocularChart> {
     store: Store<AppState>,
     listConfig: IListConfig<MonocularChart>
   ) {
-    const action = new GetMonocularCharts();
+    const action = helmEntityCatalog.chart.actions.getMultiple();
     super({
       store,
       action,
-      schema: helmEntityFactory(monocularChartsEntityType),
-      getRowUniqueId: getMonocularChartId,
+      schema: action.entity[0],
+      getRowUniqueId: (row) => action.entity[0].getId(row),
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,

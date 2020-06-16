@@ -12,8 +12,8 @@ import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import { endpointsEntityRequestDataSelector } from '../../../../../../../../store/src/selectors/endpoint.selectors';
-import { GetHelmReleases } from '../../../store/workloads.actions';
 import { HelmReleaseChartData, HelmReleaseResource } from '../../../workload.types';
+import { workloadsEntityCatalog } from '../../../workloads-entity-catalog';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
 @Component({
@@ -188,7 +188,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
           this.logService.error('Failed to delete release: ', err);
         },
         complete: () => {
-          const action = new GetHelmReleases();
+          const action = workloadsEntityCatalog.release.actions.getMultiple();
           this.store.dispatch(new ClearPaginationOfType(action));
           this.completeDelete();
           this.store.dispatch(new RouterNav({ path: ['workloads'] }));

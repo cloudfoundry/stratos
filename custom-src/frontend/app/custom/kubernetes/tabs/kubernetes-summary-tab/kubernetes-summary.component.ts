@@ -4,20 +4,20 @@ import { SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, interval, Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { first, map, startWith } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { getCurrentPageRequestInfo } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
+import { PaginatedAction, PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import {
   IChartThresholds,
   ISimpleUsageChartData,
 } from '../../../../shared/components/simple-usage-chart/simple-usage-chart.types';
+import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
-import { GetKubernetesNamespaces, GetKubernetesNodes, GetKubernetesPods } from '../../store/kubernetes.actions';
 
 interface IValueLabels {
   usedLabel?: string;
@@ -113,12 +113,15 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
 
-    const podCountAction = new GetKubernetesPods(guid);
-    const nodeCountAction = new GetKubernetesNodes(guid);
-    const namespacesCountAction = new GetKubernetesNamespaces(guid);
-    const pods$ = this.getPaginationObservable(podCountAction);
-    const nodes$ = this.getPaginationObservable(nodeCountAction);
-    const namespaces$ = this.getPaginationObservable(namespacesCountAction);
+    const podsObs = kubeEntityCatalog.pod.store.getPaginationService(guid);
+    const pods$ = podsObs.entities$;
+    this.poll(kubeEntityCatalog.pod.actions.getMultiple(guid), podsObs.pagination$)
+    const nodesObs = kubeEntityCatalog.node.store.getPaginationService(guid);
+    const nodes$ = nodesObs.entities$;
+    this.poll(kubeEntityCatalog.node.actions.getMultiple(guid), nodesObs.pagination$)
+    const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(guid);
+    const namespaces$ = namespacesObs.entities$;
+    this.poll(kubeEntityCatalog.namespace.actions.getMultiple(guid), namespacesObs.pagination$)
 
     this.podCount$ = this.kubeEndpointService.getCountObservable(pods$);
     this.nodeCount$ = this.kubeEndpointService.getCountObservable(nodes$);
@@ -175,28 +178,22 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     );
   }
 
-  private getPaginationObservable(action: PaginatedAction) {
-    const paginationMonitor = this.paginationMonitorFactory.create(
-      action.paginationKey,
-      action,
-      true
-    );
-
-    this.ngZone.runOutsideAngular(() => {
+  private poll(action: PaginatedAction, pagination$: Observable<PaginationEntityState>) {
+    this.ngZone.runOutsideAngular(() =>
       this.polls.push(
         interval(10000).subscribe(() => {
-          this.ngZone.run(() => {
-            this.store.dispatch(action);
-          });
+          this.ngZone.run(() => this.updateList(action, pagination$));
         })
-      );
-    });
+      )
+    );
+  }
 
-    return getPaginationObservables({
-      store: this.store,
-      action,
-      paginationMonitor
-    }).entities$;
+  private updateList(action: PaginatedAction, pagination$: Observable<PaginationEntityState>) {
+    pagination$.pipe(first()).subscribe(pag => {
+      if (!getCurrentPageRequestInfo(pag, { busy: true, error: false, message: '' }).busy) {
+        this.store.dispatch(action);
+      }
+    })
   }
 
   ngOnDestroy() {

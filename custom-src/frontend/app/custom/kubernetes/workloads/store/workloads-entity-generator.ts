@@ -1,12 +1,20 @@
-import { StratosEndpointExtensionDefinition } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
-import { IFavoriteMetadata } from 'frontend/packages/store/src/types/user-favorites.types';
-
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEntity,
 } from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { StratosEndpointExtensionDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
+import { IFavoriteMetadata } from '../../../../../../store/src/types/user-favorites.types';
 import { kubernetesEntityFactory } from '../../kubernetes-entity-factory';
 import { HelmRelease, HelmReleaseGraph, HelmReleaseResource } from '../workload.types';
+import { workloadsEntityCatalog } from '../workloads-entity-catalog';
+import {
+  WorkloadGraphBuilders,
+  workloadGraphBuilders,
+  WorkloadReleaseBuilders,
+  workloadReleaseBuilders,
+  WorkloadResourceBuilders,
+  workloadResourceBuilders,
+} from './workload-action-builders';
 import { helmReleaseEntityKey, helmReleaseGraphEntityType, helmReleaseResourceEntityType } from './workloads-entity-factory';
 
 
@@ -18,14 +26,19 @@ export function generateWorkloadsEntities(endpointDefinition: StratosEndpointExt
   ];
 }
 
-
 function generateReleaseEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: helmReleaseEntityKey,
     schema: kubernetesEntityFactory(helmReleaseEntityKey),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, HelmRelease>(definition);
+  workloadsEntityCatalog.release = new StratosCatalogEntity<IFavoriteMetadata, HelmRelease, WorkloadReleaseBuilders>(
+    definition,
+    {
+      actionBuilders: workloadReleaseBuilders
+    }
+  );
+  return workloadsEntityCatalog.release;
 }
 
 function generateReleaseGraphEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -34,7 +47,13 @@ function generateReleaseGraphEntity(endpointDefinition: StratosEndpointExtension
     schema: kubernetesEntityFactory(helmReleaseGraphEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseGraph>(definition);
+  workloadsEntityCatalog.graph = new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseGraph, WorkloadGraphBuilders>(
+    definition,
+    {
+      actionBuilders: workloadGraphBuilders
+    }
+  );
+  return workloadsEntityCatalog.graph;
 }
 
 function generateReleaseResourceEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -43,6 +62,12 @@ function generateReleaseResourceEntity(endpointDefinition: StratosEndpointExtens
     schema: kubernetesEntityFactory(helmReleaseResourceEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseResource>(definition);
+  workloadsEntityCatalog.resource = new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseResource, WorkloadResourceBuilders>(
+    definition,
+    {
+      actionBuilders: workloadResourceBuilders
+    }
+  );
+  return workloadsEntityCatalog.resource;
 }
 

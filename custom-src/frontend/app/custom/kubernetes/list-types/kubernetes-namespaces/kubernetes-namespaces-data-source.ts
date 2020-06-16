@@ -4,11 +4,10 @@ import { getPaginationKey } from '../../../../../../store/src/actions/pagination
 import { AppState } from '../../../../../../store/src/app-state';
 import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
-import { kubernetesEntityFactory, kubernetesNamespacesEntityType } from '../../kubernetes-entity-factory';
+import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
+import { kubernetesNamespacesEntityType } from '../../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { getKubeAPIResourceGuid } from '../../store/kube.selectors';
 import { KubernetesNamespace } from '../../store/kube.types';
-import { GetKubernetesNamespaces } from '../../store/kubernetes.actions';
 
 
 export class KubernetesNamespacesDataSource extends ListDataSource<KubernetesNamespace> {
@@ -18,11 +17,12 @@ export class KubernetesNamespacesDataSource extends ListDataSource<KubernetesNam
     kubeGuid: BaseKubeGuid,
     listConfig: IListConfig<KubernetesNamespace>
   ) {
+    const action = kubeEntityCatalog.namespace.actions.getMultiple(kubeGuid.guid);
     super({
       store,
-      action: new GetKubernetesNamespaces(kubeGuid.guid),
-      schema: kubernetesEntityFactory(kubernetesNamespacesEntityType),
-      getRowUniqueId: getKubeAPIResourceGuid,
+      action,
+      schema: action.entity[0],
+      getRowUniqueId: (row) => action.entity[0].getId(row),
       paginationKey: getPaginationKey(kubernetesNamespacesEntityType, kubeGuid.guid),
       isLocal: true,
       listConfig,
