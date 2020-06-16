@@ -32,11 +32,12 @@ var resourcesWithoutStatus = map[string]bool{
 // HelmRelease represents a Helm Release deployed via Helm
 type HelmRelease struct {
 	*release.Release
-	Endpoint  string                     `json:"-"`
-	User      string                     `json:"-"`
-	Resources map[string]KubeResource    `json:"resources"`
-	Jobs      []KubeResourceJob          `json:"-"`
-	PodJobs   map[string]KubeResourceJob `json:"-"`
+	Endpoint       string                     `json:"-"`
+	User           string                     `json:"-"`
+	Resources      map[string]KubeResource    `json:"resources"`
+	Jobs           []KubeResourceJob          `json:"-"`
+	PodJobs        map[string]KubeResourceJob `json:"-"`
+	ManifestErrors bool                       `json:"-"`
 }
 
 // KubeResource is a simple struct to pull out core common metadata for a Kube resource
@@ -69,6 +70,7 @@ func NewHelmRelease(info *release.Release, endpoint, user string) *HelmRelease {
 
 // Parse the release manifest from the Helm release
 func (r *HelmRelease) parseManifest() {
+	r.ManifestErrors = false
 	reader := bytes.NewReader([]byte(r.Manifest))
 	buffer := bufio.NewReader(reader)
 	var bufr strings.Builder
@@ -81,6 +83,7 @@ func (r *HelmRelease) parseManifest() {
 				obj, _, err := decode([]byte(bufr.String()), nil, nil)
 				if err != nil {
 					log.Error(fmt.Sprintf("Helm Manifest Parser: Error while decoding YAML object. Err was: %s", err))
+					r.ManifestErrors = true
 				} else {
 					r.processResource(obj)
 				}

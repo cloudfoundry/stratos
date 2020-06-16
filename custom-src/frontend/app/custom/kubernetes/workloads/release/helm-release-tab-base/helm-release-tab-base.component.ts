@@ -5,6 +5,7 @@ import { Observable, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, map, share, switchMap } from 'rxjs/operators';
 
+import { HideSnackBar, ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityRequestAction, WrapperRequestActionSuccess } from '../../../../../../../store/src/types/request.types';
@@ -142,6 +143,19 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
             resources.endpointId,
           );
           this.addResource(releaseResourceAction, resources);
+        } else if (messageObj.kind === 'ManifestErrors') {
+          const manifestErrors = messageObj.data;
+          workloadsEntityCatalog.release.api.setManifestError(
+            this.helmReleaseHelper.endpointGuid,
+            this.helmReleaseHelper.namespace,
+            this.helmReleaseHelper.releaseTitle,
+            manifestErrors
+          )
+          if (manifestErrors) {
+            this.store.dispatch(
+              new ShowSnackBar('Errors were found whilst loading this workload. Not all resources may be shown', 'Dismiss')
+            );
+          }
         }
       }
     });
@@ -189,5 +203,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.sub.unsubscribe();
+    this.store.dispatch(new HideSnackBar());
   }
 }

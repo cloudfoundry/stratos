@@ -1,7 +1,13 @@
 import {
   OrchestratedActionBuilders,
 } from '../../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { GetHelmRelease, GetHelmReleaseGraph, GetHelmReleaseResource, GetHelmReleases } from './workloads.actions';
+import {
+  GetHelmRelease,
+  GetHelmReleaseGraph,
+  GetHelmReleaseResource,
+  GetHelmReleases,
+  UpdateHelmReleaseManifestError,
+} from './workloads.actions';
 
 export interface WorkloadReleaseBuilders extends OrchestratedActionBuilders {
   get: (
@@ -9,6 +15,11 @@ export interface WorkloadReleaseBuilders extends OrchestratedActionBuilders {
     endpointGuid: string,
     extraArgs: { namespace: string }
   ) => GetHelmRelease;
+  setManifestError: (
+    endpointGuid: string,
+    namespace: string,
+    releaseTitle: string,
+    manifestError: boolean) => UpdateHelmReleaseManifestError;
   getMultiple: () => GetHelmReleases;
 }
 
@@ -16,6 +27,8 @@ export const workloadReleaseBuilders: WorkloadReleaseBuilders = {
   get: (title: string, endpointGuid: string, { namespace }: { namespace: string }) => {
     return new GetHelmRelease(endpointGuid, namespace, title);
   },
+  setManifestError: (endpointGuid: string, namespace: string, releaseTitle: string, manifestError: boolean) =>
+    new UpdateHelmReleaseManifestError(endpointGuid, namespace, releaseTitle, manifestError),
   getMultiple: () => new GetHelmReleases()
 }
 
