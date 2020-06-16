@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
-import { ContainerStateCollection, KubernetesPod } from '../../../store/kube.types';
+import { ContainerStateCollection, KubernetesPod, KubernetesPod } from '../../../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../../store/workloads-entity-factory';
 import {
   HelmRelease,
