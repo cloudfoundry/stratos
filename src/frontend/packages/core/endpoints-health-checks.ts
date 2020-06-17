@@ -1,19 +1,8 @@
 import { Injectable } from '@angular/core';
 
 import { entityCatalog } from '../store/src/entity-catalog/entity-catalog';
+import { EndpointHealthCheck } from '../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel } from '../store/src/types/endpoint.types';
-
-
-export class EndpointHealthCheck {
-  /**
-   * @param check To show an error, the check should either call a WrapperRequestActionFailed
-   * or kick off a chain that eventually calls a WrapperRequestActionFailed
-   */
-  constructor(
-    public endpointType: string,
-    public check: (endpoint: EndpointModel) => void
-  ) { }
-}
 
 @Injectable({
   providedIn: 'root'
