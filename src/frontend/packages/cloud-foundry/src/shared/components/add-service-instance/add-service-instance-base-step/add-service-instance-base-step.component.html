@@ -1,7 +1,7 @@
 <app-page-header>
   Choose Service Type
 </app-page-header>
-<app-steppers [cancel]="'/services'">
+<app-steppers [cancel]="cancelUrl">
   <app-step [hideNextButton]="true">
     <div class="select-service-step">
       <h3>Choose service type to {{ bindApp ? 'bind' : 'create' }}</h3>
