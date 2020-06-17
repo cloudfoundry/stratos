@@ -1,10 +1,10 @@
 import { Action } from '@ngrx/store';
+import { proxyAPIVersion } from '../jetstream';
 
 export const METRIC_API_START = '[Metrics] API Start';
 export const METRIC_API_SUCCESS = '[Metrics] API Success';
 export const METRIC_API_FAILED = '[Metrics] API Failed';
 
-import { proxyAPIVersion } = '../jetstream';
 
 export const MetricAPIQueryTypes = {
   TARGETS: 'targets',
