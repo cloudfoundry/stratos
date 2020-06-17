@@ -7,8 +7,8 @@ import { filter, first, map, mergeMap } from 'rxjs/operators';
 import { InternalAppState } from '../app-state';
 import { StratosCatalogEndpointEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEndpointDefinition } from '../entity-catalog/entity-catalog.types';
+import { cfAPIVersion, proxyAPIVersion } from '../jetstream';
 import { connectedEndpointsOfTypesSelector, endpointOfTypeSelector } from '../selectors/endpoint.selectors';
-import { proxyAPIVersion, cfAPIVersion } = '../jetstream';
 
 @Injectable()
 export class PipelineHttpClient {
