@@ -48,12 +48,10 @@
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                  "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-                }
-              ]
+              "fileReplacements": [{
+                "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+              }]
             }
           }
         },
@@ -94,7 +92,7 @@
           }
         }
       }
-    },    
+    },
     "core": {
       "root": "src/frontend/packages/core/",
       "sourceRoot": "src/frontend/packages/core",
@@ -103,7 +101,7 @@
       "schematics": {},
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
             "preserveSymlinks": true,
             "outputPath": "dist/core",
@@ -111,36 +109,20 @@
             "main": "src/frontend/packages/core/src/main.ts",
             "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
-            "assets": [
-              "src/frontend/packages/core/assets",
-              {
-                "glob": "**/*",
-                "input": "custom-src/frontend/assets/custom",
-                "output": "/core/assets/custom"
-              },
-              "src/frontend/packages/core/favicon.ico"
-            ],
-            "styles": [
-              "src/frontend/packages/core/src/styles.scss",
-              "src/frontend/packages/cf-autoscaler/src/styles.scss",
-              "node_modules/xterm/css/xterm.css"
-            ],
+            "assets": [],
+            "styles": [],
             "scripts": []
           },
           "configurations": {
             "production": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
-                }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                  "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-                }
-              ],
+              "budgets": [{
+                "type": "anyComponentStyle",
+                "maximumWarning": "6kb"
+              }],
+              "fileReplacements": [{
+                "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+              }],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -151,23 +133,6 @@
               "vendorChunk": false,
               "buildOptimizer": true
             }
-          }
-        },
-        "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "browserTarget": "core:build"
-          },
-          "configurations": {
-            "production": {
-              "browserTarget": "core:build:production"
-            }
-          }
-        },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
-          "options": {
-            "browserTarget": "core:build"
           }
         },
         "test": {
@@ -227,7 +192,7 @@
             "tsConfig": "src/frontend/packages/store/tsconfig.lib.json",
             "project": "src/frontend/packages/store/ng-package.json"
           },
-        "configurations": {
+          "configurations": {
             "production": {
               "tsConfig": "src/frontend/packages/store/tsconfig.lib.prod.json"
             }
@@ -300,8 +265,8 @@
           "options": {
             "tsConfig": "src/frontend/packages/cloud-foundry/tsconfig.lib.json",
             "project": "src/frontend/packages/cloud-foundry/ng-package.json"
-          }
-        ,          "configurations": {
+          },
+          "configurations": {
             "production": {
               "tsConfig": "src/frontend/packages/cloud-foundry/tsconfig.lib.prod.json"
             }
@@ -343,8 +308,8 @@
           "options": {
             "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.lib.json",
             "project": "src/frontend/packages/cf-autoscaler/ng-package.json"
-          }
-        ,          "configurations": {
+          },
+          "configurations": {
             "production": {
               "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.lib.prod.json"
             }
