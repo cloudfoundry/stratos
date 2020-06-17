@@ -63,6 +63,7 @@ export type EndpointType = 'cf' | 'metrics' | string;
 // export interface EndpointTypeExtensionConfig extends EndpointTypeConfig {
 //   subTypes?: EndpointSubTypeExtensionConfig[];
 // }
+
 export interface EndpointAuthTypeConfig {
   name: string;
   value: string;
