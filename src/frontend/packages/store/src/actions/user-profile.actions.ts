@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { userProfileEntitySchema } from '../../../core/src/base-entity-schemas';
+import { userProfileEntitySchema } from '../base-entity-schemas';
 import { EntityRequestAction } from '../types/request.types';
 import { UserProfileInfo, UserProfilePasswordUpdate } from '../types/user-profile.types';
 

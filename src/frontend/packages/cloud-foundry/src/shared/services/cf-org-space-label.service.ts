@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../store/src/base-entity-schemas';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { selectEntity } from '../../../../store/src/selectors/api.selectors';
