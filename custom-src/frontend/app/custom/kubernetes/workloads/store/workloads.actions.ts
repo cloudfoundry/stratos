@@ -1,4 +1,3 @@
-import { Action } from '@ngrx/store';
 import { EntityRequestAction } from 'frontend/packages/store/src/types/request.types';
 
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
@@ -26,9 +25,6 @@ export const GET_HELM_RELEASES_FAILURE = '[Helm] Get Releases Failure';
 export const GET_HELM_RELEASE = '[Helm] Get Release Status';
 export const GET_HELM_RELEASE_SUCCESS = '[Helm] Get Release Status Success';
 export const GET_HELM_RELEASE_FAILURE = '[Helm] Get Release Status Failure';
-
-
-export const UPDATE_HELM_RELEASE_MANIFEST_ERROR = '[Helm] Update Release Error';
 
 export const GET_HELM_RELEASE_PODS = '[Helm] Get Release Pods';
 export const GET_HELM_RELEASE_PODS_SUCCESS = '[Helm] Get Release Pods Success';
@@ -89,20 +85,6 @@ export class GetHelmRelease implements HelmReleaseSingleEntity {
     GET_HELM_RELEASE_FAILURE
   ];
 }
-
-export class UpdateHelmReleaseManifestError implements Action {
-  guid: string;
-  constructor(
-    public endpointGuid: string,
-    public namespace: string,
-    public releaseTitle: string,
-    public manifestError: boolean
-  ) {
-    this.guid = getHelmReleaseId(endpointGuid, namespace, releaseTitle);
-  }
-  type = UPDATE_HELM_RELEASE_MANIFEST_ERROR;
-}
-
 
 export class GetHelmReleaseGraph implements HelmReleaseSingleEntity {
   guid: string;

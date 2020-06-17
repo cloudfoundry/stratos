@@ -44,7 +44,6 @@ export class HelmReleaseHelperService {
 
     this.release$ = entityService.waitForEntity$.pipe(
       map((item) => item.entity),
-      filter(item => !!item.chart),
       map((item: HelmRelease) => {
         if (!item.chart.metadata.icon) {
           const copy = JSON.parse(JSON.stringify(item));

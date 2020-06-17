@@ -24,7 +24,6 @@ export interface HelmRelease {
       icon?: string;
     };
   };
-  manifestError: boolean;
 }
 
 export interface HelmReleaseEntity {

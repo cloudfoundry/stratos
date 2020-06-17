@@ -144,16 +144,9 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
           );
           this.addResource(releaseResourceAction, resources);
         } else if (messageObj.kind === 'ManifestErrors') {
-          const manifestErrors = messageObj.data;
-          workloadsEntityCatalog.release.api.setManifestError(
-            this.helmReleaseHelper.endpointGuid,
-            this.helmReleaseHelper.namespace,
-            this.helmReleaseHelper.releaseTitle,
-            manifestErrors
-          )
-          if (manifestErrors) {
+          if (messageObj.data) {
             this.store.dispatch(
-              new ShowSnackBar('Errors were found whilst loading this workload. Not all resources may be shown', 'Dismiss')
+              new ShowSnackBar('Errors were found when parsing this workload. Not all resources may be shown', 'Dismiss')
             );
           }
         }

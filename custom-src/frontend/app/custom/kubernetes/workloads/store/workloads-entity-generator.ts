@@ -16,7 +16,6 @@ import {
   workloadResourceBuilders,
 } from './workload-action-builders';
 import { helmReleaseEntityKey, helmReleaseGraphEntityType, helmReleaseResourceEntityType } from './workloads-entity-factory';
-import { helmReleaseEntityReducer } from './workloads.reducers';
 
 
 export function generateWorkloadsEntities(endpointDefinition: StratosEndpointExtensionDefinition): StratosBaseCatalogEntity[] {
@@ -31,15 +30,12 @@ function generateReleaseEntity(endpointDefinition: StratosEndpointExtensionDefin
   const definition = {
     type: helmReleaseEntityKey,
     schema: kubernetesEntityFactory(helmReleaseEntityKey),
-    endpoint: endpointDefinition,
+    endpoint: endpointDefinition
   };
   workloadsEntityCatalog.release = new StratosCatalogEntity<IFavoriteMetadata, HelmRelease, WorkloadReleaseBuilders>(
     definition,
     {
-      actionBuilders: workloadReleaseBuilders,
-      dataReducers: [
-        helmReleaseEntityReducer()
-      ],
+      actionBuilders: workloadReleaseBuilders
     }
   );
   return workloadsEntityCatalog.release;
