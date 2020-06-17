@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { ActionReducer, ActionReducerMap, StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-
 import { localStorageSync } from 'ngrx-store-localstorage';
 
 import { environment } from '../../core/src/environments/environment';
@@ -83,6 +82,8 @@ const storeModule = StoreModule.forRoot(
     }
   }
 );
+
+// Can this be done in core ??
 const imports = environment.production ? [
   storeModule
 ] : [

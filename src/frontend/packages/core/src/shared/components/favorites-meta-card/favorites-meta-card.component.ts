@@ -19,7 +19,6 @@ import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
 
-
 @Component({
   selector: 'app-favorites-meta-card',
   templateUrl: './favorites-meta-card.component.html',

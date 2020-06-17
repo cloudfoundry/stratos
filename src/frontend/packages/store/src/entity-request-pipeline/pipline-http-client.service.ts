@@ -4,13 +4,11 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap } from 'rxjs/operators';
 
-import { environment } from '../../../core/src/environments/environment';
 import { InternalAppState } from '../app-state';
 import { StratosCatalogEndpointEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEndpointDefinition } from '../entity-catalog/entity-catalog.types';
 import { connectedEndpointsOfTypesSelector, endpointOfTypeSelector } from '../selectors/endpoint.selectors';
-
-const { proxyAPIVersion, cfAPIVersion } = environment;
+import { proxyAPIVersion, cfAPIVersion } = '../jetstream';
 
 @Injectable()
 export class PipelineHttpClient {
