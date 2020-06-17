@@ -31,7 +31,7 @@ import {
   EndpointsListConfigService,
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
-import { SnackBarService } from '../../../shared/services/snackbar-service';
+import { SnackBarService } from '../../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-endpoints-page',

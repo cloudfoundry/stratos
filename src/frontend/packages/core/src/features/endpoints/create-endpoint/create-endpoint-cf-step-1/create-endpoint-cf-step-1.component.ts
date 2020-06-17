@@ -19,6 +19,7 @@ import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../stor
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { SnackBarService } from './../../../../shared/services/snackbar-service';
@@ -60,7 +61,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
 
-  constructor(private store: Store<GeneralEntityAppState>, activatedRoute: ActivatedRoute, private snackBarService: SnackBarService) {
+  constructor(
+    private store: Store<GeneralEntityAppState>,
+    activatedRoute: ActivatedRoute,
+    private snackBarService: SnackBarService,
+  ) {
 
     this.existingEndpoints = store.select(selectPaginationState(this.endpointEntityKey, GetAllEndpoints.storeKey))
       .pipe(

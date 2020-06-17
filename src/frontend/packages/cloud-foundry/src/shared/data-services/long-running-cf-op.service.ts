@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { LongRunningOperationsService } from '../../../../core/src/shared/services/long-running-op.service';
-import { SnackBarService } from '../../../../core/src/shared/services/snackbar-service';
+import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
 import { AppState } from '../../../../store/src/app-state';
 import { GetServiceInstance } from '../../actions/service-instances.actions';
 
@@ -11,7 +11,8 @@ export class LongRunningCfOperationsService extends LongRunningOperationsService
 
   constructor(
     store: Store<AppState>,
-    private snackBarService: SnackBarService) {
+    private snackBarService: SnackBarService
+  ) {
     super(store);
   }
 
@@ -19,8 +20,7 @@ export class LongRunningCfOperationsService extends LongRunningOperationsService
     const message = `The operation to create the service instance is taking a long time and will continue in the background.
      Please refresh the service instance list to check it's status
     ${bindApp ? ` and then bind the application via the Application page.` : '.'}`;
-    this.snackBarService.show(message, 'Dismiss');
-  }
+    this.snackBarService.show(message, 'Dismiss');  }
 
   handleLongRunningUpdateService(serviceInstanceGuid: string, cfGuid: string) {
     const message = `The operation to update the service instance is taking a long time and will continue in the background.

@@ -20,6 +20,7 @@ import { StratosCurrentUserPermissions } from '../../../../../core/permissions/s
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { SnackBarService } from '../../../../services/snackbar.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { IListAction } from '../../list.component.types';

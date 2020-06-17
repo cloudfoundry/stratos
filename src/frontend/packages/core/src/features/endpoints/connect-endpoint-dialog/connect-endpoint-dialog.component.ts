@@ -7,6 +7,7 @@ import { EndpointOnlyAppState } from '../../../../../store/src/app-state';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { MarkdownPreviewComponent } from '../../../shared/components/markdown-preview/markdown-preview.component';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
+import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.service';
 import { SnackBarService } from './../../../shared/services/snackbar-service';
 
