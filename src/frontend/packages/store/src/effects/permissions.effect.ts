@@ -33,7 +33,7 @@ export class PermissionsEffects {
     switchMap(action => {
       const allRequestsCompleted = entityCatalog.getAllBaseEndpointTypes().reduce((res, endpointType) => {
         if (endpointType.definition.userRolesFetch) {
-          res.push(endpointType.definition.userRolesFetch([], this.store, this.logService, this.httpClient));
+          res.push(endpointType.definition.userRolesFetch([], this.store, this.httpClient));
         }
         return res;
       }, []);
@@ -59,7 +59,7 @@ export class PermissionsEffects {
         guid: action.guid,
         user: action.endpoint.user
       }
-      return endpointType.definition.userRolesFetch([endpoint], this.store, this.logService, this.httpClient).pipe(
+      return endpointType.definition.userRolesFetch([endpoint], this.store, this.httpClient).pipe(
         map(succeeded => succeeded ? successAction : failedAction)
       );
     }),

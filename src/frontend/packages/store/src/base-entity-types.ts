@@ -1,3 +1,7 @@
+import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
+import {
+  MetricsEndpointDetailsComponent,
+} from '../../core/src/features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
 import {
   endpointEntitySchema,
   STRATOS_ENDPOINT_TYPE,
@@ -14,10 +18,6 @@ import {
   deleteUserFavoriteMetadataReducer,
 } from '../../store/src/reducers/favorite.reducer';
 import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
-import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
-import {
-  MetricsEndpointDetailsComponent,
-} from './features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
 
 //
 // These types are used to represent the base stratos types.

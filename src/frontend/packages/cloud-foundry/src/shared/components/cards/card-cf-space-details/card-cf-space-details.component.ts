@@ -8,6 +8,7 @@ import {
   CloudFoundrySpaceService,
 } from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-space.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar-service';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 
@@ -24,7 +25,7 @@ export class CardCfSpaceDetailsComponent implements OnDestroy {
     public cfSpaceService: CloudFoundrySpaceService,
     private store: Store<AppState>,
     private router: Router,
-    private snackBarService: SnackbarService
+    private snackBarService: SnackBarService
   ) {
     this.allowSshStatus$ = cfSpaceService.allowSsh$.pipe(
       map(status => status === 'false' ? 'Disabled' : 'Enabled')

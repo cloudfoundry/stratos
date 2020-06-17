@@ -59,7 +59,7 @@ export const cfUserRolesFetch: EntityUserRolesFetch = (
         cfEndpoints.forEach(endpoint => store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_SUCCESS)))
       } else {
         // If some endpoints are not connected as admin, go out and fetch the current user's specific roles
-        const flagsAndRoleRequests = dispatchRoleRequests(cfEndpoints, store, logService, httpClient);
+        const flagsAndRoleRequests = dispatchRoleRequests(cfEndpoints, store, httpClient);
         const allRequestsCompleted = handleCfRequests(flagsAndRoleRequests);
         return combineLatest(allRequestsCompleted).pipe(
           map(succeeds => succeeds.every(succeeded => !!succeeded)),
