@@ -1,6 +1,6 @@
-import { metricEntityType } from '../../../core/src/base-entity-schemas';
 import { environment } from '../../../core/src/environments/environment';
 import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
+import { metricEntityType } from '../base-entity-schemas';
 import { EntityRequestAction } from '../types/request.types';
 
 export const METRICS_START = '[Metrics] Fetch Start';

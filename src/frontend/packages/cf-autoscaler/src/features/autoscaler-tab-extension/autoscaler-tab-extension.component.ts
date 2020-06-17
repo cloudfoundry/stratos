@@ -2,15 +2,25 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount } from 'rxjs/operators';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
-import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { cfEntityCatalog } from '../../../../cloud-foundry/src/cf-entity-catalog';
+import {
+  applicationEntityType,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
+import { CfCurrentUserPermissions } from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
+import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
@@ -52,9 +62,32 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
   link: 'autoscale',
   icon: 'meter',
   iconFont: 'stratos-icons',
-  hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => {
+  hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute, cups: CurrentUserPermissionsService) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
-    return isAutoscalerEnabled(endpointGuid, esf).pipe(map(enabled => !enabled));
+    const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
+    const appEntService = cfEntityCatalog.application.store.getEntityService(appGuid, endpointGuid, {
+      includeRelations: [
+        createEntityRelationKey(applicationEntityType, spaceEntityType),
+        createEntityRelationKey(spaceEntityType, organizationEntityType),
+      ],
+      populateMissing: true
+    })
+
+    const canEditApp$ = appEntService.waitForEntity$.pipe(
+      switchMap(app => cups.can(
+        CfCurrentUserPermissions.APPLICATION_EDIT,
+        endpointGuid,
+        app.entity.entity.space.entity.organization_guid,
+        app.entity.entity.space.metadata.guid
+      )),
+    )
+
+    const autoscalerEnabled = isAutoscalerEnabled(endpointGuid, esf);
+
+    return canEditApp$.pipe(
+      switchMap(canEditSpace => canEditSpace ? autoscalerEnabled : of(false)),
+      map(can => !can)
+    )
   }
 })
 @Component({
@@ -130,7 +163,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private appAutoscalerPolicySnackBar: MatSnackBar,
     private appAutoscalerScalingHistorySnackBar: MatSnackBar,
-    private confirmDialog: ConfirmationDialogService,
+    private confirmDialog: ConfirmationDialogService
   ) { }
 
   ngOnInit() {

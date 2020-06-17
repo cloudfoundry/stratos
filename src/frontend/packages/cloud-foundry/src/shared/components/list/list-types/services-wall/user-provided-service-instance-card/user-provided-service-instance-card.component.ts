@@ -19,6 +19,7 @@ import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
+import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
 
 
 @Component({
@@ -120,7 +121,9 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
   private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.cfGuid,
-    null,
+    {
+      [CSI_CANCEL_URL]: '/services'
+    },
     true
   )
 

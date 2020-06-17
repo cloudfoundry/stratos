@@ -1,7 +1,8 @@
-import { MarketplaceSummaryPage } from './marketplace-summary.po';
-import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { e2e } from '../e2e';
 import { browser } from 'protractor';
+
+import { e2e } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { MarketplaceSummaryPage } from './marketplace-summary.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 
 describe('Marketplace Summary', () => {
@@ -56,7 +57,7 @@ describe('Marketplace Summary', () => {
       expect(button).toBeDefined();
       button.then(bt => bt.click());
       browser.getCurrentUrl().then(url => {
-        expect(url.endsWith('create?isSpaceScoped=false')).toBeTruthy();
+        expect(url.indexOf('create?isSpaceScoped=false') >= 0).toBeTruthy();
       });
     });
   });
