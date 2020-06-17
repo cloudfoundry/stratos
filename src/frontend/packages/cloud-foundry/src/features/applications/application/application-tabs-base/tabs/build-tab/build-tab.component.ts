@@ -1,12 +1,15 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
-import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, tap } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { AppMetadataTypes } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { UpdateExistingApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { getFullEndpointApiUrl } from '../../../../../../../../core/src/features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -58,6 +61,7 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
 export class BuildTabComponent implements OnInit {
   public isBusyUpdating$: Observable<{ updating: boolean }>;
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
+
   constructor(
     public applicationService: ApplicationService,
     private scmService: GitSCMService,
@@ -66,7 +70,7 @@ export class BuildTabComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
-
+    private cups: CurrentUserPermissionsService
   ) { }
 
   cardTwoFetching$: Observable<boolean>;
@@ -108,8 +112,17 @@ export class BuildTabComponent implements OnInit {
       })
     );
 
-    this.deploySource$ = this.applicationService.applicationStratProject$.pipe(
-      combineLatest(this.applicationService.application$)
+    const canSeeEnvVars$ = this.applicationService.appSpace$.pipe(
+      switchMap(space => this.cups.can(
+        CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+        this.applicationService.cfGuid,
+        space.metadata.guid)
+      )
+    )
+
+    const deploySource$ = observableCombineLatest(
+      this.applicationService.applicationStratProject$,
+      this.applicationService.application$
     ).pipe(
       map(([project, app]) => {
         if (!!project) {
@@ -149,6 +162,10 @@ export class BuildTabComponent implements OnInit {
         }
       }),
       startWith({ type: 'loading' })
+    )
+
+    this.deploySource$ = canSeeEnvVars$.pipe(
+      switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of(null)),
     );
   }
 

@@ -5,7 +5,8 @@
   </mat-card-header>
   <mat-card-content class="card-app-instances__compact">
     <div *ngIf="!isEditing" class="card-app-instances__large">
-      <app-running-instances [instances]="(appService.application$ | async)?.app.entity?.instances" [cfGuid]="appService.cfGuid" [appGuid]="this.appService.appGuid">
+      <app-running-instances [instances]="(appService.application$ | async)?.app.entity?.instances"
+        [cfGuid]="appService.cfGuid" [appGuid]="this.appService.appGuid">
       </app-running-instances>
     </div>
     <form [hidden]="!isEditing" class="card-app-instances__form">
@@ -14,23 +15,27 @@
       </mat-form-field>
     </form>
   </mat-card-content>
-  <mat-card-actions *ngIf="showActions && (appService.applicationRunning$ | async) && !isEditing" class="card-app-instances__actions">
-    <button (click)="edit()" mat-icon-button [disabled]="appService.isUpdatingApp$ | async">
-          <mat-icon>edit</mat-icon>
+  <ng-container *ngIf="canEditApp$ | async">
+    <mat-card-actions *ngIf="showActions && (appService.applicationRunning$ | async) && !isEditing"
+      class="card-app-instances__actions">
+      <button (click)="edit()" mat-icon-button [disabled]="appService.isUpdatingApp$ | async">
+        <mat-icon>edit</mat-icon>
       </button>
-    <button (click)="scaleDown()" mat-icon-button [disabled]="appService.isUpdatingApp$ | async">
-          <mat-icon>remove_circle_outline</mat-icon>
+      <button (click)="scaleDown()" mat-icon-button [disabled]="appService.isUpdatingApp$ | async">
+        <mat-icon>remove_circle_outline</mat-icon>
       </button>
-    <button (click)="scaleUp()" mat-icon-button [disabled]="appService.isUpdatingApp$ | async">
-          <mat-icon>add_circle_outline</mat-icon>
+      <button (click)="scaleUp()" mat-icon-button [disabled]="appService.isUpdatingApp$ | async">
+        <mat-icon>add_circle_outline</mat-icon>
       </button>
-  </mat-card-actions>
-  <mat-card-actions *ngIf="showActions && isEditing" class="card-app-instances__actions">
-    <button (click)="finishEdit(false)" mat-icon-button [disabled]="appService.isUpdatingApp$ | async">
-          <mat-icon>clear</mat-icon>
+    </mat-card-actions>
+    <mat-card-actions *ngIf="showActions && isEditing" class="card-app-instances__actions">
+      <button (click)="finishEdit(false)" mat-icon-button [disabled]="appService.isUpdatingApp$ | async">
+        <mat-icon>clear</mat-icon>
       </button>
-    <button (click)="finishEdit(true)" mat-icon-button [disabled]="appService.isUpdatingApp$ | async">
-            <mat-icon>done</mat-icon>
-        </button>
-  </mat-card-actions>
+      <button (click)="finishEdit(true)" mat-icon-button [disabled]="appService.isUpdatingApp$ | async">
+        <mat-icon>done</mat-icon>
+      </button>
+    </mat-card-actions>
+  </ng-container>
+
 </mat-card>
