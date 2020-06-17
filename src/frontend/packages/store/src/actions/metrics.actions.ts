@@ -1,12 +1,12 @@
 import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
 import { metricEntityType } from '../base-entity-schemas';
 import { EntityRequestAction } from '../types/request.types';
+import { proxyAPIVersion } from '../jetstream';
+
 
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
 export const METRICS_START_FAILED = '[Metrics] Fetch Failed';
-
-import { proxyAPIVersion } = '../jetstream';
 
 export interface IMetricQueryConfigParams {
   window?: string;
