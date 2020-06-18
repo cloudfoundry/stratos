@@ -1,11 +1,11 @@
 import { compose } from '@ngrx/store';
 
-import { deriveEndpointFavoriteFromFavorite } from '../../../core/src/core/user-favorite-helpers';
 import { InternalAppState, IRequestEntityTypeState } from '../app-state';
 import { STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema } from '../base-entity-schemas';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { IUserFavoriteGroup, IUserFavoritesGroups, IUserFavoritesGroupsState } from '../types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
+import { deriveEndpointFavoriteFromFavorite } from '../user-favorite-helpers';
 
 const favoritesEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema.entityType);
 

@@ -1,4 +1,5 @@
 import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
+import { metricEntityType } from '../base-entity-schemas';
 import { proxyAPIVersion } from '../jetstream';
 import { EntityRequestAction } from '../types/request.types';
 
