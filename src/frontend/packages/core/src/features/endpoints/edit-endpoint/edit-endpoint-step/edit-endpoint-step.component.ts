@@ -6,10 +6,11 @@ import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, switchMap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
+import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
+import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { UpdateEndpoint } from './../../../../../../store/src/actions/endpoint.actions';
 import {
   EntityCatalogSchemas,

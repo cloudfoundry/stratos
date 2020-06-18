@@ -11,10 +11,6 @@ import {
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 
-export function getFullEndpointApiUrl(endpoint: EndpointModel) {
-  return endpoint && endpoint.api_endpoint ?
-    `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}${endpoint.api_endpoint.Path}` : 'Unknown';
-}
 
 export function getEndpointUsername(endpoint: EndpointModel) {
   return endpoint && endpoint.user ? endpoint.user.name : '-';

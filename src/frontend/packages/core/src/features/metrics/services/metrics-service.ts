@@ -3,11 +3,11 @@ import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { endpointEntitySchema } from '../../../../../store/src/base-entity-schemas';
+import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { endpointListKey, EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
 
 export interface MetricsEndpointProvider {
   provider: EndpointModel;

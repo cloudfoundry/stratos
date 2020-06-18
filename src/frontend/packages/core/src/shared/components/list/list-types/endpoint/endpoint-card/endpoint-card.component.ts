@@ -14,6 +14,7 @@ import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   StratosCatalogEndpointEntity,
@@ -22,10 +23,7 @@ import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorit
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
-import {
-  coreEndpointListDetailsComponents,
-  getFullEndpointApiUrl,
-} from '../../../../../../features/endpoints/endpoint-helpers';
+import { coreEndpointListDetailsComponents } from '../../../../../../features/endpoints/endpoint-helpers';
 import { StratosStatus } from '../../../../../shared.types';
 import {
   createMetaCardMenuItemSeparator,

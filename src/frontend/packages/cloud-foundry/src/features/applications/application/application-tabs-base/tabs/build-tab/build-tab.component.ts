@@ -10,11 +10,11 @@ import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-sta
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { getFullEndpointApiUrl } from '../../../../../../../../core/src/features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ENTITY_SERVICE } from '../../../../../../../../core/src/shared/entity.tokens';
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
+import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
