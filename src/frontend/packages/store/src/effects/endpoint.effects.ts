@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
   CONNECT_ENDPOINTS,
@@ -33,6 +32,7 @@ import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 import { DispatchOnlyAppState } from '../app-state';
+import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EndpointType } from '../extension-types';
 import { endpointSchemaKey } from '../helpers/entity-factory';

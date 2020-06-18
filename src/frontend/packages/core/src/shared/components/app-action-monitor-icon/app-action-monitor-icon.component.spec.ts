@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { endpointEntitySchema } from '../../../../../store/src/base-entity-schemas';
 import { BaseTestModules } from '../../../../test-framework/core-test.helper';
-import { endpointEntitySchema } from '../../../base-entity-schemas';
 import { AppActionMonitorIconComponent } from './app-action-monitor-icon.component';
 
 describe('AppActionMonitorIconComponent', () => {
