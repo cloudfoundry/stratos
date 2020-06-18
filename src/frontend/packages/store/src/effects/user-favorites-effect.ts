@@ -24,6 +24,7 @@ import {
   UpdateUserFavoriteMetadataSuccessAction,
 } from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { DispatchOnlyAppState } from '../app-state';
+import { userFavoritesEntitySchema } from '../base-entity-schemas';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { proxyAPIVersion } from '../jetstream';
 import { NormalizedResponse } from '../types/api.types';
