@@ -11,10 +11,10 @@ import {
   getDefaultRowState,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { EntityMonitor } from '../../../../../../../store/src/monitors/entity-monitor';
+import { endpointSchemaKey } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CFAppState } from '../../../../../cf-app-state';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { quotaDefinitionEntityType } from '../../../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
@@ -44,8 +44,8 @@ export class CfQuotasDataSourceService extends ListDataSource<APIResource> {
       if (!this.sourceScheme || !row) {
         return of(getDefaultRowState());
       }
-      const entityMonitor = new EntityMonitor(this.store, this.getRowUniqueId(row), this.entityKey, this.sourceScheme);
-      return entityMonitor.entityRequest$.pipe(
+      // TODO: RC test
+      return cfEntityCatalog.quotaDefinition.store.getEntityMonitor(this.getRowUniqueId(row)).entityRequest$.pipe(
         distinctUntilChanged(),
         map(requestInfo => ({
           deleting: requestInfo.deleting.busy,

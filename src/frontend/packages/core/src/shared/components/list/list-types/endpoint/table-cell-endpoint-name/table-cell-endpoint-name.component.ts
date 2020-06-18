@@ -2,9 +2,8 @@ import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
 
-import { GetAllEndpoints } from '../../../../../../../../store/src/actions/endpoint.actions';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
+import { stratosEntityCatalog } from '../../../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { TableCellCustom } from '../../../list.types';
@@ -22,21 +21,11 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
 
   public endpoint$: Observable<any>;
 
-  constructor(
-    private entityServiceFactory: EntityServiceFactory,
-
-  ) {
-    super();
-  }
-
   @Input('row')
   set row(row: EndpointModel | RowWithEndpointId) {
     /* tslint:disable-next-line:no-string-literal */
     const id = row['endpointId'] || row['guid'];
-    this.endpoint$ = this.entityServiceFactory.create(
-      id,
-      new GetAllEndpoints()
-    ).waitForEntity$.pipe(
+    this.endpoint$ = stratosEntityCatalog.endpoint.store.getEntityService(id).waitForEntity$.pipe(
       map(data => data.entity),
       map((data: any) => {
         const ep = entityCatalog.getEndpoint(data.cnsi_type, data.sub_type).definition;

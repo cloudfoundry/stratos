@@ -2,8 +2,8 @@ import { Component, Input, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../../store/src/types/metric.types';
 import { ListAppInstance } from '../app-instance-types';
@@ -21,7 +21,7 @@ export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> i
 
   @Input('config')
   set config(config: {
-    metricEntityService: EntityService<IMetrics<IMetricMatrixResult<IMetricCell>>>
+    metricEntityService: EntityService<IMetrics<IMetricMatrixResult<IMetricCell>>> // TODO: RC search for metricEntityService
     cfGuid: string
   }) {
     if (!config) {

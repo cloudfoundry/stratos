@@ -4,7 +4,7 @@ import { filter, first, map } from 'rxjs/operators';
 
 import { STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../store/src/helpers/stratos-entity-factory';
 import { selectEntity } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';

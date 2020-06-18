@@ -1,8 +1,8 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import { endpointSchemaKey } from '../../../store/src/helpers/stratos-entity-factory';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';

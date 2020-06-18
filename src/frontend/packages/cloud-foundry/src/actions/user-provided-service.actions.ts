@@ -2,7 +2,7 @@ import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
 import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../store/src/helpers/stratos-entity-factory';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';

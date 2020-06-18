@@ -2,11 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { EntityService } from '../../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { getFullEndpointApiUrl } from '../../../../../core/src/features/endpoints/endpoint-helpers';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
+import { EntityService } from '../../../../../store/src/entity-service';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
 import { ApplicationService } from '../application.service';
@@ -29,7 +28,7 @@ export class CliInfoApplicationComponent implements OnInit {
 
   constructor(
     private applicationService: ApplicationService,
-    private entityServiceFactory: EntityServiceFactory
+    // private entityServiceFactory: EntityServiceFactory // TODO: RC Search fo
   ) {
     this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
   }
@@ -41,10 +40,13 @@ export class CliInfoApplicationComponent implements OnInit {
   }
 
   private setupObservables(cfGuid: string) {
-    this.cfEndpointEntityService = this.entityServiceFactory.create<EndpointModel>(
-      cfGuid,
-      new GetAllEndpoints()
-    );
+    this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(cfGuid);
+
+    // TODO: RC EXAMPLE
+    // this.cfEndpointEntityService = this.entityServiceFactory.create<EndpointModel>(
+    //   cfGuid,
+    //   new GetAllEndpoints() // TODO: RC single/multi actions?
+    // );
 
     this.context$ = combineLatest(
       this.applicationService.application$,

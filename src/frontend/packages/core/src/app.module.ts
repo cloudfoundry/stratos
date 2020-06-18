@@ -17,7 +17,7 @@ import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
-import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../store/src/helpers/stratos-entity-factory';
 import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
 import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
@@ -29,7 +29,6 @@ import { XSRFModule } from '../xsrf.module';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
-import { generateStratosEntities } from './base-entity-types';
 import { CoreModule } from './core/core.module';
 import { CustomizationService } from './core/customizations.types';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
@@ -50,6 +49,7 @@ import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/f
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SidePanelService } from './shared/services/side-panel.service';
 import { SharedModule } from './shared/shared.module';
+import { generateStratosEntities } from './stratos-entity-generator';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68

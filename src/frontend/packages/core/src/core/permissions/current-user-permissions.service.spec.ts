@@ -10,7 +10,7 @@ import { BaseEntityValues } from '../../../../store/src/types/entity.types';
 import { PaginationState } from '../../../../store/src/types/pagination.types';
 import { AppTestModule } from '../../../test-framework/core-test.helper';
 import { endpointEntitySchema } from '../../base-entity-schemas';
-import { generateStratosEntities } from '../../base-entity-types';
+import { generateStratosEntities } from '../../stratos-entity-generator';
 import { PermissionConfig } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { StratosPermissionStrings, StratosPermissionTypes, StratosScopeStrings } from './stratos-user-permissions.checker';

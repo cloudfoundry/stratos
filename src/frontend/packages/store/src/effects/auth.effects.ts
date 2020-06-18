@@ -27,9 +27,9 @@ import {
 } from '../actions/auth.actions';
 import { HydrateDashboardStateAction } from '../actions/dashboard-actions';
 import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
-import { GetSystemInfo } from '../actions/system.actions';
 import { DispatchOnlyAppState } from '../app-state';
 import { getDashboardStateSessionId } from '../helpers/store-helpers';
+import { stratosEntityCatalog } from '../stratos-entity-catalog';
 import { SessionData } from '../types/auth.types';
 
 const SETUP_HEADER = 'stratos-setup-required';
@@ -84,7 +84,10 @@ export class AuthEffect {
           const sessionData = response.body;
           sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
           this.rehydrateDashboardState(this.store, sessionData);
-          return [new GetSystemInfo(true), new VerifiedSession(sessionData, action.updateEndpoints)];
+          return [
+            stratosEntityCatalog.systemInfo.actions.getSystemInfo(true),
+            new VerifiedSession(sessionData, action.updateEndpoints)
+          ];
         }),
         catchError((err, caught) => {
           let setupMode = false;

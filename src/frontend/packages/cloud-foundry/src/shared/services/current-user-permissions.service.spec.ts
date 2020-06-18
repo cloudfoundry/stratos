@@ -13,10 +13,10 @@ import {
   CfScopeStrings,
 } from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
 import { endpointEntitySchema } from '../../../../core/src/base-entity-schemas';
-import { generateStratosEntities } from '../../../../core/src/base-entity-types';
 import { PermissionConfig } from '../../../../core/src/core/permissions/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
 import { StratosScopeStrings } from '../../../../core/src/core/permissions/stratos-user-permissions.checker';
+import { generateStratosEntities } from '../../../../core/src/stratos-entity-generator';
 import { AppTestModule } from '../../../../core/test-framework/core-test.helper';
 import { AppState } from '../../../../store/src/app-state';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../store/src/entity-catalog-test.module';

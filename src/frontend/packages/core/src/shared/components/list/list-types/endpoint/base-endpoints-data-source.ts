@@ -5,7 +5,7 @@ import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -55,7 +55,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
       paginationMonitorFactory,
       entityMonitorFactory,
-      GetAllEndpoints.storeKey,
+      action.paginationKey,
       action,
       EndpointRowStateSetUpManager,
       false
@@ -111,7 +111,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
         metricsAvailable: false,
         sso_allowed: false,
       }),
-      paginationKey: GetAllEndpoints.storeKey,
+      paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [
         {

@@ -25,6 +25,7 @@ export class LongRunningCfOperationsService extends LongRunningOperationsService
      Please refresh the service instance list to check it's status`;
     this.store.dispatch(new ShowSnackBar(message, 'Dismiss'));
     // Also attempt to fetch the service instance, this will update the `last operation` value to `update` and `in progress`
+    // TODO: RC FIX
     this.store.dispatch(new GetServiceInstance(serviceInstanceGuid, cfGuid));
   }
 
@@ -33,6 +34,7 @@ export class LongRunningCfOperationsService extends LongRunningOperationsService
      Please refresh the service instance list to check it's status`;
     this.store.dispatch(new ShowSnackBar(message, 'Dismiss'));
     // Also attempt to fetch the service instance, this will update the `last operation` value to `delete` and `in progress`
+    // TODO: RC FIX
     this.store.dispatch(new GetServiceInstance(serviceInstanceGuid, cfGuid));
   }
 

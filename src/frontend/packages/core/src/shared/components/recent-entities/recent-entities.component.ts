@@ -5,7 +5,7 @@ import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { recentlyVisitedSelector } from '../../../../../store/src/selectors/recently-visitied.selectors';
 import {

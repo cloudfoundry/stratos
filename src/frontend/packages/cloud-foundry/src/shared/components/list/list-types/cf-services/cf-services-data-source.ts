@@ -11,7 +11,7 @@ import {
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';

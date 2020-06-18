@@ -1,18 +1,17 @@
 import { Action } from '@ngrx/store';
 
+import { STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
 import {
   DISCONNECT_ENDPOINTS_SUCCESS,
   DisconnectEndpoint,
   GET_ENDPOINTS_SUCCESS,
-  GetAllEndpointsSuccess,
   UNREGISTER_ENDPOINTS_SUCCESS,
 } from '../../actions/endpoint.actions';
 import { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { endpointSchemaKey } from '../../helpers/stratos-entity-factory';
 import { IRecentlyVisitedState } from '../../types/recently-visited.types';
 import { addNewHit, cleanRecentsList, getDefaultRecentState } from './recently-visited.reducer.helpers';
-import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
-import { endpointSchemaKey } from '../../helpers/entity-factory';
 
 export function recentlyVisitedReducer(
   state: IRecentlyVisitedState = getDefaultRecentState(),

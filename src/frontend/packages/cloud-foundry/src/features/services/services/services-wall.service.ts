@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IService } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';

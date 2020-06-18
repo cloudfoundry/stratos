@@ -17,13 +17,12 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
-import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
 import { EntityService } from '../../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
@@ -138,16 +137,12 @@ export class CloudFoundryEndpointService {
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
     private pmf: PaginationMonitorFactory,
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
 
-    this.cfEndpointEntityService = this.entityServiceFactory.create(
-      this.cfGuid,
-      new GetAllEndpoints()
-    );
+    this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(this.cfGuid);
 
     this.cfInfoEntityService = cfEntityCatalog.cfInfo.store.getEntityService(this.cfGuid)
     this.constructCoreObservables();

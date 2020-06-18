@@ -1,7 +1,7 @@
 import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { StratosScopeStrings } from '../../../core/src/core/permissions/stratos-user-permissions.checker';
 import { MetricsAPITargets, MetricsStratosInfo } from '../actions/metrics-api.actions';
-import { endpointSchemaKey } from '../helpers/entity-factory';
+import { endpointSchemaKey } from '../helpers/stratos-entity-factory';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 
 export const endpointListKey = 'endpoint-list';

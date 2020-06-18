@@ -1,6 +1,6 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
-import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../store/src/helpers/stratos-entity-factory';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { cfEventEntityType } from '../cf-entity-types';

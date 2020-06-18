@@ -7,13 +7,12 @@ import { first, map, withLatestFrom } from 'rxjs/operators';
 
 import { SendClearEndpointEventsAction } from '../../../../../store/src/actions/internal-events.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { InternalEventState } from '../../../../../store/src/types/internal-events.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
-import { endpointEntitySchema } from '../../../base-entity-schemas';
 import { StratosStatus } from '../../../shared/shared.types';
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 
@@ -36,12 +35,7 @@ export class ErrorPageComponent implements OnInit {
   ngOnInit() {
     const endpointId = this.activatedRoute.snapshot.params.endpointId;
     if (endpointId) {
-      const endpointMonitor = new EntityMonitor<EndpointModel>(
-        this.store,
-        endpointId,
-        endpointEntitySchema.key,
-        endpointEntitySchema
-      );
+      const endpointMonitor = stratosEntityCatalog.endpoint.store.getEntityMonitor(endpointId);
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, of([endpointId]));
       this.errorDetails$ = cfEndpointEventMonitor.hasErroredOverTimeNoPoll(30).pipe(
         withLatestFrom(endpointMonitor.entity$),

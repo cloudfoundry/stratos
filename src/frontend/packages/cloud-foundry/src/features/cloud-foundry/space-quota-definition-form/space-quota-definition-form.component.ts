@@ -9,7 +9,7 @@ import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/
 import { ActiveRouteCfOrgSpace } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { IQuotaDefinition } from '../../../cf-api.types';
 
 
