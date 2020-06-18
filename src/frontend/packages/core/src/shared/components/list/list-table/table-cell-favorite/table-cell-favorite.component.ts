@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
 
+import { FavoritesConfigMapper } from '../../../../../../../store/src/favorite-config-mapper';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { TableCellCustom } from '../../list.types';
 import { ITableColumn } from '../table.types';
-import { FavoritesConfigMapper } from '../../../favorites-meta-card/favorite-config-mapper';
 
 export interface TableCellFavoriteComponentConfig<T, Y extends IFavoriteMetadata> {
   createUserFavorite: (entity: T) => UserFavorite<Y>;

@@ -13,10 +13,8 @@ import {
 } from '../../../../../../../core/src/core/extension/extension-service';
 import { environment } from '../../../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import {
-  FavoritesConfigMapper,
-} from '../../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
+import { FavoritesConfigMapper } from '../../../../../../../store/src/favorite-config-mapper';
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../../store/src/user-favorite-helpers';

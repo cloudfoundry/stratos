@@ -12,14 +12,12 @@ import { truthyIncludingZeroString } from '../../../../../../../../core/src/core
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
-  FavoritesConfigMapper,
-} from '../../../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
-import {
   MetaCardMenuItem,
 } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../core/src/shared/shared.types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';

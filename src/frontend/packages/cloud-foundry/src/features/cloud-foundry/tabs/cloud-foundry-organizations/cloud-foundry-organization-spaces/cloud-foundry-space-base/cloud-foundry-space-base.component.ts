@@ -16,11 +16,9 @@ import {
 import { environment } from '../../../../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import {
-  FavoritesConfigMapper,
-} from '../../../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';

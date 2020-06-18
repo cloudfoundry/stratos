@@ -20,6 +20,7 @@ import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
+import { FavoritesConfigMapper } from '../../store/src/favorite-config-mapper';
 import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
 import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
@@ -48,7 +49,6 @@ import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/
 import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
-import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SidePanelService } from './shared/services/side-panel.service';
 import { SharedModule } from './shared/shared.module';

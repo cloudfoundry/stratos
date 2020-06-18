@@ -1,7 +1,6 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { FavoritesConfigMapper } from '../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { StratosStatus } from '../../../core/src/shared/shared.types';
 import { GeneralEntityAppState } from '../app-state';
 import {
@@ -20,6 +19,7 @@ import {
   PaginationPageIteratorConfig,
 } from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EndpointAuthTypeConfig } from '../extension-types';
+import { FavoritesConfigMapper } from '../favorite-config-mapper';
 import { EntitySchema } from '../helpers/entity-schema';
 import { EndpointModel } from '../types/endpoint.types';
 import { UserFavorite } from '../types/user-favorites.types';

@@ -5,6 +5,7 @@ import { StoreModule } from '@ngrx/store';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 import { Observable, of } from 'rxjs';
 
+import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EntitySchema } from '../../../../../../../../store/src/helpers/entity-schema';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
@@ -13,7 +14,6 @@ import { UserFavoriteManager } from '../../../../../../../../store/src/user-favo
 import { CoreTestingModule } from '../../../../../../../test-framework/core-test.modules';
 import { SharedModule } from '../../../../../shared.module';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
-import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardComponent } from './meta-card.component';
 
 @Component({
