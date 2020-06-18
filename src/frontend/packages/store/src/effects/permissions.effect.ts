@@ -5,7 +5,6 @@ import { Action, Store } from '@ngrx/store';
 import { combineLatest, EMPTY, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
-import { LoggerService } from '../../../core/src/core/logger.service';
 import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
 import {
   GET_CURRENT_USER_RELATIONS,
@@ -27,7 +26,6 @@ export class PermissionsEffects {
     private httpClient: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>,
-    private logService: LoggerService
   ) { }
 
   @Effect() getCurrentUsersPermissions$ = this.actions$.pipe(
@@ -44,7 +42,7 @@ export class PermissionsEffects {
       );
     }),
     catchError(err => {
-      this.logService.warn('Failed to fetch current user permissions: ', err);
+      console.warn('Failed to fetch current user permissions: ', err);
       return of(failedAction);
     })
   );
@@ -66,7 +64,7 @@ export class PermissionsEffects {
       );
     }),
     catchError(err => {
-      this.logService.warn('Failed to fetch current user permissions after endpoint connected: ', err);
+      console.warn('Failed to fetch current user permissions after endpoint connected: ', err);
       return of(failedAction);
     })
   );

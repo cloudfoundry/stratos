@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
 import { userProfileEntitySchema } from '../../../core/src/base-entity-schemas';
-import { environment } from '../../../core/src/environments/environment';
 import {
   FetchUserProfileAction,
   GET_USERPROFILE,
@@ -15,6 +14,7 @@ import {
   UpdateUserProfileAction,
 } from '../actions/user-profile.actions';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { proxyAPIVersion } from '../jetstream';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { UserProfileInfo } from '../types/user-profile.types';
 import { DispatchOnlyAppState } from './../app-state';
@@ -25,8 +25,6 @@ import {
   WrapperRequestActionSuccess,
 } from './../types/request.types';
 
-
-const { proxyAPIVersion } = environment;
 
 export const userProfilePasswordUpdatingKey = 'password';
 
