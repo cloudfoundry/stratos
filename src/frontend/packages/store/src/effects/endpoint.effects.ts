@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
   CONNECT_ENDPOINTS,
@@ -35,6 +34,7 @@ import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-u
 import { DispatchOnlyAppState } from '../app-state';
 import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { EndpointType } from '../extension-types';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
