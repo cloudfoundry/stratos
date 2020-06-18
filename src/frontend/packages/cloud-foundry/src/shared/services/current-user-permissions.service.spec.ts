@@ -17,10 +17,10 @@ import { CurrentUserPermissionsService } from '../../../../core/src/core/permiss
 import { StratosScopeStrings } from '../../../../core/src/core/permissions/stratos-user-permissions.checker';
 import { AppTestModule } from '../../../../core/test-framework/core-test.helper';
 import { AppState } from '../../../../store/src/app-state';
-import { generateStratosEntities } from '../../../../store/src/base-entity-types';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../store/src/entity-catalog-test.module';
 import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { endpointSchemaKey, stratosEntityFactory } from '../../../../store/src/helpers/stratos-entity-factory';
+import { generateStratosEntities } from '../../../../store/src/stratos-entity-generator';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { BaseEntityValues } from '../../../../store/src/types/entity.types';

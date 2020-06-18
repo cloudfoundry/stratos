@@ -1,4 +1,3 @@
-import { EndpointType } from '../../core/src/core/extension/extension-types';
 import {
   AuthParams,
   ConnectEndpoint,
@@ -15,6 +14,7 @@ import {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { EndpointType } from './extension-types';
 import { EndpointModel } from './types/endpoint.types';
 import { UserProfileInfo, UserProfilePasswordUpdate } from './types/user-profile.types';
 

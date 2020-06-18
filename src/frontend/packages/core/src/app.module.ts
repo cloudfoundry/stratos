@@ -13,7 +13,6 @@ import {
   UpdateUserFavoriteMetadataAction,
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
-import { generateStratosEntities } from '../../store/src/base-entity-types';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
@@ -23,6 +22,7 @@ import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/
 import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
 import { AppStoreModule } from '../../store/src/store.module';
+import { generateStratosEntities } from '../../store/src/stratos-entity-generator';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { TabNavService } from '../tab-nav.service';

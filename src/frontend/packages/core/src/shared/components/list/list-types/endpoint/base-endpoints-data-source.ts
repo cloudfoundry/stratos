@@ -5,8 +5,7 @@ import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { endpointEntitySchema } from '../../../../../../../store/src/base-entity-schemas';
-import { endpointSchemaKey } from '../../../../../../../store/src/helpers/stratos-entity-factory';
+import { endpointSchemaKey, stratosEntityFactory } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -92,6 +91,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     this.dsEndpointType = dsEndpointType;
   }
 
+  // TODO: RC what is this?
   static getEndpointConfig(
     store: Store<AppState>,
     action: GetAllEndpoints,
@@ -103,7 +103,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     return {
       store,
       action,
-      schema: endpointEntitySchema,
+      schema: stratosEntityFactory(endpointSchemaKey),
       getRowUniqueId: object => object.guid,
       getEmptyType: () => ({
         name: '',
