@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { EndpointType } from '../../../core/src/core/extension/extension-types';
+import { EndpointType } from '../extension-types';
 import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
