@@ -66,7 +66,6 @@ export class GetHelmReleases implements MonocularPaginationAction {
   };
 }
 
-
 export class GetHelmRelease implements HelmReleaseSingleEntity {
   guid: string;
   constructor(
