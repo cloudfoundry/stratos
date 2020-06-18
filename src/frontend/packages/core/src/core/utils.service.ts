@@ -17,13 +17,6 @@ export type OptionalKeys<T extends object> = Exclude<{
   : never
 }[keyof T], undefined>
 
-
-export type NonOptionalKeys<T extends object> = Exclude<{
-  [K in keyof T]: T extends Record<K, T[K]>
-  ? K
-  : never
-}[keyof T], undefined>
-
 export type NeverKeys<T extends object> = Exclude<{
   [K in keyof T]: T[K] extends never
   ? K
