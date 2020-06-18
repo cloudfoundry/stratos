@@ -9,8 +9,13 @@ import {
 import {
   SSOAuthFormComponent,
 } from '../../core/src/features/endpoints/connect-endpoint-dialog/auth-forms/sso-auth-form.component';
-import { EndpointAuthTypeNames } from '../../core/src/features/endpoints/endpoint-helpers';
 import { EndpointAuthTypeConfig, EndpointType } from './extension-types';
+
+export enum EndpointAuthTypeNames {
+  CREDS = 'creds',
+  SSO = 'sso',
+  NONE = 'none'
+}
 
 export abstract class BaseEndpointAuth {
   static readonly UsernamePassword = {

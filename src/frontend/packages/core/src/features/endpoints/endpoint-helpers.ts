@@ -27,12 +27,6 @@ export interface EndpointIcon {
   font: string;
 }
 
-export enum EndpointAuthTypeNames {
-  CREDS = 'creds',
-  SSO = 'sso',
-  NONE = 'none'
-}
-
 // Any initial endpointTypes listDetailsComponent should be added here
 export const coreEndpointListDetailsComponents: Type<EndpointListDetailsComponent>[] = [];
 

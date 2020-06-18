@@ -1,10 +1,10 @@
 import { compose } from '@ngrx/store';
 
-import { PermissionValues } from '../../../core/src/core/permissions/current-user-permissions.config';
 import { CurrentUserRolesAppState } from '../app-state';
 import { ICurrentUserRolesState, IStratosRolesState } from '../types/current-user-roles.types';
 import { UserScopeStrings } from '../types/endpoint.types';
 
+export type PermissionValues = string;
 
 export const selectCurrentUserRolesState = (state: CurrentUserRolesAppState) => state.currentUserRoles;
 

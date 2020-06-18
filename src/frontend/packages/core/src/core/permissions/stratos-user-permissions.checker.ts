@@ -5,8 +5,9 @@ import { GeneralEntityAppState } from '../../../../store/src/app-state';
 import {
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
+  PermissionValues,
 } from '../../../../store/src/selectors/current-user-role.selectors';
-import { IPermissionConfigs, PermissionConfig, PermissionTypes, PermissionValues } from './current-user-permissions.config';
+import { IPermissionConfigs, PermissionConfig, PermissionTypes } from './current-user-permissions.config';
 import {
   BaseCurrentUserPermissionsChecker,
   IConfigGroups,
