@@ -1,15 +1,20 @@
-import {
-  FilteredByNotReturnType,
-  FilteredByReturnType,
-  KnownKeys,
-  NeverKeys,
-} from '../../../../core/src/core/utils.service';
+import { FilteredByNotReturnType, FilteredByReturnType, NeverKeys } from '../../../../core/src/core/utils.service';
 import { EntityService } from '../../entity-service';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { PaginationObservables } from '../../reducers/pagination-reducer/pagination-reducer.types';
 import { PaginatedAction } from '../../types/pagination.types';
 import { OrchestratedActionBuilders, OrchestratedActionCoreBuilders } from '../action-orchestrator/action-orchestrator';
+
+/**
+ * Remove keys such as typed indexes  (i.e. [key: string])
+ * For magic see
+ *  - https://github.com/Microsoft/TypeScript/issues/25987#issuecomment-441224690
+ *  - https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-414808995
+ */
+export type KnownKeys<T> = {
+  [K in keyof T]: string extends K ? never : number extends K ? never : K
+} extends { [_ in keyof T]: infer U } ? ({} extends U ? never : U) : never;
 
 /**
  * Core entity and entities access (entity/entities monitors and services)

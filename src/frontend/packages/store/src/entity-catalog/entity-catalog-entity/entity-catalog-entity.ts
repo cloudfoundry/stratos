@@ -1,6 +1,5 @@
 import { ActionReducer } from '@ngrx/store';
 
-import { KnownKeys } from '../../../../core/src/core/utils.service';
 import { getFullEndpointApiUrl } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import { IRequestEntityTypeState } from '../../app-state';
 import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
@@ -36,7 +35,7 @@ import {
 } from '../entity-catalog.types';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
-import { EntityCatalogEntityStore } from './entity-catalog-entity.types';
+import { EntityCatalogEntityStore, KnownKeys } from './entity-catalog-entity.types';
 
 type NonOptionalKeys<T extends object> = Exclude<{
   [K in keyof T]: T extends Record<K, T[K]>
