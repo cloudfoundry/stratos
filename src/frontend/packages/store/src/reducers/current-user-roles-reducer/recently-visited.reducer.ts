@@ -8,11 +8,11 @@ import {
   UNREGISTER_ENDPOINTS_SUCCESS,
 } from '../../actions/endpoint.actions';
 import { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
+import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { endpointSchemaKey } from '../../helpers/entity-factory';
 import { IRecentlyVisitedState } from '../../types/recently-visited.types';
 import { addNewHit, cleanRecentsList, getDefaultRecentState } from './recently-visited.reducer.helpers';
-import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
-import { endpointSchemaKey } from '../../helpers/entity-factory';
 
 export function recentlyVisitedReducer(
   state: IRecentlyVisitedState = getDefaultRecentState(),

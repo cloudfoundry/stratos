@@ -1,12 +1,7 @@
+import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import {
-  StratosCatalogEndpointEntity,
-  StratosCatalogEntity,
-} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import {
-  addOrUpdateUserFavoriteMetadataReducer,
-  deleteUserFavoriteMetadataReducer,
-} from '../../store/src/reducers/favorite.reducer';
-import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
+  MetricsEndpointDetailsComponent,
+} from '../../core/src/features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
 import {
   endpointEntitySchema,
   STRATOS_ENDPOINT_TYPE,
@@ -14,10 +9,12 @@ import {
   userFavoritesEntitySchema,
   userProfileEntitySchema,
 } from './base-entity-schemas';
-import { BaseEndpointAuth } from './features/endpoints/endpoint-auth';
 import {
-  MetricsEndpointDetailsComponent,
-} from './features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
+  StratosCatalogEndpointEntity,
+  StratosCatalogEntity,
+} from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './reducers/favorite.reducer';
+import { systemEndpointsReducer } from './reducers/system-endpoints.reducer';
 
 //
 // These types are used to represent the base stratos types.
