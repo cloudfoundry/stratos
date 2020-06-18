@@ -1,6 +1,6 @@
 import { by, promise } from 'protractor';
 
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { RadioGroup } from './radio-group.po';
 import { SnackBarPo } from './snackbar.po';

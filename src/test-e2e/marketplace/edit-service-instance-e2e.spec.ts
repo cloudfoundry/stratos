@@ -65,7 +65,10 @@ describe('Edit Service Instance', () => {
         menu.waitUntilNotShown();
 
         return browser.getCurrentUrl().then(url => {
-          expect(url.endsWith('edit')).toBeTruthy();
+          const query = url.indexOf('?');
+          const urlWithoutQuery = query >= 0 ? url.substring(0, query) : url;
+          expect(urlWithoutQuery.endsWith('edit')).toBeTruthy();
+
           servicesHelperE2E.setServicePlan(true);
           servicesHelperE2E.createServiceInstance.stepper.next();
 

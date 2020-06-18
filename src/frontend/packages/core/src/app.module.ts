@@ -13,6 +13,8 @@ import {
   UpdateUserFavoriteMetadataAction,
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
+import { STRATOS_ENDPOINT_TYPE } from '../../store/src/base-entity-schemas';
+import { generateStratosEntities } from '../../store/src/base-entity-types';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
@@ -24,19 +26,17 @@ import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visi
 import { AppStoreModule } from '../../store/src/store.module';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../store/src/user-favorite-manager';
 import { TabNavService } from '../tab-nav.service';
 import { XSRFModule } from '../xsrf.module';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
-import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
-import { generateStratosEntities } from './base-entity-types';
 import { CoreModule } from './core/core.module';
 import { CustomizationService } from './core/customizations.types';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
-import { UserFavoriteManager } from './core/user-favorite-manager';
 import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';

@@ -396,7 +396,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
   private getAllEndpointGuids() {
-    return this.store.select(connectedEndpointsSelector).pipe(
+    return this.store.select(connectedEndpointsSelector()).pipe(
       map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === CF_ENDPOINT_TYPE).map(endpoint => endpoint.guid))
     );
   }

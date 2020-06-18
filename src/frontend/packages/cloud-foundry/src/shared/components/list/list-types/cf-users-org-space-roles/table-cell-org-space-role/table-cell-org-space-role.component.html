@@ -1,4 +1,5 @@
 <app-cf-role-checkbox [cfGuid]="row.entity.cfGuid"
+  [orgGuid]="config.isSpace ? row?.entity.organization?.metadata.guid : row?.metadata.guid"
   [orgName]="config.isSpace ? row?.entity.organization?.entity.name : row?.entity.name"
   [spaceName]="config.isSpace ? row?.entity.name : null" [spaceGuid]="config.isSpace ? row.metadata.guid : ''"
   [role]="config.role"></app-cf-role-checkbox>

@@ -9,6 +9,7 @@ import {
   UpdateUserProfileAction,
 } from '../../../store/src/actions/user-profile.actions';
 import { AppState } from '../../../store/src/app-state';
+import { userProfileEntitySchema } from '../../../store/src/base-entity-schemas';
 import { userProfilePasswordUpdatingKey } from '../../../store/src/effects/user-profile.effects';
 import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../store/src/entity-service';
@@ -18,7 +19,6 @@ import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { selectRequestInfo, selectUpdateInfo } from '../../../store/src/selectors/api.selectors';
 import { SessionData } from '../../../store/src/types/auth.types';
 import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../../store/src/types/user-profile.types';
-import { userProfileEntitySchema } from '../base-entity-schemas';
 
 
 @Injectable()

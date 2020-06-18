@@ -43,13 +43,11 @@ export abstract class Page {
     return browser.get(this.navLink);
   }
 
-  isActivePage(): promise.Promise<boolean> {
-    return browser.getCurrentUrl().then(url => url === this.getUrl());
-  }
-
-  isActivePageOrChildPage(): promise.Promise<boolean> {
+  isActivePage(ignoreQuery = false): promise.Promise<boolean> {
     return browser.getCurrentUrl().then(url => {
-      return url.startsWith(this.getUrl());
+      const browserUrl = ignoreQuery ? this.stripQuery(url) : url;
+      const expectedUrl = ignoreQuery ? this.stripQuery(this.getUrl()) : this.getUrl();
+      return browserUrl === expectedUrl;
     });
   }
 
@@ -62,9 +60,15 @@ export abstract class Page {
     });
   }
 
-  waitForPage(timeout = 20000) {
+  waitForPage(timeout = 20000, ignoreQuery = false) {
     expect(this.navLink.startsWith('/')).toBeTruthy('navLink should start with a /');
-    return browser.wait(until.urlIs(this.getUrl()), timeout, `Failed to wait for page with navlink '${this.navLink}'`);
+    if (ignoreQuery) {
+      return browser.wait(() => {
+        return this.isActivePage(true);
+      });
+    } else {
+      return browser.wait(until.urlIs(this.getUrl()), timeout, `Failed to wait for page with navlink '${this.navLink}'`);
+    }
   }
 
   waitForPageDataLoaded(timeout = 20000) {
@@ -82,4 +86,9 @@ export abstract class Page {
     browser.wait(until.urlContains(browser.baseUrl + this.navLink + childPath), 20000);
   }
   private getUrl = () => browser.baseUrl + this.navLink;
+
+  private stripQuery(url: string): string {
+    const queryStarts = url.indexOf('?');
+    return queryStarts >= 0 ? url.substring(0, queryStarts) : url;
+  }
 }

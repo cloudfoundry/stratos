@@ -1,9 +1,9 @@
 import { ActionReducer } from '@ngrx/store';
 
-import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
 import { KnownKeys, NonOptionalKeys } from '../../../../core/src/core/utils.service';
 import { getFullEndpointApiUrl } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import { IRequestEntityTypeState } from '../../app-state';
+import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import {
   EntitiesFetchHandler,
   EntitiesInfoHandler,

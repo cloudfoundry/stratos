@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { EndpointType } from '../../../core/src/core/extension/extension-types';
+import { EndpointType } from '../extension-types';
+import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { NormalizedResponse } from '../types/api.types';
 import { endpointListKey, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';

@@ -4,8 +4,8 @@ import {
   systemInfoSchemaKey,
   userFavouritesSchemaKey,
   userProfileSchemaKey,
-} from '../../store/src/helpers/entity-factory';
-import { EntitySchema } from '../../store/src/helpers/entity-schema';
+} from './helpers/entity-factory';
+import { EntitySchema } from './helpers/entity-schema';
 
 export const metricEntityType = 'metrics';
 
