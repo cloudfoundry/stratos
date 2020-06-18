@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
   CONNECT_ENDPOINTS,
@@ -35,6 +34,7 @@ import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../act
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 import { DispatchOnlyAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { EndpointType } from '../extension-types';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
