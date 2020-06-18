@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 
+import { ThemeService } from '../../../../store/src/theme.service';
 import { CoreModule } from '../../core/core.module';
-import { ThemeService } from '../../core/theme.service';
 import { SharedModule } from '../../shared/shared.module';
 import { DomainMismatchComponent } from './domain-mismatch/domain-mismatch.component';
 import { LocalAccountWizardComponent } from './local-account-wizard/local-account-wizard.component';

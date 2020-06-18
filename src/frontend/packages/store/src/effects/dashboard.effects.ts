@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs/operators';
 
-import { ThemeService } from '../../../core/src/core/theme.service';
 import { HYDRATE_DASHBOARD_STATE, HydrateDashboardStateAction } from '../actions/dashboard-actions';
+import { ThemeService } from '../theme.service';
 
 
 @Injectable()
