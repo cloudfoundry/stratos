@@ -14,6 +14,7 @@ import {
 } from '../../../../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../../../cloud-foundry/src/shared/data-services/cloud-foundry.service';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { CSI_CANCEL_URL } from '../../../shared/components/add-service-instance/csi-mode.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 @Component({
@@ -35,6 +36,7 @@ export class ServicesWallComponent implements OnDestroy {
   canCreateServiceInstance: CfCurrentUserPermissions;
   initCfOrgSpaceService: Subscription;
   cfIds$: Observable<string[]>;
+  location: { [CSI_CANCEL_URL]: string };
 
   constructor(
     public cloudFoundryService: CloudFoundryService,
@@ -57,6 +59,10 @@ export class ServicesWallComponent implements OnDestroy {
     this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
       map(endpoints => !!endpoints && endpoints.length > 0)
     );
+
+    this.location = {
+      [CSI_CANCEL_URL]: `/services`
+    }
   }
 
   ngOnDestroy(): void {

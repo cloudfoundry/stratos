@@ -28,6 +28,7 @@ import {
   CANCEL_ORG_ID_PARAM,
   CANCEL_SPACE_ID_PARAM,
   CANCEL_USER_PROVIDED,
+  CSI_CANCEL_URL,
 } from '../../../add-service-instance/csi-mode.service';
 import {
   CfSpacesUserServiceInstancesDataSource,
@@ -64,7 +65,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
   protected serviceInstanceColumns: ITableColumn<APIResource<IUserProvidedServiceInstance>>[] = [
     {
       columnId: 'name',
-      headerCell: () => 'Service Instance',
+      headerCell: () => 'Name',
       cellDefinition: {
         getValue: (row) => `${row.entity.name}`
       },
@@ -152,7 +153,8 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
         {
           [CANCEL_SPACE_ID_PARAM]: item.entity.space_guid,
           [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid,
-          [CANCEL_USER_PROVIDED]: true
+          [CANCEL_USER_PROVIDED]: true,
+          [CSI_CANCEL_URL]: `/cloud-foundry/${this.cfSpaceService.cfGuid}/organizations/${this.cfSpaceService.orgGuid}/spaces/${this.cfSpaceService.spaceGuid}/service-instances`
         },
         true),
     label: 'Edit',
@@ -176,7 +178,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
 
   constructor(
     protected store: Store<CFAppState>,
-    cfSpaceService: CloudFoundrySpaceService,
+    private cfSpaceService: CloudFoundrySpaceService,
     protected datePipe: DatePipe,
     protected currentUserPermissionsService: CurrentUserPermissionsService,
     private serviceActionHelperService: ServiceActionHelperService

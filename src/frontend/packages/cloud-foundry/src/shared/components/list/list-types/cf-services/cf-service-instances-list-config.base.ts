@@ -21,9 +21,10 @@ import {
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../cf-api-svc.types';
+import { isUserProvidedServiceInstance } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
-import { CANCEL_ORG_ID_PARAM, CANCEL_SPACE_ID_PARAM } from '../../../add-service-instance/csi-mode.service';
+import { CANCEL_ORG_ID_PARAM, CANCEL_SPACE_ID_PARAM, CSI_CANCEL_URL } from '../../../add-service-instance/csi-mode.service';
 import {
   TableCellAppCfOrgSpaceHeaderComponent,
 } from '../app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
@@ -61,7 +62,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   protected serviceInstanceColumns: ITableColumn<APIResource<IServiceInstance>>[] = [
     {
       columnId: 'name',
-      headerCell: () => 'Service Instance',
+      headerCell: () => 'Name',
       cellDefinition: {
         getValue: (row) => `${row.entity.name}`
       },
@@ -149,10 +150,15 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
 
   private listActionEdit: IListAction<APIResource> = {
     action: (item: APIResource<IServiceInstance>) =>
-      this.serviceActionHelperService.startEditServiceBindingStepper(item.metadata.guid, item.entity.cfGuid, {
-        [CANCEL_SPACE_ID_PARAM]: item.entity.space_guid,
-        [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid
-      }),
+      this.serviceActionHelperService.startEditServiceBindingStepper(
+        item.metadata.guid,
+        item.entity.cfGuid,
+        {
+          [CANCEL_SPACE_ID_PARAM]: item.entity.space_guid,
+          [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid,
+          [CSI_CANCEL_URL]: this.rootLocation
+        },
+        !!isUserProvidedServiceInstance(item.entity)),
     label: 'Edit',
     description: 'Edit Service Instance',
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
@@ -176,7 +182,8 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     protected store: Store<CFAppState>,
     protected datePipe: DatePipe,
     protected currentUserPermissionsService: CurrentUserPermissionsService,
-    private serviceActionHelperService: ServiceActionHelperService
+    private serviceActionHelperService: ServiceActionHelperService,
+    private rootLocation: string
   ) {
   }
 

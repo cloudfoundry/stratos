@@ -70,7 +70,13 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
     currentUserPermissionsService: CurrentUserPermissionsService,
     serviceActionHelperService: ServiceActionHelperService
   ) {
-    super(store, datePipe, currentUserPermissionsService, serviceActionHelperService);
+    super(
+      store,
+      datePipe,
+      currentUserPermissionsService,
+      serviceActionHelperService,
+      `/services`
+    );
     const multiFilterConfigs = [
       createCfOrgSpaceFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
       createCfOrgSpaceFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),

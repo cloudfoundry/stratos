@@ -1,4 +1,4 @@
-import { metricEntityType } from '../../core/src/base-entity-schemas';
+import { metricEntityType } from '../../store/src/base-entity-schemas';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { APIResource } from '../../store/src/types/api.types';
 import {
