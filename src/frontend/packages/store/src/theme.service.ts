@@ -4,10 +4,10 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { StyleService } from '../../core/src/core/style.service';
 import { SetThemeAction } from './actions/dashboard-actions';
 import { DashboardOnlyAppState } from './app-state';
 import { selectDashboardState } from './selectors/dashboard.selectors';
+import { StyleService } from './style.service';
 import { StratosTheme } from './types/theme.types';
 
 const lightTheme: StratosTheme = {
