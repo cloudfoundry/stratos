@@ -4,6 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
 import { DefaultRouterStateSerializer, RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
 import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
@@ -38,6 +39,7 @@ import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { CustomImportModule } from './custom-import.module';
+import { environment } from './environments/environment';
 import { AboutModule } from './features/about/about.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
 import { HomeModule } from './features/home/home.module';
@@ -80,6 +82,18 @@ export class CustomRouterStateSerializer
   }
 }
 
+const storeDebugImports = environment.production ? [] : [
+  StoreDevtoolsModule.instrument({
+    maxAge: 100,
+    logOnly: !environment.production
+  })
+];
+
+@NgModule({
+  imports: storeDebugImports
+})
+class AppStoreDebugModule {}
+
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
  */
@@ -94,6 +108,7 @@ export class CustomRouterStateSerializer
     RouteModule,
     CloudFoundryPackageModule,
     AppStoreModule,
+    AppStoreDebugModule,
     BrowserModule,
     SharedModule,
     BrowserAnimationsModule,
