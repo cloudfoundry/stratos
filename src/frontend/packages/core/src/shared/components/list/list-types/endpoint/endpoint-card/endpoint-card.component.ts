@@ -21,10 +21,10 @@ import {
 } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { coreEndpointListDetailsComponents } from '../../../../../../features/endpoints/endpoint-helpers';
-import { StratosStatus } from '../../../../../shared.types';
 import {
   createMetaCardMenuItemSeparator,
   MetaCardMenuItem,

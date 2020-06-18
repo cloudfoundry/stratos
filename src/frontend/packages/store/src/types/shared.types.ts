@@ -1,5 +1,5 @@
-import { AppState } from '../../../store/src/app-state';
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import { AppState } from '../app-state';
+import { EntitySchema } from '../helpers/entity-schema';
 
 
 export class ComponentEntityMonitorConfig {

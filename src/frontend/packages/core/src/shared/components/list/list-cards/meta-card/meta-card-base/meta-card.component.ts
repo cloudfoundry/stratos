@@ -4,10 +4,10 @@ import { first, map, tap } from 'rxjs/operators';
 
 import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 

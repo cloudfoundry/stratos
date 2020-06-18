@@ -8,7 +8,7 @@ import { ApplicationService } from '../../../../../../cloud-foundry/src/features
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogConfig } from '../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { StratosStatus } from '../../../../../../core/src/shared/shared.types';
+import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',

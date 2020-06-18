@@ -12,8 +12,8 @@ import {
   MetaCardMenuItem,
 } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import {

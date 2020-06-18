@@ -3,9 +3,9 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../../../../store/src/actions/endpoint.actions';
+import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
 import { TableCellCustom } from '../../../list.types';
 import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoint-name.component';
 
