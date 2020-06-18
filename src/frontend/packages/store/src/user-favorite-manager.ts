@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
-import { LoggerService } from '../../core/src/core/logger.service';
 import {
   FavoritesConfigMapper,
   TFavoriteMapperFunction,
@@ -58,7 +57,6 @@ export interface IHydrationResults<T extends IFavoriteMetadata = IFavoriteMetada
 export class UserFavoriteManager {
   constructor(
     private store: Store<GeneralEntityAppState>,
-    private logger: LoggerService,
     private favoritesConfigMapper: FavoritesConfigMapper
   ) { }
 
@@ -124,7 +122,7 @@ export class UserFavoriteManager {
     if (!endpointFav) {
       return this.store.select(endpointEntitiesSelector).pipe(
         map(endpoints => {
-          const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid, this.logger);
+          const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid);
           const endpointEntity = endpoints[endpointGuid];
           return this.favoritesConfigMapper.getFavoriteEndpointFromEntity(endpointEntity);
         }),
