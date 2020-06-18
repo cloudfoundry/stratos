@@ -9,8 +9,8 @@ import { EntitySchema } from '../../../../../../../../store/src/helpers/entity-s
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import * as favoriteHelpers from '../../../../../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { CoreTestingModule } from '../../../../../../../test-framework/core-test.modules';
-import { UserFavoriteManager } from '../../../../../../core/user-favorite-manager';
 import { SharedModule } from '../../../../../shared.module';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
 import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
