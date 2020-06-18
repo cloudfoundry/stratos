@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import { generateStratosEntities } from '../../core/src/base-entity-types';
+import { generateStratosEntities } from '../../store/src/base-entity-types';
 import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog, TestEntityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 

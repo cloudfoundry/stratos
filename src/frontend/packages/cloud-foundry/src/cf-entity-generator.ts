@@ -4,10 +4,10 @@ import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { EndpointHealthCheck } from '../../core/endpoints-health-checks';
-import { metricEntityType } from '../../core/src/base-entity-schemas';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
+import { metricEntityType } from '../../store/src/base-entity-schemas';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,

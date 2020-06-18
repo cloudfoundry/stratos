@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, switchMap } from 'rxjs/operators';
 
-import { userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
 import { UserFavoriteManager } from '../../../core/src/core/user-favorite-manager';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import {

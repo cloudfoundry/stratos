@@ -2,8 +2,8 @@ import { ModuleWithProviders } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
-import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
 import { AppState } from '../../src/app-state';
+import { endpointEntitySchema } from '../../src/base-entity-schemas';
 import { entityCatalog } from '../../src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../src/entity-catalog/entity-catalog.types';
 import { appReducers } from '../../src/reducers.module';

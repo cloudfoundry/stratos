@@ -1,7 +1,7 @@
 import { compose } from '@ngrx/store';
 
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { InternalAppState, IRequestEntityTypeState } from '../app-state';
+import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
 import { EntityCatalogHelpers } from '../entity-catalog/entity-catalog.helper';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { EndpointModel, EndpointState } from '../types/endpoint.types';
