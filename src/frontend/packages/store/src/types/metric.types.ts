@@ -22,3 +22,8 @@ export interface IMetricCell {
   job: string;
   origin: string;
 }
+
+export enum MetricQueryType {
+  QUERY = 'query',
+  RANGE_QUERY = 'query_range'
+}

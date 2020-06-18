@@ -1,4 +1,7 @@
 import * as moment from 'moment';
+
+import { MetricQueryType } from '../../../../store/src/types/metric.types';
+
 export type momentTuple = [moment.DurationInputArg1, moment.unitOfTime.DurationConstructor];
 export interface ITimeRange {
   value?: string;
@@ -13,7 +16,4 @@ export interface StoreMetricTimeRange {
   step?: number;
 }
 
-export enum MetricQueryType {
-  QUERY = 'query',
-  RANGE_QUERY = 'query_range',
-}
+

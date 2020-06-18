@@ -1,10 +1,10 @@
 import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { IMetrics } from '../../../../../store/src/types/base-metric.types';
+import { MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
-import { MetricQueryType } from '../../services/metrics-range-selector.types';
 import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';
 
 @Component({
