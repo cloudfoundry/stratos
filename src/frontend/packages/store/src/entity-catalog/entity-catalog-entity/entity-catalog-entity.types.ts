@@ -1,4 +1,3 @@
-import { FilteredByNotReturnType, FilteredByReturnType, NeverKeys } from '../../../../core/src/core/utils.service';
 import { EntityService } from '../../entity-service';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { PaginationMonitor } from '../../monitors/pagination-monitor';
@@ -12,9 +11,29 @@ import { OrchestratedActionBuilders, OrchestratedActionCoreBuilders } from '../a
  *  - https://github.com/Microsoft/TypeScript/issues/25987#issuecomment-441224690
  *  - https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-414808995
  */
-export type KnownKeys<T> = {
+type KnownKeys<T> = {
   [K in keyof T]: string extends K ? never : number extends K ? never : K
 } extends { [_ in keyof T]: infer U } ? ({} extends U ? never : U) : never;
+
+type NeverKeys<T extends object> = Exclude<{
+  [K in keyof T]: T[K] extends never
+  ? K
+  : never
+}[keyof T], undefined>
+
+/**
+ * Pick all properties who's function has the specified return type U
+ */
+type FilteredByReturnType<T extends { [key: string]: (...args: any[]) => any }, U> = {
+  [P in keyof T]: ReturnType<T[P]> extends U ? T[P] : never
+};
+
+/**
+ * Pick all properties who's function do not have the specified return type U
+ */
+type FilteredByNotReturnType<T extends { [key: string]: (...args: any[]) => any }, U> = {
+  [P in keyof T]: ReturnType<T[P]> extends U ? never : T[P]
+};
 
 /**
  * Core entity and entities access (entity/entities monitors and services)
@@ -110,7 +129,7 @@ export type CustomEntityCatalogEntityStore<Y, ABC extends OrchestratedActionBuil
 
 /**
  * Combine all types of store
- * - CoreEntityCatalogEntityStore (entity and entities store access) 
+ * - CoreEntityCatalogEntityStore (entity and entities store access)
  * - EntityCatalogEntityStoreCollections (per entity custom entities lists)
  * - EntityCatalogEntityStoreSingles (per entity custom entity's)
  */
