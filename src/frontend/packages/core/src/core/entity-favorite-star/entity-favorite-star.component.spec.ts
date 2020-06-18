@@ -4,11 +4,11 @@ import { BehaviorSubject, of } from 'rxjs';
 
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
 import { BaseTestModulesNoShared } from '../../../test-framework/core-test.helper';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { DialogConfirmComponent } from '../../shared/components/dialog-confirm/dialog-confirm.component';
 import { FavoritesConfigMapper } from '../../shared/components/favorites-meta-card/favorite-config-mapper';
-import { UserFavoriteManager } from '../user-favorite-manager';
 import { EntityFavoriteStarComponent } from './entity-favorite-star.component';
 
 describe('EntityFavoriteStarComponent', () => {
