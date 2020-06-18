@@ -1,5 +1,5 @@
-import { userProfileEntitySchema } from '../../../core/src/base-entity-schemas';
 import { userProfilePasswordUpdatingKey } from '../effects/user-profile.effects';
+import { STRATOS_ENDPOINT_TYPE, stratosEntityFactory, userProfileSchemaKey } from '../helpers/stratos-entity-factory';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { EntityRequestAction } from '../types/request.types';
 import { UserProfileInfo, UserProfilePasswordUpdate } from '../types/user-profile.types';
@@ -11,8 +11,9 @@ export const UPDATE_USERPASSWORD = '[UserPassword] Update';
 abstract class BaseProfileAction implements EntityRequestAction {
   static guid = 'userProfile';
   guid = BaseProfileAction.guid;
-  entityType = userProfileEntitySchema.entityType;
-  endpointType = userProfileEntitySchema.endpointType;
+  entityType = userProfileSchemaKey;
+  endpointType = STRATOS_ENDPOINT_TYPE;
+  entity = [stratosEntityFactory(userProfileSchemaKey)]
   constructor(public type: string) { }
 }
 

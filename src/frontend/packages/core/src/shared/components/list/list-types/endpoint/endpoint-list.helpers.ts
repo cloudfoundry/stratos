@@ -5,7 +5,6 @@ import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { ActionState } from '../../../../../../../store/src/reducers/api-request-reducer/types';
@@ -17,6 +16,7 @@ import { StratosCurrentUserPermissions } from '../../../../../core/permissions/s
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { SnackBarService } from '../../../../services/snackbar.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { IListAction } from '../../list.component.types';
@@ -45,6 +45,7 @@ export class EndpointListHelper {
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private log: LoggerService,
+    private snackBarService: SnackBarService,
   ) { }
 
   endpointActions(): IListAction<EndpointModel>[] {
@@ -60,8 +61,8 @@ export class EndpointListHelper {
           this.confirmDialog.open(confirmation, () => {
             const obs$ = stratosEntityCatalog.endpoint.api.disconnect<ActionState>(item.guid, item.cnsi_type);
             this.handleAction(obs$, () => {
-              this.store.dispatch(new ShowSnackBar(`Disconnected endpoint '${item.name}'`));
-              stratosEntityCatalog.endpoint.api.get(item.guid);
+              this.snackBarService.show(`Disconnected endpoint '${item.name}'`);
+              stratosEntityCatalog.systemInfo.api.getSystemInfo();
             });
           });
         },
@@ -109,7 +110,7 @@ export class EndpointListHelper {
           this.confirmDialog.open(confirmation, () => {
             const obs$ = stratosEntityCatalog.endpoint.api.unregister<ActionState>(item.guid, item.cnsi_type);
             this.handleAction(obs$, () => {
-              this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
+              this.snackBarService.show(`Unregistered ${item.name}`);
             });
           });
         },

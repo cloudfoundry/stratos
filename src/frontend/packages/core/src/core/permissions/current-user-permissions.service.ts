@@ -20,7 +20,7 @@ import {
 import { StratosUserPermissionsChecker } from './stratos-user-permissions.checker';
 
 
-export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers'
+export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers';
 
 @Injectable()
 export class CurrentUserPermissionsService {
@@ -35,7 +35,7 @@ export class CurrentUserPermissionsService {
     this.allCheckers = [
       new StratosUserPermissionsChecker(store),
       ...nullSafeCustomCheckers
-    ]
+    ];
   }
   /**
    * @param action The action we're going to check the user's access to.
@@ -53,13 +53,13 @@ export class CurrentUserPermissionsService {
   ): Observable<boolean> {
     let actionConfig;
     if (typeof action === 'string') {
-      let permConfigType = this.getPermissionConfig(action);
+      const permConfigType = this.getPermissionConfig(action);
       if (!permConfigType) {
         return of(false); // Logging handled in getPermissionConfig
       }
       actionConfig = this.getConfig(permConfigType);
     } else {
-      actionConfig = this.getConfig(action)
+      actionConfig = this.getConfig(action);
     }
     const obs$ = this.getCanObservable(actionConfig, endpointGuid, ...args);
     return obs$ ?
@@ -93,7 +93,7 @@ export class CurrentUserPermissionsService {
       'permissions check',
       actionConfig.type,
       of(false)
-    )
+    );
   }
 
   private getComplexPermission(permissionConfig: PermissionConfig[], endpointGuid?: string, ...args: any[]) {
@@ -113,7 +113,7 @@ export class CurrentUserPermissionsService {
       [{
         checks: [of(false)]
       }]
-    )
+    );
   }
 
   private getConfig(config: PermissionConfigType, tries = 0): PermissionConfig[] | PermissionConfig {
@@ -149,7 +149,7 @@ export class CurrentUserPermissionsService {
       'fallback permission',
       'N/A',
       of(null)
-    )
+    );
   }
 
   private getPermissionConfig(key: CurrentUserPermissions): PermissionConfigType {
@@ -158,7 +158,7 @@ export class CurrentUserPermissionsService {
       'permissions checker',
       key,
       null
-    )
+    );
   }
 
   /**

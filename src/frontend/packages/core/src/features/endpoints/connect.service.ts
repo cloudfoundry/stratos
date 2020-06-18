@@ -13,11 +13,11 @@ import {
 
 import { AuthParams, ConnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
+import { EndpointType } from '../../../../store/src/extension-types';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../core/endpoints.service';
-import { EndpointType } from '../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../core/utils.service';
 
 export interface ConnectEndpointConfig {

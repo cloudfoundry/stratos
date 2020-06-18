@@ -6,18 +6,18 @@ import { denormalize } from 'normalizr';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
-import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   StratosCatalogEndpointEntity,
 } from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { endpointSchemaKey, stratosEntityFactory } from '../../../../../../store/src/helpers/stratos-entity-factory';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../../../../../../store/src/selectors/api.selectors';
 import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
-import { endpointEntitySchema } from '../../../../base-entity-schemas';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
 
@@ -56,9 +56,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   endpointTypeSupportsSSO = false;
   endpoint: StratosCatalogEndpointEntity;
 
-  // private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
-
-  constructor(private store: Store<GeneralEntityAppState>, activatedRoute: ActivatedRoute, ) {
+  constructor(
+    store: Store<GeneralEntityAppState>,
+    activatedRoute: ActivatedRoute,
+    private snackBarService: SnackBarService
+  ) {
     const paginationState$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().pagination$;
 
     // TODO: RC Fix me, this is madness
@@ -67,7 +69,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       map(([pagination, entities]) => {
         const pages = Object.values(pagination.ids);
         const page = [].concat.apply([], pages);
-        const endpoints = page.length ? denormalize(page, [endpointEntitySchema], entities) : [];
+        const endpoints = page.length ? denormalize(page, [stratosEntityFactory(endpointSchemaKey)], entities) : [];
         return {
           names: endpoints.map(ep => ep.name),
           urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
@@ -108,7 +110,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
           ssoAllowed: this.ssoAllowedField ? !!this.ssoAllowedField.value : false
         };
         if (!result.error) {
-          this.store.dispatch(new ShowSnackBar(`Successfully registered '${this.nameField.value}'`));
+          this.snackBarService.show(`Successfully registered '${this.nameField.value}'`);
         }
         const success = !result.error;
         return {

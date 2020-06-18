@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
   CONNECT_ENDPOINTS,
@@ -25,6 +24,7 @@ import { GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.act
 import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 import { DispatchOnlyAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { EndpointType } from '../extension-types';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { stratosEntityCatalog } from '../stratos-entity-catalog';
 import { NormalizedResponse } from '../types/api.types';

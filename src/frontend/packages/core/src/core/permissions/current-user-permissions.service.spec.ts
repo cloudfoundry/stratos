@@ -3,14 +3,14 @@ import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from 
 import { first, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/app-state';
+import { generateStratosEntities } from '../../../../store/src/base-entity-types';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../store/src/entity-catalog-test.module';
 import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { endpointSchemaKey, stratosEntityFactory } from '../../../../store/src/helpers/stratos-entity-factory';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { BaseEntityValues } from '../../../../store/src/types/entity.types';
 import { PaginationState } from '../../../../store/src/types/pagination.types';
 import { AppTestModule } from '../../../test-framework/core-test.helper';
-import { endpointEntitySchema } from '../../base-entity-schemas';
-import { generateStratosEntities } from '../../stratos-entity-generator';
 import { PermissionConfig } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { StratosPermissionStrings, StratosPermissionTypes, StratosScopeStrings } from './stratos-user-permissions.checker';
@@ -138,7 +138,7 @@ describe('CurrentUserPermissionsService', () => {
     // Create request and requestData sections
     const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>([
       [
-        endpointEntitySchema,
+        stratosEntityFactory(endpointSchemaKey),
         endpoints.map(endpoint => ({
           guid: endpoint.guid,
           data: endpoint

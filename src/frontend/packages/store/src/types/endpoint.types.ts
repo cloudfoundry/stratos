@@ -1,6 +1,6 @@
-import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { StratosScopeStrings } from '../../../core/src/core/permissions/stratos-user-permissions.checker';
 import { MetricsAPITargets, MetricsStratosInfo } from '../actions/metrics-api.actions';
+import { EndpointType } from '../extension-types';
 import { endpointSchemaKey } from '../helpers/stratos-entity-factory';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 
@@ -13,6 +13,7 @@ export interface INewlyConnectedEndpointInfo {
   user: EndpointUser;
 }
 
+// TODO: RC REMOVE
 export const endpointStoreNames: {
   section: TRequestTypeKeys,
   type: string

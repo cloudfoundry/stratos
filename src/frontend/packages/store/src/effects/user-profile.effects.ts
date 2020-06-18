@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
-import { userProfileEntitySchema } from '../../../core/src/base-entity-schemas';
 import { environment } from '../../../core/src/environments/environment';
 import {
   FetchUserProfileAction,
@@ -14,6 +13,7 @@ import {
   UpdateUserPasswordAction,
   UpdateUserProfileAction,
 } from '../actions/user-profile.actions';
+import { userProfileEntitySchema } from '../base-entity-schemas';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { UserProfileInfo } from '../types/user-profile.types';
 import { DispatchOnlyAppState } from './../app-state';
