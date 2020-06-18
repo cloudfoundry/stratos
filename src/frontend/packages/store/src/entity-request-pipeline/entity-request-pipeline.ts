@@ -2,11 +2,11 @@ import { Action, Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, InternalAppState } from '../app-state';
 import { RecursiveDelete } from '../effects/recursive-entity-delete.effect';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { isHttpErrorResponse } from '../jetstream';
 import { ApiRequestTypes, getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { PaginatedAction } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';

@@ -7,9 +7,9 @@ import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
 import { environment } from '../../../core/src/environments/environment';
-import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState } from '../../../store/src/app-state';
 import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
+import { isHttpErrorResponse } from '../../../store/src/jetstream';
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import {
   resultPerPageParam,

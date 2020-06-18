@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
-import { isHttpErrorResponse } from '../../../core/src/jetstream.helpers';
+import { isHttpErrorResponse } from '../jetstream';
 import {
   SETUP_GET_SCOPES,
   SETUP_SAVE_CONFIG,

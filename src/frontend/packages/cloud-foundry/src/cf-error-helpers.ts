@@ -1,4 +1,5 @@
-import { JetStreamErrorResponse, jetStreamErrorResponseToSafeString } from '../../core/src/jetstream.helpers';
+import { jetStreamErrorResponseToSafeString } from '../../core/src/jetstream.helpers';
+import { JetStreamErrorResponse } from '../../store/src/jetstream';
 
 export interface CfErrorObject {
   code: number;
