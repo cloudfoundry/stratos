@@ -4,7 +4,7 @@ import { IServiceInstance } from '../../frontend/packages/cloud-foundry/src/cf-a
 import { CFResponse, createEmptyCfResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { ListComponent } from '../po/list.po';
@@ -65,7 +65,7 @@ export class ServicesHelperE2E {
 
   deleteServiceInstance = (cfGuid: string, serviceGuid: string, userProvided = false): promise.Promise<CFResponse> => {
     const id = `${cfGuid}:${serviceGuid}`;
-    const url = userProvided ?`user_provided_service_instances/${serviceGuid}?async=false&recursive=true` : `service_instances/${serviceGuid}?async=false&recursive=true`;
+    const url = userProvided ? `user_provided_service_instances/${serviceGuid}?async=false&recursive=true` : `service_instances/${serviceGuid}?async=false&recursive=true`;
     return this.cfRequestHelper.sendCfDelete(
       cfGuid,
       url

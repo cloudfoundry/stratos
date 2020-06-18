@@ -1,7 +1,7 @@
 import { browser, by, element, protractor } from 'protractor';
 
 import { e2e } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFUsersListComponent } from '../po/cf-users-list.po';

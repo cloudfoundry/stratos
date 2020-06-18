@@ -1,7 +1,7 @@
 import { by, element, promise, protractor } from 'protractor';
 
 import { e2e } from '../../e2e';
-import { CFHelpers } from '../../helpers/cf-helpers';
+import { CFHelpers } from '../../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { CfOrgLevelPage } from '../org-level/cf-org-level-page.po';
 import { CfTopLevelPage } from './cf-top-level-page.po';

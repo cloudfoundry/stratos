@@ -4,7 +4,7 @@ import { IApp, IRoute, ISpace } from '../../frontend/packages/cloud-foundry/src/
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 

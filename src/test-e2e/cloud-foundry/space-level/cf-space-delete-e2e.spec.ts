@@ -1,14 +1,15 @@
-import { CfOrgLevelPage } from './../org-level/cf-org-level-page.po';
 import { by, element, protractor } from 'protractor';
+
 import { e2e } from '../../e2e';
-import { CFHelpers } from '../../helpers/cf-helpers';
+import { CFHelpers } from '../../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
-import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
 import { CFPage } from '../../po/cf-page.po';
-import { SideNavMenuItem } from '../../po/side-nav.po';
+import { ConfirmDialogComponent } from '../../po/confirm-dialog';
 import { ListComponent } from '../../po/list.po';
 import { MetaCardTitleType } from '../../po/meta-card.po';
-import { ConfirmDialogComponent } from '../../po/confirm-dialog';
+import { SideNavMenuItem } from '../../po/side-nav.po';
+import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
+import { CfOrgLevelPage } from './../org-level/cf-org-level-page.po';
 
 describe('Delete Space', () => {
   let e2eSetup;
