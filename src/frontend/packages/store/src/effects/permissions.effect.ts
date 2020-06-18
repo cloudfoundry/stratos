@@ -59,7 +59,7 @@ export class PermissionsEffects {
         guid: action.guid,
         user: action.endpoint.user
       }
-      return endpointType.definition.userRolesFetch([endpoint], this.store, this.logService, this.httpClient).pipe(
+      return endpointType.definition.userRolesFetch([endpoint], this.store, this.httpClient).pipe(
         map(succeeded => succeeded ? successAction : failedAction)
       );
     }),
