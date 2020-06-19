@@ -3,10 +3,10 @@ import * as moment from 'moment';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
 import { metricEntityType } from '../../store/src/base-entity-schemas';
-import { BaseEndpointAuth } from '../../store/src/endpoint-auth';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,

@@ -2,13 +2,12 @@ import {
   EndpointListDetailsComponent,
 } from '../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { endpointEntitySchema } from '../base-entity-schemas';
-import { BaseEndpointAuth } from '../endpoint-auth';
 import { EntitySchema } from '../helpers/entity-schema';
 import { TestEntityCatalog } from './entity-catalog';
 import { StratosCatalogEndpointEntity, StratosCatalogEntity } from './entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogSchemas, IStratosEndpointDefinition } from './entity-catalog.types';
 
-describe('EntityCatalogService', () => {
+fdescribe('EntityCatalogService', () => {
   let entityCatalog: TestEntityCatalog;
   function getEndpointDefinition() {
     return {
@@ -18,7 +17,7 @@ describe('EntityCatalogService', () => {
       icon: 'cloud_foundry',
       iconFont: 'stratos-icons',
       logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
-      authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
+      authTypes: [],
       listDetailsComponent: EndpointListDetailsComponent,
     } as IStratosEndpointDefinition;
   }
@@ -124,9 +123,7 @@ describe('EntityCatalogService', () => {
       urlValidation: false,
       unConnectable: true,
       urlValidationRegexString: 'redjecks',
-      authTypes: [
-        BaseEndpointAuth.SSO
-      ]
+      authTypes: []
     };
     const definition = {
       ...endpoint,

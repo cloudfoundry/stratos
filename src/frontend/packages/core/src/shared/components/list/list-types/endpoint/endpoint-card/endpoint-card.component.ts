@@ -21,14 +21,12 @@ import {
 } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { coreEndpointListDetailsComponents } from '../../../../../../features/endpoints/endpoint-helpers';
-import {
-  createMetaCardMenuItemSeparator,
-  MetaCardMenuItem,
-} from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
+import { createMetaCardMenuItemSeparator } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
@@ -46,7 +44,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public rowObs = new ReplaySubject<EndpointModel>();
   public favorite: UserFavoriteEndpoint;
   public address: string;
-  public cardMenu: MetaCardMenuItem[];
+  public cardMenu: MenuItem[];
   public endpointCatalogEntity: StratosCatalogEndpointEntity;
   public hasDetails = true;
   public endpointLink: string = null;

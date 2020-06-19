@@ -4,8 +4,8 @@ import {
   UserFavoriteCatalogEntity,
   UserProfileCatalogEntity,
 } from '../../store/src/base-entity-types';
-import { BaseEndpointAuth } from '../../store/src/endpoint-auth';
 import { StratosCatalogEndpointEntity } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { BaseEndpointAuth } from './core/endpoint-auth';
 import {
   MetricsEndpointDetailsComponent,
 } from './features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';

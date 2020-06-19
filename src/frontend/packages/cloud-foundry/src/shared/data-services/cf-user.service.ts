@@ -7,10 +7,8 @@ import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getCurrentUserCFGlobalStates } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
-import {
-  LocalPaginationHelpers,
-} from '../../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
+import { LocalPaginationHelpers } from '../../../../store/src/helpers/local-list.helpers';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import {
   getDefaultPaginationEntityState,
