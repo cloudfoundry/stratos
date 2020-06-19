@@ -4,13 +4,13 @@ import { first, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/app-state';
 import { endpointEntitySchema } from '../../../../store/src/base-entity-schemas';
-import { generateStratosEntities } from '../../../../store/src/base-entity-types';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../store/src/entity-catalog-test.module';
 import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { BaseEntityValues } from '../../../../store/src/types/entity.types';
 import { PaginationState } from '../../../../store/src/types/pagination.types';
 import { AppTestModule } from '../../../test-framework/core-test.helper';
+import { generateStratosEntities } from '../../stratos-entities';
 import { PermissionConfig } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { StratosPermissionStrings, StratosPermissionTypes, StratosScopeStrings } from './stratos-user-permissions.checker';

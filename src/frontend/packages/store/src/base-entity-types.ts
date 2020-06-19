@@ -1,18 +1,11 @@
 import {
-  MetricsEndpointDetailsComponent,
-} from '../../core/src/features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
-import {
   endpointEntitySchema,
   STRATOS_ENDPOINT_TYPE,
   systemInfoEntitySchema,
   userFavoritesEntitySchema,
   userProfileEntitySchema,
 } from './base-entity-schemas';
-import { BaseEndpointAuth } from './endpoint-auth';
-import {
-  StratosCatalogEndpointEntity,
-  StratosCatalogEntity,
-} from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { StratosCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './reducers/favorite.reducer';
 import { systemEndpointsReducer } from './reducers/system-endpoints.reducer';
 
@@ -34,7 +27,7 @@ const stratosType = {
  * DefaultEndpointEntityType is used to represent a general endpoint
  * This should not be used to actually attempt to render an endpoint and is instead used as a way to fill the
  */
-class DefaultEndpointCatalogEntity extends StratosCatalogEntity {
+export class DefaultEndpointCatalogEntity extends StratosCatalogEntity {
   constructor() {
     super({
       schema: endpointEntitySchema,
@@ -48,7 +41,7 @@ class DefaultEndpointCatalogEntity extends StratosCatalogEntity {
   }
 }
 
-class UserFavoriteCatalogEntity extends StratosCatalogEntity {
+export class UserFavoriteCatalogEntity extends StratosCatalogEntity {
   constructor() {
     super({
       schema: userFavoritesEntitySchema,
@@ -63,7 +56,7 @@ class UserFavoriteCatalogEntity extends StratosCatalogEntity {
   }
 }
 
-class UserProfileCatalogEntity extends StratosCatalogEntity {
+export class UserProfileCatalogEntity extends StratosCatalogEntity {
   constructor() {
     super({
       schema: userProfileEntitySchema,
@@ -73,7 +66,7 @@ class UserProfileCatalogEntity extends StratosCatalogEntity {
   }
 }
 
-class SystemInfoCatalogEntity extends StratosCatalogEntity {
+export class SystemInfoCatalogEntity extends StratosCatalogEntity {
   constructor() {
     super({
       schema: systemInfoEntitySchema,
@@ -83,25 +76,4 @@ class SystemInfoCatalogEntity extends StratosCatalogEntity {
   }
 }
 
-export function generateStratosEntities() {
-  return [
-    new DefaultEndpointCatalogEntity(),
-    new SystemInfoCatalogEntity(),
-    new UserFavoriteCatalogEntity(),
-    new UserProfileCatalogEntity(),
-    // TODO: metrics location to be sorted - STRAT-152
-    new StratosCatalogEndpointEntity({
-      type: 'metrics',
-      label: 'Metrics',
-      labelPlural: 'Metrics',
-      tokenSharing: true,
-      logoUrl: '/core/assets/endpoint-icons/metrics.svg',
-      authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None],
-      renderPriority: 1,
-      listDetailsComponent: MetricsEndpointDetailsComponent,
-    },
-      metadata => `/endpoints/metrics/${metadata.guid}`
-    )
-  ];
-}
 

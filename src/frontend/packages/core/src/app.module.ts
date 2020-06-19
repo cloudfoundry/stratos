@@ -15,7 +15,6 @@ import {
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
 import { STRATOS_ENDPOINT_TYPE } from '../../store/src/base-entity-schemas';
-import { generateStratosEntities } from '../../store/src/base-entity-types';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
@@ -52,6 +51,7 @@ import { CustomReuseStrategy } from './route-reuse-stragegy';
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SidePanelService } from './shared/services/side-panel.service';
 import { SharedModule } from './shared/shared.module';
+import { generateStratosEntities } from './stratos-entities';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
