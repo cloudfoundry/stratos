@@ -10,7 +10,7 @@ import {
   IFavoritesInfo,
   IGroupedFavorites,
   UserFavoriteManager,
-} from '../../../core/user-favorite-manager';
+} from '../../../../../store/src/user-favorite-manager';
 
 
 @Component({

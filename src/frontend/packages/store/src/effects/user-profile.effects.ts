@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
-import { environment } from '../../../core/src/environments/environment';
 import {
   FetchUserProfileAction,
   GET_USERPROFILE,
@@ -13,21 +12,15 @@ import {
   UpdateUserPasswordAction,
   UpdateUserProfileAction,
 } from '../actions/user-profile.actions';
-import { userProfileEntitySchema } from '../base-entity-schemas';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { proxyAPIVersion } from '../jetstream';
 import { UserProfileInfo } from '../types/user-profile.types';
 import { DispatchOnlyAppState } from './../app-state';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
 
-const { proxyAPIVersion } = environment;
-
-export const userProfilePasswordUpdatingKey = 'password';
-
 @Injectable()
 export class UserProfileEffect {
-
-  stratosUserConfig = entityCatalog.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
 
   constructor(
     private actions$: Actions,
@@ -56,14 +49,6 @@ export class UserProfileEffect {
   @Effect() updateUserProfileInfo$ = this.actions$.pipe(
     ofType<UpdateUserProfileAction>(UPDATE_USERPROFILE),
     mergeMap((action: UpdateUserProfileAction) => {
-      // const apiAction = {
-      //   entityType: this.stratosUserEntityType,
-      //   endpointType: this.stratosUserEndpointType, // TODO: RC remove this completely
-      //   guid: FetchUserProfileAction.guid,
-      //   type: action.type,
-      //   updatingKey: rootUpdatingKey // TODO: RC Transfer in
-      // } as EntityRequestAction;
-      // const actionType = 'update';
       this.store.dispatch(new StartRequestAction(action, 'update'));
       const userGuid = action.profile.id;
       const version = action.profile.meta.version;
@@ -89,14 +74,6 @@ export class UserProfileEffect {
   @Effect() updateUserPassword$ = this.actions$.pipe(
     ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD),
     mergeMap((action: UpdateUserPasswordAction) => {
-      // const apiAction = {
-      //   entityType: this.stratosUserEntityType,
-      //   endpointType: this.stratosUserEndpointType,
-      //   guid: FetchUserProfileAction.guid,
-      //   type: action.type,
-      //   // updatingKey: userProfilePasswordUpdatingKey
-      // } as EntityRequestAction;
-      // Use the creating action for password change
       this.store.dispatch(new StartRequestAction(action, 'update'));
       const userGuid = action.id;
       const headers = {

@@ -15,7 +15,6 @@ import {
   StratosTabType,
 } from '../../../../../../core/src/core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { getFavoriteFromEntity } from '../../../../../../core/src/core/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import {
@@ -31,6 +30,7 @@ import { ActionState } from '../../../../../../store/src/reducers/api-request-re
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { getFavoriteFromEntity } from '../../../../../../store/src/user-favorite-helpers';
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
 import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';

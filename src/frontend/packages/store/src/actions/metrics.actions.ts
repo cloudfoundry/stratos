@@ -1,13 +1,11 @@
-import { environment } from '../../../core/src/environments/environment';
 import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
 import { metricEntityType } from '../base-entity-schemas';
+import { proxyAPIVersion } from '../jetstream';
 import { EntityRequestAction } from '../types/request.types';
 
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
 export const METRICS_START_FAILED = '[Metrics] Fetch Failed';
-
-const { proxyAPIVersion } = environment;
 
 export interface IMetricQueryConfigParams {
   window?: string;

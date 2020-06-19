@@ -3,24 +3,23 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
-import { ToggleUserFavoriteAction } from '../../../store/src/actions/user-favourites-actions/toggle-user-favorite-action';
-import { GeneralEntityAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
-import { endpointEntitiesSelector } from '../../../store/src/selectors/endpoint.selectors';
+import {
+  FavoritesConfigMapper,
+  TFavoriteMapperFunction,
+} from '../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
+import { ToggleUserFavoriteAction } from './actions/user-favourites-actions/toggle-user-favorite-action';
+import { GeneralEntityAppState, IRequestEntityTypeState } from './app-state';
+import { entityCatalog } from './entity-catalog/entity-catalog';
+import { endpointEntitiesSelector } from './selectors/endpoint.selectors';
 import {
   errorFetchingFavoritesSelector,
   favoriteEntitiesSelector,
   favoriteGroupsSelector,
   fetchingFavoritesSelector,
-} from '../../../store/src/selectors/favorite-groups.selectors';
-import { isFavorite } from '../../../store/src/selectors/favorite.selectors';
-import { IUserFavoritesGroups } from '../../../store/src/types/favorite-groups.types';
-import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
-import {
-  FavoritesConfigMapper,
-  TFavoriteMapperFunction,
-} from '../shared/components/favorites-meta-card/favorite-config-mapper';
-import { LoggerService } from './logger.service';
+} from './selectors/favorite-groups.selectors';
+import { isFavorite } from './selectors/favorite.selectors';
+import { IUserFavoritesGroups } from './types/favorite-groups.types';
+import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
 
 export interface IFavoriteEntity {
   type: string;
@@ -58,7 +57,6 @@ export interface IHydrationResults<T extends IFavoriteMetadata = IFavoriteMetada
 export class UserFavoriteManager {
   constructor(
     private store: Store<GeneralEntityAppState>,
-    private logger: LoggerService,
     private favoritesConfigMapper: FavoritesConfigMapper
   ) { }
 
@@ -124,7 +122,7 @@ export class UserFavoriteManager {
     if (!endpointFav) {
       return this.store.select(endpointEntitiesSelector).pipe(
         map(endpoints => {
-          const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid, this.logger);
+          const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid);
           const endpointEntity = endpoints[endpointGuid];
           return this.favoritesConfigMapper.getFavoriteEndpointFromEntity(endpointEntity);
         }),

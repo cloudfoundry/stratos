@@ -4,7 +4,7 @@ import { ISpace } from '../../../frontend/packages/cloud-foundry/src/cf-api.type
 import { APIResource } from '../../../frontend/packages/store/src/types/api.types';
 import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
-import { CFHelpers } from '../../helpers/cf-helpers';
+import { CFHelpers } from '../../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { ListComponent } from '../../po/list.po';
 import { CfSpaceLevelPage } from './cf-space-level-page.po';

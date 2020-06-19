@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import { LoggerService } from '../../../core/src/core/logger.service';
 import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
   InvalidSession,
@@ -44,7 +43,6 @@ export class AuthEffect {
     private http: HttpClient,
     private actions$: Actions,
     private store: Store<DispatchOnlyAppState>,
-    private logger: LoggerService
   ) { }
 
   @Effect() loginRequest$ = this.actions$.pipe(
@@ -167,7 +165,7 @@ export class AuthEffect {
           const dashboardData = JSON.parse(storage.getItem(sessionId));
           store.dispatch(new HydrateDashboardStateAction(dashboardData));
         } catch (e) {
-          this.logger.warn('Failed to parse user settings from session storage, consider clearing them manually', e);
+          console.warn('Failed to parse user settings from session storage, consider clearing them manually', e);
         }
       }
     }

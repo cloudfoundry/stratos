@@ -11,7 +11,7 @@ import { userFavoritesEntitySchema } from '../../../../../store/src/base-entity-
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
-import { IFavoriteEntity } from '../../../core/user-favorite-manager';
+import { IFavoriteEntity } from '../../../../../store/src/user-favorite-manager';
 import { isEndpointConnected } from '../../../features/endpoints/connect.service';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';

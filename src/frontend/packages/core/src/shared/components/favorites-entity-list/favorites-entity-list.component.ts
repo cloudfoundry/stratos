@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
 import { distinctUntilChanged, map, scan, startWith } from 'rxjs/operators';
 
-import { IFavoriteEntity } from '../../../core/user-favorite-manager';
+import { IFavoriteEntity } from '../../../../../store/src/user-favorite-manager';
 import { FavoritesConfigMapper, IFavoriteTypes } from '../favorites-meta-card/favorite-config-mapper';
 
 

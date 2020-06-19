@@ -1,5 +1,4 @@
 import { IEntityMetadata } from '../entity-catalog/entity-catalog.types';
-import { LoggerService } from '../../../core/src/core/logger.service';
 
 export const userFavoritesPaginationKey = 'userFavorites';
 
@@ -76,10 +75,10 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
       .join(favoriteGuidSeparator);
   }
 
-  static getEntityGuidFromFavoriteGuid(favoriteGuid: string, logger: LoggerService): string {
+  static getEntityGuidFromFavoriteGuid(favoriteGuid: string): string {
     const parts = favoriteGuid.split(favoriteGuidSeparator);
     if (parts.length < 3) {
-      logger.error('Failed to determine entity guid from favorite guid: ', parts);
+      console.error('Failed to determine entity guid from favorite guid: ', parts);
       return null;
     } else if (parts.length === 3) {
       return favoriteGuid.split(favoriteGuidSeparator)[0];

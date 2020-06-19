@@ -1,10 +1,11 @@
 import { by, element, protractor } from 'protractor';
+
 import { e2e } from '../../e2e';
-import { CFHelpers } from '../../helpers/cf-helpers';
+import { CFHelpers } from '../../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
-import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
 import { CFPage } from '../../po/cf-page.po';
 import { SideNavMenuItem } from '../../po/side-nav.po';
+import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
 
 describe('Delete Organization', () => {
   let e2eSetup;
