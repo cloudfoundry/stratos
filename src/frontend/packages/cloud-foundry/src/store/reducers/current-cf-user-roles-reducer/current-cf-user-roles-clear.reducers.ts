@@ -19,7 +19,7 @@ export function removeEndpointCfRoles(state: IAllCfRolesState, action: EndpointA
 }
 
 export function addCfEndpoint(state: IAllCfRolesState, action: EndpointActionComplete) {
-  if (action.endpointType !== CF_ENDPOINT_TYPE) {
+  if (action.completeEndpointType !== CF_ENDPOINT_TYPE) {
     return state;
   }
   const endpoint = action.endpoint as EndpointModel;

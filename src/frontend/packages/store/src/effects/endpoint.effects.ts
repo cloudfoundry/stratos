@@ -145,7 +145,7 @@ export class EndpointsEffect {
         '/pp/v1/auth/login/cnsi',
         params,
         null,
-        action.endpointType,
+        action.connectEndpointType,
         body,
         response => response && response.error && response.error.error ? response.error.error : 'Could not connect, please try again'
       );
@@ -165,7 +165,7 @@ export class EndpointsEffect {
         '/pp/v1/auth/logout/cnsi',
         params,
         null,
-        action.endpointType
+        action.disconnectEndpointType
       );
     }));
 
@@ -183,7 +183,7 @@ export class EndpointsEffect {
         '/pp/v1/unregister',
         params,
         'delete',
-        action.endpointType
+        action.unregisterEndpointType
       );
     }));
 
@@ -212,10 +212,10 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/register/' + action.endpointType,
+        '/pp/v1/register/' + action.registerEndpointType,
         new HttpParams({}),
         'create',
-        action.endpointType,
+        action.registerEndpointType,
         body,
         this.processRegisterError
       );
@@ -244,7 +244,7 @@ export class EndpointsEffect {
         '/pp/v1/endpoint/' + action.id,
         new HttpParams({}),
         'update',
-        action.endpointType,
+        action.updateEndpointType,
         body,
         this.processUpdateError
       );
@@ -270,11 +270,15 @@ export class EndpointsEffect {
     return message;
   }
 
+  /**
+   * @param endpointType The underlying endpoints type (_cf_Endpoint, not _stratos_Endpoint)
+   */
   private doEndpointAction(
     apiAction: EntityRequestAction | PaginatedAction,
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
+
     endpointType: EndpointType,
     body?: string,
     errorMessageHandler?: (e: any) => string,

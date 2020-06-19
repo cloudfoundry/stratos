@@ -51,7 +51,7 @@ export class PermissionsEffects {
   @Effect() getPermissionForNewlyConnectedEndpoint$ = this.actions$.pipe(
     ofType<EndpointActionComplete>(CONNECT_ENDPOINTS_SUCCESS),
     switchMap(action => {
-      const endpointType = entityCatalog.getEndpoint(action.endpointType)
+      const endpointType = entityCatalog.getEndpoint(action.completeEndpointType)
       if (!endpointType.definition.userRolesFetch) {
         return EMPTY;
       }

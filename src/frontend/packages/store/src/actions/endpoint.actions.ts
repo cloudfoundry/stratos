@@ -41,7 +41,8 @@ export class EndpointActionComplete implements Action {
   constructor(
     public type: string,
     public guid: string,
-    public endpointType: EndpointType,
+    // Note - The underlying endpoints type (_cf_Endpoint, not _stratos_Endpoint)
+    public completeEndpointType: EndpointType,
     public endpoint: EndpointModel | INewlyConnectedEndpointInfo
   ) { }
 }
@@ -137,7 +138,8 @@ export class ConnectEndpoint extends SingleBaseEndpointAction {
   static UpdatingKey = 'connectingKey'
   constructor(
     guid: string,
-    public endpointType: EndpointType,
+    // Note - should not be called endpointType
+    public connectEndpointType: EndpointType,
     public authType: string,
     public authValues: AuthParams,
     public systemShared: boolean,
@@ -160,7 +162,8 @@ export class DisconnectEndpoint extends SingleBaseEndpointAction {
   static UpdatingKey = 'disconnecting'
   constructor(
     guid: string,
-    public endpointType: EndpointType,
+    // Note - should not be called endpointType
+    public disconnectEndpointType: EndpointType,
   ) {
     super(
       DISCONNECT_ENDPOINTS,
@@ -178,7 +181,8 @@ export class DisconnectEndpoint extends SingleBaseEndpointAction {
 export class UnregisterEndpoint extends SingleBaseEndpointAction {
   constructor(
     guid: string,
-    public endpointType: EndpointType,
+    // Note - should not be called endpointType
+    public unregisterEndpointType: EndpointType,
   ) {
     super(
       UNREGISTER_ENDPOINTS,
@@ -194,7 +198,8 @@ export class UnregisterEndpoint extends SingleBaseEndpointAction {
 
 export class RegisterEndpoint extends SingleBaseEndpointAction {
   constructor(
-    public endpointType: EndpointType,
+    // Note - should not be called endpointType
+    public registerEndpointType: EndpointType,
     public endpointSubType: string = null,
     public name: string,
     public endpoint: string,
@@ -218,7 +223,8 @@ export class RegisterEndpoint extends SingleBaseEndpointAction {
 
 export class UpdateEndpoint extends SingleBaseEndpointAction {
   constructor(
-    public endpointType: EndpointType, // TODO: RC test different types
+    // Note - should not be called endpointType
+    public updateEndpointType: EndpointType, // TODO: RC test different types
     public id: string,
     public name: string,
     public skipSSL: boolean,

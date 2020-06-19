@@ -25,10 +25,10 @@ import { UserProfileInfo, UserProfilePasswordUpdate } from './types/user-profile
 
 export interface EndpointActionBuilder extends OrchestratedActionBuilders {
   get: (
-    guid: string
+    guid: string,
   ) => GetEndpoint,
   getAll: (
-    login?: boolean
+    login?: boolean,
   ) => GetAllEndpoints,
   getMultiple: (
     endpointGuid?: string,
@@ -76,6 +76,10 @@ export interface EndpointActionBuilder extends OrchestratedActionBuilders {
     }
   ) => UpdateEndpoint,
 }
+
+// TODO: RC reg sterpper, connect with dodgy creds, no error
+// TODO: RC connect endpoint whilst on list. connection status changes... but dialog shows.. error in return currentUserCfRolesRequestStateReducer(state, action as GetCfUserRelations);
+
 export const endpointActionBuilder: EndpointActionBuilder = {
   get: (guid: string) => new GetEndpoint(guid),
   getAll: (login: boolean) => new GetAllEndpoints(login),

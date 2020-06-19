@@ -1,19 +1,14 @@
 import { AfterContentInit, Component, Input, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { denormalize } from 'normalizr';
 import { Observable } from 'rxjs';
-import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
+import { filter, map, pairwise, tap } from 'rxjs/operators';
 
-import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   StratosCatalogEndpointEntity,
 } from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { endpointEntityType, stratosEntityFactory } from '../../../../../../store/src/helpers/stratos-entity-factory';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { getAPIRequestDataState } from '../../../../../../store/src/selectors/api.selectors';
 import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -57,19 +52,12 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   endpoint: StratosCatalogEndpointEntity;
 
   constructor(
-    store: Store<GeneralEntityAppState>,
     activatedRoute: ActivatedRoute,
     private snackBarService: SnackBarService
   ) {
-    const paginationState$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().pagination$;
-
-    // TODO: RC Fix me, this is madness
-    this.existingEndpoints = paginationState$.pipe(
-      withLatestFrom(store.select(getAPIRequestDataState)),
-      map(([pagination, entities]) => {
-        const pages = Object.values(pagination.ids);
-        const page = [].concat.apply([], pages);
-        const endpoints = page.length ? denormalize(page, [stratosEntityFactory(endpointEntityType)], entities) : [];
+    // TODO: RC test
+    this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
+      map(endpoints => {
         return {
           names: endpoints.map(ep => ep.name),
           urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
@@ -98,6 +86,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       this.clientSecretField ? this.clientSecretField.value : '',
       this.ssoAllowedField ? !!this.ssoAllowedField.value : false,
     ).pipe(
+      tap(a => console.log('REGISTER RES: ', a)),
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
       map(([oldVal, newVal]) => newVal),
