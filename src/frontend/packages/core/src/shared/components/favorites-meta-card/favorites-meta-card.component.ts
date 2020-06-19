@@ -3,13 +3,11 @@ import { Store } from '@ngrx/store';
 import { isObservable, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import {
-  RemoveUserFavoriteAction,
-} from '../../../../../store/src/actions/user-favourites-actions/remove-user-favorite-action';
 import { AppState } from '../../../../../store/src/app-state';
-import { userFavoritesEntitySchema } from '../../../../../store/src/base-entity-schemas';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { stratosEntityFactory, userFavouritesEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { IFavoriteEntity } from '../../../../../store/src/user-favorite-manager';
 import { isEndpointConnected } from '../../../features/endpoints/connect.service';
@@ -72,6 +70,7 @@ export class FavoritesMetaCardComponent {
   @Input()
   set favoriteEntity(favoriteEntity: IFavoriteEntity) {
     if (!this.placeholder && favoriteEntity) {
+      // TODO: RC selector, and remove store
       const endpoint$ = this.store.select(endpointEntitiesSelector).pipe(
         map(endpoints => endpoints[favoriteEntity.favorite.endpointId])
       );
@@ -83,7 +82,7 @@ export class FavoritesMetaCardComponent {
       this.favorite = favorite;
       this.metaFavorite = !this.endpoint || (this.endpoint && !this.endpointHasEntities) ? favorite : null;
       this.prettyName = prettyName || 'Unknown';
-      this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, userFavoritesEntitySchema);
+      this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, stratosEntityFactory(userFavouritesEntityType));
 
       // If this favorite is an endpoint, lookup the image for it from the entitiy catalog
       if (this.favorite.entityType === 'endpoint') {
@@ -131,7 +130,7 @@ export class FavoritesMetaCardComponent {
   }
 
   private removeFavorite = () => {
-    this.store.dispatch(new RemoveUserFavoriteAction(this.favorite));
+    stratosEntityCatalog.userFavorite.api.delete(this.favorite);
   }
 
   public toggleMoreError() {

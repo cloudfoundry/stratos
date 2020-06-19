@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
@@ -13,11 +13,9 @@ import {
 import { getFullEndpointApiUrl } from '../../../../../../../../core/src/features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { ENTITY_SERVICE } from '../../../../../../../../core/src/shared/entity.tokens';
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
-import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { IAppSummary } from '../../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
@@ -66,7 +64,6 @@ export class BuildTabComponent implements OnInit {
     public applicationService: ApplicationService,
     private scmService: GitSCMService,
     private store: Store<CFAppState>,
-    @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource>,
     private route: ActivatedRoute,
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
@@ -92,7 +89,7 @@ export class BuildTabComponent implements OnInit {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct());
 
-    this.isBusyUpdating$ = this.entityService.updatingSection$.pipe(
+    this.isBusyUpdating$ = this.applicationService.entityService.updatingSection$.pipe(
       map(updatingSection => {
         const updating = this.updatingSectionBusy(updatingSection.restaging) ||
           this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
@@ -266,7 +263,7 @@ export class BuildTabComponent implements OnInit {
   }
 
   pollEntityService(state, stateString): Observable<any> {
-    return this.entityService
+    return this.applicationService.entityService
       .poll(1000, state).pipe(
         delay(1),
         filter(({ resource }) => {

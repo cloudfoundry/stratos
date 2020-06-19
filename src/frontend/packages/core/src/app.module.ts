@@ -9,19 +9,17 @@ import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
 import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry-package.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
-import {
-  UpdateUserFavoriteMetadataAction,
-} from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
-import { endpointSchemaKey, STRATOS_ENDPOINT_TYPE } from '../../store/src/helpers/stratos-entity-factory';
+import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../store/src/helpers/stratos-entity-factory';
 import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
 import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
 import { AppStoreModule } from '../../store/src/store.module';
+import { stratosEntityCatalog } from '../../store/src/stratos-entity-catalog';
 import { generateStratosEntities } from '../../store/src/stratos-entity-generator';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
@@ -158,7 +156,7 @@ export class AppModule {
           if (!backendErrors.length) {
             return res;
           }
-          const entityConfig = entityCatalog.getEntity(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+          const entityConfig = entityCatalog.getEntity(STRATOS_ENDPOINT_TYPE, endpointEntityType);
           res.push(new GlobalEventData(true, {
             endpoint: selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state),
             count: backendErrors.length
@@ -247,7 +245,7 @@ export class AppModule {
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {
     if (favorite) {
-      const isEndpoint = (favorite.entityType === endpointSchemaKey);
+      const isEndpoint = (favorite.entityType === endpointEntityType);
       // If the favorite is an endpoint ensure we look in the stratosEndpoint part of the store instead of, for example, cfEndpoint
       const entityKey = isEndpoint ? entityCatalog.getEntityKey({
         ...favorite,
@@ -257,10 +255,10 @@ export class AppModule {
       if (entity) {
         const newMetadata = this.favoritesConfigMapper.getEntityMetadata(favorite, entity);
         if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
-          this.store.dispatch(new UpdateUserFavoriteMetadataAction({
+          stratosEntityCatalog.userFavorite.api.updateFavorite({
             ...favorite,
             metadata: newMetadata
-          }));
+          });
         }
       }
     }

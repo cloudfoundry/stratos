@@ -28,7 +28,6 @@ export class CliInfoApplicationComponent implements OnInit {
 
   constructor(
     private applicationService: ApplicationService,
-    // private entityServiceFactory: EntityServiceFactory // TODO: RC Search fo
   ) {
     this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
   }
@@ -42,10 +41,10 @@ export class CliInfoApplicationComponent implements OnInit {
   private setupObservables(cfGuid: string) {
     this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(cfGuid);
 
-    // TODO: RC EXAMPLE
+    // TODO: RC Endpoint: get single, dispatch multiple
     // this.cfEndpointEntityService = this.entityServiceFactory.create<EndpointModel>(
     //   cfGuid,
-    //   new GetAllEndpoints() // TODO: RC single/multi actions?
+    //   new GetAllEndpoints() 
     // );
 
     this.context$ = combineLatest(

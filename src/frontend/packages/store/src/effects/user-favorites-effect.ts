@@ -9,27 +9,19 @@ import {
   GetUserFavoritesAction,
   GetUserFavoritesFailedAction,
   GetUserFavoritesSuccessAction,
-} from '../actions/user-favourites-actions/get-user-favorites-action';
-import {
   RemoveUserFavoriteAction,
   RemoveUserFavoriteSuccessAction,
-} from '../actions/user-favourites-actions/remove-user-favorite-action';
-import {
   SaveUserFavoriteAction,
   SaveUserFavoriteSuccessAction,
-} from '../actions/user-favourites-actions/save-user-favorite-action';
-import { ToggleUserFavoriteAction } from '../actions/user-favourites-actions/toggle-user-favorite-action';
-import {
+  ToggleUserFavoriteAction,
   UpdateUserFavoriteMetadataAction,
   UpdateUserFavoriteMetadataSuccessAction,
-} from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
+} from '../actions/user-favourites.actions';
 import { DispatchOnlyAppState } from '../app-state';
-import { userFavoritesEntitySchema } from '../base-entity-schemas';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { proxyAPIVersion } from '../jetstream';
 import { NormalizedResponse } from '../types/api.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { WrapperRequestActionSuccess } from '../types/request.types';
+import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
 import { UserFavoriteManager } from '../user-favorite-manager';
 
@@ -50,25 +42,26 @@ export class UserFavoritesEffect {
   @Effect() saveFavorite = this.actions$.pipe(
     ofType<SaveUserFavoriteAction>(SaveUserFavoriteAction.ACTION_TYPE),
     mergeMap(action => {
+      const actionType = 'update';
+      this.store.dispatch(new StartRequestAction(action, actionType))
       return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, action.favorite).pipe(
-        mergeMap(newFavorite => {
-          return [
-            new SaveUserFavoriteSuccessAction(newFavorite)
-          ];
-        })
+        mergeMap(newFavorite => [
+          new WrapperRequestActionSuccess(null, action, actionType),
+          new SaveUserFavoriteSuccessAction(newFavorite)
+        ]),
+        catchError(() => [
+          new WrapperRequestActionFailed('Failed to update user favorite', action, actionType)
+        ])
       );
     })
   );
 
   @Effect({ dispatch: false }) getFavorite$ = this.actions$.pipe(
     ofType<GetUserFavoritesAction>(GetUserFavoritesAction.ACTION_TYPE),
-    switchMap((action: GetUserFavoritesAction) => {
-      const apiAction = {
-        entityType: userFavoritesEntitySchema.entityType,
-        endpointType: userFavoritesEntitySchema.endpointType,
-        type: action.type
-      } as PaginatedAction;
-      const favEntityKey = entityCatalog.getEntityKey(apiAction);
+    mergeMap((action: GetUserFavoritesAction) => {
+      const favEntityKey = entityCatalog.getEntityKey(action);
+      const actionType = 'fetch';
+      this.store.dispatch(new StartRequestAction(action, actionType))
       return this.http.get<UserFavorite<IFavoriteMetadata>[]>(favoriteUrlPath).pipe(
         map(favorites => {
           const mappedData = favorites.reduce<NormalizedResponse<UserFavorite<IFavoriteMetadata>>>((data, favorite) => {
@@ -79,13 +72,15 @@ export class UserFavoritesEffect {
             }
             return data;
           }, { entities: { [favEntityKey]: {} }, result: [] });
-          this.store.dispatch(new WrapperRequestActionSuccess(mappedData, apiAction));
-          this.store.dispatch(new GetUserFavoritesSuccessAction(favorites));
+          return [
+            new WrapperRequestActionSuccess(mappedData, action),
+            new GetUserFavoritesSuccessAction(favorites)
+          ]
         }),
-        catchError(e => {
-          this.store.dispatch(new GetUserFavoritesFailedAction());
-          throw e;
-        })
+        catchError(() => [
+          new GetUserFavoritesFailedAction(),
+          new WrapperRequestActionFailed('Failed to fetch user favorites', action, actionType)
+        ])
       );
     })
   );
@@ -109,21 +104,37 @@ export class UserFavoritesEffect {
   @Effect({ dispatch: false }) removeFavorite$ = this.actions$.pipe(
     ofType<RemoveUserFavoriteAction>(RemoveUserFavoriteAction.ACTION_TYPE),
     switchMap((action: RemoveUserFavoriteAction) => {
-      const { guid } = action.favorite;
-      this.store.dispatch(new RemoveUserFavoriteSuccessAction(action.favorite));
-      this.store.dispatch(new ClearPaginationOfEntity(userFavoritesEntitySchema, guid, userFavoritesPaginationKey));
-      return this.http.delete<UserFavorite<IFavoriteMetadata>>(`${favoriteUrlPath}/${guid}`);
+      const actionType = 'update';
+      this.store.dispatch(new StartRequestAction(action, actionType))
+      return this.http.delete<UserFavorite<IFavoriteMetadata>>(`${favoriteUrlPath}/${action.guid}`).pipe(
+        map(() => [
+          new WrapperRequestActionSuccess(null, action),
+          new RemoveUserFavoriteSuccessAction(action.favorite),
+          new ClearPaginationOfEntity(action.entity[0], action.guid, userFavoritesPaginationKey)
+        ]),
+        catchError(() => [
+          new WrapperRequestActionFailed('Failed to remove user favorite', action, actionType)
+        ])
+      );
     })
   );
 
   @Effect() updateMetadata$ = this.actions$.pipe(
     ofType<UpdateUserFavoriteMetadataAction>(UpdateUserFavoriteMetadataAction.ACTION_TYPE),
-    mergeMap((action: UpdateUserFavoriteMetadataAction) => {
+    switchMap((action: UpdateUserFavoriteMetadataAction) => {
+      const actionType = 'update';
+      this.store.dispatch(new StartRequestAction(action, actionType))
       return this.http.post<UserFavorite<IFavoriteMetadata>>(
         `${favoriteUrlPath}/${action.favorite.guid}/metadata`,
         action.favorite.metadata
       ).pipe(
-        map(() => new UpdateUserFavoriteMetadataSuccessAction(action.favorite))
+        map(() => [
+          new WrapperRequestActionSuccess(null, action),
+          new UpdateUserFavoriteMetadataSuccessAction(action.favorite)
+        ]),
+        catchError(() => [
+          new WrapperRequestActionFailed('Failed to update user favorite', action, actionType)
+        ])
       );
     })
   );

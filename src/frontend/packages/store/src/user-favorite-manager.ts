@@ -7,7 +7,6 @@ import {
   FavoritesConfigMapper,
   TFavoriteMapperFunction,
 } from '../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
-import { ToggleUserFavoriteAction } from './actions/user-favourites-actions/toggle-user-favorite-action';
 import { GeneralEntityAppState, IRequestEntityTypeState } from './app-state';
 import { entityCatalog } from './entity-catalog/entity-catalog';
 import { endpointEntitiesSelector } from './selectors/endpoint.selectors';
@@ -18,6 +17,7 @@ import {
   fetchingFavoritesSelector,
 } from './selectors/favorite-groups.selectors';
 import { isFavorite } from './selectors/favorite.selectors';
+import { stratosEntityCatalog } from './stratos-entity-catalog';
 import { IUserFavoritesGroups } from './types/favorite-groups.types';
 import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
 
@@ -160,6 +160,6 @@ export class UserFavoriteManager {
   }
 
   public toggleFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
-    this.store.dispatch(new ToggleUserFavoriteAction(favorite));
+    stratosEntityCatalog.userFavorite.api.toggle(favorite);
   }
 }

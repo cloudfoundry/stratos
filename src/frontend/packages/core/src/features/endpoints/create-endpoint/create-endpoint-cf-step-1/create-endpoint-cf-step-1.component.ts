@@ -11,7 +11,7 @@ import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity
 import {
   StratosCatalogEndpointEntity,
 } from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { endpointSchemaKey, stratosEntityFactory } from '../../../../../../store/src/helpers/stratos-entity-factory';
+import { endpointEntityType, stratosEntityFactory } from '../../../../../../store/src/helpers/stratos-entity-factory';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../../../../../../store/src/selectors/api.selectors';
 import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
@@ -69,7 +69,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       map(([pagination, entities]) => {
         const pages = Object.values(pagination.ids);
         const page = [].concat.apply([], pages);
-        const endpoints = page.length ? denormalize(page, [stratosEntityFactory(endpointSchemaKey)], entities) : [];
+        const endpoints = page.length ? denormalize(page, [stratosEntityFactory(endpointEntityType)], entities) : [];
         return {
           names: endpoints.map(ep => ep.name),
           urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),

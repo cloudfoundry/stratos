@@ -9,7 +9,7 @@ import {
 } from '../../actions/endpoint.actions';
 import { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { endpointSchemaKey, STRATOS_ENDPOINT_TYPE } from '../../helpers/stratos-entity-factory';
+import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../helpers/stratos-entity-factory';
 import { IRecentlyVisitedState } from '../../types/recently-visited.types';
 import { addNewHit, cleanRecentsList, getDefaultRecentState } from './recently-visited.reducer.helpers';
 
@@ -35,7 +35,7 @@ export function recentlyVisitedReducer(
       return cleanRecentsList(state, [removeEndpointAction.guid]);
     case GET_ENDPOINTS_SUCCESS:
       const getAllAction = action as GetAllEndpointsSuccess;
-      const endpointKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+      const endpointKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointEntityType);
       const connectedIds = Object.values(getAllAction.payload.entities[endpointKey]).reduce((ids, endpoint) => {
         if (endpoint.user) {
           ids.push(endpoint.guid);

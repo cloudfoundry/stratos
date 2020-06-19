@@ -7,7 +7,7 @@ import {
   UNREGISTER_ENDPOINTS_SUCCESS,
 } from '../actions/endpoint.actions';
 import { SendClearEndpointEventsAction, SendClearEventAction, SendEventAction } from '../actions/internal-events.actions';
-import { endpointSchemaKey } from '../helpers/stratos-entity-factory';
+import { endpointEntityType } from '../helpers/stratos-entity-factory';
 import {
   CLEAR_ENDPOINT_ERROR_EVENTS,
   CLEAR_EVENTS,
@@ -21,7 +21,7 @@ import { UPDATE_ENDPOINT_SUCCESS } from './../actions/endpoint.actions';
 const defaultState: InternalEventsState = {
   types: {
     [GLOBAL_EVENT]: {},
-    [endpointSchemaKey]: {}
+    [endpointEntityType]: {}
   }
 };
 

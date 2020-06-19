@@ -1,4 +1,4 @@
-import { EndpointAction } from '../../actions/endpoint.actions';
+import { SingleBaseEndpointAction } from '../../actions/endpoint.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationState } from '../../types/pagination.types';
 import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagination';
@@ -23,7 +23,8 @@ export function paginationClearAllTypes(state: PaginationState, entityKeys: stri
   }, state);
 }
 
-export function clearEndpointEntities(state: PaginationState, action: EndpointAction) {
+export function clearEndpointEntities(state: PaginationState, action: SingleBaseEndpointAction) {
+  // TODO: RC Test
   const entityKeys = entityCatalog.getAllEntitiesForEndpointType(action.endpointType).map(entity => entity.entityKey);
   if (entityKeys.length > 0) {
     return paginationClearAllTypes(

@@ -1,10 +1,9 @@
 import { Action } from '@ngrx/store';
 
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { stratosEntityFactory, systemInfoSchemaKey } from '../helpers/stratos-entity-factory';
+import { STRATOS_ENDPOINT_TYPE, stratosEntityFactory, systemInfoEntityType } from '../helpers/stratos-entity-factory';
 import { EntityRequestAction } from '../types/request.types';
 import { SystemInfo } from '../types/system.types';
-import { GetAllEndpoints } from './endpoint.actions';
+import { BaseEndpointAction, GetAllEndpoints } from './endpoint.actions';
 
 export const GET_SYSTEM_INFO = '[System] Get info';
 export const GET_SYSTEM_INFO_SUCCESS = '[System] Get info success';
@@ -12,15 +11,14 @@ export const GET_SYSTEM_INFO_FAILED = '[System] Get info failed';
 
 export class GetSystemInfo implements EntityRequestAction {
   guid = 'info';
-  constructor(public login = false, public associatedAction?: GetAllEndpoints) {
+  constructor(public login = false, public associatedAction?: BaseEndpointAction) {
     if (!this.associatedAction) {
-      this.associatedAction = new GetAllEndpoints(login); // TODO: RC
+      this.associatedAction = new GetAllEndpoints(login);
     }
   }
-  // TODO: RC WHERE SHOULD THIS BE STORED
-  schemaKey = systemInfoSchemaKey;
-  entity = [stratosEntityFactory(systemInfoSchemaKey)]
-  entityType = systemInfoSchemaKey;
+  schemaKey = systemInfoEntityType;
+  entity = [stratosEntityFactory(systemInfoEntityType)]
+  entityType = systemInfoEntityType;
   endpointType = STRATOS_ENDPOINT_TYPE;
   type = GET_SYSTEM_INFO;
   actions = [
@@ -31,11 +29,6 @@ export class GetSystemInfo implements EntityRequestAction {
 }
 
 export class GetSystemSuccess implements Action {
-  constructor(public payload: SystemInfo, public login = false, public associatedAction: GetAllEndpoints) { }
+  constructor(public payload: SystemInfo, public login = false, public associatedAction: BaseEndpointAction) { }
   type = GET_SYSTEM_INFO_SUCCESS;
 }
-
-// export class GetSystemFailed implements Action {
-//   type = GET_SYSTEM_INFO_FAILED;
-// }
-

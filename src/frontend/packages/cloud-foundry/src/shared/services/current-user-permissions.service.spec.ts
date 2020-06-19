@@ -19,7 +19,7 @@ import { AppTestModule } from '../../../../core/test-framework/core-test.helper'
 import { AppState } from '../../../../store/src/app-state';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../store/src/entity-catalog-test.module';
 import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { endpointSchemaKey, stratosEntityFactory } from '../../../../store/src/helpers/stratos-entity-factory';
+import { endpointEntityType, stratosEntityFactory } from '../../../../store/src/helpers/stratos-entity-factory';
 import { generateStratosEntities } from '../../../../store/src/stratos-entity-generator';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
@@ -588,7 +588,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
     // Create request and requestData sections
     const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>([
       [
-        stratosEntityFactory(endpointSchemaKey),
+        stratosEntityFactory(endpointEntityType),
         endpoints.map(endpoint => ({
           guid: endpoint.guid,
           data: endpoint

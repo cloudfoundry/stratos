@@ -10,9 +10,12 @@ import {
   ConnectEndpoint,
   DISCONNECT_ENDPOINTS,
   DisconnectEndpoint,
+  EndpointActionComplete,
+  GET_ENDPOINT,
   GET_ENDPOINTS,
   GetAllEndpoints,
   GetAllEndpointsSuccess,
+  GetEndpoint,
   REGISTER_ENDPOINTS,
   RegisterEndpoint,
   UNREGISTER_ENDPOINTS,
@@ -21,7 +24,6 @@ import {
 import { SendClearEventAction } from '../actions/internal-events.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
-import { GetUserFavoritesAction } from '../actions/user-favourites-actions/get-user-favorites-action';
 import { DispatchOnlyAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EndpointType } from '../extension-types';
@@ -47,6 +49,13 @@ export class EndpointsEffect {
     private actions$: Actions,
     private store: Store<DispatchOnlyAppState>
   ) { }
+
+  @Effect() getAllEndpoint$ = this.actions$.pipe(
+    ofType<GetEndpoint>(GET_ENDPOINT),
+    mergeMap((action: GetEndpoint) => [
+      stratosEntityCatalog.systemInfo.actions.getSystemInfo(false, action)
+    ])
+  );
 
   @Effect() getAllEndpointsBySystemInfo$ = this.actions$.pipe(
     ofType<GetAllEndpoints>(GET_ENDPOINTS),
@@ -85,7 +94,7 @@ export class EndpointsEffect {
       // (endpoint success)
       return [
         new WrapperRequestActionSuccess(mappedData, associatedAction, 'fetch'),
-        new GetAllEndpointsSuccess(mappedData, associatedAction.login),
+        new GetAllEndpointsSuccess(mappedData, associatedAction['login']),
       ];
     }));
 
@@ -285,7 +294,7 @@ export class EndpointsEffect {
 
         if (apiActionType === 'delete') {
           actions.push(new ClearPaginationOfEntity(apiAction, apiAction.guid));
-          actions.push(new GetUserFavoritesAction());
+          actions.push(stratosEntityCatalog.userFavorite.actions.getAll());
         }
 
         if (apiActionType === 'create') {

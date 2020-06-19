@@ -1,9 +1,9 @@
 import { Action } from '@ngrx/store';
 
 import { EndpointType } from '../extension-types';
-import { endpointSchemaKey, STRATOS_ENDPOINT_TYPE } from '../helpers/stratos-entity-factory';
+import { endpointEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../helpers/stratos-entity-factory';
 import { NormalizedResponse } from '../types/api.types';
-import { endpointListKey, EndpointModel } from '../types/endpoint.types';
+import { endpointListKey, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';
 
@@ -12,6 +12,10 @@ export const GET_ENDPOINTS_START = '[Endpoints] Get all start'; // TODO: RD HUH
 export const GET_ENDPOINTS_LOGIN = '[Endpoints] Get all at login'; // TODO: RD HUH
 export const GET_ENDPOINTS_SUCCESS = '[Endpoints] Get all success';
 export const GET_ENDPOINTS_FAILED = '[Endpoints] Get all failed';
+
+export const GET_ENDPOINT = '[Endpoints] Get';
+export const GET_ENDPOINT_SUCCESS = '[Endpoints] Get success';
+export const GET_ENDPOINT_FAILED = '[Endpoints] Get failed';
 
 export const CONNECT_ENDPOINTS = '[Endpoints] Connect';
 export const CONNECT_ENDPOINTS_SUCCESS = '[Endpoints] Connect succeed';
@@ -33,43 +37,30 @@ export const UPDATE_ENDPOINT = '[Endpoints] Update';
 export const UPDATE_ENDPOINT_SUCCESS = '[Endpoints] Update succeed';
 export const UPDATE_ENDPOINT_FAILED = '[Endpoints] Update failed';
 
-// TODO: RC delete
-// export class EndpointActionComplete implements Action {
-//   constructor(
-//     public type: string,
-//     public guid: string,
-//     public endpointType: EndpointType,
-//     public endpoint: EndpointModel | INewlyConnectedEndpointInfo
-//   ) { }
-// }
-
-
-// export class EndpointAction implements Action {
-//   type: string;
-//   endpointType: EndpointType;
-// }
-
-export class GetAllEndpointsSuccess implements Action {
-  constructor(public payload: NormalizedResponse<EndpointModel>, public login = false) { }
-  type = GET_ENDPOINTS_SUCCESS;
+export class EndpointActionComplete implements Action {
+  constructor(
+    public type: string,
+    public guid: string,
+    public endpointType: EndpointType,
+    public endpoint: EndpointModel | INewlyConnectedEndpointInfo
+  ) { }
 }
 
-abstract class BaseEndpointAction implements EntityRequestAction {
-  public entityType = endpointSchemaKey;
+export abstract class BaseEndpointAction implements EntityRequestAction {
+  public entityType = endpointEntityType;
   public endpointType = STRATOS_ENDPOINT_TYPE;
   public subType = '';
+  public entity = [stratosEntityFactory(endpointEntityType)]
   constructor(public type: string) { }
   actions: string[];
-  // TODO: RC SCHEMAS everywhere
 }
 
-abstract class SingleBaseEndpointAction extends BaseEndpointAction {
+export abstract class SingleBaseEndpointAction extends BaseEndpointAction {
   constructor(
     type: string,
     public guid: string
   ) {
     super(type);
-
   }
 }
 
@@ -79,7 +70,6 @@ abstract class MultipleBaseEndpointAction extends BaseEndpointAction implements 
     public paginationKey: string
   ) {
     super(type);
-
   }
 }
 
@@ -95,6 +85,22 @@ export interface AuthParamsToken {
 
 // All supported auth params types
 export type AuthParams = AuthParamsUsernamePassword | AuthParamsToken;
+
+export class GetEndpoint extends SingleBaseEndpointAction {
+  constructor(
+    guid: string
+  ) {
+    super(
+      GET_ENDPOINT,
+      guid
+    )
+  }
+  actions = [
+    GET_ENDPOINT,
+    GET_ENDPOINT_SUCCESS,
+    GET_ENDPOINT_FAILED
+  ];
+}
 
 export class GetAllEndpoints extends MultipleBaseEndpointAction {
   public static storeKey = endpointListKey;
@@ -117,6 +123,14 @@ export class GetAllEndpoints extends MultipleBaseEndpointAction {
     page: 1,
     'results-per-page': 50,
   };
+}
+
+export class GetAllEndpointsSuccess extends GetAllEndpoints {
+  constructor(public payload: NormalizedResponse<EndpointModel>, public login = false) {
+    super(login)
+    console.log(this.type);// TODO: RC test type
+  }
+  type = GET_ENDPOINTS_SUCCESS;
 }
 
 export class ConnectEndpoint extends SingleBaseEndpointAction {

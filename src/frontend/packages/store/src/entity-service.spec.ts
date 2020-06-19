@@ -4,7 +4,6 @@ import { inject, TestBed } from '@angular/core/testing';
 import { Action, Store } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { ENTITY_SERVICE } from '../../core/src/shared/entity.tokens';
 import { generateTestEntityServiceProvider } from '../../core/test-framework/entity-service.helper';
 import { createEntityStore, TestStoreEntity } from '../testing/src/store-test-helper';
 import { APIResponse } from './actions/request.actions';
@@ -168,20 +167,6 @@ describe('EntityServiceService', () => {
         },
       ]
     });
-  });
-
-  it('should be created', inject([ENTITY_SERVICE], (service: EntityService) => {
-    expect(service).toBeTruthy();
-  }));
-
-  it('should poll', (done) => {
-    inject([ENTITY_SERVICE, HttpXhrBackend], (service: EntityService, mockBackend: HttpTestingController) => {
-      const sub = service.poll(1, '_root_').subscribe(a => {
-        sub.unsubscribe();
-        expect('polled once').toEqual('polled once');
-        done();
-      });
-    })();
   });
 
   it('should get application', (done) => {

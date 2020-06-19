@@ -18,7 +18,7 @@ import {
 } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { CfApplicationState } from '../../../../../cloud-foundry/src/store/types/application.types';
 import { EntityService } from '../../../../../store/src/entity-service';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/stratos-entity-factory';
+import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
@@ -68,8 +68,8 @@ export class CloudFoundryEndpointService {
 
   static createGetAllOrganizations(cfGuid: string) {
     const paginationKey = cfGuid ?
-      createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
-      : createEntityRelationPaginationKey(endpointSchemaKey);
+      createEntityRelationPaginationKey(endpointEntityType, cfGuid)
+      : createEntityRelationPaginationKey(endpointEntityType);
     const getAllOrganizationsAction = cfEntityCatalog.org.actions.getMultiple(cfGuid, paginationKey,
       {
         includeRelations: [
@@ -83,8 +83,8 @@ export class CloudFoundryEndpointService {
   }
   static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
     const paginationKey = cfGuid ?
-      createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
-      : createEntityRelationPaginationKey(endpointSchemaKey);
+      createEntityRelationPaginationKey(endpointEntityType, cfGuid)
+      : createEntityRelationPaginationKey(endpointEntityType);
     const getAllOrganizationsAction = cfEntityCatalog.org.actions.getMultiple(cfGuid, paginationKey,
       {
         includeRelations: [

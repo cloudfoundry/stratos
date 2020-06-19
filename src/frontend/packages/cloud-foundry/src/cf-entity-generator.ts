@@ -7,7 +7,6 @@ import { EndpointHealthCheck } from '../../core/endpoints-health-checks';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
 import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
-import { metricEntityType } from '../../store/src/base-entity-schemas';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -22,6 +21,7 @@ import {
 } from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { ActionDispatcher, JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
+import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { selectSessionData } from '../../store/src/reducers/auth.reducer';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';

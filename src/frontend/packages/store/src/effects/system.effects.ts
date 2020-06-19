@@ -18,7 +18,7 @@ export class SystemEffects {
     private store: Store<InternalAppState>
   ) { }
 
-  // // TODO: RC 
+  // // TODO: RC getSystemInfo vs getAllEndpoints. when to do start/finish. which to kick off process
   // static guid = 'info';
 
   @Effect() getInfo$ = this.actions$.pipe(
@@ -37,7 +37,7 @@ export class SystemEffects {
           return [
             // new GetSystemFailed(),
             { type: action.actions[2] },
-            new WrapperRequestActionFailed('Could not get system endpoints', associatedAction),
+            // new WrapperRequestActionFailed('Could not get system endpoints', associatedAction),
             new WrapperRequestActionFailed('Could not fetch system info', action)
           ];
         }));

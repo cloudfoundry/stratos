@@ -2,11 +2,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { endpointEntitySchema } from '../../../../../store/src/base-entity-schemas';
 import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { endpointListKey, EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
 
 export interface MetricsEndpointProvider {
@@ -22,14 +21,8 @@ export class MetricsService {
   haveNoMetricsEndpoints$: Observable<boolean>;
   haveNoConnectedMetricsEndpoints$: Observable<boolean>;
 
-  constructor(
-    private paginationMonitorFactory: PaginationMonitorFactory
-  ) {
-    this.endpointsMonitor = this.paginationMonitorFactory.create(
-      endpointListKey,
-      endpointEntitySchema,
-      true
-    );
+  constructor() {
+    this.endpointsMonitor = stratosEntityCatalog.endpoint.store.getPaginationMonitor()
 
     this.setupObservables();
   }

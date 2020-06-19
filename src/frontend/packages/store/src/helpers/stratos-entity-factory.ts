@@ -1,9 +1,9 @@
 import { EntitySchema } from './entity-schema';
 
-export const userFavouritesSchemaKey = 'userFavorites';
-export const endpointSchemaKey = 'endpoint';
-export const userProfileSchemaKey = 'userProfile';
-export const systemInfoSchemaKey = 'system';
+export const userFavouritesEntityType = 'userFavorites';
+export const endpointEntityType = 'endpoint';
+export const userProfileEntityType = 'userProfile';
+export const systemInfoEntityType = 'systemInfo';
 
 export const metricEntityType = 'metrics';
 
@@ -19,19 +19,19 @@ class StratosEntitySchema extends EntitySchema {
   }
 }
 
-// Note - The cache entry is added as a secondary step. This helps keep the child entity definition's clear and easier to spot circular
-// dependencies which would otherwise be hidden (if we assigned directly to entityCache and references via entityCache in other entities)
-const UserFavouritesSchema = new StratosEntitySchema(userFavouritesSchemaKey, 'id');
-entityCache[userFavouritesSchemaKey] = UserFavouritesSchema;
+// TODO: RC test auto log out process
 
-const SystemInfoSchema = new StratosEntitySchema(systemInfoSchemaKey, 'id');
-entityCache[systemInfoSchemaKey] = SystemInfoSchema;
+const UserFavouritesSchema = new StratosEntitySchema(userFavouritesEntityType, 'id');
+entityCache[userFavouritesEntityType] = UserFavouritesSchema;
 
-const EndpointSchema = new StratosEntitySchema(endpointSchemaKey, 'guid');
-entityCache[endpointSchemaKey] = EndpointSchema;
+const SystemInfoSchema = new StratosEntitySchema(systemInfoEntityType, 'id');
+entityCache[systemInfoEntityType] = SystemInfoSchema;
 
-const UserProfileInfoSchema = new StratosEntitySchema(userProfileSchemaKey, 'id');
-entityCache[userProfileSchemaKey] = UserProfileInfoSchema;
+const EndpointSchema = new StratosEntitySchema(endpointEntityType, 'guid');
+entityCache[endpointEntityType] = EndpointSchema;
+
+const UserProfileInfoSchema = new StratosEntitySchema(userProfileEntityType, 'id');
+entityCache[userProfileEntityType] = UserProfileInfoSchema;
 
 export function stratosEntityFactory(key: string): EntitySchema {
   const entity = entityCache[key];
@@ -39,9 +39,5 @@ export function stratosEntityFactory(key: string): EntitySchema {
     throw new Error(`Unknown entity schema type: ${key}`);
   }
   return entity;
-}
 
-// export const userFavoritesEntitySchema = new StratosEntitySchema(entityFactory(userFavouritesSchemaKey).entityType);
-// export const endpointEntitySchema = new StratosEntitySchema(entityFactory(endpointSchemaKey).entityType);
-// export const userProfileEntitySchema = new StratosEntitySchema(entityFactory(userProfileSchemaKey).entityType);
-// export const systemInfoEntitySchema = new StratosEntitySchema(entityFactory(systemInfoSchemaKey).entityType);
+}

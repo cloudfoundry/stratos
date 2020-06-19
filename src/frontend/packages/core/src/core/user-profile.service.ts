@@ -25,18 +25,9 @@ export class UserProfileService {
 
   private userGuid$: Observable<string>;
 
-  // private stratosUserConfig = entityCatalog.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
-
   constructor(
     private store: Store<AppState>,
-    // esf: EntityServiceFactory // TODO: RC Search
   ) {
-    // if (!this.stratosUserConfig) {
-    //   console.error('Can not get user profile entity');
-    //   this.userProfile$ = of({} as UserProfileInfo);
-    //   return;
-    // }
-
     this.userGuid$ = this.store.select(s => s.auth).pipe(
       filter((auth: AuthState) => !!(auth && auth.sessionData)),
       map((auth: AuthState) => auth.sessionData),

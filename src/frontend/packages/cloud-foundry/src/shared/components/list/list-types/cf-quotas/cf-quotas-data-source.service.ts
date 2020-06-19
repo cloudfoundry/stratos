@@ -11,7 +11,7 @@ import {
   getDefaultRowState,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { endpointSchemaKey } from '../../../../../../../store/src/helpers/stratos-entity-factory';
+import { endpointEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
@@ -22,7 +22,7 @@ import { createEntityRelationPaginationKey } from '../../../../../entity-relatio
 export class CfQuotasDataSourceService extends ListDataSource<APIResource> {
 
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
-    const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
+    const quotaPaginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
     const action = new GetQuotaDefinitions(quotaPaginationKey, cfGuid);
 
     super({

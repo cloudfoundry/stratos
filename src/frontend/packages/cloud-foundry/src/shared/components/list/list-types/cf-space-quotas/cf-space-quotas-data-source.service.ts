@@ -10,7 +10,7 @@ import {
   getDefaultRowState,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { endpointSchemaKey } from '../../../../../../../store/src/helpers/stratos-entity-factory';
+import { endpointEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GetOrganizationSpaceQuotaDefinitions } from '../../../../../actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../cf-app-state';
@@ -22,7 +22,7 @@ import { createEntityRelationPaginationKey } from '../../../../../entity-relatio
 export class CfOrgSpaceQuotasDataSourceService extends ListDataSource<APIResource> {
 
   constructor(store: Store<CFAppState>, orgGuid: string, cfGuid: string, listConfig?: IListConfig<APIResource>) {
-    const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
+    const quotaPaginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
     const action = new GetOrganizationSpaceQuotaDefinitions(quotaPaginationKey, orgGuid, cfGuid);
 
     super({
