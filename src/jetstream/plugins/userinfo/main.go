@@ -59,10 +59,11 @@ func (userInfo *UserInfo) Init() error {
 }
 
 func (userInfo *UserInfo) getProvider(c echo.Context) Provider {
-
 	log.Debugf("getUserInfoProvider: %v", userInfo.portalProxy.GetConfig().AuthEndpointType)
 	if interfaces.AuthEndpointTypes[userInfo.portalProxy.GetConfig().AuthEndpointType] == interfaces.Local {
 		return InitLocalUserInfo(userInfo.portalProxy)
+	} else if interfaces.AuthEndpointTypes[userInfo.portalProxy.GetConfig().AuthEndpointType] == interfaces.AuthNone {
+		return InitNoAuthUserInfo(userInfo.portalProxy)
 	}
 
 	return InitUaaUserInfo(userInfo.portalProxy, c)

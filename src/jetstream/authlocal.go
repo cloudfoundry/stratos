@@ -27,6 +27,11 @@ type localAuth struct {
 	p                      *portalProxy
 }
 
+func (a *localAuth) ShowConfig(config *interfaces.ConsoleConfig) {
+	log.Infof("... Local User              : %s", config.LocalUser)
+	log.Infof("... Local User Scope        : %s", config.LocalUserScope)
+}
+
 //Login provides Local-auth specific Stratos login
 func (a *localAuth) Login(c echo.Context) error {
 
@@ -112,6 +117,8 @@ func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) 
 
 	return connectdUser, nil
 }
+
+func (a *localAuth) BeforeVerifySession(c echo.Context) {}
 
 //VerifySession verifies the session the specified local user, currently just verifies user exists
 func (a *localAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
