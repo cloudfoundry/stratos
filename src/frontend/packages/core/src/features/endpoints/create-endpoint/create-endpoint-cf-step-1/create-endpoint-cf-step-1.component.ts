@@ -55,14 +55,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     activatedRoute: ActivatedRoute,
     private snackBarService: SnackBarService
   ) {
-    // TODO: RC test
     this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
-      map(endpoints => {
-        return {
-          names: endpoints.map(ep => ep.name),
-          urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
-        };
-      })
+      map(endpoints => ({
+        names: endpoints.map(ep => ep.name),
+        urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
+      }))
     );
 
     const epType = getIdFromRoute(activatedRoute, 'type');

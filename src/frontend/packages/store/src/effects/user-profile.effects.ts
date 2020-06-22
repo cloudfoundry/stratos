@@ -58,7 +58,7 @@ export class UserProfileEffect {
       }
 
       return this.httpClient.put(`/pp/${proxyAPIVersion}/users/${userGuid}`, action.profile, { headers }).pipe(
-        mergeMap((info: UserProfileInfo) => {// TODO: RC push result back into store??
+        mergeMap((info: UserProfileInfo) => {
           return [
             new WrapperRequestActionSuccess({
               entities: {},
@@ -81,7 +81,7 @@ export class UserProfileEffect {
         'x-stratos-password-new': action.passwordChanges.password
       };
       return this.httpClient.put(`/pp/${proxyAPIVersion}/users/${userGuid}/password`, action.passwordChanges, { headers }).pipe(
-        switchMap((info: UserProfileInfo) => {// TODO: RC TEST & push result back into store??
+        switchMap((info: UserProfileInfo) => {
           return [
             new WrapperRequestActionSuccess({
               entities: {},

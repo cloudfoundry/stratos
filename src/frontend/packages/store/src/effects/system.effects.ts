@@ -18,12 +18,12 @@ export class SystemEffects {
     private store: Store<InternalAppState>
   ) { }
 
-  // // TODO: RC getSystemInfo vs getAllEndpoints. when to do start/finish. which to kick off process
-  // static guid = 'info';
-
   @Effect() getInfo$ = this.actions$.pipe(
     ofType<GetSystemInfo>(GET_SYSTEM_INFO),
     mergeMap(action => {
+      // Associated action with be either get endpoint or get all endpoints/
+      // Start action for those two are dispatched here, as well as error handling
+      // Success actions are handling in the effect associated with GetSystemSuccess
       this.store.dispatch(new StartRequestAction(action));
       const { associatedAction } = action;
       this.store.dispatch(new StartRequestAction(associatedAction, 'fetch'));

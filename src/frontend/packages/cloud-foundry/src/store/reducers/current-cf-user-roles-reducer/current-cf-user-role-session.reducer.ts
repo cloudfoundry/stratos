@@ -24,7 +24,7 @@ export function updateNewlyConnectedCfEndpoint(
   state: IAllCfRolesState,
   action: EndpointActionComplete
 ): IAllCfRolesState {
-  if (action.completeEndpointType !== CF_ENDPOINT_TYPE) {
+  if (action.endpointType !== CF_ENDPOINT_TYPE) {
     return state;
   }
   const endpoint = action.endpoint as INewlyConnectedEndpointInfo;

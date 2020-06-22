@@ -409,7 +409,9 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
   const definition: IStratosEntityDefinition = {
     type: quotaDefinitionEntityType,
     schema: cfEntityFactory(quotaDefinitionEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Organization Quota',
+    labelPlural: 'Organization Quotas',
   };
   cfEntityCatalog.quotaDefinition = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -451,6 +453,8 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
         }
       };
     },
+    label: 'App Env Var',
+    labelPlural: 'App Env Vars',
   };
   cfEntityCatalog.appEnvVar = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -478,6 +482,8 @@ function generateCFAppSummaryEntity(endpointDefinition: StratosEndpointExtension
     type: appSummaryEntityType,
     schema: cfEntityFactory(appSummaryEntityType),
     endpoint: endpointDefinition,
+    label: 'App Summary',
+    labelPlural: 'App Summaries',
   };
   cfEntityCatalog.appSummary = new StratosCatalogEntity<IBasicCFMetaData, IAppSummary, AppSummaryActionBuilders>(definition, {
     dataReducers: [
@@ -500,7 +506,9 @@ function generateCFSpaceQuotaEntity(endpointDefinition: StratosEndpointExtension
   const definition: IStratosEntityDefinition = {
     type: spaceQuotaEntityType,
     schema: cfEntityFactory(spaceQuotaEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Space Quota',
+    labelPlural: 'Space Quotas',
   };
   cfEntityCatalog.spaceQuota = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -518,7 +526,9 @@ function generateCFPrivateDomainEntity(endpointDefinition: StratosEndpointExtens
   const definition: IStratosEntityDefinition = {
     type: privateDomainsEntityType,
     schema: cfEntityFactory(privateDomainsEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Private Domain',
+    labelPlural: 'Private Domains',
   };
   cfEntityCatalog.privateDomain = new StratosCatalogEntity<IBasicCFMetaData, APIResource<IPrivateDomain>>(definition, {
     dataReducers: [

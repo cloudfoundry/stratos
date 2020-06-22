@@ -66,8 +66,9 @@ export class ConnectEndpointService {
       pairwise()
     ).subscribe(([oldVal, newVal]) => {
       if (!newVal.error && (oldVal.busy && !newVal.busy)) {
+        // TODO: RC Q Shouldn't this be in `next`?
         // Has finished fetching
-        stratosEntityCatalog.endpoint.api.get(this.config.guid); // TODO: RC Test
+        stratosEntityCatalog.endpoint.api.get(this.config.guid);
       }
     }));
 
@@ -84,7 +85,6 @@ export class ConnectEndpointService {
     this.update$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(this.config.guid).getUpdatingSection(ConnectEndpoint.UpdatingKey)
       .pipe(filter(update => !!update));
 
-    // TODO: RC TEST... is systeminfo updated on connect? should this dispatch system info instead?
     this.fetchingInfo$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(this.config.guid).entityRequest$.pipe(
       filter(request => !!request),
       map(request => request.fetching)

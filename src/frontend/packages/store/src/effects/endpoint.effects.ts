@@ -68,16 +68,15 @@ export class EndpointsEffect {
     ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS),
     mergeMap(action => {
       const { associatedAction } = action;
-      // TODO: RC test service instance wall
       const entityKey = entityCatalog.getEntityKey(associatedAction);
       const endpoints = action.payload.endpoints;
       // Data is an array of endpoints
-      const mappedData = {
+      const mappedData: NormalizedResponse<EndpointModel> = {
         entities: {
           [entityKey]: {}
         },
         result: []
-      } as NormalizedResponse<EndpointModel>;
+      };
 
       Object.keys(endpoints).forEach((type: string) => {
         const endpointsForType = endpoints[type];
@@ -145,7 +144,7 @@ export class EndpointsEffect {
         '/pp/v1/auth/login/cnsi',
         params,
         null,
-        action.connectEndpointType,
+        action.endpointsType,
         body,
         response => response && response.error && response.error.error ? response.error.error : 'Could not connect, please try again'
       );
@@ -165,7 +164,7 @@ export class EndpointsEffect {
         '/pp/v1/auth/logout/cnsi',
         params,
         null,
-        action.disconnectEndpointType
+        action.endpointsType
       );
     }));
 
@@ -183,7 +182,7 @@ export class EndpointsEffect {
         '/pp/v1/unregister',
         params,
         'delete',
-        action.unregisterEndpointType
+        action.endpointsType
       );
     }));
 
@@ -212,10 +211,10 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/register/' + action.registerEndpointType,
+        '/pp/v1/register/' + action.endpointsType,
         new HttpParams({}),
         'create',
-        action.registerEndpointType,
+        action.endpointsType,
         body,
         this.processRegisterError
       );
@@ -244,7 +243,7 @@ export class EndpointsEffect {
         '/pp/v1/endpoint/' + action.id,
         new HttpParams({}),
         'update',
-        action.updateEndpointType,
+        action.endpointsType,
         body,
         this.processUpdateError
       );

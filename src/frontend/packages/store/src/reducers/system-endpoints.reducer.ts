@@ -28,7 +28,6 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointMo
       return changeEndpointConnectionStatus(state, action, 'connected');
     case CONNECT_ENDPOINTS:
     case DISCONNECT_ENDPOINTS:
-      // TODO: RC TEST THIS EMITS
       return changeEndpointConnectionStatus(state, action, 'checking');
     case METRIC_API_SUCCESS:
       return updateMetricsInfo(state, action);

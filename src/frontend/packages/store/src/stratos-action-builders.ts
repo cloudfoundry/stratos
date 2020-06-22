@@ -65,7 +65,7 @@ export interface EndpointActionBuilder extends OrchestratedActionBuilders {
     guid: string,
     endpointGuid: string,
     args: {
-      endpointType: EndpointType, // TODO: RC test different types
+      endpointType: EndpointType,
       id: string,
       name: string,
       skipSSL: boolean,
@@ -94,7 +94,6 @@ export const endpointActionBuilder: EndpointActionBuilder = {
     body: string,
   ) => new ConnectEndpoint(guid, endpointType, authType, authValues, systemShared, body),
   disconnect: (guid: string, endpointType: EndpointType) => new DisconnectEndpoint(guid, endpointType),
-  // TODO: RC test two places where unregister happens
   unregister: (guid: string, endpointType: EndpointType) => new UnregisterEndpoint(guid, endpointType),
   register: (
     endpointType: EndpointType,
@@ -119,7 +118,7 @@ export const endpointActionBuilder: EndpointActionBuilder = {
     guid: string,
     endpointGuid: string,
     args: {
-      endpointType: EndpointType, // TODO: RC test different types
+      endpointType: EndpointType,
       // id: string,
       name: string,
       skipSSL: boolean,
@@ -179,9 +178,7 @@ export const userFavoriteActionBuilder: UserFavoriteActionBuilder = {
   updateFavorite: (favorite: UserFavorite<IFavoriteMetadata>) => new UpdateUserFavoriteMetadataAction(favorite)
 }
 
-// TODO: Schemas
 export interface UserProfileActionBuilder extends OrchestratedActionBuilders {
-  // TODO: RC test all
   get: (
     userGuid: string
   ) => FetchUserProfileAction
