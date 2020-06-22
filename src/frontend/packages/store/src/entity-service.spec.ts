@@ -4,11 +4,9 @@ import { inject, TestBed } from '@angular/core/testing';
 import { Action, Store } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { generateTestEntityServiceProvider } from '../../core/test-framework/entity-service.helper';
 import { createEntityStore, TestStoreEntity } from '../testing/src/store-test-helper';
 import { APIResponse } from './actions/request.actions';
 import { GeneralAppState } from './app-state';
-import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalog-test.module';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogEntityConfig, IStratosEndpointDefinition } from './entity-catalog/entity-catalog.types';
@@ -17,6 +15,7 @@ import { PipelineResult } from './entity-request-pipeline/entity-request-pipelin
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
 import { EntitySchema } from './helpers/entity-schema';
+import { STRATOS_ENDPOINT_TYPE } from './helpers/stratos-entity-factory';
 import { EntityMonitor } from './monitors/entity-monitor';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { completeApiRequest, startApiRequest } from './reducers/api-request-reducer/request-helpers';
@@ -142,11 +141,6 @@ describe('EntityServiceService', () => {
       providers: [
         EntityServiceFactory,
         EntityMonitorFactory,
-        generateTestEntityServiceProvider(
-          action.guid,
-          entitySchema,
-          action
-        ),
         {
           provide: HttpXhrBackend,
           useClass: HttpTestingController

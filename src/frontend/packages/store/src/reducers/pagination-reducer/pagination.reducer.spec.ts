@@ -1,7 +1,6 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { RequestTypes } from '../../actions/request.actions';
-import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { EntityCatalogHelpers } from '../../entity-catalog/entity-catalog.helper';
 import { EntitySchema } from '../../helpers/entity-schema';

@@ -13,8 +13,6 @@ import { SystemInfo } from './types/system.types';
 import { UserFavorite } from './types/user-favorites.types';
 import { UserProfileInfo } from './types/user-profile.types';
 
-// TODO: RC Test all of these actions
-
 export class StratosEntityCatalog {
   endpoint: StratosCatalogEntity<
     undefined,
