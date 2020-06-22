@@ -1,15 +1,5 @@
 import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
-import {
-  delay,
-  distinctUntilChanged,
-  filter,
-  map,
-  pairwise,
-  startWith,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { AuthParams, ConnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
@@ -82,11 +72,11 @@ export class ConnectEndpointService {
     }));
 
     this.subs.push(this.connected$.pipe(
-      filter(([connected]) => connected),
+      filter(([isConnected]) => isConnected),
       delay(this.connectDelay),
       tap(() => this.hasConnected.next(true)),
-      distinctUntilChanged(([connected], [oldConnected]) => connected && oldConnected),
-    ).subscribe(([connected, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
+      distinctUntilChanged(([isConnected], [oldIsConnected]) => isConnected && oldIsConnected),
+    ).subscribe(([, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
     );
   }
 
@@ -94,7 +84,7 @@ export class ConnectEndpointService {
     this.update$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(this.config.guid).getUpdatingSection(ConnectEndpoint.UpdatingKey)
       .pipe(filter(update => !!update));
 
-    // TODO: RC Endpoint entity vs system endpoint (SystemEffects.guid)
+    // TODO: RC TEST... is systeminfo updated on connect? should this dispatch system info instead?
     this.fetchingInfo$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(this.config.guid).entityRequest$.pipe(
       filter(request => !!request),
       map(request => request.fetching)
@@ -144,25 +134,21 @@ export class ConnectEndpointService {
     this.hasAttemptedConnect = true;
     const { authType, authVal, systemShared, bodyContent } = this.pData;
 
-    stratosEntityCatalog.endpoint.api.connect(
+    return stratosEntityCatalog.endpoint.api.connect<ActionState>(
       this.config.guid,
       this.config.type,
       authType,
       authVal,
       systemShared,
       bodyContent,
-    );
-
-    return this.isBusy$.pipe(
+    ).pipe(
       pairwise(),
-      filter(([oldBusy, newBusy]) => {
-        return !(oldBusy === true && newBusy === false);
-      }),
-      withLatestFrom(this.update$),
-      map(([, updateSection]) => ({
+      filter(([oldV, newV]) => oldV.busy && !newV.busy),
+      map(([, newV]) => newV),
+      map(updateSection => ({
         success: !updateSection.error,
         errorMessage: updateSection.message
-      }))
+      })),
     );
   }
 

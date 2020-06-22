@@ -33,6 +33,9 @@ import {
   userProfileActionBuilder,
 } from './stratos-action-builders';
 import { stratosEntityCatalog } from './stratos-entity-catalog';
+import { SystemInfo } from './types/system.types';
+import { UserFavorite } from './types/user-favorites.types';
+import { UserProfileInfo } from './types/user-profile.types';
 
 export function generateStratosEntities(): StratosBaseCatalogEntity[] {
   /**
@@ -64,7 +67,7 @@ function generateEndpoint(stratosType) {
     endpoint: stratosType,
   }
   stratosEntityCatalog.endpoint = new StratosCatalogEntity<
-    any,//TODO: RC
+    undefined,
     EndpointModel,
     EndpointActionBuilder
   >(
@@ -86,8 +89,8 @@ function generateSystemInfo(stratosType) {
     endpoint: stratosType,
   }
   stratosEntityCatalog.systemInfo = new StratosCatalogEntity<
-    any,
-    any, //TODO: RC
+    undefined,
+    SystemInfo,
     SystemInfoActionBuilder
   >(
     definition,
@@ -105,8 +108,8 @@ function generateUserFavorite(stratosType) {
     endpoint: stratosType,
   }
   stratosEntityCatalog.userFavorite = new StratosCatalogEntity<
-    any,
-    any, //TODO: RC
+    undefined,
+    UserFavorite,
     UserFavoriteActionBuilder
   >(
     definition,
@@ -128,14 +131,15 @@ function generateUserProfile(stratosType) {
     endpoint: stratosType,
   }
   stratosEntityCatalog.userProfile = new StratosCatalogEntity<
-    any,
-    any, //TODO: RC
-    UserProfileActionBuilder>(
-      definition,
-      {
-        actionBuilders: userProfileActionBuilder
-      }
-    )
+    undefined,
+    UserProfileInfo,
+    UserProfileActionBuilder
+  >(
+    definition,
+    {
+      actionBuilders: userProfileActionBuilder
+    }
+  )
   return stratosEntityCatalog.userProfile;
 }
 

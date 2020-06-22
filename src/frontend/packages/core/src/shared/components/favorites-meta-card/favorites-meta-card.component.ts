@@ -1,12 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { isObservable, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { stratosEntityFactory, userFavouritesEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
-import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { IFavoriteEntity } from '../../../../../store/src/user-favorite-manager';
@@ -70,10 +67,7 @@ export class FavoritesMetaCardComponent {
   @Input()
   set favoriteEntity(favoriteEntity: IFavoriteEntity) {
     if (!this.placeholder && favoriteEntity) {
-      // TODO: RC selector, and remove store
-      const endpoint$ = this.store.select(endpointEntitiesSelector).pipe(
-        map(endpoints => endpoints[favoriteEntity.favorite.endpointId])
-      );
+      const endpoint$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(favoriteEntity.favorite.endpointId).entity$;
       this.endpointConnected$ = endpoint$.pipe(map(endpoint => isEndpointConnected(endpoint)));
       this.actions$ = this.endpointConnected$.pipe(
         map(connected => connected ? this.config.menuItems : [])
@@ -112,7 +106,6 @@ export class FavoritesMetaCardComponent {
   }
 
   constructor(
-    private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService
   ) { }
 

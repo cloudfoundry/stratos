@@ -278,7 +278,6 @@ export class EndpointsEffect {
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
-
     endpointType: EndpointType,
     body?: string,
     errorMessageHandler?: (e: any) => string,

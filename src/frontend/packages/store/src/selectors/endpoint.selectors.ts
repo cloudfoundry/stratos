@@ -12,10 +12,9 @@ export const endpointStatusSelector = (state: InternalAppState): EndpointState =
 // All endpoint request data
 // Note - Replacing `buildEntityKey` with `entityCatalog.getEntityKey` will cause circular dependency
 const endpointEntityKey = EntityCatalogHelpers.buildEntityKey(endpointEntityType, STRATOS_ENDPOINT_TYPE);
-// TODO: RC search for this. should replace almost everywhere with stratosEntityCatalog access
 export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointEntityKey);
 
-export const endpointOfType = (type: string) =>
+const endpointOfType = (type: string) =>
   (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
     return Object.values(endpoints || {}).reduce((endpointsOfType, endpoint) => {
       if (endpoint.cnsi_type === type) {
