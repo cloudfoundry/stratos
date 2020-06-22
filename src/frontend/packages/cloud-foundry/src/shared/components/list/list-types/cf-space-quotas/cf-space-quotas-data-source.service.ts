@@ -45,7 +45,6 @@ export class CfOrgSpaceQuotasDataSourceService extends ListDataSource<APIResourc
         return of(getDefaultRowState());
       }
 
-      // TODO: RC test
       return cfEntityCatalog.spaceQuota.store.getEntityMonitor(this.getRowUniqueId(row)).entityRequest$.pipe(
         distinctUntilChanged(),
         map(requestInfo => ({

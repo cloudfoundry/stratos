@@ -76,7 +76,6 @@ export class CurrentUserPermissionsService {
     } else if (actionConfig) {
       return this.getSimplePermission(actionConfig, endpointGuid, ...args);
     } else if (endpointGuid) {
-      // TODO: RC test
       return stratosEntityCatalog.endpoint.store.getEntityMonitor(endpointGuid).entity$.pipe(
         switchMap(endpoint => endpoint ?
           this.getFallbackPermission(endpointGuid, endpoint.cnsi_type) :

@@ -44,7 +44,6 @@ export class CfQuotasDataSourceService extends ListDataSource<APIResource> {
       if (!this.sourceScheme || !row) {
         return of(getDefaultRowState());
       }
-      // TODO: RC test
       return cfEntityCatalog.quotaDefinition.store.getEntityMonitor(this.getRowUniqueId(row)).entityRequest$.pipe(
         distinctUntilChanged(),
         map(requestInfo => ({

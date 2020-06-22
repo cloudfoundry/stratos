@@ -45,8 +45,16 @@ export class MetaCardComponent implements OnDestroy {
   @Input()
   status$: Observable<StratosStatus>;
 
+  // @Input()
+  // public favorite: UserFavorite<IFavoriteMetadata>;
+  private _favorite: UserFavorite<IFavoriteMetadata>;
   @Input()
-  public favorite: UserFavorite<IFavoriteMetadata>;
+  set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
+    this._favorite = favorite;
+  }
+  get favorite(): UserFavorite<IFavoriteMetadata> {
+    return this._favorite;
+  }
 
   @Input()
   public confirmFavoriteRemoval = false;
