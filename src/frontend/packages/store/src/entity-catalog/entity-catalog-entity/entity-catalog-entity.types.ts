@@ -4,7 +4,7 @@ import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { PaginationObservables } from '../../reducers/pagination-reducer/pagination-reducer.types';
 import { PaginatedAction } from '../../types/pagination.types';
 import { OrchestratedActionBuilders, OrchestratedActionCoreBuilders } from '../action-orchestrator/action-orchestrator';
-import { FilteredByReturnType, KnownKeys, NeverKeys } from './type.helpers';
+import { FilteredByNotReturnType, FilteredByReturnType, KnownKeys, NeverKeys } from './type.helpers';
 
 /**
  * Core entity and entities access (entity/entities monitors and services)
