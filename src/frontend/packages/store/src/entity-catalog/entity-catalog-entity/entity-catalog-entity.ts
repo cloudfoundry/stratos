@@ -35,13 +35,8 @@ import {
 } from '../entity-catalog.types';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
-import { EntityCatalogEntityStore, KnownKeys } from './entity-catalog-entity.types';
-
-type NonOptionalKeys<T extends object> = Exclude<{
-  [K in keyof T]: T extends Record<K, T[K]>
-  ? K
-  : never
-}[keyof T], undefined>
+import { EntityCatalogEntityStore } from './entity-catalog-entity.types';
+import { KnownKeys, NonOptionalKeys } from './type.helpers';
 
 export type KnownActionBuilders<ABC extends OrchestratedActionBuilders> = Pick<ABC, NonOptionalKeys<Pick<ABC, KnownKeys<ABC>>>>;
 

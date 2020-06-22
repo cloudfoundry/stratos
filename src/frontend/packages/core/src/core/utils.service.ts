@@ -11,38 +11,6 @@ export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   return null;
 }
 
-export type OptionalKeys<T extends object> = Exclude<{
-  [K in keyof T]: T extends Record<K, T[K]>
-  ? K
-  : never
-}[keyof T], undefined>
-
-export type NeverKeys<T extends object> = Exclude<{
-  [K in keyof T]: T[K] extends never
-  ? K
-  : never
-}[keyof T], undefined>
-
-/**
- * Pick all properties who's function has the specified return type U
- */
-export type FilteredByReturnType<T extends { [key: string]: (...args: any[]) => any }, U> = {
-  [P in keyof T]: ReturnType<T[P]> extends U ? T[P] : never
-};
-
-/**
- * Pick all properties who's function do not have the specified return type U
- */
-export type FilteredByNotReturnType<T extends { [key: string]: (...args: any[]) => any }, U> = {
-  [P in keyof T]: ReturnType<T[P]> extends U ? never : T[P]
-};
-
-// Note - Adding }[keyof T] to [P in keyof T] types should filter out properties of type `never`, however this fails with generics!
-export type FilteredByValueType<T extends { [key: string]: (...args: any[]) => any }, U> = {
-  [P in keyof T]: T[P] extends U ? never : T[P]
-};
-
-
 export const urlValidationExpression =
   '^' +
   // protocol identifier

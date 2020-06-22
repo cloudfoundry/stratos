@@ -9,7 +9,7 @@ export interface SessionUser {
   admin: boolean;
   guid: string;
   name: string;
-  scopes: [];
+  scopes: string[];
 }
 export interface PluginConfig {
   userInvitationsEnabled: 'true' | 'false';
