@@ -74,7 +74,6 @@ export class StratosBaseCatalogEntity<
     this.entityKey = this.isEndpoint ?
       EntityCatalogHelpers.buildEntityKey(EntityCatalogHelpers.endpointType, baseEntity.type) :
       EntityCatalogHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
-    console.log(definition, this.entityKey)
     const actionBuilders = ActionBuilderConfigMapper.getActionBuilders(
       this.builders.actionBuilders,
       this.endpointType,

@@ -2,7 +2,7 @@ import { AfterContentInit, Component, Input, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { filter, map, pairwise, tap } from 'rxjs/operators';
+import { filter, map, pairwise } from 'rxjs/operators';
 
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import {
@@ -86,7 +86,6 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       this.clientSecretField ? this.clientSecretField.value : '',
       this.ssoAllowedField ? !!this.ssoAllowedField.value : false,
     ).pipe(
-      tap(a => console.log('REGISTER RES: ', a)),
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
       map(([oldVal, newVal]) => newVal),

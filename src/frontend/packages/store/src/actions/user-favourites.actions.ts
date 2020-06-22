@@ -34,9 +34,9 @@ abstract class BaseMultipleUserFavouritesAction extends BaseUserFavoritesAction 
 
 abstract class BaseSuccessFavouritesAction extends BaseMultipleUserFavouritesAction {
   constructor(
-    paginationKey: string,
+    type: string,
     public favorites: UserFavorite<IFavoriteMetadata>[],
-    type: string
+    paginationKey: string,
   ) {
     super(type, paginationKey);
   }
@@ -44,8 +44,8 @@ abstract class BaseSuccessFavouritesAction extends BaseMultipleUserFavouritesAct
 
 abstract class BaseSuccessFavouriteAction extends BaseSingleUserFavouritesAction {
   constructor(
+    type: string,
     public favorite: UserFavorite<IFavoriteMetadata>,
-    type: string
   ) {
     super(type, favorite.guid);
   }
@@ -55,7 +55,7 @@ abstract class BaseSuccessFavouriteAction extends BaseSingleUserFavouritesAction
 
 export class GetUserFavoritesAction extends BaseMultipleUserFavouritesAction {
   static PAGINATION_KEY = 'user_favourites';
-  static ACTION_TYPE = 'GET_USER_FAVORITES';
+  static ACTION_TYPE = '[Favorite] Get Favorites';
   constructor() {
     super(
       GetUserFavoritesAction.ACTION_TYPE,
@@ -65,18 +65,18 @@ export class GetUserFavoritesAction extends BaseMultipleUserFavouritesAction {
 }
 
 export class GetUserFavoritesSuccessAction extends BaseSuccessFavouritesAction {
-  static ACTION_TYPE = 'GET_USER_FAVORITES_SUCCESS';
+  static ACTION_TYPE = '[Favorite] Get Favorites Success';
   constructor(favorites: UserFavorite<IFavoriteMetadata>[]) {
     super(
-      GetUserFavoritesAction.PAGINATION_KEY,
+      GetUserFavoritesSuccessAction.ACTION_TYPE,
       favorites,
-      GetUserFavoritesSuccessAction.ACTION_TYPE
+      GetUserFavoritesAction.PAGINATION_KEY,
     );
   }
 }
 
 export class GetUserFavoritesFailedAction extends BaseMultipleUserFavouritesAction {
-  static ACTION_TYPE = 'GET_USER_FAVORITES_FAILED';
+  static ACTION_TYPE = '[Favorite] Get Favorites Failed';
   constructor() {
     super(
       GetUserFavoritesFailedAction.ACTION_TYPE,
@@ -88,58 +88,58 @@ export class GetUserFavoritesFailedAction extends BaseMultipleUserFavouritesActi
 // --------- 
 
 export class RemoveUserFavoriteAction extends BaseSingleUserFavouritesAction {
-  static ACTION_TYPE = 'REMOVE_USER_FAVORITE';
+  static ACTION_TYPE = '[Favorite] Remove Favorite';
   constructor(public favorite: UserFavorite<IFavoriteMetadata>) {
     super(
+      RemoveUserFavoriteAction.ACTION_TYPE,
       favorite.guid,
-      RemoveUserFavoriteAction.ACTION_TYPE
     );
   }
 }
 
 export class RemoveUserFavoriteSuccessAction extends BaseSuccessFavouriteAction {
-  static ACTION_TYPE = 'REMOVE_USER_FAVORITE_SUCCESS';
+  static ACTION_TYPE = '[Favorite] Remove Favorite Success';
   constructor(favorite: UserFavorite<IFavoriteMetadata>) {
-    super(favorite, RemoveUserFavoriteSuccessAction.ACTION_TYPE);
+    super(RemoveUserFavoriteSuccessAction.ACTION_TYPE, favorite)
   }
 }
 
 // --------- 
 
 export class SaveUserFavoriteAction extends BaseSingleUserFavouritesAction {
-  static ACTION_TYPE = 'SAVE_USER_FAVORITE';
+  static ACTION_TYPE = '[Favorite] Save Favorite';
   constructor(public favorite: UserFavorite<IFavoriteMetadata>) {
     super(SaveUserFavoriteAction.ACTION_TYPE, favorite.guid);
   }
 }
 
 export class SaveUserFavoriteSuccessAction extends BaseSuccessFavouriteAction {
-  static ACTION_TYPE = 'SAVE_USER_FAVORITE_SUCCESS';
+  static ACTION_TYPE = '[Favorite] Save Favorite Success';
   constructor(favorite: UserFavorite<IFavoriteMetadata>) {
-    super(favorite, SaveUserFavoriteSuccessAction.ACTION_TYPE);
+    super(SaveUserFavoriteSuccessAction.ACTION_TYPE, favorite);
   }
 }
 
 // --------- 
 
 export class ToggleUserFavoriteAction extends BaseSingleUserFavouritesAction {
-  static ACTION_TYPE = 'TOGGLE_USER_FAVORITE';
+  static ACTION_TYPE = '[Favorite] Toggle Favorite';
   constructor(public favorite: UserFavorite<IFavoriteMetadata>) {
-    super(favorite.guid, ToggleUserFavoriteAction.ACTION_TYPE);
+    super(ToggleUserFavoriteAction.ACTION_TYPE, favorite.guid);
   }
 }
 
 // ---------
 export class UpdateUserFavoriteMetadataAction extends BaseSingleUserFavouritesAction {
-  static ACTION_TYPE = 'UPDATE_FAVORITE_METADATA';
+  static ACTION_TYPE = '[Favorite] Update Favorite Metadata';
   constructor(public favorite: UserFavorite<IFavoriteMetadata>) {
-    super(favorite.guid, UpdateUserFavoriteMetadataAction.ACTION_TYPE);
+    super(UpdateUserFavoriteMetadataAction.ACTION_TYPE, favorite.guid);
   }
 }
 
 export class UpdateUserFavoriteMetadataSuccessAction extends BaseSuccessFavouriteAction {
-  static ACTION_TYPE = 'UPDATE_FAVORITE_METADATA_SUCCESS';
+  static ACTION_TYPE = '[Favorite] Update Favorite Metadata Success';
   constructor(public favorite: UserFavorite<IFavoriteMetadata>) {
-    super(favorite, UpdateUserFavoriteMetadataSuccessAction.ACTION_TYPE);
+    super(UpdateUserFavoriteMetadataSuccessAction.ACTION_TYPE, favorite);
   }
 }
