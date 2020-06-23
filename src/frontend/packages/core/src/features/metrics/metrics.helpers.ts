@@ -1,7 +1,8 @@
 import { Observable, of as observableOf } from 'rxjs';
 
-import { StratosStatus } from '../../shared/shared.types';
-import { EndpointIcon, getFullEndpointApiUrl } from '../endpoints/endpoint-helpers';
+import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
+import { StratosStatus } from '../../../../store/src/types/shared.types';
+import { EndpointIcon } from '../endpoints/endpoint-helpers';
 import { entityCatalog } from './../../../../store/src/entity-catalog/entity-catalog';
 import { MetricsEndpointProvider } from './services/metrics-service';
 

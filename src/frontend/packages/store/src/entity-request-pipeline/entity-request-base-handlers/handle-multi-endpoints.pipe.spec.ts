@@ -1,6 +1,6 @@
 import { of } from 'rxjs';
 
-import { JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
+import { JetStreamErrorResponse } from '../../jetstream';
 import { JetstreamResponse } from '../entity-request-pipeline.types';
 import { handleJetstreamResponsePipeFactory, JetstreamError } from './handle-multi-endpoints.pipe';
 

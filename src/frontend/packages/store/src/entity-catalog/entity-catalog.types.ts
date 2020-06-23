@@ -1,7 +1,6 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { StratosStatus } from '../../../core/src/shared/shared.types';
 import { GeneralEntityAppState } from '../app-state';
 import {
   ApiErrorMessageHandler,
@@ -22,6 +21,7 @@ import { EndpointAuthTypeConfig } from '../extension-types';
 import { FavoritesConfigMapper } from '../favorite-config-mapper';
 import { EntitySchema } from '../helpers/entity-schema';
 import { EndpointModel } from '../types/endpoint.types';
+import { StratosStatus } from '../types/shared.types';
 import { UserFavorite } from '../types/user-favorites.types';
 
 export interface EntityCatalogEntityConfig {

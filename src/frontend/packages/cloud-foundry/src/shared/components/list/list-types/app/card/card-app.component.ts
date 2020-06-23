@@ -7,9 +7,9 @@ import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-sta
 import { applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../core/src/shared/shared.types';
 import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
 import { IApp, ISpace } from '../../../../../../cf-api.types';

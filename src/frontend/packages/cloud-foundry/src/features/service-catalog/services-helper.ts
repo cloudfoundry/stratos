@@ -5,10 +5,10 @@ import { combineLatest, filter, first, map, share, switchMap } from 'rxjs/operat
 
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getIdFromRoute, safeStringToObj } from '../../../../core/src/core/utils.service';
-import { StratosStatus } from '../../../../core/src/shared/shared.types';
 import { EntityService } from '../../../../store/src/entity-service';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../store/src/types/api.types';
+import { StratosStatus } from '../../../../store/src/types/shared.types';
 import {
   IService,
   IServiceBroker,

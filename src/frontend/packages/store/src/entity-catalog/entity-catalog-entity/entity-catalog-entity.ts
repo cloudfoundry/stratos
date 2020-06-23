@@ -1,8 +1,8 @@
 import { ActionReducer } from '@ngrx/store';
 
-import { getFullEndpointApiUrl } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import { IRequestEntityTypeState } from '../../app-state';
 import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
+import { getFullEndpointApiUrl } from '../../endpoint-utils';
 import {
   EntitiesFetchHandler,
   EntitiesInfoHandler,
@@ -134,8 +134,8 @@ export class StratosBaseCatalogEntity<
       }
       return newSchema;
     }, {
-        default: entitySchemas.default
-      });
+      default: entitySchemas.default
+    });
   }
 
   private getEndpointType(definition: IStratosBaseEntityDefinition) {

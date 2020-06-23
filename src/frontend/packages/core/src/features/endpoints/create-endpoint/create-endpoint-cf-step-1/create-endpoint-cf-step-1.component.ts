@@ -10,6 +10,7 @@ import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/a
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../../../store/src/base-entity-schemas';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
+import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   StratosCatalogEndpointEntity,
@@ -21,7 +22,7 @@ import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
-import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
+import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({

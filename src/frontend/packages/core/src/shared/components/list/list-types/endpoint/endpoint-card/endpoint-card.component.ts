@@ -14,19 +14,17 @@ import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   StratosCatalogEndpointEntity,
 } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
-import {
-  coreEndpointListDetailsComponents,
-  getFullEndpointApiUrl,
-} from '../../../../../../features/endpoints/endpoint-helpers';
-import { StratosStatus } from '../../../../../shared.types';
+import { coreEndpointListDetailsComponents } from '../../../../../../features/endpoints/endpoint-helpers';
 import {
   createMetaCardMenuItemSeparator,
   MetaCardMenuItem,
