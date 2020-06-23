@@ -34,6 +34,9 @@ spec:
         imagePullPolicy: {{.Values.imagePullPolicy}}
         command: ["/chartrepo"]
         args: ["serve", "--doclayer-url=mongodb://{{ .Release.Name }}-fdbdoclayer:27016", "--cafile=/etc/certs/ca.crt", "--certfile=/etc/certs/tls.crt", "--keyfile=/etc/certs/tls.key"]
+        env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         ports:
         - name: endpoint
           containerPort: 8080

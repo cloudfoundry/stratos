@@ -52,6 +52,8 @@ spec:
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.fdbdoclayer}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         - name: FDB_COORDINATOR
           value: {{ .Release.Name }}-fdbdoclayer
         - name: FDB_LISTEN_IP
@@ -88,6 +90,8 @@ spec:
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.fdbserver}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         - name: FDB_COORDINATOR
           value: {{ .Release.Name }}-fdbdoclayer
         - name: FDB_LISTEN_IP

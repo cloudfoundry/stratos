@@ -16,6 +16,11 @@ echo "Chart folder         : ${CHART_PATH}"
 echo ""
 
 # ===========================================================================================
+# Copy our customization helper over the default, empty one
+# ===========================================================================================
+cp "${DIR}/__stratos.tpl" "${CHART_PATH}/templates/__stratos.tpl"
+
+# ===========================================================================================
 # Chart.yaml changes
 # ===========================================================================================
 
@@ -45,7 +50,6 @@ echo -e "${CYAN}Patching README.md${RESET}"
 sed -i.bak -e 's@Stratos@SUSE Stratos Console@g' ${CHART_PATH}/README.md
 
 # Change first paragraph to include Kubernetes
-console for Cloud Foundry.
 SRC="console for Cloud Foundry."
 DEST="console for Cloud Foundry and Kubernetes."
 sed -i.bak -e 's@'"${SRC}"'@'"${DEST}"'@g' ${CHART_PATH}/README.md
