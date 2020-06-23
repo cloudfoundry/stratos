@@ -1,8 +1,6 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { EndpointHealthCheck } from '../../../core/endpoints-health-checks';
-import { FavoritesConfigMapper } from '../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { StratosStatus } from '../../../core/src/shared/shared.types';
 import { GeneralEntityAppState } from '../app-state';
 import {
@@ -21,7 +19,9 @@ import {
   PaginationPageIteratorConfig,
 } from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EndpointAuthTypeConfig } from '../extension-types';
+import { FavoritesConfigMapper } from '../favorite-config-mapper';
 import { EntitySchema } from '../helpers/entity-schema';
+import { EndpointModel } from '../types/endpoint.types';
 import { UserFavorite } from '../types/user-favorites.types';
 
 export interface EntityCatalogEntityConfig {
@@ -93,6 +93,17 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
    * Hook that can override the way entities are fetched
    */
   readonly entitiesFetchHandler?: EntitiesFetchHandler;
+}
+
+export class EndpointHealthCheck {
+  /**
+   * @param check To show an error, the check should either call a WrapperRequestActionFailed
+   * or kick off a chain that eventually calls a WrapperRequestActionFailed
+   */
+  constructor(
+    public endpointType: string,
+    public check: (endpoint: EndpointModel) => void
+  ) { }
 }
 
 /**

@@ -18,6 +18,7 @@ import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/
 import {
   StratosCatalogEndpointEntity,
 } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
@@ -26,7 +27,6 @@ import {
   getFullEndpointApiUrl,
 } from '../../../../../../features/endpoints/endpoint-helpers';
 import { StratosStatus } from '../../../../../shared.types';
-import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import {
   createMetaCardMenuItemSeparator,
   MetaCardMenuItem,

@@ -4,6 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
 import { DefaultRouterStateSerializer, RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
 import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
@@ -19,6 +20,7 @@ import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
+import { FavoritesConfigMapper } from '../../store/src/favorite-config-mapper';
 import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
 import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
@@ -38,6 +40,7 @@ import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { CustomImportModule } from './custom-import.module';
+import { environment } from './environments/environment';
 import { AboutModule } from './features/about/about.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
 import { HomeModule } from './features/home/home.module';
@@ -46,7 +49,6 @@ import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/
 import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
-import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SidePanelService } from './shared/services/side-panel.service';
 import { SharedModule } from './shared/shared.module';
@@ -80,6 +82,18 @@ export class CustomRouterStateSerializer
   }
 }
 
+const storeDebugImports = environment.production ? [] : [
+  StoreDevtoolsModule.instrument({
+    maxAge: 100,
+    logOnly: !environment.production
+  })
+];
+
+@NgModule({
+  imports: storeDebugImports
+})
+class AppStoreDebugModule {}
+
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
  */
@@ -94,6 +108,7 @@ export class CustomRouterStateSerializer
     RouteModule,
     CloudFoundryPackageModule,
     AppStoreModule,
+    AppStoreDebugModule,
     BrowserModule,
     SharedModule,
     BrowserAnimationsModule,

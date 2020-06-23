@@ -9,6 +9,7 @@ import {
 import { AppState } from '../../../../../store/src/app-state';
 import { userFavoritesEntitySchema } from '../../../../../store/src/base-entity-schemas';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { IFavoritesMetaCardConfig } from '../../../../../store/src/favorite-config-mapper';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { IFavoriteEntity } from '../../../../../store/src/user-favorite-manager';
@@ -17,7 +18,6 @@ import { ComponentEntityMonitorConfig, StratosStatus } from '../../shared.types'
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
 
 
 @Component({

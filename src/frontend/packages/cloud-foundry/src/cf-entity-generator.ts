@@ -3,17 +3,17 @@ import * as moment from 'moment';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { EndpointHealthCheck } from '../../core/endpoints-health-checks';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
-import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
 import { metricEntityType } from '../../store/src/base-entity-schemas';
+import { BaseEndpointAuth } from '../../store/src/endpoint-auth';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
+  EndpointHealthCheck,
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../store/src/entity-catalog/entity-catalog.types';

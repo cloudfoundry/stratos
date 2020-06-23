@@ -3,13 +3,10 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
-import {
-  FavoritesConfigMapper,
-  TFavoriteMapperFunction,
-} from '../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { ToggleUserFavoriteAction } from './actions/user-favourites-actions/toggle-user-favorite-action';
 import { GeneralEntityAppState, IRequestEntityTypeState } from './app-state';
 import { entityCatalog } from './entity-catalog/entity-catalog';
+import { FavoritesConfigMapper, TFavoriteMapperFunction } from './favorite-config-mapper';
 import { endpointEntitiesSelector } from './selectors/endpoint.selectors';
 import {
   errorFetchingFavoritesSelector,

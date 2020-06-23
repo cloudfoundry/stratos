@@ -1,4 +1,3 @@
-import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import {
   MetricsEndpointDetailsComponent,
 } from '../../core/src/features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
@@ -9,6 +8,7 @@ import {
   userFavoritesEntitySchema,
   userProfileEntitySchema,
 } from './base-entity-schemas';
+import { BaseEndpointAuth } from './endpoint-auth';
 import {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,

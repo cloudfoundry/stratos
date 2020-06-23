@@ -1,7 +1,6 @@
 import { compose } from '@ngrx/store';
 
 import { PermissionValues } from '../../../core/src/core/permissions/current-user-permissions.config';
-import { StratosScopeStrings } from '../../../core/src/core/permissions/stratos-user-permissions.checker';
 import { CurrentUserRolesAppState } from '../app-state';
 import { ICurrentUserRolesState, IStratosRolesState } from '../types/current-user-roles.types';
 import { UserScopeStrings } from '../types/endpoint.types';
@@ -38,7 +37,7 @@ export const getCurrentUserStratosRole = (role: PermissionValues) => compose(
 
 // Top level stratos endpoint scopes
 // ============================
-export const getCurrentUserStratosHasScope = (scope: StratosScopeStrings) => compose(
+export const getCurrentUserStratosHasScope = (scope: UserScopeStrings) => compose(
   selectCurrentUserGlobalHasScopes(scope),
   selectCurrentUserStratosScopesState,
   getCurrentUserStratosRolesState

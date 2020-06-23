@@ -1,8 +1,8 @@
-import { BaseEndpointAuth } from '../../../core/src/features/endpoints/endpoint-auth';
 import {
   EndpointListDetailsComponent,
 } from '../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { endpointEntitySchema } from '../base-entity-schemas';
+import { BaseEndpointAuth } from '../endpoint-auth';
 import { EntitySchema } from '../helpers/entity-schema';
 import { TestEntityCatalog } from './entity-catalog';
 import { StratosCatalogEndpointEntity, StratosCatalogEntity } from './entity-catalog-entity/entity-catalog-entity';
