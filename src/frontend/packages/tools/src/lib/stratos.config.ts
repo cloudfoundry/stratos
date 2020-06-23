@@ -102,7 +102,7 @@ export class StratosConfig implements Logger {
       this.log('Building without any extensions');
     } else {
       this.log('Building with these extensions:');
-      extensions.forEach(ext => console.log( ' + ' + ext));
+      extensions.forEach(ext => console.log(' + ', ext));
     }
   }
 
