@@ -68,7 +68,6 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     this.xterm = new Terminal();
     this.xterm.loadAddon(this.xtermFitAddon);
     this.xterm.open(this.container.nativeElement);
-    //    this.xtermFitAddon.fit();
     this.resize();
 
     this.xterm.onKey(e => {
@@ -125,7 +124,6 @@ export class SshViewerComponent implements OnInit, OnDestroy {
           } else {
             console.log('Error')
             const eMsg = this.errorMessage;
-            //this.disconnect();
             this.errorMessage = eMsg;
           }
         },
