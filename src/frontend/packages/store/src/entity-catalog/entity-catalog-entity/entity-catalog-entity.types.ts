@@ -4,27 +4,8 @@ import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { PaginationObservables } from '../../reducers/pagination-reducer/pagination-reducer.types';
 import { PaginatedAction } from '../../types/pagination.types';
 import { OrchestratedActionBuilders, OrchestratedActionCoreBuilders } from '../action-orchestrator/action-orchestrator';
-import { KnownKeys } from './type.helpers';
+import { FilteredByNotReturnType, FilteredByReturnType, KnownKeys, NeverKeys } from './type.helpers';
 
-type NeverKeys<T extends object> = Exclude<{
-  [K in keyof T]: T[K] extends never
-  ? K
-  : never
-}[keyof T], undefined>
-
-/**
- * Pick all properties who's function has the specified return type U
- */
-type FilteredByReturnType<T extends { [key: string]: (...args: any[]) => any }, U> = {
-  [P in keyof T]: ReturnType<T[P]> extends U ? T[P] : never
-};
-
-/**
- * Pick all properties who's function do not have the specified return type U
- */
-type FilteredByNotReturnType<T extends { [key: string]: (...args: any[]) => any }, U> = {
-  [P in keyof T]: ReturnType<T[P]> extends U ? never : T[P]
-};
 
 /**
  * Core entity and entities access (entity/entities monitors and services)
