@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
-import { createEmptyStoreModule } from '@stratos/store/testing';
+import { createEmptyStoreModule } from '@stratosui/store/testing';
 
 import {
   ApplicationEnvVarsHelper,

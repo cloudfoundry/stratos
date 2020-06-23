@@ -8,15 +8,6 @@ import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../..
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getCurrentUserCFGlobalStates } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
 import {
-  CfUser,
-  createUserRoleInOrg,
-  createUserRoleInSpace,
-  IUserPermissionInOrg,
-  IUserPermissionInSpace,
-  UserRoleInOrg,
-  UserRoleInSpace,
-} from '../../../../cloud-foundry/src/store/types/user.types';
-import {
   LocalPaginationHelpers,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
@@ -48,6 +39,15 @@ import {
   waitForCFPermissions,
 } from '../../features/cloud-foundry/cf.helpers';
 import { selectCfPaginationState } from '../../store/selectors/pagination.selectors';
+import {
+  CfUser,
+  createUserRoleInOrg,
+  createUserRoleInSpace,
+  IUserPermissionInOrg,
+  IUserPermissionInSpace,
+  UserRoleInOrg,
+  UserRoleInSpace,
+} from '../../store/types/cf-user.types';
 
 @Injectable()
 export class CfUserService {

@@ -3,7 +3,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store, StoreModule } from '@ngrx/store';
-import { testSCFEndpointGuid } from '@stratos/store/testing';
+import { testSCFEndpointGuid } from '@stratosui/store/testing';
 
 import { CoreModule } from '../../core/src/core/core.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
@@ -23,7 +23,7 @@ import {
 import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
-import { createUserRoleInOrg } from '../src/store/types/user.types';
+import { createUserRoleInOrg } from '../src/store/types/cf-user.types';
 import { CfUserServiceTestProvider } from './user-service-helper';
 
 export const cfEndpointServiceProviderDeps = [

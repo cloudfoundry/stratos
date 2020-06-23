@@ -65,6 +65,8 @@ spec:
           name: https
           protocol: TCP
         env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         - name: CONSOLE_CERT_PATH
           value: "/{{ .Release.Name }}-cert-volume"
         volumeMounts:
@@ -75,6 +77,8 @@ spec:
         imagePullPolicy: {{.Values.imagePullPolicy}}
         name: proxy
         env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         - name: STRATOS_HELM_RELEASE
           value: "{{ .Release.Name }}"
         - name: DB_USER
@@ -277,16 +281,7 @@ spec:
         - name: UI_LIST_ALLOW_LOAD_MAXED
           value: {{ default "false" .Values.console.ui.listAllowLoadMaxed | quote }}
         {{- end }}
-        - name: MONOCULAR_CRT_PATH
-          value: "/etc/monocular-certs/tls.crt"
-        - name: MONOCULAR_KEY_PATH
-          value: "/etc/monocular-certs/tls.key"
-        - name: MONOCULAR_CA_CRT_PATH
-          value: "/etc/monocular-certs/ca.crt"
-        - name: FDB_URL
-          value: "mongodb://{{ .Release.Name }}-fdbdoclayer:27016"
-        - name: SYNC_SERVER_URL
-          value: "http://{{ .Release.Name }}-chartsync:8080"
+        {{- include "stratosJetstreamEnv" . | indent 8 }}
         readinessProbe:
           httpGet:
             path: /pp/v1/ping

@@ -1,7 +1,8 @@
-import { HttpRequest } from '@angular/common/http';
+import { HttpClient, HttpRequest } from '@angular/common/http';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { LoggerService } from '../../../core/src/core/logger.service';
 import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, GeneralEntityAppState, InternalAppState } from '../app-state';
 import {
@@ -10,6 +11,7 @@ import {
 } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { EntityInfo, NormalizedResponse } from '../types/api.types';
+import { EndpointUser } from '../types/endpoint.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';
 import { JetstreamError } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
@@ -135,3 +137,17 @@ export type EntitiesInfoHandler = (
 export type EntityFetch<T = any> = (entity: T) => void;
 export type EntityFetchHandler<T = any> = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => EntityFetch<T>;
 export type EntitiesFetchHandler = (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => void;
+
+export interface EntityUserRolesEndpoint {
+  user?: EndpointUser;
+  guid?: string;
+}
+
+export type EntityUserRolesFetch = (
+  endpoints: string[] | EntityUserRolesEndpoint[],
+  store: Store<AppState>,
+  logService: LoggerService,
+  httpClient: HttpClient
+) => Observable<boolean>;
+
+export type EntityUserRolesReducer<T = any> = (state: T, action: Action) => T;

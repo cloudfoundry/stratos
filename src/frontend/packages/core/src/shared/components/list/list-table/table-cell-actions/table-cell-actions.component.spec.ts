@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { of as observableOf } from 'rxjs';
 
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CoreTestingModule } from '../../../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../../../core/core.module';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { ListConfig } from '../../list.component.types';

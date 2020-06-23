@@ -236,6 +236,7 @@ pushd "${DEST_HELM_CHART_PATH}" > /dev/null
 rm -rf "${DEST_HELM_CHART_PATH}/**/*.orig"
 
 # Run customization script if there is one
+# This can do things like provide a custom __stratos.tpl file
 if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" ]; then
   printf "${YELLOW}${BOLD}Applying Helm Chart customizations${RESET}\n"
   "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" "${DEST_HELM_CHART_PATH}"

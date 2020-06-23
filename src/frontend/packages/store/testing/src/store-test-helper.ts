@@ -7,11 +7,11 @@ import { AppState } from '../../src/app-state';
 import { entityCatalog } from '../../src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../src/entity-catalog/entity-catalog.types';
 import { appReducers } from '../../src/reducers.module';
-import { getDefaultRequestState } from '../../src/reducers/api-request-reducer/types';
+import { getDefaultRequestState, rootUpdatingKey } from '../../src/reducers/api-request-reducer/types';
 import { getDefaultPaginationEntityState } from '../../src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
 import { NormalizedResponse } from '../../src/types/api.types';
 import { SessionData, SessionDataEndpoint } from '../../src/types/auth.types';
-import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../src/types/current-user-roles.types';
+import { getDefaultRolesRequestState } from '../../src/types/current-user-roles.types';
 import { EndpointModel } from '../../src/types/endpoint.types';
 import { BaseEntityValues } from '../../src/types/entity.types';
 import { WrapperRequestActionSuccess } from '../../src/types/request.types';
@@ -202,9 +202,7 @@ function getDefaultInitialTestStratosStoreState() {
         isAdmin: false,
         scopes: []
       },
-      cf: {
-        [testSCFEndpointGuid]: getDefaultEndpointRoles()
-      },
+      endpoints: {},
       state: getDefaultRolesRequestState()
     }
   };
@@ -250,7 +248,7 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
         '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
           fetching: false,
           updating: {
-            _root_: {
+            [rootUpdatingKey]: {
               busy: false,
               error: false,
               message: ''

@@ -5,12 +5,12 @@ import { CfAPIResource } from './store/types/cf-api.types';
 
 export function getFavoriteFromCfEntity<T extends IEntityMetadata = IEntityMetadata>(
   entity,
-  entityKey: string,
+  entityType: string,
   favoritesConfigMapper: FavoritesConfigMapper
 ): UserFavorite<T> {
   if (isCfEntity(entity as CfAPIResource)) {
     return favoritesConfigMapper.getFavoriteFromEntity<T>(
-      entityKey,
+      entityType,
       'cf',
       entity.entity.cfGuid,
       entity

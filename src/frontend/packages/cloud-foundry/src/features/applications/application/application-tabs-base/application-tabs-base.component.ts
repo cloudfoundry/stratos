@@ -6,8 +6,6 @@ import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/o
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
-import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import {
   getActionsFromExtensions,
@@ -16,6 +14,7 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../../../core/src/core/extension/extension-service';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { getFavoriteFromEntity } from '../../../../../../core/src/core/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
@@ -37,6 +36,7 @@ import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { ApplicationStateData } from '../../../../shared/services/application-state.service';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ApplicationService } from '../../application.service';
 import { ApplicationPollingService } from './application-polling.service';
 
@@ -91,7 +91,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     );
 
     const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
-      switchMap(space => this.currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+      switchMap(space => this.currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid, space.metadata.guid)
       ),
       map(can => !can)

@@ -73,7 +73,7 @@ and binding a database service instance to Stratos - for more information see [h
 To do so, `clone` the **stratos** repository, `cd` into the newly cloned repository and `push` to Cloud Foundry. This can be done with:
 
 ```
-git clone https://github.com/cloudfoundry/stratos
+git clone https://github.com/suse/stratos
 cd stratos
 git checkout tags/stable -b stable
 ./build/store-git-metadata.sh
@@ -91,7 +91,7 @@ If you wish to enable AOT or reduce the push time, you can pre-build the UI befo
 This can be done with:
 
 ```
-git clone https://github.com/cloudfoundry/stratos
+git clone https://github.com/suse/stratos
 cd stratos
 npm install
 npm run prebuild-ui

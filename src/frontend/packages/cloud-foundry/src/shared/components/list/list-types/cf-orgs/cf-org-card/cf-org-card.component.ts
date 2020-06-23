@@ -5,9 +5,9 @@ import { map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { createUserRoleInOrg } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { getFavoriteFromEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
@@ -37,6 +37,8 @@ import { OrgQuotaHelper } from '../../../../../../features/cloud-foundry/service
 import {
   createOrgQuotaDefinition,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { createUserRoleInOrg } from '../../../../../../store/types/cf-user.types';
+import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CF_ENDPOINT_TYPE } from './../../../../../../cf-types';
 
@@ -78,12 +80,12 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       {
         label: 'Edit',
         action: this.edit,
-        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_EDIT, this.cfEndpointService.cfGuid)
+        can: this.currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_EDIT, this.cfEndpointService.cfGuid)
       },
       {
         label: 'Delete',
         action: this.delete,
-        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_DELETE, this.cfEndpointService.cfGuid)
+        can: this.currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_DELETE, this.cfEndpointService.cfGuid)
       }
     ];
   }

@@ -1,9 +1,8 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -11,6 +10,7 @@ import { ListConfig } from '../../../../../../../core/src/shared/components/list
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { CfUser } from '../../../../../store/types/cf-user.types';
 import { UserListUsersVisible, userListUserVisibleKey } from './cf-user-list-helpers';
 
 function createUserVisibilityFilter(userHasRoles: (user: CfUser) => boolean):

@@ -38,7 +38,7 @@ import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
 import { EntityCatalogEntityStore } from './entity-catalog-entity.types';
 
-export type KnownActionBuilders<ABC extends OrchestratedActionBuilders> = Pick<ABC, NonOptionalKeys<Pick<ABC, KnownKeys<ABC>>>>
+export type KnownActionBuilders<ABC extends OrchestratedActionBuilders> = Pick<ABC, NonOptionalKeys<Pick<ABC, KnownKeys<ABC>>>>;
 
 export interface EntityCatalogBuilders<
   T extends IEntityMetadata = IEntityMetadata,
@@ -301,7 +301,7 @@ export class StratosCatalogEntity<
 
   public getEntitiesEmitHandler(): EntitiesInfoHandler {
     return this.definition.entitiesEmitHandler ||
-      this.definition.endpoint ? this.definition.endpoint.entitiesEmitHandler : null
+      this.definition.endpoint ? this.definition.endpoint.entitiesEmitHandler : null;
   }
 
   public getEntityFetchHandler(): EntityFetchHandler {

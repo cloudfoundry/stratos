@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
+import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
 
 import { TabNavService } from '../../../../../core/tab-nav.service';
-import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from '@stratos/store/testing';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,

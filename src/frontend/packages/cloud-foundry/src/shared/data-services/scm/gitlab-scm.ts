@@ -134,7 +134,7 @@ export class GitLabSCM implements GitSCM {
     };
   }
 
-  private convertCommit(projectName: string, commit: any): GitCommit {
+  public convertCommit(projectName: string, commit: any): GitCommit {
     const emailMD5 = Md5.hashStr(commit.author_email);
     const avatarURL = `https://secure.gravatar.com/avatar/${emailMD5}?s=120&d=identicon`;
 

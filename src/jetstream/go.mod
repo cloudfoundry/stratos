@@ -40,7 +40,7 @@ require (
 	github.com/gorilla/context v1.1.1
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.1.3
-	github.com/gorilla/websocket v1.4.1
+	github.com/gorilla/websocket v1.4.2
 	github.com/govau/cf-common v0.0.7
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect

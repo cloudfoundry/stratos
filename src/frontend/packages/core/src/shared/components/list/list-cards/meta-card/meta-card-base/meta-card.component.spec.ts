@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
-import { createBasicStoreModule } from '@stratos/store/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { Observable, of } from 'rxjs';
 
 import { EntitySchema } from '../../../../../../../../store/src/helpers/entity-schema';

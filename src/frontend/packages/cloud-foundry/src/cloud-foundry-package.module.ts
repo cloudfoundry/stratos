@@ -16,6 +16,7 @@ import { LongRunningCfOperationsService } from './shared/data-services/long-runn
 import { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
 import { CloudFoundryUserProvidedServicesService } from './shared/services/cloud-foundry-user-provided-services.service';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
+import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
 
 @NgModule({
   imports: [
@@ -37,11 +38,12 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
     // ])
   ],
   providers: [
+    ...cfCurrentUserPermissionsService,
     CfUserService,
     CloudFoundryService,
     ServiceActionHelperService,
     LongRunningCfOperationsService,
-    CloudFoundryUserProvidedServicesService
+    CloudFoundryUserProvidedServicesService,
   ]
 })
 export class CloudFoundryPackageModule { }

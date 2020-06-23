@@ -7,7 +7,7 @@ import { endpointHasMetrics } from '../../../../core/src/features/endpoints/endp
 import { EndpointOnlyAppState } from '../../../../store/src/app-state';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 import { ASSIGN_ROUTE_SUCCESS } from '../../actions/application-service-routes.actions';
-import { UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
+import { CF_APP_UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import {
   createAppInstancesMetricAction,
@@ -29,7 +29,7 @@ export class AppEffects {
   );
 
   @Effect({ dispatch: false }) clearCellMetrics$ = this.actions$.pipe(
-    ofType<APISuccessOrFailedAction>(UPDATE_SUCCESS),
+    ofType<APISuccessOrFailedAction>(CF_APP_UPDATE_SUCCESS),
     map(action => {
       // User's can scale down instances and previous instance data is kept in store, when the user scales up again this stale data can
       // be incorrectly shown straight away. In order to work around this fetch the latest metrics again when scaling up

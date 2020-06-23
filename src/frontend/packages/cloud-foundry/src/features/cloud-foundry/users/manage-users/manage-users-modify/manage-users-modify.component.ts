@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import {
   catchError,
@@ -32,13 +32,6 @@ import {
   ITableListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  selectUsersIsRemove,
-  selectUsersIsSetByUsername,
-  selectUsersRolesOrgGuid,
-  selectUsersRolesPicked,
-  selectUsersRolesRoles,
-} from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { UsersRolesFlipSetRoles, UsersRolesSetOrg } from '../../../../../actions/users-roles.actions';
 import { IOrganization } from '../../../../../cf-api.types';
@@ -49,7 +42,14 @@ import {
 import {
   TableCellSelectOrgComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
-import { CfUser, OrgUserRoleNames } from '../../../../../store/types/user.types';
+import {
+  selectCfUsersIsRemove,
+  selectCfUsersIsSetByUsername,
+  selectCfUsersRolesOrgGuid,
+  selectCfUsersRolesPicked,
+  selectCfUsersRolesRoles,
+} from '../../../../../store/selectors/cf-users-roles.selector';
+import { CfUser, OrgUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
@@ -154,7 +154,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       this.cfRolesService.loading$.subscribe(loading => this.blocked.next(loading));
     }
 
-    const orgEntity$ = this.store.select(selectUsersRolesOrgGuid).pipe(
+    const orgEntity$ = this.store.select(selectCfUsersRolesOrgGuid).pipe(
       startWith(''),
       distinctUntilChanged(),
       filter(orgGuid => !!orgGuid),
@@ -197,7 +197,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       });
     }
 
-    const users$: Observable<CfUserWithWarning[]> = this.store.select(selectUsersRolesPicked).pipe(
+    const users$: Observable<CfUserWithWarning[]> = this.store.select(selectCfUsersRolesPicked).pipe(
       filter(users => !!users),
       distinctUntilChanged(),
       map(users => users.map(this.mapUser.bind(this)))
@@ -211,14 +211,14 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       map(users => users.filter(user => !!user.showWarning).map(user => user.username))
     );
 
-    this.valid$ = this.store.select(selectUsersRolesRoles).pipe(
+    this.valid$ = this.store.select(selectCfUsersRolesRoles).pipe(
       debounceTime(150),
       switchMap(newRoles => this.cfRolesService.createRolesDiff(newRoles.orgGuid)),
       map(changes => !!changes.length)
     );
 
-    this.isSetByUsername$ = this.store.select(selectUsersIsSetByUsername);
-    this.isRemove$ = this.store.select(selectUsersIsRemove);
+    this.isSetByUsername$ = this.store.select(selectCfUsersIsSetByUsername);
+    this.isRemove$ = this.store.select(selectCfUsersIsRemove);
   }
 
   private mapUser(user: CfUser): CfUserWithWarning {
@@ -263,7 +263,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     }
 
     // When the state is ready (org guid is correct), recreate the space roles table for the selected org
-    this.store.select(selectUsersRolesRoles).pipe(
+    this.store.select(selectCfUsersRolesRoles).pipe(
       // Wait for the store to have the correct org
       filter(newRoles => newRoles && newRoles.orgGuid === orgGuid),
       first()
@@ -289,7 +289,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     }
 
     // In order to show the removed roles correctly (as ticks) flip them from remove to add
-    this.store.select(selectUsersIsRemove).pipe(first()).subscribe(isRemove => {
+    this.store.select(selectCfUsersIsRemove).pipe(first()).subscribe(isRemove => {
       if (isRemove) {
         this.store.dispatch(new UsersRolesFlipSetRoles());
       }
@@ -305,10 +305,10 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   onNext = () => {
     return combineLatest([
-      this.store.select(selectUsersIsRemove).pipe(first()),
+      this.store.select(selectCfUsersIsRemove).pipe(first()),
       this.cfRolesService.createRolesDiff(this.selectedOrgGuid)
     ]).pipe(
-      map(([isRemove,]) => {
+      map(([isRemove, ]) => {
         if (isRemove) {
           // If we're going to eventually remove the roles flip the add to remove
           this.store.dispatch(new UsersRolesFlipSetRoles());

@@ -4,9 +4,9 @@ import { Observable, Subscription } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { getServiceName } from '../services-helper';
 import { ServicesService } from '../services.service';
 
@@ -16,7 +16,7 @@ import { ServicesService } from '../services.service';
   styleUrls: ['./service-tabs-base.component.scss'],
 })
 export class ServiceTabsBaseComponent {
-  canCreateServiceInstance: CurrentUserPermissions;
+  canCreateServiceInstance: CfCurrentUserPermissions;
   toolTipText$: Observable<string>;
   hasVisiblePlans$: Observable<boolean>;
   servicesSubscription: Subscription;
@@ -50,7 +50,7 @@ export class ServiceTabsBaseComponent {
   constructor(private servicesService: ServicesService, private store: Store<CFAppState>) {
     this.hasVisiblePlans$ = this.servicesService.servicePlans$.pipe(
       map(p => p.length > 0));
-    this.canCreateServiceInstance = CurrentUserPermissions.SERVICE_INSTANCE_CREATE;
+    this.canCreateServiceInstance = CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE;
     this.toolTipText$ = this.hasVisiblePlans$.pipe(
       map(hasPlans => {
         if (hasPlans) {

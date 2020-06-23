@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
-import { testSessionData } from '@stratos/store/testing';
+import { testSessionData } from '@stratosui/store/testing';
 
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';

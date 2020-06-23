@@ -16,8 +16,8 @@ import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/i
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../../base-entity-schemas';
-import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { environment } from '../../../environments/environment';
 import { getFullEndpointApiUrl } from '../../../features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
@@ -127,7 +127,7 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
     },
     label: 'Delete',
     description: 'Delete Helm Repository',
-    createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
+    createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
   };
 
   private handleDeleteAction(item, handleChange) {
@@ -147,6 +147,7 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
         }
       });
   }
+
 
   constructor(
     public store: Store<AppState>,

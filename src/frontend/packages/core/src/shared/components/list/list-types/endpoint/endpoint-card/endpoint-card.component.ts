@@ -9,8 +9,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { CurrentUserPermissions } from 'frontend/packages/core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/permissions/current-user-permissions.service';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -64,7 +63,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @Input() component: EndpointListDetailsComponent;
   private endpointDetails: ViewContainerRef;
-  @ViewChild('endpointDetails', { read: ViewContainerRef }) set content(content: ViewContainerRef) {
+  @ViewChild('endpointDetails', { read: ViewContainerRef, static: true }) set content(content: ViewContainerRef) {
     this.endpointDetails = content;
     this.updateInnerComponent();
   }
@@ -107,15 +106,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         can: endpointAction.createVisible(this.rowObs)
       }));
 
-      // Add edit
-      this.cardMenu.push({
-        label: 'Edit endpoint',
-        action: () => this.editEndpoint(),
-        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
-      });
-      this.cardMenu.push(createMetaCardMenuItemSeparator());
-
       // Add a copy address to clipboard
+      this.cardMenu.push(createMetaCardMenuItemSeparator());
       this.cardMenu.push({
         label: 'Copy address to Clipboard',
         action: () => this.copyToClipboard.copyToClipboard(),

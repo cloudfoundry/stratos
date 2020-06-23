@@ -7,6 +7,7 @@ import {
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
 import { CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
+import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
 import {
   CloudFoundryUserProvidedServicesService,
@@ -20,7 +21,12 @@ describe('CliInfoCloudFoundryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CliInfoCloudFoundryComponent, CliInfoComponent, CliCommandComponent],
+      declarations: [
+        CliInfoCloudFoundryComponent,
+        CliInfoComponent,
+        CliCommandComponent,
+        CfUserPermissionDirective
+      ],
       imports: generateCfBaseTestModules(),
       providers: [
         generateTestCfEndpointServiceProvider(),

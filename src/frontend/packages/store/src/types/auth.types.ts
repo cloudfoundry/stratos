@@ -1,22 +1,17 @@
-import { ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
+import { StratosScopeStrings } from '../../../core/src/core/permissions/stratos-user-permissions.checker';
 
 export interface SessionDataEndpoint {
   guid: string;
   name: string;
   version: string;
-  user: {
-    admin: boolean,
-    guid: string,
-    name: string,
-    scopes: ScopeStrings[];
-  };
+  user: SessionUser;
   type: string;
 }
 export interface SessionUser {
   admin: boolean;
   guid: string;
   name: string;
-  scopes: ScopeStrings[];
+  scopes: StratosScopeStrings[];
 }
 export interface PluginConfig {
   userInvitationsEnabled: 'true' | 'false';

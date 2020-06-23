@@ -1,13 +1,13 @@
-import { NgModule, Injectable } from '@angular/core';
+import { Injectable, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
-import { RouterStateSerializer, StoreRouterConnectingModule, DefaultRouterStateSerializer } from '@ngrx/router-store';
+import { DefaultRouterStateSerializer, RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
 import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
-import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry.module';
+import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry-package.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import {
   UpdateUserFavoriteMetadataAction,
@@ -35,6 +35,7 @@ import { CustomizationService } from './core/customizations.types';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
+import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { UserFavoriteManager } from './core/user-favorite-manager';
 import { CustomImportModule } from './custom-import.module';
 import { AboutModule } from './features/about/about.module';
@@ -116,7 +117,8 @@ export class CustomRouterStateSerializer
     SidePanelService,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
-    { provide: RouteReuseStrategy, useClass: CustomReuseStrategy }
+    { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
+    CurrentUserPermissionsService
   ],
   bootstrap: [AppComponent]
 })

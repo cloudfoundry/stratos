@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 
 import {
   createEntityRelationKey,

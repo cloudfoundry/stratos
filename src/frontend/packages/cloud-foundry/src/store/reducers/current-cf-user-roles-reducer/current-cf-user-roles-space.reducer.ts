@@ -1,18 +1,18 @@
 import { APIResource } from '../../../../../store/src/types/api.types';
-import { UserRelationTypes } from '../../../actions/permissions.actions';
+import { CfUserRelationTypes } from '../../../actions/permissions.actions';
 import { ISpace } from '../../../cf-api.types';
 import { ISpaceRoleState } from '../../types/cf-current-user-roles.types';
 
-export const defaultUserSpaceRoleState: ISpaceRoleState = {
+export const defaultCfUserSpaceRoleState: ISpaceRoleState = {
   orgId: null,
   isManager: false,
   isAuditor: false,
   isDeveloper: false,
 };
 
-export function currentUserSpaceRoleReducer(
-  state: ISpaceRoleState = defaultUserSpaceRoleState,
-  relationType: UserRelationTypes,
+export function currentCfUserSpaceRoleReducer(
+  state: ISpaceRoleState = defaultCfUserSpaceRoleState,
+  relationType: CfUserRelationTypes,
   userHasRelation: boolean,
   space: APIResource<ISpace>
 ): ISpaceRoleState {
@@ -28,7 +28,7 @@ export function currentUserSpaceRoleReducer(
 }
 
 function addId(
-  state: ISpaceRoleState = defaultUserSpaceRoleState,
+  state: ISpaceRoleState = defaultCfUserSpaceRoleState,
   space: APIResource<ISpace>
 ) {
   if (!state.orgId) {
@@ -42,21 +42,21 @@ function addId(
 
 function applyRoles(
   state: ISpaceRoleState,
-  relationType: UserRelationTypes,
+  relationType: CfUserRelationTypes,
   userHasRelation: boolean
 ) {
   switch (relationType) {
-    case UserRelationTypes.AUDITED_SPACES:
+    case CfUserRelationTypes.AUDITED_SPACES:
       return {
         ...state,
         isAuditor: userHasRelation
       };
-    case UserRelationTypes.MANAGED_SPACES:
+    case CfUserRelationTypes.MANAGED_SPACES:
       return {
         ...state,
         isManager: userHasRelation
       };
-    case UserRelationTypes.SPACES:
+    case CfUserRelationTypes.SPACES:
       return {
         ...state,
         isDeveloper: userHasRelation

@@ -164,7 +164,7 @@ CHART_FILE="${KUBE_FOLDER}/console-${DEV_IMAGE_VERSION}.tgz"
 echo "Chart file path: ${CHART_FILE}"
 
 log "Upgrading using latest Helm Chart"
-helm upgrade ${NAME} "${CHART_FILE}" --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
+helm upgrade ${NAME} "${CHART_FILE}" --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
 
 checkVersion console-${DEV_IMAGE_VERSION}
 waitForHelmRelease
@@ -177,7 +177,7 @@ sed -i.bak -e 's/appVersion: '"${DEV_IMAGE_VERSION}"'/appVersion: 0.2.0/g' "${HE
 cat "${HELM_TMP}/Chart.yaml"
 
 log "Upgrading using latest Helm Chart (checking chart upgrade)"
-helm upgrade ${NAME} "${HELM_TMP}" --recreate-pods --debug --set imagePullPolicy=Always
+helm upgrade ${NAME} "${HELM_TMP}" --debug --set imagePullPolicy=Always
 
 waitForHelmRelease
 checkVersion console-0.2.0
@@ -204,7 +204,7 @@ helm install ${HELM_REPO_NAME}/console --name ${NAME} --namespace ${NAMESPACE}
 waitForHelmRelease
 
 log "Upgrading using --reuse-values"
-helm upgrade ${NAME} "${HELM_TMP}" --recreate-pods --debug --reuse-values
+helm upgrade ${NAME} "${HELM_TMP}" --debug --reuse-values
 
 waitForHelmRelease
 # Should have used same values as before

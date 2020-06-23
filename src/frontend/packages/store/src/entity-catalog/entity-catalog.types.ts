@@ -12,6 +12,8 @@ import {
   EntitiesInfoHandler,
   EntityFetchHandler,
   EntityInfoHandler,
+  EntityUserRolesFetch,
+  EntityUserRolesReducer,
   PreApiRequest,
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
@@ -93,8 +95,6 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   readonly entitiesFetchHandler?: EntitiesFetchHandler;
 }
 
-
-
 /**
  * Static information describing a stratos endpoint.
  *
@@ -129,6 +129,14 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly favoriteFromEntity?: <M extends IEntityMetadata = IEntityMetadata>(
     entity: any, entityKey: string, favoritesConfigMapper: FavoritesConfigMapper
   ) => UserFavorite<M>;
+  /**
+   * Allows the endpoint to fetch user roles, for example when the user loads Stratos or connects an endpoint of this type
+   */
+  readonly userRolesFetch?: EntityUserRolesFetch
+  /**
+   * Allows the user roles to be stored, updated and removed in the current user permissions section of the store
+   */
+  readonly userRolesReducer?: EntityUserRolesReducer
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }

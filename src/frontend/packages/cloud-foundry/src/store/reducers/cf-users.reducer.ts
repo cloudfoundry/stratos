@@ -5,10 +5,10 @@ import { APIResource, NormalizedResponse } from '../../../../store/src/types/api
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 import { GET_ORGANIZATION_USERS_SUCCESS, GetAllOrgUsers } from '../../actions/organization.actions';
 import {
-  ADD_ROLE_SUCCESS,
-  ChangeUserRole,
-  createDefaultUserRelations,
-  REMOVE_ROLE_SUCCESS,
+  ADD_CF_ROLE_SUCCESS,
+  ChangeCfUserRole,
+  createDefaultCfUserRelations,
+  REMOVE_CF_ROLE_SUCCESS,
 } from '../../actions/users.actions';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfUserEntityType } from '../../cf-entity-types';
@@ -20,7 +20,7 @@ import {
   getDefaultCfUserMissingRoles,
   OrgUserRoleNames,
   SpaceUserRoleNames,
-} from '../types/user.types';
+} from '../types/cf-user.types';
 
 const properties = {
   org: {
@@ -36,12 +36,12 @@ const properties = {
   }
 };
 
-export function userReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: APISuccessOrFailedAction) {
+export function cfUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: APISuccessOrFailedAction) {
   switch (action.type) {
-    case ADD_ROLE_SUCCESS:
-    case REMOVE_ROLE_SUCCESS:
+    case ADD_CF_ROLE_SUCCESS:
+    case REMOVE_CF_ROLE_SUCCESS:
       // Ensure that a user's roles collections are updated when we call add/remove
-      const permAction = action.apiAction as ChangeUserRole;
+      const permAction = action.apiAction as ChangeCfUserRole;
       if (permAction.username) {
         return state;
       }
@@ -50,7 +50,7 @@ export function userReducer(state: IRequestEntityTypeState<APIResource<CfUser>>,
         ...state,
         [userGuid]: {
           ...state[userGuid],
-          entity: updatePermission(state[userGuid].entity, entityGuid, isSpace, permissionTypeKey, action.type === ADD_ROLE_SUCCESS),
+          entity: updatePermission(state[userGuid].entity, entityGuid, isSpace, permissionTypeKey, action.type === ADD_CF_ROLE_SUCCESS),
         }
       };
     case GET_ORGANIZATION_USERS_SUCCESS:
@@ -99,18 +99,18 @@ type StateEntities<T> = IRequestEntityTypeState<APIResource<T>>;
 export function userSpaceOrgReducer<T = StateEntity>(isSpace: boolean) {
   return (state: StateEntities<T>, action: APISuccessOrFailedAction) => {
     switch (action.type) {
-      case ADD_ROLE_SUCCESS:
-      case REMOVE_ROLE_SUCCESS:
+      case ADD_CF_ROLE_SUCCESS:
+      case REMOVE_CF_ROLE_SUCCESS:
         // Ensure that an org or space's roles lists are updated when we call add/remove
-        const permAction = action.apiAction as ChangeUserRole;
-        const isAdd = action.type === ADD_ROLE_SUCCESS ? true : false;
+        const permAction = action.apiAction as ChangeCfUserRole;
+        const isAdd = action.type === ADD_CF_ROLE_SUCCESS ? true : false;
         return (isSpace && !!permAction.isSpace) || (!isSpace && !permAction.isSpace) ? newEntityState<T>(state, permAction, isAdd) : state;
     }
     return state;
   };
 }
 
-function newEntityState<T = StateEntity>(state: StateEntities<T>, action: ChangeUserRole, add: boolean): StateEntities<T> {
+function newEntityState<T = StateEntity>(state: StateEntities<T>, action: ChangeCfUserRole, add: boolean): StateEntities<T> {
   const apiResource: APIResource<T> = state[action.guid];
   if (!apiResource) {
     return state;
@@ -165,7 +165,7 @@ function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUse
   // The GetAllOrgUsers request should contain the required roles, if not ignore this action (this will occur when we're fetching total
   // number of users in org and junking the result)
   const getOrgUsersAction: GetAllOrgUsers = action.apiAction as GetAllOrgUsers;
-  const requiredRelations = createDefaultUserRelations();
+  const requiredRelations = createDefaultCfUserRelations();
   const hasRequiredRelations = requiredRelations.reduce((reqRels, rel) => {
     if (getOrgUsersAction.includeRelations.find(includedRel => includedRel === rel)) {
       reqRels.push(rel);
