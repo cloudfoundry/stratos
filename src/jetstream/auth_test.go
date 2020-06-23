@@ -812,6 +812,12 @@ func TestVerifySessionNoDate(t *testing.T) {
 		_, _, ctx, pp, db, _ := setupHTTPTest(req)
 		defer db.Close()
 
+		//Init the auth service
+		err := pp.InitStratosAuthService(interfaces.Local)
+		if err != nil {
+			log.Fatalf("Could not initialise auth service: %v", err)
+		}
+
 		// Set a dummy userid in session - normally the login to UAA would do this.
 		sessionValues := make(map[string]interface{})
 		sessionValues["user_id"] = mockUserGUID
@@ -823,7 +829,7 @@ func TestVerifySessionNoDate(t *testing.T) {
 			So(errSession, ShouldBeNil)
 		})
 
-		err := pp.verifySession(ctx)
+		err = pp.verifySession(ctx)
 		Convey("Should fail to verify session.", func() {
 
 			So(err, ShouldNotBeNil)
