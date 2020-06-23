@@ -242,14 +242,16 @@ describe('Application View -', () => {
         const envVarValue = 'new env var value';
         appVariables.addVariable(envVarName, envVarValue);
 
+        appVariables.list.table.waitUntilNotBusy();
+
         expect(appVariables.list.table.getRows().count()).toBe(1);
-        expect(appVariables.list.table.getCell(0, 1).getText()).toBe(envVarName);
-        expect(appVariables.list.table.getCell(0, 2).getText()).toBe(envVarValue);
+        appVariables.list.table.waitForCellText(0, 1, envVarName);
+        appVariables.list.table.waitForCellText(0, 2, envVarValue);
 
         // Edit Env Var
         const envVarValueEdited = `${envVarValue}-edited`;
         appVariables.editVariable(0, envVarValueEdited);
-        expect(appVariables.list.table.getCell(0, 2).getText()).toBe(envVarValueEdited);
+        appVariables.list.table.waitForCellText(0, 2, envVarValueEdited);
 
         // Delete Env Var
         appVariables.deleteVariable(0, envVarName);

@@ -139,8 +139,11 @@ export class EndpointsService implements CanActivate {
       map(ep => {
         return Object.values(ep)
           .filter(endpoint => {
+            if (endpoint.cnsi_type !== type) {
+              return;
+            }
             const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
-            return endpoint.cnsi_type === type && (epType.unConnectable || endpoint.connectionStatus === 'connected');
+            return epType.unConnectable || endpoint.connectionStatus === 'connected';
           });
       })
     );
