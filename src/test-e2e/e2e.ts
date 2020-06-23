@@ -1,5 +1,6 @@
 import { browser, promise, protractor } from 'protractor';
 
+import { CustomizationsMetadata } from '../frontend/packages/core/src/core/customizations.types';
 import { ConsoleUserType, E2EHelpers } from './helpers/e2e-helpers';
 import { RequestHelpers } from './helpers/request-helpers';
 import { ResetsHelpers } from './helpers/reset-helpers';
@@ -14,6 +15,13 @@ export class E2E {
 
   // Turn on debug logging for test helpers
   public static DEBUG_LOGGING = !!process.env.STRATOS_E2E_DEBUG || false;
+
+  /**
+   * Temporary location for customization, we should in future look to fetch this a better way from client side code
+  */
+  public static customization: CustomizationsMetadata = {
+    alwaysShowNavForEndpointTypes: (epType) => true
+  }
 
   // General helpers
   public helper = new E2EHelpers();

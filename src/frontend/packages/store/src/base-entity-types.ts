@@ -41,10 +41,10 @@ class DefaultEndpointCatalogEntity extends StratosCatalogEntity {
       type: endpointEntitySchema.entityType,
       endpoint: stratosType,
     }, {
-        dataReducers: [
-          systemEndpointsReducer
-        ]
-      });
+      dataReducers: [
+        systemEndpointsReducer
+      ]
+    });
   }
 }
 
@@ -55,11 +55,11 @@ class UserFavoriteCatalogEntity extends StratosCatalogEntity {
       type: userFavoritesEntitySchema.entityType,
       endpoint: stratosType,
     }, {
-        dataReducers: [
-          addOrUpdateUserFavoriteMetadataReducer,
-          deleteUserFavoriteMetadataReducer,
-        ]
-      });
+      dataReducers: [
+        addOrUpdateUserFavoriteMetadataReducer,
+        deleteUserFavoriteMetadataReducer,
+      ]
+    });
   }
 }
 
