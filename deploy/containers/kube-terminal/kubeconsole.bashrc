@@ -72,5 +72,6 @@ touch "/stratos/.firstrun"
 # Remove any env vars matching KUBERNETES
 unset `compgen -A variable | grep KUBERNETES`
 
-echo "Ready"
+echo 
+echo -e "Ready - ${CYAN}kubectl${RESET} and ${CYAN}helm${RESET} commands are available"
 echo ""
