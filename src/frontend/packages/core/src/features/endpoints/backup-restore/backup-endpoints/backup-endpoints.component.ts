@@ -5,9 +5,9 @@ import { Observable, of, Subject } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
+import { httpErrorResponseToSafeString } from '../../../../../../store/src/jetstream';
 import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { httpErrorResponseToSafeString } from '../../../../jetstream.helpers';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
