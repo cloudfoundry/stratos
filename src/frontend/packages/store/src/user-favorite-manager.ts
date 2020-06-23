@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
-import { FavoritesConfigMapper } from '../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { GeneralEntityAppState, IRequestEntityTypeState } from './app-state';
 import { entityCatalog } from './entity-catalog/entity-catalog';
 import { FavoritesConfigMapper } from './favorite-config-mapper';

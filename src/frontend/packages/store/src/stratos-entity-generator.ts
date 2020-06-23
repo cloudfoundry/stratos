@@ -1,4 +1,4 @@
-import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
+import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
 import {
   MetricsEndpointDetailsComponent,
 } from '../../core/src/features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
