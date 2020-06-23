@@ -10,7 +10,7 @@ import {
   ISpaceQuotaDefinition,
 } from '../../frontend/packages/cloud-foundry/src/cf-api.types';
 import { CFResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
-import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/user.types';
+import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/cf-user.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { ApplicationPageSummaryTab } from '../application/po/application-page-summary.po';
 import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';

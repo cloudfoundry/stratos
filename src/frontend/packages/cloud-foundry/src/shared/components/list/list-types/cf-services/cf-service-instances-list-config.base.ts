@@ -5,8 +5,9 @@ import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -20,6 +21,7 @@ import {
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../cf-api-svc.types';
+import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { CANCEL_ORG_ID_PARAM, CANCEL_SPACE_ID_PARAM } from '../../../add-service-instance/csi-mode.service';
 import {
@@ -127,7 +129,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDeleteCache, CurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid)
+          row => this.can(this.canDeleteCache, CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid)
         )
       )
   };
@@ -140,7 +142,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
         )
       )
   };
@@ -156,12 +158,12 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
         )
       )
   };
 
-  private can(cache: CanCache, perm: CurrentUserPermissions, cfGuid: string, spaceGuid: string): Observable<boolean> {
+  private can(cache: CanCache, perm: CfCurrentUserPermissions, cfGuid: string, spaceGuid: string): Observable<boolean> {
     let can = cache[spaceGuid];
     if (!can) {
       can = this.currentUserPermissionsService.can(perm, cfGuid, spaceGuid);

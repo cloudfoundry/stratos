@@ -3,23 +3,19 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTextareaAutosize } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { PaginationMonitorFactory } from 'frontend/packages/store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from 'frontend/packages/store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../shared/components/stepper/step/step.component';
+import { kubeEntityCatalog } from '../../kubernetes/kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
 import { KubernetesNamespace } from '../../kubernetes/store/kube.types';
-import { CreateKubernetesNamespace, GetKubernetesNamespaces } from '../../kubernetes/store/kubernetes.actions';
-import { HelmInstall } from '../store/helm.actions';
+import { helmEntityCatalog } from '../helm-entity-catalog';
 import { HelmInstallValues } from '../store/helm.types';
 
 @Component({
@@ -61,11 +57,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     public endpointsService: EndpointsService,
-    private store: Store<AppState>,
     private httpClient: HttpClient,
     private confirmDialog: ConfirmationDialogService,
-    private pmf: PaginationMonitorFactory,
-    private emf: EntityMonitorFactory
   ) {
     const chart = this.route.snapshot.params;
     this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
@@ -98,12 +91,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
     this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
 
-    const action = new GetKubernetesNamespaces(null);
-    const allNamespaces$ = getPaginationObservables<KubernetesNamespace>({
-      store: this.store,
-      action,
-      paginationMonitor: this.pmf.create(action.paginationKey, action, true)
-    }).entities$.pipe(
+    const allNamespaces$ = kubeEntityCatalog.namespace.store.getPaginationService(null).entities$.pipe(
       filter(namespaces => !!namespaces),
       first()
     );
@@ -234,12 +222,10 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       });
     }
 
-    const action = new CreateKubernetesNamespace(
+    return kubeEntityCatalog.namespace.api.create<RequestInfoState>(
       this.details.controls.releaseNamespace.value,
-      this.details.controls.endpoint.value);
-    this.store.dispatch(action);
-
-    return this.emf.create(action.guid, action).entityRequest$.pipe(
+      this.details.controls.endpoint.value
+    ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => oldVal.creating && !newVal.creating),
       map(([, newVal]) => newVal),
@@ -267,11 +253,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     };
 
     // Make the request
-    const action = new HelmInstall(values);
-    this.store.dispatch(action);
-
-    // Wait for result of request
-    return this.emf.create(action.guid, action).entityRequest$.pipe(
+    return helmEntityCatalog.chart.api.install<RequestInfoState>(values).pipe(
+      // Wait for result of request
       filter(state => !!state),
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.creating && !newVal.creating)),

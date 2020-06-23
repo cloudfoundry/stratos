@@ -6,10 +6,10 @@ There are two main forms of contribution: reporting issues and performing code c
 
 ## Reporting Issues
 
-If you find a problem with Stratos UI, report it using [GitHub issues](https://github.com/cloudfoundry/stratos/issues/new).
+If you find a problem with Stratos UI, report it using [GitHub issues](https://github.com/suse/stratos/issues/new).
 
 Before reporting a new issue, please take a moment to check whether it has already been reported
-[here](https://github.com/cloudfoundry/stratos/issues). If this is the case, please:
+[here](https://github.com/suse/stratos/issues). If this is the case, please:
 
 - Read all the comments to confirm that it's the same issue you're having.
 - Refrain from adding "same thing here" or "+1" comments. Just hit the

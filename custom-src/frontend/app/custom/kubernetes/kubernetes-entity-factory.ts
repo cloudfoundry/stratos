@@ -3,7 +3,15 @@ import { Schema, schema } from 'normalizr';
 import { getAPIResourceGuid } from '../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { metricEntityType } from '../../base-entity-schemas';
-import { getKubeAPIResourceGuid } from './store/kube.selectors';
+import {
+  getGuidFromKubeDashboardObj,
+  getGuidFromKubeDeploymentObj,
+  getGuidFromKubeNamespaceObj,
+  getGuidFromKubeNodeObj,
+  getGuidFromKubePodObj,
+  getGuidFromKubeServiceObj,
+  getGuidFromKubeStatefulSetObj,
+} from './store/kube.getIds';
 import { KubernetesApp } from './store/kube.types';
 
 export const kubernetesEntityType = 'kubernetesInfo';
@@ -13,7 +21,6 @@ export const kubernetesNamespacesEntityType = 'kubernetesNamespace';
 export const kubernetesServicesEntityType = 'kubernetesService';
 export const kubernetesStatefulSetsEntityType = 'kubernetesStatefulSet';
 export const kubernetesDeploymentsEntityType = 'kubernetesDeployment';
-export const kubernetesAppsEntityType = 'kubernetesApp';
 export const kubernetesDashboardEntityType = 'kubernetesDashboard';
 
 export const getKubeAppId = (object: KubernetesApp) => object.name;
@@ -49,52 +56,52 @@ entityCache[kubernetesEntityType] = new KubernetesEntitySchema(
   { idAttribute: getAPIResourceGuid }
 );
 
-entityCache[kubernetesAppsEntityType] = new KubernetesEntitySchema(
-  kubernetesAppsEntityType,
-  {},
-  { idAttribute: getKubeAppId }
-);
-
 entityCache[kubernetesStatefulSetsEntityType] = new KubernetesEntitySchema(
   kubernetesStatefulSetsEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  {
+    idAttribute: getGuidFromKubeStatefulSetObj
+  }
 );
 
 entityCache[kubernetesPodsEntityType] = new KubernetesEntitySchema(
   kubernetesPodsEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  {
+    idAttribute: getGuidFromKubePodObj
+  }
 );
 
 entityCache[kubernetesDeploymentsEntityType] = new KubernetesEntitySchema(
   kubernetesDeploymentsEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  {
+    idAttribute: getGuidFromKubeDeploymentObj
+  }
 );
 
 entityCache[kubernetesNodesEntityType] = new KubernetesEntitySchema(
   kubernetesNodesEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  { idAttribute: getGuidFromKubeNodeObj }
 );
 
 entityCache[kubernetesNamespacesEntityType] = new KubernetesEntitySchema(
   kubernetesNamespacesEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  { idAttribute: getGuidFromKubeNamespaceObj }
 );
 
 entityCache[kubernetesServicesEntityType] = new KubernetesEntitySchema(
   kubernetesServicesEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  { idAttribute: getGuidFromKubeServiceObj }
 );
 
 entityCache[kubernetesDashboardEntityType] = new KubernetesEntitySchema(
   kubernetesDashboardEntityType,
   {},
-  { idAttribute: getKubeAPIResourceGuid }
+  { idAttribute: getGuidFromKubeDashboardObj }
 );
 
 entityCache[metricEntityType] = new KubernetesEntitySchema(metricEntityType);

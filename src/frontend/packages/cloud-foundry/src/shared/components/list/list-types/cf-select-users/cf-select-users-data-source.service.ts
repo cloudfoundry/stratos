@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';

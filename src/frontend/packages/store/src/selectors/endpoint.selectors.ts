@@ -1,4 +1,4 @@
-import { compose, createSelector } from '@ngrx/store';
+import { compose } from '@ngrx/store';
 
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { InternalAppState, IRequestEntityTypeState } from '../app-state';
@@ -15,7 +15,7 @@ export const endpointStatusSelector = (state: InternalAppState): EndpointState =
 const endpointEntityKey = EntityCatalogHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
 export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointEntityKey);
 
-const endpointOfType = (type: string) =>
+export const endpointOfType = (type: string) =>
   (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
     return Object.values(endpoints || {}).reduce((endpointsOfType, endpoint) => {
       if (endpoint.cnsi_type === type) {
@@ -30,8 +30,6 @@ export const endpointOfTypeSelector = (endpointType: string) => compose(
   endpointEntitiesSelector,
 );
 
-// TODO: Move this #3769
-const cfEndpointEntitiesSelector = endpointOfType('cf');
 
 const getConnectedEndpoints = (endpoints: IRequestEntityTypeState<EndpointModel>) =>
   Object.values(endpoints || {}).reduce((connected, endpoint) => {
@@ -54,19 +52,6 @@ export const connectedEndpointsOfTypesSelector = (endpointType: string) => compo
   endpointEntitiesSelector,
 );
 
-
-// TODO: Move this #3769
-export const endpointsCFEntitiesSelector = createSelector(
-  endpointEntitiesSelector,
-  cfEndpointEntitiesSelector
-);
-
-// const log = (label) => {
-//   return (val) => console.log(label, val);
-// };
-
-// TODO: Move this #3769
-export const endpointsCfEntitiesConnectedSelector = connectedEndpointsOfTypesSelector('cf');
 
 // Single endpoint request information
 export const endpointsEntityRequestSelector = (guid: string) => selectRequestInfo(endpointEntityKey, guid);

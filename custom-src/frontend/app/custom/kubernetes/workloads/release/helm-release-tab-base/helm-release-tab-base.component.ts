@@ -1,31 +1,23 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { LoggerService } from 'frontend/packages/core/src/core/logger.service';
-import { IPageSideNavTab } from 'frontend/packages/core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { AppState } from 'frontend/packages/store/src/app-state';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
-import { PaginatedAction } from 'frontend/packages/store/src/types/pagination.types';
-import { EntityRequestAction, WrapperRequestActionSuccess } from 'frontend/packages/store/src/types/request.types';
 import { Observable, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, map, share, switchMap } from 'rxjs/operators';
 
+import { HideSnackBar, ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
+import { EntityRequestAction, WrapperRequestActionSuccess } from '../../../../../../../store/src/types/request.types';
+import { LoggerService } from '../../../../../core/logger.service';
+import { IPageSideNavTab } from '../../../../../features/dashboard/page-side-nav/page-side-nav.component';
+import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
 import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';
-import { getKubeAPIResourceGuid } from '../../../store/kube.selectors';
-import { KubernetesPod } from '../../../store/kube.types';
-import { getHelmReleaseServiceId } from '../../store/workloads-entity-factory';
-import {
-  GetHelmReleaseGraph,
-  GetHelmReleasePods,
-  GetHelmReleaseResource,
-  GetHelmReleaseServices,
-} from '../../store/workloads.actions';
-import { HelmReleaseGraph, HelmReleaseGuid, HelmReleasePod } from '../../workload.types';
+import { KubernetesPod, KubeService } from '../../../store/kube.types';
+import { KubePaginationAction } from '../../../store/kubernetes.actions';
+import { HelmReleaseGraph, HelmReleaseGuid, HelmReleasePod, HelmReleaseService } from '../../workload.types';
+import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
-
-type IDGetterFunction = (data: any) => string;
-
 
 
 @Component({
@@ -114,19 +106,21 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
         } else if (messageObj.kind === 'Pods') {
           const pods: KubernetesPod[] = messageObj.data || [];
           const podsWithInfo: KubernetesPod[] = pods.map(pod => KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod));
-          const releasePodsAction = new GetHelmReleasePods(this.helmReleaseHelper.endpointGuid, this.helmReleaseHelper.releaseTitle);
-          this.populateList(releasePodsAction, podsWithInfo, getKubeAPIResourceGuid);
+          const releasePodsAction = kubeEntityCatalog.pod.actions.getInWorkload(
+            this.helmReleaseHelper.endpointGuid,
+            this.helmReleaseHelper.releaseTitle
+          );
+          this.populateList(releasePodsAction, podsWithInfo);
         } else if (messageObj.kind === 'Graph') {
           const graph: HelmReleaseGraph = messageObj.data;
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
           graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
-          const releaseGraphAction = new GetHelmReleaseGraph(graph.endpointId, graph.releaseTitle);
-
+          const releaseGraphAction = workloadsEntityCatalog.graph.actions.get(graph.releaseTitle, graph.endpointId);
           this.addResource(releaseGraphAction, graph);
         } else if (messageObj.kind === 'Manifest' || messageObj.kind === 'Resources') {
           // Store all of the services
           const manifest = messageObj.data;
-          const svcs = [];
+          const svcs: KubeService[] = [];
           // Store ALL resources for the release
           manifest.forEach(resource => {
             if (resource.kind === 'Service' && prefix) {
@@ -134,18 +128,27 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
             }
           });
           if (svcs.length > 0) {
-            const releaseServicesAction = new GetHelmReleaseServices(
+            const releaseServicesAction = kubeEntityCatalog.service.actions.getInWorkload(
+              this.helmReleaseHelper.releaseTitle,
               this.helmReleaseHelper.endpointGuid,
-              this.helmReleaseHelper.releaseTitle
-            );
-            this.populateList(releaseServicesAction, svcs, getHelmReleaseServiceId);
+            )
+            this.populateList(releaseServicesAction, svcs);
           }
 
           const resources = { ...manifest };
           resources.endpointId = this.helmReleaseHelper.endpointGuid;
           resources.releaseTitle = this.helmReleaseHelper.releaseTitle;
-          const releaseResourceAction = new GetHelmReleaseResource(resources.endpointId, resources.releaseTitle);
+          const releaseResourceAction = workloadsEntityCatalog.resource.actions.get(
+            resources.releaseTitle,
+            resources.endpointId,
+          );
           this.addResource(releaseResourceAction, resources);
+        } else if (messageObj.kind === 'ManifestErrors') {
+          if (messageObj.data) {
+            this.store.dispatch(
+              new ShowSnackBar('Errors were found when parsing this workload. Not all resources may be shown', 'Dismiss')
+            );
+          }
         }
       }
     });
@@ -167,19 +170,24 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
     this.store.dispatch(successWrapper);
   }
 
-  private populateList(action: PaginatedAction, resources: any, idGetter: IDGetterFunction) {
+  private populateList(action: KubePaginationAction, resources: any) {
+    const entity = entityCatalog.getEntity(action);
     const newResources = {};
     resources.forEach(resource => {
-      const newResource: HelmReleasePod = {
-        endpointId: action.endpointGuid,
+      const newResource: HelmReleasePod | HelmReleaseService = {
+        endpointId: action.kubeGuid,
         releaseTitle: this.helmReleaseHelper.releaseTitle,
         ...resource
       };
-      newResources[idGetter(newResource)] = newResource;
+      newResource.metadata.kubeId = action.kubeGuid;
+      // The service entity from manifest is missing this, but apply here to ensure any others are caught
+      newResource.metadata.namespace = this.helmReleaseHelper.namespace;
+      const entityId = action.entity[0].getId(resource)
+      newResources[entityId] = newResource;
     });
 
     const releasePods = {
-      entities: { [entityCatalog.getEntityKey(action)]: newResources },
+      entities: { [entity.entityKey]: newResources },
       result: Object.keys(newResources)
     };
     const successWrapper = new WrapperRequestActionSuccess(releasePods, action, 'fetch', releasePods.result.length, 1);
@@ -188,5 +196,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.sub.unsubscribe();
+    this.store.dispatch(new HideSnackBar());
   }
 }

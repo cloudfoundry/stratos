@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { createEmptyStoreModule } from '@stratos/store/testing';
+import { createEmptyStoreModule } from '@stratosui/store/testing';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import {
@@ -26,8 +26,6 @@ import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-c
 import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
 
-/* tslint:disable:max-line-length */
-/* tslint:enable:max-line-length */
 
 describe('AppAutoscalerMetricChartCardComponent', () => {
   let component: AppAutoscalerMetricChartCardComponent;

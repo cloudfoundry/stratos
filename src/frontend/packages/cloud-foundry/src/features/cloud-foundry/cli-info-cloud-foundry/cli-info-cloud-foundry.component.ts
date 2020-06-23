@@ -5,8 +5,6 @@ import { first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { CFAppCLIInfoContext } from '../../../../../cloud-foundry/src/shared/components/cli-info/cli-info.component';
-import { CurrentUserPermissionsChecker } from '../../../../../core/src/core/current-user-permissions.checker';
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { getFullEndpointApiUrl } from '../../../../../core/src/features/endpoints/endpoint-helpers';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
@@ -17,6 +15,7 @@ import { IOrganization, ISpace } from '../../../cf-api.types';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
+import { CfCurrentUserPermissions, CfUserPermissionsChecker } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
@@ -38,8 +37,8 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
 })
 export class CliInfoCloudFoundryComponent implements OnInit {
 
-  permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
-  permsSpaceEdit = CurrentUserPermissions.SPACE_EDIT;
+  permsOrgEdit = CfCurrentUserPermissions.ORGANIZATION_EDIT;
+  permsSpaceEdit = CfCurrentUserPermissions.SPACE_EDIT;
 
   orgGuid: string;
   spaceGuid: string;
@@ -70,7 +69,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
     if (activeRouteCfOrgSpace.orgGuid) {
       this.orgGuid = activeRouteCfOrgSpace.orgGuid;
-      this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || CurrentUserPermissionsChecker.ALL_SPACES;
+      this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || CfUserPermissionsChecker.ALL_SPACES;
     }
   }
 

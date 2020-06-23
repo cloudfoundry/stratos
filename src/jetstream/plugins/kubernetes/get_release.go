@@ -142,6 +142,8 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 	graph.ParseManifest(rel)
 	sendResource(ws, "Graph", graph)
 
+	sendResource(ws, "ManifestErrors", rel.ManifestErrors)
+
 	stopchan := make(chan bool)
 
 	go readLoop(ws, stopchan)

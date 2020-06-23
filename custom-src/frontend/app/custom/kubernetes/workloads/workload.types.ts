@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 
-import { KubeService } from '../store/kube.types';
+import { KubernetesPod, KubeService } from '../store/kube.types';
 
 export interface HelmRelease {
   endpointId: string;
@@ -27,28 +26,16 @@ export interface HelmRelease {
   };
 }
 
-export interface HelmReleasePod {
+export interface HelmReleaseEntity {
   endpointId: string;
   releaseTitle: string;
-  name: string;
-  ready: string;
-  status: string;
-  restarts: string;
-  age: string;
 }
 
-export interface HelmReleaseService {
-  endpointId: string;
-  releaseTitle: string;
-  name: string;
-  kubeService$?: Observable<KubeService>;
-  metadata: any;
-  spec: any;
-}
+export interface HelmReleasePod extends HelmReleaseEntity, KubernetesPod { }
 
-export interface HelmReleaseGraph {
-  endpointId: string;
-  releaseTitle: string;
+export interface HelmReleaseService extends HelmReleaseEntity, KubeService { }
+
+export interface HelmReleaseGraph extends HelmReleaseEntity {
   nodes: {};
   links: {};
 }

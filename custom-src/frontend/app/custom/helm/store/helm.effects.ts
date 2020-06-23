@@ -2,24 +2,25 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from 'frontend/packages/store/src/actions/endpoint.actions';
-import { ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
-import { AppState } from 'frontend/packages/store/src/app-state';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
-import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
-import { NormalizedResponse } from 'frontend/packages/store/src/types/api.types';
+import { Observable } from 'rxjs';
+import { catchError, flatMap, mergeMap } from 'rxjs/operators';
+
+import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../../../../../store/src/actions/endpoint.actions';
+import { ClearPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { ApiRequestTypes } from '../../../../../store/src/reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import {
   EntityRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
-} from 'frontend/packages/store/src/types/request.types';
-import { Observable } from 'rxjs';
-import { catchError, flatMap, mergeMap } from 'rxjs/operators';
-
+} from '../../../../../store/src/types/request.types';
 import { environment } from '../../../environments/environment';
 import { isJetstreamError } from '../../../jetstream.helpers';
-import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
+import { helmEntityCatalog } from '../helm-entity-catalog';
+import { getHelmVersionId, getMonocularChartId, HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 import {
   GET_HELM_VERSIONS,
   GET_MONOCULAR_CHARTS,
@@ -85,7 +86,7 @@ export class HelmEffects {
 
         const items = response.data as Array<any>;
         const processedData = items.reduce((res, data) => {
-          const id = data.id;
+          const id = getMonocularChartId(data);
           res.entities[entityKey][id] = data;
           // Promote the name to the top-level object for simplicity
           data.name = data.attributes.name;
@@ -119,7 +120,7 @@ export class HelmEffects {
             endpointId: endpoint,
             ...endpointData
           };
-          processedData.entities[entityKey][endpoint] = version;
+          processedData.entities[entityKey][getHelmVersionId(version)] = version;
           processedData.result.push(endpoint);
         });
         return processedData;
@@ -142,7 +143,7 @@ export class HelmEffects {
           ];
         }),
         catchError(error => {
-          const { status, message } = this.createHelmError(error);
+          const { status, message } = HelmEffects.createHelmError(error);
           const errorMessage = `Failed to install helm chart: ${message}`;
           return [
             new WrapperRequestActionFailed(errorMessage, action, requestType, {
@@ -172,7 +173,7 @@ export class HelmEffects {
     return this.httpClient.get(url, requestArgs).pipe(
       mergeMap((response: any) => [new WrapperRequestActionSuccess(mapResult(response), action)]),
       catchError(error => {
-        const { status, message } = this.createHelmError(error);
+        const { status, message } = HelmEffects.createHelmError(error);
         return [
           new WrapperRequestActionFailed(message, action, 'fetch', {
             endpointIds,
@@ -186,7 +187,7 @@ export class HelmEffects {
     );
   }
 
-  private createHelmErrorMessage(err: any): string {
+  static createHelmErrorMessage(err: any): string {
     if (err) {
       if (err.error && err.error.message) {
         // Kube error
@@ -202,7 +203,7 @@ export class HelmEffects {
     return 'Helm API request error';
   }
 
-  private createHelmError(err: any): { status: string, message: string } {
+  static createHelmError(err: any): { status: string, message: string } {
     let unwrapped = err;
     if (err.error) {
       unwrapped = err.error;
@@ -212,7 +213,7 @@ export class HelmEffects {
       // Wrapped error
       return {
         status: jetstreamError.error.statusCode.toString(),
-        message: this.createHelmErrorMessage(jetstreamError)
+        message: HelmEffects.createHelmErrorMessage(jetstreamError)
       };
     }
     return {
@@ -242,7 +243,7 @@ export class HelmEffects {
         this.syncing = syncing;
         if (remaining !== existing) {
           // Dispatch action to refresh charts
-          this.store.dispatch(new GetMonocularCharts());
+          helmEntityCatalog.chart.api.getMultiple();
         }
         if (remaining > 0) {
           this.scheduleSyncStatusCheck();

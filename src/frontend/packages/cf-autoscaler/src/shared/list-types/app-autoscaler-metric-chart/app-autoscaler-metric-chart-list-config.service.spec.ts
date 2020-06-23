@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
-import { createEmptyStoreModule } from '@stratos/store/testing';
+import { createEmptyStoreModule } from '@stratosui/store/testing';
 
 import {
   ApplicationEnvVarsHelper,
@@ -18,9 +18,6 @@ import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagi
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartListConfigService } from './app-autoscaler-metric-chart-list-config.service';
 
-/* tslint:disable:max-line-length */
-
-/* tslint:enable:max-line-length */
 
 describe('AppAutoscalerMetricChartListConfigService', () => {
   beforeEach(() => {

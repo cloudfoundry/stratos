@@ -1,12 +1,12 @@
 <app-page-sub-nav>
   <button mat-icon-button name="rename"
-    *appUserPermission="permsSpaceEdit;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;spaceGuid:cfSpaceService.spaceGuid"
+    *appCfUserPermission="permsSpaceEdit;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;spaceGuid:cfSpaceService.spaceGuid"
     routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/edit-space"
     matTooltip="Edit Space">
     <mat-icon>edit</mat-icon>
   </button>
   <button mat-icon-button name="delete"
-    *appUserPermission="permsSpaceDelete;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;"
+    *appCfUserPermission="permsSpaceDelete;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;"
     (click)="deleteSpaceWarn()" matTooltip="Delete Space">
     <mat-icon>delete</mat-icon>
   </button>

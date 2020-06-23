@@ -3,8 +3,9 @@
     {{ getServiceLabel() | async }}
   </div>
   <div class="page-header-right">
-    <ng-container *appUserPermission="canCreateServiceInstance">
-      <button mat-icon-button name="add-service-instance" [routerLink]="addServiceInstanceLink()" [queryParams]="isServiceSpaceScoped() | async" [disabled]="!(hasVisiblePlans$ | async)">
+    <ng-container *appCfUserPermission="canCreateServiceInstance">
+      <button mat-icon-button name="add-service-instance" [routerLink]="addServiceInstanceLink()"
+        [queryParams]="isServiceSpaceScoped() | async" [disabled]="!(hasVisiblePlans$ | async)">
         <mat-icon [matTooltip]="toolTipText$ | async">add</mat-icon>
       </button>
     </ng-container>

@@ -3,12 +3,13 @@ import { NgModule } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
-import { createBasicStoreModule } from '@stratos/store/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
 import { appReducers } from '../../store/src/reducers.module';
 import { CoreModule } from '../src/core/core.module';
+import { CurrentUserPermissionsService } from '../src/core/permissions/current-user-permissions.service';
 import {
   ApplicationStateIconComponent,
 } from '../src/shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -35,7 +36,10 @@ import { CoreTestingModule } from './core-test.modules';
 
 
 @NgModule({
-  imports: [CoreModule]
+  imports: [CoreModule],
+  providers: [
+    CurrentUserPermissionsService
+  ]
 })
 export class AppTestModule {
   constructor(

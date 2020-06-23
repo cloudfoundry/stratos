@@ -2,7 +2,7 @@ import { ChangeDetectorRef, NgZone } from '@angular/core';
 import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
-import { createBasicStoreModule } from '@stratos/store/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
@@ -14,6 +14,7 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../shared.module';
 import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
@@ -125,7 +126,8 @@ describe('ListComponent', () => {
           // ApplicationStateService,
           PaginationMonitorFactory,
           EntityMonitorFactory,
-          EndpointListHelper
+          EndpointListHelper,
+          CurrentUserPermissionsService
         ],
         imports: [
           CoreModule,

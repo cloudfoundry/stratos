@@ -4,8 +4,9 @@ import { Store } from '@ngrx/store';
 import { switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import {
   DataFunctionDefinition,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -22,6 +23,7 @@ import { GetAppServiceBindings } from '../../../../../actions/application-servic
 import { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { isServiceInstance, isUserProvidedServiceInstance } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import {
@@ -46,7 +48,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     description: 'Bind Service Instance',
     visible$: this.appService.waitForAppEntity$.pipe(
       switchMap(app => this.currentUserPermissionsService.can(
-        CurrentUserPermissions.SERVICE_INSTANCE_CREATE,
+        CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
         this.appService.cfGuid,
         app.entity.entity.space_guid
       ))
@@ -70,7 +72,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     label: 'Edit',
     createVisible: () => this.appService.waitForAppEntity$.pipe(
       switchMap(app => this.currentUserPermissionsService.can(
-        CurrentUserPermissions.SERVICE_BINDING_EDIT,
+        CfCurrentUserPermissions.SERVICE_BINDING_EDIT,
         this.appService.cfGuid,
         app.entity.entity.space_guid
       ))
@@ -91,7 +93,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     label: 'Unbind',
     createVisible: () => this.appService.waitForAppEntity$.pipe(
       switchMap(app => this.currentUserPermissionsService.can(
-        CurrentUserPermissions.SERVICE_BINDING_EDIT,
+        CfCurrentUserPermissions.SERVICE_BINDING_EDIT,
         this.appService.cfGuid,
         app.entity.entity.space_guid
       ))

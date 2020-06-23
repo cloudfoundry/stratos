@@ -1,12 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { TabNavService } from '../../../../../core/tab-nav.service';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   generateCfBaseTestModules,
   generateTestCfServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { populateStoreWithTestEndpoint } from '@stratos/store/testing';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CloudFoundryComponent } from './cloud-foundry.component';
 

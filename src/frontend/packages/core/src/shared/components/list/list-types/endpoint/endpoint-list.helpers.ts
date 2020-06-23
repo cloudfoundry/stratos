@@ -5,6 +5,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
+import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
@@ -14,9 +15,9 @@ import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
-import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { LoggerService } from '../../../../../core/logger.service';
+import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
@@ -72,7 +73,7 @@ export class EndpointListHelper {
         label: 'Disconnect',
         description: ``, // Description depends on console user permission
         createVisible: (row$: Observable<EndpointModel>) => combineLatest(
-          this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER),
+          this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER),
           row$
         ).pipe(
           map(([isAdmin, row]) => {
@@ -119,7 +120,16 @@ export class EndpointListHelper {
         },
         label: 'Unregister',
         description: 'Remove the endpoint',
-        createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
+        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
+      },
+      {
+        action: (item) => {
+          const routerLink = `/endpoints/edit/${item.guid}`;
+          this.store.dispatch(new RouterNav({ path: routerLink }));
+        },
+        label: 'Edit endpoint',
+        description: 'Edit the endpoint',
+        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
       }
     ];
   }

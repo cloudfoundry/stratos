@@ -8,11 +8,10 @@ import {
   ListDataSource,
 } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
-import { kubernetesEntityFactory, kubernetesNodesEntityType } from '../../kubernetes-entity-factory';
+import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
+import { kubernetesNodesEntityType } from '../../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { getKubeAPIResourceGuid } from '../../store/kube.selectors';
 import { KubernetesNode } from '../../store/kube.types';
-import { GetKubernetesNodes } from '../../store/kubernetes.actions';
 
 export class KubernetesNodesDataSource extends ListDataSource<KubernetesNode> {
 
@@ -22,11 +21,12 @@ export class KubernetesNodesDataSource extends ListDataSource<KubernetesNode> {
     listConfig: IListConfig<KubernetesNode>,
     transformEntities: (DataFunction<KubernetesNode> | DataFunctionDefinition)[]
   ) {
+    const action = kubeEntityCatalog.node.actions.getMultiple(kubeGuid.guid);
     super({
       store,
-      action: new GetKubernetesNodes(kubeGuid.guid),
-      schema: kubernetesEntityFactory(kubernetesNodesEntityType),
-      getRowUniqueId: getKubeAPIResourceGuid,
+      action,
+      schema: action.entity[0],
+      getRowUniqueId: (row) => action.entity[0].getId(row),
       paginationKey: getPaginationKey(kubernetesNodesEntityType, kubeGuid.guid),
       isLocal: true,
       listConfig,

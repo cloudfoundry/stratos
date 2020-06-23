@@ -7,17 +7,10 @@ import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actio
 import { AppState } from '../../../../../store/src/app-state';
 import { EntityService } from '../../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { PaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
-import {
-  kubernetesDeploymentsEntityType,
-  kubernetesNodesEntityType,
-  kubernetesPodsEntityType,
-  kubernetesServicesEntityType,
-  kubernetesStatefulSetsEntityType,
-} from '../kubernetes-entity-factory';
+import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import {
   KubernetesDeployment,
@@ -26,15 +19,6 @@ import {
   KubernetesStatefulSet,
   KubeService,
 } from '../store/kube.types';
-import {
-  GeKubernetesDeployments,
-  GetKubernetesDashboard,
-  GetKubernetesNodes,
-  GetKubernetesPods,
-  GetKubernetesServices,
-  GetKubernetesStatefulSets,
-  KubePaginationAction,
-} from '../store/kubernetes.actions';
 import { KubeDashboardStatus } from '../store/kubernetes.effects';
 
 @Injectable()
@@ -62,7 +46,6 @@ export class KubernetesEndpointService {
     public baseKube: BaseKubeGuid,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
-    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     const kubeGuid = baseKube.guid;
 
@@ -161,30 +144,15 @@ export class KubernetesEndpointService {
 
     this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
 
-    this.deployments$ = this.getObservable<KubernetesDeployment>(
-      new GeKubernetesDeployments(this.kubeGuid),
-      kubernetesDeploymentsEntityType
-    );
+    this.deployments$ = this.getObservable<KubernetesDeployment>(kubeEntityCatalog.deployment.store.getPaginationService(this.kubeGuid));
 
-    this.pods$ = this.getObservable<KubernetesPod>(
-      new GetKubernetesPods(this.kubeGuid),
-      kubernetesPodsEntityType
-    );
+    this.pods$ = this.getObservable<KubernetesPod>(kubeEntityCatalog.pod.store.getPaginationService(this.kubeGuid));
 
-    this.nodes$ = this.getObservable<KubernetesNode>(
-      new GetKubernetesNodes(this.kubeGuid),
-      kubernetesNodesEntityType
-    );
+    this.nodes$ = this.getObservable<KubernetesNode>(kubeEntityCatalog.node.store.getPaginationService(this.kubeGuid))
 
-    this.statefulSets$ = this.getObservable<KubernetesStatefulSet>(
-      new GetKubernetesStatefulSets(this.kubeGuid),
-      kubernetesStatefulSetsEntityType
-    );
+    this.statefulSets$ = this.getObservable<KubernetesStatefulSet>(kubeEntityCatalog.statefulSet.store.getPaginationService(this.kubeGuid));
 
-    this.services$ = this.getObservable<KubeService>(
-      new GetKubernetesServices(this.kubeGuid),
-      kubernetesServicesEntityType
-    );
+    this.services$ = this.getObservable<KubeService>(kubeEntityCatalog.service.store.getPaginationService(this.kubeGuid));
 
     this.kubeDashboardEnabled$ = this.store.select('auth').pipe(
       filter(auth => !!auth.sessionData['plugin-config']),
@@ -196,10 +164,7 @@ export class KubernetesEndpointService {
       map(auth => auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
     );
 
-    const kubeDashboardStatus$ = this.entityServiceFactory.create<KubeDashboardStatus>(
-      this.kubeGuid,
-      new GetKubernetesDashboard(this.kubeGuid),
-    ).waitForEntity$.pipe(
+    const kubeDashboardStatus$ = kubeEntityCatalog.dashboard.store.getEntityService(this.kubeGuid).waitForEntity$.pipe(
       map(status => status.entity),
       filter(status => !!status)
     );
@@ -229,14 +194,11 @@ export class KubernetesEndpointService {
   }
 
   public refreshKubernetesDashboardStatus() {
-    this.store.dispatch(new GetKubernetesDashboard(this.kubeGuid));
+    kubeEntityCatalog.dashboard.api.get(this.kubeGuid);
   }
 
-  private getObservable<T>(paginationAction: KubePaginationAction, schemaKey: string): Observable<T[]> {
-    return getPaginationObservables<T>({
-      store: this.store,
-      action: paginationAction,
-      paginationMonitor: this.paginationMonitorFactory.create(paginationAction.paginationKey, paginationAction, true)
-    }, true).entities$.pipe(filter(p => !!p), first());
+  private getObservable<T>(obs: PaginationObservables<T>): Observable<T[]> {
+    return obs.entities$.pipe(filter(p => !!p), first());
   }
+
 }

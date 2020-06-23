@@ -5,8 +5,6 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
-import { kubernetesEntityFactory, kubernetesServicesEntityType } from '../../kubernetes-entity-factory';
-import { getKubeAPIResourceGuid } from '../../store/kube.selectors';
 import { KubeService } from '../../store/kube.types';
 
 export class BaseKubernetesServicesDataSource extends ListDataSource<KubeService> {
@@ -20,8 +18,8 @@ export class BaseKubernetesServicesDataSource extends ListDataSource<KubeService
     super({
       store,
       action,
-      schema: kubernetesEntityFactory(kubernetesServicesEntityType),
-      getRowUniqueId: getKubeAPIResourceGuid,
+      schema: action.entity[0],
+      getRowUniqueId: (row) => action.entity[0].getId(row),
       paginationKey: action.paginationKey,
       transformEntity,
       isLocal: true,

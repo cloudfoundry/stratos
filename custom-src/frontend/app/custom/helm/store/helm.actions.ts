@@ -1,6 +1,4 @@
 import { EntityRequestAction } from '../../../../../store/src/types/request.types';
-import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
-import { helmReleaseEntityKey } from '../../kubernetes/workloads/store/workloads-entity-factory';
 import {
   HELM_ENDPOINT_TYPE,
   helmEntityFactory,
@@ -42,8 +40,18 @@ export class GetMonocularCharts implements MonocularPaginationAction {
     'order-direction': 'desc',
     'order-direction-field': 'name',
   };
+  flattenPagination = true;
 }
 
+export class HelmInstall implements EntityRequestAction {
+  type = HELM_INSTALL;
+  endpointType = HELM_ENDPOINT_TYPE;
+  entityType = monocularChartsEntityType;
+  guid: string;
+  constructor(public values: HelmInstallValues) {
+    this.guid = '<New Release>' + this.values.releaseName;
+  }
+}
 
 export class GetHelmVersions implements MonocularPaginationAction {
   constructor() {
@@ -63,15 +71,5 @@ export class GetHelmVersions implements MonocularPaginationAction {
     'order-direction': 'asc',
     'order-direction-field': 'version',
   };
+  flattenPagination = true;
 }
-
-export class HelmInstall implements EntityRequestAction {
-  type = HELM_INSTALL;
-  endpointType = KUBERNETES_ENDPOINT_TYPE;
-  entityType = helmReleaseEntityKey;
-  guid: string;
-  constructor(public values: HelmInstallValues) {
-    this.guid = '<New Release>' + this.values.releaseName;
-  }
-}
-

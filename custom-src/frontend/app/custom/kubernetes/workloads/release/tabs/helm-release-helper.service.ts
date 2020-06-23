@@ -1,20 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AppState } from 'frontend/packages/store/src/app-state';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
-import { EntityServiceFactory } from 'frontend/packages/store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from 'frontend/packages/store/src/monitors/pagination-monitor.factory';
-import { selectEntity } from 'frontend/packages/store/src/selectors/api.selectors';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { KubernetesPod } from '../../../store/kube.types';
-import {
-  GetHelmRelease,
-  GetHelmReleaseGraph,
-  GetHelmReleasePods,
-  GetHelmReleaseResource,
-} from '../../store/workloads.actions';
+import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
+import { ContainerStateCollection, KubernetesPod } from '../../../store/kube.types';
+import { getHelmReleaseDetailsFromGuid } from '../../store/workloads-entity-factory';
 import {
   HelmRelease,
   HelmReleaseChartData,
@@ -22,6 +12,7 @@ import {
   HelmReleaseGuid,
   HelmReleaseResource,
 } from '../../workload.types';
+import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
 
 
 @Injectable()
@@ -38,17 +29,18 @@ export class HelmReleaseHelperService {
 
   constructor(
     helmReleaseGuid: HelmReleaseGuid,
-    private store: Store<AppState>,
-    private esf: EntityServiceFactory,
-    private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
     this.guid = helmReleaseGuid.guid;
-    this.releaseTitle = this.guid.split(':')[2];
-    this.namespace = this.guid.split(':')[1];
-    this.endpointGuid = this.guid.split(':')[0];
+    const { endpointId, namespace, releaseTitle } = getHelmReleaseDetailsFromGuid(this.guid);
+    this.releaseTitle = releaseTitle;
+    this.namespace = namespace;
+    this.endpointGuid = endpointId;
 
-    const action = new GetHelmRelease(this.endpointGuid, this.namespace, this.releaseTitle);
-    const entityService = this.esf.create<HelmRelease>(action.guid, action);
+    const entityService = workloadsEntityCatalog.release.store.getEntityService(
+      this.releaseTitle,
+      this.endpointGuid,
+      { namespace: this.namespace }
+    );
 
     this.release$ = entityService.waitForEntity$.pipe(
       map((item) => item.entity),
@@ -71,31 +63,29 @@ export class HelmReleaseHelperService {
 
   public fetchReleaseGraph(): Observable<HelmReleaseGraph> {
     // Get helm release
-    const action = new GetHelmReleaseGraph(this.endpointGuid, this.releaseTitle);
-    const entityKey = entityCatalog.getEntityKey(action);
-    return this.store.select(selectEntity<HelmReleaseGraph>(entityKey, action.guid)).pipe(
+    const guid = workloadsEntityCatalog.graph.actions.get(this.releaseTitle, this.endpointGuid).guid;
+    return workloadsEntityCatalog.graph.store.getEntityMonitor(guid).entity$.pipe(
       filter(graph => !!graph)
     );
   }
 
   public fetchReleaseResources(): Observable<HelmReleaseResource> {
     // Get helm release
-    const action = new GetHelmReleaseResource(this.endpointGuid, this.releaseTitle);
-    const entityKey = entityCatalog.getEntityKey(action);
-    return this.store.select(selectEntity<HelmReleaseResource>(entityKey, action.guid)).pipe(
+    const action = workloadsEntityCatalog.resource.actions.get(this.releaseTitle, this.endpointGuid)
+    return workloadsEntityCatalog.resource.store.getEntityMonitor(
+      action.guid
+    ).entity$.pipe(
       filter(resources => !!resources)
     );
   }
 
   public fetchReleaseChartStats(): Observable<HelmReleaseChartData> {
-    const action = new GetHelmReleasePods(this.endpointGuid, this.releaseTitle);
-    return this.paginationMonitorFactory.create(
-      action.paginationKey,
-      action.entity[0],
-      true
+    return kubeEntityCatalog.pod.store.getInWorkload.getPaginationMonitor(
+      this.endpointGuid,
+      this.releaseTitle
     ).currentPage$.pipe(
       filter(pods => !!pods),
-      map(this.mapPods)
+      map(pods => this.mapPods(pods))
     );
   }
 
@@ -120,11 +110,13 @@ export class HelmReleaseHelperService {
       } else {
         podPhases[status]++;
       }
+
       if (pod.status.containerStatuses) {
         pod.status.containerStatuses.forEach(containerStatus => {
-          if (containerStatus.state.running) {
+          const isReady = this.isContainerReady(containerStatus.state);
+          if (isReady === true) {
             containers.ready.value++;
-          } else {
+          } else if (isReady === false) {
             containers.notReady.value++;
           }
         });
@@ -138,5 +130,17 @@ export class HelmReleaseHelperService {
       })),
       containersChartData: Object.values(containers)
     };
+  }
+
+  private isContainerReady(state: ContainerStateCollection = {}): Boolean {
+    if (state.running) {
+      return true;
+    } else if (!!state.waiting) {
+      return false;
+    } else if (!!state.terminated) {
+      // Assume a failed state is not ready (covers completed init states), discard success state
+      return state.terminated.exitCode === 0 ? null : false
+    }
+    return false;
   }
 }

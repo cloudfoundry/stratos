@@ -2,7 +2,7 @@
   <div class="summary__sub-nav">
     <div class="summary__actions" *ngIf="applicationService.appSpace$ | async as space">
       <ng-container
-        *appUserPermission="manageAppPermission;spaceGuid:space.metadata.guid;endpointGuid:applicationService.cfGuid">
+        *appCfUserPermission="manageAppPermission;spaceGuid:space.metadata.guid;endpointGuid:applicationService.cfGuid">
         <app-page-sub-nav-section>
           <button mat-icon-button name="edit" *ngIf="(applicationService.applicationState$ | async)"
             routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit"
@@ -198,8 +198,10 @@
             <mat-card-title>Additional Application Info</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="appSvc.app.entity.guid">{{ appSvc.app.entity.guid }}</app-metadata-item>
-            <app-metadata-item icon="chevron_right" label="Command">{{ appSvc.app.entity.command || appSvc.app.entity.detected_start_command || '-' }}</app-metadata-item>
+            <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="appSvc.app.entity.guid">
+              {{ appSvc.app.entity.guid }}</app-metadata-item>
+            <app-metadata-item icon="chevron_right" label="Command">
+              {{ appSvc.app.entity.command || appSvc.app.entity.detected_start_command || '-' }}</app-metadata-item>
             <app-metadata-item icon="power" label="Ports">{{ appSvc.app.entity.ports || '-' }}</app-metadata-item>
           </mat-card-content>
         </mat-card>
@@ -210,9 +212,12 @@
             <mat-card-title>Health Check Configuration</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <app-metadata-item icon="favorite_border" label="Health Check Type">{{ appSvc.app.entity.health_check_type }}</app-metadata-item>
-            <app-metadata-item icon="schedule" label="Health Check Timeout">{{ appSvc.app.entity.health_check_timeout | uptime }}</app-metadata-item>
-            <app-metadata-item *ngIf="appSvc.app.entity.health_check_type === 'http'" icon="http" label="Health Check HTTP Endpoint">{{ appSvc.app.entity.health_check_http_endpoint }}</app-metadata-item>
+            <app-metadata-item icon="favorite_border" label="Health Check Type">
+              {{ appSvc.app.entity.health_check_type }}</app-metadata-item>
+            <app-metadata-item icon="schedule" label="Health Check Timeout">
+              {{ appSvc.app.entity.health_check_timeout | uptime }}</app-metadata-item>
+            <app-metadata-item *ngIf="appSvc.app.entity.health_check_type === 'http'" icon="http"
+              label="Health Check HTTP Endpoint">{{ appSvc.app.entity.health_check_http_endpoint }}</app-metadata-item>
           </mat-card-content>
         </mat-card>
       </app-tile>

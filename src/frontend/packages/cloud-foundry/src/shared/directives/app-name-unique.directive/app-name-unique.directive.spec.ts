@@ -5,7 +5,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
-import { createBasicStoreModule } from '@stratos/store/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { ExtensionService } from '../../../../../core/src/core/extension/extension-service';

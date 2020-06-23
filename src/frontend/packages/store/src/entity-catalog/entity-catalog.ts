@@ -1,6 +1,9 @@
+import { Action } from '@ngrx/store';
+
 import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { IRequestEntityTypeState } from '../app-state';
 import { ExtraApiReducers } from '../reducers/api-request-reducers.generator.helpers';
+import { ICurrentUserRolesState } from '../types/current-user-roles.types';
 import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
 import {
   StratosBaseCatalogEntity,
@@ -199,6 +202,29 @@ class EntityCatalog {
       }
       return allEntityReducers;
     }, {} as ExtraApiReducers<IRequestEntityTypeState<any>>);
+  }
+
+  public getAllCurrentUserReducers(state: ICurrentUserRolesState, action: Action): ICurrentUserRolesState {
+    const endpoints = this.getAllEndpointTypes();
+    let oneChanged = false;
+    endpoints.forEach(endpoint => {
+      if (endpoint.definition.userRolesReducer) {
+        const endpointState = endpoint.definition.userRolesReducer(state.endpoints[endpoint.type], action);
+        oneChanged = oneChanged || !!endpointState;
+        if (!!endpointState) {
+          state = {
+            ...state,
+            endpoints: {
+              ...state.endpoints,
+              [endpoint.type]: endpointState
+            }
+          }
+        }
+      }
+    })
+    return oneChanged ? {
+      ...state
+    } : state;
   }
 }
 

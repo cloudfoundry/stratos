@@ -3,11 +3,9 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/src/app-state';
 import { ListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../shared/components/list/list.component.types';
-import { kubernetesEntityFactory, kubernetesPodsEntityType } from '../../kubernetes-entity-factory';
+import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { getKubeAPIResourceGuid } from '../../store/kube.selectors';
 import { KubernetesPod } from '../../store/kube.types';
-import { GetKubernetesPods } from '../../store/kubernetes.actions';
 
 export class KubernetesPodsDataSource extends ListDataSource<KubernetesPod> {
 
@@ -16,12 +14,12 @@ export class KubernetesPodsDataSource extends ListDataSource<KubernetesPod> {
     kubeGuid: BaseKubeGuid,
     listConfig: IListConfig<KubernetesPod>
   ) {
-    const action = new GetKubernetesPods(kubeGuid.guid);
+    const action = kubeEntityCatalog.pod.actions.getMultiple(kubeGuid.guid);
     super({
       store,
       action,
-      schema: kubernetesEntityFactory(kubernetesPodsEntityType),
-      getRowUniqueId: getKubeAPIResourceGuid,
+      schema: action.entity[0],
+      getRowUniqueId: (row) => action.entity[0].getId(row),
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,

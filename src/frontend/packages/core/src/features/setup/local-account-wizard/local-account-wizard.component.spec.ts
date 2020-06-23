@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from '@stratos/store/testing';
+import { createEmptyStoreModule } from '@stratosui/store/testing';
 
 import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';

@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { serviceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -20,7 +20,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 export class CfServicesDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey);
-    const getServicesAction = cfEntityCatalog.service.actions.getMultiple(endpointGuid, paginationKey, {})
+    const getServicesAction = cfEntityCatalog.service.actions.getMultiple(endpointGuid, paginationKey, {});
     super({
       store,
       action: getServicesAction,

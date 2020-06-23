@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratos/store';
+import { getRowMetadata } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType, spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -25,7 +25,7 @@ export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
       [],
       false,
       false
-    )
+    );
     super({
       store,
       action,

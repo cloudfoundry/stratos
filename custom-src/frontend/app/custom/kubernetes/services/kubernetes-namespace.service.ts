@@ -1,15 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getIdFromRoute } from '../../../core/utils.service';
+import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
 import { KubernetesNamespace } from '../store/kube.types';
-import { GetKubernetesNamespace } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
 @Injectable()
@@ -21,18 +17,12 @@ export class KubernetesNamespaceService {
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
     public activatedRoute: ActivatedRoute,
-    public store: Store<AppState>,
-    public paginationMonitorFactory: PaginationMonitorFactory,
-    public entityServiceFactory: EntityServiceFactory,
   ) {
 
     this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
     this.kubeGuid = kubeEndpointService.kubeGuid;
 
-    const namespaceEntity = this.entityServiceFactory.create<KubernetesNamespace>(
-      this.namespaceName,
-      new GetKubernetesNamespace(this.namespaceName, this.kubeGuid),
-    );
+    const namespaceEntity = kubeEntityCatalog.namespace.store.getEntityService(this.namespaceName, this.kubeGuid);
 
     this.namespace$ = namespaceEntity.entityObs$.pipe(
       filter(p => !!p),
