@@ -5,9 +5,9 @@ import { first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { CFAppCLIInfoContext } from '../../../../../cloud-foundry/src/shared/components/cli-info/cli-info.component';
-import { getFullEndpointApiUrl } from '../../../../../core/src/features/endpoints/endpoint-helpers';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';

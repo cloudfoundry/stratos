@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { getFullEndpointApiUrl } from '../../../../../core/src/features/endpoints/endpoint-helpers';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
+import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { EntityService } from '../../../../../store/src/entity-service';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';

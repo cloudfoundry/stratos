@@ -2,18 +2,13 @@ import { OverlayContainer } from '@angular/cdk/overlay';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { first, map, filter } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 
-import { SetThemeAction } from '../../../store/src/actions/dashboard-actions';
-import { DashboardOnlyAppState } from '../../../store/src/app-state';
-import { selectDashboardState } from '../../../store/src/selectors/dashboard.selectors';
+import { SetThemeAction } from './actions/dashboard-actions';
+import { DashboardOnlyAppState } from './app-state';
+import { selectDashboardState } from './selectors/dashboard.selectors';
 import { StyleService } from './style.service';
-
-export interface StratosTheme {
-  key: string;
-  label: string;
-  styleName: string;
-}
+import { StratosTheme } from './types/theme.types';
 
 const lightTheme: StratosTheme = {
   key: 'default',

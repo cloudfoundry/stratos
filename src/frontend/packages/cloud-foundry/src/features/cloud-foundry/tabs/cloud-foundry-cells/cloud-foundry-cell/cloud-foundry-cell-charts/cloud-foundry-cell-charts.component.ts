@@ -4,9 +4,8 @@ import { MetricsConfig } from '../../../../../../../../core/src/shared/component
 import {
   MetricsLineChartConfig,
 } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
-import { MetricQueryType } from '../../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../../../store/src/types/metric.types';
+import { IMetricCell, MetricQueryType } from '../../../../../../../../store/src/types/metric.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 
 @Component({

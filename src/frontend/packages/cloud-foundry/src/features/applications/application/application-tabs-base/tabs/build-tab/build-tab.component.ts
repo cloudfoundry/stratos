@@ -10,10 +10,10 @@ import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-sta
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { getFullEndpointApiUrl } from '../../../../../../../../core/src/features/endpoints/endpoint-helpers';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
+import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
 import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { IAppSummary } from '../../../../../../cf-api.types';

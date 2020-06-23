@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
   InvalidSession,
   LOGIN,
@@ -27,6 +26,7 @@ import {
 import { HydrateDashboardStateAction } from '../actions/dashboard-actions';
 import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
 import { DispatchOnlyAppState } from '../app-state';
+import { BrowserStandardEncoder } from '../browser-encoder';
 import { getDashboardStateSessionId } from '../helpers/store-helpers';
 import { stratosEntityCatalog } from '../stratos-entity-catalog';
 import { SessionData } from '../types/auth.types';

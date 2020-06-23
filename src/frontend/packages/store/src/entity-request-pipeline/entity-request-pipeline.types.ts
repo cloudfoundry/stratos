@@ -2,12 +2,12 @@ import { HttpClient, HttpRequest } from '@angular/common/http';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, GeneralEntityAppState, InternalAppState } from '../app-state';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
 } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { JetStreamErrorResponse } from '../jetstream';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { EntityInfo, NormalizedResponse } from '../types/api.types';
 import { EndpointUser } from '../types/endpoint.types';

@@ -2,9 +2,9 @@ import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { stratosEntityCatalog } from '../../../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
 import { TableCellCustom } from '../../../list.types';
 import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoint-name.component';
 

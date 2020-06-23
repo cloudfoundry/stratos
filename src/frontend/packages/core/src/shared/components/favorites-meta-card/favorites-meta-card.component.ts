@@ -3,16 +3,16 @@ import { isObservable, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { IFavoritesMetaCardConfig } from '../../../../../store/src/favorite-config-mapper';
 import { stratosEntityFactory, userFavouritesEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
+import { MenuItem } from '../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../store/src/types/shared.types';
+import { IFavoriteEntity } from '../../../../../store/src/types/user-favorite-manager.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
-import { IFavoriteEntity } from '../../../../../store/src/user-favorite-manager';
 import { isEndpointConnected } from '../../../features/endpoints/connect.service';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../shared.types';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
-import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
 
 
 @Component({
@@ -59,7 +59,7 @@ export class FavoritesMetaCardComponent {
   public endpointConnected$: Observable<boolean>;
   public name$: Observable<string>;
   public routerLink$: Observable<string>;
-  public actions$: Observable<MetaCardMenuItem[]>;
+  public actions$: Observable<MenuItem[]>;
 
   // Optional icon for the favorite
   public iconUrl$: Observable<string>;

@@ -7,7 +7,7 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import { BREADCRUMB_URL_PARAM } from '../../../../../../../core/src/shared/components/breadcrumbs/breadcrumbs.types';
-import { StratosStatus } from '../../../../../../../core/src/shared/shared.types';
+import { StratosStatus } from '../../../../../../../store/src/types/shared.types';
 import { ApplicationStateData, ApplicationStateService } from '../../../../services/application-state.service';
 
 

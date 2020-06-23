@@ -1,21 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import {
-  StratosBaseCatalogEntity,
-} from '../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
-import { IEntityMetadata, IStratosEntityDefinition } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { EntityRequestAction } from '../../../../../store/src/types/request.types';
-import {
-  IFavoriteMetadata,
-  IFavoriteTypeInfo,
-  UserFavorite,
-  UserFavoriteEndpoint,
-} from '../../../../../store/src/types/user-favorites.types';
-import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { entityCatalog } from './entity-catalog/entity-catalog';
+import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { EntityCatalogHelpers } from './entity-catalog/entity-catalog.helper';
+import { IEntityMetadata, IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
+import { EndpointModel } from './types/endpoint.types';
+import { MenuItem } from './types/menu-item.types';
+import { EntityRequestAction } from './types/request.types';
+import { IFavoriteMetadata, IFavoriteTypeInfo, UserFavorite, UserFavoriteEndpoint } from './types/user-favorites.types';
 
 
 export interface IFavoriteTypes {
@@ -33,7 +26,7 @@ export interface IFavoritesMetaCardConfig {
   lines?: TFavoritesMetaCardLine[];
   routerLink?: string;
   name: string;
-  menuItems?: MetaCardMenuItem[];
+  menuItems?: MenuItem[];
 }
 
 export interface IFavoriteConfig<T, Q extends IFavoriteMetadata> {

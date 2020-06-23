@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
-import { StratosTheme } from '../../../core/src/core/theme.service';
 import { DashboardState } from '../reducers/dashboard-reducer';
+import { StratosTheme } from '../types/theme.types';
 
 export const OPEN_SIDE_NAV = '[Dashboard] Open side nav';
 export const CLOSE_SIDE_NAV = '[Dashboard] Close side nav';

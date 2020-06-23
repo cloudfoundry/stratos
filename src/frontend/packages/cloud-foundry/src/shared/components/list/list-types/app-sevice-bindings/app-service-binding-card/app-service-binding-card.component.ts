@@ -8,12 +8,10 @@ import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import {
-  MetaCardMenuItem,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
 import {
   IService,
   IServiceBinding,
@@ -55,7 +53,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     data$: Observable<string>;
     customStyle?: string;
   }[];
-  cardMenu: MetaCardMenuItem[];
+  cardMenu: MenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>> | null>;
   serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance | IUserProvidedServiceInstance>>>;
   tags$: Observable<AppChip<IServiceInstance | IUserProvidedServiceInstance>[]>;

@@ -1,5 +1,5 @@
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { PaginationEntityState } from '../types/pagination.types';
 
 export class LocalPaginationHelpers {
 

@@ -6,7 +6,7 @@ import { AppState } from '../app-state';
 import { MultiActionListEntity } from '../monitors/pagination-monitor';
 import { errorFetchingFavoritesSelector, fetchingFavoritesSelector } from '../selectors/favorite-groups.selectors';
 import { APIResource } from '../types/api.types';
-import { IFavoritesInfo } from '../user-favorite-manager';
+import { IFavoritesInfo } from '../types/user-favorites.types';
 
 
 export function getDashboardStateSessionId(username?: string) {

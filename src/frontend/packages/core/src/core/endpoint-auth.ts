@@ -1,10 +1,17 @@
 import { Validators } from '@angular/forms';
 
-import { EndpointAuthTypeConfig, EndpointType } from '../../../../store/src/extension-types';
-import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
-import { NoneAuthFormComponent } from './connect-endpoint-dialog/auth-forms/none-auth-form.component';
-import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
-import { EndpointAuthTypeNames } from './endpoint-helpers';
+import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
+import {
+  CredentialsAuthFormComponent,
+} from '../features/endpoints/connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
+import { NoneAuthFormComponent } from '../features/endpoints/connect-endpoint-dialog/auth-forms/none-auth-form.component';
+import { SSOAuthFormComponent } from '../features/endpoints/connect-endpoint-dialog/auth-forms/sso-auth-form.component';
+
+export enum EndpointAuthTypeNames {
+  CREDS = 'creds',
+  SSO = 'sso',
+  NONE = 'none'
+}
 
 export abstract class BaseEndpointAuth {
   static readonly UsernamePassword = {

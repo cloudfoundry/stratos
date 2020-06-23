@@ -13,7 +13,7 @@ import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-ca
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { InternalEventState } from '../../../../../store/src/types/internal-events.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
-import { StratosStatus } from '../../../shared/shared.types';
+import { StratosStatus } from '../../../../../store/src/types/shared.types';
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 
 @Component({

@@ -7,7 +7,6 @@ import {
   PermissionConfig,
   PermissionConfigLink,
   PermissionTypes,
-  PermissionValues,
 } from '../../../core/src/core/permissions/current-user-permissions.config';
 import {
   CurrentUserPermissionsService,
@@ -21,6 +20,7 @@ import {
   IPermissionCheckCombiner,
 } from '../../../core/src/core/permissions/current-user-permissions.types';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
+import { PermissionValues } from '../../../store/src/selectors/current-user-role.selectors';
 import { connectedEndpointsSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../cf-api.types';
 import { cfEntityCatalog } from '../cf-entity-catalog';

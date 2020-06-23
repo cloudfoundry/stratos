@@ -1,6 +1,6 @@
-import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
 import { metricEntityType } from '../helpers/stratos-entity-factory';
 import { proxyAPIVersion } from '../jetstream';
+import { MetricQueryType } from '../types/metric.types';
 import { EntityRequestAction } from '../types/request.types';
 
 export const METRICS_START = '[Metrics] Fetch Start';
