@@ -4,43 +4,8 @@ import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { PaginationObservables } from '../../reducers/pagination-reducer/pagination-reducer.types';
 import { PaginatedAction } from '../../types/pagination.types';
 import { OrchestratedActionBuilders, OrchestratedActionCoreBuilders } from '../action-orchestrator/action-orchestrator';
+import { FilteredByNotReturnType, FilteredByReturnType, KnownKeys, NeverKeys } from './type.helpers';
 
-export type NonOptionalKeys<T extends object> = Exclude<{
-  [K in keyof T]: T extends Record<K, T[K]>
-  ? K
-  : never
-}[keyof T], undefined>
-
-
-/**
- * Remove keys such as typed indexes  (i.e. [key: string])
- * For magic see
- *  - https://github.com/Microsoft/TypeScript/issues/25987#issuecomment-441224690
- *  - https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-414808995
- */
-export type KnownKeys<T> = {
-  [K in keyof T]: string extends K ? never : number extends K ? never : K
-} extends { [_ in keyof T]: infer U } ? ({} extends U ? never : U) : never;
-
-type NeverKeys<T extends object> = Exclude<{
-  [K in keyof T]: T[K] extends never
-  ? K
-  : never
-}[keyof T], undefined>
-
-/**
- * Pick all properties who's function has the specified return type U
- */
-type FilteredByReturnType<T extends { [key: string]: (...args: any[]) => any }, U> = {
-  [P in keyof T]: ReturnType<T[P]> extends U ? T[P] : never
-};
-
-/**
- * Pick all properties who's function do not have the specified return type U
- */
-type FilteredByNotReturnType<T extends { [key: string]: (...args: any[]) => any }, U> = {
-  [P in keyof T]: ReturnType<T[P]> extends U ? never : T[P]
-};
 
 /**
  * Core entity and entities access (entity/entities monitors and services)
