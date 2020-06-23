@@ -11,21 +11,6 @@ export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   return null;
 }
 
-export type OptionalKeys<T extends object> = Exclude<{
-  [K in keyof T]: T extends Record<K, T[K]>
-  ? K
-  : never
-}[keyof T], undefined>
-
-
-
-
-// Note - Adding }[keyof T] to [P in keyof T] types should filter out properties of type `never`, however this fails with generics!
-export type FilteredByValueType<T extends { [key: string]: (...args: any[]) => any }, U> = {
-  [P in keyof T]: T[P] extends U ? never : T[P]
-};
-
-
 export const urlValidationExpression =
   '^' +
   // protocol identifier

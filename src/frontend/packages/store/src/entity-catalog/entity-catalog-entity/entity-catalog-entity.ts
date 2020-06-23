@@ -35,7 +35,8 @@ import {
 } from '../entity-catalog.types';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
-import { EntityCatalogEntityStore, KnownKeys, NonOptionalKeys } from './entity-catalog-entity.types';
+import { EntityCatalogEntityStore } from './entity-catalog-entity.types';
+import { KnownKeys, NonOptionalKeys } from './type.helpers';
 
 export type KnownActionBuilders<ABC extends OrchestratedActionBuilders> = Pick<ABC, NonOptionalKeys<Pick<ABC, KnownKeys<ABC>>>>;
 
@@ -133,8 +134,8 @@ export class StratosBaseCatalogEntity<
       }
       return newSchema;
     }, {
-        default: entitySchemas.default
-      });
+      default: entitySchemas.default
+    });
   }
 
   private getEndpointType(definition: IStratosBaseEntityDefinition) {
