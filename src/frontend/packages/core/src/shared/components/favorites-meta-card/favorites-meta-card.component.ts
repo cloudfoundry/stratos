@@ -11,13 +11,13 @@ import { userFavoritesEntitySchema } from '../../../../../store/src/base-entity-
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { IFavoritesMetaCardConfig } from '../../../../../store/src/favorite-config-mapper';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import { MenuItem } from '../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../store/src/types/shared.types';
+import { IFavoriteEntity } from '../../../../../store/src/types/user-favorite-manager.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
-import { IFavoriteEntity } from '../../../../../store/src/user-favorite-manager';
 import { isEndpointConnected } from '../../../features/endpoints/connect.service';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
-import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
 
 
 @Component({
@@ -64,7 +64,7 @@ export class FavoritesMetaCardComponent {
   public endpointConnected$: Observable<boolean>;
   public name$: Observable<string>;
   public routerLink$: Observable<string>;
-  public actions$: Observable<MetaCardMenuItem[]>;
+  public actions$: Observable<MenuItem[]>;
 
   // Optional icon for the favorite
   public iconUrl$: Observable<string>;

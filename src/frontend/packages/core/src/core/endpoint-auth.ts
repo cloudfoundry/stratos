@@ -1,15 +1,11 @@
 import { Validators } from '@angular/forms';
 
+import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
 import {
   CredentialsAuthFormComponent,
-} from '../../core/src/features/endpoints/connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
-import {
-  NoneAuthFormComponent,
-} from '../../core/src/features/endpoints/connect-endpoint-dialog/auth-forms/none-auth-form.component';
-import {
-  SSOAuthFormComponent,
-} from '../../core/src/features/endpoints/connect-endpoint-dialog/auth-forms/sso-auth-form.component';
-import { EndpointAuthTypeConfig, EndpointType } from './extension-types';
+} from '../features/endpoints/connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
+import { NoneAuthFormComponent } from '../features/endpoints/connect-endpoint-dialog/auth-forms/none-auth-form.component';
+import { SSOAuthFormComponent } from '../features/endpoints/connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 
 export enum EndpointAuthTypeNames {
   CREDS = 'creds',

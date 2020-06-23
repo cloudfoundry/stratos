@@ -6,7 +6,7 @@ import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { ToggleUserFavoriteAction } from './actions/user-favourites-actions/toggle-user-favorite-action';
 import { GeneralEntityAppState, IRequestEntityTypeState } from './app-state';
 import { entityCatalog } from './entity-catalog/entity-catalog';
-import { FavoritesConfigMapper, TFavoriteMapperFunction } from './favorite-config-mapper';
+import { FavoritesConfigMapper } from './favorite-config-mapper';
 import { endpointEntitiesSelector } from './selectors/endpoint.selectors';
 import {
   errorFetchingFavoritesSelector,
@@ -16,38 +16,9 @@ import {
 } from './selectors/favorite-groups.selectors';
 import { isFavorite } from './selectors/favorite.selectors';
 import { IUserFavoritesGroups } from './types/favorite-groups.types';
+import { IGroupedFavorites, IHydrationResults } from './types/user-favorite-manager.types';
 import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
 
-export interface IFavoriteEntity {
-  type: string;
-  prettyName: string;
-  cardMapper: TFavoriteMapperFunction<IFavoriteMetadata>;
-  favorite: UserFavorite<IFavoriteMetadata>;
-}
-
-export interface IGroupedFavorites {
-  endpoint: IHydrationResults<IEndpointFavMetadata>;
-  entities: IHydrationResults[];
-}
-
-
-export interface IAllFavorites {
-  fetching: boolean;
-  error: boolean;
-  entityGroups: IGroupedFavorites[];
-}
-
-export interface IFavoritesInfo {
-  fetching: boolean;
-  error: boolean;
-}
-
-export interface IHydrationResults<T extends IFavoriteMetadata = IFavoriteMetadata> {
-  type: string;
-  cardMapper: TFavoriteMapperFunction<any>;
-  prettyName: string;
-  favorite: UserFavorite<T>;
-}
 @Injectable({
   providedIn: 'root'
 })

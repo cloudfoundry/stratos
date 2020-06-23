@@ -2,6 +2,12 @@ import { IEntityMetadata } from '../entity-catalog/entity-catalog.types';
 
 export const userFavoritesPaginationKey = 'userFavorites';
 
+
+export interface IFavoritesInfo {
+  fetching: boolean;
+  error: boolean;
+}
+
 /**
  * A user favorite blueprint. Can be used to fetch the full entity from a particular endpoint.
  */

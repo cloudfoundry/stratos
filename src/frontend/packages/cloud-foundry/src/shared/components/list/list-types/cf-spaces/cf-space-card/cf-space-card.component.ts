@@ -12,9 +12,6 @@ import {
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import {
-  MetaCardMenuItem,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
@@ -22,6 +19,7 @@ import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
+import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
@@ -47,7 +45,7 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
   styleUrls: ['./cf-space-card.component.scss']
 })
 export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implements OnInit, OnDestroy {
-  cardMenu: MetaCardMenuItem[];
+  cardMenu: MenuItem[];
   spaceGuid: string;
   appInstancesCount: number;
   appInstancesLimit: string;
