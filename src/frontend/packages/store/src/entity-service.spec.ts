@@ -4,12 +4,12 @@ import { inject, TestBed } from '@angular/core/testing';
 import { Action, Store } from '@ngrx/store';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { STRATOS_ENDPOINT_TYPE } from '../../core/src/base-entity-schemas';
 import { ENTITY_SERVICE } from '../../core/src/shared/entity.tokens';
 import { generateTestEntityServiceProvider } from '../../core/test-framework/entity-service.helper';
 import { createEntityStore, TestStoreEntity } from '../testing/src/store-test-helper';
 import { APIResponse } from './actions/request.actions';
 import { GeneralAppState } from './app-state';
+import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalog-test.module';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogEntityConfig, IStratosEndpointDefinition } from './entity-catalog/entity-catalog.types';

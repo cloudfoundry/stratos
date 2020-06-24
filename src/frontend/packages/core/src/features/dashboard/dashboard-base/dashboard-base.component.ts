@@ -7,8 +7,8 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
-import { GetCurrentUsersRelations } from '../../../../../cloud-foundry/src/actions/permissions.actions';
 import { CloseSideNav, DisableMobileNav, EnableMobileNav } from '../../../../../store/src/actions/dashboard-actions';
+import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
@@ -190,7 +190,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
           link: path + '/' + route.path
         };
         if (item.requiresEndpointType) {
-          // Upstream always likes to show Cloud Foundry related endpoints - other distributions can chane this behaviour
+          // Upstream always likes to show Cloud Foundry related endpoints - other distributions can change this behaviour
           const alwaysShow = this.cs.get().alwaysShowNavForEndpointTypes ?
             this.cs.get().alwaysShowNavForEndpointTypes(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
           item.hidden = alwaysShow ? of(false) : this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);

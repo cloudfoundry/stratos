@@ -4,12 +4,16 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { EntityRequestAction } from '../types/request.types';
 import { GET_SYSTEM_INFO, GetSystemFailed, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
-import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
-import { SystemInfo, systemStoreNames } from '../types/system.types';
 import { InternalAppState } from '../app-state';
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
+import { STRATOS_ENDPOINT_TYPE } from '../base-entity-schemas';
+import {
+  EntityRequestAction,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
+} from '../types/request.types';
+import { SystemInfo, systemStoreNames } from '../types/system.types';
 
 @Injectable()
 export class SystemEffects {

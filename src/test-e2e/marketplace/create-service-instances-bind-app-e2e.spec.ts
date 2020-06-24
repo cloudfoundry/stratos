@@ -30,16 +30,15 @@ describe('Create Service Instance with binding', () => {
     createServiceInstance.waitForPage();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance, servicesHelperE2E);
-  });
-
-  it('- should reach create service instance page', () => {
-    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
+    createMarketplaceServiceInstance.waitForPage();
   });
 
   describe('Long running tests - ', () => {
     extendE2ETestTime(100000);
 
     it('- should be able to to create a service instance with binding', () => {
+      expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
+
       serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
 
       const servicesSecrets = e2e.secrets.getDefaultCFEndpoint().services;

@@ -5,8 +5,9 @@ import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -21,11 +22,13 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IUserProvidedServiceInstance } from '../../../../../cf-api-svc.types';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import {
   CANCEL_ORG_ID_PARAM,
   CANCEL_SPACE_ID_PARAM,
   CANCEL_USER_PROVIDED,
+  CSI_CANCEL_URL,
 } from '../../../add-service-instance/csi-mode.service';
 import {
   CfSpacesUserServiceInstancesDataSource,
@@ -62,7 +65,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
   protected serviceInstanceColumns: ITableColumn<APIResource<IUserProvidedServiceInstance>>[] = [
     {
       columnId: 'name',
-      headerCell: () => 'Service Instance',
+      headerCell: () => 'Name',
       cellDefinition: {
         getValue: (row) => `${row.entity.name}`
       },
@@ -123,7 +126,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDeleteCache, CurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid)
+          row => this.can(this.canDeleteCache, CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid)
         )
       )
   };
@@ -137,7 +140,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
         )
       )
   };
@@ -150,7 +153,8 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
         {
           [CANCEL_SPACE_ID_PARAM]: item.entity.space_guid,
           [CANCEL_ORG_ID_PARAM]: item.entity.space.entity.organization_guid,
-          [CANCEL_USER_PROVIDED]: true
+          [CANCEL_USER_PROVIDED]: true,
+          [CSI_CANCEL_URL]: `/cloud-foundry/${this.cfSpaceService.cfGuid}/organizations/${this.cfSpaceService.orgGuid}/spaces/${this.cfSpaceService.spaceGuid}/service-instances`
         },
         true),
     label: 'Edit',
@@ -158,12 +162,12 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
         )
       )
   };
 
-  private can(cache: CanCache, perm: CurrentUserPermissions, cfGuid: string, spaceGuid: string): Observable<boolean> {
+  private can(cache: CanCache, perm: CfCurrentUserPermissions, cfGuid: string, spaceGuid: string): Observable<boolean> {
     let can = cache[spaceGuid];
     if (!can) {
       can = this.currentUserPermissionsService.can(perm, cfGuid, spaceGuid);
@@ -174,7 +178,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
 
   constructor(
     protected store: Store<CFAppState>,
-    cfSpaceService: CloudFoundrySpaceService,
+    private cfSpaceService: CloudFoundrySpaceService,
     protected datePipe: DatePipe,
     protected currentUserPermissionsService: CurrentUserPermissionsService,
     private serviceActionHelperService: ServiceActionHelperService

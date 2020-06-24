@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { CFAppState } from 'frontend/packages/cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from 'frontend/packages/core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/permissions/current-user-permissions.service';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
@@ -11,6 +10,7 @@ import { CFFeatureFlagTypes } from '../../../../../../../cf-api.types';
 import {
   CfSpaceUsersListConfigService,
 } from '../../../../../../../shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service';
+import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 import { createCfOrgSpaceSteppersUrl, someFeatureFlags, waitForCFPermissions } from '../../../../../cf.helpers';
 
@@ -42,7 +42,7 @@ export class CloudFoundrySpaceUsersComponent {
       switchMap(() => combineLatest([
         someFeatureFlags(requiredFeatureFlags, activeRouteCfOrgSpace.cfGuid, store, userPerms),
         userPerms.can(
-          CurrentUserPermissions.SPACE_CHANGE_ROLES,
+          CfCurrentUserPermissions.SPACE_CHANGE_ROLES,
           activeRouteCfOrgSpace.cfGuid,
           activeRouteCfOrgSpace.orgGuid,
           activeRouteCfOrgSpace.spaceGuid

@@ -2,24 +2,16 @@ import { Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList }
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
+import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../core/user-favorite-helpers';
+import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../shared.types';
-import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
-
-export interface MetaCardMenuItem {
-  icon?: string;
-  label: string;
-  action: () => void;
-  can?: Observable<boolean>;
-  disabled?: Observable<boolean>;
-  separator?: boolean;
-}
 
 export function createMetaCardMenuItemSeparator() {
   return {
@@ -89,7 +81,7 @@ export class MetaCardComponent implements OnDestroy {
   }
 
   @Input('actionMenu')
-  set actionMenu(actionMenu: MetaCardMenuItem[]) {
+  set actionMenu(actionMenu: MenuItem[]) {
     if (actionMenu) {
       this.pActionMenu = actionMenu.map(menuItem => {
         if (!menuItem.can) {
@@ -107,7 +99,7 @@ export class MetaCardComponent implements OnDestroy {
       );
     }
   }
-  get actionMenu(): MetaCardMenuItem[] {
+  get actionMenu(): MenuItem[] {
     return this.pActionMenu;
   }
 
@@ -115,7 +107,7 @@ export class MetaCardComponent implements OnDestroy {
 
   public showMenu$: Observable<boolean>;
   public isDeleting$: Observable<boolean> = observableOf(false);
-  private pActionMenu: MetaCardMenuItem[];
+  private pActionMenu: MenuItem[];
 
   constructor(
     private entityMonitorFactory: EntityMonitorFactory,

@@ -1,5 +1,5 @@
-import { FavoritesConfigMapper } from '../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { IEntityMetadata } from '../../store/src/entity-catalog/entity-catalog.types';
+import { FavoritesConfigMapper } from '../../store/src/favorite-config-mapper';
 import { UserFavorite } from '../../store/src/types/user-favorites.types';
 import { CfAPIResource } from './store/types/cf-api.types';
 

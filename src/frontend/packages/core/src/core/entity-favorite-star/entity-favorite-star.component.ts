@@ -2,12 +2,12 @@ import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
+import { FavoritesConfigMapper } from '../../../../store/src/favorite-config-mapper';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
 import { ConfirmationDialogConfig } from '../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
-import { FavoritesConfigMapper } from '../../shared/components/favorites-meta-card/favorite-config-mapper';
 import { EndpointsService } from '../endpoints.service';
-import { UserFavoriteManager } from '../user-favorite-manager';
 
 @Component({
   selector: 'app-entity-favorite-star',

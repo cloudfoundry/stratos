@@ -9,6 +9,7 @@ import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catal
 import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
 import { appReducers } from '../../store/src/reducers.module';
 import { CoreModule } from '../src/core/core.module';
+import { CurrentUserPermissionsService } from '../src/core/permissions/current-user-permissions.service';
 import {
   ApplicationStateIconComponent,
 } from '../src/shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -35,7 +36,10 @@ import { CoreTestingModule } from './core-test.modules';
 
 
 @NgModule({
-  imports: [CoreModule]
+  imports: [CoreModule],
+  providers: [
+    CurrentUserPermissionsService
+  ]
 })
 export class AppTestModule {
   constructor(

@@ -1,13 +1,15 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, Renderer2 } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
-import { Observable, Subscription } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { first, map, switchMap } from 'rxjs/operators';
 
 import { AppMetadataTypes } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogConfig } from '../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { StratosStatus } from '../../../../../../core/src/shared/shared.types';
+import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
   'Are you sure you want to set the instance count to 0?', 'Confirm', true);
@@ -28,14 +30,26 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   status$: Observable<StratosStatus>;
 
+  public canEditApp$: Observable<boolean>;
+
   constructor(
     public appService: ApplicationService,
     private renderer: Renderer2,
     private confirmDialog: ConfirmationDialogService,
-    private snackBar: MatSnackBar) {
+    private snackBar: MatSnackBar,
+    cups: CurrentUserPermissionsService
+  ) {
     this.status$ = this.appService.applicationState$.pipe(
       map(state => state.indicator)
     );
+    this.canEditApp$ = combineLatest(
+      appService.appOrg$,
+      appService.appSpace$
+    ).pipe(
+      switchMap(([org, space]) =>
+        cups.can(CfCurrentUserPermissions.APPLICATION_EDIT, appService.cfGuid, org.metadata.guid, space.metadata.guid)
+      ))
+
   }
 
   private currentCount = 0;

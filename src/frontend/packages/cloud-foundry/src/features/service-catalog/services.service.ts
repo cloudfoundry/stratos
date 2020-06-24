@@ -132,6 +132,7 @@ export class ServicesService {
       map(o => (o.length === 0 ? null : o[0]))
     );
     this.isSpaceScoped$ = this.serviceBroker$.pipe(
+      first(),
       map(o => o ? o.entity.space_guid : null),
       switchMap(spaceGuid => {
         if (!spaceGuid) {
@@ -151,7 +152,8 @@ export class ServicesService {
             })),
           );
         }
-      })
+      }),
+      first()
     );
     this.serviceInstances$ = this.allServiceInstances$.pipe(
       map(instances => instances.filter(instance => instance.entity.service_guid === this.serviceGuid))

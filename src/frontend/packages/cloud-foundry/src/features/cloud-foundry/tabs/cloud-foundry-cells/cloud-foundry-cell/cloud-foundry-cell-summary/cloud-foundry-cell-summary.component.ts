@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
-import { StratosStatus } from '../../../../../../../../core/src/shared/shared.types';
+import { StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import {
   CfCellHealthListConfigService,
 } from '../../../../../../shared/components/list/list-types/cf-cell-health/cf-cell-health-list-config.service';

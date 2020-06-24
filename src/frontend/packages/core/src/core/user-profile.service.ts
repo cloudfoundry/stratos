@@ -9,6 +9,7 @@ import {
   UpdateUserProfileAction,
 } from '../../../store/src/actions/user-profile.actions';
 import { AppState } from '../../../store/src/app-state';
+import { userProfileEntitySchema } from '../../../store/src/base-entity-schemas';
 import { userProfilePasswordUpdatingKey } from '../../../store/src/effects/user-profile.effects';
 import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../store/src/entity-service';
@@ -16,8 +17,8 @@ import { EntityServiceFactory } from '../../../store/src/entity-service-factory.
 import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../../store/src/reducers/api-request-reducer/types';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { selectRequestInfo, selectUpdateInfo } from '../../../store/src/selectors/api.selectors';
+import { SessionData } from '../../../store/src/types/auth.types';
 import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../../store/src/types/user-profile.types';
-import { userProfileEntitySchema } from '../base-entity-schemas';
 
 
 @Injectable()
@@ -69,6 +70,7 @@ export class UserProfileService {
     return this.store.select(s => s.auth).pipe(
       filter((auth: AuthState) => !!(auth && auth.sessionData)),
       map((auth: AuthState) => auth.sessionData),
+      filter((sessionData: SessionData) => !!sessionData.user),
       first(),
       map(data => new FetchUserProfileAction(data.user.guid))
     );

@@ -4,10 +4,11 @@ import { Subject, Subscription } from 'rxjs';
 import { debounceTime, takeWhile, tap } from 'rxjs/operators';
 
 import { MetricsAction } from '../../../../store/src/actions/metrics.actions';
-import { IMetrics } from '../../../../store/src/types/base-metric.types';
 import { EntityMonitor } from '../../../../store/src/monitors/entity-monitor';
+import { IMetrics } from '../../../../store/src/types/base-metric.types';
+import { MetricQueryType } from '../../../../store/src/types/metric.types';
 import { MetricsRangeSelectorService } from './metrics-range-selector.service';
-import { ITimeRange, MetricQueryType } from './metrics-range-selector.types';
+import { ITimeRange } from './metrics-range-selector.types';
 
 @Injectable()
 export class MetricsRangeSelectorManagerService {
