@@ -1,4 +1,4 @@
-import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { pick } from '../../../store/src/helpers/reducer.helper';
 import { ActionMergeFunction } from '../../../store/src/types/api.types';
@@ -164,9 +164,6 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
       `apps/${guid}`,
       null,
       {
-        headers: new HttpHeaders({
-          'x-cap-passthrough': 'true'
-        }),
         params: new HttpParams({
           fromObject: {
             recursive: 'true'
@@ -192,12 +189,7 @@ export class DeleteApplicationInstance extends CFStartAction
     this.options = new HttpRequest(
       'DELETE',
       `apps/${appGuid}/instances/${index}`,
-      null,
-      {
-        headers: new HttpHeaders({
-          'x-cap-passthrough': 'true'
-        })
-      }
+      null
     );
     this.guid = `${appGuid}-${index}`;
   }
@@ -215,11 +207,6 @@ export class RestageApplication extends CFStartAction implements ICFAction {
       'POST',
       `apps/${guid}/restage`,
       null,
-      {
-        headers: new HttpHeaders({
-          'x-cap-passthrough': 'true'
-        })
-      }
     );
   }
   actions = [RESTAGE, RESTAGE_SUCCESS, RESTAGE_FAILED];
