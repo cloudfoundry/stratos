@@ -146,7 +146,9 @@ func (c *KubernetesSpecification) Init() error {
 	c.portalProxy.GetConfig().PluginConfig[kubeTerminalPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
 
 	// Kick off the cleanup of any old kube terminal pods
-	c.kubeTerminal.StartCleanup()
+	if c.kubeTerminal != nil {
+		c.kubeTerminal.StartCleanup()
+	}
 
 	return nil
 }
@@ -177,7 +179,9 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name", c.GetRelease)
 
 	// Kube Terminal
-	echoGroup.GET("/kubeterminal/:guid", c.kubeTerminal.Start)
+	if c.kubeTerminal != nil {
+		echoGroup.GET("/kubeterminal/:guid", c.kubeTerminal.Start)
+	}
 }
 
 func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
