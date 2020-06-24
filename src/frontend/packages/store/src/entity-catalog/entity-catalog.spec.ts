@@ -1,8 +1,8 @@
 import {
   EndpointListDetailsComponent,
 } from '../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
-import { endpointEntitySchema } from '../base-entity-schemas';
 import { EntitySchema } from '../helpers/entity-schema';
+import { endpointEntityType, stratosEntityFactory } from '../helpers/stratos-entity-factory';
 import { TestEntityCatalog } from './entity-catalog';
 import { StratosCatalogEndpointEntity, StratosCatalogEntity } from './entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogSchemas, IStratosEndpointDefinition } from './entity-catalog.types';
@@ -106,7 +106,7 @@ fdescribe('EntityCatalogService', () => {
     expect(catalogEntity.definition).toEqual({
       ...endpoint,
       schema: {
-        default: endpointEntitySchema
+        default: stratosEntityFactory(endpointEntityType)
       }
     });
   });
@@ -138,7 +138,7 @@ fdescribe('EntityCatalogService', () => {
       iconFont: 'stratos-icons',
       listDetailsComponent: EndpointListDetailsComponent,
       schema: {
-        default: endpointEntitySchema
+        default: stratosEntityFactory(endpointEntityType)
       },
       parentType: endpoint.type
     };

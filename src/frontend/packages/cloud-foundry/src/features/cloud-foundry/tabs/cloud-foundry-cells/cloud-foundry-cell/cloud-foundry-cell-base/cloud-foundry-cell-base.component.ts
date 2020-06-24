@@ -4,7 +4,7 @@ import { first, map } from 'rxjs/operators';
 
 import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
-import { metricEntityType } from '../../../../../../../../store/src/base-entity-schemas';
+import { metricEntityType } from '../../../../../../../../store/src/helpers/stratos-entity-factory';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { getActiveRouteCfCellProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';

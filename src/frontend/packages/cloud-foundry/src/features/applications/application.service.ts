@@ -44,13 +44,13 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
     guid,
     endpointGuid, [
-      createEntityRelationKey(applicationEntityType, routeEntityType),
-      createEntityRelationKey(applicationEntityType, spaceEntityType),
-      createEntityRelationKey(applicationEntityType, stackEntityType),
-      createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
-      createEntityRelationKey(routeEntityType, domainEntityType),
-      createEntityRelationKey(spaceEntityType, organizationEntityType),
-    ]
+    createEntityRelationKey(applicationEntityType, routeEntityType),
+    createEntityRelationKey(applicationEntityType, spaceEntityType),
+    createEntityRelationKey(applicationEntityType, stackEntityType),
+    createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
+    createEntityRelationKey(routeEntityType, domainEntityType),
+    createEntityRelationKey(spaceEntityType, organizationEntityType),
+  ]
   );
 }
 
@@ -64,7 +64,7 @@ export interface ApplicationData {
 @Injectable()
 export class ApplicationService {
 
-  private appEntityService: EntityService<APIResource<IApp>>;
+  public entityService: EntityService<APIResource<IApp>>;
   private appSummaryEntityService: EntityService<IAppSummary>;
 
   constructor(
@@ -74,7 +74,7 @@ export class ApplicationService {
     private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsHelper,
   ) {
-    this.appEntityService = cfEntityCatalog.application.store.getEntityService(
+    this.entityService = cfEntityCatalog.application.store.getEntityService(
       appGuid,
       cfGuid,
       {
@@ -138,7 +138,7 @@ export class ApplicationService {
 
   private constructCoreObservables() {
     // First set up all the base observables
-    this.app$ = this.appEntityService.waitForEntity$;
+    this.app$ = this.entityService.waitForEntity$;
     const moreWaiting$ = this.app$.pipe(
       filter(entityInfo => !!(entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)),
       map(entityInfo => entityInfo.entity.entity));
@@ -162,9 +162,9 @@ export class ApplicationService {
       filter(org => !!org)
     );
 
-    this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.pipe(publishReplay(1), refCount());
+    this.isDeletingApp$ = this.entityService.isDeletingEntity$.pipe(publishReplay(1), refCount());
 
-    this.waitForAppEntity$ = this.appEntityService.waitForEntity$.pipe(publishReplay(1), refCount());
+    this.waitForAppEntity$ = this.entityService.waitForEntity$.pipe(publishReplay(1), refCount());
 
     this.appSummary$ = this.waitForAppEntity$.pipe(
       switchMap(() => this.appSummaryEntityService.entityObs$),
@@ -231,9 +231,9 @@ export class ApplicationService {
   }
 
   private constructStatusObservables() {
-    this.isFetchingApp$ = this.appEntityService.isFetchingEntity$;
+    this.isFetchingApp$ = this.entityService.isFetchingEntity$;
 
-    this.isUpdatingApp$ = this.appEntityService.entityObs$.pipe(map(a => {
+    this.isUpdatingApp$ = this.entityService.entityObs$.pipe(map(a => {
       const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || { busy: false };
       const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || { busy: false };
       return !!updatingRoot.busy || !!updatingSection.busy;

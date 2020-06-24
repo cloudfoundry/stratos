@@ -2,7 +2,7 @@ import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
 import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
+import { endpointEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
@@ -39,7 +39,7 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
   ) {
     super();
     this.paginationKey = paginationKey || (spaceGuid ? createEntityRelationPaginationKey(spaceEntityType, spaceGuid) :
-      createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid));
+      createEntityRelationPaginationKey(endpointEntityType, endpointGuid));
     this.options = new HttpRequest(
       'GET',
       `user_provided_service_instances`,

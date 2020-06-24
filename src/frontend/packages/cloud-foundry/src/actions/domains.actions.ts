@@ -1,6 +1,6 @@
 import { HttpRequest } from '@angular/common/http';
 
-import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
+import { endpointEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
@@ -36,7 +36,7 @@ export class FetchAllDomains extends CFStartAction implements PaginatedAction {
       'GET',
       'domains',
     );
-    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
+    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(endpointEntityType, endpointGuid);
   }
   actions = [GET_ALL_DOMAIN, GET_ALL_DOMAIN_SUCCESS, GET_ALL_DOMAIN_FAILED];
   entity = [cfEntityFactory(domainEntityType)];

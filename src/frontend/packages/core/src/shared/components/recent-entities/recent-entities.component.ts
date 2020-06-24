@@ -5,7 +5,7 @@ import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { recentlyVisitedSelector } from '../../../../../store/src/selectors/recently-visitied.selectors';
 import {
@@ -29,7 +29,7 @@ class RenderableRecent {
   public mostRecentHit: moment.Moment;
   public subText$: Observable<string>;
   constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<AppState>) {
-    if (entity.entityType === endpointSchemaKey) {
+    if (entity.entityType === endpointEntityType) {
       this.subText$ = observableOf(entity.prettyType);
     } else {
       this.subText$ = this.store.select(endpointEntitiesSelector).pipe(

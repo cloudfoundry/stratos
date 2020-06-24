@@ -9,11 +9,11 @@ import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rx
 
 import { CloseSideNav, DisableMobileNav, EnableMobileNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
-import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -144,7 +144,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     });
 
     this.dispatchRelations();
-    this.store.dispatch(new GetUserFavoritesAction());
+    stratosEntityCatalog.userFavorite.api.getAll();
   }
 
   ngOnDestroy() {

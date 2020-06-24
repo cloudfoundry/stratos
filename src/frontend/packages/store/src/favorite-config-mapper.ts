@@ -160,13 +160,13 @@ export class FavoritesConfigMapper {
 
   public getFavoriteEndpointFromEntity(
     endpoint: EndpointModel
-  ) {
+  ): UserFavoriteEndpoint {
     return this.getFavoriteFromEntity(
       EntityCatalogHelpers.endpointType,
       endpoint.cnsi_type,
       endpoint.guid,
       endpoint
-    ) as UserFavoriteEndpoint;
+    );
   }
 
 }

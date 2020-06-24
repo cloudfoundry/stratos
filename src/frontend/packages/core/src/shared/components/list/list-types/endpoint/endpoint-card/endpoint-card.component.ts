@@ -9,7 +9,6 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/permissions/current-user-permissions.service';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -122,7 +121,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     private endpointListHelper: EndpointListHelper,
     private componentFactoryResolver: ComponentFactoryResolver,
     private favoritesConfigMapper: FavoritesConfigMapper,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     super();
     this.endpointIds$ = this.endpointIds.asObservable();

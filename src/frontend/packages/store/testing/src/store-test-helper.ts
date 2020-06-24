@@ -3,9 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
 import { AppState } from '../../src/app-state';
-import { endpointEntitySchema } from '../../src/base-entity-schemas';
 import { entityCatalog } from '../../src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../src/entity-catalog/entity-catalog.types';
+import { endpointEntityType, stratosEntityFactory } from '../../src/helpers/stratos-entity-factory';
 import { appReducers } from '../../src/reducers.module';
 import { getDefaultRequestState, rootUpdatingKey } from '../../src/reducers/api-request-reducer/types';
 import { getDefaultPaginationEntityState } from '../../src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
@@ -396,7 +396,7 @@ export function createEntityStore(entityMap: Map<EntityCatalogEntityConfig, Arra
 }
 
 export function populateStoreWithTestEndpoint(): EndpointModel {
-  const stratosEndpointEntityConfig: EntityCatalogEntityConfig = endpointEntitySchema;
+  const stratosEndpointEntityConfig: EntityCatalogEntityConfig = stratosEntityFactory(endpointEntityType);
   const stratosEndpointEntityKey = entityCatalog.getEntityKey(stratosEndpointEntityConfig);
   const mappedData = {
     entities: {

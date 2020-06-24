@@ -1,7 +1,7 @@
 import { SendEventAction } from '../../actions/internal-events.actions';
 import { RecursiveDeleteFailed } from '../../effects/recursive-entity-delete.effect';
 import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { endpointSchemaKey } from '../../helpers/entity-factory';
+import { endpointEntityType } from '../../helpers/stratos-entity-factory';
 import { ApiRequestTypes, getFailApiRequestActions } from '../../reducers/api-request-reducer/request-helpers';
 import { GLOBAL_EVENT, InternalEventSeverity, InternalEventStateMetadata } from '../../types/internal-events.types';
 import { EntityRequestAction } from '../../types/request.types';
@@ -26,7 +26,7 @@ export function jetstreamErrorHandler(
   if (endpointString) {
     endpointIds.forEach(endpoint =>
       actionDispatcher(
-        new SendEventAction<InternalEventStateMetadata>(endpointSchemaKey, endpoint, {
+        new SendEventAction<InternalEventStateMetadata>(endpointEntityType, endpoint, {
           eventCode: error.status ? error.status + '' : '500',
           severity: InternalEventSeverity.ERROR,
           message: 'Jetstream API request error',

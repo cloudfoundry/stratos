@@ -10,7 +10,7 @@ import { CurrentUserPermissionsService } from '../../../../../core/src/core/perm
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { GetSystemInfo } from '../../../../../store/src/actions/system.actions';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { waitForCFPermissions } from '../cf.helpers';
@@ -57,7 +57,6 @@ interface UserInviteSend {
 export class UserInviteConfigureService {
 
   constructor(
-    private store: Store<CFAppState>,
     private http: HttpClient,
     private snackBar: MatSnackBar,
     private confirmDialog: ConfirmationDialogService,
@@ -70,7 +69,7 @@ export class UserInviteConfigureService {
     const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
     const obs$ = this.http.post(url, formData).pipe(
       map(v => {
-        this.store.dispatch(new GetSystemInfo());
+        stratosEntityCatalog.systemInfo.api.getSystemInfo()
         return {
           error: false
         };
@@ -99,7 +98,7 @@ export class UserInviteConfigureService {
       const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
       this.http.delete(url).pipe(
         map(v => {
-          this.store.dispatch(new GetSystemInfo());
+          stratosEntityCatalog.systemInfo.api.getSystemInfo()
           return {
             error: false,
             errorMessage: ''

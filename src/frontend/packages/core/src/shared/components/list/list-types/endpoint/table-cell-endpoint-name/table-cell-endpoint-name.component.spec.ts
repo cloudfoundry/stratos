@@ -26,7 +26,9 @@ describe('TableCellEndpointNameComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellEndpointNameComponent);
     component = fixture.componentInstance;
-    component.row = {} as EndpointModel;
+    component.row = {
+      guid: ''
+    } as EndpointModel;
     fixture.detectChanges();
   });
 

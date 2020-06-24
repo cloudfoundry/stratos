@@ -1,13 +1,13 @@
 import { compose } from '@ngrx/store';
 
 import { InternalAppState, IRequestEntityTypeState } from '../app-state';
-import { STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema } from '../base-entity-schemas';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { STRATOS_ENDPOINT_TYPE, userFavouritesEntityType } from '../helpers/stratos-entity-factory';
 import { IUserFavoriteGroup, IUserFavoritesGroups, IUserFavoritesGroupsState } from '../types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 import { deriveEndpointFavoriteFromFavorite } from '../user-favorite-helpers';
 
-const favoritesEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavoritesEntitySchema.entityType);
+const favoritesEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavouritesEntityType);
 
 export const favoriteEntitiesSelector = (state: InternalAppState):
   IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> => state.requestData[favoritesEntityKey];
