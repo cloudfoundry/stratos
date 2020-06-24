@@ -12,9 +12,9 @@
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
             "customWebpackConfig": {
-              "path": "./dist/tools/build/main.js"
+              "path": "./dist/devkit/build/main.js"
             },
-            "indexTransform": "./dist/tools/build/index.transform.js",
+            "indexTransform": "./dist/devkit/build/index.transform.js",
             "preserveSymlinks": true,
             "outputPath": "dist",
             "index": "src/frontend/packages/core/src/index.html",
@@ -89,6 +89,19 @@
           "options": {
             "protractorConfig": "./protractor.conf.js",
             "devServerTarget": "stratos:serve"
+          }
+        }
+      }
+    },
+    "theme": {
+      "root": "src/frontend/packages/theme/",
+      "sourceRoot": "",
+      "projectType": "library",
+      "architect": {
+        "build": {
+          "builder": "./dist/devkit:stratos-theme",
+          "options": {
+            "outputPath": "dist/theme"
           }
         }
       }

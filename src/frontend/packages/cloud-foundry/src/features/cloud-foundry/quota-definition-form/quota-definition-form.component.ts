@@ -8,7 +8,7 @@ import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/
 import { ActiveRouteCfOrgSpace } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { IQuotaDefinition } from '../../../cf-api.types';
 
 export interface QuotaFormValues {
@@ -71,7 +71,7 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   fetchQuotasDefinitions() {
-    const quotaPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid);
+    const quotaPaginationKey = createEntityRelationPaginationKey(endpointEntityType, this.cfGuid);
     const quotaDefinitions$ = cfEntityCatalog.quotaDefinition.store.getPaginationService(quotaPaginationKey, this.cfGuid, {})
       .entities$.pipe(
         filter(o => !!o),

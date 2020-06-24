@@ -4,10 +4,7 @@ import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
 import { InternalAppState } from '../../../../store/src/app-state';
-import { ENDPOINT_TYPE, STRATOS_ENDPOINT_TYPE } from '../../../../store/src/base-entity-schemas';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { selectEntity } from '../../../../store/src/selectors/api.selectors';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
 import { LoggerService } from '../logger.service';
 import {
   CurrentUserPermissions,
@@ -79,8 +76,7 @@ export class CurrentUserPermissionsService {
     } else if (actionConfig) {
       return this.getSimplePermission(actionConfig, endpointGuid, ...args);
     } else if (endpointGuid) {
-      const key = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, ENDPOINT_TYPE);
-      return this.store.select(selectEntity<EndpointModel>(key, endpointGuid)).pipe(
+      return stratosEntityCatalog.endpoint.store.getEntityMonitor(endpointGuid).entity$.pipe(
         switchMap(endpoint => endpoint ?
           this.getFallbackPermission(endpointGuid, endpoint.cnsi_type) :
           of(false)

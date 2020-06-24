@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 
 import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog, TestEntityCatalog } from '../../store/src/entity-catalog/entity-catalog';
-import { generateStratosEntities } from '../src/stratos-entities';
+import { generateStratosEntities } from '../../store/src/stratos-entity-generator';
 
 @NgModule({
   imports: [

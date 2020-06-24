@@ -1,0 +1,17 @@
+{
+  "name": "@example/theme",
+  "version": "0.0.1",
+  "stratos": {
+    "assets": {
+      "assets/core": "core/assets",
+      "assets/favicon.ico": "favicon.ico"
+    },
+    "theme":{
+      "loadingCss": "loader/loading.css",
+      "loadingHtml": "loader/loading.html"
+    }
+  },
+  "peerDependencies": {
+    "@stratosui/theme": "0.0.1"
+  }
+}

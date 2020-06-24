@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { endpointEntitySchema } from '../../../../../../../store/src/base-entity-schemas';
+import { endpointEntityType, stratosEntityFactory } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
 import { AppMonitorComponentTypes } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
 import { TableCellRequestMonitorIconComponent } from './table-cell-request-monitor-icon.component';
@@ -24,7 +24,7 @@ describe('TableCellRequestMonitorIconComponent', () => {
     component.id = '1';
     component.config = () => ({
       entityKey: '',
-      schema: endpointEntitySchema,
+      schema: stratosEntityFactory(endpointEntityType),
       monitorState: AppMonitorComponentTypes.DELETE
     });
     component.row = {

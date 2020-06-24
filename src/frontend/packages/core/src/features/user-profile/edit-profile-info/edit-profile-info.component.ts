@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { Subscription } from 'rxjs';
-import { first, map, take, tap } from 'rxjs/operators';
+import { delay, first, map, take, tap } from 'rxjs/operators';
 
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../../../store/src/types/user-profile.types';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
@@ -119,8 +119,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
         updates[key] = this.editProfileForm.value[key];
       }
     }
-    const obs$ = this.userProfileService.updateProfile(this.profile, updates);
-    return obs$.pipe(
+    return this.userProfileService.updateProfile(this.profile, updates).pipe(
       take(1),
       map(([profileResult, passwordResult]) => {
         const okay = !profileResult.error && !passwordResult.error;
@@ -131,6 +130,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
           message: okay ? '' : `An error occurred whilst updating your profile: ${message}`
         };
       }),
+      delay(300), // Ensure that the profile is updated before fetching to refresh local copy
       tap(() => this.userProfileService.fetchUserProfile())
     );
   }

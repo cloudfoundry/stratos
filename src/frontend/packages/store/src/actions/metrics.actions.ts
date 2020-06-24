@@ -1,4 +1,4 @@
-import { metricEntityType } from '../base-entity-schemas';
+import { metricEntityType } from '../helpers/stratos-entity-factory';
 import { proxyAPIVersion } from '../jetstream';
 import { MetricQueryType } from '../types/metric.types';
 import { EntityRequestAction } from '../types/request.types';

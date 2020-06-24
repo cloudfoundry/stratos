@@ -1,4 +1,4 @@
-import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -18,10 +18,8 @@ import { CurrentUserPermissionsService } from '../../../../../../core/src/core/p
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../../core/src/shared/components/page-header/page-header.types';
-import { ENTITY_SERVICE } from '../../../../../../core/src/shared/entity.tokens';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { EntityService } from '../../../../../../store/src/entity-service';
 import { FavoritesConfigMapper } from '../../../../../../store/src/favorite-config-mapper';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
@@ -59,7 +57,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   constructor(
     public applicationService: ApplicationService,
-    @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource>,
     private store: Store<CFAppState>,
     private endpointsService: EndpointsService,
     private ngZone: NgZone,
@@ -244,7 +241,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
+    this.appSub$ = this.applicationService.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
         requestInfo.deleting.deleted ||
         requestInfo.error
@@ -255,7 +252,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     this.isFetching$ = this.applicationService.isFetchingApp$;
 
-    this.isBusyUpdating$ = this.entityService.updatingSection$.pipe(
+    this.isBusyUpdating$ = this.applicationService.entityService.updatingSection$.pipe(
       map(updatingSection => {
         const updating = this.updatingSectionBusy(updatingSection.restaging) ||
           this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
