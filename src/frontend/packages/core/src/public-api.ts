@@ -6,7 +6,6 @@
 
 // Extensions
 export * from './core/extension/extension-service';
-export * from './core/extension/extension-types';
 
 // Customization
 export * from './core/customizations.types';
