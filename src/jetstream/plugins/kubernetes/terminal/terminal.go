@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/api"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 
 	log "github.com/sirupsen/logrus"
@@ -13,13 +13,13 @@ import (
 
 const (
 	serviceAccountTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-	serviceHostEnvVar = "KUBERNETES_SERVICE_HOST"
-	servicePortEnvVar = "KUBERNETES_SERVICE_PORT"
+	serviceHostEnvVar       = "KUBERNETES_SERVICE_HOST"
+	servicePortEnvVar       = "KUBERNETES_SERVICE_PORT"
 	// For dev - read token from env var
 	serviceTokenEnvVar = "KUBE_TERMINAL_SERVICE_ACCOUNT_TOKEN"
 
-	stratosRoleLabel = "stratos-role"
-	stratosKubeTerminalRole = "kube-terminal"
+	stratosRoleLabel         = "stratos-role"
+	stratosKubeTerminalRole  = "kube-terminal"
 	stratosSessionAnnotation = "stratos-session"
 
 	consoleContainerName = "kube-terminal"
@@ -27,16 +27,22 @@ const (
 
 // KubeTerminal supports spawning pods to provide a CLI environment to the user
 type KubeTerminal struct {
-	PortalProxy	interfaces.PortalProxy
-	Namespace string `configName:"STRATOS_KUBERNETES_NAMESPACE"`
-	Image     string `configName:"STRATOS_KUBERNETES_TERMINAL_IMAGE"`
-	Token     []byte
-	APIServer string
-	Kube api.Kubernetes
+	PortalProxy interfaces.PortalProxy
+	Namespace   string `configName:"STRATOS_KUBERNETES_NAMESPACE"`
+	Image       string `configName:"STRATOS_KUBERNETES_TERMINAL_IMAGE"`
+	Token       []byte
+	APIServer   string
+	Kube        api.Kubernetes
 }
 
 // NewKubeTerminal checks that the environment is set up to support the Kube Terminal
 func NewKubeTerminal(p interfaces.PortalProxy) *KubeTerminal {
+	// Only enabled in tech preview
+	if !p.GetConfig().EnableTechPreview {
+		log.Info("Kube Terminal not enabled - requires tech preview")
+		return nil
+	}
+
 	kt := &KubeTerminal{
 		PortalProxy: p,
 	}
