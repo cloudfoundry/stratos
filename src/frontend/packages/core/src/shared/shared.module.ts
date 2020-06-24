@@ -312,11 +312,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardProgressOverlayComponent,
     MaxListMessageComponent
   ],
-  entryComponents: [
-    DialogConfirmComponent,
-    SnackBarReturnComponent,
-    MarkdownPreviewComponent,
-  ],
   providers: [
     ListConfig,
     EndpointListHelper,

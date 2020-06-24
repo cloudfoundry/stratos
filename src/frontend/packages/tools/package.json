@@ -1,0 +1,12 @@
+{
+  "name": "@stratosui/tools",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "npm run tsc",
+    "tsc": "tsc",
+    "builder": "npm run build && cp src/builder/*.json ../../../../dist/tools/builder"
+  },
+  "devDependencies": {
+    "typescript": "<3.6.0"
+  }
+}

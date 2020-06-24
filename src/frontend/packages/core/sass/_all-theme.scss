@@ -48,7 +48,6 @@
 @import '../src/shared/components/user-avatar/user-avatar.component.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
-@import './mat-themes';
 @import './mat-desktop';
 @import './fonts';
 @import './ansi-colors';
@@ -57,53 +56,28 @@
 
 @import '../../cloud-foundry/src/shared/components/schema-form/schema-form.component.theme';
 @import '../../cloud-foundry/src/features/services/services-wall/services-wall.component.theme';
-@import '../../cloud-foundry/src/shared/components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component.theme';
 @import '../../cloud-foundry/src/features/cloud-foundry/tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component.theme';
 @import '../../cloud-foundry/src/features/applications/application/application-base.component.theme';
 @import '../../cloud-foundry/src/features/applications/deploy-application/deploy-application.component.theme';
 @import '../../cloud-foundry/src/features/applications/deploy-application/deploy-application-step2/deploy-application-fs/deploy-application-fs.component.theme';
 @import '../../cloud-foundry/src/features/cloud-foundry/tabs/cloud-foundry-firehose/cloud-foundry-firehose.component.theme';
 @import '../../cloud-foundry/src/features/service-catalog/service-catalog-page/service-catalog-page.component.theme';
-@import '../../cloud-foundry/src/features/applications/application-wall/application-wall.component.theme';
 @import '../../core/src/features/error-page/error-page/error-page.component.theme';
 @import '../../core/src/features/endpoints/backup-restore/restore-endpoints/restore-endpoints.component.theme';
 @import '../../core/src/features/metrics/metrics/metrics.component.theme';
-
-// Defaults
-$side-nav-light-text: #fff;
-$side-nav-light-bg: #333;
-$side-nav-light-hover: #555;
-$side-nav-light-active: #484848;
-
 // Creates the app theme and applies it to the application
 // $theme = Angular Material Theme
 // $nav-theme - Colors for the Side Nav (optional)
 // $status-theme - Colors for status (optional)
-@mixin app-theme($theme, $nav-theme: null, $status-theme: null) {
-  $background-colors: map-get($theme, background);
-  $foreground-colors: map-get($theme, foreground);
-  $is-dark: map-get($theme, is-dark);
-  $app-background-color: white;
-  $app-background-text-color: rgba(mat-color($foreground-colors, base), .65);
-  $primary: map-get($theme, primary);
-  $accent: map-get($theme, accent);
-  $warn: map-get($theme, warn);
-  $subdued: mat-contrast($primary, 50);
-
-  @if $is-dark == true {
-    $app-background-color: lighten(mat-color($background-colors, background), 10%);
-    $subdued: lighten($subdued, 90);
-  } @else {
-    $app-background-color: darken(mat-color($background-colors, background), 2%);
-    $subdued: lighten($subdued, 50);
-  }
+@mixin app-theme($stratos-theme, $nav-theme: null, $status-theme: null) {
+  $theme: map-get($stratos-theme, theme);
+  $app-theme: map-get($stratos-theme, app-theme);
+  $app-background-color: map-get($app-theme, app-background-color);
 
   html {
     background-color: $app-background-color;
   }
 
-  // App Theme defines a set of colors used by stratos components
-  $app-theme: (app-background-color: $app-background-color, app-background-text-color: rgba(mat-color($foreground-colors, base), .65), side-nav: app-generate-nav-theme($theme, $nav-theme), status: app-generate-status-theme($theme, $status-theme), subdued-color: $subdued, ansi-colors: $ansi-color-palette); // Pass the Material theme and the App Theme to components that need to be themed
   @include dialog-error-theme($theme, $app-theme);
   @include login-page-theme($theme, $app-theme);
   @include side-nav-theme($theme, $app-theme);
@@ -122,7 +96,6 @@ $side-nav-light-active: #484848;
   @include app-hyperlinks($theme, $app-theme);
   @include app-no-content-message-theme($theme, $app-theme);
   @include app-boolean-indicator-theme($theme, $app-theme);
-  @include cf-security-group-theme($theme);
   @include loading-page-theme($theme, $app-theme);
   @include app-log-viewer-theme($theme, $app-theme);
   @include app-deploy-app-theme($theme, $app-theme);
@@ -163,24 +136,4 @@ $side-nav-light-active: #484848;
   @include app-user-avatar-theme($theme, $app-theme);
   @include restore-endpoints-theme($theme, $app-theme);
   @include metrics-component-theme($theme, $app-theme);
-}
-
-@function app-generate-nav-theme($theme, $nav-theme: null) {
-  @if ($nav-theme) {
-    @return $nav-theme;
-  } @else {
-    // Use default palette for side navigation
-    @return (background: $side-nav-light-bg, background-top: $side-nav-light-bg, text: darken($side-nav-light-text, 10%), active: $side-nav-light-active, active-text: $side-nav-light-text, hover: $side-nav-light-hover, hover-text: $side-nav-light-text);
-  }
-}
-
-@function app-generate-status-theme($theme, $status-theme: null) {
-  @if ($status-theme) {
-    @return $status-theme;
-  } @else {
-    $warn: map-get($theme, warn);
-    $primary: map-get($theme, primary);
-    $white: #fff; // Use default palette for status
-    @return (success: map-get($mat-green, 500), warning: map-get($mat-orange, 500), danger: mat-color($warn), tentative: map-get($mat-grey, 500), busy: mat-color($primary), text: $white, );
-  }
 }

@@ -4,14 +4,17 @@
   "newProjectRoot": "src/frontend/packages",
   "projects": {
     "stratos": {
-      "root": "",
+      "root": "src/frontend/packages",
       "sourceRoot": "src/frontend/packages",
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-builders/custom-webpack:browser",
           "options": {
-            "aot": true,
+            "customWebpackConfig": {
+              "path": "./dist/tools/build/main.js"
+            },
+            "indexTransform": "./dist/tools/build/index.transform.js",
             "preserveSymlinks": true,
             "outputPath": "dist",
             "index": "src/frontend/packages/core/src/index.html",
@@ -36,10 +39,6 @@
           },
           "configurations": {
             "production": {
-              "budgets": [{
-                "type": "anyComponentStyle",
-                "maximumWarning": "6kb"
-              }],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -57,7 +56,7 @@
           }
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@angular-builders/custom-webpack:dev-server",
           "options": {
             "aot": true,
             "sslCert": "dev-ssl/server.crt",
@@ -96,34 +95,22 @@
     },
     "core": {
       "root": "src/frontend/packages/core/",
-      "sourceRoot": "src/frontend/packages/core/src",
-      "projectType": "application",
+      "sourceRoot": "src/frontend/packages/core",
+      "projectType": "library",
       "prefix": "app",
       "schematics": {},
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
-            "aot": true,
             "preserveSymlinks": true,
             "outputPath": "dist/core",
             "index": "src/frontend/packages/core/src/index.html",
             "main": "src/frontend/packages/core/src/main.ts",
             "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
-            "assets": [
-              "src/frontend/packages/core/favicon.ico",
-              "src/frontend/packages/core/assets",
-              {
-                "glob": "**/*",
-                "input": "custom-src/frontend/assets/custom",
-                "output": "/core/assets/custom"
-              }
-            ],
-            "styles": [
-              "src/frontend/packages/core/src/styles.css",
-              "src/frontend/packages/cf-autoscaler/src/styles.css"
-            ],
+            "assets": [],
+            "styles": [],
             "scripts": []
           },
           "configurations": {
@@ -146,23 +133,6 @@
               "vendorChunk": false,
               "buildOptimizer": true
             }
-          }
-        },
-        "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "browserTarget": "core:build"
-          },
-          "configurations": {
-            "production": {
-              "browserTarget": "core:build:production"
-            }
-          }
-        },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
-          "options": {
-            "browserTarget": "core:build"
           }
         },
         "test": {
@@ -249,6 +219,37 @@
             "exclude": [
               "!src/frontend/packages/store/**"
             ]
+          }
+        }
+      }
+    },
+    "shared": {
+      "root": "src/frontend/packages/shared",
+      "sourceRoot": "src/frontend/packages/shared/src",
+      "projectType": "library",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "src/frontend/packages/shared/tsconfig.lib.json",
+            "project": "src/frontend/packages/shared/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/frontend/packages/shared/src/test.ts",
+            "tsConfig": "src/frontend/packages/shared/tsconfig.spec.json",
+            "karmaConfig": "src/frontend/packages/shared/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": ["src/tsconfig.json"],
+            "tslintConfig": "src/frontend/packages/shared/tslint.json",
+            "files": ["src/frontend/packages/shared/src/**/*.ts"]
           }
         }
       }
@@ -349,8 +350,5 @@
     "@schematics/angular:directive": {
       "prefix": "app"
     }
-  },
-  "cli": {
-    "_defaultCollection": "@nrwl/angular"
   }
 }

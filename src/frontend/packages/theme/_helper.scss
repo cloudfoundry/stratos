@@ -1,0 +1,97 @@
+// Stratos Theme Helper
+
+@import '~@angular/material/theming';
+@import './mat-themes';
+@import './mat-colors';
+
+// Defaults
+$side-nav-light-text: #fff;
+$side-nav-light-bg: #333;
+$side-nav-light-hover: #555;
+$side-nav-light-active: #484848;
+
+// Themes palettes and colors
+
+// Light Theme defaults
+$oss-theme-primary: mat-palette($mat-blue);
+$oss-theme-accent: mat-palette($mat-blue);
+$oss-theme-warn: mat-palette($mat-red);
+$oss-theme: mat-light-theme($oss-theme-primary, $oss-theme-accent, $oss-theme-warn);
+
+// Dark Theme defaults
+$oss-dark-primary: mat-palette($mat-blue);
+$oss-dark-accent: mat-palette($mat-amber, A400, A100, A700);
+$oss-dark-warn: mat-palette($mat-red);
+$oss-dark-theme: mat-dark-theme($oss-dark-primary, $oss-dark-accent, $oss-dark-warn);
+
+@function stratos-default-theme() {
+  @return (
+    default: stratos-default-light-theme(),
+    dark: stratos-default-dark-theme()
+  );
+}
+
+@function stratos-default-dark-theme() {
+  @return stratos-theme-helper($oss-dark-theme);
+}
+
+@function stratos-default-light-theme() {
+  @return stratos-theme-helper($oss-theme);
+}
+
+// Creates the app theme and applies it to the application
+// $theme = Angular Material Theme
+// $nav-theme - Colors for the Side Nav (optional)
+// $status-theme - Colors for status (optional)
+@function stratos-theme-helper($theme: $oss-theme, $nav-theme: null, $status-theme: null) {
+  $background-colors: map-get($theme, background);
+  $foreground-colors: map-get($theme, foreground);
+  $is-dark: map-get($theme, is-dark);
+  $app-background-color: white;
+  $app-background-text-color: rgba(mat-color($foreground-colors, base), .65);
+  $primary: map-get($theme, primary);
+  $accent: map-get($theme, accent);
+  $warn: map-get($theme, warn);
+  $subdued: mat-contrast($primary, 50);
+
+  @if $is-dark == true {
+    $app-background-color: lighten(mat-color($background-colors, background), 10%);
+    $subdued: lighten($subdued, 90);
+  } @else {
+    $app-background-color: darken(mat-color($background-colors, background), 2%);
+    $subdued: lighten($subdued, 50);
+  }
+
+  // Just returns a light theme
+  @return (
+    theme: $theme,
+    app-theme: (
+      app-background-color: $app-background-color,
+      app-background-text-color: rgba(mat-color($foreground-colors, base), .65),
+      side-nav: app-generate-nav-theme($theme, $nav-theme),
+      status: app-generate-status-theme($theme, $status-theme),
+      subdued-color: $subdued,
+      ansi-colors: $ansi-color-palette
+    )
+  );  
+}
+
+@function app-generate-nav-theme($theme, $nav-theme: null) {
+  @if ($nav-theme) {
+    @return $nav-theme;
+  } @else {
+    // Use default palette for side navigation
+    @return (background: $side-nav-light-bg, background-top: $side-nav-light-bg, text: darken($side-nav-light-text, 10%), active: $side-nav-light-active, active-text: $side-nav-light-text, hover: $side-nav-light-hover, hover-text: $side-nav-light-text);
+  }
+}
+
+@function app-generate-status-theme($theme, $status-theme: null) {
+  @if ($status-theme) {
+    @return $status-theme;
+  } @else {
+    $warn: map-get($theme, warn);
+    $primary: map-get($theme, primary);
+    $white: #fff; // Use default palette for status
+    @return (success: map-get($mat-green, 500), warning: map-get($mat-orange, 500), danger: mat-color($warn), tentative: map-get($mat-grey, 500), busy: mat-color($primary), text: $white, );
+  }
+}

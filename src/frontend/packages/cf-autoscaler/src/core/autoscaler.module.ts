@@ -83,13 +83,6 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
   ],
   providers: [
     ApplicationService
-  ],
-  entryComponents: [
-    AppAutoscalerMetricChartCardComponent,
-    AppAutoscalerComboChartComponent,
-    AppAutoscalerComboSeriesVerticalComponent,
-    TableCellAutoscalerEventChangeComponent,
-    TableCellAutoscalerEventStatusComponent
   ]
 })
 export class AutoscalerModule { }

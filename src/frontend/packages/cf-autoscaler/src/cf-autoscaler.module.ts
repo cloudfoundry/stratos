@@ -52,7 +52,6 @@ const customRoutes: Routes = [
   ],
   declarations: [
     AutoscalerTabExtensionComponent
-  ],
-  entryComponents: [AutoscalerTabExtensionComponent]
+  ]
 })
 export class CfAutoscalerModule { }

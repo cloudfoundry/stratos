@@ -1,8 +1,9 @@
 import { NgModule } from '@angular/core';
-import { NavExtensionRoutingModule } from './nav-extension.routing';
-import { ExampleComponent } from './example-component/example.component';
+
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
+import { ExampleComponent } from './example-component/example.component';
+import { NavExtensionRoutingModule } from './nav-extension.routing';
 
 @NgModule({
   imports: [
@@ -11,9 +12,6 @@ import { SharedModule } from '../../shared/shared.module';
     NavExtensionRoutingModule,
   ],
   declarations: [
-    ExampleComponent
-  ],
-  entryComponents: [
     ExampleComponent
   ]
 })

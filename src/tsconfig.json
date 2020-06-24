@@ -30,6 +30,7 @@
     ],
     "preserveSymlinks": true,
     "paths": {
+      "@stratosui/core": ["frontend/packages/core/src/public-api.ts"],
       "@stratosui/store": ["frontend/packages/store/src/public-api.ts"],
       "@stratosui/store/testing": ["frontend/packages/store/testing/public-api.ts"]
     }    
