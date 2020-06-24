@@ -23,7 +23,7 @@ export interface PackageInfo {
 export interface PackageJson {
   name: string;
   stratos?: StratosPakageMetadata;
-  scripts: {[key: string]: string};
+  scripts: { [key: string]: string };
 }
 
 // Custom stratos metadata that can be in the package.json file
@@ -33,7 +33,7 @@ export interface StratosPakageMetadata {
   ignore?: boolean;
   theme?: boolean;
   theming?: string;
-  assets?: {[src: string]: string};
+  assets?: { [src: string]: string };
 }
 
 // Theming metadata
@@ -87,7 +87,7 @@ export class Packages {
     if (fs.existsSync(pkgFile)) {
       try {
         pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8').toString());
-      } catch(e) {}
+      } catch (e) { }
     }
     return pkg;
   }
@@ -123,11 +123,7 @@ export class Packages {
 
     // Local folders
     // Find all local packages in the folder
-    const p = getDirectories(this.localPackagesFolder).forEach(pkgDir => {
-      const pkgInfo: any = {
-        dir: pkgDir
-      };
-
+    getDirectories(this.localPackagesFolder).forEach(pkgDir => {
       this.addPackage(pkgDir, true);
     });
 
@@ -170,7 +166,7 @@ export class Packages {
     const pkgFile = Packages.loadPackageFile(pkgDir);
     if (pkgFile !== null) {
       // Check to see if we should include this package
-      if (this.includePackage(pkgFile))  {
+      if (this.includePackage(pkgFile)) {
         // Process all of the peer dependencies first
         if (pkgFile.peerDependencies) {
           Object.keys(pkgFile.peerDependencies).forEach(dep => this.addPackage(dep));
@@ -191,7 +187,7 @@ export class Packages {
 
   // Get all of the extensions
   public getExtensions(): ExtensionMetadata[] {
-    const extensions: ExtensionMetadata[] = [];
+    const extensions: ExtensionMetadata[] = [];
     this.packages.forEach(pkg => {
       if (pkg.extension) {
         extensions.push(pkg.extension);
