@@ -173,7 +173,7 @@ const config = {
   plugins: [{
     package: 'protractor-console',
     logLevels: ['info', 'warning', 'severe']
-  }],  
+  }],
   onPrepare() {
     // https://webdriver.io/docs/api/chromium.html#setnetworkconditions
     // browser.driver.setNetworkConditions({
@@ -185,7 +185,7 @@ const config = {
 
     // Ensuer base URL does NOT end with a /
     if (browser.baseUrl.endsWith('/')) {
-      browser.baseUrl = browser.baseUrl.substr(0, browser.baseUrl.length -1);
+      browser.baseUrl = browser.baseUrl.substr(0, browser.baseUrl.length - 1);
     }
 
     skipPlugin.install(jasmine);

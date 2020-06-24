@@ -1,4 +1,4 @@
-import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
+import { CfUser } from '../../../../../store/types/cf-user.types';
 
 
 export const userListUserVisibleKey = 'showUsers';

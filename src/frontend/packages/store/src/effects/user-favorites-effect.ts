@@ -4,10 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, switchMap } from 'rxjs/operators';
 
-import { userFavoritesEntitySchema } from '../../../core/src/base-entity-schemas';
-import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { UserFavoriteManager } from '../../../core/src/core/user-favorite-manager';
-import { environment } from '../../../core/src/environments/environment.prod';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import {
   GetUserFavoritesAction,
@@ -28,12 +24,15 @@ import {
   UpdateUserFavoriteMetadataSuccessAction,
 } from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { DispatchOnlyAppState } from '../app-state';
+import { userFavoritesEntitySchema } from '../base-entity-schemas';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { proxyAPIVersion } from '../jetstream';
 import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { WrapperRequestActionSuccess } from '../types/request.types';
 import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
+import { UserFavoriteManager } from '../user-favorite-manager';
 
-const { proxyAPIVersion } = environment;
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
 
 

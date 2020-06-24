@@ -1,13 +1,13 @@
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
+import { ConfirmDialogComponent } from '../po/confirm-dialog';
+import { ListComponent } from '../po/list.po';
+import { MetaCardTitleType } from '../po/meta-card.po';
 import { CreateServiceInstance } from './create-service-instance.po';
+import { CreateUserProvidedServiceInstance } from './create-ups-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
-import { ConfirmDialogComponent } from '../po/confirm-dialog';
-import { MetaCardTitleType } from '../po/meta-card.po';
-import { ListComponent } from '../po/list.po';
-import { CreateUserProvidedServiceInstance } from './create-ups-service-instance.po';
 
 describe('Delete Service Instance (User Provided Service)', () => {
   const createServiceInstance = new CreateServiceInstance();

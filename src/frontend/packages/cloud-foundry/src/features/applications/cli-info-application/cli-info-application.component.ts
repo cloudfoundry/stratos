@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { EntityService } from '../../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { getFullEndpointApiUrl } from '../../../../../core/src/features/endpoints/endpoint-helpers';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
+import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
+import { EntityService } from '../../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
 import { ApplicationService } from '../application.service';

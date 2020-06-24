@@ -10,15 +10,14 @@ import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { EndpointsEffect } from './effects/endpoint.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { PaginationEffects } from './effects/pagination.effects';
+import { PermissionsEffects } from './effects/permissions.effect';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
 import { RouterEffect } from './effects/router.effects';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
-import { SnackBarEffects } from './effects/snackBar.effects';
 import { SystemEffects } from './effects/system.effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
-import { UsersRolesEffects } from './effects/users-roles.effects';
 import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-client.service';
 import { AppReducersModule } from './reducers.module';
 
@@ -41,13 +40,12 @@ import { AppReducersModule } from './reducers.module';
       ActionHistoryEffect,
       RouterEffect,
       SystemEffects,
-      SnackBarEffects,
       SetClientFilterEffect,
       MetricsEffect,
       UserProfileEffect,
-      UsersRolesEffects,
       RecursiveDeleteEffect,
-      UserFavoritesEffect
+      UserFavoritesEffect,
+      PermissionsEffects
     ])
   ]
 })

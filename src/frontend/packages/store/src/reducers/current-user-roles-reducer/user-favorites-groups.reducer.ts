@@ -1,6 +1,5 @@
 import { Action } from '@ngrx/store';
 
-import { deriveEndpointFavoriteFromFavorite, isEndpointTypeFavorite } from '../../../../core/src/core/user-favorite-helpers';
 import {
   GetUserFavoritesAction,
   GetUserFavoritesFailedAction,
@@ -16,6 +15,7 @@ import {
   IUserFavoritesGroupsState,
 } from '../../types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite } from '../../types/user-favorites.types';
+import { deriveEndpointFavoriteFromFavorite, isEndpointTypeFavorite } from '../../user-favorite-helpers';
 
 export function userFavoriteGroupsReducer(
   state: IUserFavoritesGroupsState = getDefaultFavoriteGroupsState(),

@@ -7,9 +7,10 @@ import { Observable } from 'rxjs';
 import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/actions/endpoint.actions';
-import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
+import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../../../store/src/base-entity-schemas';
 import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
+import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   StratosCatalogEndpointEntity,
@@ -17,11 +18,11 @@ import {
 import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
 import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
-import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
-import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
+import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
@@ -60,7 +61,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
 
-  constructor(private store: Store<GeneralEntityAppState>, activatedRoute: ActivatedRoute, ) {
+  constructor(
+    private store: Store<GeneralEntityAppState>,
+    activatedRoute: ActivatedRoute,
+    private snackBarService: SnackBarService,
+  ) {
 
     this.existingEndpoints = store.select(selectPaginationState(this.endpointEntityKey, GetAllEndpoints.storeKey))
       .pipe(
@@ -116,7 +121,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
           ssoAllowed: this.ssoAllowedField ? !!this.ssoAllowedField.value : false
         };
         if (!result.error) {
-          this.store.dispatch(new ShowSnackBar(`Successfully registered '${this.nameField.value}'`));
+          this.snackBarService.show(`Successfully registered '${this.nameField.value}'`);
         }
         const success = !result.error;
         return {

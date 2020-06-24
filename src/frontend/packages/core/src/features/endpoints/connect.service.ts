@@ -15,16 +15,16 @@ import {
 import { AuthParams, ConnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { GetSystemInfo } from '../../../../store/src/actions/system.actions';
 import { EndpointOnlyAppState } from '../../../../store/src/app-state';
+import { STRATOS_ENDPOINT_TYPE } from '../../../../store/src/base-entity-schemas';
 import { EndpointsEffect } from '../../../../store/src/effects/endpoint.effects';
 import { SystemEffects } from '../../../../store/src/effects/system.effects';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
+import { EndpointType } from '../../../../store/src/extension-types';
 import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { EndpointsService } from '../../core/endpoints.service';
-import { EndpointType } from '../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../core/utils.service';
 
 export interface ConnectEndpointConfig {

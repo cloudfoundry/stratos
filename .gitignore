@@ -94,6 +94,21 @@ src/jetstream/console-database.db
 src/jetstream/config.properties
 src/jetstream/db/dbconf.yml
 
+# Customisations - these can be removed in the future
+# Left in for now to prevent these files being checked-in, if they are still present
+# from a previous checkout
+src/frontend/packages/core/favicon.ico
+src/frontend/packages/core/sass/custom.scss
+src/frontend/packages/core/assets/eula.html
+src/frontend/packages/core/assets/logo.png
+src/frontend/packages/core/assets/nav-logo.png
+src/frontend/packages/core/assets/login-bg.jpg
+src/frontend/packages/core/src/custom-import.module.ts
+src/frontend/packages/core/src/custom
+src/frontend/packages/core/assets/custom
+src/frontend/packages/core/sass/custom
+src/frontend/packages/core/src/index.html
+
 # Customisation - generated import module
 src/frontend/packages/core/src/_custom-import.module.ts
 

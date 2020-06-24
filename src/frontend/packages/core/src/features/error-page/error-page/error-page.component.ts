@@ -7,14 +7,14 @@ import { first, map, withLatestFrom } from 'rxjs/operators';
 
 import { SendClearEndpointEventsAction } from '../../../../../store/src/actions/internal-events.actions';
 import { AppState } from '../../../../../store/src/app-state';
+import { endpointEntitySchema } from '../../../../../store/src/base-entity-schemas';
 import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
 import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
 import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { InternalEventState } from '../../../../../store/src/types/internal-events.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
-import { endpointEntitySchema } from '../../../base-entity-schemas';
-import { StratosStatus } from '../../../shared/shared.types';
+import { StratosStatus } from '../../../../../store/src/types/shared.types';
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 
 @Component({

@@ -1,9 +1,8 @@
 import { ActionReducer } from '@ngrx/store';
 
-import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
-import { KnownKeys, NonOptionalKeys } from '../../../../core/src/core/utils.service';
-import { getFullEndpointApiUrl } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import { IRequestEntityTypeState } from '../../app-state';
+import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
+import { getFullEndpointApiUrl } from '../../endpoint-utils';
 import {
   EntitiesFetchHandler,
   EntitiesInfoHandler,
@@ -37,6 +36,7 @@ import {
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
 import { EntityCatalogEntityStore } from './entity-catalog-entity.types';
+import { KnownKeys, NonOptionalKeys } from './type.helpers';
 
 export type KnownActionBuilders<ABC extends OrchestratedActionBuilders> = Pick<ABC, NonOptionalKeys<Pick<ABC, KnownKeys<ABC>>>>;
 
@@ -134,8 +134,8 @@ export class StratosBaseCatalogEntity<
       }
       return newSchema;
     }, {
-        default: entitySchemas.default
-      });
+      default: entitySchemas.default
+    });
   }
 
   private getEndpointType(definition: IStratosBaseEntityDefinition) {

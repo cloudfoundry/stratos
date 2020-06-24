@@ -8,6 +8,7 @@ import {
 import { ServicesService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { StratosStatus } from '../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { StratosStatus } from '../../../../../store/src/types/shared.types';
 import { IServiceBroker, IServicePlan } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 

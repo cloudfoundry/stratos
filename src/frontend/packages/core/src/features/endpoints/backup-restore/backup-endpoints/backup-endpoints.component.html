@@ -14,7 +14,9 @@
         <button mat-raised-button color="primary" [disabled]="disableSelectNone$ | async"
           (click)="service.selectNone()">Select None</button>
       </div>
-      <app-table [dataSource]="endpointDataSource" [columns]="columns"></app-table>
+      <!-- 77px is the min height given Connection details drop down. In some cases it's missing, those rows would be
+      shorter without the min height here -->
+      <app-table [dataSource]="endpointDataSource" [columns]="columns" [minRowHeight]="'77px'"></app-table>
     </div>
     <ng-template #noEndpoints>
       <p>There are no endpoints to backup</p>

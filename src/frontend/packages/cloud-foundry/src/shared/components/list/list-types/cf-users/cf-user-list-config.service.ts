@@ -4,11 +4,11 @@ import { BehaviorSubject, combineLatest, Observable, of as observableOf } from '
 import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 
 import { UsersRolesSetUsers } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
-import { GetAllUsersAsAdmin } from '../../../../../../../cloud-foundry/src/actions/users.actions';
+import { GetAllCfUsersAsAdmin } from '../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
-import { CurrentUserPermissionsChecker } from '../../../../../../../core/src/core/current-user-permissions.checker';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   IListAction,
@@ -33,6 +33,8 @@ import {
   hasSpaceRoleWithinOrg,
   waitForCFPermissions,
 } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CfUser } from '../../../../../store/types/cf-user.types';
+import { CfUserPermissionsChecker } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from './../../../../data-services/cf-user.service';
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-permission-cell.component';
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
@@ -235,7 +237,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         this.dataSource = new CfUserDataSourceService(store, action, this, userHasRoles);
 
         // Only show the filter (show users with/without roles) if the list of users can actually contain users without roles
-        if (GetAllUsersAsAdmin.is(action)) {
+        if (GetAllCfUsersAsAdmin.is(action)) {
           this.assignMultiConfig();
           this.initialiseMultiFilter(action);
         } else {
@@ -348,7 +350,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.activeRouteCfOrgSpace.cfGuid,
     this.activeRouteCfOrgSpace.orgGuid,
     this.activeRouteCfOrgSpace.orgGuid && !this.activeRouteCfOrgSpace.spaceGuid ?
-      CurrentUserPermissionsChecker.ALL_SPACES : this.activeRouteCfOrgSpace.spaceGuid)
+      CfUserPermissionsChecker.ALL_SPACES : this.activeRouteCfOrgSpace.spaceGuid)
 
   private createCanUpdateOrgRoles = () => canUpdateOrgSpaceRoles(
     this.userPerms,

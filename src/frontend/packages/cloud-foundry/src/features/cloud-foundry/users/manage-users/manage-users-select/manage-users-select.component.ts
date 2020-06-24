@@ -13,7 +13,7 @@ import {
   CfSelectUsersListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-list-config.service';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
-import { CfUser } from '../../../../../store/types/user.types';
+import { CfUser } from '../../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 

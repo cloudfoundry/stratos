@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Migrate in custom theme and extensions into the new package structure
+# Migrate custom theme and extensions into the new package structure
 
 set -e
 set -o pipefail

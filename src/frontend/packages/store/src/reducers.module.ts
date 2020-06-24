@@ -1,10 +1,7 @@
 import { NgModule } from '@angular/core';
 import { ActionReducer, ActionReducerMap, StoreModule } from '@ngrx/store';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-
 import { localStorageSync } from 'ngrx-store-localstorage';
 
-import { environment } from '../../core/src/environments/environment';
 import { getDashboardStateSessionId } from './helpers/store-helpers';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { requestReducer } from './reducers/api-request-reducers.generator';
@@ -71,29 +68,21 @@ export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionRedu
 
   })(reducer);
 }
+
 const metaReducers = [localStorageSyncReducer];
 
-const storeModule = StoreModule.forRoot(
-  appReducers,
-  {
-    metaReducers,
-    runtimeChecks: {
-      strictStateImmutability: true,
-      strictActionImmutability: false
-    }
-  }
-);
-const imports = environment.production ? [
-  storeModule
-] : [
-    storeModule,
-    StoreDevtoolsModule.instrument({
-      maxAge: 100,
-      logOnly: !environment.production
-    })
-  ];
-
 @NgModule({
-  imports
+  imports: [
+    StoreModule.forRoot(
+      appReducers,
+      {
+        metaReducers,
+        runtimeChecks: {
+          strictStateImmutability: true,
+          strictActionImmutability: false
+        }
+      }
+    )
+  ]
 })
 export class AppReducersModule { }

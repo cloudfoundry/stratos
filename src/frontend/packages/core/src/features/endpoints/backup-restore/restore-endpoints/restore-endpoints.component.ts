@@ -7,8 +7,8 @@ import { first, map } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../../store/src/actions/endpoint.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
+import { httpErrorResponseToSafeString } from '../../../../../../store/src/jetstream';
 import { getEventFiles } from '../../../../core/browser-helper';
-import { httpErrorResponseToSafeString } from '../../../../jetstream.helpers';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';

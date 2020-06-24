@@ -24,11 +24,11 @@
     </div>
     <div *ngIf="infos.length > 0">
       <div class="metrics-tree__root"></div>
-        <ul class="metrics-tree tree">
-          <li *ngFor="let info of infos" class="metric-endpoint">
-            <mat-card class="metrics-provision">
+      <ul class="metrics-tree tree">
+        <li *ngFor="let info of infos" class="metric-endpoint">
+          <mat-card class="metrics-provision">
             <app-card-status *ngIf="info.status" [status$]="info.status"></app-card-status>
-              <mat-card-content>
+            <mat-card-content>
               <div class="metrics-info">
                 <mat-icon fontSet="{{ info.icon.font }}">{{info.icon.name }}</mat-icon>
                 <div class="metrics-metadata">
@@ -36,12 +36,16 @@
                   <div>{{ info.type }}</div>
                   <div class="metrics-metadata__cols">
                     <div class="metrics-metadata__two-cols">
-                      <app-metadata-item icon="link" label="Address" [clipboardValue]="info.url">{{ info.url }}</app-metadata-item>
-                      <app-metadata-item icon="history" label="Prometheus Job">{{ info.metadata.metrics_job || 'N/A' }}</app-metadata-item>
-                      <app-metadata-item icon="history" label="Prometheus Environment">{{ info.metadata.metrics_environment || 'N/A' }}</app-metadata-item>
+                      <app-metadata-item icon="link" label="Address" [clipboardValue]="info.url">{{ info.url }}
+                      </app-metadata-item>
+                      <app-metadata-item icon="history" label="Prometheus Job">{{ info.metadata.metrics_job || 'N/A' }}
+                      </app-metadata-item>
+                      <app-metadata-item icon="history" label="Prometheus Environment">
+                        {{ info.metadata.metrics_environment || 'N/A' }}</app-metadata-item>
                     </div>
                     <div class="metrics-metadata__two-cols">
-                      <div class="metrics-extra" *ngIf="info.metadata.metrics_job && (jobDetails$ | async) as jobDetails">
+                      <div class="metrics-extra"
+                        *ngIf="info.metadata.metrics_job && (jobDetails$ | async) as jobDetails">
                         <div *ngIf="jobDetails[info.metadata.metrics_job]">
                           <app-metadata-item icon="help_outline" label="Exporter Health">{{
                             jobDetails[info.metadata.metrics_job].health | uppercase }}</app-metadata-item>
@@ -56,9 +60,11 @@
                   <div *ngIf="!info.known">
                     <div class="metrics-unknown">
                       <mat-icon class="text-warning">warning</mat-icon>
-                      <div>The metrics endpoint reports that it provides data for this endpoint which is not registered with Stratos</div>
+                      <div>The metrics endpoint reports that it provides data for this endpoint which is not registered
+                        with Stratos</div>
                     </div>
-                    <div class="metrics-unknown__detail">This could be intentional or there may be a mismatch in the endpoint address used by this Metrics endpoint and that which is registered with Stratos.</div>
+                    <div class="metrics-unknown__detail">This could be intentional or there may be a mismatch in the
+                      endpoint address used by this Metrics endpoint and that which is registered with Stratos.</div>
                   </div>
                 </div>
               </div>
@@ -69,4 +75,3 @@
     </div>
   </div>
 </div>
-
