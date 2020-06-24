@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
-import { StratosStatus } from '../../../../../../core/src/shared/shared.types';
+import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 
 @Component({
   selector: 'app-card-app-status',

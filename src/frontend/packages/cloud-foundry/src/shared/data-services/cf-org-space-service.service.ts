@@ -1,6 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { endpointsCfEntitiesConnectedSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -28,6 +27,7 @@ import { ResetPagination, SetParams } from '../../../../store/src/actions/pagina
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { getCurrentPageRequestInfo } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
+import { connectedEndpointsOfTypesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
@@ -35,6 +35,7 @@ import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pa
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { QParam, QParamJoiners } from '../q-param';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {
@@ -221,7 +222,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createCf() {
-    const list$ = this.store.select(endpointsCfEntitiesConnectedSelector).pipe(
+    const list$ = this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
       // Ensure we have endpoints
       filter(endpoints => endpoints && !!Object.keys(endpoints).length),
       publishReplay(1),

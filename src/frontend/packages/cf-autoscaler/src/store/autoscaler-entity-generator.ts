@@ -1,5 +1,5 @@
 import { IOrgFavMetadata } from '../../../cloud-foundry/src/cf-metadata-types';
-import { metricEntityType } from '../../../core/src/base-entity-schemas';
+import { metricEntityType } from '../../../store/src/base-entity-schemas';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEntity,

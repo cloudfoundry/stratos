@@ -37,6 +37,10 @@ ls -alR
 echo ""
 
 helm template -f ${__DIRNAME}/imagelist.values.yaml ${CHART_FOLDER} | grep "image:" | grep --extended --only-matching '([^"/[:space:]]+/)?[^"/[:space:]]+/[^:[:space:]]+:[a-zA-Z0-9\._-]+' | sort | uniq | awk -F'/' '{print $2}' > imagelist.txt
+if [ $? -ne 0 ]; then
+  echo -e "${BOLD}${RED}ERROR: Failed to render Helm Chart in order to generate image list"
+  exit 1
+fi
 popd > /dev/null
 
 printf "${CYAN}"

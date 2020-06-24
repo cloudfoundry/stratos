@@ -227,7 +227,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     // CfRolesService,
     CloudFoundryCellService,
     UserInviteService,
-    UserInviteConfigureService
+    UserInviteConfigureService,
   ],
   entryComponents: [
     UserInviteConfigurationDialogComponent

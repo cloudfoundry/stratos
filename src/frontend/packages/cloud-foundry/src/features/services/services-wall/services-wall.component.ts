@@ -13,8 +13,9 @@ import {
   initCfOrgSpaceService,
 } from '../../../../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../../../cloud-foundry/src/shared/data-services/cloud-foundry.service';
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { CSI_CANCEL_URL } from '../../../shared/components/add-service-instance/csi-mode.service';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 @Component({
   selector: 'app-services-wall',
@@ -32,16 +33,17 @@ export class ServicesWallComponent implements OnDestroy {
 
   public haveConnectedCf$: Observable<boolean>;
 
-  canCreateServiceInstance: CurrentUserPermissions;
+  canCreateServiceInstance: CfCurrentUserPermissions;
   initCfOrgSpaceService: Subscription;
   cfIds$: Observable<string[]>;
+  location: { [CSI_CANCEL_URL]: string };
 
   constructor(
     public cloudFoundryService: CloudFoundryService,
     public store: Store<CFAppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService) {
 
-    this.canCreateServiceInstance = CurrentUserPermissions.SERVICE_INSTANCE_CREATE;
+    this.canCreateServiceInstance = CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE;
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
       map(endpoints => endpoints
         .filter(endpoint => endpoint.connectionStatus === 'connected')
@@ -57,6 +59,10 @@ export class ServicesWallComponent implements OnDestroy {
     this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
       map(endpoints => !!endpoints && endpoints.length > 0)
     );
+
+    this.location = {
+      [CSI_CANCEL_URL]: `/services`
+    }
   }
 
   ngOnDestroy(): void {

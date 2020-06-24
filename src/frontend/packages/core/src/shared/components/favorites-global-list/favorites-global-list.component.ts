@@ -5,12 +5,9 @@ import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { getFavoriteInfoObservable } from '../../../../../store/src/helpers/store-helpers';
-import {
-  IFavoriteEntity,
-  IFavoritesInfo,
-  IGroupedFavorites,
-  UserFavoriteManager,
-} from '../../../core/user-favorite-manager';
+import { IFavoriteEntity, IGroupedFavorites } from '../../../../../store/src/types/user-favorite-manager.types';
+import { IFavoritesInfo } from '../../../../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
 
 
 @Component({

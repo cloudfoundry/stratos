@@ -15,6 +15,9 @@ import {
 import {
   RunningInstancesComponent,
 } from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
+import {
+  cfCurrentUserPermissionsService,
+} from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
 import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
@@ -48,7 +51,8 @@ describe('AutoscalerTabExtensionComponent', () => {
       providers: [
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        TabNavService
+        TabNavService,
+        ...cfCurrentUserPermissionsService
       ]
     })
       .compileComponents();

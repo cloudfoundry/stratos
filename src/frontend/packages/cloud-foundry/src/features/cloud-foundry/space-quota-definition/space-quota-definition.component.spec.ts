@@ -3,8 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
 
-import { endpointEntitySchema } from '../../../../../core/src/base-entity-schemas';
 import { TabNavService } from '../../../../../core/tab-nav.service';
+import { endpointEntitySchema } from '../../../../../store/src/base-entity-schemas';
 import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
 import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { NormalizedResponse } from '../../../../../store/src/types/api.types';

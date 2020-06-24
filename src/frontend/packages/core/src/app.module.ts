@@ -1,22 +1,25 @@
-import { NgModule, Injectable } from '@angular/core';
+import { Injectable, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
-import { RouterStateSerializer, StoreRouterConnectingModule, DefaultRouterStateSerializer } from '@ngrx/router-store';
+import { DefaultRouterStateSerializer, RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
 import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
-import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry.module';
+import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry-package.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import {
   UpdateUserFavoriteMetadataAction,
 } from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
+import { STRATOS_ENDPOINT_TYPE } from '../../store/src/base-entity-schemas';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
+import { FavoritesConfigMapper } from '../../store/src/favorite-config-mapper';
 import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
 import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
 import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
@@ -24,19 +27,19 @@ import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visi
 import { AppStoreModule } from '../../store/src/store.module';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../store/src/user-favorite-manager';
 import { TabNavService } from '../tab-nav.service';
 import { XSRFModule } from '../xsrf.module';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
-import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
-import { generateStratosEntities } from './base-entity-types';
 import { CoreModule } from './core/core.module';
 import { CustomizationService } from './core/customizations.types';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
-import { UserFavoriteManager } from './core/user-favorite-manager';
+import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { CustomImportModule } from './custom-import.module';
+import { environment } from './environments/environment';
 import { AboutModule } from './features/about/about.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
 import { HomeModule } from './features/home/home.module';
@@ -45,10 +48,10 @@ import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/
 import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
-import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SidePanelService } from './shared/services/side-panel.service';
 import { SharedModule } from './shared/shared.module';
+import { generateStratosEntities } from './stratos-entities';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -79,6 +82,18 @@ export class CustomRouterStateSerializer
   }
 }
 
+const storeDebugImports = environment.production ? [] : [
+  StoreDevtoolsModule.instrument({
+    maxAge: 100,
+    logOnly: !environment.production
+  })
+];
+
+@NgModule({
+  imports: storeDebugImports
+})
+class AppStoreDebugModule {}
+
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
  */
@@ -93,6 +108,7 @@ export class CustomRouterStateSerializer
     RouteModule,
     CloudFoundryPackageModule,
     AppStoreModule,
+    AppStoreDebugModule,
     BrowserModule,
     SharedModule,
     BrowserAnimationsModule,
@@ -116,7 +132,8 @@ export class CustomRouterStateSerializer
     SidePanelService,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
-    { provide: RouteReuseStrategy, useClass: CustomReuseStrategy }
+    { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
+    CurrentUserPermissionsService
   ],
   bootstrap: [AppComponent]
 })

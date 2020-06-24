@@ -1,16 +1,16 @@
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
+import { ConfirmDialogComponent } from '../po/confirm-dialog';
+import { ListComponent } from '../po/list.po';
+import { MetaCardTitleType } from '../po/meta-card.po';
 import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
-import { ConfirmDialogComponent } from '../po/confirm-dialog';
-import { MetaCardTitleType } from '../po/meta-card.po';
-import { ListComponent } from '../po/list.po';
 
 // Regression test for:
-// - Deleting a service instance in the services list will delete the service but the list incorerctly shows no services
+// - Deleting a service instance in the services list will delete the service but the list incorrectly shows no services
 describe('Delete Service Instance', () => {
   const createServiceInstance = new CreateServiceInstance();
   let createMarketplaceServiceInstance: CreateMarketplaceServiceInstance;
@@ -41,13 +41,12 @@ describe('Delete Service Instance', () => {
     createServiceInstance.waitForPage();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
-  });
-
-  it('should go to create service instance view', () => {
-    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
+    createMarketplaceServiceInstance.waitForPage();
   });
 
   it('should be able to create a service instance', () => {
+    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
+
     const serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
     names.push(serviceInstanceName);
     servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName);

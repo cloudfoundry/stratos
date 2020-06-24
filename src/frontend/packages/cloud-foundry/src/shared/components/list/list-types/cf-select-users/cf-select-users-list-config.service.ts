@@ -3,7 +3,6 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CfUser, CfUserMissingRoles } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import {
   TableRowStateManager,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
@@ -25,6 +24,7 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CfUser, CfUserMissingRoles } from '../../../../../store/types/cf-user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
 

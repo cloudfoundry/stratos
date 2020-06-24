@@ -11,13 +11,9 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import {
-  selectUsersRoles,
-  selectUsersRolesChangedRoles,
-} from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.actions';
-import { ChangeUserRole } from '../../../../../actions/users.actions';
+import { ChangeCfUserRole } from '../../../../../actions/users.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
@@ -29,7 +25,8 @@ import {
   TableCellConfirmRoleAddRemComponent,
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
-import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/user.types';
+import { selectCfUsersRoles, selectCfUsersRolesChangedRoles } from '../../../../../store/selectors/cf-users-roles.selector';
+import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/manage-users-set-usernames.component';
 
@@ -102,7 +99,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       entityKey: entityCatalog.getEntityKey(schema),
       schema,
       monitorState: AppMonitorComponentTypes.UPDATE,
-      updateKey: ChangeUserRole.generateUpdatingKey(row.role, row.userGuid),
+      updateKey: ChangeCfUserRole.generateUpdatingKey(row.role, row.userGuid),
       getId: () => guid
     };
   }
@@ -129,7 +126,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     // Kick off an update
     this.updateChanges.next(new Date().getTime());
     // Ensure that any entity we're going to show the state for is clear of any previous or unrelated errors
-    this.store.select(selectUsersRoles).pipe(
+    this.store.select(selectCfUsersRoles).pipe(
       first(),
     ).subscribe(usersRoles => this.store.dispatch(new UsersRolesClearUpdateState(usersRoles.changedRoles)));
   }
@@ -149,7 +146,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   }
 
   private createCfObs() {
-    this.cfGuid$ = this.store.select(selectUsersRoles).pipe(
+    this.cfGuid$ = this.store.select(selectCfUsersRoles).pipe(
       map(mu => mu.cfGuid),
       filter(cfGuid => !!cfGuid),
       distinctUntilChanged(),
@@ -158,7 +155,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 
   private createChangesObs() {
     const changesViaUsername = this.updateChanges.pipe(
-      switchMap(() => this.store.select(selectUsersRolesChangedRoles)),
+      switchMap(() => this.store.select(selectCfUsersRolesChangedRoles)),
       map(changes => changes
         .map(change => ({
           ...change,
@@ -171,7 +168,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     const changesViaUserGuid = this.updateChanges.pipe(
       withLatestFrom(this.cfGuid$),
       mergeMap(([, cfGuid]) => this.cfUserService.getUsers(cfGuid)),
-      withLatestFrom(this.store.select(selectUsersRolesChangedRoles)),
+      withLatestFrom(this.store.select(selectCfUsersRolesChangedRoles)),
       map(([users, changes]) =>
         changes
           .map(change => ({

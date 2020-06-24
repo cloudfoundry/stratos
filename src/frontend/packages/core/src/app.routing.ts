@@ -89,7 +89,7 @@ const appRoutes: Routes = [
           path: '',
           loadChildren: () => import('./features/endpoints/endpoints.module').then(m => m.EndpointsModule),
         }]
-      },
+      },    
       {
         path: 'marketplace',
         loadChildren: () => import('../../cloud-foundry/src/features/service-catalog/service-catalog.module')

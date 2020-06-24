@@ -76,7 +76,7 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
     ApplicationEnvVarsHelper,
     ApplicationMonitorService,
     DatePipe,
-    ApplicationDeploySourceTypes
+    ApplicationDeploySourceTypes,
   ]
 })
 export class ApplicationsModule { }

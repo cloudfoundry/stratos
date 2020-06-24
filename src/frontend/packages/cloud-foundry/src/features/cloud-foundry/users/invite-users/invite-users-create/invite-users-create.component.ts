@@ -18,7 +18,7 @@ import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfUserEntityType } from '../../../../../cf-entity-types';
 import { CFEntityConfig } from '../../../../../cf-types';
-import { SpaceUserRoleNames } from '../../../../../store/types/user.types';
+import { SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invites/user-invite.service';

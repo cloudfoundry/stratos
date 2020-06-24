@@ -4,12 +4,10 @@ import { Store } from '@ngrx/store';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, startWith } from 'rxjs/operators';
 
-import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { LoggerService } from '../../../../../../core/src/core/logger.service';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../../store/src/app-state';
-import { selectUsersRoles } from '../../../../../../store/src/selectors/users-roles.selector';
 import {
   UsersRolesClear,
   UsersRolesExecuteChanges,
@@ -17,8 +15,10 @@ import {
   UsersRolesSetUsers,
 } from '../../../../actions/users-roles.actions';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace } from '../../../../store/types/user.types';
+import { selectCfUsersRoles } from '../../../../store/selectors/cf-users-roles.selector';
+import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace } from '../../../../store/types/cf-user.types';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from '../manage-users/cf-roles.service';
@@ -71,7 +71,7 @@ export class RemoveUserComponent implements OnDestroy {
       return;
     }
 
-    const cfGuid$ = this.store.select(selectUsersRoles).pipe(
+    const cfGuid$ = this.store.select(selectCfUsersRoles).pipe(
       combineLatest(this.singleUser$),
       first()
     );
@@ -114,12 +114,12 @@ export class RemoveUserComponent implements OnDestroy {
       const isOrgRole = !c.spaceGuid;
 
       if (isOrgRole) {
-        return this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, c.orgGuid).pipe(
+        return this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, c.orgGuid).pipe(
           map((can) => ({ can, change: c }))
         );
       }
 
-      return this.userPerms.can(CurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid, c.orgGuid, c.spaceGuid).pipe(
+      return this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid, c.orgGuid, c.spaceGuid).pipe(
         map((can) => ({ can, change: c }))
       );
     });

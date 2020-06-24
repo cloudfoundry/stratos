@@ -4,15 +4,14 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
-  MetaCardMenuItem,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
+import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import {
@@ -21,8 +20,10 @@ import {
   getServicePlanName,
   getServiceSummaryUrl,
 } from '../../../../../../features/service-catalog/services-helper';
+import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
+import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
 
 @Component({
   selector: 'app-service-instance-card',
@@ -48,7 +49,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           label: 'Edit',
           action: this.edit,
           can: this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
+            CfCurrentUserPermissions.SERVICE_INSTANCE_EDIT,
             this.serviceInstanceEntity.entity.cfGuid,
             this.serviceInstanceEntity.entity.space_guid
           )
@@ -58,7 +59,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           action: this.detach,
           disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0),
           can: this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
+            CfCurrentUserPermissions.SERVICE_INSTANCE_EDIT,
             this.serviceInstanceEntity.entity.cfGuid,
             this.serviceInstanceEntity.entity.space_guid
           )
@@ -67,7 +68,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           label: 'Delete',
           action: this.delete,
           can: this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_INSTANCE_DELETE,
+            CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE,
             this.serviceInstanceEntity.entity.cfGuid,
             this.serviceInstanceEntity.entity.space_guid
           )
@@ -101,7 +102,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   static done = false;
   serviceInstanceEntity: APIResource<IServiceInstance>;
   cfGuid: string;
-  cardMenu: MetaCardMenuItem[];
+  cardMenu: MenuItem[];
 
   serviceInstanceTags: AppChip[];
   hasMultipleBindings = new BehaviorSubject(true);
@@ -128,7 +129,9 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.cfGuid,
-    null
+    {
+      [CSI_CANCEL_URL]: '/services'
+    }
   )
 
   getServiceName = () => {

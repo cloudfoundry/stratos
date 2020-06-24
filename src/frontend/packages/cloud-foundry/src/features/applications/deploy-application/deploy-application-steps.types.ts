@@ -5,11 +5,12 @@ import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { PermissionConfig, PermissionTypes } from '../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
+import { PermissionConfig } from '../../../../../core/src/core/permissions/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { CFFeatureFlagTypes } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { CfPermissionTypes } from '../../../user-permissions/cf-user-permissions-checkers';
 
 export enum DEPLOY_TYPES_IDS {
   GITLAB = 'gitlab',
@@ -107,7 +108,7 @@ export class ApplicationDeploySourceTypes {
       );
 
       const canDeployWithDocker$ = this.perms.can(
-        new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.diego_docker), cfId
+        new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.diego_docker), cfId
       ).pipe(
         publishReplay(1),
         refCount(),

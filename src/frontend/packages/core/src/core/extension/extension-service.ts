@@ -1,4 +1,4 @@
-import { Injectable, NgModule, ModuleWithProviders } from '@angular/core';
+import { Injectable, ModuleWithProviders, NgModule } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { AppState, GeneralEntityAppState } from '../../../../store/src/app-state';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
+import { CurrentUserPermissionsService } from '../permissions/current-user-permissions.service';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
@@ -23,7 +24,12 @@ export interface StratosTabMetadata {
   link: string;
   icon?: string;
   iconFont?: string;
-  hidden?: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => Observable<boolean>;
+  hidden?: (
+    store: Store<AppState>,
+    esf: EntityServiceFactory,
+    activatedRoute: ActivatedRoute,
+    cups: CurrentUserPermissionsService
+  ) => Observable<boolean>;
 }
 
 export interface StratosTabMetadataConfig extends StratosTabMetadata {
@@ -97,7 +103,7 @@ function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMeta
   });
   extensionMetadata.tabs[tab].push({
     ...props
-  });  
+  });
 }
 
 function addExtensionAction(action: StratosActionType, target: any, props: StratosActionMetadata) {

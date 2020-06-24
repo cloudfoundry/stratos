@@ -27,6 +27,7 @@ import { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
+import { AppServiceBindingDataSource } from '../../list/list-types/app-sevice-bindings/app-service-binding-data-source';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -38,7 +39,7 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
 export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
   constructor(
-    route: ActivatedRoute,
+    private route: ActivatedRoute,
     private upsService: CloudFoundryUserProvidedServicesService,
     public modeService: CsiModeService,
     private store: Store<CFAppState>,
@@ -297,11 +298,24 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       this.serviceInstanceId,
       updateData
     ).pipe(
-      map(er => ({
-        success: !er.error,
-        redirect: !er.error,
-        message: `Failed to update service instance: ${er.message}`
-      }))
+      map(er => {
+        if (!er.error) {
+          // Update the application binding list
+          const appId = this.appId || this.route.snapshot.queryParamMap.get('appId');
+          if (appId) {
+            this.store.dispatch(AppServiceBindingDataSource.createGetAllServiceBindings(appId, this.cfGuid));
+          }
+          return {
+            success: true,
+            redirect: true,
+          };
+        }
+        return {
+          success: false,
+          redirect: false,
+          message: `Failed to update service instance: ${er.message}`
+        };
+      })
     );
   }
 

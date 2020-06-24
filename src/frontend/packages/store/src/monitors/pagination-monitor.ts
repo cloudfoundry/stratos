@@ -14,14 +14,12 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import {
-  LocalPaginationHelpers,
-} from '../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 import { AppState, GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { EntitySchema } from '../helpers/entity-schema';
+import { LocalPaginationHelpers } from '../helpers/local-list.helpers';
 import { ActionState, ListActionState } from '../reducers/api-request-reducer/types';
 import { getCurrentPageRequestInfo } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { getAPIRequestDataState, selectEntities } from '../selectors/api.selectors';

@@ -17,7 +17,6 @@ import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
 import { ClickStopPropagationDirective } from './click-stop-propagation.directive';
 import { APP_TITLE, appTitleFactory } from './core.types';
-import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { DisableRouterLinkDirective } from './disable-router-link.directive';
 import { DotContentComponent } from './dot-content/dot-content.component';
 import { EndpointsService } from './endpoints.service';
@@ -85,7 +84,6 @@ import { WindowRef } from './window-ref/window-ref.service';
     PaginationMonitorFactory,
     UserProfileService,
     EntityServiceFactory,
-    CurrentUserPermissionsService,
     {
       provide: APP_TITLE,
       useFactory: appTitleFactory,

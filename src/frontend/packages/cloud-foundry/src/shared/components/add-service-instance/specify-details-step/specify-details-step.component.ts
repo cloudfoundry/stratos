@@ -31,7 +31,6 @@ import {
 } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
 import { pathGet, safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
 import { UpdateServiceInstance } from '../../../../actions/service-instances.actions';
@@ -297,7 +296,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       this.longRunningOpService.handleLongRunningCreateService(bindApp);
       // Return to app page instead of falling through to service page
       if (bindApp) {
-        return observableOf(this.routeToServices(state.cfGuid, state.bindAppGuid));
+        return observableOf(this.routeToServices());
       }
     } else if (request.error) {
       // The request has errored, report this back
@@ -318,7 +317,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           } else {
             // Refetch env vars for app, since they have been changed by CF
             cfEntityCatalog.appEnvVar.api.getMultiple(state.bindAppGuid, state.cfGuid);
-            return this.routeToServices(state.cfGuid, state.bindAppGuid);
+            return this.routeToServices();
           }
         })
       );
@@ -356,13 +355,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
   }
 
-  routeToServices = (cfGuid: string = null, appGuid: string = null): StepOnNextResult => {
-    if (this.modeService.isAppServicesMode()) {
-      this.store.dispatch(new RouterNav({ path: ['/applications', cfGuid, appGuid, 'services'] }));
-    } else {
-      this.store.dispatch(new RouterNav({ path: ['/services'] }));
-    }
-    return { success: true };
+  routeToServices = (): StepOnNextResult => {
+    return {
+      success: true,
+      // We should always go back to where we came from, aka 'cancel' location.
+      redirect: true,
+    };
   }
 
   private setServiceInstanceGuid = (request: { creating: boolean; error: boolean; response: { result: any[]; }; }) =>

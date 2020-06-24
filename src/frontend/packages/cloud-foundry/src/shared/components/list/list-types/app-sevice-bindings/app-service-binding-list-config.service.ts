@@ -4,8 +4,9 @@ import { Store } from '@ngrx/store';
 import { switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import {
   DataFunctionDefinition,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -18,11 +19,12 @@ import {
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GetAppServiceBindings } from '../../../../../actions/application-service-routes.actions';
 import { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { isServiceInstance, isUserProvidedServiceInstance } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
+import { CSI_CANCEL_URL } from '../../../add-service-instance/csi-mode.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import {
   TableCellServiceInstanceTagsComponent,
@@ -46,7 +48,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     description: 'Bind Service Instance',
     visible$: this.appService.waitForAppEntity$.pipe(
       switchMap(app => this.currentUserPermissionsService.can(
-        CurrentUserPermissions.SERVICE_INSTANCE_CREATE,
+        CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
         this.appService.cfGuid,
         app.entity.entity.space_guid
       ))
@@ -55,22 +57,20 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
 
   private listActionEdit: IListAction<APIResource<IServiceBinding>> = {
     action: (item) => {
-      // FIXME: If the user cancels stepper this leaks #4295
       this.serviceActionHelperService.startEditServiceBindingStepper(
         item.entity.service_instance_guid,
         this.appService.cfGuid,
-        { appId: this.appService.appGuid },
+        {
+          appId: this.appService.appGuid,
+          [CSI_CANCEL_URL]: `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/services`
+        },
         !!isUserProvidedServiceInstance(item.entity.service_instance.entity)
-      ).subscribe(res => {
-        if (!res.error) {
-          this.store.dispatch(new GetAppServiceBindings(this.appService.appGuid, this.appService.cfGuid));
-        }
-      });
+      );
     },
     label: 'Edit',
     createVisible: () => this.appService.waitForAppEntity$.pipe(
       switchMap(app => this.currentUserPermissionsService.can(
-        CurrentUserPermissions.SERVICE_BINDING_EDIT,
+        CfCurrentUserPermissions.SERVICE_BINDING_EDIT,
         this.appService.cfGuid,
         app.entity.entity.space_guid
       ))
@@ -91,7 +91,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     label: 'Unbind',
     createVisible: () => this.appService.waitForAppEntity$.pipe(
       switchMap(app => this.currentUserPermissionsService.can(
-        CurrentUserPermissions.SERVICE_BINDING_EDIT,
+        CfCurrentUserPermissions.SERVICE_BINDING_EDIT,
         this.appService.cfGuid,
         app.entity.entity.space_guid
       ))
@@ -102,7 +102,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     return [
       {
         columnId: 'name',
-        headerCell: () => 'Service Instances',
+        headerCell: () => 'Name',
         cellDefinition: {
           getValue: (row) => row.entity.service_instance.entity.name
         },

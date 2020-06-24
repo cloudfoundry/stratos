@@ -1,4 +1,4 @@
-import { metricEntityType } from '../../core/src/base-entity-schemas';
+import { metricEntityType } from '../../store/src/base-entity-schemas';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { APIResource } from '../../store/src/types/api.types';
 import {
@@ -46,7 +46,7 @@ import {
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
 import { getAPIResourceGuid } from './store/selectors/api.selectors';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/user.types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/cf-user.types';
 
 const entityCache: {
   [key: string]: EntitySchema
