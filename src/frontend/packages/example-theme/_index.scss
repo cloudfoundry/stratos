@@ -1,0 +1,9 @@
+@import '~@stratosui/theme/helper';
+
+// Custom Theme
+@import './sass/custom';
+
+@function stratos-theme() {
+  $theme: stratos-theme-helper($stratos-theme);
+  @return $theme
+}
