@@ -10,7 +10,8 @@ export const GET_SYSTEM_INFO_SUCCESS = '[System] Get info success';
 export const GET_SYSTEM_INFO_FAILED = '[System] Get info failed';
 
 export class GetSystemInfo implements EntityRequestAction {
-  guid = 'info';
+  static guid = 'info';
+  guid = GetSystemInfo.guid;
   constructor(public login = false, public associatedAction?: BaseEndpointAction) {
     if (!this.associatedAction) {
       this.associatedAction = new GetAllEndpoints(login);

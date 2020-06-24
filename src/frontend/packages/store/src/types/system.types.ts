@@ -12,11 +12,3 @@ export interface SystemInfo {
     }
   };
 }
-
-// export const systemStoreNames: {
-//   section: TRequestTypeKeys,
-//   type: string
-// } = {
-//   section: RequestSectionKeys.Other,
-//   type: entityFactory(systemInfoSchemaKey).entityType
-// };

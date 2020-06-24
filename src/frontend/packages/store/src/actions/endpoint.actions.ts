@@ -39,7 +39,9 @@ export class EndpointActionComplete implements Action {
   constructor(
     public type: string,
     public guid: string,
-    // Note - The underlying endpoints type (_cf_Endpoint, not _stratos_Endpoint)
+    /**
+     * Note - The underlying endpoints type (_cf_Endpoint, not _stratos_Endpoint)
+     */
     public endpointType: EndpointType,
     public endpoint: EndpointModel | INewlyConnectedEndpointInfo
   ) { }

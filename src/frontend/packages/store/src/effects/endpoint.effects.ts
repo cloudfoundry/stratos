@@ -50,7 +50,7 @@ export class EndpointsEffect {
     private store: Store<DispatchOnlyAppState>
   ) { }
 
-  @Effect() getAllEndpoint$ = this.actions$.pipe(
+  @Effect() getEndpoint$ = this.actions$.pipe(
     ofType<GetEndpoint>(GET_ENDPOINT),
     mergeMap((action: GetEndpoint) => [
       stratosEntityCatalog.systemInfo.actions.getSystemInfo(false, action)

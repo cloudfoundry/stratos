@@ -19,12 +19,10 @@ class StratosEntitySchema extends EntitySchema {
   }
 }
 
-// TODO: RC test auto log out process
-
-const UserFavouritesSchema = new StratosEntitySchema(userFavouritesEntityType, 'id');
+const UserFavouritesSchema = new StratosEntitySchema(userFavouritesEntityType, 'guid');
 entityCache[userFavouritesEntityType] = UserFavouritesSchema;
 
-const SystemInfoSchema = new StratosEntitySchema(systemInfoEntityType, 'id');
+const SystemInfoSchema = new StratosEntitySchema(systemInfoEntityType, 'guid');
 entityCache[systemInfoEntityType] = SystemInfoSchema;
 
 const EndpointSchema = new StratosEntitySchema(endpointEntityType, 'guid');
@@ -39,5 +37,4 @@ export function stratosEntityFactory(key: string): EntitySchema {
     throw new Error(`Unknown entity schema type: ${key}`);
   }
   return entity;
-
 }

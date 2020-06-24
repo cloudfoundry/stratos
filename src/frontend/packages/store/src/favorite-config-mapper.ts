@@ -122,15 +122,10 @@ export class FavoritesConfigMapper {
    * For a given endpoint type, return the list of possible favorite types
    */
   public getAllTypesForEndpoint(endpointType: string): IFavoriteTypes[] {
-    return entityCatalog.getAllEntitiesForEndpointType(endpointType)
-      .filter(fav => {
-        console.log(fav);
-        return true;
-      })
-      .map(catalogEntity => ({
-        type: catalogEntity.definition.type,
-        prettyName: catalogEntity.definition.label
-      }));
+    return entityCatalog.getAllEntitiesForEndpointType(endpointType).map(catalogEntity => ({
+      type: catalogEntity.definition.type,
+      prettyName: catalogEntity.definition.label
+    }));
   }
 
   private buildFavoriteFromCatalogEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(

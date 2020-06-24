@@ -148,10 +148,9 @@ export class EntityCatalogEntityStoreHelpers {
           schemaKey: '',
           startWithNull: false
         }
-      ): EntityMonitor<Y> => {
-
-        return new EntityMonitor<Y>(EntityCatalogHelpers.GetEntityCatalogHelper().store, entityId, entityKey, getSchema(params.schemaKey), params.startWithNull);
-      },
+      ): EntityMonitor<Y> => new EntityMonitor<Y>(
+        EntityCatalogHelpers.GetEntityCatalogHelper().store, entityId, entityKey, getSchema(params.schemaKey), params.startWithNull
+      ),
       getEntityService: (
         ...args: Parameters<ABC['get']>
       ): EntityService<Y> => {

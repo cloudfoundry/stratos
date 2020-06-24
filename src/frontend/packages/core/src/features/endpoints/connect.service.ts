@@ -66,7 +66,6 @@ export class ConnectEndpointService {
       pairwise()
     ).subscribe(([oldVal, newVal]) => {
       if (!newVal.error && (oldVal.busy && !newVal.busy)) {
-        // TODO: RC Q Shouldn't this be in `next`?
         // Has finished fetching
         stratosEntityCatalog.endpoint.api.get(this.config.guid);
       }

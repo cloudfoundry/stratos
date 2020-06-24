@@ -20,7 +20,6 @@ export class CloudFoundryService {
 
     this.cfEndpointsMonitor = stratosEntityCatalog.endpoint.store.getPaginationMonitor();
 
-    // TODO: RC Q should we now avoid selectors.. selectEntity, selectCfEntity, etc? and always access via entity catalog?
     this.cFEndpoints$ = this.cfEndpointsMonitor.currentPage$.pipe(
       map(endpoints => endpoints.filter(e => e.cnsi_type === 'cf'))
     );

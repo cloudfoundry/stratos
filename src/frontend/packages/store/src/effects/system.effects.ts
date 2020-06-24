@@ -35,9 +35,7 @@ export class SystemEffects {
           ];
         }), catchError((e) => {
           return [
-            // new GetSystemFailed(),
             { type: action.actions[2] },
-            // new WrapperRequestActionFailed('Could not get system endpoints', associatedAction),
             new WrapperRequestActionFailed('Could not fetch system info', action)
           ];
         }));

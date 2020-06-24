@@ -34,7 +34,6 @@ export class CfOrgSpaceLabelService {
     // FIXME: hide STRATOS_ENDPOINT_TYPE from extensions - STRAT-154
     const endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointEntityType);
 
-    // TODO: RC Q should we now avoid selectors.. selectEntity, selectCfEntity, etc? and always access via entity catalog?
     this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointEntityKey, this.cfGuid));
 
     this.org$ = this.store.select<APIResource<IOrganization>>(selectCfEntity(organizationEntityType, this.orgGuid));

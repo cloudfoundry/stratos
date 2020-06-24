@@ -33,9 +33,6 @@ export class FavoritesEntityListComponent implements OnInit {
   @Input()
   set endpointTypes(types: string[] | string) {
     if (!this.favoriteTypes) {
-      // return [
-
-      // ]
       if (Array.isArray(types)) {
         this.favoriteTypes = types.reduce((allTypes, endpointType) => {
           return [
