@@ -3,7 +3,7 @@
 # Build script for devkit
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT="$( cd "$( dirname "${DIR}" )" && cd ../../.. && pwd )"
-DIST=$ROOT/dist/devkit
+DIST=$ROOT/dist-devkit
 
 echo $DIST
 echo $DIR
