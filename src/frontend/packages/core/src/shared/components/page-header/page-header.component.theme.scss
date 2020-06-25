@@ -12,6 +12,11 @@
   $menu-background-color: mat-color($background, card);
   $is-dark: map-get($theme, is-dark);
   $username-background: $menu-background-color;
+  $header-background: map-get($app-theme, header-background-color);
+  $header-foreground: map-get($app-theme, header-foreground-color);
+  $underflow-background: map-get($app-theme, underflow-background-color);
+  $underflow-foreground: map-get($app-theme, underflow-foreground-color);
+
   @if $is-dark == true {
     $username-background: lighten($menu-background-color, 5%);
   } @else {
@@ -20,6 +25,10 @@
   $username-color: mat-color($foreground, text);
 
   .page-header {
+    &__toolbar {
+      background-color: $header-background;
+      color: $header-foreground;
+    }
     &__warning-count {
       background-color: mat-color($primary);
       color: mat-contrast($primary, 500);
@@ -34,7 +43,8 @@
       color: $subdued;
     }
     &__underflow {
-      background-color: mat-color($primary);
+      background-color: $underflow-background;
+      color: $underflow-foreground;
     }
     &__divider {
       color: mat-contrast($primary, 500);
