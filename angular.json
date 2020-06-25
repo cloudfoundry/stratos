@@ -12,9 +12,9 @@
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
             "customWebpackConfig": {
-              "path": "./dist/devkit/build/main.js"
+              "path": "./dist-devkit/build/main.js"
             },
-            "indexTransform": "./dist/devkit/build/index.transform.js",
+            "indexTransform": "./dist-devkit/build/index.transform.js",
             "preserveSymlinks": true,
             "outputPath": "dist",
             "index": "src/frontend/packages/core/src/index.html",
@@ -99,7 +99,7 @@
       "projectType": "library",
       "architect": {
         "build": {
-          "builder": "./dist/devkit:stratos-theme",
+          "builder": "./dist-devkit:stratos-theme",
           "options": {
             "outputPath": "dist/theme"
           }
