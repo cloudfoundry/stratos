@@ -80,6 +80,7 @@ deploy/ci/travis/temp/
 deploy/kubernetes/console/imagelist.txt
 
 .dist/
+dist-devkit/
 deploy/uaa/tmp/
 src/backend/*/vendor/
 .v8flags*
