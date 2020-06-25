@@ -3,7 +3,7 @@
     <div class="page-header__inner">
       <div class="page-header">
         <div>
-          <mat-toolbar class="page-header__toolbar" color="primary">
+          <mat-toolbar class="page-header__toolbar">
             <div *ngIf="isMobile$ | async" class="page-header__nav-toggle-wrapper">
               <button mat-icon-button *ngIf="!hideSideNavButton" (click)="toggleSidenav()">
                 <mat-icon class="page-header__nav-toggle">menu</mat-icon>

@@ -1,5 +1,6 @@
 // Stratos Theme Helper
 
+@use "sass:color";
 @import '~@angular/material/theming';
 @import './mat-themes';
 @import './mat-colors';
@@ -71,9 +72,16 @@ $oss-dark-theme: mat-dark-theme($oss-dark-primary, $oss-dark-accent, $oss-dark-w
       side-nav: app-generate-nav-theme($theme, $nav-theme),
       status: app-generate-status-theme($theme, $status-theme),
       subdued-color: $subdued,
-      ansi-colors: $ansi-color-palette
+      ansi-colors: $ansi-color-palette,
+      header-background-color: mat-color($primary),
+      header-foreground-color: mat-contrast($primary, 500),
+      // Does the header background color span across the top, or is the sidenav background color used for the top-left portion
+      header-background-span: false,
+      // Background colors to use for things like the about page header (underflow)
+      underflow-background-color: mat-color($primary),
+      underflow-foreground-color: mat-contrast($primary, 500)
     )
-  );  
+  );
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
@@ -81,7 +89,14 @@ $oss-dark-theme: mat-dark-theme($oss-dark-primary, $oss-dark-accent, $oss-dark-w
     @return $nav-theme;
   } @else {
     // Use default palette for side navigation
-    @return (background: $side-nav-light-bg, background-top: $side-nav-light-bg, text: darken($side-nav-light-text, 10%), active: $side-nav-light-active, active-text: $side-nav-light-text, hover: $side-nav-light-hover, hover-text: $side-nav-light-text);
+    @return (
+      background: $side-nav-light-bg,
+      text: darken($side-nav-light-text, 10%),
+      active: $side-nav-light-active,
+      active-text: $side-nav-light-text,
+      hover: $side-nav-light-hover, 
+      hover-text: $side-nav-light-text
+    );
   }
 }
 
