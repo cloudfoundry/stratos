@@ -10,6 +10,8 @@ import {
   CLEAR_PAGINATION_OF_TYPE,
   ClearPaginationOfType,
   CREATE_PAGINATION,
+  HYDRATE_PAGINATION_STATE,
+  HydratePaginationStateAction,
   IGNORE_MAXED_STATE,
   IgnorePaginationMaxedState,
   REMOVE_PARAMS,
@@ -100,7 +102,7 @@ function paginationReducer(updatePagination) {
   };
 }
 
-function paginate(action, state = {}, updatePagination) {
+function paginate(action, state: PaginationState = {}, updatePagination) {
   if (action.type === ApiActionTypes.API_REQUEST_START) {
     return state;
   }
@@ -143,7 +145,45 @@ function paginate(action, state = {}, updatePagination) {
     return paginationIgnoreMaxed(state, action as IgnorePaginationMaxedState);
   }
 
+  if (action.type === HYDRATE_PAGINATION_STATE) {
+    return hydratePagination(state, action as HydratePaginationStateAction);
+  }
+
   return enterPaginationReducer(state, action, updatePagination);
+}
+
+// TODO: RC tidy the hell out of this
+function hydratePagination(state: PaginationState, action: HydratePaginationStateAction): PaginationState {
+  const hydrate = (action.paginationState || {}); // TODO: RC don't wrap when parseing
+  const entityKeys = Object.keys(hydrate || {});
+  if (entityKeys.length === 0) {
+    return state;
+  }
+
+  // TODO: RC how to remove entries (pagination and list) that no longer exist (endpoint not connected, deleted app (bindings), etc)?
+
+  const newState = entityKeys.reduce((res, entityKey) => {
+    const existingEntityState = state[entityKey] || {};
+    const hydrateEntityState = action.paginationState[entityKey]; // TODO: RC don't wrap when parseing
+
+    // TODO: RC change Object.keys to Object.entries
+    res[entityKey] = Object.keys(hydrateEntityState).reduce((res2, paginationKey) => {
+      const existingPageState = existingEntityState[paginationKey] || getDefaultPaginationEntityState()
+      const hydratePagSection = hydrateEntityState[paginationKey];
+      res2[paginationKey] = {
+        ...existingPageState,
+        ...hydratePagSection
+      }
+      return res2;
+    }, {
+      ...existingEntityState
+    });
+
+    return res;
+  }, {
+    ...state
+  });
+  return newState;
 }
 
 function isEndpointAction(action) {

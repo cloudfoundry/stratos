@@ -23,11 +23,10 @@ import {
   VERIFY_SESSION,
   VerifySession,
 } from '../actions/auth.actions';
-import { HydrateDashboardStateAction } from '../actions/dashboard-actions';
 import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
 import { DispatchOnlyAppState } from '../app-state';
 import { BrowserStandardEncoder } from '../browser-encoder';
-import { getDashboardStateSessionId } from '../helpers/store-helpers';
+import { LocalStorageService } from '../helpers/local-storage-service';
 import { stratosEntityCatalog } from '../stratos-entity-catalog';
 import { SessionData } from '../types/auth.types';
 
@@ -81,7 +80,7 @@ export class AuthEffect {
         mergeMap(response => {
           const sessionData = response.body;
           sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
-          this.rehydrateDashboardState(this.store, sessionData);
+          LocalStorageService.storageToStore(this.store, sessionData)
           return [
             stratosEntityCatalog.systemInfo.actions.getSystemInfo(true),
             new VerifiedSession(sessionData, action.updateEndpoints)
@@ -155,19 +154,5 @@ export class AuthEffect {
     return false;
   }
 
-  private rehydrateDashboardState(store: Store<DispatchOnlyAppState>, sessionData: SessionData) {
-    const storage = localStorage || window.localStorage;
-    // We use the username to key the session storage. We could replace this with the users id?
-    if (storage && sessionData.user) {
-      const sessionId = getDashboardStateSessionId(sessionData.user.name);
-      if (sessionId) {
-        try {
-          const dashboardData = JSON.parse(storage.getItem(sessionId));
-          store.dispatch(new HydrateDashboardStateAction(dashboardData));
-        } catch (e) {
-          console.warn('Failed to parse user settings from session storage, consider clearing them manually', e);
-        }
-      }
-    }
-  }
+
 }

@@ -9,6 +9,7 @@ import { APIResource } from '../types/api.types';
 import { IFavoritesInfo } from '../types/user-favorites.types';
 
 
+// TODO: RC bring into LocalStorageService, rename
 export function getDashboardStateSessionId(username?: string) {
   const prefix = 'stratos-';
   if (username) {

@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
 import { EntityCatalogEntityConfig, extractEntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { PaginationClientFilter, PaginationParam } from '../types/pagination.types';
+import { PaginationClientFilter, PaginationParam, PaginationState } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const CLEAR_PAGINATION_OF_ENTITY = '[Pagination] Clear pagination of entity';
@@ -22,6 +22,7 @@ export const SET_PAGE_BUSY = '[Pagination] Set Page Busy';
 export const REMOVE_ID_FROM_PAGINATION = '[Pagination] Remove id from pagination';
 export const UPDATE_MAXED_STATE = '[Pagination] Update maxed state';
 export const IGNORE_MAXED_STATE = '[Pagination] Ignore maxed state';
+export const HYDRATE_PAGINATION_STATE = '[Pagination] Hydrate pagination state';
 
 export function getPaginationKey(type: string, id: string, endpointGuid?: string) {
   const key = `${type}-${id}`;
@@ -217,4 +218,9 @@ export class IgnorePaginationMaxedState implements Action, EntityCatalogEntityCo
     public paginationKey: string,
     public forcedEntityKey?: string
   ) { }
+}
+
+export class HydratePaginationStateAction implements Action {
+  constructor(public paginationState: PaginationState) { }
+  type = HYDRATE_PAGINATION_STATE;
 }

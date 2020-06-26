@@ -1,6 +1,7 @@
 import { SortDirection } from '@angular/material/sort';
 import { Action } from '@ngrx/store';
 
+import { ListsState } from '../reducers/list.reducer';
 import { defaultClientPaginationPageSize } from '../reducers/pagination-reducer/pagination-reducer-reset-pagination';
 
 
@@ -25,7 +26,8 @@ export class ListFilter {
 
 export const ListStateActionTypes = {
   SET: '[List] Set',
-  SET_VIEW: '[List] Set View'
+  SET_VIEW: '[List] Set View',
+  HYDRATE: '[List] Hydrate'
 };
 
 export type ListView = 'table' | 'cards';
@@ -38,4 +40,10 @@ export class SetListStateAction implements Action {
 export class SetListViewAction implements Action {
   constructor(public key: string, public view: ListView) { }
   type = ListStateActionTypes.SET_VIEW;
+}
+
+
+export class HydrateListsStateAction implements Action {
+  constructor(public listsState: ListsState) { }
+  type = ListStateActionTypes.HYDRATE;
 }

@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { ActionReducer, ActionReducerMap, StoreModule } from '@ngrx/store';
 import { localStorageSync } from 'ngrx-store-localstorage';
 
-import { getDashboardStateSessionId } from './helpers/store-helpers';
+import { LocalStorageService, LocalStorageSyncTypes } from './helpers/local-storage-service';
+import { getDashboardStateSessionId } from './public-api';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
@@ -16,6 +17,8 @@ import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
+import { PaginationState } from './types/pagination.types';
+
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
 
@@ -27,7 +30,7 @@ import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 //   return storeLogger()(reducer);
 // }
 
-export const appReducers = {
+export const appReducers: ActionReducerMap<{}> = {
   auth: authReducer,
   uaaSetup: uaaSetupReducer,
   endpoints: endpointsReducer,
@@ -43,15 +46,14 @@ export const appReducers = {
   currentUserRoles: currentUserRolesReducer,
   userFavoritesGroups: userFavoriteGroupsReducer,
   recentlyVisited: recentlyVisitedReducer,
-} as ActionReducerMap<{}>;
+};
 
 export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
   // This is done to ensure we don't accidentally apply state from session storage from another user.
   let globalUserId = null;
   return localStorageSync({
-    storageKeySerializer: (id) => {
-      return globalUserId || id;
-    },
+    // Decide the key to store each section by
+    storageKeySerializer: (storeKey: LocalStorageSyncTypes) => LocalStorageService.makeKey(globalUserId, storeKey),
     syncCondition: () => {
       if (globalUserId) {
         return true;
@@ -63,7 +65,20 @@ export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionRedu
       }
       return false;
     },
-    keys: ['dashboard'],
+    keys: [
+      LocalStorageSyncTypes.DASHBOARD,
+      LocalStorageSyncTypes.LISTS,
+      {
+        [LocalStorageSyncTypes.PAGINATION]: {
+          serialize: (pagination: PaginationState) => LocalStorageService.parseForStorage<PaginationState>(
+            pagination,
+            LocalStorageSyncTypes.PAGINATION
+          ),
+        }
+      },
+      // encrypt: // TODO: RC only store guids, so shouldn't need
+      // decrypt: // TODO: RC
+    ],
     rehydrate: false,
 
   })(reducer);
