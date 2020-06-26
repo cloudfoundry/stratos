@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { ICFAction, RequestEntityLocation } from '../../../store/src/types/request.types';
+import { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { appEnvVarsEntityType, applicationEntityType, appStatsEntityType, appSummaryEntityType } from '../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../entity-relations/entity-relations.types';
@@ -39,7 +39,6 @@ export class GetAppStatsAction extends CFStartAction implements PaginatedAction,
     'order-direction': 'desc',
     'order-direction-field': 'index',
   };
-  entityLocation = RequestEntityLocation.ARRAY;
 }
 
 export class GetAppEnvVarsAction extends CFStartAction implements PaginatedAction, ICFAction {

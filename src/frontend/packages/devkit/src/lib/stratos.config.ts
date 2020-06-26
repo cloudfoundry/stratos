@@ -59,16 +59,11 @@ export class StratosConfig implements Logger {
         }
       } else {
         this.log('Using default configuration');
-
-        // Default config excludes the example packages
-        this.stratosConfig.packages = {
-          exclude: [
-            '@example/theme',
-            '@example/extensions'
-          ]
-        };
       }
     }
+
+    // Exclude the default packages... unless explicity `include`d
+    this.excludeExamples()
 
     const mainDir = options ? path.dirname(options.main) : dir;
 
@@ -103,6 +98,44 @@ export class StratosConfig implements Logger {
     } else {
       this.log('Building with these extensions:');
       extensions.forEach(ext => this.log(` + ${ext.package}`));
+    }
+  }
+
+  private excludeExamples() {
+    const examplePackages = ['@example/theme', '@example/extensions']
+    const exclude = [];
+    // Are examples explicitly in the include section?
+    if (this.stratosConfig &&
+      this.stratosConfig.packages &&
+      this.stratosConfig.packages.include &&
+      this.stratosConfig.packages.include.length > 0 // Will check if this is an array
+    ) {
+      examplePackages.forEach(ep => this.addIfMissing(this.stratosConfig.packages.include, ep, exclude))
+    } else {
+      exclude.push(...examplePackages);
+    }
+
+    // No op
+    if (exclude.length < 1) {
+      return;
+    }
+
+    // If examples are not in include section, add them to the exclude
+    if (!this.stratosConfig) {
+      this.stratosConfig = {}
+    }
+    if (!this.stratosConfig.packages) {
+      this.stratosConfig.packages = {}
+    }
+    if (!this.stratosConfig.packages.exclude) {
+      this.stratosConfig.packages.exclude = [];
+    }
+    exclude.forEach(e => this.addIfMissing(this.stratosConfig.packages.exclude, e));
+  }
+
+  private addIfMissing<T = string>(array: T[], entry: T, dest: T[] = array) {
+    if (array.indexOf(entry) < 0) {
+      dest.push(entry)
     }
   }
 
