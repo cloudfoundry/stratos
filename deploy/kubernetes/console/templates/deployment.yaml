@@ -81,6 +81,10 @@ spec:
           value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         - name: STRATOS_HELM_RELEASE
           value: "{{ .Release.Name }}"
+        - name: STRATOS_KUBERNETES_NAMESPACE
+          value: "{{ .Release.Namespace }}"
+        - name: STRATOS_KUBERNETES_TERMINAL_IMAGE
+          value: "{{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-kube-terminal:{{.Values.consoleVersion}}"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -312,6 +316,9 @@ spec:
       {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
+      {{- end }}
+      {{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+      serviceAccountName: "stratos"
       {{- end }}
       volumes:
       - name: "{{ .Release.Name }}-encryption-key-volume"

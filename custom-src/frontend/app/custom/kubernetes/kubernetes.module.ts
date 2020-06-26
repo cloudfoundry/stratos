@@ -91,6 +91,7 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
+import { KubeConsoleComponent } from './kube-terminal/kube-console.component';
 
 /* tslint:disable:max-line-length */
 
@@ -142,6 +143,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     NodePodCountComponent,
     KubernetesServicePortsComponent,
     KubernetesPodStatusComponent,
+    KubeConsoleComponent,
     KubeServiceCardComponent,
     KubernetesResourceViewerComponent,
     KubeServiceCardComponent,

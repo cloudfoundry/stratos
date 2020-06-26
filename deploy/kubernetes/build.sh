@@ -169,10 +169,9 @@ function patchDockerfile {
   if [ "${DOCKER_REG_DEFAULTS}" == "false" ]; then
     sed -i.bak "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   fi
-  sed -i.bak "s/opensuse/${BASE_IMAGE_TAG}/g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
+  sed -i.bak "s/leap15_1/${BASE_IMAGE_TAG}/g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   popd > /dev/null 2>&1
 }
-
 
 #
 # MAIN -------------------------------------------------------------------------------------------
@@ -184,7 +183,9 @@ popd > /dev/null 2>&1
 echo "Base path: ${STRATOS_PATH}"
 
 # cleanup output, intermediate artifacts
-cleanup
+if [ "${CHART_ONLY}" == "false" ]; then
+  cleanup
+fi
 
 # Clean any old patched docker files left if previously errored
 # rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.patched

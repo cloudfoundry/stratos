@@ -4,6 +4,10 @@
       <mat-icon>dashboard</mat-icon>
       <span class="kube-details__button">View Dashboard</span>
     </button>
+    <button *ngIf="kubeEndpointService.kubeTerminalEnabled$ | async" [routerLink]="kubeTerminalLink" mat-button>
+      <mat-icon>desktop_windows</mat-icon>
+      <span class="kube-details__button">Open Terminal</span>
+    </button>
   </app-page-sub-nav>
 
   <app-loading-page [isLoading]="isLoading$" [text]="'Retrieving Kubernetes details'">

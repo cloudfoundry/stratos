@@ -16,12 +16,15 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/terminal"
 )
 
 // KubernetesSpecification is the endpoint that adds Kubernetes support to the backend
 type KubernetesSpecification struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
+	kubeTerminal *terminal.KubeTerminal
 }
 
 type KubeStatus struct {
@@ -51,12 +54,20 @@ const (
 	kubeEndpointType    = "k8s"
 	defaultKubeClientID = "K8S_CLIENT"
 
-	// kubeDashboardPluginConfigSetting is config value send back to the client to indicate if the kube dashboard can be navigated to
+	// kubeDashboardPluginConfigSetting is config value sent back to the client to indicate if the kube dashboard ie enabled
 	kubeDashboardPluginConfigSetting = "kubeDashboardEnabled"
+	// kubeTerminalPluginConfigSetting is config value sent back to the client to indicate if the kube terminal is enabled
+	kubeTerminalPluginConfigSetting = "kubeTerminalEnabled"
 )
 
+// Init creates a new instance of the Kubernetes plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
-	return &KubernetesSpecification{portalProxy: portalProxy, endpointType: kubeEndpointType}, nil
+	kubeTerminal := terminal.NewKubeTerminal(portalProxy)
+	kube := &KubernetesSpecification{portalProxy: portalProxy, endpointType: kubeEndpointType, kubeTerminal: kubeTerminal}
+	if kubeTerminal != nil {
+		kubeTerminal.Kube = kube
+	}
+	return kube, nil
 }
 
 func (c *KubernetesSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
@@ -133,6 +144,14 @@ func (c *KubernetesSpecification) Init() error {
 	// Kube dashboard is enabled by Tech Preview mode
 	c.portalProxy.GetConfig().PluginConfig[kubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
 
+	// Kube terminal is enabled by Tech Preview mode
+	c.portalProxy.GetConfig().PluginConfig[kubeTerminalPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
+
+	// Kick off the cleanup of any old kube terminal pods
+	if c.kubeTerminal != nil {
+		c.kubeTerminal.StartCleanup()
+	}
+
 	return nil
 }
 
@@ -161,6 +180,10 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name/status", c.GetReleaseStatus)
 	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name", c.GetRelease)
 
+	// Kube Terminal
+	if c.kubeTerminal != nil {
+		echoGroup.GET("/kubeterminal/:guid", c.kubeTerminal.Start)
+	}
 }
 
 func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {

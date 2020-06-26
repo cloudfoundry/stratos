@@ -65,7 +65,13 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-repository))/stratos-chartsync
-
+- name: kube-terminal-image
+    type: docker-image
+    source:
+      username: ((docker-username))
+      password: ((docker-password))
+      repository: ((docker-repository))/stratos-kube-terminal
+  
 # Artifacts
 - name: image-tag
   type: s3
@@ -144,6 +150,13 @@ jobs:
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
+          tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
+      - put: kube-terminal-image
+        params:
+          dockerfile: stratos/deploy/containers/kube-terminal/Dockerfile.kubeterminal
+          build: stratos/deploy/containers/kube-terminal
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))

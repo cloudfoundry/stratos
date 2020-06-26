@@ -19,6 +19,7 @@ require (
 	github.com/kubernetes-sigs/aws-iam-authenticator v0.3.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
+	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/goconvey v1.6.4

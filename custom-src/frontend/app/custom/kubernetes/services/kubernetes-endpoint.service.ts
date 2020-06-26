@@ -40,6 +40,7 @@ export class KubernetesEndpointService {
   kubeDashboardStatus$: Observable<KubeDashboardStatus>;
   kubeDashboardLabel$: Observable<string>;
   kubeDashboardConfigured$: Observable<boolean>;
+  kubeTerminalEnabled$: Observable<boolean>;
 
   constructor(
     public baseKube: BaseKubeGuid,
@@ -156,6 +157,11 @@ export class KubernetesEndpointService {
     this.kubeDashboardEnabled$ = this.store.select('auth').pipe(
       filter(auth => !!auth.sessionData['plugin-config']),
       map(auth => auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true')
+    );
+
+    this.kubeTerminalEnabled$ = this.store.select('auth').pipe(
+      filter(auth => !!auth.sessionData['plugin-config']),
+      map(auth => auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
     );
 
     const kubeDashboardStatus$ = kubeEntityCatalog.dashboard.store.getEntityService(this.kubeGuid).waitForEntity$.pipe(

@@ -23,6 +23,7 @@ import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kuberne
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 import { KubedashConfigurationComponent } from './kubernetes-dashboard/kubedash-configuration/kubedash-configuration.component';
+import { KubeConsoleComponent } from './kube-terminal/kube-console.component';
 
 const kubernetes: Routes = [{
   path: '',
@@ -129,6 +130,13 @@ const kubernetes: Routes = [{
 {
   path: ':endpointId/dashboard-config',
   component: KubedashConfigurationComponent,
+},
+{
+  path: ':endpointId/terminal',
+  component: KubeConsoleComponent,
+  data: {
+    uiNoMargin: true
+  }
 }
 ];
 

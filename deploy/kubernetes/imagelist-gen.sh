@@ -12,6 +12,22 @@ __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 printf "${BOLD}${CYAN}Generating ${YELLOW}imagelist.txt${RESET}\n"
 echo ""
 
+STRATOS_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd ../../ && pwd )"
+
+# Add any customizations
+function addCustomizations() {
+
+  if [ -f "${STRATOS_FOLDER}/custom-src/deploy/kubernetes/imagelist.txt" ];then
+    echo "Including custom imagelist contents"
+    cat "${STRATOS_FOLDER}/custom-src/deploy/kubernetes/imagelist.txt" >> ./imagelist.txt
+
+    # Update version number
+    VERSION=$(grep -Po 'consoleVersion: \K(.*)' ./values.yaml)
+    echo "Image Version: ${VERSION}"
+    sed -i 's/_VERSION_/'"${VERSION}"'/g' imagelist.txt
+  fi
+}
+
 
 CHART_FOLDER=${1}
 
@@ -41,6 +57,11 @@ if [ $? -ne 0 ]; then
   echo -e "${BOLD}${RED}ERROR: Failed to render Helm Chart in order to generate image list"
   exit 1
 fi
+
+# Add any customizations to the image list
+# Mainly used if there are unreferenced images that need to be included
+addCustomizations
+
 popd > /dev/null
 
 printf "${CYAN}"
