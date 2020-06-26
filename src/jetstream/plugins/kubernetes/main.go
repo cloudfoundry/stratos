@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"errors"
 
@@ -135,7 +137,7 @@ func (c *KubernetesSpecification) Init() error {
 }
 
 func (c *KubernetesSpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
-	// no-op
+	echoGroup.GET("/kube/cert", c.RequiresCert)
 }
 
 func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
@@ -241,4 +243,32 @@ func parseErrorResponse(body []byte) error {
 }
 
 func (c *KubernetesSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
+}
+
+func (c *KubernetesSpecification) RequiresCert(ec echo.Context) error {
+	url := ec.QueryParam("url")
+
+	log.Debug("Request Kube API Versions")
+	var httpClient = c.portalProxy.GetHttpClient(false)
+	_, err := httpClient.Get(url + "/api")
+	var response struct {
+		Status   int
+		Required bool
+		Error    bool
+		Message  string
+	}
+	if err != nil {
+		if strings.Contains(err.Error(), "x509: certificate") {
+			response.Status = http.StatusOK
+			response.Required = true
+		} else {
+			response.Status = http.StatusInternalServerError
+			response.Error = true
+			response.Message = fmt.Sprintf("Failed to validate Kube certificate requirement: %+v", err)
+		}
+	} else {
+		response.Status = http.StatusOK
+		response.Required = false
+	}
+	return ec.JSON(response.Status, response)
 }

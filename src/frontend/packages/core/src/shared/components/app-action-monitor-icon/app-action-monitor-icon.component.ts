@@ -36,7 +36,8 @@ export class ActionMonitorComponentState {
     this.currentState = this.getStateObservable(entityMonitor, monitorState);
   }
 
-  private getStateObservable(entityMonitor: EntityMonitor, monitorState: AppMonitorComponentTypes) {
+  private getStateObservable(entityMonitor: EntityMonitor, monitorState: AppMonitorComponentTypes)
+  : Observable<IApplicationMonitorComponentState> {
     switch (monitorState) {
       case AppMonitorComponentTypes.DELETE:
         return this.getDeletingState(entityMonitor);
@@ -122,6 +123,10 @@ export class ActionMonitorComponentState {
 })
 export class AppActionMonitorIconComponent implements OnInit {
 
+  // State observable - use this instead of creating one
+  @Input()
+  public state: Observable<IApplicationMonitorComponentState>;
+
   @Input()
   public entityKey: string;
 
@@ -143,6 +148,9 @@ export class AppActionMonitorIconComponent implements OnInit {
   constructor(private entityMonitorFactory: EntityMonitorFactory) { }
 
   ngOnInit() {
+    if (this.state) {
+      this.currentState = this.state;
+    } else {
     const state: ActionMonitorComponentState = new ActionMonitorComponentState(
       this.entityMonitorFactory,
       this.id,
@@ -151,5 +159,6 @@ export class AppActionMonitorIconComponent implements OnInit {
       this.updateKey
     );
     this.currentState = state.currentState;
+    }
   }
 }

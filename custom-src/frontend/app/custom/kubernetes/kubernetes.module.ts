@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -93,6 +92,7 @@ import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kuberne
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 
+/* tslint:disable:max-line-length */
 
 /* tslint:enable */
 
@@ -146,7 +146,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesResourceViewerComponent,
     KubeServiceCardComponent,
     KubedashConfigurationComponent,
-    KubernetesPodContainersComponent
+    KubernetesPodContainersComponent,
   ],
   providers: [
     KubernetesService,
@@ -170,7 +170,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesPodStatusComponent,
     KubeServiceCardComponent,
     KubernetesResourceViewerComponent,
-    KubernetesPodContainersComponent
+    KubernetesPodContainersComponent,
   ],
   exports: [
     KubernetesResourceViewerComponent

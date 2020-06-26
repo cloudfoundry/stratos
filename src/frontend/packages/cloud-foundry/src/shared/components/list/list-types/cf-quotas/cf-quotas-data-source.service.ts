@@ -50,7 +50,7 @@ export class CfQuotasDataSourceService extends ListDataSource<APIResource> {
         map(requestInfo => ({
           deleting: requestInfo.deleting.busy,
           error: requestInfo.deleting.error,
-          message: requestInfo.deleting.error ? `Failed to delete quota: ${requestInfo.message}` : null
+          message: requestInfo.deleting.error ? `Failed to delete quota: ${requestInfo.deleting.message}` : null
         }))
       );
     };

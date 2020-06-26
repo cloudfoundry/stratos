@@ -20,6 +20,7 @@ import {
   KubernetesConfigAuthFormComponent,
 } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
+import { KubeConfigRegistrationComponent } from './kube-config-registration/kube-config-registration.component';
 import { kubeEntityCatalog } from './kubernetes-entity-catalog';
 import {
   KUBERNETES_ENDPOINT_TYPE,
@@ -129,31 +130,44 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     urlValidation: undefined,
     authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CERT_AUTH], kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG]],
     renderPriority: 4,
-    subTypes: [{
-      type: 'caasp',
-      label: 'SUSE CaaS Platform',
-      authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG]],
-      logoUrl: '/core/assets/custom/caasp.png',
-      renderPriority: 5
-    }, {
-      type: 'aks',
-      label: 'Azure AKS',
-      authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG_AZ]],
-      logoUrl: '/core/assets/custom/aks.svg',
-      renderPriority: 6
-    }, {
-      type: 'eks',
-      label: 'Amazon EKS',
-      authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.AWS_IAM]],
-      logoUrl: '/core/assets/custom/eks.svg',
-      renderPriority: 6
-    }, {
-      type: 'gke',
-      label: 'Google Kubernetes Engine',
-      authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.GKE]],
-      logoUrl: '/core/assets/custom/gke.svg',
-      renderPriority: 6
-    }],
+    subTypes: [
+      {
+        type: 'config',
+        label: 'Import Kubeconfig',
+        authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG]],
+        logoUrl: '/core/assets/custom/kube_import.png',
+        renderPriority: 3,
+        registrationComponent: KubeConfigRegistrationComponent,
+      },
+      {
+        type: 'caasp',
+        label: 'SUSE CaaS Platform',
+        labelShort: 'CaaSP',
+        authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG]],
+        logoUrl: '/core/assets/custom/caasp.png',
+        renderPriority: 5,
+      }, {
+        type: 'aks',
+        label: 'Azure AKS',
+        labelShort: 'AKS',
+        authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG_AZ]],
+        logoUrl: '/core/assets/custom/aks.svg',
+        renderPriority: 6
+      }, {
+        type: 'eks',
+        label: 'Amazon EKS',
+        labelShort: 'EKS',
+        authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.AWS_IAM]],
+        logoUrl: '/core/assets/custom/eks.svg',
+        renderPriority: 6
+      }, {
+        type: 'gke',
+        label: 'Google Kubernetes Engine',
+        labelShort: 'GKE',
+        authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.GKE]],
+        logoUrl: '/core/assets/custom/gke.svg',
+        renderPriority: 6
+      }],
   };
   return [
     generateEndpointEntity(endpointDefinition),

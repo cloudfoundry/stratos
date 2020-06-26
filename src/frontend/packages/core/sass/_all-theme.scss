@@ -181,6 +181,6 @@ $side-nav-light-active: #484848;
     $warn: map-get($theme, warn);
     $primary: map-get($theme, primary);
     $white: #fff; // Use default palette for status
-    @return (success: map-get($mat-green, 500), warning: map-get($mat-orange, 500), danger: mat-color($warn), tentative: map-get($mat-grey, 500), busy: mat-color($primary), text: $white, );
+    @return (success: map-get($mat-green, 500), warning: map-get($mat-orange, 500), danger: mat-color($warn), tentative: map-get($mat-grey, 500), busy: mat-color($primary), text: $white, info: map-get($mat-blue, 500));
   }
 }

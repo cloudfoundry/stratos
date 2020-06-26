@@ -14,13 +14,35 @@ import {
   KubernetesConfigAuthFormComponent,
 } from './auth-forms/kubernetes-config-auth-form/kubernetes-config-auth-form.component';
 import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth-form/kubernetes-gke-auth-form.component';
+import { KubeConfigImportComponent } from './kube-config-registration/kube-config-import/kube-config-import.component';
+import {
+  KubeConfigTableImportStatusComponent,
+} from './kube-config-registration/kube-config-import/kube-config-table-import-status/kube-config-table-import-status.component';
+import { KubeConfigRegistrationComponent } from './kube-config-registration/kube-config-registration.component';
+import {
+  KubeConfigSelectionComponent,
+} from './kube-config-registration/kube-config-selection/kube-config-selection.component';
+import {
+  KubeConfigTableCertComponent,
+} from './kube-config-registration/kube-config-selection/kube-config-table-cert/kube-config-table-cert.component';
+import {
+  KubeConfigTableName,
+} from './kube-config-registration/kube-config-selection/kube-config-table-name/kube-config-table-name.component';
+import {
+  KubeConfigTableSelectComponent,
+} from './kube-config-registration/kube-config-selection/kube-config-table-select/kube-config-table-select.component';
+import {
+  KubeConfigTableSubTypeSelectComponent,
+} from './kube-config-registration/kube-config-selection/kube-config-table-sub-type-select/kube-config-table-sub-type-select.component';
+import {
+  KubeConfigTableUserSelectComponent,
+} from './kube-config-registration/kube-config-selection/kube-config-table-user-select/kube-config-table-user-select.component';
 import { kubeEntityCatalog } from './kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes-entity-factory';
 import { generateKubernetesEntities } from './kubernetes-entity-generator';
 import { BaseKubeGuid } from './kubernetes-page.types';
 import { KubernetesStoreModule } from './kubernetes.store.module';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
-
 
 @NgModule({
   imports: [
@@ -35,6 +57,15 @@ import { KubernetesEndpointService } from './services/kubernetes-endpoint.servic
     KubernetesAWSAuthFormComponent,
     KubernetesConfigAuthFormComponent,
     KubernetesGKEAuthFormComponent,
+    KubeConfigRegistrationComponent,
+    KubeConfigSelectionComponent,
+    KubeConfigImportComponent,
+    KubeConfigTableSelectComponent,
+    KubeConfigTableUserSelectComponent,
+    KubeConfigTableImportStatusComponent,
+    KubeConfigTableSubTypeSelectComponent,
+    KubeConfigTableName,
+    KubeConfigTableCertComponent
   ],
   providers: [
     BaseKubeGuid,
@@ -45,6 +76,13 @@ import { KubernetesEndpointService } from './services/kubernetes-endpoint.servic
     KubernetesAWSAuthFormComponent,
     KubernetesConfigAuthFormComponent,
     KubernetesGKEAuthFormComponent,
+    KubeConfigRegistrationComponent,
+    KubeConfigTableSelectComponent,
+    KubeConfigTableUserSelectComponent,
+    KubeConfigTableImportStatusComponent,
+    KubeConfigTableSubTypeSelectComponent,
+    KubeConfigTableName,
+    KubeConfigTableCertComponent
   ]
 })
 export class KubernetesSetupModule {

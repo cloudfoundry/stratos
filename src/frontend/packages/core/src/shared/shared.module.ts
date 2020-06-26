@@ -47,6 +47,7 @@ import { MetaCardItemComponent } from './components/list/list-cards/meta-card/me
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { TableCellEditComponent } from './components/list/list-table/table-cell-edit/table-cell-edit.component';
 import {
   TableCellRequestMonitorIconComponent,
 } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
@@ -310,7 +311,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     SidepanelPreviewComponent,
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,
-    MaxListMessageComponent
+    MaxListMessageComponent,
+    TableCellEditComponent
   ],
   entryComponents: [
     DialogConfirmComponent,

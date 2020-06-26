@@ -1,8 +1,7 @@
-import { DataSource } from '@angular/cdk/table';
 import { Component, Input, OnInit } from '@angular/core';
 import { schema } from 'normalizr';
 import { never as observableNever, Observable, of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
@@ -26,7 +25,7 @@ import { ITableColumn } from '../list/list-table/table.types';
 export class AppActionMonitorComponent<T> implements OnInit {
 
   @Input()
-  private data$: Observable<Array<T>> = observableNever();
+  public data$: Observable<Array<T>> = observableNever();
 
   @Input()
   public entityKey: string;
@@ -58,7 +57,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
   @Input()
   public columns: ITableColumn<T>[] = [];
 
-  public dataSource: DataSource<T>;
+  public dataSource: ITableListDataSource<T>;
 
   public allColumns: ITableColumn<T>[] = [];
 
@@ -82,9 +81,16 @@ export class AppActionMonitorComponent<T> implements OnInit {
       cellFlex: '0 0 24px'
     };
 
+    // Some obs will only ever emit once, once consumed in template this meant table never received emitted data
+    // so wrap in publish replay
+    const replayData = this.data$.pipe(
+      publishReplay(1),
+      refCount()
+    )
+
     this.allColumns = [...this.columns, monitorColumn];
     this.dataSource = {
-      connect: () => this.data$,
+      connect: () => replayData,
       disconnect: () => { },
       trackBy: (index, item) => {
         const fn = monitorColumn.cellConfig(item).getId;
@@ -117,7 +123,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
           })
         );
       }
-    } as ITableListDataSource<T>;
+    };
   }
 
 

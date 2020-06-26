@@ -1,8 +1,8 @@
 import { compose } from '@ngrx/store';
 
+import { GeneralEntityAppState, IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState } from '../app-state';
 import { EntityCatalogHelpers } from '../entity-catalog/entity-catalog.helper';
 import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { GeneralEntityAppState, IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState } from '../app-state';
 import { ActionState, RequestInfoState, UpdatingSection } from '../reducers/api-request-reducer/types';
 import { APIResource } from '../types/api.types';
 
@@ -31,7 +31,7 @@ export const getEntityUpdateSections = (
 export const getUpdateSectionById = (guid: string) => (
   updating
 ): ActionState => {
-  return updating[guid];
+  return updating ? updating[guid] : null;
 };
 
 export function selectUpdateInfo(

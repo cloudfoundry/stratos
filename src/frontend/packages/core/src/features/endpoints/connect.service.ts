@@ -201,6 +201,25 @@ export class ConnectEndpointService {
     );
   }
 
+  public getConnectingObservable() {
+    return this.isBusy$.pipe(
+      pairwise(),
+      filter(([oldBusy, newBusy]) => {
+        return !(oldBusy === true && newBusy === false);
+      }),
+      withLatestFrom(this.update$),
+      map(([, updateSection]) => ({
+        ...updateSection,
+        completed: !updateSection.busy,
+      })),
+      startWith({
+        busy: true,
+        completed: false,
+        error: false
+      })
+    );
+  }
+
   public destroy() {
     safeUnsubscribe(...this.subs);
   }

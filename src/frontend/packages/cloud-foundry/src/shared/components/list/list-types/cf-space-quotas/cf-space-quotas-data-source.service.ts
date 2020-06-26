@@ -50,7 +50,7 @@ export class CfOrgSpaceQuotasDataSourceService extends ListDataSource<APIResourc
         map(requestInfo => ({
           deleting: requestInfo.deleting.busy,
           error: requestInfo.deleting.error,
-          message: requestInfo.deleting.error ? `Failed to delete space quota: ${requestInfo.message}` : null
+          message: requestInfo.deleting.error ? `Failed to delete space quota: ${requestInfo.deleting.message}` : null
         }))
       );
     };
