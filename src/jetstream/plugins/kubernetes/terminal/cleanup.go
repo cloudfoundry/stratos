@@ -22,6 +22,8 @@ func (k *KubeTerminal) cleanup() {
 	// Use a random initial wait before cleaning up
 	// If we had more than one backend, this helps to ensure they are not all trying to cleanup at the same time
 	wait := rand.Intn(30)
+	log.Debug("Kubernetes Terminal cleanup will start in %d minutes", wait)
+
 	for {
 		time.Sleep(time.Duration(wait) * time.Minute)
 		log.Debug("Cleaning up stale Kubernetes Terminal pods and secrets ...")
@@ -35,7 +37,7 @@ func (k *KubeTerminal) cleanup() {
 			pods, err := podClient.List(options)
 			if err == nil {
 				for _, pod := range pods.Items {
-					if sessionID, ok := pod.Annotations["stratos-session"]; ok {
+					if sessionID, ok := pod.Annotations[stratosSessionAnnotation]; ok {
 						i, err := strconv.Atoi(sessionID)
 						if err == nil {
 							isValid, err := k.PortalProxy.GetSessionDataStore().IsValidSession(i)
@@ -55,7 +57,7 @@ func (k *KubeTerminal) cleanup() {
 			secrets, err := secretClient.List(options)
 			if err == nil {
 				for _, secret := range secrets.Items {
-					if sessionID, ok := secret.Annotations["stratos-session"]; ok {
+					if sessionID, ok := secret.Annotations[stratosSessionAnnotation]; ok {
 						i, err := strconv.Atoi(sessionID)
 						if err == nil {
 							isValid, err := k.PortalProxy.GetSessionDataStore().IsValidSession(i)
@@ -67,13 +69,13 @@ func (k *KubeTerminal) cleanup() {
 					}
 				}
 			} else {
-				log.Debug("Kube Terminal Cleanup: Could not get secrets")
-				log.Debug(err)
+				log.Warn("Kube Terminal Cleanup: Could not get secrets")
+				log.Warn(err)
 			}
 
 		} else {
-			log.Debug("Kube Terminal Cleanup: Could not get clients")
-			log.Debug(err)
+			log.Warn("Kube Terminal Cleanup: Could not get clients")
+			log.Warn(err)
 		}
 
 		wait = waitPeriod

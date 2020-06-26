@@ -26,7 +26,6 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-
 // KeyCode - JSON object that is passed from the front-end to notify of a key press or a term resize
 type KeyCode struct {
 	Key  string `json:"key"`
@@ -103,11 +102,9 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	// API Endpoint to SSH/exec into a container
 	target := fmt.Sprintf("%s/api/v1/namespaces/%s/pods/%s/exec?command=/bin/bash&stdin=true&stderr=true&stdout=true&tty=true", k.APIServer, k.Namespace, podData.PodName)
 
-	// This dialer does not use the kubeHttpClient  - is it unused?
 	dialer := &websocket.Dialer{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
-			//Certificates:       []tls.Certificate{cert},
 		},
 	}
 
