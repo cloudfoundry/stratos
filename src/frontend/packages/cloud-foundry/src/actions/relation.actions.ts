@@ -2,7 +2,7 @@ import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { RequestActionEntity, RequestEntityLocation } from '../../../store/src/types/request.types';
+import { RequestActionEntity } from '../../../store/src/types/request.types';
 import { EntityTreeRelation } from '../entity-relations/entity-relation-tree';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
@@ -95,8 +95,6 @@ export class FetchRelationSingleAction extends FetchRelationAction {
       populateMissing,
       url,
     );
-    this.entityLocation = RequestEntityLocation.OBJECT;
     this.entity = child.entity;
   }
-  entityLocation: RequestEntityLocation;
 }

@@ -17,11 +17,7 @@ import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../.
 import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../../../store/src/types/api.types';
 import { isPaginatedAction, PaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
-import {
-  EntityRequestAction,
-  RequestEntityLocation,
-  WrapperRequestActionSuccess,
-} from '../../../store/src/types/request.types';
+import { EntityRequestAction, WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
 import { FetchRelationAction, FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { validationPostProcessor } from './entity-relations-post-processor';
@@ -341,7 +337,6 @@ function associateChildWithParent(
         const parentAction: EntityRequestAction = {
           endpointGuid: action.endpointGuid,
           entity: catalogEntity.getSchema(action.parentEntityConfig.schemaKey),
-          entityLocation: RequestEntityLocation.OBJECT,
           guid: action.parentGuid,
           entityType: action.parentEntityConfig.entityType,
           endpointType: action.parentEntityConfig.endpointType,
