@@ -1,6 +1,12 @@
 @mixin stratos-title-component-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
+  $show-title-text: map-get($app-theme, stratos-title-show-text);
   .stratos-title {
     color: mat-color($primary);
+    @if $show-title-text {
+      .stratos-title__header {
+        display: initial;
+      }
+    }
   }
 }

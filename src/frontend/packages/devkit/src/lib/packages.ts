@@ -61,7 +61,11 @@ export interface AssetMetadata {
 }
 
 // Helpers for getting list of dirs in a dir
-const isDirectory = source => fs.lstatSync(source).isDirectory();
+const isDirectory = source => {
+  const realPath = fs.realpathSync(source);
+  const stats = fs.lstatSync(realPath);
+  return stats.isDirectory();
+}
 const getDirectories = source =>
   fs.readdirSync(source).map(name => path.join(source, name)).filter(isDirectory);
 
