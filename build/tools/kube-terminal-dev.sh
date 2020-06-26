@@ -22,23 +22,26 @@ sed -i.bak '/\s*app\.kubernetes\.io\/version/d' $TEMPFILE
 sed -i.bak '/\s*app\.kubernetes\.io\/instance/d' $TEMPFILE
 sed -i.bak '/\s*{{-/d' $TEMPFILE
 
-kubectl apply -f $TEMPFILE
+# Create a namespace
+NS="stratos-dev"
+kubectl get ns $NS > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  kubectl create ns $NS
+fi
+
+kubectl apply -n $NS -f $TEMPFILE
+USER=stratos-dev-admin-user
+USER=stratos
 
 # Service account should be created - now need to get token
-SECRET=$(kubectl get sa stratos -o json | jq -r '.secrets[0].name')
-TOKEN=$(kubectl get secret $SECRET -o json | jq -r '.data.token')
+SECRET=$(kubectl get -n $NS sa $USER -o json | jq -r '.secrets[0].name')
+TOKEN=$(kubectl get -n $NS secret $SECRET -o json | jq -r '.data.token')
 echo "Token secret: $SECRET"
+TOKEN=$(echo $TOKEN | base64 -d -)
 echo "Token         $TOKEN"
 
 rm -f $TEMPFILE
 rm -f $TEMPFILE.bak
-
-# Create a namespace
-NS="stratos-dev"
-kubectl get ns $NS > /dev/null
-if [ $? -ne 0 ]; then
-  kubectl create ns $NS
-fi
 
 CFG=${STRATOS_DIR}/src/jetstream/config.properties
 touch $CFG
