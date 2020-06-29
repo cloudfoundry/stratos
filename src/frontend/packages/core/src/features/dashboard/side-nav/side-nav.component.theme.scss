@@ -17,7 +17,7 @@
 
   .side-nav {
     &__nav-toggle {
-      color: mat-color($side-nav-colors, text);
+      color: $side-nav-top-foreground;
     }
     &__inner {
       background-color: mat-color($side-nav-colors, background);
@@ -28,7 +28,7 @@
     }
     &__item {
       color: mat-color($side-nav-colors, text);
-      transition: color ease .3s;
+      transition: none;
       &:hover {
         background-color: $side-nav-hover-color;
         color: mat-color($side-nav-colors, hover-text);
@@ -40,7 +40,7 @@
       }
     }
     &__items {
-      color: map-get($app-theme, app-background-text-color);
+      color: mat-color($side-nav-colors, text);
     }
     &__logo-text {
       color: mat-contrast($primary, 500);

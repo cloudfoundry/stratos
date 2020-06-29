@@ -1,15 +1,5 @@
 import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
-import {
-  delay,
-  distinctUntilChanged,
-  filter,
-  map,
-  pairwise,
-  startWith,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { AuthParams, ConnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
@@ -158,25 +148,6 @@ export class ConnectEndpointService {
         success: !updateSection.error,
         errorMessage: updateSection.message
       })),
-    );
-  }
-
-  public getConnectingObservable() {
-    return this.isBusy$.pipe(
-      pairwise(),
-      filter(([oldBusy, newBusy]) => {
-        return !(oldBusy === true && newBusy === false);
-      }),
-      withLatestFrom(this.update$),
-      map(([, updateSection]) => ({
-        ...updateSection,
-        completed: !updateSection.busy,
-      })),
-      startWith({
-        busy: true,
-        completed: false,
-        error: false
-      })
     );
   }
 

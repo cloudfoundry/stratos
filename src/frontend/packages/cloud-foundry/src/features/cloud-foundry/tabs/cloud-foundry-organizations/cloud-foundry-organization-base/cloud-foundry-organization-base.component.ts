@@ -46,12 +46,14 @@ export class CloudFoundryOrganizationBaseComponent {
     {
       link: 'summary',
       label: 'Summary',
-      icon: 'description'
+      icon: 'organization',
+      iconFont: 'stratos-icons'
     },
     {
       link: 'spaces',
       label: 'Spaces',
-      icon: 'language'
+      icon: 'virtual_space',
+      iconFont: 'stratos-icons'
     },
     {
       link: 'users',
@@ -61,12 +63,14 @@ export class CloudFoundryOrganizationBaseComponent {
     {
       link: 'quota',
       label: 'Quota',
-      icon: 'data_usage'
+      icon: 'quota',
+      iconFont: 'stratos-icons'
     },
     {
       link: 'space-quota-definitions',
       label: 'Space Quotas',
-      icon: 'data_usage'
+      icon: 'quota',
+      iconFont: 'stratos-icons'
     },
     {
       link: 'events',

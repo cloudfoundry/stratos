@@ -59,6 +59,7 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
 export class BuildTabComponent implements OnInit {
   public isBusyUpdating$: Observable<{ updating: boolean }>;
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
+
   constructor(
     public applicationService: ApplicationService,
     private scmService: GitSCMService,

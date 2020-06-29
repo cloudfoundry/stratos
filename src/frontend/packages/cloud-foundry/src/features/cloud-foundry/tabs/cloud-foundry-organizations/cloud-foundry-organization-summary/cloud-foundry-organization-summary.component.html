@@ -27,7 +27,7 @@
       <app-tile-group>
         <app-tile>
           <app-card-number-metric
-            link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces" icon="language"
+            link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces" iconFont="stratos-icons" icon="virtual_space"
             label="Spaces" labelSingular="Space" value="{{ (cfOrgService.spaces$ | async)?.length }}">
           </app-card-number-metric>
         </app-tile>
@@ -36,12 +36,12 @@
             value="{{ cfOrgService.appCount$ | async }}"></app-card-number-metric>
         </app-tile>
         <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
-          <app-card-number-metric icon="content_copy" label="App Instances"
+          <app-card-number-metric icon="application_instance" iconFont="stratos-icons" label="App Instances"
             value="{{ (cfOrgService.appInstances$ | async) }}"
             limit="{{ (cfOrgService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
         </app-tile>
         <app-tile>
-          <app-card-number-metric iconFont="stratos-icons" icon="network_route" label="Routes"
+          <app-card-number-metric iconFont="stratos-icons" icon="route" label="Routes"
             value="{{ (cfOrgService.routesCount$ | async) }}"
             limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
         </app-tile>
@@ -58,12 +58,12 @@
             limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_private_domains}}"></app-card-number-metric>
         </app-tile>
         <app-tile>
-          <app-card-number-metric iconFont="stratos-icons" icon="service" label="Service Instances"
+          <app-card-number-metric iconFont="stratos-icons" icon="service_instance" label="Service Instances"
             value="{{ (cfOrgService.serviceInstancesCount$ | async) }}"
             limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
         </app-tile>
         <app-tile *ngIf="(cfOrgService.userProvidedServiceInstancesCount$ | async) > 0">
-          <app-card-number-metric iconFont="stratos-icons" icon="service" label="User Service Instances"
+          <app-card-number-metric iconFont="stratos-icons" icon="service_instance" label="User Service Instances"
             value="{{ (cfOrgService.userProvidedServiceInstancesCount$ | async) }}"></app-card-number-metric>
         </app-tile>
         <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">

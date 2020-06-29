@@ -5,18 +5,18 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuardService } from './core/auth-guard.service';
 import { CoreModule } from './core/core.module';
 import { EndpointsService } from './core/endpoints.service';
+import { NotSetupGuardService } from './core/not-setup-guard.service';
 import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { CustomRoutingImportModule } from './custom-import.module';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 import { HomePageComponent } from './features/home/home/home-page.component';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
 import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain-mismatch.component';
+import { LocalAccountWizardComponent } from './features/setup/local-account-wizard/local-account-wizard.component';
+import { SetupWelcomeComponent } from './features/setup/setup-welcome/setup-welcome.component';
 import { ConsoleUaaWizardComponent } from './features/setup/uaa-wizard/console-uaa-wizard.component';
 import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page.component';
 import { SharedModule } from './shared/shared.module';
-import { NotSetupGuardService } from './core/not-setup-guard.service';
-import { SetupWelcomeComponent } from './features/setup/setup-welcome/setup-welcome.component';
-import { LocalAccountWizardComponent } from './features/setup/local-account-wizard/local-account-wizard.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -76,7 +76,8 @@ const appRoutes: Routes = [
         data: {
           stratosNavigation: {
             label: 'Endpoints',
-            matIcon: 'settings_ethernet',
+            matIcon: 'endpoints',
+            matIconFont: 'stratos-icons',
             position: 100,
             requiresPersistence: true
           }

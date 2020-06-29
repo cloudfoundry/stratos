@@ -9,11 +9,7 @@ import { InternalAppState, IRequestTypeState } from '../../../store/src/app-stat
 import { EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES } from '../../../store/src/entity-catalog-test.module';
 import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
-import {
-  EntityRequestAction,
-  RequestEntityLocation,
-  WrapperRequestActionSuccess,
-} from '../../../store/src/types/request.types';
+import { EntityRequestAction, WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
 import {
   entityRelationMissingQuotaGuid,
   entityRelationMissingQuotaUrl,
@@ -444,7 +440,6 @@ describe('Entity Relations - validate -', () => {
       const associateAPIAction: EntityRequestAction = {
         endpointGuid: getOrgAction.endpointGuid,
         entity: getOrgAction.entity[0],
-        entityLocation: RequestEntityLocation.OBJECT,
         guid: orgGuid,
         entityType: organizationEntityType,
         type: '[Entity] Associate with parent',

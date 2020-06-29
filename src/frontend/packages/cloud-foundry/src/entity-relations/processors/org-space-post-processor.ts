@@ -8,7 +8,7 @@ import { deepMergeState, mergeEntity } from '../../../../store/src/helpers/reduc
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
-import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
+import { WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
 import { GetOrganization } from '../../actions/organization.actions';
 import { GetSpace } from '../../actions/space.actions';
 import { getCFEntityKey } from '../../cf-entity-helpers';
@@ -105,7 +105,6 @@ export function orgSpacePostProcess(
       actions: [],
       endpointGuid: action.endpointGuid,
       entity: userCatalogEntity.getSchema(),
-      entityLocation: RequestEntityLocation.ARRAY,
       entityType: userCatalogEntity.definition.type,
       endpointType: CF_ENDPOINT_TYPE,
       type: '[Entity] Post-process Org/Space Users',
