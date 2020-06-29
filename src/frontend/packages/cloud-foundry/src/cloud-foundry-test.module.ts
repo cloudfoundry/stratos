@@ -3,11 +3,11 @@ import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 
 import { generateASEntities } from '../../cf-autoscaler/src/store/autoscaler-entity-generator';
-import { generateStratosEntities } from '../../core/src/base-entity-types';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../core/src/core/github.helpers';
 import { LoggerService } from '../../core/src/core/logger.service';
 import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog, TestEntityCatalog } from '../../store/src/entity-catalog/entity-catalog';
+import { generateStratosEntities } from '../../store/src/stratos-entity-generator';
 import { testSCFEndpointGuid } from '../../store/testing/public-api';
 import { BaseCfOrgSpaceRouteMock } from '../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateCFEntities } from './cf-entity-generator';

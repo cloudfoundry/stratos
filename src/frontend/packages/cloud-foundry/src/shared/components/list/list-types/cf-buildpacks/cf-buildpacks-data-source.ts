@@ -9,7 +9,7 @@ import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { endpointEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { getRowMetadata } from '../../../../../../../store/src/public-api';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
@@ -17,7 +17,7 @@ import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
 export class CfBuildpacksDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
+    const paginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
     const action = cfEntityCatalog.buildPack.actions.getMultiple(cfGuid, paginationKey)
     super({
       store,

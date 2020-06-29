@@ -1,8 +1,8 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import { endpointEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
@@ -51,7 +51,7 @@ export class GetAllCfUsersAsAdmin extends CFStartAction implements PaginatedActi
     paginationKey?: string
   ) {
     super();
-    this.paginationKey = paginationKey || createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
+    this.paginationKey = paginationKey || createEntityRelationPaginationKey(endpointEntityType, endpointGuid);
     this.options = new HttpRequest(
       'GET',
       'users'

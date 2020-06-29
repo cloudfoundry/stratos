@@ -314,11 +314,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MaxListMessageComponent,
     TableCellEditComponent
   ],
-  entryComponents: [
-    DialogConfirmComponent,
-    SnackBarReturnComponent,
-    MarkdownPreviewComponent,
-  ],
   providers: [
     ListConfig,
     EndpointListHelper,

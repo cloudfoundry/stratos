@@ -1,7 +1,7 @@
 import { compose } from '@ngrx/store';
 
-import { PermissionValues } from '../../../../core/src/core/permissions/current-user-permissions.config';
 import {
+  PermissionValues,
   selectCurrentUserGlobalHasScopes,
   selectCurrentUserRolesState,
 } from '../../../../store/src/selectors/current-user-role.selectors';

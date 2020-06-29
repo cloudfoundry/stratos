@@ -2,10 +2,9 @@ import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { GetAllEndpoints } from '../../../../../../../../store/src/actions/endpoint.actions';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
+import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
+import { stratosEntityCatalog } from '../../../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
 import { TableCellCustom } from '../../../list.types';
 import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoint-name.component';
 
@@ -17,15 +16,11 @@ import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoi
 export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
   public endpointAddress$: Observable<any>;
 
-  constructor(private entityServiceFactory: EntityServiceFactory) {
-    super();
-  }
-
   @Input('row')
   set row(row: EndpointModel | RowWithEndpointId) {
     /* tslint:disable-next-line:no-string-literal */
     const id = row['endpointId'] || row['guid'];
-    this.endpointAddress$ = this.entityServiceFactory.create(id, new GetAllEndpoints()).waitForEntity$.pipe(
+    this.endpointAddress$ = stratosEntityCatalog.endpoint.store.getEntityService(id).waitForEntity$.pipe(
       map(data => data.entity),
       map((data: any) => getFullEndpointApiUrl(data))
     );

@@ -1,20 +1,21 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
-import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, tap } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { AppMetadataTypes } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { UpdateExistingApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { getFullEndpointApiUrl } from '../../../../../../../../core/src/features/endpoints/endpoint-helpers';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { ENTITY_SERVICE } from '../../../../../../../../core/src/shared/entity.tokens';
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
-import { EntityService } from '../../../../../../../../store/src/entity-service';
+import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { IAppSummary } from '../../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
@@ -62,11 +63,10 @@ export class BuildTabComponent implements OnInit {
     public applicationService: ApplicationService,
     private scmService: GitSCMService,
     private store: Store<CFAppState>,
-    @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource>,
     private route: ActivatedRoute,
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
-
+    private cups: CurrentUserPermissionsService
   ) { }
 
   cardTwoFetching$: Observable<boolean>;
@@ -88,7 +88,7 @@ export class BuildTabComponent implements OnInit {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct());
 
-    this.isBusyUpdating$ = this.entityService.updatingSection$.pipe(
+    this.isBusyUpdating$ = this.applicationService.entityService.updatingSection$.pipe(
       map(updatingSection => {
         const updating = this.updatingSectionBusy(updatingSection.restaging) ||
           this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
@@ -108,8 +108,17 @@ export class BuildTabComponent implements OnInit {
       })
     );
 
-    this.deploySource$ = this.applicationService.applicationStratProject$.pipe(
-      combineLatest(this.applicationService.application$)
+    const canSeeEnvVars$ = this.applicationService.appSpace$.pipe(
+      switchMap(space => this.cups.can(
+        CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+        this.applicationService.cfGuid,
+        space.metadata.guid)
+      )
+    )
+
+    const deploySource$ = observableCombineLatest(
+      this.applicationService.applicationStratProject$,
+      this.applicationService.application$
     ).pipe(
       map(([project, app]) => {
         if (!!project) {
@@ -149,6 +158,10 @@ export class BuildTabComponent implements OnInit {
         }
       }),
       startWith({ type: 'loading' })
+    )
+
+    this.deploySource$ = canSeeEnvVars$.pipe(
+      switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of(null)),
     );
   }
 
@@ -249,7 +262,7 @@ export class BuildTabComponent implements OnInit {
   }
 
   pollEntityService(state, stateString): Observable<any> {
-    return this.entityService
+    return this.applicationService.entityService
       .poll(1000, state).pipe(
         delay(1),
         filter(({ resource }) => {

@@ -1,0 +1,12 @@
+// Theming for the copmponents in the Cloud Foundry package
+
+@import '../src/features/applications/application-wall/application-wall.component.theme';
+@import '../src/shared/components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component.theme';
+
+@mixin apply-theme-stratos-cloud-foundry($stratos-theme) {
+
+  $theme: map-get($stratos-theme, theme);
+  $app-theme: map-get($stratos-theme, app-theme);
+
+  @include cf-security-group-theme($theme);
+}

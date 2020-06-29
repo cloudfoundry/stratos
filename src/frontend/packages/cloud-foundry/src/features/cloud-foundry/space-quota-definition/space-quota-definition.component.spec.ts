@@ -3,10 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
 
-import { endpointEntitySchema } from '../../../../../core/src/base-entity-schemas';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
 import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
+import { endpointEntityType, stratosEntityFactory } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import { WrapperRequestActionSuccess } from '../../../../../store/src/types/request.types';
 import {
@@ -51,7 +51,7 @@ describe('SpaceQuotaDefinitionComponent', () => {
       .compileComponents();
 
 
-    const stratosEndpointEntityConfig: EntityCatalogEntityConfig = endpointEntitySchema;
+    const stratosEndpointEntityConfig: EntityCatalogEntityConfig = stratosEntityFactory(endpointEntityType);
     const stratosEndpointEntityKey = EntityCatalogHelpers.buildEntityKey(
       stratosEndpointEntityConfig.entityType,
       stratosEndpointEntityConfig.endpointType

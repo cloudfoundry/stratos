@@ -52,7 +52,6 @@ environment.dev.ts
 #v1
 *.iml
 docs/src
-lib
 tools/test-backend/config/mock.config.json
 tools/.coverage-karma/
 dev-certs/*
@@ -81,6 +80,7 @@ deploy/ci/travis/temp/
 deploy/kubernetes/console/imagelist.txt
 
 .dist/
+dist-devkit/
 deploy/uaa/tmp/
 src/backend/*/vendor/
 .v8flags*
@@ -96,8 +96,9 @@ src/jetstream/config.properties
 src/jetstream/db/dbconf.yml
 src/jetstream/plugins/monocular/chart-repo/chartrepo
 
-# Customisations
-
+# Customisations - these can be removed in the future
+# Left in for now to prevent these files being checked-in, if they are still present
+# from a previous checkout
 src/frontend/packages/core/favicon.ico
 src/frontend/packages/core/sass/custom.scss
 src/frontend/packages/core/assets/eula.html
@@ -109,6 +110,9 @@ src/frontend/packages/core/src/custom
 src/frontend/packages/core/assets/custom
 src/frontend/packages/core/sass/custom
 src/frontend/packages/core/src/index.html
+
+# Customisation - generated import module
+src/frontend/packages/core/src/_custom-import.module.ts
 
 # Prebuild package
 

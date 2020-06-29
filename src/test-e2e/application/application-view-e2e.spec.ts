@@ -4,7 +4,7 @@ import { IApp } from '../../frontend/packages/cloud-foundry/src/cf-api.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageEventsTab } from './po/application-page-events.po';
@@ -135,8 +135,7 @@ describe('Application View -', () => {
       });
 
       it('Deployment Info', () => {
-        appSummary.cardDeployInfo.waitForTitle('Deployment Info');
-        expect(appSummary.cardDeployInfo.getContent()).toBe('None');
+        expect(appSummary.cardDeployInfo.isPresent()).toBeFalsy();
       });
     });
 

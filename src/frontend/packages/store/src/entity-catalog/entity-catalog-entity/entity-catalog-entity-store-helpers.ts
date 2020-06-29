@@ -122,6 +122,7 @@ export class EntityCatalogEntityStoreHelpers {
       if (!rAction.guid) {
         throw new Error(`\`${actionKey}\` action for entity \`${rAction.entityType}\` has no guid`);
       }
+
       const entityMonitor = es.getEntityMonitor(
         rAction.guid,
         {
@@ -147,9 +148,9 @@ export class EntityCatalogEntityStoreHelpers {
           schemaKey: '',
           startWithNull: false
         }
-      ): EntityMonitor<Y> =>
-        new EntityMonitor<Y>(EntityCatalogHelpers.GetEntityCatalogHelper().store, entityId, entityKey, getSchema(params.schemaKey), params.startWithNull)
-      ,
+      ): EntityMonitor<Y> => new EntityMonitor<Y>(
+        EntityCatalogHelpers.GetEntityCatalogHelper().store, entityId, entityKey, getSchema(params.schemaKey), params.startWithNull
+      ),
       getEntityService: (
         ...args: Parameters<ABC['get']>
       ): EntityService<Y> => {

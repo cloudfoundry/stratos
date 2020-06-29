@@ -9,7 +9,7 @@ import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/
 import { ActiveRouteCfOrgSpace } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../../../cloud-foundry/src/features/cloud-foundry/cf.helpers';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { IQuotaDefinition } from '../../../cf-api.types';
 
 
@@ -65,7 +65,7 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
     this.spaceQuotaDefinitions$ = cfEntityCatalog.spaceQuota.store.getAllInOrganization.getPaginationService(
       this.orgGuid,
       this.cfGuid,
-      createEntityRelationPaginationKey(endpointSchemaKey, this.cfGuid)
+      createEntityRelationPaginationKey(endpointEntityType, this.cfGuid)
     ).entities$
       .pipe(
         filter(o => !!o),

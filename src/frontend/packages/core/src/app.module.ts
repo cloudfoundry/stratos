@@ -4,40 +4,40 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
 import { DefaultRouterStateSerializer, RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
 import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
 import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry-package.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
-import {
-  UpdateUserFavoriteMetadataAction,
-} from '../../store/src/actions/user-favourites-actions/update-user-favorite-metadata-action';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
-import { endpointSchemaKey } from '../../store/src/helpers/entity-factory';
+import { FavoritesConfigMapper } from '../../store/src/favorite-config-mapper';
+import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../store/src/helpers/stratos-entity-factory';
 import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
 import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
 import { AppStoreModule } from '../../store/src/store.module';
+import { stratosEntityCatalog } from '../../store/src/stratos-entity-catalog';
+import { generateStratosEntities } from '../../store/src/stratos-entity-generator';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../store/src/user-favorite-manager';
 import { TabNavService } from '../tab-nav.service';
 import { XSRFModule } from '../xsrf.module';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
-import { STRATOS_ENDPOINT_TYPE } from './base-entity-schemas';
-import { generateStratosEntities } from './base-entity-types';
 import { CoreModule } from './core/core.module';
 import { CustomizationService } from './core/customizations.types';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
-import { UserFavoriteManager } from './core/user-favorite-manager';
 import { CustomImportModule } from './custom-import.module';
+import { environment } from './environments/environment';
 import { AboutModule } from './features/about/about.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
 import { HomeModule } from './features/home/home.module';
@@ -46,7 +46,6 @@ import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/
 import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
-import { FavoritesConfigMapper } from './shared/components/favorites-meta-card/favorite-config-mapper';
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
 import { SidePanelService } from './shared/services/side-panel.service';
 import { SharedModule } from './shared/shared.module';
@@ -80,6 +79,18 @@ export class CustomRouterStateSerializer
   }
 }
 
+const storeDebugImports = environment.production ? [] : [
+  StoreDevtoolsModule.instrument({
+    maxAge: 100,
+    logOnly: !environment.production
+  })
+];
+
+@NgModule({
+  imports: storeDebugImports
+})
+class AppStoreDebugModule { }
+
 /**
  * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
  */
@@ -94,6 +105,7 @@ export class CustomRouterStateSerializer
     RouteModule,
     CloudFoundryPackageModule,
     AppStoreModule,
+    AppStoreDebugModule,
     BrowserModule,
     SharedModule,
     BrowserAnimationsModule,
@@ -159,7 +171,7 @@ export class AppModule {
           if (!backendErrors.length) {
             return res;
           }
-          const entityConfig = entityCatalog.getEntity(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+          const entityConfig = entityCatalog.getEntity(STRATOS_ENDPOINT_TYPE, endpointEntityType);
           res.push(new GlobalEventData(true, {
             endpoint: selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state),
             count: backendErrors.length
@@ -248,7 +260,7 @@ export class AppModule {
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {
     if (favorite) {
-      const isEndpoint = (favorite.entityType === endpointSchemaKey);
+      const isEndpoint = (favorite.entityType === endpointEntityType);
       // If the favorite is an endpoint ensure we look in the stratosEndpoint part of the store instead of, for example, cfEndpoint
       const entityKey = isEndpoint ? entityCatalog.getEntityKey({
         ...favorite,
@@ -258,10 +270,10 @@ export class AppModule {
       if (entity) {
         const newMetadata = this.favoritesConfigMapper.getEntityMetadata(favorite, entity);
         if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
-          this.store.dispatch(new UpdateUserFavoriteMetadataAction({
+          stratosEntityCatalog.userFavorite.api.updateFavorite({
             ...favorite,
             metadata: newMetadata
-          }));
+          });
         }
       }
     }

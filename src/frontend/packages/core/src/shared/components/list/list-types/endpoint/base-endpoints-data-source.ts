@@ -5,14 +5,14 @@ import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
+import { endpointEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { endpointEntitySchema } from '../../../../../base-entity-schemas';
-import { DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
 import { RowsState } from '../../data-sources-controllers/list-data-source-types';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
@@ -55,7 +55,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
       paginationMonitorFactory,
       entityMonitorFactory,
-      GetAllEndpoints.storeKey,
+      action.paginationKey,
       action,
       EndpointRowStateSetUpManager,
       false
@@ -99,26 +99,26 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     rowsState: Observable<RowsState>,
     destroy: () => void,
     refresh: () => void
-  ) {
+  ): IListDataSourceConfig<EndpointModel, EndpointModel> {
     return {
       store,
       action,
-      schema: endpointEntitySchema,
-      getRowUniqueId: object => object.guid,
+      schema: action.entity[0],
+      getRowUniqueId: (object) => action.entity[0].getId(object),
       getEmptyType: () => ({
         name: '',
         system_shared_token: false,
         metricsAvailable: false,
         sso_allowed: false,
       }),
-      paginationKey: GetAllEndpoints.storeKey,
+      paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [
         {
           type: 'filter',
           field: 'name'
         },
-      ] as DataFunctionDefinition[],
+      ],
       listConfig,
       rowsState,
       destroy,
@@ -130,7 +130,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     rowStateManager: TableRowStateManager,
     store: Store<AppState>
   ) {
-    const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
+    const eventMonitor = internalEventMonitorFactory.getMonitor(endpointEntityType);
     return eventMonitor.hasErroredOverTime().pipe(
       withLatestFrom(store.select(endpointEntitiesSelector)),
       tap(([errored, endpoints]) => Object.keys(errored).forEach(id => {

@@ -3,7 +3,8 @@ import * as moment from 'moment';
 
 import { MetricQueryConfig, MetricsAction } from '../../../../store/src/actions/metrics.actions';
 import { IMetrics } from '../../../../store/src/types/base-metric.types';
-import { ITimeRange, MetricQueryType, StoreMetricTimeRange } from './metrics-range-selector.types';
+import { MetricQueryType } from '../../../../store/src/types/metric.types';
+import { ITimeRange, StoreMetricTimeRange } from './metrics-range-selector.types';
 
 @Injectable()
 export class MetricsRangeSelectorService {

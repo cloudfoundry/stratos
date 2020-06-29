@@ -1,9 +1,8 @@
 import { compose } from '@ngrx/store';
 
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { InternalAppState, IRequestEntityTypeState } from '../app-state';
 import { EntityCatalogHelpers } from '../entity-catalog/entity-catalog.helper';
-import { endpointSchemaKey } from '../helpers/entity-factory';
+import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../helpers/stratos-entity-factory';
 import { EndpointModel, EndpointState } from '../types/endpoint.types';
 import { selectEntities, selectEntity, selectRequestInfo } from './api.selectors';
 
@@ -12,7 +11,7 @@ export const endpointStatusSelector = (state: InternalAppState): EndpointState =
 
 // All endpoint request data
 // Note - Replacing `buildEntityKey` with `entityCatalog.getEntityKey` will cause circular dependency
-const endpointEntityKey = EntityCatalogHelpers.buildEntityKey(endpointSchemaKey, STRATOS_ENDPOINT_TYPE);
+const endpointEntityKey = EntityCatalogHelpers.buildEntityKey(endpointEntityType, STRATOS_ENDPOINT_TYPE);
 export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointEntityKey);
 
 export const endpointOfType = (type: string) =>

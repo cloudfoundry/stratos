@@ -1,4 +1,4 @@
-import { ElementArrayFinder, ElementFinder, promise, element, by } from 'protractor';
+import { by, element, ElementArrayFinder, ElementFinder, promise } from 'protractor';
 
 import { ListComponent } from '../po/list.po';
 import { MetaCard, MetaCardTitleType } from '../po/meta-card.po';
@@ -42,5 +42,13 @@ export class ServicesWallPage extends Page {
       planName: items[2].value,
       applicationsAttached: items[3].value,
     }));
+  }
+
+  isActivePage() {
+    return super.isActivePage(true);
+  }
+
+  waitForPage() {
+    return super.waitForPage(undefined, true);
   }
 }

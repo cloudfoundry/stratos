@@ -3,10 +3,8 @@ import * as moment from 'moment';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { EndpointHealthCheck } from '../../core/endpoints-health-checks';
-import { metricEntityType } from '../../core/src/base-entity-schemas';
+import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
-import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
@@ -14,6 +12,7 @@ import {
   StratosCatalogEntity,
 } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
+  EndpointHealthCheck,
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../store/src/entity-catalog/entity-catalog.types';
@@ -22,6 +21,7 @@ import {
 } from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { ActionDispatcher, JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
+import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { selectSessionData } from '../../store/src/reducers/auth.reducer';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
@@ -409,7 +409,9 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
   const definition: IStratosEntityDefinition = {
     type: quotaDefinitionEntityType,
     schema: cfEntityFactory(quotaDefinitionEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Organization Quota',
+    labelPlural: 'Organization Quotas',
   };
   cfEntityCatalog.quotaDefinition = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -451,6 +453,8 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
         }
       };
     },
+    label: 'App Env Var',
+    labelPlural: 'App Env Vars',
   };
   cfEntityCatalog.appEnvVar = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -478,6 +482,8 @@ function generateCFAppSummaryEntity(endpointDefinition: StratosEndpointExtension
     type: appSummaryEntityType,
     schema: cfEntityFactory(appSummaryEntityType),
     endpoint: endpointDefinition,
+    label: 'App Summary',
+    labelPlural: 'App Summaries',
   };
   cfEntityCatalog.appSummary = new StratosCatalogEntity<IBasicCFMetaData, IAppSummary, AppSummaryActionBuilders>(definition, {
     dataReducers: [
@@ -500,7 +506,9 @@ function generateCFSpaceQuotaEntity(endpointDefinition: StratosEndpointExtension
   const definition: IStratosEntityDefinition = {
     type: spaceQuotaEntityType,
     schema: cfEntityFactory(spaceQuotaEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Space Quota',
+    labelPlural: 'Space Quotas',
   };
   cfEntityCatalog.spaceQuota = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -518,7 +526,9 @@ function generateCFPrivateDomainEntity(endpointDefinition: StratosEndpointExtens
   const definition: IStratosEntityDefinition = {
     type: privateDomainsEntityType,
     schema: cfEntityFactory(privateDomainsEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Private Domain',
+    labelPlural: 'Private Domains',
   };
   cfEntityCatalog.privateDomain = new StratosCatalogEntity<IBasicCFMetaData, APIResource<IPrivateDomain>>(definition, {
     dataReducers: [

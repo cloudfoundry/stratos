@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { filter, map, pairwise } from 'rxjs/operators';
 
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
@@ -19,8 +19,23 @@ export const enum CreateServiceFormMode {
   BindServiceInstance = 'bind-service-instance',
 }
 
+/**
+ * Where should the user be taken on cancel (and success). If not supplied will fall back on previous location and then deduced from
+ * params
+ */
+export const CSI_CANCEL_URL = 'cancel'
+
+/**
+ * Used when `CSI_CANCEL_URL` is not supplied
+ */
 export const CANCEL_SPACE_ID_PARAM = 'space-guid';
+/**
+ * Used when `CSI_CANCEL_URL` is not supplied
+ */
 export const CANCEL_ORG_ID_PARAM = 'org-guid';
+/**
+ * Used when `CSI_CANCEL_URL` is not supplied
+ */
 export const CANCEL_USER_PROVIDED = 'up';
 
 interface ViewDetail {
@@ -44,12 +59,16 @@ export class CsiModeService {
 
   private mode: string;
   public viewDetail: ViewDetail;
+  /**
+   * Where should the user be taken on cancel (and success). Taken from url param, previous location or deduced
+   */
   public cancelUrl: string;
   // This property is only used when launching the Create Service Instance Wizard from the Marketplace
   spaceScopedDetails: SpaceScopedService = { isSpaceScoped: false };
 
   constructor(
     private activatedRoute: ActivatedRoute,
+    router: Router
   ) {
     const serviceId = getIdFromRoute(activatedRoute, 'serviceId');
     const serviceInstanceId = getIdFromRoute(activatedRoute, 'serviceInstanceId');
@@ -118,6 +137,7 @@ export class CsiModeService {
         `/cloud-foundry/${cfId}/organizations/${orgGuid}/spaces/${spaceGuid}/${isUserProvided ? 'user-service-instances' : 'service-instances'}`;
     }
 
+    this.updateCancelUrl(this.activatedRoute, router);
   }
 
   getViewDetail = () => this.viewDetail;
@@ -146,6 +166,35 @@ export class CsiModeService {
         return { success: true };
       })
     );
+  }
+
+  private updateCancelUrl(
+    activatedRoute: ActivatedRoute,
+    router: Router
+  ) {
+    // cancelUrl determines where we go on cancel AND success
+    const cancelUrl = activatedRoute.snapshot.queryParamMap.get(CSI_CANCEL_URL);
+    if (cancelUrl) {
+      // Override cancelUrl with what's been passed in (probably came from the service selection pre-step)
+      this.cancelUrl = cancelUrl;
+    } else {
+      // There's some holes with the way cancelUrl in ctor is calculated
+      // - marketplace/service/instances list --> cancel goes to space service instance list
+      // - marketplace/service create instance --> cancel goes to marketplace/service/instance regardless of starting tab
+      // - .. others??
+      // For simplicity always go back to the previous location
+      // - good catch all
+      // - doesn't work that well for marketplace/service create instance --> success (should go to marketplace/service/instance)
+      // - if user has refreshed on stepper (previous url was login) use the old cancelUrl best-guess value
+      const currentNavigation = router.getCurrentNavigation();
+      if (currentNavigation &&
+        currentNavigation.previousNavigation &&
+        currentNavigation.previousNavigation.finalUrl &&
+        currentNavigation.previousNavigation.finalUrl.toString() !== '/login'
+      ) {
+        this.cancelUrl = currentNavigation.previousNavigation.finalUrl.toString();
+      }
+    }
   }
 
 }

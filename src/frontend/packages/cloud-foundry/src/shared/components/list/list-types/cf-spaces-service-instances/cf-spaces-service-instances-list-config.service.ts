@@ -30,7 +30,13 @@ export class CfSpacesServiceInstancesListConfigService extends CfServiceInstance
     datePipe: DatePipe,
     currentUserPermissionsService: CurrentUserPermissionsService,
     serviceActionHelperService: ServiceActionHelperService) {
-    super(store, datePipe, currentUserPermissionsService, serviceActionHelperService);
+    super(
+      store,
+      datePipe,
+      currentUserPermissionsService,
+      serviceActionHelperService,
+      `/cloud-foundry/${cfSpaceService.cfGuid}/organizations/${cfSpaceService.orgGuid}/spaces/${cfSpaceService.spaceGuid}/service-instances`
+    );
     this.dataSource = new CfSpacesServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
     this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {
       breadcrumbs: 'space-services'

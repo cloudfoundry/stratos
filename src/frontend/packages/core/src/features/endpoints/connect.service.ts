@@ -1,4 +1,3 @@
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
 import {
   delay,
@@ -13,18 +12,12 @@ import {
 } from 'rxjs/operators';
 
 import { AuthParams, ConnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
-import { GetSystemInfo } from '../../../../store/src/actions/system.actions';
-import { EndpointOnlyAppState } from '../../../../store/src/app-state';
-import { EndpointsEffect } from '../../../../store/src/effects/endpoint.effects';
-import { SystemEffects } from '../../../../store/src/effects/system.effects';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { EndpointType } from '../../../../store/src/extension-types';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
+import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { STRATOS_ENDPOINT_TYPE } from '../../base-entity-schemas';
 import { EndpointsService } from '../../core/endpoints.service';
-import { EndpointType } from '../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../core/utils.service';
 
 export interface ConnectEndpointConfig {
@@ -65,15 +58,12 @@ export class ConnectEndpointService {
   private hasAttemptedConnect: boolean;
   private pData: ConnectEndpointData;
 
-  private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
-
   // We need a delay to ensure the BE has finished registering the endpoint.
   // If we don't do this and if we're quick enough, we can navigate to the application page
   // and end up with an empty list where we should have results.
   private connectDelay = 1000;
 
   constructor(
-    private store: Store<EndpointOnlyAppState>,
     private endpointsService: EndpointsService,
     public config: ConnectEndpointConfig,
   ) {
@@ -87,33 +77,29 @@ export class ConnectEndpointService {
     ).subscribe(([oldVal, newVal]) => {
       if (!newVal.error && (oldVal.busy && !newVal.busy)) {
         // Has finished fetching
-        this.store.dispatch(new GetSystemInfo());
+        stratosEntityCatalog.endpoint.api.get(this.config.guid);
       }
     }));
 
     this.subs.push(this.connected$.pipe(
-      filter(([connected]) => connected),
+      filter(([isConnected]) => isConnected),
       delay(this.connectDelay),
       tap(() => this.hasConnected.next(true)),
-      distinctUntilChanged(([connected], [oldConnected]) => connected && oldConnected),
-    ).subscribe(([connected, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
+      distinctUntilChanged(([isConnected], [oldIsConnected]) => isConnected && oldIsConnected),
+    ).subscribe(([, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
     );
   }
 
   private setupObservables() {
-    this.update$ = this.store.select(
-      this.getUpdateSelector()
-    ).pipe(filter(update => !!update));
+    this.update$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(this.config.guid).getUpdatingSection(ConnectEndpoint.UpdatingKey)
+      .pipe(filter(update => !!update));
 
-    this.fetchingInfo$ = this.store.select(
-      this.getRequestSelector()
-    ).pipe(
+    this.fetchingInfo$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(this.config.guid).entityRequest$.pipe(
       filter(request => !!request),
-      map(request => request.fetching));
+      map(request => request.fetching)
+    );
 
-    this.connected$ = this.store.select(
-      this.getEntitySelector()
-    ).pipe(
+    this.connected$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(this.config.guid).entity$.pipe(
       map(endpoint => {
         const isConnected = !!(endpoint && endpoint.api_endpoint && endpoint.user);
         return [isConnected, endpoint] as [boolean, EndpointModel];
@@ -149,28 +135,6 @@ export class ConnectEndpointService {
     );
   }
 
-  private getUpdateSelector() {
-    return selectUpdateInfo(
-      this.endpointEntityKey,
-      this.config.guid,
-      EndpointsEffect.connectingKey
-    );
-  }
-
-  private getRequestSelector() {
-    return selectRequestInfo(
-      this.endpointEntityKey,
-      SystemEffects.guid
-    );
-  }
-
-  private getEntitySelector() {
-    return selectEntity<EndpointModel>(
-      this.endpointEntityKey,
-      this.config.guid,
-    );
-  }
-
   public setData(data: ConnectEndpointData) {
     this.pData = data;
   }
@@ -179,25 +143,21 @@ export class ConnectEndpointService {
     this.hasAttemptedConnect = true;
     const { authType, authVal, systemShared, bodyContent } = this.pData;
 
-    this.store.dispatch(new ConnectEndpoint(
+    return stratosEntityCatalog.endpoint.api.connect<ActionState>(
       this.config.guid,
       this.config.type,
       authType,
       authVal,
       systemShared,
       bodyContent,
-    ));
-
-    return this.isBusy$.pipe(
+    ).pipe(
       pairwise(),
-      filter(([oldBusy, newBusy]) => {
-        return !(oldBusy === true && newBusy === false);
-      }),
-      withLatestFrom(this.update$),
-      map(([, updateSection]) => ({
+      filter(([oldV, newV]) => oldV.busy && !newV.busy),
+      map(([, newV]) => newV),
+      map(updateSection => ({
         success: !updateSection.error,
         errorMessage: updateSection.message
-      }))
+      })),
     );
   }
 

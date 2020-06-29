@@ -4,6 +4,17 @@
   $side-nav-colors: map-get($app-theme, side-nav);
   $side-nav-bottom-color: map-get($app-theme, subdued-color);
   $side-nav-hover-color: mat-color($side-nav-colors, hover);
+  $header-span: map-get($app-theme, header-background-span);
+
+  $side-nav-top-background: map-get($side-nav-colors, background);
+  $side-nav-top-foreground: map-get($side-nav-colors, text);
+
+  // Does the header background color span across the top, or is the sidenav background color used for the top-left portion
+  @if $header-span == true {
+    $side-nav-top-background: map-get($app-theme, header-background-color);
+    $side-nav-top-foreground: map-get($app-theme, header-foreground-color);
+  }
+
   .side-nav {
     &__nav-toggle {
       color: mat-color($side-nav-colors, text);
@@ -12,7 +23,8 @@
       background-color: mat-color($side-nav-colors, background);
     }
     &__top {
-      background-color: mat-color($side-nav-colors, background-top);
+      background-color: $side-nav-top-background;
+      color: $side-nav-top-foreground;
     }
     &__item {
       color: mat-color($side-nav-colors, text);

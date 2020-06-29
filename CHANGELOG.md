@@ -155,7 +155,7 @@ Details:
 
 ## 2.6.1
 
-[Full Changelog](https://github.com/cloudfoundry/stratos/compare/2.6.0...2.6.1)
+[Full Changelog](https://github.com/SUSE/stratos/compare/2.6.0...2.6.1)
 
 This release contains a few fixes:
 
@@ -182,7 +182,7 @@ This release contains two fixes listed below.
 
 ## 2.5.3
 
-[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.2...2.5.3)
+[Full Changelog](https://github.com/suse/stratos/compare/2.5.2...2.5.3)
 
 This release contains a number of fixes and improvements:
 
@@ -200,7 +200,7 @@ This release contains a number of fixes and improvements:
 
 ## 2.5.2
 
-[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.1...2.5.2)
+[Full Changelog](https://github.com/suse/stratos/compare/2.5.1...2.5.2)
 
 This release contains a number of fixes and improvements:
 
@@ -222,7 +222,7 @@ This release contains a number of fixes and improvements:
 
 ## 2.5.1
 
-[Full Changelog](https://github.com/cloudfoundry-incubator/stratos/compare/2.5.0...2.5.1)
+[Full Changelog](https://github.com/suse/stratos/compare/2.5.0...2.5.1)
 
 This release contains a number of fixes and improvements:
 

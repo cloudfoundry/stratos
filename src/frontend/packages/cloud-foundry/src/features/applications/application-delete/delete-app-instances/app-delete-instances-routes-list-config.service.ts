@@ -12,7 +12,7 @@ import {
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../../cf-api-svc.types';
@@ -59,7 +59,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
         const action = cfEntityCatalog.serviceBinding.actions.getAllForServiceInstance(
           serviceBinding.entity.service_instance_guid,
           appService.cfGuid,
-          createEntityRelationPaginationKey(endpointSchemaKey, serviceBindingEntityType),
+          createEntityRelationPaginationKey(endpointEntityType, serviceBindingEntityType),
           {
             includeRelations: [],
           }

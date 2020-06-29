@@ -3,7 +3,6 @@ import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { catchError, first, map, pairwise, share, skipWhile, switchMap, tap } from 'rxjs/operators';
 
-import { LoggerService } from '../../../core/src/core/logger.service';
 import { AppState } from '../../../store/src/app-state';
 import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import {
@@ -50,7 +49,6 @@ const createEndpointArray = (store: Store<AppState>, endpoints: string[] | Entit
 export const cfUserRolesFetch: EntityUserRolesFetch = (
   endpoints: string[] | EntityUserRolesEndpoint[],
   store: Store<AppState>,
-  logService: LoggerService,
   httpClient: HttpClient
 ) => {
   return createEndpointArray(store, endpoints).pipe(
@@ -61,7 +59,7 @@ export const cfUserRolesFetch: EntityUserRolesFetch = (
         cfEndpoints.forEach(endpoint => store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_SUCCESS)))
       } else {
         // If some endpoints are not connected as admin, go out and fetch the current user's specific roles
-        const flagsAndRoleRequests = dispatchRoleRequests(cfEndpoints, store, logService, httpClient);
+        const flagsAndRoleRequests = dispatchRoleRequests(cfEndpoints, store, httpClient);
         const allRequestsCompleted = handleCfRequests(flagsAndRoleRequests);
         return combineLatest(allRequestsCompleted).pipe(
           map(succeeds => succeeds.every(succeeded => !!succeeded)),
@@ -84,7 +82,6 @@ interface IEndpointConnectionInfo {
 function dispatchRoleRequests(
   endpoints: EntityUserRolesEndpoint[],
   store: Store<AppState>,
-  logService: LoggerService,
   httpClient: HttpClient
 ): CfsRequestState {
   const requests: CfsRequestState = {};
@@ -117,7 +114,7 @@ function dispatchRoleRequests(
           );
         }),
         catchError(err => {
-          logService.warn('Failed to fetch current user permissions for a cf: ', err);
+          console.warn('Failed to fetch current user permissions for a cf: ', err);
           store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_FAILED));
           return of(err);
         })

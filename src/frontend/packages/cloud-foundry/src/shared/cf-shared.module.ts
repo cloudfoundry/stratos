@@ -6,9 +6,6 @@ import { CoreModule } from '../../../core/src/core/core.module';
 import { CardCell, TableCellCustom } from '../../../core/src/shared/components/list/list.types';
 import { SharedModule } from '../../../core/src/shared/shared.module';
 import {
-  ApplicationInstanceChartComponent,
-} from '../features/applications/application/application-instance-chart/application-instance-chart.component';
-import {
   AddServiceInstanceBaseStepComponent,
 } from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
 import {
@@ -23,6 +20,9 @@ import {
 import {
   SpecifyUserProvidedDetailsComponent,
 } from './components/add-service-instance/specify-user-provided-details/specify-user-provided-details.component';
+import {
+  ApplicationInstanceChartComponent,
+} from './components/application-instance-chart/application-instance-chart.component';
 import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';

@@ -1,14 +1,13 @@
-import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
-import { BaseEndpointAuth } from '../../../core/src/features/endpoints/endpoint-auth';
 import {
   EndpointListDetailsComponent,
 } from '../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { EntitySchema } from '../helpers/entity-schema';
+import { endpointEntityType, stratosEntityFactory } from '../helpers/stratos-entity-factory';
 import { TestEntityCatalog } from './entity-catalog';
 import { StratosCatalogEndpointEntity, StratosCatalogEntity } from './entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogSchemas, IStratosEndpointDefinition } from './entity-catalog.types';
 
-describe('EntityCatalogService', () => {
+fdescribe('EntityCatalogService', () => {
   let entityCatalog: TestEntityCatalog;
   function getEndpointDefinition() {
     return {
@@ -18,7 +17,7 @@ describe('EntityCatalogService', () => {
       icon: 'cloud_foundry',
       iconFont: 'stratos-icons',
       logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
-      authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
+      authTypes: [],
       listDetailsComponent: EndpointListDetailsComponent,
     } as IStratosEndpointDefinition;
   }
@@ -107,7 +106,7 @@ describe('EntityCatalogService', () => {
     expect(catalogEntity.definition).toEqual({
       ...endpoint,
       schema: {
-        default: endpointEntitySchema
+        default: stratosEntityFactory(endpointEntityType)
       }
     });
   });
@@ -124,9 +123,7 @@ describe('EntityCatalogService', () => {
       urlValidation: false,
       unConnectable: true,
       urlValidationRegexString: 'redjecks',
-      authTypes: [
-        BaseEndpointAuth.SSO
-      ]
+      authTypes: []
     };
     const definition = {
       ...endpoint,
@@ -141,7 +138,7 @@ describe('EntityCatalogService', () => {
       iconFont: 'stratos-icons',
       listDetailsComponent: EndpointListDetailsComponent,
       schema: {
-        default: endpointEntitySchema
+        default: stratosEntityFactory(endpointEntityType)
       },
       parentType: endpoint.type
     };

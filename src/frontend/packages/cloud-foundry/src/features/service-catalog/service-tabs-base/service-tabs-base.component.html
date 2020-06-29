@@ -1,11 +1,11 @@
 <app-page-header [tabs]="tabLinks" tabsHeader="Service" [breadcrumbs]="breadcrumbs">
   <div class="app-page-header">
-    {{ getServiceLabel() | async }}
+    {{ serviceLabel$ | async }}
   </div>
   <div class="page-header-right">
     <ng-container *appCfUserPermission="canCreateServiceInstance">
-      <button mat-icon-button name="add-service-instance" [routerLink]="addServiceInstanceLink()"
-        [queryParams]="isServiceSpaceScoped() | async" [disabled]="!(hasVisiblePlans$ | async)">
+      <button mat-icon-button name="add-service-instance" [routerLink]="addServiceInstanceLink"
+        [queryParams]="isServiceSpaceScoped$ | async" [disabled]="!(hasVisiblePlans$ | async)">
         <mat-icon [matTooltip]="toolTipText$ | async">add</mat-icon>
       </button>
     </ng-container>
