@@ -40,6 +40,7 @@
 @import '../src/shared/components/tile-selector-tile/tile-selector-tile.component.theme';
 @import '../src/shared/components/entity-summary-title/entity-summary-title.component.theme';
 @import '../src/shared/components/multiline-title/multiline-title.component.theme';
+@import '../src/shared/components/intro-screen/intro-screen.component.theme';
 @import '../src/features/user-profile/profile-info/profile-info.component.theme';
 @import '../src/core/stateful-icon/stateful-icon.component.theme';
 @import './components/mat-snack-bar.theme';
@@ -65,6 +66,8 @@
 @import '../../core/src/features/error-page/error-page/error-page.component.theme';
 @import '../../core/src/features/endpoints/backup-restore/restore-endpoints/restore-endpoints.component.theme';
 @import '../../core/src/features/metrics/metrics/metrics.component.theme';
+
+
 // Creates the app theme and applies it to the application
 // $theme = Angular Material Theme
 // $nav-theme - Colors for the Side Nav (optional)
@@ -136,4 +139,6 @@
   @include app-user-avatar-theme($theme, $app-theme);
   @include restore-endpoints-theme($theme, $app-theme);
   @include metrics-component-theme($theme, $app-theme);
+  @include intro-screen-theme($theme, $app-theme);
+
 }
