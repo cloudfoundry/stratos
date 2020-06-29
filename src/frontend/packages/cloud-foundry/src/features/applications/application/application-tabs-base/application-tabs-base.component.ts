@@ -93,9 +93,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     );
 
     this.tabLinks = [
-      { link: 'summary', label: 'Summary', icon: 'description' },
-      { link: 'instances', label: 'Instances', icon: 'library_books' },
-      { link: 'routes', label: 'Routes', iconFont: 'stratos-icons', icon: 'network_route' },
+      { link: 'summary', label: 'Summary', iconFont: 'stratos-icons', icon: 'application' },
+      { link: 'instances', label: 'Instances', iconFont: 'stratos-icons', icon: 'application_instance' },
+      { link: 'routes', label: 'Routes', iconFont: 'stratos-icons', icon: 'route' },
       { link: 'log-stream', label: 'Log Stream', icon: 'featured_play_list' },
       { link: 'services', label: 'Services', iconFont: 'stratos-icons', icon: 'service' },
       { link: 'variables', label: 'Variables', icon: 'list', hidden$: appDoesNotHaveEnvVars$ },

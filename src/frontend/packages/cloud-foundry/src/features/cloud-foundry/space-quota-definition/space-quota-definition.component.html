@@ -45,7 +45,7 @@
       <h4 class="quota-definition-base__section-header">Application</h4>
       <app-tile-group>
         <app-tile>
-          <app-card-number-metric labelAtTop="true" icon="apps" label="Maximum Application Instances"
+          <app-card-number-metric labelAtTop="true" icon="application_instance" iconFont="stratos-icons" label="Maximum Application Instances"
             value="{{ quotaDefinition.entity?.app_instance_limit }}">
           </app-card-number-metric>
         </app-tile>
@@ -73,12 +73,12 @@
       <h4 class="quota-definition-base__section-header">Routes</h4>
       <app-tile-group>
         <app-tile>
-          <app-card-number-metric labelAtTop="true" icon="network_route" iconFont="stratos-icons" label="Maximum Routes"
+          <app-card-number-metric labelAtTop="true" icon="route" iconFont="stratos-icons" label="Maximum Routes"
             value="{{ quotaDefinition.entity?.total_routes }}">
           </app-card-number-metric>
         </app-tile>
         <app-tile>
-          <app-card-number-metric labelAtTop="true" icon="network_route" iconFont="stratos-icons"
+          <app-card-number-metric labelAtTop="true" icon="route" iconFont="stratos-icons"
             label="Maximum Reserved Route Ports" value="{{ quotaDefinition.entity?.total_reserved_route_ports }}">
           </app-card-number-metric>
         </app-tile>
