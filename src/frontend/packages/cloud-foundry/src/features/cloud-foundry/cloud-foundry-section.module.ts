@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -21,8 +22,8 @@ import { CreateSpaceStepComponent } from './add-space/create-space-step/create-s
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
+import { CloudFoundrySectionRoutingModule } from './cloud-foundry-section.routing';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
-import { CloudFoundryRoutingModule } from './cloud-foundry.routing';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
 import { EditOrganizationStepComponent } from './edit-organization/edit-organization-step/edit-organization-step.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
@@ -137,7 +138,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
   imports: [
     CoreModule,
     SharedModule,
-    CloudFoundryRoutingModule,
+    CloudFoundrySectionRoutingModule,
     RouterModule,
     NgxChartsModule,
     CloudFoundrySharedModule
@@ -228,9 +229,10 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CloudFoundryCellService,
     UserInviteService,
     UserInviteConfigureService,
+    DatePipe
   ],
   entryComponents: [
     UserInviteConfigurationDialogComponent
   ]
 })
-export class CloudFoundryModule { }
+export class CloudFoundrySectionModule { }

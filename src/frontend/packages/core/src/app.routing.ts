@@ -5,18 +5,18 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuardService } from './core/auth-guard.service';
 import { CoreModule } from './core/core.module';
 import { EndpointsService } from './core/endpoints.service';
+import { NotSetupGuardService } from './core/not-setup-guard.service';
 import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { CustomRoutingImportModule } from './custom-import.module';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 import { HomePageComponent } from './features/home/home/home-page.component';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
 import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain-mismatch.component';
+import { LocalAccountWizardComponent } from './features/setup/local-account-wizard/local-account-wizard.component';
+import { SetupWelcomeComponent } from './features/setup/setup-welcome/setup-welcome.component';
 import { ConsoleUaaWizardComponent } from './features/setup/uaa-wizard/console-uaa-wizard.component';
 import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page.component';
 import { SharedModule } from './shared/shared.module';
-import { NotSetupGuardService } from './core/not-setup-guard.service';
-import { SetupWelcomeComponent } from './features/setup/setup-welcome/setup-welcome.component';
-import { LocalAccountWizardComponent } from './features/setup/local-account-wizard/local-account-wizard.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -60,18 +60,6 @@ const appRoutes: Routes = [
       },
       { path: 'entity-list', loadChildren: () => import('./api-driven-views/api-driven-views.module').then(m => m.ApiDrivenViewsModule) },
       {
-        path: 'applications',
-        loadChildren: () => import('../../cloud-foundry/src/features/applications/applications.module').then(m => m.ApplicationsModule),
-        data: {
-          stratosNavigation: {
-            label: 'Applications',
-            matIcon: 'apps',
-            requiresEndpointType: 'cf',
-            position: 20
-          }
-        },
-      },
-      {
         path: 'endpoints',
         data: {
           stratosNavigation: {
@@ -89,45 +77,6 @@ const appRoutes: Routes = [
           path: '',
           loadChildren: () => import('./features/endpoints/endpoints.module').then(m => m.EndpointsModule),
         }]
-      },    
-      {
-        path: 'marketplace',
-        loadChildren: () => import('../../cloud-foundry/src/features/service-catalog/service-catalog.module')
-          .then(m => m.ServiceCatalogModule),
-        data: {
-          stratosNavigation: {
-            label: 'Marketplace',
-            matIcon: 'store',
-            requiresEndpointType: 'cf',
-            position: 30
-          }
-        },
-      },
-      {
-        path: 'services',
-        loadChildren: () => import('../../cloud-foundry/src/features/services/services.module').then(m => m.ServicesModule),
-        data: {
-          stratosNavigation: {
-            label: 'Services',
-            matIcon: 'service',
-            matIconFont: 'stratos-icons',
-            requiresEndpointType: 'cf',
-            position: 40
-          }
-        },
-      },
-      {
-        path: 'cloud-foundry',
-        loadChildren: () => import('../../cloud-foundry/src/features/cloud-foundry/cloud-foundry.module').then(m => m.CloudFoundryModule),
-        data: {
-          stratosNavigation: {
-            label: 'Cloud Foundry',
-            matIcon: 'cloud_foundry',
-            matIconFont: 'stratos-icons',
-            requiresEndpointType: 'cf',
-            position: 50
-          }
-        },
       },
       { path: 'about', loadChildren: () => import('./features/about/about.module').then(m => m.AboutModule) },
       { path: 'user-profile', loadChildren: () => import('./features/user-profile/user-profile.module').then(m => m.UserProfileModule) },
