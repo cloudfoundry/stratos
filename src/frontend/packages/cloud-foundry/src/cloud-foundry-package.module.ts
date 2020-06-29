@@ -31,11 +31,6 @@ import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-perm
     CloudFoundryStoreModule,
     // FIXME: Ensure that anything lazy loaded is not included here - #3675
     CloudFoundrySharedModule,
-    // FIXME: Move cf effects into cf module - #3675
-    // EffectsModule.for Root([
-    //   PermissionsEffects,
-    //   PermissionEffects
-    // ])
   ],
   providers: [
     ...cfCurrentUserPermissionsService,
