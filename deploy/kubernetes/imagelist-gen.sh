@@ -17,9 +17,9 @@ STRATOS_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd ../../ && pwd )"
 # Add any customizations
 function addCustomizations() {
 
-  if [ -f "${STRATOS_FOLDER}/custom-src/deploy/kubernetes/imagelist.txt" ];then
+  if [ -f "${STRATOS_FOLDER}/deploy/kubernetes/custom/imagelist.txt" ];then
     echo "Including custom imagelist contents"
-    cat "${STRATOS_FOLDER}/custom-src/deploy/kubernetes/imagelist.txt" >> ./imagelist.txt
+    cat "${STRATOS_FOLDER}/deploy/kubernetes/custom/imagelist.txt" >> ./imagelist.txt
 
     # Update version number
     VERSION=$(grep -Po 'consoleVersion: \K(.*)' ./values.yaml)

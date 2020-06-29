@@ -14,7 +14,7 @@ export enum AppMonitorComponentTypes {
   FETCHING = 'MONITOR_FETCHING',
 }
 
-export interface IApplicationMonitorComponentState {
+export interface IActionMonitorComponentState {
   busy: boolean;
   error: boolean;
   completed: boolean;
@@ -23,7 +23,7 @@ export interface IApplicationMonitorComponentState {
 
 export class ActionMonitorComponentState {
 
-  public currentState: Observable<IApplicationMonitorComponentState>;
+  public currentState: Observable<IActionMonitorComponentState>;
 
   constructor(
     private entityMonitorFactory: EntityMonitorFactory,
@@ -37,7 +37,7 @@ export class ActionMonitorComponentState {
   }
 
   private getStateObservable(entityMonitor: EntityMonitor, monitorState: AppMonitorComponentTypes)
-  : Observable<IApplicationMonitorComponentState> {
+    : Observable<IActionMonitorComponentState> {
     switch (monitorState) {
       case AppMonitorComponentTypes.DELETE:
         return this.getDeletingState(entityMonitor);
@@ -50,7 +50,7 @@ export class ActionMonitorComponentState {
     }
   }
 
-  private getDeletingState(entityMonitor: EntityMonitor): Observable<IApplicationMonitorComponentState> {
+  private getDeletingState(entityMonitor: EntityMonitor): Observable<IActionMonitorComponentState> {
     return entityMonitor.entityRequest$.pipe(
       map(requestState => ({
         busy: requestState.deleting.busy,
@@ -61,7 +61,7 @@ export class ActionMonitorComponentState {
     );
   }
 
-  private getFetchingState(entityMonitor: EntityMonitor): Observable<IApplicationMonitorComponentState> {
+  private getFetchingState(entityMonitor: EntityMonitor): Observable<IActionMonitorComponentState> {
     const completed$ = this.getHasCompletedObservable(
       entityMonitor.entityRequest$.pipe(
         map(requestState => requestState.fetching),
@@ -82,7 +82,7 @@ export class ActionMonitorComponentState {
 
   private fetchUpdatingState = (requestState: RequestInfoState): ActionState =>
     (requestState.updating[this.updateKey] || { busy: false, error: false, message: '' })
-  private getUpdatingState(entityMonitor: EntityMonitor): Observable<IApplicationMonitorComponentState> {
+  private getUpdatingState(entityMonitor: EntityMonitor): Observable<IActionMonitorComponentState> {
 
 
     const completed$ = this.getHasCompletedObservable(
@@ -125,7 +125,7 @@ export class AppActionMonitorIconComponent implements OnInit {
 
   // State observable - use this instead of creating one
   @Input()
-  public state: Observable<IApplicationMonitorComponentState>;
+  public state: Observable<IActionMonitorComponentState>;
 
   @Input()
   public entityKey: string;
@@ -143,7 +143,7 @@ export class AppActionMonitorIconComponent implements OnInit {
   public updateKey = rootUpdatingKey;
 
   @Output()
-  public currentState: Observable<IApplicationMonitorComponentState>;
+  public currentState: Observable<IActionMonitorComponentState>;
 
   constructor(private entityMonitorFactory: EntityMonitorFactory) { }
 
@@ -151,14 +151,14 @@ export class AppActionMonitorIconComponent implements OnInit {
     if (this.state) {
       this.currentState = this.state;
     } else {
-    const state: ActionMonitorComponentState = new ActionMonitorComponentState(
-      this.entityMonitorFactory,
-      this.id,
-      this.schema,
-      this.monitorState,
-      this.updateKey
-    );
-    this.currentState = state.currentState;
+      const state: ActionMonitorComponentState = new ActionMonitorComponentState(
+        this.entityMonitorFactory,
+        this.id,
+        this.schema,
+        this.monitorState,
+        this.updateKey
+      );
+      this.currentState = state.currentState;
     }
   }
 }

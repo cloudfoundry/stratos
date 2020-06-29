@@ -5,4 +5,4 @@ version: 0.1.0
 appVersion: 0.1.0
 sources:
   - https://github.com/cloudfoundry/stratos
-icon: https://github.com/cloudfoundry/stratos/raw/master/deploy/kubernetes/console/icon.png
+icon: https://raw.githubusercontent.com/cloudfoundry/stratos/master/deploy/kubernetes/console/icon.png
