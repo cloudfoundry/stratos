@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
@@ -81,7 +82,8 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
   ],
   providers: [
     ApplicationService,
-    ApplicationEnvVarsHelper
+    ApplicationEnvVarsHelper,
+    DatePipe
   ]
 })
 export class AutoscalerModule { }
