@@ -36,7 +36,7 @@ export class KubernetesNodeComponent {
   tabLinks = [
     { link: 'summary', label: 'Summary', icon: 'kubernetes', iconFont: 'stratos-icons' },
     { link: 'metrics', label: 'Metrics', icon: 'equalizer' },
-    { link: 'pods', label: 'Pods', icon: 'adjust' },
+    { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons' },
   ];
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
