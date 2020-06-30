@@ -33,7 +33,7 @@ import { KubernetesService } from '../services/kubernetes.service';
 export class KubernetesNamespaceComponent {
 
   tabLinks = [
-    { link: 'pods', label: 'Pods', icon: 'adjust' },
+    { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons'  },
     { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' }
   ];
 
