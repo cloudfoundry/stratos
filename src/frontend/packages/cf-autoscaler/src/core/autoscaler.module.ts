@@ -2,6 +2,9 @@ import { NgModule } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { ApplicationService } from '../../../cloud-foundry/src/features/applications/application.service';
+import {
+  ApplicationEnvVarsHelper,
+} from '../../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CloudFoundrySharedModule } from '../../../cloud-foundry/src/shared/cf-shared.module';
 import { CoreModule } from '../../../core/src/core/core.module';
 import { SharedModule } from '../../../core/src/shared/shared.module';
@@ -82,7 +85,8 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     CardAutoscalerDefaultComponent
   ],
   providers: [
-    ApplicationService
+    ApplicationService,
+    ApplicationEnvVarsHelper
   ]
 })
 export class AutoscalerModule { }
