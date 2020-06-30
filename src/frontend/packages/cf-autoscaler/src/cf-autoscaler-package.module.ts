@@ -13,13 +13,7 @@ import { AutoscalerEffects } from './store/autoscaler.effects';
       AutoscalerEffects
     ]),
     CfAutoscalerModule
-    // ExtensionService.declare([
-    //   AutoscalerTabExtensionComponent,
-    // ])
   ],
-  declarations: [
-    // AutoscalerTabExtensionComponent
-  ]
 })
 export class CfAutoscalerPackageModule { }
 

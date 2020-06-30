@@ -29,6 +29,7 @@ export class CardAutoscalerDefaultComponent implements OnInit {
   appAutoscalerPolicyService: EntityService;
   appAutoscalerPolicy$: Observable<APIResource<AppAutoscalerPolicyLocal>>;
   applicationInstances$: Observable<number>;
+  runningApplicationInstances$: Observable<number>;
 
   @Input()
   onUpdate: () => void = () => { }
@@ -48,6 +49,12 @@ export class CardAutoscalerDefaultComponent implements OnInit {
       publishReplay(1),
       refCount()
     );
+    this.runningApplicationInstances$ = this.applicationService.appStats$.pipe(
+      map(appInstancesPages => {
+        const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
+        return allInstances.filter(stat => stat.state === 'RUNNING').length;
+      })
+    )
   }
 
 }
