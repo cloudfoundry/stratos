@@ -5,7 +5,6 @@ import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { generateCFEntities } from './cf-entity-generator';
-import { CloudFoundryRoutingModule } from './cloud-foundry-routing.module';
 import { CloudFoundrySharedModule } from './shared/cf-shared.module';
 import { CfUserService } from './shared/data-services/cf-user.service';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
@@ -24,7 +23,6 @@ import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-perm
     CloudFoundryStoreModule,
     // FIXME: Ensure that anything lazy loaded is not included here - #3675
     CloudFoundrySharedModule,
-    CloudFoundryRoutingModule
   ],
   providers: [
     ...cfCurrentUserPermissionsService,
