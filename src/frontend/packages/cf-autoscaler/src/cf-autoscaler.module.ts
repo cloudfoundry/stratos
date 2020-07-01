@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { ExtensionService } from 'frontend/packages/core/src/core/extension/extension-service';
 
+import { CloudFoundrySharedModule } from '../../cloud-foundry/src/shared/cf-shared.module';
 import { CoreModule } from '../../core/src/core/core.module';
 import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
@@ -16,6 +17,7 @@ import { CardAutoscalerDefaultComponent } from './shared/card-autoscaler-default
     CommonModule,
     SharedModule,
     MDAppModule,
+    CloudFoundrySharedModule,
     NgxChartsModule,
     ExtensionService.declare([
       AutoscalerTabExtensionComponent,

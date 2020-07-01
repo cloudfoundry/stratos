@@ -4,7 +4,9 @@
   </mat-card-header>
   <mat-card-content>
     <app-metadata-item label="Current">
-      {{(runningApplicationInstances$ | async) || 0}} / {{ applicationInstances$ | async }}
+      <app-running-instances [instances]="applicationInstances$ | async" [cfGuid]="appService.cfGuid"
+        [appGuid]="this.appService.appGuid">
+      </app-running-instances>
     </app-metadata-item>
     <div class="card-autoscaler-default__min-max">
       <app-metadata-item label="Minimum">

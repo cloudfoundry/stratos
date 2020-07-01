@@ -9,7 +9,7 @@ export class CardAutoscalerDefault extends Component {
   }
 
   private getRunningInstances(): ElementFinder {
-    return this.locator.element(by.css('app-metadata-item:first-of-type .metadata-item__value'));
+    return this.locator.element(by.tagName('app-running-instances'));
   }
 
   getRunningInstancesText(): promise.Promise<string> {
