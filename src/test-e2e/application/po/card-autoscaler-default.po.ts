@@ -1,7 +1,6 @@
-import { by, element, ElementFinder, promise, protractor } from 'protractor';
+import { by, element, ElementFinder, promise } from 'protractor';
 
 import { Component } from '../../po/component.po';
-import { CreateAutoscalerPolicy } from './create-autoscaler-policy.po'
 
 export class CardAutoscalerDefault extends Component {
 
@@ -10,7 +9,7 @@ export class CardAutoscalerDefault extends Component {
   }
 
   private getRunningInstances(): ElementFinder {
-    return this.locator.element(by.tagName('app-running-instances'));
+    return this.locator.element(by.css('app-metadata-item:first-of-type .metadata-item__value'));
   }
 
   getRunningInstancesText(): promise.Promise<string> {
