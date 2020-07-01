@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { of } from 'rxjs';
 
 // Things in this path include add/edit policy stepper, policy metrics page and policy events page
 // They're include like this to ensure those parts are lazy loaded.
@@ -11,12 +10,7 @@ const customRoutes: Routes = [
     loadChildren: () => import('./core/autoscaler.module').then(m => m.AutoscalerModule),
     data: {
       // Required to place content in the mat-drawer-content/.page-content container
-      stratosNavigation: {
-        text: 'Applications',
-        matIcon: 'apps',
-        position: 20,
-        hidden: of(true)
-      }
+      stratosNavigationPage: true
     },
   },
 ];

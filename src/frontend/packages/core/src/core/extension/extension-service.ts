@@ -178,7 +178,7 @@ export class ExtensionService {
   }
 
   private moveExtensionRoute(routeConfig: Route[], dashboardRoute: Route): boolean {
-    const index = routeConfig.findIndex(r => !!r.data && !!r.data.stratosNavigation);
+    const index = routeConfig.findIndex(r => !!r.data && (!!r.data.stratosNavigation || r.data.stratosNavigationPage));
     if (index >= 0) {
       const removed = routeConfig.splice(index, 1);
       dashboardRoute.children = dashboardRoute.children.concat(removed);
