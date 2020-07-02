@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 
+import { CfAutoscalerModule } from '../../../../cf-autoscaler/src/cf-autoscaler.module';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';

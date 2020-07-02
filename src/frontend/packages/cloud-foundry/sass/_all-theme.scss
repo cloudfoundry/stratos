@@ -1,5 +1,10 @@
 // Theming for the copmponents in the Cloud Foundry package
 
+
+@import '../src/features/applications/application-wall/application-wall.component.theme';
+@import '../src/features/services/services-wall/services-wall.component.theme';
+@import '../src/features/service-catalog/service-catalog-page/service-catalog-page.component.theme';
+
 @import '../src/shared/components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component.theme';
 @import '../src/shared/components/schema-form/schema-form.component.theme';
 @import '../src/features/cloud-foundry/tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component.theme';

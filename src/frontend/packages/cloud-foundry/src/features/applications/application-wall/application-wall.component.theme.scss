@@ -1,0 +1,6 @@
+@import '../../../../sass/mixins';
+
+.app-wall {
+  @include apply-smaller-list-input;
+}
+
