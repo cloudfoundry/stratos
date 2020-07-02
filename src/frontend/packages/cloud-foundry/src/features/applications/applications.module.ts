@@ -1,7 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { CfAutoscalerModule } from '../../../../cf-autoscaler/src/cf-autoscaler.module';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
@@ -39,12 +38,14 @@ import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { MapRoutesComponent } from './routes/map-routes/map-routes.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
 
+
 @NgModule({
   imports: [
     CoreModule,
     SharedModule,
     ApplicationsRoutingModule,
     CloudFoundrySharedModule,
+    // FIXME: Remove hard link between cf and autoscaler packages #4416
     CfAutoscalerModule
   ],
   declarations: [
