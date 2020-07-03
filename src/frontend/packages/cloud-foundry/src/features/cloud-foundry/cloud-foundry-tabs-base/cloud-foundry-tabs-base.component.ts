@@ -68,7 +68,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
     // Default tabs + add any tabs from extensions
     this.tabLinks = [
-      { link: 'summary', label: 'Summary', icon: 'description' },
+      { link: 'summary', label: 'Summary', icon: 'cloud_foundry', iconFont: 'stratos-icons' },
       { link: 'organizations', label: 'Organizations', icon: 'organization', iconFont: 'stratos-icons' },
       {
         link: CloudFoundryTabsBaseComponent.cells,
@@ -76,7 +76,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
         icon: 'select_all',
         hidden$: cellsHidden$
       },
-      { link: 'routes', label: 'Routes', icon: 'network_route', iconFont: 'stratos-icons', },
+      { link: 'routes', label: 'Routes', icon: 'route', iconFont: 'stratos-icons', },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',

@@ -75,11 +75,19 @@ $oss-dark-theme: mat-dark-theme($oss-dark-primary, $oss-dark-accent, $oss-dark-w
       ansi-colors: $ansi-color-palette,
       header-background-color: mat-color($primary),
       header-foreground-color: mat-contrast($primary, 500),
+      stratos-title-show-text: false,
       // Does the header background color span across the top, or is the sidenav background color used for the top-left portion
       header-background-span: false,
       // Background colors to use for things like the about page header (underflow)
       underflow-background-color: mat-color($primary),
-      underflow-foreground-color: mat-contrast($primary, 500)
+      underflow-foreground-color: mat-contrast($primary, 500),
+      link-color: mat-color($primary),
+      link-active-color: mat-color($primary, 700),
+      user-avatar-background-color: mat-color($primary),
+      user-avatar-foreground-color: mat-contrast($primary, 500),
+      user-avatar-underflow-invert-colors: true,
+      user-avatar-header-invert-colors: true,
+      intro-screen-background-color: null
     )
   );
 }

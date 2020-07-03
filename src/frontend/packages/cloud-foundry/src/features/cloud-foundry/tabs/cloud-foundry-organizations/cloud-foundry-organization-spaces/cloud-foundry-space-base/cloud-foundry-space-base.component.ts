@@ -50,7 +50,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     {
       link: 'summary',
       label: 'Summary',
-      icon: 'description'
+      icon: 'virtual_space',
+      iconFont: 'stratos-icons',
     },
     {
       link: 'apps',
@@ -73,7 +74,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
       link: 'routes',
       label: 'Routes',
       iconFont: 'stratos-icons',
-      icon: 'network_route'
+      icon: 'route'
     },
     {
       link: 'users',
