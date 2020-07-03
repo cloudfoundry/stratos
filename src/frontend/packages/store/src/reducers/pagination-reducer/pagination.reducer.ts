@@ -16,6 +16,8 @@ import {
   IgnorePaginationMaxedState,
   REMOVE_PARAMS,
   RESET_PAGINATION,
+  RESET_PAGINATION_SORT_FILTER,
+  ResetPaginationSortFilter,
   SET_CLIENT_FILTER,
   SET_CLIENT_FILTER_KEY,
   SET_CLIENT_PAGE,
@@ -42,6 +44,7 @@ import { createNewPaginationSection } from './pagination-reducer-create-paginati
 import { paginationIgnoreMaxed, paginationMaxReached } from './pagination-reducer-max-reached';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { getDefaultPaginationEntityState, paginationResetPagination } from './pagination-reducer-reset-pagination';
+import { paginationResetToStart } from './pagination-reducer-reset-sort-filter';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientFilterKey } from './pagination-reducer-set-client-filter-key';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
@@ -147,6 +150,10 @@ function paginate(action, state: PaginationState = {}, updatePagination) {
 
   if (action.type === HYDRATE_PAGINATION_STATE) {
     return hydratePagination(state, action as HydratePaginationStateAction);
+  }
+
+  if (action.type === RESET_PAGINATION_SORT_FILTER) {
+    return paginationResetToStart(state, action as ResetPaginationSortFilter);
   }
 
   return enterPaginationReducer(state, action, updatePagination);

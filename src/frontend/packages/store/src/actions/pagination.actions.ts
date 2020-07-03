@@ -1,11 +1,12 @@
 import { Action } from '@ngrx/store';
 
 import { EntityCatalogEntityConfig, extractEntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { PaginationClientFilter, PaginationParam, PaginationState } from '../types/pagination.types';
+import { PaginatedAction, PaginationClientFilter, PaginationParam, PaginationState } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const CLEAR_PAGINATION_OF_ENTITY = '[Pagination] Clear pagination of entity';
 export const RESET_PAGINATION = '[Pagination] Reset pagination';
+export const RESET_PAGINATION_SORT_FILTER = '[Pagination] Reset pagination sort & filter';
 export const CREATE_PAGINATION = '[Pagination] Create pagination';
 export const CLEAR_PAGES = '[Pagination] Clear pages only';
 export const SET_PAGE = '[Pagination] Set page';
@@ -56,6 +57,16 @@ export class ResetPagination extends BasePaginationAction implements Action {
     super(pEntityConfig);
   }
   type = RESET_PAGINATION;
+}
+
+/**
+ * Reset filter & sorting like ResetPagination except retain the results
+ */
+export class ResetPaginationSortFilter extends BasePaginationAction implements Action {
+  constructor(public pAction: PaginatedAction) {
+    super(pAction);
+  }
+  type = RESET_PAGINATION_SORT_FILTER;
 }
 
 export class CreatePagination extends BasePaginationAction implements Action {

@@ -49,12 +49,13 @@ import {
   ListView,
   SetListViewAction,
 } from '../../../../../store/src/actions/list.actions';
-import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pagination.actions';
+import { ResetPaginationSortFilter, SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pagination.actions';
 import { GeneralAppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
+import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
   EntitySelectConfig,
@@ -592,6 +593,22 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       default:
         return this.config.defaultView || 'table';
     }
+  }
+
+  resetFilteringAndSort() {
+    // TODO: RC check for better way of doing this
+    const pAction: PaginatedAction = this.dataSource.action['length'] ? this.dataSource.action[0] : this.dataSource.action
+    this.store.dispatch(new ResetPaginationSortFilter(pAction));
+    // Ensure that the changes are pushed back to the multi filter controls
+    this.multiFilterManagers.forEach(manager => {
+      manager.value
+      manager.hasOneItem$.pipe(first()).subscribe(hasOneItem => {
+        if (hasOneItem) {
+          return;
+        }
+        manager.selectItem('')
+      })
+    })
   }
 
   updateListView(listView: ListView) {
