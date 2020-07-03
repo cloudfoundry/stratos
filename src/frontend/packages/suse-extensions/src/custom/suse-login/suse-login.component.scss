@@ -2,8 +2,7 @@
 
 .suse-login {
   align-items: center;
-  background-color: $suse-blue;
-  border-bottom: 10px solid $suse-primary-color;
+  background-color: $suse-dark-green;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -16,7 +15,7 @@
     flex-direction: row;
   }
   &__header {
-    background-color: $suse-secondary;
+    background-color: $suse-dark-green;
     color: $suse-text;
     flex: 0 0 60px;
     font-size: 24px;
@@ -47,7 +46,7 @@
   }
   &__logo {
     img {
-      width: 79px;
+      width: 128px;
     }
   }
   &__intro {
