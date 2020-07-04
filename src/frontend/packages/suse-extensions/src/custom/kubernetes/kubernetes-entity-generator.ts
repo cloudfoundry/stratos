@@ -1,5 +1,6 @@
 import { Validators } from '@angular/forms';
 
+import { BaseEndpointAuth } from '../../../../core/src/core/endpoint-auth';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -128,7 +129,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     iconFont: 'stratos-icons',
     logoUrl: '/core/assets/custom/kubernetes.svg',
     urlValidation: undefined,
-    authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CERT_AUTH], kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG]],
+    authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CERT_AUTH], kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG], BaseEndpointAuth.UsernamePassword],
     renderPriority: 4,
     subTypes: [
       {

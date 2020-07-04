@@ -77,7 +77,7 @@ func (c *CertKubeAuth) extractCerts(ec echo.Context) (*KubeCertificate, error) {
 }
 
 func (c *CertKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
-	log.Info("FetchCerts")
+	log.Debug("Kube Certs - FetchToken")
 
 	kubeCertAuth, err := c.extractCerts(ec)
 	if err != nil {
