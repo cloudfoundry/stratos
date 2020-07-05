@@ -97,18 +97,13 @@ export class FavoritesMetaCardComponent {
         this.iconUrl$ = observableOf('');
       }
 
-      console.log(favoriteEntity);
       const entityDef = entityCatalog.getEntity(this.favorite.endpointType, this.favorite.entityType);
-      console.log(entityDef);
-
       this.icon = {
         hasIcon: !!entityDef.definition.logoUrl || !!entityDef.definition.icon,
         icon: entityDef.definition.icon,
         iconFont: entityDef.definition.iconFont,
         logoUrl: entityDef.definition.logoUrl,
       };
-
-      console.log(this.icon);
 
       this.setConfirmation(this.prettyName, favorite);
 
