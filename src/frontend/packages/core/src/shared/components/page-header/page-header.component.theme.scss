@@ -39,9 +39,6 @@
     &__menu-separator {
       background-color: mat-color($foreground, divider);
     }
-    &__history {
-      color: $subdued;
-    }
     &__underflow {
       background-color: $underflow-background;
       color: $underflow-foreground;
