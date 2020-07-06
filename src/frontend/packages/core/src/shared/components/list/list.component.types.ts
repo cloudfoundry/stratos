@@ -1,3 +1,4 @@
+import { Type } from '@angular/core';
 import * as moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -12,6 +13,8 @@ import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
+import { Injectable } from "@angular/core";
+import { CardCell } from './list.types';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -79,9 +82,9 @@ export interface IListConfig<T> {
    */
   enableTextFilter?: boolean;
   /**
-   * Fix the height of a table row
+   * Set a custom value for the minimum height of a table row
    */
-  tableFixedRowHeight?: boolean;
+  minRowHeight?: string;
   /**
    * Set the align-self of each cell in the row
    */
@@ -90,6 +93,13 @@ export interface IListConfig<T> {
    * The card component used in card view
    */
   cardComponent?: CardTypes<T>;
+  /**
+   * The component to show when expanding a row
+   */
+  expandComponent?: ListExpandedComponentType<T>;
+  /**
+   * Hide the fresh button
+   */
   hideRefresh?: boolean;
   /**
    * Allow selection regardless of number or visibility of multi actions
@@ -142,11 +152,12 @@ export interface IListMultiFilterConfigItem {
 export const defaultPaginationPageSizeOptionsCards = [defaultClientPaginationPageSize, 30, 80];
 export const defaultPaginationPageSizeOptionsTable = [defaultClientPaginationPageSize, 20, 80];
 
+@Injectable()
 export class ListConfig<T> implements IListConfig<T> {
   isLocal = false;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
-  text = null;
+  text: ITableText = null;
   enableTextFilter = false;
   cardComponent = null;
   defaultView = 'table' as ListView;
@@ -245,3 +256,5 @@ export class MultiFilterManager<T> {
     this.value = itemValue;
   }
 }
+
+export type ListExpandedComponentType<T> = Type<CardCell<T>>;

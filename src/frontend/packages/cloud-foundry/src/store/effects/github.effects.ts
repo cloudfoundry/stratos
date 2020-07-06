@@ -5,17 +5,17 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../core/src/core/logger.service';
-import { GitSCMService, GitSCMType } from '../../../../core/src/shared/data-services/scm/scm.service';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import {
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../../actions/github.actions';
 import { CFAppState } from '../../cf-app-state';
 import { gitRepoEntityType } from '../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { GitSCMService } from '../../shared/data-services/scm/scm.service';
 import { createFailedGithubRequestMessage } from './deploy-app.effects';
 
 // TODO: Remove this in favour of action builder config.
@@ -41,24 +41,17 @@ export class GithubEffects {
         entityType: gitRepoEntityType,
         endpointType: CF_ENDPOINT_TYPE,
         type: action.type,
-        guid: action.stProject.deploySource.project
+        guid: action.guid
       };
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
-      const scmType = action.stProject.deploySource.scm || action.stProject.deploySource.type;
-      const scm = this.scmService.getSCM(scmType as GitSCMType);
-      return scm.getRepository(this.httpClient, action.stProject.deploySource.project).pipe(
+      return action.meta.scm.getRepository(this.httpClient, action.meta.projectName).pipe(
         mergeMap(repoDetails => {
           const mappedData = {
             entities: { cfGitRepo: {} },
             result: []
           } as NormalizedResponse;
-          const id = scmType + '-' + repoDetails.full_name;
-          mappedData.entities.cfGitRepo[id] = repoDetails;
-          // mappedData.entities.cfGitRepo[id] = {
-          //   entity: repoDetails,
-          //   metadata: {}
-          // };
-          mappedData.result.push(id);
+          mappedData.entities.cfGitRepo[action.guid] = repoDetails;
+          mappedData.result.push(action.guid);
           return [
             new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
           ];

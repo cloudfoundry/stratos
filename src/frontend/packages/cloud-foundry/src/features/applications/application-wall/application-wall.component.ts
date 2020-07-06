@@ -6,12 +6,12 @@ import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 @Component({
   selector: 'app-application-wall',
@@ -52,7 +52,7 @@ export class ApplicationWallComponent implements OnDestroy {
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
       map(endpoints => endpoints.map(endpoint => endpoint.guid)),
     );
-    this.canCreateApplication = CurrentUserPermissions.APPLICATION_CREATE;
+    this.canCreateApplication = CfCurrentUserPermissions.APPLICATION_CREATE;
 
     this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
       map(endpoints => !!endpoints && endpoints.length > 0)

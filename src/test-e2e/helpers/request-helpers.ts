@@ -68,8 +68,6 @@ export class RequestHelpers {
    * @param {object?} formData - the form data
    */
   sendRequest(req, options, body?: any, formData?): promise.Promise<any> {
-
-    const p = promise.defer<any>();
     const reqObj = req || this.newRequest();
 
     options.url = this.getHost() + '/' + options.url;
@@ -85,24 +83,53 @@ export class RequestHelpers {
     }
 
     E2E.debugLog('REQ: ' + options.method + ' ' + options.url);
-    E2E.debugLog('   > ' + JSON.stringify(options));
+    this.showOptions(options);
+    return this.retryRequest(reqObj, options, body, formData);
+  }
+
+  retryRequest(reqObj, options, body?: any, formData?, promize = null, retry = 0): promise.Promise<any> {
+    const _that = this;
+    const p = promize || promise.defer<any>();
 
     reqObj(options).then((response) => {
-      E2E.debugLog('OK');
-
+      E2E.debugLog('   + OK : ' + response.statusCode);
       // Get XSRF Token
       if (response.headers && response.headers['x-xsrf-token']) {
         reqObj._xsrfToken = response.headers['x-xsrf-token'];
       }
       p.fulfill(response.body);
     }).catch((e) => {
-      E2E.debugLog('ERROR');
-      E2E.debugLog(e);
-      E2E.debugLog(e.statusCode + ' : ' + e.message);
-      p.reject(e);
+      E2E.debugLog('   - ERR: ' + e.statusCode + ' : ' + e.message);
+      if (e.statusCode !== 401 && retry < 2) {
+        retry++;
+        E2E.debugLog('   - Retrying ' + options.method + ' ' + options.url + ' [' + retry + ']');
+        _that.retryRequest(reqObj, options, body, formData, p, retry);
+      } else {
+        p.reject(e);
+      }
     });
 
     return p.promise;
+  }
+
+  showOptions(options: any) {
+    if (!options) {
+      return;
+    }
+    const cpy = JSON.parse(JSON.stringify(options));
+    this.sanitizeOption(cpy);
+    E2E.debugLog('   > ' + JSON.stringify(cpy));
+  }
+
+  sanitizeOption(options) {
+    Object.keys(options).forEach(key => {
+      const v = options[key];
+      if (typeof v === 'string' && key === 'password') {
+        options[key]='******';
+      } else if  (typeof v === 'object') {
+        this.sanitizeOption(options[key]);
+      }
+    });
   }
 
   /**
@@ -116,6 +143,7 @@ export class RequestHelpers {
       username: creds.username || 'dev',
       password: creds.password || 'dev'
     };
+
     return this.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/uaa' }, null, formData);
   }
 

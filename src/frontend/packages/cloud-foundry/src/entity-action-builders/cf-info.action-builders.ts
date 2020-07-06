@@ -1,7 +1,7 @@
+import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetCFInfo } from '../actions/cloud-foundry.actions';
-import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 
-export interface CfInfoDefinitionActionBuilders extends CFOrchestratedActionBuilders {
+export interface CfInfoDefinitionActionBuilders extends OrchestratedActionBuilders {
   get: (cfGuid: string) => GetCFInfo;
 }
 

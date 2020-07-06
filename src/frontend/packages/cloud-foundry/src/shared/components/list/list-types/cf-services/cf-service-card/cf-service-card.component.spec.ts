@@ -4,8 +4,8 @@ import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import {
   generateCfBaseTestModulesNoShared,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -62,11 +62,10 @@ describe('CfServiceCardComponent', () => {
         extra: '',
         tags: [''],
         requires: [''],
-        service_broker_guid: '',
+        service_broker_guid: 'service_broker_guid',
         plan_updateable: 1,
         service_plans_url: '',
         service_plans: [],
-
       },
       metadata: null
     };

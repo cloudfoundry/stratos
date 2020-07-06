@@ -12,6 +12,7 @@ import {
   AutoscalerScaleHistoryPageComponent,
 } from '../features/autoscaler-scale-history-page/autoscaler-scale-history-page.component';
 import { EditAutoscalerPolicyComponent } from '../features/edit-autoscaler-policy/edit-autoscaler-policy.component';
+import { EditAutoscalerCredentialComponent } from '../features/edit-autoscaler-credential/edit-autoscaler-credential.component';
 
 const autoscalerRoutes: Routes = [
   {
@@ -24,6 +25,10 @@ const autoscalerRoutes: Routes = [
           {
             path: 'edit-autoscaler-policy',
             component: EditAutoscalerPolicyComponent,
+          },
+          {
+            path: 'edit-autoscaler-credential',
+            component: EditAutoscalerCredentialComponent,
           },
           {
             path: 'app-autoscaler-metric-page',

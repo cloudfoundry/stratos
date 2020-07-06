@@ -94,8 +94,16 @@ spec:
 {{ toYaml .Values.console.podExtraLabels | nindent 8 }}
 {{- end }}
     spec:
+{{- if .Values.configInit }}
+{{- if .Values.configInit.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.configInit.nodeSelector | trim  | indent 8 }}
+{{- end }}
+{{- end }}
       containers:
       - env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         - name: "STRATOS_VOLUME_MIGRATION"
           value: "true"
         - name: "IS_UPGRADE"
@@ -170,6 +178,10 @@ spec:
         app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
         helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     spec:
+{{- if .Values.configInit }}
+      nodeSelector:
+{{ toYaml .Values.configInit.nodeSelector | indent 8 }}
+{{- end }}
       containers:
       - env:
         - name: "NAMESPACE"

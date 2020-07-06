@@ -44,7 +44,7 @@ type PortalProxy interface {
 	Env() *env.VarSet
 	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
 	ListEndpoints() ([]*CNSIRecord, error)
-	UpdateEndointMetadata(guid string, metadata string) error
+	UpdateEndpointMetadata(guid string, metadata string) error
 
 	// UAA Token
 	GetUAATokenRecord(userGUID string) (TokenRecord, error)

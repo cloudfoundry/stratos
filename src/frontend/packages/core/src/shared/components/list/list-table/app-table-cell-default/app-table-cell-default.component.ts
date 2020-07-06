@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, Observable } from 'rxjs';
 
 import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
 import { pathGet } from '../../../../../core/utils.service';
@@ -7,7 +7,6 @@ import { TableCellCustom } from '../../list.types';
 import { ICellDefinition } from '../table.types';
 
 @Component({
-  moduleId: module.id,
   selector: 'app-table-cell-default',
   templateUrl: 'app-table-cell-default.component.html',
   styleUrls: ['app-table-cell-default.component.scss']
@@ -43,7 +42,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
   public isExternalLink = false;
   public linkValue: string;
   public linkTarget = '_self';
-  public valueGenerator: (row: T, schemaKey?: string) => string;
+  public valueGenerator: (row: T, schemaKey?: string) => string | Observable<string>;
   public showShortLink = false;
 
   public init() {

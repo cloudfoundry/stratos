@@ -9,6 +9,20 @@ $bottom-index: $top-index - 1;
   &__toolbar {
     padding: 0 20px;
   }
+  &__left {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+  &__filler {
+    flex: 1 1 auto;
+  }
+  &__right {
+    align-items: center;
+    display: flex;
+    flex: 0;
+  }
   &__notification-button {
     margin-right: 5px;
   }
@@ -39,7 +53,12 @@ $bottom-index: $top-index - 1;
     justify-content: space-between;
   }
   &__history {
-    padding: 0 20px 20px;
+    min-width: 200px;
+  }
+  &__history-title {
+    font-size: 14px;
+    margin: 0 0 10px;
+    padding: 2px 10px 10px;
   }
   &__nav-toggle-wrapper {
     margin-right: 20px;
@@ -47,9 +66,6 @@ $bottom-index: $top-index - 1;
   &__nav-toggle,
   &__logout {
     cursor: pointer;
-  }
-  &__filler {
-    flex: 1 1 auto;
   }
   &__breadcrumb,
   &__breadcrumb-separator {
@@ -86,37 +102,19 @@ $bottom-index: $top-index - 1;
     opacity: .3;
     padding: 0 10px 0 5px;
   }
-  &__menu-button-icon {
-    $menu-button-height: 30px;
-    border-radius: 50%;
-    height: $menu-button-height;
-    line-height: $menu-button-height;
-    width: $menu-button-height;
-  }
-  &__username-icon {
-    $menu-button-height: 50px;
-    border-radius: 50%;
-    font-size: 24px;
-    height: $menu-button-height;
-    line-height: $menu-button-height;
-    text-align: center;
-    width: $menu-button-height;
-  }
-  &__username-subtext {
-    font-size: 12px;
-    opacity: .6;
-  }
   &__menu-button {
+    align-items: center;
     display: flex;
     justify-content: center;
   }
   &__usermenu {
-    padding: 5px 0;
+    margin-left: 8px;
   }
   &__username {
     align-items: center;
     display: flex;
-    padding: 5px 15px 15px 12px;
+    margin-top: -8px;
+    padding: 15px;
   }
   &__username-text {
     margin-left: 10px;

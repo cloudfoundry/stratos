@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map, publishReplay, refCount, share } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { AppState } from '../../../../../../store/src/app-state';
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
 
 
@@ -39,7 +39,7 @@ export class PageHeaderEventsComponent implements OnInit {
   private events$: Observable<any>;
   constructor(
     private activatedRoute: ActivatedRoute,
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     private eventService: GlobalEventService,
   ) { }
 

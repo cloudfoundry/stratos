@@ -1,4 +1,4 @@
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginatedAction } from '../../types/pagination.types';
 import { EntityRequestAction } from '../../types/request.types';
 

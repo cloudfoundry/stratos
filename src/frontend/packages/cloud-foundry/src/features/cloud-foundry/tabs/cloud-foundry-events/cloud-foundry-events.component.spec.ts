@@ -23,8 +23,14 @@ describe('CloudFoundryEventsComponent', () => {
       imports: [...CFBaseTestModules],
       providers: [
         CloudFoundryEndpointService,
-        ActiveRouteCfOrgSpace,
-        CfUserService
+        CfUserService, {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: 'cfGuid',
+            orgGuid: 'orgGuid',
+            spaceGuid: 'spaceGuid'
+          }
+        }
       ]
     })
       .compileComponents();

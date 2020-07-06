@@ -1,9 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { EndpointOnlyAppState } from '../../../../../../store/src/app-state';
 import { EndpointsService } from '../../../../core/endpoints.service';
 import { MarkdownPreviewComponent } from '../../../../shared/components/markdown-preview/markdown-preview.component';
 import { IStepperStep, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
@@ -26,7 +24,6 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   public doConnect = false;
 
   constructor(
-    private store: Store<EndpointOnlyAppState>,
     private endpointsService: EndpointsService,
     private sidePanelService: SidePanelService,
   ) {
@@ -37,7 +34,7 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   }
 
   onEnter = (data: ConnectEndpointConfig) => {
-    this.connectService = new ConnectEndpointService(this.store, this.endpointsService, data);
+    this.connectService = new ConnectEndpointService(this.endpointsService, data);
   }
 
   onNext = (): Observable<StepOnNextResult> => this.doConnect ? this.connectService.submit().pipe(

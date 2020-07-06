@@ -2,30 +2,21 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
+import { filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  applicationEntityType,
-  domainEntityType,
-  routeEntityType,
-  spaceEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-types';
+import { domainEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
-import { IDomain, ISpace } from '../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
-import { pathGet } from '../../../../../../core/src/core/utils.service';
 import {
   StepOnNextFunction,
   StepOnNextResult,
 } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { ActionState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { IDomain } from '../../../../cf-api.types';
+import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
@@ -62,7 +53,6 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   constructor(
     private applicationService: ApplicationService,
     private store: Store<CFAppState>,
-    private entityServiceFactory: EntityServiceFactory,
   ) {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
@@ -111,19 +101,12 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       switchMap(() => this.appService.waitForAppEntity$
         .pipe(
           switchMap(app => {
-            const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
-            const actionBuilder = spaceEntity.actionOrchestrator.getActionBuilder('get');
-            const getSpaceAction = actionBuilder(
+            this.spaceGuid = app.entity.entity.space_guid;
+            return cfEntityCatalog.space.store.getEntityService(
               app.entity.entity.space_guid,
               app.entity.entity.cfGuid,
               { includeRelations: [createEntityRelationKey(spaceEntityType, domainEntityType)] }
-            );
-            this.spaceGuid = app.entity.entity.space_guid;
-            const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(
-              this.spaceGuid,
-              getSpaceAction
-            );
-            return spaceService.waitForEntity$;
+            ).waitForEntity$;
           }),
           filter(({ entity }) => !!entity.entity.domains),
           tap(({ entity }) => {
@@ -221,39 +204,34 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       path = '/' + path;
     }
 
-    const routeEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
-    const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('create');
-    const createRouteAction = actionBuilder(newRouteGuid, this.cfGuid, new Route(domainGuid, this.spaceGuid, host, path, port));
-
-    this.store.dispatch(createRouteAction);
-    return this.store.select(selectCfRequestInfo(routeEntityType, newRouteGuid))
-      .pipe(
-        filter(route => !route.creating && !route.fetching),
-        mergeMap(route => {
-          if (route.error) {
-            return observableOf({ success: false, message: `Failed to create route: ${route.message}` });
-          } else {
-            return this.mapRoute(route.response.result[0]);
-          }
-        })
-      );
+    return cfEntityCatalog.route.api.create<RequestInfoState>(
+      newRouteGuid,
+      this.cfGuid,
+      new Route(domainGuid, this.spaceGuid, host, path, port)
+    ).pipe(
+      pairwise(),
+      filter(([oldR, newR]) => oldR.creating && !newR.creating),
+      map(([, newR]) => newR),
+      mergeMap(route => {
+        if (route.error) {
+          return observableOf({ success: false, message: `Failed to create route: ${route.message}` });
+        } else {
+          return this.mapRoute(route.response.result[0]);
+        }
+      })
+    );
   }
 
   private mapRoute(routeGuid: string): Observable<StepOnNextResult> {
-    const appEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-    const actionBuilder = appEntity.actionOrchestrator.getActionBuilder('assignRoute');
-    const assignRouteAction = actionBuilder(this.cfGuid, routeGuid, this.appGuid);
-    this.store.dispatch(assignRouteAction);
-    return this.store.select(selectCfRequestInfo(applicationEntityType, this.appGuid)).pipe(
+    return cfEntityCatalog.application.api.assignRoute<ActionState>(this.cfGuid, routeGuid, this.appGuid).pipe(
       pairwise(),
-      filter(([oldApp, newApp]) => {
-        return pathGet('updating.Assigning-Route.busy', oldApp) && !pathGet('updating.Assigning-Route.busy', newApp);
-      }),
-      map(([oldApp, newApp]) => newApp),
-      map((requestState: RequestInfoState) => {
+      filter(([oldR, newR]) => oldR.busy && !newR.busy),
+      map(([, newR]) => newR),
+      map((requestState: ActionState) => {
         if (requestState.error) {
           return { success: false, message: `Failed to associate route with app: ${requestState.error}` };
         }
+        cfEntityCatalog.route.api.getAllForApplication(this.appGuid, this.cfGuid)
         this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid, 'routes'] }));
         return { success: true };
       })
@@ -261,29 +239,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   private mapRouteSubmit(): Observable<StepOnNextResult> {
-
     return this.selectedRoute$.pipe(
-      tap(route => {
-        entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType)
-          .actionOrchestrator
-          .getEntityActionDispatcher((action) => this.store.dispatch(action))
-          .dispatchAction('assignRoute', this.cfGuid, route.metadata.guid, this.appGuid);
-      }),
-      switchMap(() => this.appService.app$),
-      map(requestInfo => requestInfo.entityRequestInfo.updating['Assigning-Route']),
-      filter(requestInfo => !requestInfo.busy),
-      take(1),
-      map(requestInfo => {
-        if (requestInfo.error) {
-          return { success: false, message: `Failed to associate route with app: ${requestInfo.message}` };
-        } else {
-          const routeEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, routeEntityType);
-          const actionBuilder = routeEntity.actionOrchestrator.getActionBuilder('getAllForApplication');
-          const getAppRoutesAction = actionBuilder(this.appGuid, this.cfGuid);
-          this.store.dispatch(getAppRoutesAction);
-          return { success: true, redirect: true };
-        }
-      })
+      switchMap(route => this.mapRoute(route.metadata.guid))
     );
   }
 

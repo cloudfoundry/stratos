@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import {
   getActionsFromExtensions,
@@ -12,10 +10,12 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../../core/src/core/extension/extension-service';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { FavoritesConfigMapper } from '../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
+import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-mapper';
 import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
 @Component({
@@ -54,7 +54,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     );
 
     const firehoseHidden$ = this.currentUserPermissionsService
-      .can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
+      .can(CfCurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
       .pipe(map(visible => !visible));
 
     const usersHidden$ = cfEndpointService.usersCount$.pipe(
@@ -68,7 +68,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
     // Default tabs + add any tabs from extensions
     this.tabLinks = [
-      { link: 'summary', label: 'Summary', icon: 'description' },
+      { link: 'summary', label: 'Summary', icon: 'cloud_foundry', iconFont: 'stratos-icons' },
       { link: 'organizations', label: 'Organizations', icon: 'organization', iconFont: 'stratos-icons' },
       {
         link: CloudFoundryTabsBaseComponent.cells,
@@ -76,7 +76,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
         icon: 'select_all',
         hidden$: cellsHidden$
       },
-      { link: 'routes', label: 'Routes', icon: 'network_route', iconFont: 'stratos-icons', },
+      { link: 'routes', label: 'Routes', icon: 'route', iconFont: 'stratos-icons', },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',
@@ -101,7 +101,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   ngOnInit() {
     this.isFetching$ = observableOf(false);
-    this.canAddOrg$ = this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
+    this.canAddOrg$ = this.currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
   }
 
 }

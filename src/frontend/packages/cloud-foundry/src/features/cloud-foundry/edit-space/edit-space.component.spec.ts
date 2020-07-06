@@ -5,6 +5,9 @@ import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  CloudFoundryUserProvidedServicesService,
+} from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organization.service';
 import { EditSpaceStepComponent } from './edit-space-step/edit-space-step.component';
@@ -18,7 +21,13 @@ describe('EditSpaceComponent', () => {
     TestBed.configureTestingModule({
       declarations: [EditSpaceComponent, EditSpaceStepComponent],
       imports: generateCfBaseTestModules(),
-      providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider(), TabNavService, CloudFoundryOrganizationService]
+      providers: [
+        ActiveRouteCfOrgSpace,
+        generateTestCfEndpointServiceProvider(),
+        TabNavService,
+        CloudFoundryOrganizationService,
+        CloudFoundryUserProvidedServicesService
+      ]
     })
       .compileComponents();
   }));

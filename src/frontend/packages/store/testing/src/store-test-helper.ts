@@ -2,16 +2,16 @@ import { ModuleWithProviders } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
-import { endpointEntitySchema } from '../../../core/src/base-entity-schemas';
 import { AppState } from '../../src/app-state';
-import { entityCatalog } from '../../src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../src/entity-catalog/entity-catalog.types';
+import { endpointEntityType, stratosEntityFactory } from '../../src/helpers/stratos-entity-factory';
 import { appReducers } from '../../src/reducers.module';
-import { getDefaultRequestState } from '../../src/reducers/api-request-reducer/types';
+import { getDefaultRequestState, rootUpdatingKey } from '../../src/reducers/api-request-reducer/types';
 import { getDefaultPaginationEntityState } from '../../src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
 import { NormalizedResponse } from '../../src/types/api.types';
 import { SessionData, SessionDataEndpoint } from '../../src/types/auth.types';
-import { getDefaultEndpointRoles, getDefaultRolesRequestState } from '../../src/types/current-user-roles.types';
+import { getDefaultRolesRequestState } from '../../src/types/current-user-roles.types';
 import { EndpointModel } from '../../src/types/endpoint.types';
 import { BaseEntityValues } from '../../src/types/entity.types';
 import { WrapperRequestActionSuccess } from '../../src/types/request.types';
@@ -165,6 +165,7 @@ function getDefaultInitialTestStratosStoreState() {
       pollingEnabled: true,
       themeKey: null,
       headerEventMinimized: true,
+      gravatarEnabled: false,
     },
     actionHistory: [],
     lists: {},
@@ -201,9 +202,7 @@ function getDefaultInitialTestStratosStoreState() {
         isAdmin: false,
         scopes: []
       },
-      cf: {
-        [testSCFEndpointGuid]: getDefaultEndpointRoles()
-      },
+      endpoints: {},
       state: getDefaultRolesRequestState()
     }
   };
@@ -233,7 +232,8 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
               string: '',
               items: {}
             },
-          }
+          },
+          maxedState: {}
         }
       },
       metrics: {},
@@ -248,7 +248,7 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
         '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
           fetching: false,
           updating: {
-            _root_: {
+            [rootUpdatingKey]: {
               busy: false,
               error: false,
               message: ''
@@ -396,7 +396,7 @@ export function createEntityStore(entityMap: Map<EntityCatalogEntityConfig, Arra
 }
 
 export function populateStoreWithTestEndpoint(): EndpointModel {
-  const stratosEndpointEntityConfig: EntityCatalogEntityConfig = endpointEntitySchema;
+  const stratosEndpointEntityConfig: EntityCatalogEntityConfig = stratosEntityFactory(endpointEntityType);
   const stratosEndpointEntityKey = entityCatalog.getEntityKey(stratosEndpointEntityConfig);
   const mappedData = {
     entities: {

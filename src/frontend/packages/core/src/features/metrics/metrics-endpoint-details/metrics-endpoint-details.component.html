@@ -1,0 +1,9 @@
+<div class="metrics-details" *ngIf="data$ | async as info">
+  <div class="metrics-details__line">
+    <mat-icon *ngIf="info.warning" class="metrics-details__icon text-warning">warning</mat-icon>
+    {{ info.ok }}
+    <ng-container *ngIf="info.total > 0"> / {{info.total}}</ng-container>
+    <ng-container *ngIf="info.plural"> sources</ng-container>
+    <ng-container *ngIf="!info.plural"> source</ng-container>
+  </div>
+</div>

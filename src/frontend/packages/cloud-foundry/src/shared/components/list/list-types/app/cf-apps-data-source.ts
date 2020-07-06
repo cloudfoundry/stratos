@@ -1,20 +1,18 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllApplications } from '../../../../../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
-  appStatsEntityType,
   organizationEntityType,
   routeEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { DispatchSequencer, DispatchSequencerAction } from '../../../../../../../core/src/core/dispatch-sequencer';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   distinctPageUntilChanged,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -22,23 +20,17 @@ import {
   ListPaginationMultiFilterChange,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { CFListDataSource } from '../../../../cf-list-data-source';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { cfOrgSpaceFilter } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CFListDataSource } from '../../../../cf-list-data-source';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
-
-// export function createGetAllAppAction(paginationKey): GetAllApplications {
-//   return new GetAllApplications(paginationKey, null, [
-//     createEntityRelationKey(applicationEntityType, spaceEntityType),
-//     createEntityRelationKey(spaceEntityType, organizationEntityType),
-//     createEntityRelationKey(applicationEntityType, routeEntityType),
-//   ]);
-// }
+import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 
 export class CfAppsDataSource extends CFListDataSource<APIResource> {
 
@@ -51,18 +43,18 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
   private subs: Subscription[];
   public action: GetAllApplications;
 
-
   constructor(
-    store: Store<CFAppState>,
+    store: Store<AppState>,
     listConfig?: IListConfig<APIResource>,
     transformEntities?: any[],
     paginationKey = CfAppsDataSource.paginationKey,
     seedPaginationKey = CfAppsDataSource.paginationKey,
-    startingCfGuid?: string
+    cfGuid?: string
   ) {
     const syncNeeded = paginationKey !== seedPaginationKey;
-    const action = new GetAllApplications(paginationKey, null, CfAppsDataSource.includeRelations);
-    action.endpointGuid = startingCfGuid;
+    const action = cfEntityCatalog.application.actions.getMultiple(cfGuid, CfAppsDataSource.paginationKey, {
+      includeRelations: CfAppsDataSource.includeRelations,
+    });
 
     const dispatchSequencer = new DispatchSequencer(store);
 
@@ -114,12 +106,9 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
           const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;
           if (appState === 'STARTED') {
-            const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
-            const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
-            const getAction = actionBuilder(appGuid, cfGuid);
             actions.push({
               id: appGuid,
-              action: getAction
+              action: cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid)
             });
           }
         });

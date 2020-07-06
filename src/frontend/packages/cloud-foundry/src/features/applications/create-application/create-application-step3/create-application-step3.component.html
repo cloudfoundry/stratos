@@ -2,7 +2,7 @@
 <form [formGroup]="setDomainHost" class="stepper-form">
   <mat-form-field>
     <mat-select placeholder="Domain" name="domain" formControlName="domain">
-      <mat-option *ngFor="let domain of (domains$ | async)" [value]="domain.entity.guid">
+      <mat-option *ngFor="let domain of (domains$ | async)" [value]="domain.metadata.guid">
         <span>{{ domain.entity.name }}</span>
       </mat-option>
     </mat-select>

@@ -20,10 +20,12 @@ helm repo add stratos https://cloudfoundry.github.io/stratos
 Check the repository was successfully added by searching for the `console`, for example:
 
 ```
-helm search console
+helm search repo console
 NAME               	CHART VERSION   APP VERSION	DESCRIPTION                                  
-stratos/console    	3.0.0           3.0.0      	A Helm chart for deploying Stratos UI Console
+stratos/console    	3.2.0           3.2.0      	A Helm chart for deploying Stratos UI Console
 ```
+
+> Note: Version numbers will depend on the version of Stratos available from the Helm repository
 
 > Note: Commands shown in this document are for Helm version 3. For Helm version 2, when installing, instead of supplying the name via the `--name` flag, it is supplied as the first argument, before the chart name.
 
@@ -73,6 +75,8 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.templatesConfigMapName|Name of config map that provides the template files for user invitation emails||
 |console.userInviteSubject|Email subject of the user invitation message||
 |console.techPreview|Enable/disable Tech Preview features|false|
+|console.ui.listMaxSize|Override the default maximum number of entities that a configured list can fetch. When a list meets this amount additional pages are not fetched||
+|console.ui.listAllowLoadMaxed|If the maximum list size is met give the user the option to fetch all results|false|
 |console.localAdminPassword|Use local admin user instead of UAA - set to a password to enable||
 |console.tlsSecretName|Secret containing TLS certificate to use for the Console||
 |console.mariadb.external|Use an external database instead of the built-in MariaDB|false|
@@ -83,13 +87,11 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.mariadb.host|Hostname of the database when using an external db||
 |console.mariadb.port|Port of the database when using an external db|3306|
 |console.mariadb.tls|TLS mode when connecting to database (true, false, skip-verify, preferred)|false|
-|console.uaa.protocol|Protocol to use when authenticating with the UAA|https://|
-|console.uaa.host|Host of the UAA to authenticate with ||
-|console.uaa.port|Port of the UAA to authenticate with ||
-|console.uaa.consoleClient|Client to use when authenticating with the UAA|cf|
-|console.uaa.consoleClientSecret|Client secret to use when authenticating with the UAA||
-|console.uaa.consoleAdminIdentifier|Scope that identifies an admin user of Stratos (e.g. cloud_controller.admin||
-|console.uaa.skipSSLValidation|Skip SSL validation when when authenticating with the UAA|false|
+|uaa.endpoint|URL of the UAA endpoint to authenticate with ||
+|uaa.consoleClient|Client to use when authenticating with the UAA|cf|
+|uaa.consoleClientSecret|Client secret to use when authenticating with the UAA||
+|uaa.consoleAdminIdentifier|Scope that identifies an admin user of Stratos (e.g. cloud_controller.admin||
+|uaa.skipSSLValidation|Skip SSL validation when when authenticating with the UAA|false|
 |env.SMTP_AUTH|Authenticate against the SMTP server using AUTH command when Sending User Invite emails|false|
 |env.SMTP_FROM_ADDRESS|From email address to use when Sending User Invite emails||
 |env.SMTP_USER|User name to use for authentication when Sending User Invite emails||
@@ -113,6 +115,9 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.service.extraLabels|Additional labels to be added to all service resources||
 |console.service.ingress.annotations|Annotations to be added to the ingress resource||
 |console.service.ingress.extraLabels|Additional labels to be added to the ingress resource||
+|console.nodeSelector|Node selectors to use for the console Pod||
+|mariadb.nodeSelector|Node selectors to use for the database Pod||
+|configInit.nodeSelector|Node selectors to use for the configuration Pod||
 
 ## Accessing the Console
 
@@ -150,10 +155,8 @@ helm repo update
 To update an instance, the following assumes your instance is called `my-console`:
 
 ```
-helm upgrade my-console stratos/console --recreate-pods
+helm upgrade my-console stratos/console
 ```
-
-> Note: You *must* use the `--recreate-pods` flag when upgrading
 
 After the upgrade, perform a `helm list` to ensure your console is the latest version.
 
@@ -278,9 +281,7 @@ UAA configuration can be specified by providing the following configuration.
 Create a yaml file with the content below and and update according to your environment and save to a file called `uaa-config.yaml`.
 ```
 uaa:
-  protocol: https://
-  port: 2793
-  host: uaa.cf-dev.io
+  endpoint: https://uaa.cf-dev.io:2793
   consoleClient:  cf
   consoleClientSecret: 
   consoleAdminIdentifier: cloud_controller.admin 
@@ -288,7 +289,6 @@ uaa:
 ```
 
 To install Stratos with the above specified configuration:
-
 
 ```
 kubectl create namespace console

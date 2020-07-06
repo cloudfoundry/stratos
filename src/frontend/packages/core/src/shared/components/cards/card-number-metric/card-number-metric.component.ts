@@ -2,10 +2,10 @@ import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { UtilsService } from '../../../../core/utils.service';
-import { StratosStatus } from '../../../shared.types';
 import { determineCardStatus } from '../card-status/card-status.component';
 
 @Component({
@@ -34,7 +34,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   status$ = new BehaviorSubject<StratosStatus>(StratosStatus.NONE);
   isUnlimited: boolean;
 
-  constructor(private utils: UtilsService, private store: Store<CFAppState>) { }
+  constructor(private utils: UtilsService, private store: Store<AppState>) { }
 
   ngOnInit() {
     this.format();

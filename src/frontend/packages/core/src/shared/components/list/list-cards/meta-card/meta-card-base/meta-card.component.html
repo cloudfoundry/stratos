@@ -31,6 +31,7 @@
             <mat-icon *ngIf="menuItem.icon">{{menuItem.icon}}</mat-icon>
             <span>{{menuItem.label}}</span>
           </button>
+          <div *ngIf="menuItem.separator" class="meta-card__header__popup-separator"></div>
         </ng-container>
       </mat-menu>
     </div>

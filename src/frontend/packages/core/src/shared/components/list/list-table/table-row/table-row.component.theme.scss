@@ -8,6 +8,17 @@
   $foreground: map-get($theme, foreground);
   .table-row {
     border-bottom-color: mat-color($foreground, divider);
+    &.in-expanded-row {
+      border-left-color: mat-color($foreground, divider);
+    }
+
+    &__inner {
+      .table-row__inner__expansion.mat-expansion-panel {
+        box-shadow: none;
+        box-sizing: inherit;
+      }
+    }
+
   }
   .table-row-wrapper {
     &__errored {

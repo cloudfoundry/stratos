@@ -6,7 +6,6 @@
   display: flex;
 
   &__overlay {
-    background-color: rgba(0, 0, 0, 0);
     left: 0;
     overflow: hidden;
     position: absolute;
@@ -29,7 +28,6 @@
     }
 
     &-show {
-      background-color: rgba(0, 0, 0, .6);
       transition-delay: 0s;
       visibility: visible;
 
@@ -39,7 +37,6 @@
     }
 
     &-inner {
-      box-shadow: -4px 3px 41px -1px rgba(0, 0, 0, .36);
       padding: 50px;
       position: relative;
       transform: translateY(-100%);

@@ -13,12 +13,12 @@ LOCAL_BUILD="true"
 # TRAVIS_COMMIT
 
 if [ -z "$TRAVIS_REPO_SLUG" ]; then
-  echo "Need to be running in Trvis"
+  echo "Need to be running in Travis"
   exit 1
 fi
 
 if [ -z "$TRAVIS_COMMIT" ]; then
-  echo "Need to be running in Trvis"
+  echo "Need to be running in Travis"
   exit 1
 fi
 
@@ -40,9 +40,11 @@ function tryGetExistingBuild() {
   if [ $? -eq 0 ]; then
     # We found an existing build, so download and unpack it
     echo "Downloading build package"
-    tar -xvf ${GZIP_NAME}
+    tar -xvf ${GZIP_NAME} > /dev/null
     if [ $? -eq 0 ]; then
       LOCAL_BUILD="false"
+    else 
+      echo "Failed to untar the build package"
     fi
     rm -rf ${GZIP_NAME}
   fi

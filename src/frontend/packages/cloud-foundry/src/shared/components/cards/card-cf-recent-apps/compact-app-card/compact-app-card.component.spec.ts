@@ -6,13 +6,9 @@ import {
 import {
   ApplicationStateIconPipe,
 } from '../../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
-import {
-  ApplicationStateService,
-} from '../../../../../../../core/src/shared/components/application-state/application-state.service';
-import {
-  generateCfBaseTestModulesNoShared,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModulesNoShared } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { ApplicationStateService } from '../../../../services/application-state.service';
 import { CompactAppCardComponent } from './compact-app-card.component';
 
 describe('CompactAppCardComponent', () => {

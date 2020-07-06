@@ -30,7 +30,6 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
     noEntries: 'There are no endpoints'
   };
   enableTextFilter = true;
-  tableFixedRowHeight = true;
 
   constructor(
     private store: Store<CFAppState>,

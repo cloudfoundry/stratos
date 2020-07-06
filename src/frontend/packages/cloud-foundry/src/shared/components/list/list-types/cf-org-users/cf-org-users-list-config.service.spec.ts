@@ -10,7 +10,7 @@ import {
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
-} from '../../../../../../../core/test-framework/cloud-foundry-organization.service.mock';
+} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {

@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, of as observableOf, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { catchError, combineLatest, filter, first, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
 
@@ -34,6 +34,37 @@ export interface FileTransferStatus {
   fileName: string;
 }
 
+interface DeploySource {
+  type: string;
+}
+
+interface GitSCMSourceInfo extends DeploySource {
+  project: string;
+  branch: string;
+  url: string;
+  commit: string;
+  scm: string;
+}
+
+// Structure used to provide metadata about the Git Url source
+interface GitUrlSourceInfo extends DeploySource {
+  branch: string;
+  url: string;
+}
+
+// DockerImageSourceInfo - Structure used to provide metadata about the docker source
+interface DockerImageSourceInfo extends DeploySource {
+  applicationName: string;
+  dockerImage: string;
+  dockerUsername: string;
+}
+
+interface FolderSourceInfo extends DeploySource {
+  wait: boolean;
+  files: number;
+  folders: string[];
+}
+
 export class DeployApplicationDeployer {
 
   isRedeploy: string;
@@ -60,7 +91,7 @@ export class DeployApplicationDeployer {
   // Status of file transfers
   fileTransferStatus$ = new BehaviorSubject<FileTransferStatus>(undefined);
 
-  public messages: Observable<string>;
+  public messages = new BehaviorSubject<string>('');
 
   // Are we deploying?
   deploying = false;
@@ -134,13 +165,14 @@ export class DeployApplicationDeployer {
         this.applicationSource = appDetail.applicationSource;
         this.applicationOverrides = appDetail.applicationOverrides;
         const host = window.location.host;
+        const appId = this.isRedeploy ? `&app=${this.isRedeploy}` : '';
         const streamUrl = (
           `wss://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
-          `?org=${org.entity.name}&space=${space.entity.name}`
+          `?org=${org.entity.name}&space=${space.entity.name}${appId}`
         );
 
         this.inputStream = new Subject<string>();
-        this.messages = websocketConnect(streamUrl)
+        const buffer = websocketConnect(streamUrl)
           .pipe(
             switchMap((get) => get(this.inputStream)),
             catchError(e => {
@@ -158,7 +190,16 @@ export class DeployApplicationDeployer {
             map((log) => log.message),
             share(),
           );
-        this.msgSub = this.messages.subscribe();
+
+        // Buffer messages until each newline character
+        let b = '';
+        this.msgSub = buffer.subscribe(m => {
+          b = b + m;
+          if (b.endsWith('\n')) {
+            this.messages.next(b);
+            b = '';
+          }
+        });
       })
     ).subscribe();
 
@@ -204,7 +245,7 @@ export class DeployApplicationDeployer {
   }
 
   sendGitSCMSourceMetadata = (appSource: DeployApplicationSource) => {
-    const gitscm = {
+    const gitscm: GitSCMSourceInfo = {
       project: appSource.gitDetails.projectName,
       branch: appSource.gitDetails.branch.name,
       type: appSource.type.group,
@@ -222,7 +263,7 @@ export class DeployApplicationDeployer {
   }
 
   sendGitUrlSourceMetadata = (appSource: DeployApplicationSource) => {
-    const gitUrl = {
+    const gitUrl: GitUrlSourceInfo = {
       url: appSource.gitDetails.projectName,
       branch: appSource.gitDetails.branch.name,
       type: appSource.type.id
@@ -237,7 +278,7 @@ export class DeployApplicationDeployer {
   }
 
   sendDockerImageMetadata = (appSource: DeployApplicationSource) => {
-    const dockerInfo = {
+    const dockerInfo: DockerImageSourceInfo = {
       applicationName: appSource.dockerDetails.applicationName,
       dockerImage: appSource.dockerDetails.dockerImage,
       dockerUsername: appSource.dockerDetails.dockerUsername,
@@ -392,7 +433,7 @@ export class DeployApplicationDeployer {
 
     this.fileTransferStatus$.next(this.fileTransferStatus);
 
-    const transferMetadata = {
+    const transferMetadata: FolderSourceInfo = {
       files: metadata.files.length,
       folders: metadata.folders,
       type: 'filefolder',

@@ -6,16 +6,17 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
+import { SharedModule } from '../../../../../core/src/shared/shared.module';
+import { TabNavService } from '../../../../../core/tab-nav.service';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../core/tab-nav.service';
 import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CreateApplicationStep1Component,
 } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { AppNameUniqueDirective } from '../../../shared/directives/app-name-unique.directive/app-name-unique.directive';
 import { CreateApplicationStep2Component } from './create-application-step2/create-application-step2.component';
 import { CreateApplicationStep3Component } from './create-application-step3/create-application-step3.component';
 import { CreateApplicationComponent } from './create-application.component';
@@ -30,7 +31,8 @@ describe('CreateApplicationComponent', () => {
         CreateApplicationComponent,
         CreateApplicationStep1Component,
         CreateApplicationStep2Component,
-        CreateApplicationStep3Component
+        CreateApplicationStep3Component,
+        AppNameUniqueDirective,
       ],
       imports: [
         ...generateCfStoreModules(),

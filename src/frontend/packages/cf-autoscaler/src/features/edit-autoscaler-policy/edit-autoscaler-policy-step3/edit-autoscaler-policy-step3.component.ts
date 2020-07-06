@@ -242,11 +242,6 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
     this.setRecurringScheduleValidator();
   }
 
-  resetRepeatType(key: string) {
-    this.editRepeatType = key;
-    this.setRecurringScheduleValidator();
-  }
-
   mutualValidate(inputName: string, lastValid: boolean, currentValid: boolean) {
     if (this.editRecurringScheduleForm && lastValid !== currentValid) {
       this.editRecurringScheduleForm.controls[inputName].updateValueAndValidity();

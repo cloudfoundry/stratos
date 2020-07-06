@@ -8,9 +8,13 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../../../core/src/core/github.helpers';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { ApplicationServiceMock } from '../../../../../../../../core/test-framework/application-service-helper';
+import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationService } from '../../../../application.service';
+import {
+  GithubCommitAuthorComponent,
+} from './../../../../../../shared/components/github-commit-author/github-commit-author.component';
+import { GitSCMService } from './../../../../../../shared/data-services/scm/scm.service';
 import { GitSCMTabComponent } from './gitscm-tab.component';
 
 describe('GitSCMTabComponent', () => {
@@ -18,7 +22,7 @@ describe('GitSCMTabComponent', () => {
   let fixture: ComponentFixture<GitSCMTabComponent>;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [GitSCMTabComponent],
+      declarations: [GitSCMTabComponent, GithubCommitAuthorComponent],
       imports: [
         ...generateCfStoreModules(),
         CoreModule,
@@ -32,6 +36,7 @@ describe('GitSCMTabComponent', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         DatePipe,
+        GitSCMService,
       ]
     })
       .compileComponents();

@@ -1,5 +1,6 @@
-import { Component, ViewChild, TemplateRef, OnDestroy, AfterViewInit } from '@angular/core';
 import { TemplatePortal } from '@angular/cdk/portal';
+import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+
 import { TabNavService } from '../../../../tab-nav.service';
 
 @Component({

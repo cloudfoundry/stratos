@@ -3,17 +3,12 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, map, pairwise } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { selectCfRequestInfo } from '../../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { IEntityMetadata } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { SpaceActionBuilders } from '../../../../entity-action-builders/space.action-builders';
+import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
@@ -45,10 +40,9 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   constructor(
     store: Store<CFAppState>,
     activatedRoute: ActivatedRoute,
-    paginationMonitorFactory: PaginationMonitorFactory,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
   ) {
-    super(store, activatedRoute, paginationMonitorFactory, activeRouteCfOrgSpace);
+    super(store, activatedRoute, activeRouteCfOrgSpace);
   }
 
   ngOnInit() {
@@ -79,21 +73,17 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   submit: StepOnNextFunction = () => {
     const id = `${this.orgGuid}-${this.spaceName.value}`;
-    const spaceEntity = entityCatalog.getEntity<IEntityMetadata, any, SpaceActionBuilders>(
-      CF_ENDPOINT_TYPE,
-      spaceEntityType
-    );
-    spaceEntity.actionDispatchManager.dispatchCreate(id, this.cfGuid, {
+    return cfEntityCatalog.space.api.create<RequestInfoState>(id, this.cfGuid, {
       createSpace: {
         name: this.spaceName.value,
         organization_guid: this.orgGuid,
         space_quota_definition_guid: this.quotaDefinition.value
       },
       orgGuid: this.orgGuid
-    });
-
-    return this.store.select(selectCfRequestInfo(spaceEntityType, id)).pipe(
-      filter(o => !!o && !o.fetching && !o.creating),
+    }).pipe(
+      pairwise(),
+      filter(([oldS, newS]) => oldS.creating && !newS.creating),
+      map(([, newS]) => newS),
       this.map('Failed to create space: ')
     );
   }

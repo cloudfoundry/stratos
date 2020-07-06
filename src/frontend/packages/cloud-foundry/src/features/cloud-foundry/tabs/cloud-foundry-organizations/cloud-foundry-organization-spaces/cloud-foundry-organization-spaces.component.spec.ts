@@ -7,7 +7,8 @@ import {
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
-} from '../../../../../../../core/test-framework/cloud-foundry-organization.service.mock';
+} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
+import { CfUserPermissionDirective } from '../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CloudFoundryOrganizationSpacesComponent } from './cloud-foundry-organization-spaces.component';
 
@@ -17,7 +18,10 @@ describe('CloudFoundryOrganizationSpacesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundryOrganizationSpacesComponent],
+      declarations: [
+        CloudFoundryOrganizationSpacesComponent,
+        CfUserPermissionDirective
+      ],
       imports: generateCfBaseTestModules(),
       providers: [
         ...generateTestCfEndpointServiceProvider(),

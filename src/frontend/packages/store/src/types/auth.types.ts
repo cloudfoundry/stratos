@@ -1,22 +1,15 @@
-import { ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
-
 export interface SessionDataEndpoint {
   guid: string;
   name: string;
   version: string;
-  user: {
-    admin: boolean,
-    guid: string,
-    name: string,
-    scopes: ScopeStrings[];
-  };
+  user: SessionUser;
   type: string;
 }
 export interface SessionUser {
   admin: boolean;
   guid: string;
   name: string;
-  scopes: ScopeStrings[];
+  scopes: string[];
 }
 export interface PluginConfig {
   userInvitationsEnabled: 'true' | 'false';
@@ -31,6 +24,8 @@ export interface SessionEndpoint {
 }
 export interface SessionDataConfig {
   enableTechPreview?: boolean;
+  listMaxSize?: number;
+  listAllowLoadMaxed?: boolean;
 }
 export interface SessionData {
   endpoints?: SessionEndpoints;

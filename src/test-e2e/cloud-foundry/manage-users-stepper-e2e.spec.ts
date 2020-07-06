@@ -1,7 +1,7 @@
 import { browser, by, element, protractor } from 'protractor';
 
 import { e2e } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFUsersListComponent } from '../po/cf-users-list.po';
@@ -58,6 +58,8 @@ describe('Manage Users Stepper', () => {
     cfPage.goToUsersTab();
 
     const usersTable = new CFUsersListComponent();
+    usersTable.waitForNoLoadingIndicator();
+    usersTable.pagination.setPageSize('80', 'mat-select-3');
     usersTable.header.setSearchText(userName);
     let usersRow = -1;
     usersTable.table.findRow('username', userName)
@@ -69,7 +71,7 @@ describe('Manage Users Stepper', () => {
         const selectUser = new CheckboxComponent(usersTable.table.getCell(usersRow, 0));
         selectUser.scrollIntoView();
         selectUser.waitUntilShown();
-        selectUser.getComponent().click();
+        selectUser.click();
 
         const usersButton = usersTable.header.getIconButton('people');
         browser.wait(until.visibilityOf(usersButton));

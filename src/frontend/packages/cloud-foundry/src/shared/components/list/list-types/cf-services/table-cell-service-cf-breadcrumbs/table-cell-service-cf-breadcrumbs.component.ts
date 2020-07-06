@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { IService } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { CfOrgSpaceLabelService } from '../../../../../../../../core/src/shared/services/cf-org-space-label.service';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IService } from '../../../../../../cf-api-svc.types';
 import { CFAppState } from '../../../../../../cf-app-state';
+import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
 @Component({
   selector: 'app-table-cell-service-cf-breadcrumbs',

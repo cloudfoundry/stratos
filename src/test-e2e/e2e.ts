@@ -1,5 +1,6 @@
 import { browser, promise, protractor } from 'protractor';
 
+import { CustomizationsMetadata } from '../frontend/packages/core/src/core/customizations.types';
 import { ConsoleUserType, E2EHelpers } from './helpers/e2e-helpers';
 import { RequestHelpers } from './helpers/request-helpers';
 import { ResetsHelpers } from './helpers/reset-helpers';
@@ -15,6 +16,13 @@ export class E2E {
   // Turn on debug logging for test helpers
   public static DEBUG_LOGGING = !!process.env.STRATOS_E2E_DEBUG || false;
 
+  /**
+   * Temporary location for customization, we should in future look to fetch this a better way from client side code
+  */
+  public static customization: CustomizationsMetadata = {
+    alwaysShowNavForEndpointTypes: (epType) => true
+  }
+
   // General helpers
   public helper = new E2EHelpers();
 
@@ -24,10 +32,14 @@ export class E2E {
   // Access to the secrets configuration
   public secrets = new SecretsHelpers();
 
-  static debugLog(log) {
+  static debugLog(log, ...optionalParams: any[]) {
     if (E2E.DEBUG_LOGGING) {
       /* tslint:disable:no-console*/
-      console.log(log);
+      if (optionalParams && optionalParams.length) {
+        console.log(log, optionalParams);
+      } else {
+        console.log(log);
+      }
       /* tslint:disable */
     }
   }
@@ -63,8 +75,8 @@ export class E2E {
   /**
    * Log message in the control flow if debug logging is set
    */
-  debugLog(log: string) {
-    protractor.promise.controlFlow().execute(() => E2E.debugLog(log));
+  debugLog(log: string, ...optionalParams: any[]) {
+    protractor.promise.controlFlow().execute(() => E2E.debugLog(log, optionalParams));
   }
 }
 
@@ -200,6 +212,10 @@ export class E2ESetup {
   private doSetup() {
     const p = promise.fulfilled(true);
 
+    // Extend the timeout for setup
+    const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
+
     // Create the sessions neeed
     if (this.needAdminSession) {
       p.then(() => this.createSession(this.adminReq, ConsoleUserType.admin));
@@ -212,6 +228,9 @@ export class E2ESetup {
     this.setupOps.forEach(op => {
       p.then(() => protractor.promise.controlFlow().execute(() => op.bind(this)()));
     });
+
+    // Reset timeout
+    p.then(() => protractor.promise.controlFlow().execute(() => jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout));
 
     return promise;
   }

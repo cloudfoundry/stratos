@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpClientModule, HttpClient, HttpBackend } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -7,6 +7,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundrySharedModule } from '../../../../shared/cf-shared.module';
 import { CreateApplicationStep2Component } from './create-application-step2.component';
 
 describe('CreateApplicationStep2Component', () => {
@@ -23,6 +24,7 @@ describe('CreateApplicationStep2Component', () => {
         CommonModule,
         CoreModule,
         SharedModule,
+        CloudFoundrySharedModule,
         NoopAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule,

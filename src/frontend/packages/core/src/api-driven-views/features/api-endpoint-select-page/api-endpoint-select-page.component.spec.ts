@@ -21,7 +21,9 @@ describe('ApiEndpointSelectPageComponent', () => {
         SharedModule,
         ApiDrivenViewsModule,
       ],
-      providers: [TabNavService]
+      providers: [
+        TabNavService,
+      ]
     })
       .compileComponents();
   }));

@@ -103,5 +103,5 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
 }
 
 export function selectSessionData() {
-  return (state: AuthOnlyAppState) => state.auth.sessionData;
+  return (state: AuthOnlyAppState): SessionData => state.auth.sessionData;
 }

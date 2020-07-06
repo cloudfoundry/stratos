@@ -1,10 +1,15 @@
-<div class="app-no-content-container">
+ <div class="app-no-content-container" [ngClass]="{'app-no-content-container__menu': mode === 'menu'}">
   <div *ngIf="toolbarLink?.text" class="app-no-content-container__link" #toolBarLinkElement>
     <div class="app-no-content-container__link-text">{{toolbarLink.text}}</div>
     <mat-icon #toolbarRef class="app-no-content-container__link-icon">reply</mat-icon>
   </div>
   <mat-icon [fontSet]="iconFont">{{icon}}</mat-icon>
-  <div class="first-line">{{firstLine}}</div>
+  <div *ngIf="firstLine" class="first-line">{{firstLine}}</div>
   <div class="second-line">
-    <a *ngIf="secondLine?.link" [routerLink]="secondLine?.link">{{secondLine?.linkText}}</a>{{secondLine?.text}}</div>
+    <a *ngIf="secondLine?.link" [routerLink]="secondLine?.link">{{secondLine?.linkText}}</a>{{secondLine?.text}}
+  </div>
+  <div class="second-line" *ngFor="let line of otherLines">
+    <a *ngIf="line?.link" [routerLink]="line?.link">{{line?.linkText}}</a>{{line?.text}}
+  </div>
+  <ng-content></ng-content>
 </div>

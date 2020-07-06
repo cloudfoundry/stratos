@@ -1,0 +1,21 @@
+@mixin metrics-component-theme($theme, $app-theme) {
+  $primary: map-get($theme, primary);
+  $background: map-get($theme, background);
+  $tree-background-color:  mat-color($background, background);
+  $is-dark: map-get($theme, is-dark);
+
+  // Last item uses background color to overwrisr the side bar to make it appear
+  // like its the last item in th tree
+  .tree li:last-child::before {
+    background-color: $tree-background-color;
+  }
+
+  .metrics-tree__root {
+    // Should match .mat-drawer-container
+    @if $is-dark == true {
+      background-color: #ffffff;
+    } @else {
+      background-color: mat-contrast($primary, 300);
+    }
+  }
+}

@@ -1,5 +1,10 @@
-import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewInit, Renderer2 } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild } from '@angular/core';
 
+export interface NoContentMessageLine {
+  link?: string;
+  linkText?: string;
+  text: string;
+}
 @Component({
   selector: 'app-no-content-message',
   templateUrl: './no-content-message.component.html',
@@ -10,17 +15,16 @@ export class NoContentMessageComponent implements AfterViewInit {
   @Input() icon: string;
   @Input() iconFont: string;
   @Input() firstLine: string;
-  @Input() secondLine: {
-    link?: string;
-    linkText?: string;
-    text: string;
-  };
+  @Input() secondLine: NoContentMessageLine;
+  @Input() otherLines: NoContentMessageLine[];
   @Input() toolbarLink: {
     text: string;
   };
   @Input() toolbarAlign: string;
 
-  @ViewChild('toolBarLinkElement', {static: false}) toolBarLinkElement: ElementRef;
+  @Input() mode: string;
+
+  @ViewChild('toolBarLinkElement') toolBarLinkElement: ElementRef;
 
   constructor(private renderer: Renderer2) { }
 

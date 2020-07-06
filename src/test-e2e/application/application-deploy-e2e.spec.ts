@@ -1,7 +1,7 @@
-import { browser } from 'protractor';
+import { browser, promise } from 'protractor';
 
 import { e2e } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { createApplicationDeployTests } from './application-deploy-helper';
@@ -13,6 +13,7 @@ import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 import { ApplicationPageVariablesTab } from './po/application-page-variables.po';
 import { ApplicationBasePage } from './po/application-page.po';
+import { DeployApplication } from './po/deploy-app.po';
 
 let applicationE2eHelper: ApplicationE2eHelper;
 let cfHelper: CFHelpers;
@@ -208,17 +209,27 @@ describe('Application Deploy -', () => {
       appEvents.list.table.toggleSort('Timestamp');
 
       const currentUser = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
-      // Create
-      expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\ncreate');
-      expect(appEvents.list.table.getCell(0, 0).getText()).toBe(`person\n${currentUser}`);
-      // Map Route
-      expect(appEvents.list.table.getCell(1, 1).getText()).toBe('audit\napp\nmap-route');
-      expect(appEvents.list.table.getCell(1, 0).getText()).toBe(`person\n${currentUser}`);
-      // Update (route)
-      expect(appEvents.list.table.getCell(2, 1).getText()).toBe('audit\napp\nupdate');
-      expect(appEvents.list.table.getCell(2, 0).getText()).toBe(`person\n${currentUser}`);
-    });
 
+      const checkEventTableItem = (data: { [columnHeader: string]: string }[], text) => {
+        const item = data.find(i => i.type === text);
+        expect(item).toBeDefined();
+        expect(item.actor).toBe(`person\n${currentUser}`);
+      };
+
+      // Don't worry about order of events
+      appEvents.list.table.getTableData().then(data => {
+        // Create
+        checkEventTableItem(data, 'audit\napp\ncreate');
+        // Lifecycle - buildpack(s)
+        checkEventTableItem(data, 'audit\napp\nupdate');
+        // Map Route
+        checkEventTableItem(data, 'audit\napp\nmap-route');
+        // Upload bits
+        checkEventTableItem(data, 'audit\napp\nupload-bits');
+        // Build Create
+        checkEventTableItem(data, 'audit\napp\nbuild\ncreate');
+      });
+    });
   });
 
   describe('Instance scaling', () => {
@@ -299,6 +310,106 @@ describe('Application Deploy -', () => {
     confirm.waitUntilShown();
     expect(confirm.getMessage()).toBe('Are you sure you want to terminate instance 0?');
     confirm.confirm();
+  });
+
+  describe('Redeploy', () => {
+
+    let pRedeployHash: promise.Promise<string>;
+    const deployApp: DeployApplication = new DeployApplication();
+
+    it('Should reach deploy stepper from git tab', () => {
+      const appGithub = new ApplicationPageGithubTab(appDetails.cfGuid, appDetails.appGuid);
+      appGithub.goToGithubTab();
+
+
+      const pCurrentCommitRow = appGithub.commits.table.getHighlightedRow();
+      expect(pCurrentCommitRow).toBeGreaterThanOrEqual(0);
+
+      // Initial deploy should be HEAD of master, so top row
+      const pDeployedHash = appGithub.commits.table.getCell(0, 1).getText();
+
+      pRedeployHash = appGithub.commits.table.getCell(1, 1).getText();
+      expect(pRedeployHash).not.toBe(pDeployedHash);
+      pRedeployHash.then(redeployHash => {
+        expect(redeployHash).toBeDefined();
+        expect(redeployHash.length).toBe(8);
+      });
+
+      const menu = appGithub.commits.table.openRowActionMenuByIndex(1);
+      menu.waitUntilShown();
+      menu.clickItem('Deploy');
+      return deployApp.waitForChildPage('?appGuid=');
+
+    });
+
+    it('Should be source step with correct values', () => {
+      deployApp.header.waitForTitleText('Redeploy');
+
+      deployApp.stepper.getStepNames().then(steps => {
+        expect(steps.length).toBe(3);
+        expect(steps[0]).toBe('Source');
+        expect(steps[1]).toBe('Overrides (Optional)');
+        expect(steps[2]).toBe('Redeploy');
+      });
+
+      expect(deployApp.stepper.getActiveStepName()).toBe('Source');
+      expect(deployApp.stepper.canNext()).toBeTruthy();
+
+      return deployApp.stepper.getStepperForm().getFieldsMapped().then(fields => {
+        fields.forEach(field => {
+          switch (field.placeholder) {
+            case 'Project':
+              expect(field.value).toBe(testApp);
+              break;
+            case 'Branch':
+              expect(field.text).toBe('master');
+              break;
+            default:
+              fail(`Unknown field: ${field.placeholder}`);
+              break;
+          }
+        });
+        expect(deployApp.sourceStepGetRedeployCommit()).toBe(pRedeployHash);
+      });
+    });
+
+    it('Should deploy successfully', () => {
+      deployApp.stepper.next();
+
+      const overrides = deployApp.getOverridesForm();
+      overrides.waitUntilShown();
+
+      deployApp.stepper.next();
+
+      // Turn off waiting for Angular - the web socket connection is kept open which means the tests will timeout
+      // waiting for angular if we don't turn off.
+      browser.waitForAngularEnabled(false);
+
+      // Press next to deploy the app
+      deployApp.stepper.next();
+
+      // Wait for the application to be fully deployed - so we see any errors that occur
+      deployApp.waitUntilDeployed();
+
+      // Wait until app summary button can be pressed
+      deployApp.stepper.waitUntilCanNext('Go to App Summary');
+      deployApp.stepper.next();
+    });
+
+    it('Should have correct commit after deploy', () => {
+
+      const appSummary = new ApplicationPageSummaryTab(appDetails.cfGuid, appDetails.appGuid);
+      // Reload page at app summary, just in case of caching
+      appSummary.navigateTo();
+      appSummary.waitForPage();
+      appSummary.cardDeployInfo.github.waitUntilShown();
+      appSummary.cardDeployInfo.github.getValue().then(commitHash => {
+        expect(commitHash).toBeDefined();
+        expect(commitHash.length).toBe(8);
+      });
+
+      browser.waitForAngularEnabled(true);
+    });
   });
 
   afterAll(() => applicationE2eHelper.deleteApplication(null, { appName: testAppName }));

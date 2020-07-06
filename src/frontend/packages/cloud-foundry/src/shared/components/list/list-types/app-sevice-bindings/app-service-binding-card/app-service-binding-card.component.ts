@@ -5,41 +5,35 @@ import { combineLatest as observableCombineLatest, Observable, of as observableO
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
+import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
+import {
   IService,
   IServiceBinding,
   IServiceInstance,
   IUserProvidedServiceInstance,
-} from '../../../../../../../../core/src/core/cf-api-svc.types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { EnvVarViewComponent } from '../../../../../../../../core/src/shared/components/env-var-view/env-var-view.component';
-import {
-  MetaCardMenuItem,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
-import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+} from '../../../../../../cf-api-svc.types';
+import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
-import {
-  serviceBindingEntityType,
-  serviceInstancesEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../../../cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { serviceBindingEntityType } from '../../../../../../cf-entity-types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { isUserProvidedServiceInstance } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
-  getCfService,
   getServiceBrokerName,
   getServiceName,
   getServicePlanName,
   getServiceSummaryUrl,
 } from '../../../../../../features/service-catalog/services-helper';
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
+import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
+import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 
 
 interface EnvVarData {
@@ -59,7 +53,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     data$: Observable<string>;
     customStyle?: string;
   }[];
-  cardMenu: MetaCardMenuItem[];
+  cardMenu: MenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>> | null>;
   serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance | IUserProvidedServiceInstance>>>;
   tags$: Observable<AppChip<IServiceInstance | IUserProvidedServiceInstance>[]>;
@@ -73,7 +67,6 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   constructor(
     private dialog: MatDialog,
     private datePipe: DatePipe,
-    private entityServiceFactory: EntityServiceFactory,
     private appService: ApplicationService,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
@@ -85,7 +78,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
         action: this.edit,
         can: this.appService.waitForAppEntity$.pipe(
           switchMap(app => this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            CfCurrentUserPermissions.SERVICE_BINDING_EDIT,
             this.appService.cfGuid,
             app.entity.entity.space_guid
           )))
@@ -95,7 +88,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
         action: this.detach,
         can: this.appService.waitForAppEntity$.pipe(
           switchMap(app => this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_BINDING_EDIT,
+            CfCurrentUserPermissions.SERVICE_BINDING_EDIT,
             this.appService.cfGuid,
             app.entity.entity.space_guid
           )))
@@ -126,16 +119,13 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsServiceInstance() {
-    const serviceInstanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
-    const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('get');
-    const getServiceInstanceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid);
-    const serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
-      this.row.entity.service_instance_guid,
-      getServiceInstanceAction
+    const serviceInstance$ = cfEntityCatalog.serviceInstance.store.getEntityService(
+      this.row.entity.service_instance_guid, this.appService.cfGuid
     ).waitForEntity$;
     this.serviceInstance$ = serviceInstance$;
     this.service$ = serviceInstance$.pipe(
-      switchMap(o => getCfService(o.entity.entity.service_guid, this.appService.cfGuid, this.entityServiceFactory).waitForEntity$),
+      switchMap(o => cfEntityCatalog.service.store.getEntityService(o.entity.entity.service_guid, this.appService.cfGuid, {})
+        .waitForEntity$),
       filter(service => !!service)
     );
     this.listData = [{
@@ -158,10 +148,13 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
             return null;
           }
           const serviceInstance: IServiceInstance = si.entity.entity as IServiceInstance;
-          return getServiceBrokerName(
-            serviceInstance.service.entity.service_broker_guid,
-            serviceInstance.cfGuid,
-            this.entityServiceFactory
+          return this.service$.pipe(
+            switchMap(service => {
+              return getServiceBrokerName(
+                service.entity.entity.service_broker_guid,
+                serviceInstance.cfGuid,
+              );
+            })
           );
         })
       )
@@ -174,7 +167,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     );
 
     this.serviceUrl$ = this.service$.pipe(
-      map(service => getServiceSummaryUrl(service.entity.entity.cfGuid, service.entity.entity.guid))
+      map(service => getServiceSummaryUrl(service.entity.entity.cfGuid, service.entity.metadata.guid))
     );
 
     this.serviceName$ = this.service$.pipe(
@@ -184,12 +177,8 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   private setupAsUserProvidedServiceInstance() {
-    const serviceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
-    const actionBuilder = serviceEntity.actionOrchestrator.getActionBuilder('get');
-    const getUserProvidedServiceAction = actionBuilder(this.row.entity.service_instance_guid, this.appService.cfGuid);
-    const userProvidedServiceInstance$ = this.entityServiceFactory.create<APIResource<IUserProvidedServiceInstance>>(
-      this.row.entity.service_instance_guid,
-      getUserProvidedServiceAction
+    const userProvidedServiceInstance$ = cfEntityCatalog.userProvidedService.store.getEntityService(
+      this.row.entity.service_instance_guid, this.appService.cfGuid
     ).waitForEntity$;
     this.serviceInstance$ = userProvidedServiceInstance$;
     this.service$ = of(null);
@@ -248,10 +237,13 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     );
   }
 
-  private edit = () => this.serviceActionHelperService.editServiceBinding(
+  private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.row.entity.service_instance_guid,
     this.appService.cfGuid,
-    { appId: this.appService.appGuid },
+    {
+      appId: this.appService.appGuid,
+      [CSI_CANCEL_URL]: `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/services`
+    },
     this.isUserProvidedServiceInstance
   )
 }

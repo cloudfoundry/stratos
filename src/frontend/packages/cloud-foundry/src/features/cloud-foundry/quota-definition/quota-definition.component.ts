@@ -4,15 +4,14 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { GetQuotaDefinition } from '../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../../../core/src/core/cf-api.types';
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../cf-api.types';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
@@ -44,16 +43,15 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   public isCf = false;
 
   constructor(
-    protected entityServiceFactory: EntityServiceFactory,
     protected store: Store<AppState>,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     activatedRoute: ActivatedRoute,
     currentUserPermissionsService: CurrentUserPermissionsService
   ) {
-    super(entityServiceFactory, store, activeRouteCfOrgSpace, activatedRoute);
+    super(store, activeRouteCfOrgSpace, activatedRoute);
     this.setupQuotaDefinitionObservable();
     const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
-    this.canEditQuota$ = currentUserPermissionsService.can(CurrentUserPermissions.QUOTA_EDIT, cfGuid);
+    this.canEditQuota$ = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid);
     this.isCf = !orgGuid;
     this.editParams = { [QUOTA_ORG_GUID]: orgGuid };
   }
@@ -62,10 +60,7 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
     const quotaGuid$ = this.quotaGuid ? of(this.quotaGuid) : this.org$.pipe(map(org => org.entity.quota_definition_guid));
     const entityInfo$ = quotaGuid$.pipe(
       first(),
-      switchMap(quotaGuid => this.entityServiceFactory.create<APIResource<IOrgQuotaDefinition>>(
-        quotaGuid,
-        new GetQuotaDefinition(quotaGuid, this.cfGuid),
-      ).entityObs$)
+      switchMap(quotaGuid => cfEntityCatalog.quotaDefinition.store.getEntityService(quotaGuid, this.cfGuid, {}).entityObs$)
     );
 
     this.quotaDefinition$ = entityInfo$.pipe(

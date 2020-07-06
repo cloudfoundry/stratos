@@ -1,9 +1,9 @@
 import { HttpRequest } from '@angular/common/http';
 import { Action } from '@ngrx/store';
 
+import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
 import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
 import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
 import { EntitySchema } from '../helpers/entity-schema';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from './api.types';
@@ -16,16 +16,6 @@ export interface SingleEntityAction {
 
 export interface RequestAction extends Action, BasePipelineRequestAction, SingleEntityAction {
   updatingKey?: string;
-}
-
-/**
- * The entities in the response can live in a few different places. This will tell us where to look in the response to gather the entities
- * @export
- */
-export enum RequestEntityLocation {
-  RESOURCE, // The response is an object and the entities list is within a 'resource' param. Falls back to 'OBJECT' if missing.
-  ARRAY, // The response is an array which contains the entities
-  OBJECT, // The response is the entity
 }
 
 export type RequestActionEntity = EntitySchema | EntitySchema[];
@@ -53,7 +43,6 @@ export interface EntityRequestAction extends EntityCatalogEntityConfig, RequestA
    * For single entity requests
    */
   guid?: string;
-  entityLocation?: RequestEntityLocation;
   /**
    * For delete requests we clear the pagination sections (include all pages) of all list matching the same entity type. In some cases,
    * like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that

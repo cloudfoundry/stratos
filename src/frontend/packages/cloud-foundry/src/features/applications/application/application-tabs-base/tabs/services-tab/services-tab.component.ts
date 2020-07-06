@@ -16,6 +16,4 @@ import {
     }
   ]
 })
-export class ServicesTabComponent {
-
-}
+export class ServicesTabComponent { }

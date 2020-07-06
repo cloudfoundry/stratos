@@ -1,5 +1,3 @@
-import { schema } from 'normalizr';
-
 export interface GithubRepo {
   pushed_at: string;
   created_at: string;
@@ -18,7 +16,7 @@ export interface GithubUser {
   type: string;
 }
 
-export interface GitBranch {
+export interface GitHubBranch {
   name: string;
   commit?: GithubCommit;
 }

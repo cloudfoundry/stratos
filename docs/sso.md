@@ -55,11 +55,13 @@ uaac client update cf --authorized_grant_types authorization_code
 When SSO has been configured Stratos's log in request will contain a URL that tells SSO where to return to. When using a browser this is automatically populated. To avoid situations where this can be hijacked or called separately an SSO `state` whitelist can be provided via the environment variable `SSO_WHITELIST`. This is a comma separated list. For example...
 
 ```
-SSO_WHITELIST=https://your.domain
+SSO_WHITELIST=https://your.domain/*
 ```
 
 ```
-SSO_WHITELIST=https://your.domain,https://your.other.domain
+SSO_WHITELIST=https://your.domain/*,https://your.other.domain/*
 ```
 
 When set, any requests to log in with a different `state` will be denied.
+
+In order for the SSO `state` to match an entry from the whitelist the schema, hostname, port and path must match exactly. A wildcard `*` can be provided for the path to match anything.

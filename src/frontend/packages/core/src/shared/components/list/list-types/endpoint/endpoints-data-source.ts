@@ -1,20 +1,20 @@
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { AppState } from '../../../../../../../store/src/app-state';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
+import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { IListConfig } from '../../list.component.types';
 import { BaseEndpointsDataSource } from './base-endpoints-data-source';
 
 
 export class EndpointsDataSource extends BaseEndpointsDataSource {
-  store: Store<CFAppState>;
+  store: Store<AppState>;
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<AppState>,
     listConfig: IListConfig<EndpointModel>,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
@@ -23,7 +23,7 @@ export class EndpointsDataSource extends BaseEndpointsDataSource {
     super(
       store,
       listConfig,
-      new GetAllEndpoints(),
+      stratosEntityCatalog.endpoint.actions.getAll(),
       null,
       paginationMonitorFactory,
       entityMonitorFactory,

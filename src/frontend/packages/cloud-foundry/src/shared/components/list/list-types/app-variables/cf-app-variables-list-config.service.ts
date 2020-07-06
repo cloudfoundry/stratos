@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { of as observableOf, Subject } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
@@ -16,10 +15,12 @@ import {
   IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { UpdateExistingApplication } from '../../../../../actions/application.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import { appEnvVarsEntityType, applicationEntityType } from '../../../../../cf-entity-types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
+import { applicationEntityType } from '../../../../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
@@ -84,25 +85,22 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     title: 'Environment Variables', filter: 'Search by name', noEntries: 'There are no variables'
   };
   enableTextFilter = true;
+  minRowHeight = '77px';
 
   private dispatchDeleteAction(newValues: ListAppEnvVar[]) {
     const confirmation = this.getConfirmationModal(newValues);
-
-    const appEnvVarsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-    const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('removeFromApplication');
-    const action = actionBuilder(
-      this.envVarsDataSource.appGuid,
-      this.envVarsDataSource.cfGuid,
-      this.envVarsDataSource.transformedEntities,
-      newValues
-    );
 
     const entityReq$ = this.getEntityMonitor();
     const trigger$ = new Subject();
     this.confirmDialog.open(
       confirmation,
       () => {
-        this.store.dispatch(action);
+        cfEntityCatalog.appEnvVar.api.removeFromApplication(
+          this.envVarsDataSource.appGuid,
+          this.envVarsDataSource.cfGuid,
+          this.envVarsDataSource.transformedEntities,
+          newValues
+        );
         trigger$.next();
       }
     );
@@ -118,8 +116,8 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
       endpointType: CF_ENDPOINT_TYPE
     });
     return catalogEntity
+      .store
       .getEntityMonitor(
-        this.store,
         this.envVarsDataSource.appGuid
       )
       .entityRequest$.pipe(
@@ -150,7 +148,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   constructor(
     private store: Store<CFAppState>,
     private appService: ApplicationService,
-    private confirmDialog: ConfirmationDialogService
+    private confirmDialog: ConfirmationDialogService,
   ) {
     this.envVarsDataSource = new CfAppVariablesDataSource(this.store, this.appService, this);
   }

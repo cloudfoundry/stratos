@@ -3,13 +3,13 @@ import { Action, Store } from '@ngrx/store';
 import { isObservable, Observable, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
+import { AppState, InternalAppState } from '../app-state';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEntity,
-} from '../entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+} from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
-import { AppState, InternalAppState } from '../app-state';
 import { PaginationFlattenerConfig } from '../helpers/paginated-request-helpers';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
@@ -52,17 +52,17 @@ function getRequestObservable(
   request: HttpRequest<any>,
   paginationPageIterator?: PaginationPageIterator
 ): Observable<PagedJetstreamResponse> {
-  const initialRequest = makeRequestEntityPipe(
-    httpClient,
-    request,
-    entityCatalog.getEndpoint(action.endpointType, action.subType),
-    action.endpointGuid,
-    action.externalRequest
-  );
   if (action.flattenPagination && !paginationPageIterator) {
     console.warn('Action requires all request pages but no page flattener was given.');
   }
   if (!action.flattenPagination || !paginationPageIterator) {
+    const initialRequest = makeRequestEntityPipe(
+      httpClient,
+      request,
+      entityCatalog.getEndpoint(action.endpointType, action.subType),
+      action.endpointGuid,
+      action.externalRequest
+    );
     return initialRequest.pipe(map(response => singleRequestToPaged(response)));
   }
   return paginationPageIterator.mergeAllPagesEntities();
@@ -79,9 +79,7 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   const prePaginatedRequestFunction = getPrePaginatedRequestFunction(catalogEntity);
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const entity = catalogEntity as StratosCatalogEntity;
-  const flattenerConfig = entity.definition.paginationConfig ?
-    entity.definition.paginationConfig :
-    entity.definition.endpoint ? entity.definition.endpoint.paginationConfig : null;
+  const flattenerConfig = entity.getPaginationConfig();
 
   // Get pagination state from the store
   const paginationState = selectPaginationState(
@@ -117,7 +115,16 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
     first(),
     switchMap(requestObject => {
       const pageIterator = flattenerConfig ?
-        new PaginationPageIterator(httpClient, requestObject, completePaginationAction, actionDispatcher, flattenerConfig) : null;
+        new PaginationPageIterator(
+          store,
+          httpClient,
+          requestObject,
+          completePaginationAction,
+          actionDispatcher,
+          flattenerConfig,
+          paginationState ? paginationState.maxedState : null
+        ) :
+        null;
       return getRequestObservable(
         httpClient,
         completePaginationAction,

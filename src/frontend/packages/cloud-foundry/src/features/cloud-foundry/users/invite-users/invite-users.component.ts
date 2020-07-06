@@ -4,7 +4,7 @@ import { CfUserService } from '../../../../shared/data-services/cf-user.service'
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { UserInviteService } from '../../user-invites/user-invite.service';
+import { UserInviteConfigureService, UserInviteService } from '../../user-invites/user-invite.service';
 import { CfRolesService } from '../manage-users/cf-roles.service';
 
 @Component({
@@ -14,6 +14,7 @@ import { CfRolesService } from '../manage-users/cf-roles.service';
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     UserInviteService,
+    UserInviteConfigureService,
     CfUserService,
     CfRolesService,
     CloudFoundryEndpointService

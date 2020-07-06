@@ -1,15 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TabNavService } from '../../../../../../../../../core/tab-nav.service';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryOrganizationServiceMock,
-} from '../../../../../../../../../core/test-framework/cloud-foundry-organization.service.mock';
-import {
-  CloudFoundrySpaceServiceMock,
-} from '../../../../../../../../../core/test-framework/cloud-foundry-space.service.mock';
+} from '../../../../../../../../test-framework/cloud-foundry-organization.service.mock';
+import { CloudFoundrySpaceServiceMock } from '../../../../../../../../test-framework/cloud-foundry-space.service.mock';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { CfAdminAddUserWarningComponent } from '../../../../cf-admin-add-user-warning/cf-admin-add-user-warning.component';
@@ -18,7 +17,6 @@ import {
 } from '../../../cloud-foundry-invite-user-link/cloud-foundry-invite-user-link.component';
 import { CloudFoundrySpaceUsersComponent } from './cloud-foundry-space-users.component';
 
-/* tslint:disable:max-line-length */
 describe('CloudFoundrySpaceUsersComponent', () => {
   let component: CloudFoundrySpaceUsersComponent;
   let fixture: ComponentFixture<CloudFoundrySpaceUsersComponent>;
@@ -30,7 +28,8 @@ describe('CloudFoundrySpaceUsersComponent', () => {
       providers: [
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
-        ...generateTestCfEndpointServiceProvider()
+        ...generateTestCfEndpointServiceProvider(),
+        TabNavService
       ]
     })
       .compileComponents();

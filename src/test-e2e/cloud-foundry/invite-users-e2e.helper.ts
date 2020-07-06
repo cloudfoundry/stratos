@@ -2,7 +2,7 @@ import { browser, promise } from 'protractor';
 
 import { e2e } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFUsersListComponent } from '../po/cf-users-list.po';
@@ -164,7 +164,13 @@ export function setupInviteUserTests(
       inviteUserStepper.snackBar.waitForMessage('Failed to invite one or more users. Please address per user message and try again');
       expect(stackedActions.isInputSuccess(0)).toBe(true);
       expect(stackedActions.isInputSuccess(1)).toBe(false);
-      expect(stackedActions.getInputMessage(1)).toBe(`${slightlyValidEmail} is invalid email.`);
+
+      // Check message - flexibility on old and newer UAA
+      stackedActions.getInputMessage(1).then(msg => {
+        const okay = msg === `${slightlyValidEmail} is invalid email.` || msg === 'No authentication provider found.';
+        expect(okay).toBeTruthy('Error message is not as expected');
+      });
+
       // Clear state
       inviteUserStepper.cancel();
       usersTable.inviteUser();

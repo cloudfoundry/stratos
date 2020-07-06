@@ -81,7 +81,20 @@ For example:
 The approach for all of these is the same:
 
 1. Create a new component that will provide the tab contents
-2. Ensure that your component is included in the `EntryComponent` section of your custom module
+2. Ensure that your component is declared with the `ExtensionService` in the imports of your custom module, for example:
+```
+  @NgModule({
+    imports: [
+      ExtensionService.declare([
+        ExtensionComponent,
+      ])
+    ],
+    declarations: [
+      ExtensionComponent
+    ]
+  })
+```
+
 2. Decorate the component with the `StratosTab` decorator, for example:
 
 ```
@@ -122,8 +135,8 @@ An action is a icon button that appears at the top-right of a View. For example:
 The approach for all of these is the same:
 
 1. Create a new component that will provide the contents to show when the action is clicked
-2. Ensure that your component is included in the `EntryComponent` section of your custom module
-2. Decorate the component with the `StratosAction` decorator, for example:
+2. Ensure that your component is declared with the `ExtensionService` in the imports of your custom module
+3. Decorate the component with the `StratosAction` decorator, for example:
 
 ```
 @StratosAction({
@@ -243,16 +256,19 @@ export class ExampleTabExtensionComponent implements OnInit {
 Save the file.
 
 
-### Mark the component as an entry component
+### Mark the component as an extensions component
 
-The last thing we need to do is to mark our Extension component as an entry component.
+The last thing we need to do is to mark our Extension component as an extensions component.
 
-To do this, in a text editor, open the file `src/frontend/app/custom/custom.module.ts` and add the entry components section so it looks like this:
+To do this, in a text editor, open the file `src/frontend/app/custom/custom.module.ts` and add the `ExtensionService.declare` to the import sesion, so it looks like this:
 
 ```
 @NgModule({
   imports: [
-    CommonModule
+    CommonModule,
+    ExtensionService.declare([
+      ExampleTabExtensionComponent,
+    ])    
   ],
   declarations: [ExampleTabExtensionComponent],
   entryComponents: [ExampleTabExtensionComponent]

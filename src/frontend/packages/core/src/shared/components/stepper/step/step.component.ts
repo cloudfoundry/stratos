@@ -91,6 +91,9 @@ export class StepComponent {
   skip = false;
 
   @Input()
+  showBusy = false;
+
+  @Input()
   onNext: StepOnNextFunction = () => observableOf({ success: true })
 
   @Input()

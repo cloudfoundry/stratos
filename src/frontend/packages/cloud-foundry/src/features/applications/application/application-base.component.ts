@@ -3,43 +3,24 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import {
-  ApplicationStateService,
-} from '../../../../../core/src/shared/components/application-state/application-state.service';
-import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../core/src/shared/entity.tokens';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { ApplicationService, createGetApplicationAction } from '../application.service';
+import { APP_GUID, CF_GUID } from '../../../../../core/src/shared/entity.tokens';
+import { ApplicationStateService } from '../../../shared/services/application-state.service';
+import { ApplicationService } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 export function applicationServiceFactory(
   cfId: string,
   id: string,
   store: Store<CFAppState>,
-  entityServiceFactoryInstance: EntityServiceFactory,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsHelper,
-  paginationMonitorFactory: PaginationMonitorFactory,
 ) {
   return new ApplicationService(
     cfId,
     id,
     store,
-    entityServiceFactoryInstance,
     appStateService,
     appEnvVarsService,
-    paginationMonitorFactory
-  );
-}
-
-export function entityServiceFactory(
-  cfId: string,
-  id: string,
-  esf: EntityServiceFactory
-) {
-  return esf.create(
-    id,
-    createGetApplicationAction(id, cfId)
   );
 }
 
@@ -76,18 +57,10 @@ export function getGuids(type?: string) {
         CF_GUID,
         APP_GUID,
         Store,
-        EntityServiceFactory,
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        PaginationMonitorFactory
       ]
-    },
-    {
-      provide: ENTITY_SERVICE,
-      useFactory: entityServiceFactory,
-      deps: [CF_GUID, APP_GUID, EntityServiceFactory]
-    },
-
+    }
   ]
 })
 export class ApplicationBaseComponent {

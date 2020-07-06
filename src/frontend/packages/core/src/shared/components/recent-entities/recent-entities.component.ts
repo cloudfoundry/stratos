@@ -4,8 +4,8 @@ import * as moment from 'moment';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { AppState } from '../../../../../store/src/app-state';
+import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { recentlyVisitedSelector } from '../../../../../store/src/selectors/recently-visitied.selectors';
 import {
@@ -28,8 +28,8 @@ interface IRelevanceModifiers {
 class RenderableRecent {
   public mostRecentHit: moment.Moment;
   public subText$: Observable<string>;
-  constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<CFAppState>) {
-    if (entity.entityType === endpointSchemaKey) {
+  constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<AppState>) {
+    if (entity.entityType === endpointEntityType) {
       this.subText$ = observableOf(entity.prettyType);
     } else {
       this.subText$ = this.store.select(endpointEntitiesSelector).pipe(
@@ -71,7 +71,7 @@ class CountedRecentEntitiesManager {
     [guid: string]: RenderableRecent
   };
 
-  constructor(recentState: IRecentlyVisitedState, private store: Store<CFAppState>) {
+  constructor(recentState: IRecentlyVisitedState, private store: Store<AppState>) {
     const { entities, hits } = recentState;
     const mostRecentTime = hits[0] ? moment(hits[0].date) : moment();
 
@@ -157,10 +157,12 @@ export class RecentEntitiesComponent {
   @Input()
   public history = false;
 
+  @Input() mode: string;
+
   public recentEntities$: Observable<RenderableRecent[]>;
   public frecentEntities$: Observable<RenderableRecent[]>;
   public hasHits$: Observable<boolean>;
-  constructor(store: Store<CFAppState>) {
+  constructor(store: Store<AppState>) {
     const recentEntities$ = store.select(recentlyVisitedSelector);
     this.hasHits$ = recentEntities$.pipe(
       map(recentEntities => recentEntities && !!recentEntities.hits && recentEntities.hits.length > 0)

@@ -3,11 +3,11 @@
     <div class="steppers__inner">
       <div class="steppers__headers" *ngIf="steps.length > 1">
         <div *ngFor="let step of steps; let i = index"
-          [ngClass]="{'steppers__header--active': step.active, 'steppers__header--busy': step.blocked}"
+          [ngClass]="{'steppers__header--active': step.active, 'steppers__header--busy': step.blocked || step.showBusy}"
           class="steppers__header">
           <div class="steppers__header-inner" *ngIf="steps.length !== 1">
             <!-- Blocked -->
-            <mat-spinner *ngIf="step.blocked; else notBlocked" diameter="20"></mat-spinner>
+            <mat-spinner *ngIf="(step.blocked || step.showBusy); else notBlocked" diameter="20"></mat-spinner>
             <!-- Not Blocked -->
             <ng-template #notBlocked>
               <app-dot-content [disabled]="step.skip">

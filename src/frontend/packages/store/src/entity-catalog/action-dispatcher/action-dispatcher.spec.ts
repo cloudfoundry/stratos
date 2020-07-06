@@ -1,124 +1,130 @@
-import { Action } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
+import { of } from 'rxjs';
 
-import { EntityRequestAction } from '../../types/request.types';
+import { AppState } from '../../app-state';
+import { EntityServiceFactory } from '../../entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { ActionOrchestrator, OrchestratedActionBuilders } from '../action-orchestrator/action-orchestrator';
-import { getPaginationAction, getRequestAction } from '../action-orchestrator/action-orchestrator.spec.helpers';
-import { EntityActionDispatcherManager } from './action-dispatcher';
-
-function actionDispatcher(action: Action) {
-  // noop
-}
+import { ActionBuilderConfigMapper } from '../entity-catalog-entity/action-builder-config.mapper';
+import { EntityCatalogEntityStoreHelpers } from '../entity-catalog-entity/entity-catalog-entity-store-helpers';
+import { EntityCatalogHelper } from '../entity-catalog-entity/entity-catalog.service';
+import { EntityCatalogHelpers } from '../entity-catalog.helper';
 
 describe('ActionDispatcher', () => {
   it('should not dispatch unknown action', () => {
-    const actionOrchestrator = new ActionOrchestrator('Empty');
-    const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
-    expect(entityActionDispatcher.getActionDispatcher('get').dispatch('1', '2')).toBe(false);
-  });
-  it('should dispatch custom action', () => {
-    interface CustomOrchestratedActionBuilders extends OrchestratedActionBuilders {
-      custom: (guid: string) => EntityRequestAction;
-    }
-    const actionBuilders = {
-      custom: guid => getRequestAction(),
-      customAarb: guid => getRequestAction(),
-      get: guid => getRequestAction()
-    } as CustomOrchestratedActionBuilders;
-    const data = 'adsd';
-    const data2 = 'adsd2';
-    const spy = spyOn(actionBuilders, 'custom');
-    const actionOrchestrator = new ActionOrchestrator('Custom', actionBuilders);
-    const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
-    // By getting action dispatcher
-    const dipatcher = entityActionDispatcher.getActionDispatcher('custom');
-    const dipatcher2 = entityActionDispatcher.getActionDispatcher('customAarb');
-    expect(entityActionDispatcher.getActionDispatcher('custom').dispatch(data)).toBe(true);
-    expect(spy).toHaveBeenCalledWith(data);
-    expect(entityActionDispatcher.getActionDispatcher('customAarb').dispatch(data)).toBe(true);
-    // By dispatching action directly
-    expect(entityActionDispatcher.dispatchAction('custom', data2)).toBe(true);
-    expect(spy).toHaveBeenCalledWith(data2);
+    const actionBuilders = ActionBuilderConfigMapper.getActionBuilders({}, null, null, null)
+    const actionOrchestrator = new ActionOrchestrator('Empty', actionBuilders);
+
+    const store = {
+      ...EntityCatalogEntityStoreHelpers.createCoreStore(
+        actionOrchestrator,
+        entityType,
+        null
+      ),
+      ...EntityCatalogEntityStoreHelpers.getPaginationStore(
+        actionBuilders,
+        entityType,
+        null
+      )
+    };
+    const entityActionDispatcher = EntityCatalogEntityStoreHelpers.getActionDispatchers(
+      store,
+      actionBuilders
+    )
+    expect(entityActionDispatcher.get).toBeUndefined();
   });
 
-  it('should dispatch get action', () => {
-    function getActionBuilder() {
-      return getRequestAction();
-    }
+  const entityType = 'entityType';
+  const endpointType = 'endpointType';
+
+  it('should dispatch actions', () => {
+    const endpointGuid = 'endpoint Guid';
     const guid = 'guid';
-    const endpointGuid = 'guid';
-    const actionBuilders = {
-      get: getActionBuilder
-    } as OrchestratedActionBuilders;
-    const spy = spyOn(actionBuilders, 'get');
-    const actionOrchestrator = new ActionOrchestrator('get', actionBuilders);
-    const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
-    expect(entityActionDispatcher.dispatchGet(guid, endpointGuid)).toBe(true);
-    expect(spy).toHaveBeenCalledWith(guid, endpointGuid);
-  });
+    const paginationKey = 'asd';
 
-  it('should dispatch delete action', () => {
-    function getActionBuilder() {
-      return getRequestAction();
+    const getAction = { type: 'get action', entityType, endpointType, guid, endpointGuid };
+    const getMultipleAction = { type: 'getMultiple action', entityType, endpointType, endpointGuid, paginationKey };
+    const customGetAction = { type: 'custom Action', entityType, endpointType, guid }
+    const customGetMultipleAction = { type: 'custom MultipleAction', entityType, endpointType, paginationKey }
+
+    const builders: OrchestratedActionBuilders = {
+      get: (guid: string, endpointGuid: string, extraArgs?: any) => ({
+        ...getAction,
+        guid,
+        endpointGuid
+      }),
+      getMultiple: (endpointGuid: string, paginationKey: string) => ({
+        ...getMultipleAction,
+        endpointGuid,
+        paginationKey
+      }),
+      custom: (guid: string) => ({
+        ...customGetAction,
+        guid
+      }),
+      customMultipleAction: (paginationKey: string) => ({
+        ...customGetMultipleAction,
+        paginationKey
+      }),
     }
-    const guid = 'guid';
-    const endpointGuid = 'guid';
-    const actionBuilders = {
-      delete: getActionBuilder
-    } as OrchestratedActionBuilders;
-    const spy = spyOn(actionBuilders, 'delete');
-    const actionOrchestrator = new ActionOrchestrator('delete', actionBuilders);
-    const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
-    expect(entityActionDispatcher.dispatchDelete(guid, endpointGuid)).toBe(true);
-    expect(spy).toHaveBeenCalledWith(guid, endpointGuid);
+    const actionBuilders = ActionBuilderConfigMapper.getActionBuilders(builders, null, null, null)
+    const actionOrchestrator = new ActionOrchestrator(entityType, actionBuilders);
+
+    const entityStore = {
+      ...EntityCatalogEntityStoreHelpers.createCoreStore(
+        actionOrchestrator,
+        entityType,
+        (schema: string) => null
+      ),
+      ...EntityCatalogEntityStoreHelpers.getPaginationStore(
+        actionBuilders,
+        entityType,
+        (schema: string) => null
+      )
+    };
+    const entityActionDispatcher = EntityCatalogEntityStoreHelpers.getActionDispatchers(
+      entityStore,
+      actionBuilders
+    )
+
+    const store = {
+      dispatch: (action: Action) => { console.log(action) },
+      select: (...args: any[]) => of(null)
+    } as Store<AppState<any>>
+
+    EntityCatalogHelpers.SetEntityCatalogHelper({
+      store,
+      esf: {
+        create: (guid, action) => of(null)
+      } as unknown as EntityServiceFactory,
+      pmf: {
+        create: (pk, ec, isLocal) => ({
+          currentPageState$: {}
+        })
+      } as unknown as PaginationMonitorFactory
+    } as EntityCatalogHelper)
+    const storeDispatchSpy = spyOn(store, 'dispatch');
+
+    expect(entityActionDispatcher.get).toBeDefined();
+    expect(entityActionDispatcher.get(guid, endpointGuid)).toBeDefined();
+    expect(storeDispatchSpy).toHaveBeenCalledWith(getAction)
+    storeDispatchSpy.calls.reset();
+
+    expect(entityActionDispatcher.custom).toBeDefined();
+    expect(entityActionDispatcher.custom(guid)).toBeDefined();
+    expect(storeDispatchSpy).toHaveBeenCalledWith(customGetAction)
+    storeDispatchSpy.calls.reset();
+
+    expect(entityActionDispatcher.getMultiple).toBeDefined();
+    expect(entityActionDispatcher.getMultiple(endpointGuid, paginationKey)).toBeDefined();
+    expect(storeDispatchSpy).toHaveBeenCalledWith(getMultipleAction)
+    storeDispatchSpy.calls.reset();
+
+    expect(entityActionDispatcher.customMultipleAction).toBeDefined();
+    expect(entityActionDispatcher.customMultipleAction(paginationKey)).toBeDefined();
+    expect(storeDispatchSpy).toHaveBeenCalledWith(customGetMultipleAction)
+    storeDispatchSpy.calls.reset();
+
   });
 
-  it('should dispatch update action', () => {
-    function getActionBuilder() {
-      return getRequestAction();
-    }
-    const guid = 'guid';
-    const endpointGuid = 'guid';
-    const arbData = { arb: true };
-    const actionBuilders = {
-      update: getActionBuilder
-    } as OrchestratedActionBuilders;
-    const spy = spyOn(actionBuilders, 'update');
-    const actionOrchestrator = new ActionOrchestrator('update', actionBuilders);
-    const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
-    expect(entityActionDispatcher.dispatchUpdate(guid, endpointGuid, arbData)).toBe(true);
-    expect(spy).toHaveBeenCalledWith(guid, endpointGuid, arbData);
-  });
-
-  it('should dispatch create action', () => {
-    function getActionBuilder() {
-      return getRequestAction();
-    }
-    const endpointGuid = 'guid';
-    const aString = 'stringy';
-    const actionBuilders = {
-      create: getActionBuilder
-    } as OrchestratedActionBuilders;
-    const spy = spyOn(actionBuilders, 'create');
-    const actionOrchestrator = new ActionOrchestrator('create', actionBuilders);
-    const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
-    expect(entityActionDispatcher.dispatchCreate(endpointGuid, aString)).toBe(true);
-    expect(spy).toHaveBeenCalledWith(endpointGuid, aString);
-  });
-
-  it('should dispatch getMultiple action', () => {
-    function getActionBuilder() {
-      return getPaginationAction();
-    }
-
-    const actionBuilders = {
-      getMultiple: getActionBuilder
-    } as OrchestratedActionBuilders;
-    const endpointGuid = 'guid';
-    const paginationKey = 'pagKey';
-    const spy = spyOn(actionBuilders, 'getMultiple');
-    const actionOrchestrator = new ActionOrchestrator('getMultiple', actionBuilders);
-    const entityActionDispatcher = new EntityActionDispatcherManager(actionDispatcher, actionOrchestrator);
-    expect(entityActionDispatcher.dispatchGetMultiple(endpointGuid, paginationKey)).toBe(true);
-    expect(spy).toHaveBeenCalledWith(endpointGuid, paginationKey);
-  });
 });

@@ -1,8 +1,9 @@
-import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
+import { HttpParams, HttpRequest } from '@angular/common/http';
+
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CFEntityConfig } from '../cf-types';
+import { IUpdateSpace } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
@@ -15,6 +16,7 @@ import {
   spaceEntityType,
   spaceWithOrgEntityType,
 } from '../cf-entity-types';
+import { CFEntityConfig } from '../cf-types';
 import {
   createEntityRelationKey,
   EntityInlineChildAction,
@@ -24,7 +26,6 @@ import { CFStartAction } from './cf-action.types';
 import { GetAllOrgUsers } from './organization.actions';
 import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
-import { HttpRequest, HttpParams } from '@angular/common/http';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -61,6 +62,7 @@ export class GetSpace extends CFStartAction implements ICFAction, EntityInlinePa
     GET_SPACE_FAILED
   ];
   entity = [cfEntityFactory(spaceEntityType)];
+  schemaKey = ''; // Required by builder
   entityType = spaceEntityType;
   options: HttpRequest<any>;
 }
@@ -231,7 +233,6 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
       'GET',
       `spaces/${guid}/user_roles`
     );
-    this.flattenPaginationMax = 600;
   }
   actions = getActions('Spaces', 'List all user roles');
 }

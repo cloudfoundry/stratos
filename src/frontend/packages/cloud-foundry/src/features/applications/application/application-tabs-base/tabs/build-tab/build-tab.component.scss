@@ -29,6 +29,14 @@
       justify-content: flex-end;
     }
   }
+  &__staging-error {
+    align-items: center;
+    display: flex;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
 }
 
 .app-metadata {

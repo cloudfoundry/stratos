@@ -1,9 +1,9 @@
 package stringutils
 
 import (
+	"net/url"
 	"strings"
 	"unicode"
-	"net/url"
 )
 
 // ArrayContainsString checks the string array to see if it contains the specifed value
@@ -26,7 +26,8 @@ func RemoveSpaces(str string) string {
 	}, str)
 }
 
-// CompareURL compares two URLs, taking into account default HTTP/HTTPS ports and ignoring query string
+// CompareURL compares two URLs, taking into account default HTTP/HTTPS ports and ignoring query string. Allows `b` to contain a wildcard `*`
+// to match any path of `a`s
 func CompareURL(a, b string) bool {
 
 	ua, err := url.Parse(a)
@@ -41,7 +42,7 @@ func CompareURL(a, b string) bool {
 
 	aPort := getPort(ua)
 	bPort := getPort(ub)
-	return ua.Scheme == ub.Scheme && ua.Hostname() == ub.Hostname() && aPort == bPort && ua.Path == ub.Path
+	return ua.Scheme == ub.Scheme && ua.Hostname() == ub.Hostname() && aPort == bPort && (ua.Path == ub.Path || ub.Path == "/*")
 }
 
 func getPort(u *url.URL) string {

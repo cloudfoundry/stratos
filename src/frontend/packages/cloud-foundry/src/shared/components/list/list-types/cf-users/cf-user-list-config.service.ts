@@ -4,14 +4,12 @@ import { BehaviorSubject, combineLatest, Observable, of as observableOf } from '
 import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 
 import { UsersRolesSetUsers } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
-import { GetAllUsersAsAdmin } from '../../../../../../../cloud-foundry/src/actions/users.actions';
+import { GetAllCfUsersAsAdmin } from '../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
-import { IOrganization, ISpace } from '../../../../../../../core/src/core/cf-api.types';
-import { CurrentUserPermissionsChecker } from '../../../../../../../core/src/core/current-user-permissions.checker';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
+import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   IListAction,
   IListMultiFilterConfig,
@@ -20,9 +18,11 @@ import {
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { IOrganization, ISpace } from '../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import {
   canUpdateOrgSpaceRoles,
@@ -33,6 +33,8 @@ import {
   hasSpaceRoleWithinOrg,
   waitForCFPermissions,
 } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CfUser } from '../../../../../store/types/cf-user.types';
+import { CfUserPermissionsChecker } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from './../../../../data-services/cf-user.service';
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-permission-cell.component';
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
@@ -89,10 +91,16 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     },
   ];
   enableTextFilter = true;
-  text = {
+  text: ITableText = {
     title: null,
     filter: 'Search by username',
-    noEntries: 'There are no users'
+    noEntries: 'There are no users',
+    maxedResults: {
+      icon: 'people',
+      canIgnoreMaxFirstLine: 'Fetching all users might take a long time',
+      cannotIgnoreMaxFirstLine: 'There are too many users to fetch',
+      filterLine: 'Please navigate to an Organization or Space users list'
+    }
   };
   private initialised: Observable<boolean>;
   private multiFilterConfigs: IListMultiFilterConfig[];
@@ -100,7 +108,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   manageUserAction: IListAction<APIResource<CfUser>> = {
     action: (user: APIResource<CfUser>) => {
       this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, [user.entity]));
-      this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: user.entity.guid } });
+      this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: user.metadata.guid } });
     },
     label: 'Manage Roles',
     createVisible: (row$: Observable<APIResource>) => this.createCanUpdateOrgSpaceRoles()
@@ -110,7 +118,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     action: (users: APIResource<CfUser>[]) => {
       this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, users.map(user => user.entity)));
       if (users.length === 1) {
-        this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: users[0].entity.guid } });
+        this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: users[0].metadata.guid } });
       } else {
         this.router.navigate([this.createManagerUsersUrl()]);
       }
@@ -129,7 +137,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
 
     const action = (withSpaces?: boolean) => {
       return (user: APIResource<CfUser>) => {
-        const queryParams = { queryParams: { user: user.entity.guid, spaces: withSpaces } };
+        const queryParams = { queryParams: { user: user.metadata.guid, spaces: withSpaces } };
 
         this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, [user.entity]));
         this.router.navigate([this.createRemoveUserUrl()], queryParams);
@@ -222,14 +230,14 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
             cf.global.isAdmin,
             activeRouteCfOrgSpace.cfGuid,
             activeRouteCfOrgSpace.orgGuid,
-            activeRouteCfOrgSpace.spaceGuid)
+            activeRouteCfOrgSpace.spaceGuid),
         )
       ),
       tap(([cf, action]) => {
         this.dataSource = new CfUserDataSourceService(store, action, this, userHasRoles);
 
         // Only show the filter (show users with/without roles) if the list of users can actually contain users without roles
-        if (GetAllUsersAsAdmin.is(action)) {
+        if (GetAllCfUsersAsAdmin.is(action)) {
           this.assignMultiConfig();
           this.initialiseMultiFilter(action);
         } else {
@@ -342,7 +350,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.activeRouteCfOrgSpace.cfGuid,
     this.activeRouteCfOrgSpace.orgGuid,
     this.activeRouteCfOrgSpace.orgGuid && !this.activeRouteCfOrgSpace.spaceGuid ?
-      CurrentUserPermissionsChecker.ALL_SPACES : this.activeRouteCfOrgSpace.spaceGuid)
+      CfUserPermissionsChecker.ALL_SPACES : this.activeRouteCfOrgSpace.spaceGuid)
 
   private createCanUpdateOrgRoles = () => canUpdateOrgSpaceRoles(
     this.userPerms,
@@ -350,7 +358,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.activeRouteCfOrgSpace.orgGuid)
 
   getColumns = () => this.columns;
-  getGlobalActions = () => [];
   getMultiActions = () => [this.manageMultiUserAction];
   getSingleActions = () => [this.manageUserAction, ...this.removeUserActions()];
   getMultiFiltersConfigs = () => this.multiFilterConfigs;

@@ -1,8 +1,15 @@
-import { ComponentFactory, ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import {
+  ComponentFactory,
+  ComponentFactoryResolver,
+  ComponentRef,
+  Inject,
+  Injectable,
+  ViewContainerRef,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { asapScheduler, BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, observeOn, publishReplay, refCount, tap } from 'rxjs/operators';
-import { DOCUMENT } from '@angular/common';
 
 /**
  * Service to allow the overlay side panel to be shown or hidden.
@@ -33,6 +40,10 @@ export class SidePanelService {
     this.previewMode$ = this.observeSubject(this.previewModeSubject);
 
     this.setupRouterListener();
+  }
+
+  public unsetContainer() {
+    this.container = undefined;
   }
 
   public setContainer(container: ViewContainerRef) {

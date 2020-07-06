@@ -2,7 +2,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
-import { CfEvent } from '../../../../../../../core/src/core/cf-api.types';
 import { arraysEqual } from '../../../../../../../core/src/core/utils.service';
 import {
   valueOrCommonFalsy,
@@ -13,9 +12,10 @@ import {
   ListConfig,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
+import { AddParams } from '../../../../../../../store/src/actions/pagination.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { CfEvent } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { QParam, QParamJoiners } from '../../../../q-param';
 import { CfEventsDataSource } from './cf-events-data-source';
@@ -50,11 +50,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
       columnId: 'detail', headerCell: () => 'Detail', cellComponent: TableCellEventDetailComponent, cellFlex: '6'
     },
     {
-      columnId: 'timestamp',
-      headerCell: () => 'Timestamp',
-      cellComponent: TableCellEventTimestampComponent,
-      sort: true,
-      cellFlex: '3'
+      columnId: 'timestamp', headerCell: () => 'Timestamp', cellComponent: TableCellEventTimestampComponent, sort: true, cellFlex: '3'
     },
   ];
   viewType = ListViewTypes.TABLE_ONLY;
@@ -109,44 +105,18 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     ).subscribe(currentFilters => {
       const action = this.eventSource.action as PaginatedAction;
 
-
-      const addQs: { [key: string]: string } = {};
-      const removeQs: string[] = [];
-
-      if (!arraysEqual(values.type, currentFilters.type)) {
-        if (!!values.type && !!values.type.length) {
-          addQs.type = new QParam('type', values.type, QParamJoiners.in).toString();
-        } else {
-          removeQs.push('type');
+      // Recreate the whole q param and set it again using 'AddParams'
+      const typeChanged = !arraysEqual(values.type, currentFilters.type)
+      const acteeChanged = valueOrCommonFalsy(values.actee) !== valueOrCommonFalsy(currentFilters.actee)
+      if (typeChanged || acteeChanged) {
+        const newQ: string[] = [];
+        if (values.type && values.type.length) {
+          newQ.push(new QParam('type', values.type, QParamJoiners.in).toString());
         }
-      }
-
-      if (valueOrCommonFalsy(values.actee) !==
-        valueOrCommonFalsy(currentFilters.actee)) {
-
-        if (!!values.actee && !!values.actee.length) {
-          addQs.actee = new QParam('actee', values.actee, QParamJoiners.in).toString();
-        } else {
-          removeQs.push('actee');
+        if (values.actee && values.actee.length) {
+          newQ.push(new QParam('actee', values.actee, QParamJoiners.in).toString());
         }
-      }
-
-      if (!!Object.keys(addQs).length) {
-        const existingQ: { [key: string]: string } = {} = {};
-        if (currentFilters.type && currentFilters.type.length) {
-          existingQ.type = new QParam('type', currentFilters.type, QParamJoiners.in).toString();
-        }
-        if (currentFilters.actee) {
-          existingQ.actee = new QParam('actee', currentFilters.actee, QParamJoiners.in).toString();
-        }
-        const newQ = {
-          ...existingQ,
-          ...addQs
-        };
-        this.store.dispatch(new AddParams(action, this.eventSource.paginationKey, { q: Object.values(newQ) }));
-      }
-      if (!!removeQs.length) {
-        this.store.dispatch(new RemoveParams(action, action.paginationKey, [], removeQs));
+        this.store.dispatch(new AddParams(action, this.eventSource.paginationKey, { q: newQ }));
       }
     });
   }

@@ -9,7 +9,7 @@ import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../core/src/core/gi
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/tab-nav.service';
 import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryComponentsModule } from '../../../shared/components/components.module';
+import { CloudFoundrySharedModule } from '../../../shared/cf-shared.module';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CreateApplicationModule } from '../create-application/create-application.module';
@@ -69,7 +69,7 @@ describe('DeployApplicationComponent', () => {
         HttpClientModule,
         HttpClientTestingModule,
         HttpClientModule,
-        CloudFoundryComponentsModule
+        CloudFoundrySharedModule
       ]
     })
       .compileComponents();

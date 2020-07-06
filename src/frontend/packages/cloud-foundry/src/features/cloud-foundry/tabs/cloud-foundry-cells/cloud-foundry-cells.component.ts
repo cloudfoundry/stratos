@@ -2,11 +2,13 @@ import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { CfCellHelper } from '../../../../../../core/src/features/cloud-foundry/cf-cell.helpers';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/src/app-state';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { CfCellsListConfigService } from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
+import {
+  CfCellsListConfigService,
+} from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
+import { CfCellHelper } from '../../cf-cell.helpers';
 import { getActiveRouteCfCellProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 

@@ -1,12 +1,12 @@
 import { by, element, promise, protractor } from 'protractor';
 
 import { e2e } from '../../e2e';
-import { CFHelpers } from '../../helpers/cf-helpers';
+import { CFHelpers } from '../../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
+import { TableComponent } from '../../po/table.po';
 import { CfSpaceLevelPage } from '../space-level/cf-space-level-page.po';
 import { CfOrgLevelPage } from './cf-org-level-page.po';
 import { SpaceFormPage } from './space-form-page.po';
-import { TableComponent } from '../../po/table.po';
 
 describe('Manage Space', () => {
   let e2eSetup;

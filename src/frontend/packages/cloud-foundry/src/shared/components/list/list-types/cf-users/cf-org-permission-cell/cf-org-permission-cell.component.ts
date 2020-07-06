@@ -3,24 +3,22 @@ import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { RemoveUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
+import { RemoveCfUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import {
-  CfUser,
-  IUserPermissionInOrg,
-  OrgUserRoleNames,
-} from '../../../../../../../../cloud-foundry/src/store/types/user.types';
-import { IOrganization } from '../../../../../../../../core/src/core/cf-api.types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IOrganization } from '../../../../../../cf-api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getOrgRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/cf-user.types';
+import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
 
@@ -36,7 +34,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
     public store: Store<CFAppState>,
     cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
-    confirmDialog: ConfirmationDialogService
+    confirmDialog: ConfirmationDialogService,
   ) {
     super(store, confirmDialog, cfUserService);
     this.chipsConfig$ = combineLatest(
@@ -60,7 +58,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
     row: APIResource<CfUser>,
     showName: boolean): ICellPermissionList<OrgUserRoleNames>[] {
     return getOrgRoles(orgPerms.permissions).map(perm => {
-      const updatingKey = RemoveUserRole.generateUpdatingKey(
+      const updatingKey = RemoveCfUserRole.generateUpdatingKey(
         perm.key,
         row.metadata.guid
       );
@@ -72,10 +70,9 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
         ...perm,
         name: showName ? orgPerms.name : null,
         guid: orgPerms.orgGuid,
-        userName: row.entity.username,
+        username: row.entity.username,
         userGuid: row.metadata.guid,
-        busy: catalogEntity.getEntityMonitor(
-          this.store,
+        busy: catalogEntity.store.getEntityMonitor(
           orgPerms.orgGuid
         )
           .getUpdatingSection(updatingKey).pipe(
@@ -88,7 +85,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
   }
 
   public removePermission(cellPermission: ICellPermissionList<OrgUserRoleNames>, updateConnectedUser: boolean) {
-    this.store.dispatch(new RemoveUserRole(
+    this.store.dispatch(new RemoveCfUserRole(
       this.cfUserService.activeRouteCfOrgSpace.cfGuid,
       cellPermission.userGuid,
       cellPermission.guid,
@@ -99,6 +96,6 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
   }
 
   public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
-    this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
+    this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
 
 }

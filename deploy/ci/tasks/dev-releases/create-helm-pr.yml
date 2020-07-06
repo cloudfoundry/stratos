@@ -9,7 +9,6 @@ image_resource:
   source:
    # Generated using scripts/Dockerfile.stratos-ci
    repository: splatform/stratos-ci-concourse
-   tag: "latest"
 params:
   GIT_USER:
   GIT_EMAIL:

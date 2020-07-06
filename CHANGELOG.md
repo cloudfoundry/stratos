@@ -1,5 +1,75 @@
 # Change Log
 
+## 3.2.1
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.2.0...3.2.1)
+
+**Improvements:**
+
+- Apply SSO whitelist to additional places [\#4318](https://github.com/cloudfoundry/stratos/issues/4318)
+
+**Fixes:**
+
+- User Button Misaligned [\#4316](https://github.com/cloudfoundry/stratos/issues/4316)
+
+## 3.2.0
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.1.0...3.2.0)
+
+This release contains a number of fixes and improvements:
+
+**Improvements:**
+
+- SSO_WHITELIST should be able to ignore path [\#4273](https://github.com/cloudfoundry/stratos/issues/4273)
+- Improve view that shows details for a metrics endpoint [\#4271](https://github.com/cloudfoundry/stratos/issues/4271)
+- Helm Chart: Add support for node selectors [\#4265](https://github.com/cloudfoundry/stratos/issues/4265)
+- Add documentation for list's 'max' feature, include info on 'fetch all' button [\#4259](https://github.com/cloudfoundry/stratos/issues/4259)
+- Backup Endpoints & Tokens [\#4228](https://github.com/cloudfoundry/stratos/issues/4228)
+
+**Fixes:**
+
+- User profile is fetched on most page changes [\#4284](https://github.com/cloudfoundry/stratos/issues/4284)
+- Servicves Marketplace: Create service icon is incorrectly aligned [\#4280](https://github.com/cloudfoundry/stratos/issues/4280)
+- Deployment time does not show correctly in diagnostics when deployed with Helm 3 [\#4261](https://github.com/cloudfoundry/stratos/issues/4261)
+- Pushing app from Stratos can sometimes fail due to expired token [\#4253](https://github.com/cloudfoundry/stratos/issues/4253)
+- Helm: Chart fails to render if `uaa` section is missing, docs misleading [\#4248](https://github.com/cloudfoundry/stratos/issues/4248)
+- Profile: Disabling polling fails to disable polling [\#4244](https://github.com/cloudfoundry/stratos/issues/4244)
+- App Summary: Github tab: Row highlight of deployed commit is obscured [\#4243](https://github.com/cloudfoundry/stratos/issues/4243)
+- Data Inaccuracies in PCF [\#4237](https://github.com/cloudfoundry/stratos/issues/4237)
+
+## 3.1.0
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.0.0...3.1.0)
+
+This release contains a number of fixes and improvements:
+
+**Improvements:**
+
+- Update Feature Flags with new entries [\#4188](https://github.com/cloudfoundry/stratos/issues/4188)
+- Improve Application Deployment UI [\#4183](https://github.com/cloudfoundry/stratos/pull/4183)
+- Scalability: Improve handling of 'maxed' lists [\#4180](https://github.com/cloudfoundry/stratos/issues/4180)
+- Scalability: Add button to load maxed lists [\#4179](https://github.com/cloudfoundry/stratos/issues/4179)
+- Scalability: Improve scaling of service instances [\#4162](https://github.com/cloudfoundry/stratos/pull/4162)
+- Scalability: Improve scaling of users and organisations [\#4156](https://github.com/cloudfoundry/stratos/pull/4156)
+- Local Admin User: Auto-login user if they have just set up account [\#4135](https://github.com/cloudfoundry/stratos/issues/4135)
+- Add support for showing Gravatar for the user icon [\#4134](https://github.com/cloudfoundry/stratos/pull/4134)
+- Disable Jetstream API logging via Env Var [\#4130](https://github.com/cloudfoundry/stratos/issues/4130)
+- Improve UI element sizing and presentation on desktop [\#4129](https://github.com/cloudfoundry/stratos/pull/4129)
+- Allow org managers to add users outside of org [\#4103](https://github.com/cloudfoundry/stratos/issues/4103)
+- Allow Endpoint Name to be edited [\#3640](https://github.com/cloudfoundry/stratos/issues/3640)
+
+**Fixes:**
+
+- CF Quota's `Maximum Application Instance Memory Usage` not formatted correctly [\#4206](https://github.com/cloudfoundry/stratos/issues/4206)
+- Notification and error pages loop when using 'X' [\#4202](https://github.com/cloudfoundry/stratos/issues/4202)
+- Cf app redeploy stepper starts with empty step, cannot continue [\#4185](https://github.com/cloudfoundry/stratos/issues/4185)
+- Can't push apps with multiple buildpacks [\#4181](https://github.com/cloudfoundry/stratos/issues/4181)
+- Deleting a Service Instance or User Provided Service Instance breaks list [\#4157](https://github.com/cloudfoundry/stratos/issues/4157)
+- Deleting an organisation with spaces fails [\#4155](https://github.com/cloudfoundry/stratos/issues/4155)
+- App Deploy should accept manifest .YML or .YAML [\#4152](https://github.com/cloudfoundry/stratos/issues/4152)
+- Only fetch first page of maxed lists [\#4138](https://github.com/cloudfoundry/stratos/pull/4138)
+- 'Register an endpoint' arrow misaligned [\#3519](https://github.com/cloudfoundry/stratos/issues/3519)
+
 ## 3.0.0
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/2.6.1...3.0.0)

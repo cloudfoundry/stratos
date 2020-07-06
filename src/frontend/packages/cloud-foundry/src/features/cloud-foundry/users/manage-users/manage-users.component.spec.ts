@@ -1,3 +1,4 @@
+import { HttpClientModule } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
@@ -6,8 +7,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../core/tab-nav.service';
-import { CfUserServiceTestProvider } from '../../../../../../core/test-framework/user-service-helper';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CfUserServiceTestProvider } from '../../../../../test-framework/user-service-helper';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CfRolesService } from './cf-roles.service';
 import { UsersRolesConfirmComponent } from './manage-users-confirm/manage-users-confirm.component';
@@ -16,8 +17,8 @@ import {
   SpaceRolesListWrapperComponent,
 } from './manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
 import { UsersRolesSelectComponent } from './manage-users-select/manage-users-select.component';
+import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/manage-users-set-usernames.component';
 import { UsersRolesComponent } from './manage-users.component';
-import { HttpClientModule } from '@angular/common/http';
 
 describe('UsersRolesComponent', () => {
   let component: UsersRolesComponent;
@@ -53,7 +54,8 @@ describe('UsersRolesComponent', () => {
         UsersRolesSelectComponent,
         UsersRolesModifyComponent,
         UsersRolesConfirmComponent,
-        SpaceRolesListWrapperComponent
+        SpaceRolesListWrapperComponent,
+        ManageUsersSetUsernamesComponent
       ]
     })
       .compileComponents();

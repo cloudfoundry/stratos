@@ -1,45 +1,46 @@
 @import '~@angular/material/theming';
-@import './mat-themes';
 @import './all-theme';
-@import './mat-colors';
 
-// Custom theme support
-@import './custom';
+// Import the theme
+@import '~@stratosui/theme';
 
-body.stratos {
-  .dark-theme {
-    // Dark Theme defaults
-    $dark-primary: mat-palette($mat-blue);
-    $dark-accent: mat-palette($mat-amber, A400, A100, A700);
-    $dark-warn: mat-palette($mat-red);
-    $dark-theme: mat-dark-theme($dark-primary, $dark-accent, $dark-warn);
+$stratos-dark-theme-supported: false !default;
 
-    $stratos-dark-theme: $dark-theme !default;
-    $stratos-dark-nav-theme: null !default;
-    $stratos-dark-status-theme: null !default;
+// Themes - stratos-theme() function must be supplied by the theme
+$stratos-themes: stratos-theme();
 
-    @include angular-material-theme($stratos-dark-theme);
-    @include app-theme($stratos-dark-theme, $stratos-dark-nav-theme, $stratos-dark-status-theme);
+// stratos-theme() can return a single theme rather than a map of default and dark themes
+@if not map-has-key($stratos-themes, 'default') {
+  $tmp: $stratos-themes;
+  $stratos-themes: (
+    default: $tmp
+  )
+}
+
+// Import any custom scss that the theme defines
+@import '~@stratosui/theme/extensions';
+
+// Default theme ( = light theme)
+$stratos-theme: map-get($stratos-themes, default);
+$theme: map-get($stratos-theme, theme);
+
+@if map-has-key($stratos-themes, 'dark') {
+  $stratos-dark-theme-supported: true;
+  $dark-stratos-theme: map-get($stratos-themes, dark);
+  $dark-theme: map-get($dark-stratos-theme, theme);
+
+  body.stratos {
+    .dark-theme {
+      @include angular-material-theme($dark-theme);
+      @include app-theme($dark-stratos-theme);
+    }
   }
 }
 
 .default {
-  // Themes palettes and colors
-  $oss-theme-primary: mat-palette($mat-blue);
-  $oss-theme-accent: mat-palette($mat-blue);
-  $oss-theme-warn: mat-palette($mat-red);
-  $oss-theme: mat-light-theme($oss-theme-primary, $oss-theme-accent, $oss-theme-warn);
-
-  // Default to using the open source theme
-  $stratos-theme: $oss-theme !default;
-  $stratos-nav-theme: null !default;
-  $stratos-status-theme: null !default;
-
-  @include angular-material-theme($stratos-theme);
-  @include app-theme($stratos-theme, $stratos-nav-theme, $stratos-status-theme);
+  @include angular-material-theme($theme);
+  @include app-theme($stratos-theme);
 }
 
-$stratos-dark-theme-supported: true !default;
-
-// Create the theme
+// Import mat-core
 @include mat-core;

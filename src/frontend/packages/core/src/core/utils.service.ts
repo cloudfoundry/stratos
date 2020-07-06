@@ -11,8 +11,6 @@ export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   return null;
 }
 
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-
 export const urlValidationExpression =
   '^' +
   // protocol identifier
@@ -270,13 +268,6 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
 
 export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;
 export const truthyIncludingZeroString = (obj: any): string => truthyIncludingZero(obj) ? obj.toString() : null;
-
-export const sortStringify = (obj: { [key: string]: string | string[] | number }): string => {
-  const keys = Object.keys(obj).sort();
-  return keys.reduce((res, key) => {
-    return res += `${key}-${obj[key]},`;
-  }, '');
-};
 
 /**
  * Real basic, shallow check

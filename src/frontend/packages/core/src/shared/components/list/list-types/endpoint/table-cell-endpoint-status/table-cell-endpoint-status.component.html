@@ -2,11 +2,11 @@
   <ng-container *ngIf="connectable; else notConnectable">
     <ng-container *ngIf="row.connectionStatus === 'connected'">
       <span *ngIf="config?.showLabel">Connected </span>
-      <mat-icon>cloud_done</mat-icon>
+      <mat-icon fontSet="stratos-icons">endpoints_connected</mat-icon>
     </ng-container>
     <ng-container *ngIf="row.connectionStatus === 'disconnected'">
       <span *ngIf="config?.showLabel">Disconnected </span>
-      <mat-icon>cloud_off</mat-icon>
+      <mat-icon fontSet="stratos-icons">endpoints_disconnected</mat-icon>
     </ng-container>
     <ng-container *ngIf="row.connectionStatus === 'checking'">
       <span *ngIf="config?.showLabel">Updating </span>
@@ -26,6 +26,14 @@
       <ng-container *ngIf="status === 'Synchronizing'">
         <span *ngIf="config?.showLabel">Synchronizing </span>
         <mat-spinner diameter="20"></mat-spinner>
+      </ng-container>
+      <ng-container *ngIf="status === 'Pending'">
+        <span *ngIf="config?.showLabel">Sync Pending</span>
+        <mat-icon>hourglass_empty</mat-icon>
+      </ng-container>
+      <ng-container *ngIf="status === 'Failed'">
+        <span *ngIf="config?.showLabel">Synchronization failed</span>
+        <mat-icon>sync_problem</mat-icon>
       </ng-container>
     </ng-container>
     <ng-template #noStatus>

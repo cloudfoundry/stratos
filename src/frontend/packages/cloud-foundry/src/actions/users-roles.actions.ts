@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { CfUser } from '../store/types/user.types';
+import { CfUser } from '../store/types/cf-user.types';
 import { CfRoleChange } from '../store/types/users-roles.types';
 
 export const UsersRolesActions = {
@@ -10,13 +10,31 @@ export const UsersRolesActions = {
   SetOrg: '[Users Roles] Set org',
   SetOrgRole: '[Users Roles] Set org role',
   SetSpaceRole: '[Users Roles] Set space role',
+  FlipSetRoles: '[Users Roles] Flip Set Roles',
+  SetIsRemove: '[Users Roles] Set Is Remove',
+  SetIsSetByUsername: '[Users Roles] Set Is Set By Username',
   SetChanges: '[Users Roles] Set role changes',
   ExecuteChanges: '[Users Roles] Execute changes',
 };
 
 export class UsersRolesSetUsers implements Action {
   type = UsersRolesActions.SetUsers;
-  constructor(public cfGuid: string, public users: CfUser[]) { }
+  constructor(public cfGuid: string, public users: CfUser[], public origin?: string) { }
+}
+
+export class UsersRolesFlipSetRoles implements Action {
+  type = UsersRolesActions.FlipSetRoles;
+  constructor() { }
+}
+
+export class UsersRolesSetIsRemove implements Action {
+  type = UsersRolesActions.SetIsRemove;
+  constructor(public isRemove: boolean) { }
+}
+
+export class UsersRolesSetIsSetByUsername implements Action {
+  type = UsersRolesActions.SetIsSetByUsername;
+  constructor(public isSetByUsername: boolean) { }
 }
 
 export class UsersRolesSetOrgRole implements Action {
@@ -58,4 +76,5 @@ export class UsersRolesSetChanges implements Action {
 
 export class UsersRolesExecuteChanges implements Action {
   type = UsersRolesActions.ExecuteChanges;
+  constructor(public setByUsername = false, public resetOrgUsers?: string, public resetSpaceUsers?: string) { }
 }

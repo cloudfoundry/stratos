@@ -3,7 +3,6 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CfUser, CfUserMissingRoles } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import {
   TableRowStateManager,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
@@ -25,6 +24,7 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CfUser, CfUserMissingRoles } from '../../../../../store/types/cf-user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
 
@@ -59,7 +59,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   constructor(
     private store: Store<CFAppState>,
     private cfGuid: string,
-    private cfUserService: CfUserService,
+    cfUserService: CfUserService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory
@@ -95,7 +95,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       switchMap(entities => entities
         .map(entity => {
           const hasMissingRoles = this.hasMissingRoles(entity.entity.missingRoles);
-          rowStateManager.updateRowState(entity.entity.guid, { warning: hasMissingRoles });
+          rowStateManager.updateRowState(entity.metadata.guid, { warning: hasMissingRoles });
         })
       ),
     ).subscribe();
@@ -117,8 +117,8 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   }
 
   private getUsername = (user: CfUser): string => {
-    const userName = user.username || user.guid;
-    return this.hasMissingRoles(user.missingRoles) ? `${userName} - Not all roles for this user are known` : userName;
+    const username = user.username || user.guid;
+    return this.hasMissingRoles(user.missingRoles) ? `${username} - Not all roles for this user are known` : username;
   }
 
   private hasMissingRoles(missingRoles: CfUserMissingRoles): boolean {

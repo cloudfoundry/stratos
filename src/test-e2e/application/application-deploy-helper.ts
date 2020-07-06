@@ -182,7 +182,8 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
       const commits = deployApp.getCommitList();
       expect(commits.getHeaderText()).toBe('Select a commit');
 
-      expect(deployApp.stepper.canNext()).toBeFalsy();
+      // The first commit should be auto-selected
+      expect(deployApp.stepper.canNext()).toBeTruthy();
 
       commits.getTableData().then(data => {
         expect(data.length).toBeGreaterThan(0);
@@ -206,8 +207,9 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
       const overrides = deployApp.getOverridesForm();
       overrides.waitUntilShown();
 
+      // Adding a random route appends to the app name... which bumps route over 63 character max
       if (type !== CREATE_APP_DEPLOY_TEST_TYPE.DOCKER) {
-        overrides.fill({ name: res.testAppName, random_route: true });
+        overrides.fill({ name: res.testAppName });
       }
 
       e2e.debugLog(`${loggingPrefix} Overrides Step - overrides set`);

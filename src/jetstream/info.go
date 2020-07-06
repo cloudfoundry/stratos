@@ -57,6 +57,8 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 	}
 
 	s.Configuration.TechPreview = p.Config.EnableTechPreview
+	s.Configuration.ListMaxSize = p.Config.UIListMaxSize
+	s.Configuration.ListAllowLoadMaxed = p.Config.UIListAllowLoadMaxed
 
 	// Only add diagnostics information if the user is an admin
 	if uaaUser.Admin {

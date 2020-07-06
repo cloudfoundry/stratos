@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 
 import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { DetachAppsComponent } from './detach-apps.component';
@@ -12,7 +13,19 @@ describe('DetachAppsComponent', () => {
     TestBed.configureTestingModule({
       declarations: [DetachAppsComponent],
       imports: generateCfBaseTestModules(),
-      providers: [DatePipe]
+      providers: [
+        DatePipe, {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {
+                serviceInstanceId: 'serviceInstanceId',
+                endpointId: 'endpointId'
+              }
+            }
+          }
+        },
+      ]
     })
       .compileComponents();
   }));

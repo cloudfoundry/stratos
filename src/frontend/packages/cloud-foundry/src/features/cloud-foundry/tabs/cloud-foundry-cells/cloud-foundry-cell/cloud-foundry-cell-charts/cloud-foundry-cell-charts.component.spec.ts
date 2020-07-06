@@ -1,14 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  generateCfBaseTestModules,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellChartsComponent } from './cloud-foundry-cell-charts.component';
 
-// TODO: Fix after metrics has been sorted - STRAT-152
-xdescribe('CloudFoundryCellChartsComponent', () => {
+describe('CloudFoundryCellChartsComponent', () => {
   let component: CloudFoundryCellChartsComponent;
   let fixture: ComponentFixture<CloudFoundryCellChartsComponent>;
 
