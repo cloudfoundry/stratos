@@ -461,7 +461,7 @@ describe('Autoscaler -', () => {
       });
 
       // This depends on scheduleStartDate1
-      extendE2ETestTime(120000);
+      extendE2ETestTime(180000);
 
       /**
        * Find the required scaling event row via row count and row content
@@ -486,6 +486,8 @@ describe('Autoscaler -', () => {
       }
 
       function waitForRow() {
+        // Timeout after 32 attempts (each 5 seconds, which is just under 3 minutes)
+        let retries = 32;
         const sub = timer(5000, 5000).pipe(
           switchMap(() => promise.all<boolean | number>([
             findRow(),
@@ -497,15 +499,26 @@ describe('Autoscaler -', () => {
             e2e.debugLog('Waiting for event row: Skip actions... list is refreshing');
             return;
           }
+          retries--;
           if (foundRow) {
             e2e.debugLog('Waiting for event row: Found row!');
             sub.unsubscribe();
           } else {
             e2e.debugLog('Waiting for event row: manually refreshing list');
             eventPageBase.list.header.refresh();
+
+            if (retries === 0) {
+              e2e.debugLog('Timed out waiting for event row');
+              sub.unsubscribe();
+              fail('Timed out waiting for event row');
+            }
           }
         });
         browser.wait(() => sub.closed);
+        // Fail the test if the retry count made it down to 0
+        if (retries === 0) {
+          fail('Timed out waiting for event row');
+        }
       }
 
       it('Go to events page', () => {
