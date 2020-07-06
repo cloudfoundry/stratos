@@ -6,7 +6,7 @@ import {
 } from 'frontend/packages/store/src/reducers/current-user-roles-reducer/recently-visited.reducer.helpers';
 import * as moment from 'moment';
 import { Observable, of as observableOf } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
@@ -54,13 +54,6 @@ export class RecentEntitiesComponent {
   public hasHits$: Observable<boolean>;
   constructor(store: Store<AppState>) {
     const recentEntities$ = store.select(recentlyVisitedSelector);
-
-    recentEntities$.pipe(first()).subscribe(e => {
-      console.log('recent entities');
-      console.log(e);
-      console.log(Object.keys(e).length);
-    });
-
     this.recentEntities$ = recentEntities$.pipe(
       map(entities => Object.values(entities)),
       map((entities: IRecentlyVisitedEntity[]) => {
