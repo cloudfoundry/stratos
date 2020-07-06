@@ -216,9 +216,17 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		sendErrorMessage(clientWebSocket, err, CLOSE_PUSH_ERROR)
 		return err
 	}
+
+	log.Info("Sending message to front-end to indicate push completed")
 	sendEvent(clientWebSocket, EVENT_PUSH_COMPLETED)
 
+	log.Info("Sending close")
 	sendEvent(clientWebSocket, CLOSE_SUCCESS)
+
+	// Close the web socket
+	log.Info("Closing web socket")
+	clientWebSocket.Close()
+
 	return nil
 }
 
