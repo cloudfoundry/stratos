@@ -170,10 +170,10 @@ const config = {
     print: function () {}
   },
   params: secrets,
-  plugins: [{
-    package: 'protractor-console',
-    logLevels: ['info', 'warning', 'severe']
-  }],
+  // plugins: [{
+  //   package: 'protractor-console',
+  //   logLevels: ['info', 'warning', 'severe']
+  // }],
   onPrepare() {
     // https://webdriver.io/docs/api/chromium.html#setnetworkconditions
     // browser.driver.setNetworkConditions({
