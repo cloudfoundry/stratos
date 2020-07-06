@@ -32,7 +32,7 @@ stages:
 jobs:
   include:
     - stage: Test
-    - name: E2E Tests - Long Suites
+      name: E2E Tests - Long Suites
       before_script:
         - "./deploy/ci/travis/job-e2e-before_script.sh"
       script:
