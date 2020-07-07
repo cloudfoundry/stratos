@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 
@@ -42,6 +42,9 @@ import { WorkloadsRouting } from './workloads.routing';
   ],
   entryComponents: [
     HelmReleaseCardComponent
+  ],
+  providers: [
+    DatePipe
   ]
 })
 export class WorkloadsModule { }
