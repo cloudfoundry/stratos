@@ -9,13 +9,20 @@ set -euo pipefail
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 STRATOS="`cd "${DIR}/..";pwd`"
 
+function processFile {
+  filename=$1
+  if [ -L "$filename" ]; then
+    echo Removing symlink $filename
+    rm $filename
+  fi
+}
+
 function processFolder {
   for filename in $1; do
-    if [ -L "$filename" ]; then
-      rm $filename
-    fi
+    processFile $filename
   done
 }
 
 processFolder "${STRATOS}/src/frontend/packages/core/sass/*.*"
 processFolder "${STRATOS}/src/frontend/packages/core/assets/*.*"
+processFile "${STRATOS}/src/frontend/packages/core/favicon.ico"
