@@ -15,6 +15,7 @@
     <ul class="side-nav__items">
       <li *ngFor="let tab of tabs">
         <a *ngIf="!tab.hidden || !(tab.hidden | async)" [matTooltip]="tab.label" matTooltipPosition="right"
+          [matTooltipShowDelay]="500"
           [matTooltipDisabled]="!iconMode" class="side-nav__item" [routerLink]="[tab.link]"
           [routerLinkActive]="['side-nav__item--active']">
           <mat-icon class="side-nav__item-icon" [fontSet]="tab.matIconFont">{{ tab.matIcon }}</mat-icon> <span
