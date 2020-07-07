@@ -1,5 +1,6 @@
 import { AddRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
 import { IRecentlyVisitedEntity, IRecentlyVisitedState } from '../../types/recently-visited.types';
+import { EntityDeleteCompleteAction } from './../../effects/user-favorites-effect';
 
 // Maximum number of recent entities to show to the user
 export const MAX_RECENT_COUNT = 100;
@@ -61,4 +62,12 @@ export function cleanRecentsList(state: IRecentlyVisitedState, endpointGuids: st
 
   // Convert the array back into a map
   return filtered.reduce(recentArrayToMap, {});
+}
+
+export function clearEntityFromRecentsList(state: IRecentlyVisitedState, action: EntityDeleteCompleteAction): IRecentlyVisitedState {
+  // Remove entity from the map if it exists
+  const fav = action.asFavorite();
+  const newState = { ...state };
+  delete newState[fav.guid];
+  return newState;
 }

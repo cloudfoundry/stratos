@@ -27,7 +27,6 @@ import { UserFavoriteManager } from '../user-favorite-manager';
 
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
 
-
 @Injectable()
 export class UserFavoritesEffect {
 
