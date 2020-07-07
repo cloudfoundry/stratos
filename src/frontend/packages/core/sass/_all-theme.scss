@@ -55,14 +55,6 @@
 @import '../src/shared/components/favorites-global-list/favorites-global-list.component.theme';
 @import '../src/shared/components/favorites-meta-card/favorites-meta-card.component.theme';
 
-@import '../../cloud-foundry/src/shared/components/schema-form/schema-form.component.theme';
-@import '../../cloud-foundry/src/features/services/services-wall/services-wall.component.theme';
-@import '../../cloud-foundry/src/features/cloud-foundry/tabs/cf-admin-add-user-warning/cf-admin-add-user-warning.component.theme';
-@import '../../cloud-foundry/src/features/applications/application/application-base.component.theme';
-@import '../../cloud-foundry/src/features/applications/deploy-application/deploy-application.component.theme';
-@import '../../cloud-foundry/src/features/applications/deploy-application/deploy-application-step2/deploy-application-fs/deploy-application-fs.component.theme';
-@import '../../cloud-foundry/src/features/cloud-foundry/tabs/cloud-foundry-firehose/cloud-foundry-firehose.component.theme';
-@import '../../cloud-foundry/src/features/service-catalog/service-catalog-page/service-catalog-page.component.theme';
 @import '../../core/src/features/error-page/error-page/error-page.component.theme';
 @import '../../core/src/features/endpoints/backup-restore/restore-endpoints/restore-endpoints.component.theme';
 @import '../../core/src/features/metrics/metrics/metrics.component.theme';
@@ -88,7 +80,6 @@
   @include display-value-theme($theme, $app-theme);
   @include steppers-theme($theme, $app-theme);
   @include list-theme($theme, $app-theme);
-  @include app-base-page-theme($theme, $app-theme);
   @include app-mat-snack-bar-theme($theme, $app-theme);
   @include ngx-charts-gauge($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
@@ -101,8 +92,6 @@
   @include app-boolean-indicator-theme($theme, $app-theme);
   @include loading-page-theme($theme, $app-theme);
   @include app-log-viewer-theme($theme, $app-theme);
-  @include app-deploy-app-theme($theme, $app-theme);
-  @include app-cloud-foundry-firehose-theme($theme, $app-theme);
   @include app-card-number-metric-theme($theme, $app-theme);
   @include app-card-boolean-metric-theme($theme, $app-theme);
   @include app-dot-content($theme, $app-theme);
@@ -111,12 +100,10 @@
   @include app-page-header-events($theme, $app-theme);
   @include app-user-profile-banner-component-theme($theme, $app-theme);
   @include action-monitor-icon-theme($theme, $app-theme);
-  @include app-deploy-app-fs-component-theme($theme, $app-theme);
   @include app-upload-progress-indicator-component-theme($theme, $app-theme);
   @include page-404($theme, $app-theme);
   @include about-page-theme($theme, $app-theme);
   @include meta-card-component($theme, $app-theme);
-  @include app-schema-form-theme($theme, $app-theme);
   @include start-end-theme($theme, $app-theme);
   @include metrics-chart-theme($theme, $app-theme);
   @include metrics-range-selector-theme($theme, $app-theme);
@@ -130,7 +117,6 @@
   @include favorites-global-list-theme($theme, $app-theme);
   @include favorites-meta-card-theme($theme, $app-theme);
   @include page-side-nav-theme($theme, $app-theme);
-  @include cf-admin-add-user-warning($theme, $app-theme);
   @include entity-summary-title-theme($theme, $app-theme);
   @include app-meta-card-item-theme($theme, $app-theme);
   @include error-page-theme($theme, $app-theme);

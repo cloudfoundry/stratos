@@ -29,7 +29,7 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
             return [
               ...generateCFEntities(),
               ...generateStratosEntities(),
-              ...generateASEntities(), // FIXME: CF should not depend on autoscaler. See #3916
+              ...generateASEntities(), // FIXME: Remove hard link between cf and autoscaler packages #4416
             ];
           }
         }

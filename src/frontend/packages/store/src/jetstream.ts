@@ -67,7 +67,7 @@ export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]): Jet
   }) as JetStreamErrorResponse;
 }
 
-export function isJetstreamError(err: any): JetStreamErrorResponse {
+function isJetstreamError(err: any): JetStreamErrorResponse {
   return !!(
     err &&
     err.error &&

@@ -17,13 +17,13 @@ const importModuleRegex = /src\/frontend\/packages\/core\/src\/custom-import.mod
 
 export class ExtensionsHandler {
 
-  constructor() {}
+  constructor() { }
 
   // Write out the _custom-import.module.ts file importing all of the required extensions
   public apply(webpackConfig: any, config: StratosConfig, options: any) {
 
     // Generate the module file to import the appropriate extensions
-    const dir = path.dirname(options.main);
+    const dir = path.join(config.rootDir, path.dirname(options.main));
     const overrideFile = path.resolve(path.join(dir, './_custom-import.module.ts'));
 
     fs.writeFileSync(overrideFile, '// This file is auto-generated - DO NOT EDIT\n\n');
