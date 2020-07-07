@@ -49,7 +49,12 @@ import {
   ListView,
   SetListViewAction,
 } from '../../../../../store/src/actions/list.actions';
-import { ResetPaginationSortFilter, SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pagination.actions';
+import {
+  ResetPagination,
+  ResetPaginationSortFilter,
+  SetClientFilterKey,
+  SetPage,
+} from '../../../../../store/src/actions/pagination.actions';
 import { GeneralAppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
@@ -611,6 +616,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         manager.selectItem('')
       })
     })
+    if (!this.config.isLocal) {
+      // TODO: RC Fixes space routes, breaks app wall!!
+      this.store.dispatch(new ResetPagination(pAction, pAction.paginationKey));
+    }
   }
 
   updateListView(listView: ListView) {
