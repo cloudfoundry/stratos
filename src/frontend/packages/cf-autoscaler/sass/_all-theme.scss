@@ -1,0 +1,8 @@
+@import '../src/features/edit-autoscaler-policy/edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.theme';
+
+@mixin apply-theme-stratos-autoscaler($stratos-theme) {
+
+  $theme: map-get($stratos-theme, theme);
+  $app-theme: map-get($stratos-theme, app-theme);
+
+}
