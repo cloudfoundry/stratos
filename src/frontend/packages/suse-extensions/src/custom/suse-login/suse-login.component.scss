@@ -1,9 +1,8 @@
-@import '../../../../suse-theme/sass/custom/suse-colors';
+@import '../../../../suse-theme/sass/colors';
 
 .suse-login {
   align-items: center;
-  background-color: $suse-blue;
-  border-bottom: 10px solid $suse-primary;
+  background-color: $suse-dark-green;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -16,7 +15,7 @@
     flex-direction: row;
   }
   &__header {
-    background-color: $suse-secondary;
+    background-color: $suse-dark-green;
     color: $suse-text;
     flex: 0 0 60px;
     font-size: 24px;
@@ -38,6 +37,7 @@
     padding: 20px 0;
   }
   &__title {
+    font-family: "Work Sans";
     width: 90%;
   }
   &__copyright {
@@ -46,11 +46,12 @@
   }
   &__logo {
     img {
-      width: 79px;
+      width: 128px;
     }
   }
   &__intro {
     flex: 1;
+    font-family: "Work Sans";
     margin-right: 24px;
   }
   &__box {
@@ -79,13 +80,15 @@
     margin-top: 24px;
   }
   &__headline {
-    color: $suse-primary;
+    color: $suse-primary-color;
+    font-family: "Work Sans";
     font-size: 52px;
     font-weight: 300;
     margin: 0;
   }
   &__tagline {
     color: $suse-text-gray;
+    font-family: "Work Sans";
     font-size: 18px;
     font-weight: 300;
     line-height: 1.5;

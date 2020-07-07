@@ -1,6 +1,6 @@
 .stratos-initial-load-spinner-container {
   align-items: center;
-  background-color: #0D2C40;
+  background-color: #f2f2f2;
   display: flex;
   justify-content: center;
   height: 100%;
@@ -16,9 +16,9 @@
 .stratos-initial-load-spinner {
   animation: stratos-initial-load-animate 1s infinite linear;
   box-sizing: border-box;
-  border: 5px solid rgba(86, 107, 121,0.45);
+  border: 5px solid rgba(12, 50, 44, 0.45);
   border-radius: 50%;
-  border-top-color: #00B2E2;
+  border-top-color: #30BA78;
   display: inline-block;
   height: 128px;
   margin: 0 auto;
