@@ -1,0 +1,37 @@
+
+@mixin monocular-chart-card($theme, $app-theme) {
+  $link-color: map-get($app-theme, link-color);
+  $link-active-color: map-get($app-theme, link-active-color);
+
+  $is-dark: map-get($theme, is-dark);
+  @if $is-dark == true {
+    $border-color: $black;
+    $background-color-top: lighten(#3f3f3f, 10);
+    $background-color-bottom: #3f3f3f;
+    $color: $suse-link-color;
+    .list-item {
+      background-color: $background-color-bottom;
+      border-color: $border-color;
+      .list-item-logo {
+        background-color: $background-color-top;
+      }
+      .list-item-info {
+        a {
+          color: $link-color;
+          &:hover {
+            color: $link-active-color;
+          }
+        }
+        border-color: $border-color;
+        .chart-item-info {
+          &__version {
+            color: $link-color;
+          }
+          &__repo:hover {
+            background-color: $background-color-bottom;
+          }
+        }
+      }
+    }
+  }
+}

@@ -7,6 +7,7 @@
   },
   "stratos": {
     "module": "SuseModule",
-    "routingModule": "SuseRoutingModule"
+    "routingModule": "SuseRoutingModule",
+    "theming": "sass/_all-theme#apply-theme-suse-extensions"
   }
 }

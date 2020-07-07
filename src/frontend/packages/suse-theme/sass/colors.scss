@@ -24,7 +24,7 @@ $suse-theme-primary: mat-palette($suse-primary);
 $suse-theme-warn: mat-palette($mat-red);
 $stratos-theme: mat-light-theme($suse-theme-primary, $suse-theme-primary, $suse-theme-warn);
 
-$stratos-dark-theme-supported: false;
+$suse-dark-theme: mat-dark-theme($suse-theme-primary, $suse-theme-primary, $suse-theme-warn);
 
 // SUSE Brand primary colour
 $suse-primary-color: #30BA78;
@@ -39,3 +39,8 @@ $suse-side-nav-bg: #f2f2f2;
 $suse-side-nav-text: #000;
 $suse-side-nav-active-bg: $suse-primary-color;
 $suse-side-nav-active-text: #fff;
+
+$suse-dark-side-nav-bg: #303030;
+$suse-dark-side-nav-text: #f2f2f2;
+$suse-dark-side-nav-active-bg: darken($suse-primary-color, 15);
+$suse-dark-side-nav-active-text: #f2f2f2;
