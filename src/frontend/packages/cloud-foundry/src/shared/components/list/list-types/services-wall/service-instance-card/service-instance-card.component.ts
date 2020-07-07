@@ -105,6 +105,22 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           switchMap(service => getServiceBrokerName(service.entity.service_broker_guid, service.entity.cfGuid))
         )
       }
+
+      if (!this.serviceName$) {
+        // See note for this.serviceBrokerName$
+        this.serviceName$ = this.service$.pipe(
+          map(getServiceName)
+        )
+      }
+
+      this.servicePlanName = this.serviceInstanceEntity.entity.service_plan ?
+        getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity)
+        : null;
+
+      this.serviceUrl = getServiceSummaryUrl(
+        this.serviceInstanceEntity.entity.cfGuid,
+        this.serviceInstanceEntity.entity.service_guid
+      );
     }
   }
 
@@ -127,6 +143,9 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   cfOrgSpace: CfOrgSpaceLabelService;
   serviceBrokerName$: Observable<string>;
+  serviceName$: Observable<string>;
+  servicePlanName: string;
+  serviceUrl: string;
 
   private service$: Observable<APIResource<IService>>;
 
@@ -153,26 +172,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     }
   )
 
-  getServiceName = () => {
-    // See note for this.serviceBrokerName$
-    return this.service$.pipe(
-      map(getServiceName)
-    )
-  }
-
-  getServicePlanName = () => {
-    if (!this.serviceInstanceEntity.entity.service_plan) {
-      return null;
-    }
-    return getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity);
-  }
-
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
-  getServiceUrl = () => {
-    return getServiceSummaryUrl(
-      this.serviceInstanceEntity.entity.cfGuid,
-      this.serviceInstanceEntity.entity.service_guid
-    );
-  }
 }
