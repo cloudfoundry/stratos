@@ -506,17 +506,15 @@ describe('Autoscaler -', () => {
           } else {
             e2e.debugLog('Waiting for event row: manually refreshing list');
             eventPageBase.list.header.refresh();
-
             if (retries === 0) {
-              e2e.debugLog('Timed out waiting for event row');
               sub.unsubscribe();
-              fail('Timed out waiting for event row');
             }
           }
         });
         browser.wait(() => sub.closed);
         // Fail the test if the retry count made it down to 0
         if (retries === 0) {
+          e2e.debugLog('Timed out waiting for event row');
           fail('Timed out waiting for event row');
         }
       }
