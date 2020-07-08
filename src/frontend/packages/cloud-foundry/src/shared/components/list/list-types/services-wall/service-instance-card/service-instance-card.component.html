@@ -13,12 +13,12 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Service</app-meta-card-key>
-    <app-meta-card-value><a [routerLink]="getServiceUrl()">{{ getServiceName() }}</a>
+    <app-meta-card-value><a [routerLink]="serviceUrl">{{ serviceName$ | async }}</a>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Service Plan</app-meta-card-key>
-    <app-meta-card-value>{{ getServicePlanName() }} </app-meta-card-value>
+    <app-meta-card-value>{{ servicePlanName }} </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Service Broker</app-meta-card-key>
