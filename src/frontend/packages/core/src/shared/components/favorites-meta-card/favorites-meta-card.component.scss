@@ -38,7 +38,7 @@
   }
   &__logo-panel {
     display: flex;
-    justify-content: center;
+    justify-content: left;
     width: 56px;
   }
   &__logo {
@@ -49,6 +49,11 @@
   &__icon {
     margin-right: 4px;
     opacity: .7;
+  }
+  &__icon-panel {
+    display: flex;
+    justify-content: left;
+    width: 36px;
   }
   &__panel {
     display: flex;
