@@ -38,6 +38,7 @@ const (
 	CLOSE_NO_SESSION
 	CLOSE_NO_CNSI
 	CLOSE_NO_CNSI_USERTOKEN
+	CLOSE_ACK
 )
 
 // Events
@@ -222,6 +223,23 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	log.Info("Sending close")
 	sendEvent(clientWebSocket, CLOSE_SUCCESS)
+
+	log.Info("Waiting for close ackhowledgement from the client")
+
+	wait := 30 * time.Second
+	clientWebSocket.SetReadDeadline(time.Now().Add(wait))
+
+	// Wait for the client to acknowledge the close - timeout ?
+	if err := clientWebSocket.ReadJSON(&msg); err != nil {
+		log.Errorf("Error reading JSON: %v+", err)
+		return nil
+	}
+
+	if msg.Type != CLOSE_ACK {
+		log.Errorf("Expected a close acknowledgement - got: %s", msg.Type)
+	} else {
+		log.Info("Got close acknowledgement from the client")
+	}
 
 	// Close the web socket - should we wait for ack from client?
 	log.Info("Closing web socket")
