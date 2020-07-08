@@ -218,13 +218,12 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		return err
 	}
 
-	log.Info("Sending message to front-end to indicate push completed")
+	log.Debug("Sending message to front-end to indicate push completed")
 	sendEvent(clientWebSocket, EVENT_PUSH_COMPLETED)
 
-	log.Info("Sending close")
 	sendEvent(clientWebSocket, CLOSE_SUCCESS)
 
-	log.Info("Waiting for close ackhowledgement from the client")
+	log.Debug("Waiting for close ackhowledgement from the client")
 
 	wait := 30 * time.Second
 	clientWebSocket.SetReadDeadline(time.Now().Add(wait))
@@ -238,11 +237,10 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	if msg.Type != CLOSE_ACK {
 		log.Errorf("Expected a close acknowledgement - got: %s", string(msg.Type))
 	} else {
-		log.Info("Got close acknowledgement from the client")
+		log.Debug("Got close acknowledgement from the client")
 	}
 
 	// Close the web socket - should we wait for ack from client?
-	log.Info("Closing web socket")
 	clientWebSocket.Close()
 
 	return nil

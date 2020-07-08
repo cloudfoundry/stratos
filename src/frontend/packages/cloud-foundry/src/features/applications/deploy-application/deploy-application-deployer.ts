@@ -176,14 +176,11 @@ export class DeployApplicationDeployer {
           .pipe(
             switchMap((get) => get(this.inputStream)),
             catchError(e => {
-              console.warn('error');
-              console.warn(e);
               return [];
             }),
             filter(l => !!l),
             map(log => JSON.parse(log)),
             tap((log) => {
-              console.warn(JSON.stringify(log));
               // Deal with control messages
               if (log.type !== SocketEventTypes.DATA) {
                 this.processWebSocketMessage(log);
