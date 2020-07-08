@@ -68,8 +68,9 @@ func (c *KubeBasicAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Con
 
 func (c *KubeBasicAuth) GetUserFromToken(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
 	return &interfaces.ConnectedUser{
-		GUID: "Kube Cert Auth",
-		Name: "Cert Auth",
+		// RefreshjToken is the username
+		GUID: fmt.Sprintf("%s-%s", cnsiGUID, cfTokenRecord.RefreshToken),
+		Name: cfTokenRecord.RefreshToken,
 	}, true
 }
 
