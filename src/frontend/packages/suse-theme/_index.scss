@@ -52,6 +52,10 @@
 
   $app-theme: map-get($theme, app-theme);
   $app-theme: map-merge($app-theme, (
+    link-color: $suse-dark-link-color,
+    link-active-color: darken($suse-dark-link-color, 10%),
+    underflow-background-color: $suse-dark-primary-color,
+    user-avatar-background-color: $suse-dark-primary-color,
     side-nav: (
       background: $suse-dark-side-nav-bg,
       text: $suse-dark-side-nav-text,
@@ -59,7 +63,7 @@
       active-text: $suse-dark-side-nav-active-text,
       hover: $suse-dark-side-nav-active-bg,
       hover-text: $suse-dark-side-nav-active-text
-    )
+    ),
   ));
 
   $theme: map-merge($theme, (

@@ -10,4 +10,8 @@ body.stratos {
     border-radius: 20px;
   }
 
+  .dark-theme mat-drawer.mat-drawer-side {
+    // Border right added only in dark mode, applied to whole vertical drawer covering main page and header
+    border-right: none;
+  }
 }
