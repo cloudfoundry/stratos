@@ -12,6 +12,7 @@ import (
 )
 
 const authConnectTypeBasicAuth = "creds"
+const authTypeHttpBasic = "HttpBasic"
 
 // KubeBasicAuth is HTTP Basic Authentication
 type KubeBasicAuth struct {
@@ -75,5 +76,13 @@ func (c *KubeBasicAuth) GetUserFromToken(cnsiGUID string, cfTokenRecord *interfa
 }
 
 func (c *KubeBasicAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
-	// Not needed - 'creds' is built-in
+	// Register auth type with Jetstream - use the same as the HttpBasic auth
+
+	auth := c.portalProxy.GetAuthProvider(authTypeHttpBasic)
+	if auth.Handler != nil {
+		c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+			Handler:  auth.Handler,
+			UserInfo: auth.UserInfo,
+		})
+	}
 }
