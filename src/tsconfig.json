@@ -34,7 +34,7 @@
       "@stratosui/store": ["frontend/packages/store/src/public-api.ts"],
       "@stratosui/store/testing": ["frontend/packages/store/testing/public-api.ts"],
       "@example/extensions": ["frontend/packages/example-extensions/src/public-api.ts"],
-      "@suse/extensions": ["frontend/packages/suse-extensions/src/public-api.ts"],
+      "@susestratos/extensions": ["frontend/packages/suse-extensions/src/public-api.ts"],
     }
   }
 }
