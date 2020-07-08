@@ -159,7 +159,7 @@ export class KubeConfigImportComponent implements OnDestroy {
 
   private doConnect(connect: KubeConfigImportAction, next: KubeConfigImportAction[]) {
     if (!connect.user) {
-      connect.state.next({ message: 'Can not connect - not user specified', error: true });
+      connect.state.next({ message: 'Can not connect - no user specified', error: true });
       return;
     }
     const helper = new KubeConfigAuthHelper();
