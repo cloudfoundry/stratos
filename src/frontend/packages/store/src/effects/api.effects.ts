@@ -3,6 +3,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { EntityDeleteCompleteAction } from '../actions/entity.delete.actions';
 import { RemoveUserFavoriteAction } from '../actions/user-favourites.actions';
 import { baseRequestPipelineFactory } from '../entity-request-pipeline/base-single-entity-request.pipeline';
 import { basePaginatedRequestPipeline } from '../entity-request-pipeline/entity-pagination-request-pipeline';
@@ -13,7 +14,6 @@ import { ICFAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { UserFavorite } from '../types/user-favorites.types';
 import { ApiActionTypes, RequestTypes } from './../actions/request.actions';
 import { InternalAppState } from './../app-state';
-import { EntityDeleteCompleteAction } from './user-favorites-effect';
 
 @Injectable()
 export class APIEffect {

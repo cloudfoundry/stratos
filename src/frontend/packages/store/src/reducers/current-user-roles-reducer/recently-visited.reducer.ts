@@ -12,7 +12,12 @@ import { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from '
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../helpers/stratos-entity-factory';
 import { IRecentlyVisitedState } from '../../types/recently-visited.types';
-import { addRecentlyVisitedEntity, cleanRecentsList, getDefaultRecentState } from './recently-visited.reducer.helpers';
+import {
+  addRecentlyVisitedEntity,
+  cleanRecentsList,
+  clearEntityFromRecentsList,
+  getDefaultRecentState,
+} from './recently-visited.reducer.helpers';
 
 export function recentlyVisitedReducer(
   state: IRecentlyVisitedState = getDefaultRecentState(),
