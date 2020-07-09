@@ -2,6 +2,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -96,6 +97,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
         const { name, routerLink } = mapperFunction(favorite.metadata);
         this.store.dispatch(new AddRecentlyVisitedEntityAction({
           guid: favorite.guid,
+          date: moment().valueOf(),
           entityType: favorite.entityType,
           endpointType: favorite.endpointType,
           entityId: favorite.entityId,

@@ -15,7 +15,7 @@ $page-padding: 20px;
   flex: 1;
   flex-direction: column;
   margin: 0 -#{$page-padding} -#{$page-padding};
-  padding: 24px;
+  padding: 20px;
   @include breakpoint(tablet) {
     margin: -#{$page-padding} -#{$page-padding} -#{$page-padding} $page-padding;
   }

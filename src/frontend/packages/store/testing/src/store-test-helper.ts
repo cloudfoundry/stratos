@@ -123,10 +123,7 @@ export const testSessionData: SessionData = {
 
 function getDefaultInitialTestStratosStoreState() {
   return {
-    recentlyVisited: {
-      entities: {},
-      hits: []
-    },
+    recentlyVisited: {},
     userFavoritesGroups: {
       busy: false,
       error: false,

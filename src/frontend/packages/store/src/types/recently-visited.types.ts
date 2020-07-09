@@ -1,12 +1,11 @@
 import { IFavoriteTypeInfo } from './user-favorites.types';
 
-export interface IEntityHit {
-  guid: string;
-  date: number;
-}
+// Types used for maintaining the list of recent entities visited by the user
+
 export interface IRecentlyVisitedEntity extends IFavoriteTypeInfo {
   guid: string;
   name: string;
+  date: number;
   entityId: string;
   prettyType: string;
   prettyEndpointType: string;
@@ -14,14 +13,11 @@ export interface IRecentlyVisitedEntity extends IFavoriteTypeInfo {
   routerLink?: string;
 }
 
-export interface IRecentlyVisitedEntities {
-  [guid: string]: IRecentlyVisitedEntity;
-}
-export interface IRecentlyVisitedState {
-  entities: IRecentlyVisitedEntities;
-  hits: IEntityHit[];
+export interface IRecentlyVisitedEntityWithIcon extends IRecentlyVisitedEntity {
+  icon: string;
+  iconFont: string;
 }
 
-export interface IRecentlyVisitedEntityDated extends IRecentlyVisitedEntity {
-  date: number;
+export interface IRecentlyVisitedState {
+  [guid: string]: IRecentlyVisitedEntity;
 }
