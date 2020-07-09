@@ -1,6 +1,19 @@
-// Custom SUSE Theme
+@import '~@angular/material/theming';
 
+$white: #fff;
+$black: #000;
 
+$black-87-opacity: rgba($black, .87);
+$white-87-opacity: rgba($white, .87);
+$black-12-opacity: rgba($black, .12);
+$white-12-opacity: rgba($white, .12);
+$black-6-opacity: rgba($black, .06);
+$white-6-opacity: rgba($white, .06);
+
+$suse-secondary: #00243e;
+$suse-text-gray: #ccc;
+$suse-button-gray: #888;
+$suse-dark-blue: #06253A;
 
 // SUSE Primary Material Design pallette
 // From http://mcg.mbitson.com/#!?mcgpalette0=%233f51b5
@@ -13,4 +26,18 @@ $stratos-theme: mat-light-theme($suse-theme-primary, $suse-theme-primary, $suse-
 
 $stratos-dark-theme-supported: false;
 
-@import "custom/suse"
+// SUSE Brand primary colour
+$suse-primary-color: #30BA78;
+$suse-text: #fff;
+$suse-blue: #073155;
+$suse-dark-green: #0c322c;
+$suse-header-bar: #0c322c;
+$suse-link-color: #008ACF;
+$suse-gray: #f2f2f2;
+$suse-gray-fg: #333;
+
+// Side nav
+$suse-side-nav-bg: #f2f2f2;
+$suse-side-nav-text: #000;
+$suse-side-nav-active-bg: $suse-primary-color;
+$suse-side-nav-active-text: #fff;
