@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math/rand"	
 	"net"
 	"net/http"
 	"os"
@@ -114,6 +115,8 @@ func main() {
 			log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.UnixDate})
 		}
 	}
+
+	rand.Seed(time.Now().UnixNano())
 
 	log.SetOutput(os.Stdout)
 
