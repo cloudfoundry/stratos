@@ -6,9 +6,6 @@ import { CoreModule } from '../../../core/src/core/core.module';
 import { CardCell, TableCellCustom } from '../../../core/src/shared/components/list/list.types';
 import { SharedModule } from '../../../core/src/shared/shared.module';
 import {
-  ApplicationInstanceChartComponent,
-} from '../features/applications/application/application-instance-chart/application-instance-chart.component';
-import {
   AddServiceInstanceBaseStepComponent,
 } from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
 import {
@@ -23,6 +20,9 @@ import {
 import {
   SpecifyUserProvidedDetailsComponent,
 } from './components/add-service-instance/specify-user-provided-details/specify-user-provided-details.component';
+import {
+  ApplicationInstanceChartComponent,
+} from './components/application-instance-chart/application-instance-chart.component';
 import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
@@ -202,13 +202,10 @@ import { ServiceIconComponent } from './components/service-icon/service-icon.com
 import { ServiceInstanceLastOpComponent } from './components/service-instance-last-op/service-instance-last-op.component';
 import { ServicePlanPriceComponent } from './components/service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
-import { GitSCMService } from './data-services/scm/scm.service';
 import { AppNameUniqueDirective } from './directives/app-name-unique.directive/app-name-unique.directive';
+import { CfUserPermissionDirective } from './directives/cf-user-permission/cf-user-permission.directive';
 import { ApplicationStateService } from './services/application-state.service';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
-
-// tslint:disable:max-line-length
-// tslint:enable:max-line-length
 
 const cfListTableCells: Type<TableCellCustom<any>>[] = [
   TableCellServiceInstanceAppsAttachedComponent,
@@ -266,8 +263,6 @@ const cfListCards: Type<CardCell<any>>[] = [
   UserProvidedServiceInstanceCardComponent,
 ];
 
-// listTableCells.push();
-
 @NgModule({
   imports: [
     CommonModule,
@@ -321,7 +316,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     AppNameUniqueDirective,
     ApplicationInstanceChartComponent,
     GithubCommitAuthorComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+    CfUserPermissionDirective
   ],
   exports: [
     ServiceIconComponent,
@@ -363,7 +359,8 @@ const cfListCards: Type<CardCell<any>>[] = [
     AppNameUniqueDirective,
     ApplicationInstanceChartComponent,
     GithubCommitAuthorComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+    CfUserPermissionDirective
   ],
   entryComponents: [
     CfEndpointDetailsComponent,
@@ -375,8 +372,8 @@ const cfListCards: Type<CardCell<any>>[] = [
   ],
   providers: [
     ApplicationStateService,
-    GitSCMService,
-    CloudFoundryUserProvidedServicesService,
+    CloudFoundryUserProvidedServicesService
   ]
 })
 export class CloudFoundrySharedModule { }
+

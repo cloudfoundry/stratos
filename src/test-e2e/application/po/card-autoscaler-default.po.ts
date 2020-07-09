@@ -1,7 +1,6 @@
-import { by, element, ElementFinder, promise, protractor } from 'protractor';
+import { by, element, ElementFinder, promise } from 'protractor';
 
 import { Component } from '../../po/component.po';
-import { CreateAutoscalerPolicy } from './create-autoscaler-policy.po'
 
 export class CardAutoscalerDefault extends Component {
 

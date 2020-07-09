@@ -1,0 +1,18 @@
+// Custom ACME Theme
+
+// ACME Primary Material Design pallette
+// From http://mcg.mbitson.com/#!?mcgpalette0=%233f51b5
+$acme-primary: (50: #e8eaf6, 100: #c5cbe9, 200: #9fa8da, 300: #7985cb, 400: #5c6bc0, 500: #3f51b5, 600: #394aae, 700: #3140a5, 800: #29379d, 900: #1b278d, A100: #c6cbff, A200: #939dff, A400: #606eff, A700: #4757ff, contrast: (  50: #000000,  100: #000000,  200: #000000,  300: #000000,  400: #ffffff,  500: #ffffff,  600: #ffffff,  700: #ffffff,  800: #ffffff,  900: #ffffff,  A100: #000000,  A200: #000000,  A400: #ffffff,  A700: #ffffff, ));
+$mat-red: ( 50: #ffebee, 100: #ffcdd2, 200: #ef9a9a, 300: #e57373, 400: #ef5350, 500: #f44336, 600: #e53935, 700: #d32f2f, 800: #c62828, 900: #b71c1c, A100: #ff8a80, A200: #ff5252, A400: #ff1744, A700: #d50000, contrast: ( 50: $black-87-opacity, 100: $black-87-opacity, 200: $black-87-opacity, 300: $black-87-opacity, 400: $black-87-opacity, 500: white, 600: white, 700: white, 800: $white-87-opacity, 900: $white-87-opacity, A100: $black-87-opacity, A200: white, A400: white, A700: white, ));
+
+// Common
+$acme-theme-primary: mat-palette($acme-primary);
+$acme-theme-warn: mat-palette($mat-red);
+
+// Dark Theme
+$stratos-dark-theme: mat-dark-theme($acme-theme-primary, $acme-theme-primary, $acme-theme-warn);
+
+// Default Theme
+$stratos-theme: mat-light-theme($acme-theme-primary, $acme-theme-primary, $acme-theme-warn);
+
+@import 'custom/acme';

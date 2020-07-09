@@ -5,12 +5,12 @@ import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { PermissionStrings } from '../../../../../../core/src/core/current-user-permissions.config';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { SetCFDetails } from '../../../../actions/create-applications-page.actions';
 import { ISpace } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
 import { getSpacesFromOrgWithRole } from '../../../../store/selectors/cf-current-user-role.selectors';
+import { CfPermissionStrings } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 
 @Component({
@@ -83,7 +83,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     return this.cfOrgSpaceService.org.select.pipe(
       withLatestFrom(this.cfOrgSpaceService.cf.select),
       switchMap(([orgGuid, endpointGuid]) => {
-        return this.store.select(getSpacesFromOrgWithRole(endpointGuid, orgGuid, PermissionStrings.SPACE_DEVELOPER));
+        return this.store.select(getSpacesFromOrgWithRole(endpointGuid, orgGuid, CfPermissionStrings.SPACE_DEVELOPER));
       }),
       switchMap((spacesOrAll => {
         if (spacesOrAll === 'all') {

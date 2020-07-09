@@ -12,7 +12,6 @@ import {
   quotaDefinitionEntityType,
   spaceEntityType,
 } from '../../../../../cloud-foundry/src/cf-entity-types';
-import { OrgUserRoleNames } from '../../../../../cloud-foundry/src/store/types/user.types';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import {
@@ -30,6 +29,7 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
+import { OrgUserRoleNames } from '../../../store/types/cf-user.types';
 import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';

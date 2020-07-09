@@ -7,7 +7,7 @@ import {
 } from '../../../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
 import { pathGet } from '../../../../../../core/src/core/utils.service';
-import { StratosStatus } from '../../../../../../core/src/shared/shared.types';
+import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 
 @Component({
   selector: 'app-card-app-usage',

@@ -2,10 +2,10 @@
   <h1>CLI Info</h1>
   <div class="page-header-right">
     <span>
-        <button mat-icon-button (click)="back()">
-          <mat-icon matTooltip="Back to App">close</mat-icon>
-        </button>
-      </span>
+      <button mat-icon-button (click)="back()">
+        <mat-icon matTooltip="Back to App">close</mat-icon>
+      </button>
+    </span>
   </div>
 </app-page-header>
 
@@ -17,13 +17,17 @@
   <app-cli-command name="List" msg="To list all orgs:" syntax="cf orgs">
   </app-cli-command>
 
-  <app-cli-command *appUserPermission="permsOrgEdit;endpointGuid:activeRouteCfOrgSpace.cfGuid;organizationGuid:activeRouteCfOrgSpace.orgGuid" name="Rename" msg="To rename an org:" syntax="cf rename-org {{context.orgName || '[organization name]'}} [name]">
+  <app-cli-command
+    *appCfUserPermission="permsOrgEdit;endpointGuid:activeRouteCfOrgSpace.cfGuid;organizationGuid:activeRouteCfOrgSpace.orgGuid"
+    name="Rename" msg="To rename an org:" syntax="cf rename-org {{context.orgName || '[organization name]'}} [name]">
   </app-cli-command>
 
-  <app-cli-command name="Information" msg="To fetch org information:" syntax="cf org {{context.orgName || '[organization name]'}}">
+  <app-cli-command name="Information" msg="To fetch org information:"
+    syntax="cf org {{context.orgName || '[organization name]'}}">
   </app-cli-command>
 
-  <app-cli-command name="Users" msg="List each org role's users:" syntax="cf org-users {{context.orgName || '[organization name]'}}">
+  <app-cli-command name="Users" msg="List each org role's users:"
+    syntax="cf org-users {{context.orgName || '[organization name]'}}">
   </app-cli-command>
 
   <br>
@@ -32,13 +36,17 @@
   <app-cli-command name="List" msg="To list the spaces in the targeted org:" syntax="cf spaces">
   </app-cli-command>
 
-  <app-cli-command *appUserPermission="permsSpaceEdit;endpointGuid:activeRouteCfOrgSpace.cfGuid;organizationGuid:orgGuid;spaceGuid:spaceGuid" name="Rename" msg="To rename a space:" syntax="cf rename-space {{context.spaceName || '[space name]'}} [name]">
+  <app-cli-command
+    *appCfUserPermission="permsSpaceEdit;endpointGuid:activeRouteCfOrgSpace.cfGuid;organizationGuid:orgGuid;spaceGuid:spaceGuid"
+    name="Rename" msg="To rename a space:" syntax="cf rename-space {{context.spaceName || '[space name]'}} [name]">
   </app-cli-command>
 
-  <app-cli-command name="Information" msg="To fetch space information:" syntax="cf space {{context.spaceName || '[space name]'}}">
+  <app-cli-command name="Information" msg="To fetch space information:"
+    syntax="cf space {{context.spaceName || '[space name]'}}">
   </app-cli-command>
 
-  <app-cli-command name="Users" msg="List each space role's users:" syntax="cf space-users {{context.spaceName || '[space name]'}}">
+  <app-cli-command name="Users" msg="List each space role's users:"
+    syntax="cf space-users {{context.spaceName || '[space name]'}}">
   </app-cli-command>
 
 </app-cli-info>

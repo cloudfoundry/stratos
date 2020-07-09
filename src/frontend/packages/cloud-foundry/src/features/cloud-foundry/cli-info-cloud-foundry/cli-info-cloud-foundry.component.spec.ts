@@ -7,12 +7,12 @@ import {
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
 import { CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
+import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry.component';
 
 describe('CliInfoCloudFoundryComponent', () => {
@@ -21,10 +21,14 @@ describe('CliInfoCloudFoundryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CliInfoCloudFoundryComponent, CliInfoComponent, CliCommandComponent],
+      declarations: [
+        CliInfoCloudFoundryComponent,
+        CliInfoComponent,
+        CliCommandComponent,
+        CfUserPermissionDirective
+      ],
       imports: generateCfBaseTestModules(),
       providers: [
-        CloudFoundryEndpointService,
         generateTestCfEndpointServiceProvider(),
         ActiveRouteCfOrgSpace,
         ApplicationStateService,

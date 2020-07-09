@@ -26,8 +26,6 @@ import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-c
 import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
 
-/* tslint:disable:max-line-length */
-/* tslint:enable:max-line-length */
 
 describe('AppAutoscalerMetricChartCardComponent', () => {
   let component: AppAutoscalerMetricChartCardComponent;

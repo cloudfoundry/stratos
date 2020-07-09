@@ -23,7 +23,7 @@ import {
 import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
-import { createUserRoleInOrg } from '../src/store/types/user.types';
+import { createUserRoleInOrg } from '../src/store/types/cf-user.types';
 import { CfUserServiceTestProvider } from './user-service-helper';
 
 export const cfEndpointServiceProviderDeps = [
@@ -114,7 +114,7 @@ export function generateTestCfServiceProvider() {
     useFactory: (
       store: Store<CFAppState>,
     ) => {
-      const appService = new CloudFoundryService(store);
+      const appService = new CloudFoundryService();
       return appService;
     },
     deps: [Store]

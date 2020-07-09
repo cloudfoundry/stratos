@@ -6,26 +6,23 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { getFavoriteFromEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import {
-  FavoritesConfigMapper,
-} from '../../../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
-import {
-  MetaCardMenuItem,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../core/src/shared/shared.types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
+import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
@@ -39,6 +36,7 @@ import {
   createSpaceQuotaDefinition,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-quota';
+import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 
 @Component({
@@ -47,7 +45,7 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
   styleUrls: ['./cf-space-card.component.scss']
 })
 export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implements OnInit, OnDestroy {
-  cardMenu: MetaCardMenuItem[];
+  cardMenu: MenuItem[];
   spaceGuid: string;
   appInstancesCount: number;
   appInstancesLimit: string;
@@ -87,7 +85,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
         label: 'Edit',
         action: this.edit,
         can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SPACE_EDIT,
+          CfCurrentUserPermissions.SPACE_EDIT,
           this.cfEndpointService.cfGuid,
           this.orgGuid,
           this.spaceGuid
@@ -97,7 +95,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
         label: 'Delete',
         action: this.delete,
         can: this.currentUserPermissionsService.can(
-          CurrentUserPermissions.SPACE_DELETE,
+          CfCurrentUserPermissions.SPACE_DELETE,
           this.cfEndpointService.cfGuid,
           this.orgGuid
         )

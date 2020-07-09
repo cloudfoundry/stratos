@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
-import { CurrentUserPermissions } from '../../../../../../../../../core/src/core/current-user-permissions.config';
 import { ConfirmationDialogConfig } from '../../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import {
   ConfirmationDialogService,
@@ -15,6 +14,7 @@ import { entityCatalog } from '../../../../../../../../../store/src/entity-catal
 import { selectDeletionInfo } from '../../../../../../../../../store/src/selectors/api.selectors';
 import { spaceEntityType } from '../../../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
+import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
@@ -27,8 +27,8 @@ import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-
 export class CloudFoundrySpaceSummaryComponent {
   detailsLoading$: Observable<boolean>;
   name$: Observable<string>;
-  public permsSpaceEdit = CurrentUserPermissions.SPACE_EDIT;
-  public permsSpaceDelete = CurrentUserPermissions.SPACE_DELETE;
+  public permsSpaceEdit = CfCurrentUserPermissions.SPACE_EDIT;
+  public permsSpaceDelete = CfCurrentUserPermissions.SPACE_DELETE;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,

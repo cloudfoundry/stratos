@@ -1,13 +1,13 @@
-import { deriveEndpointFavoriteFromFavorite } from '../../../../core/src/core/user-favorite-helpers';
 import {
   GetUserFavoritesAction,
   GetUserFavoritesFailedAction,
   GetUserFavoritesSuccessAction,
-} from '../../actions/user-favourites-actions/get-user-favorites-action';
-import { RemoveUserFavoriteSuccessAction } from '../../actions/user-favourites-actions/remove-user-favorite-action';
-import { SaveUserFavoriteSuccessAction } from '../../actions/user-favourites-actions/save-user-favorite-action';
+  RemoveUserFavoriteSuccessAction,
+  SaveUserFavoriteSuccessAction,
+} from '../../actions/user-favourites.actions';
 import { getDefaultFavoriteGroupsState, IUserFavoritesGroupsState } from '../../types/favorite-groups.types';
 import { IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
+import { deriveEndpointFavoriteFromFavorite } from '../../user-favorite-helpers';
 import { userFavoriteGroupsReducer } from './user-favorites-groups.reducer';
 
 const endpointFavorite = () => new UserFavorite<IEndpointFavMetadata>(

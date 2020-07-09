@@ -2,11 +2,11 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { IFavoritesInfo } from '../../../core/src/core/user-favorite-manager';
 import { AppState } from '../app-state';
 import { MultiActionListEntity } from '../monitors/pagination-monitor';
 import { errorFetchingFavoritesSelector, fetchingFavoritesSelector } from '../selectors/favorite-groups.selectors';
 import { APIResource } from '../types/api.types';
+import { IFavoritesInfo } from '../types/user-favorites.types';
 
 
 export function getDashboardStateSessionId(username?: string) {

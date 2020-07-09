@@ -278,7 +278,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     UserPermissionDirective,
     BooleanIndicatorComponent,
     TableComponent,
-    UserPermissionDirective,
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
     DateTimeComponent,
@@ -312,11 +311,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,
     MaxListMessageComponent
-  ],
-  entryComponents: [
-    DialogConfirmComponent,
-    SnackBarReturnComponent,
-    MarkdownPreviewComponent,
   ],
   providers: [
     ListConfig,

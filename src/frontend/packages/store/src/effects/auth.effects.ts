@@ -4,8 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import { LoggerService } from '../../../core/src/core/logger.service';
-import { BrowserStandardEncoder } from '../../../core/src/helper';
 import {
   InvalidSession,
   LOGIN,
@@ -27,9 +25,10 @@ import {
 } from '../actions/auth.actions';
 import { HydrateDashboardStateAction } from '../actions/dashboard-actions';
 import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
-import { GetSystemInfo } from '../actions/system.actions';
 import { DispatchOnlyAppState } from '../app-state';
+import { BrowserStandardEncoder } from '../browser-encoder';
 import { getDashboardStateSessionId } from '../helpers/store-helpers';
+import { stratosEntityCatalog } from '../stratos-entity-catalog';
 import { SessionData } from '../types/auth.types';
 
 const SETUP_HEADER = 'stratos-setup-required';
@@ -44,7 +43,6 @@ export class AuthEffect {
     private http: HttpClient,
     private actions$: Actions,
     private store: Store<DispatchOnlyAppState>,
-    private logger: LoggerService
   ) { }
 
   @Effect() loginRequest$ = this.actions$.pipe(
@@ -84,7 +82,10 @@ export class AuthEffect {
           const sessionData = response.body;
           sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
           this.rehydrateDashboardState(this.store, sessionData);
-          return [new GetSystemInfo(true), new VerifiedSession(sessionData, action.updateEndpoints)];
+          return [
+            stratosEntityCatalog.systemInfo.actions.getSystemInfo(true),
+            new VerifiedSession(sessionData, action.updateEndpoints)
+          ];
         }),
         catchError((err, caught) => {
           let setupMode = false;
@@ -164,7 +165,7 @@ export class AuthEffect {
           const dashboardData = JSON.parse(storage.getItem(sessionId));
           store.dispatch(new HydrateDashboardStateAction(dashboardData));
         } catch (e) {
-          this.logger.warn('Failed to parse user settings from session storage, consider clearing them manually', e);
+          console.warn('Failed to parse user settings from session storage, consider clearing them manually', e);
         }
       }
     }

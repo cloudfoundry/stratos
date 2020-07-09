@@ -1,8 +1,9 @@
 import { browser } from 'protractor';
 
+import { CF_ENDPOINT_TYPE } from '../../frontend/packages/cloud-foundry/src/cf-types';
 import { ApplicationsPage } from '../applications/applications.po';
 import { CfTopLevelPage } from '../cloud-foundry/cf-level/cf-top-level-page.po';
-import { e2e } from '../e2e';
+import { E2E, e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { MenuComponent } from '../po/menu.po';
 import { SideNavMenuItem } from '../po/side-nav.po';
@@ -67,21 +68,26 @@ describe('Endpoints', () => {
           expect(endpointsPage.isActivePage()).toBeTruthy();
         });
 
-        it('Should show application wall with \'no clusters\' message', () => {
-          endpointsPage.sideNav.goto(SideNavMenuItem.Applications);
-          expect(applications.hasNoCloudFoundryMessage()).toBeTruthy();
-        });
+        if (!E2E.customization.alwaysShowNavForEndpointTypes || E2E.customization.alwaysShowNavForEndpointTypes(CF_ENDPOINT_TYPE)) {
+          it('Should show application wall with \'no clusters\' message', () => {
+            endpointsPage.sideNav.goto(SideNavMenuItem.Applications);
+            expect(applications.hasNoCloudFoundryMessage()).toBeTruthy();
+          });
 
-        it('Should show services view with \'no clusters\' message', () => {
-          endpointsPage.sideNav.goto(SideNavMenuItem.Services);
-          expect(services.hasNoCloudFoundryMessage()).toBeTruthy();
-        });
+          it('Should show services view with \'no clusters\' message', () => {
+            endpointsPage.sideNav.goto(SideNavMenuItem.Services);
+            expect(services.hasNoCloudFoundryMessage()).toBeTruthy();
+          });
 
-        it('Should show Cloud Foundry view with \'no clusters\' message', () => {
-          endpointsPage.sideNav.goto(SideNavMenuItem.CloudFoundry);
-          expect(cloudFoundry.hasNoCloudFoundryMessage()).toBeTruthy();
-        });
-
+          it('Should show Cloud Foundry view with \'no clusters\' message', () => {
+            endpointsPage.sideNav.goto(SideNavMenuItem.CloudFoundry);
+            expect(cloudFoundry.hasNoCloudFoundryMessage()).toBeTruthy();
+          });
+        } else {
+          it('No CF side nav when no CF connected', () => {
+            expect(endpointsPage.sideNav.isMenuItemPresent(SideNavMenuItem.CloudFoundry)).toBeFalsy();
+          });
+        }
       });
     });
 

@@ -3,10 +3,8 @@ import * as moment from 'moment';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { EndpointHealthCheck } from '../../core/endpoints-health-checks';
-import { metricEntityType } from '../../core/src/base-entity-schemas';
+import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
-import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
@@ -14,6 +12,7 @@ import {
   StratosCatalogEntity,
 } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
+  EndpointHealthCheck,
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../store/src/entity-catalog/entity-catalog.types';
@@ -22,6 +21,7 @@ import {
 } from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { ActionDispatcher, JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
+import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { selectSessionData } from '../../store/src/reducers/auth.reducer';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
@@ -166,17 +166,19 @@ import { populatePaginationFromParent } from './entity-relations/entity-relation
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
+import { cfUserReducer, endpointDisconnectUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
+import { currentCfUserRolesReducer } from './store/reducers/current-cf-user-roles-reducer/current-cf-user-roles.reducer';
 import { endpointDisconnectRemoveEntitiesReducer } from './store/reducers/endpoint-disconnect-application.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
 import { routeReducer, updateAppSummaryRoutesReducer } from './store/reducers/routes.reducer';
 import { serviceInstanceReducer } from './store/reducers/service-instance.reducer';
 import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
-import { endpointDisconnectUserReducer, userReducer, userSpaceOrgReducer } from './store/reducers/users.reducer';
 import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
+import { CfUser } from './store/types/cf-user.types';
 import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
-import { CfUser } from './store/types/user.types';
+import { cfUserRolesFetch } from './user-permissions/cf-user-roles-fetch';
 
 function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
   return populatePaginationFromParent(store, action).pipe(
@@ -365,7 +367,9 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
           map(([beValue, userOverride]) => userOverride || beValue || entityTypeDefault)
         );
       },
-    }
+    },
+    userRolesFetch: cfUserRolesFetch,
+    userRolesReducer: currentCfUserRolesReducer
   };
   return [
     generateCfEndpointEntity(endpointDefinition),
@@ -405,7 +409,9 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
   const definition: IStratosEntityDefinition = {
     type: quotaDefinitionEntityType,
     schema: cfEntityFactory(quotaDefinitionEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Organization Quota',
+    labelPlural: 'Organization Quotas',
   };
   cfEntityCatalog.quotaDefinition = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -447,6 +453,8 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
         }
       };
     },
+    label: 'App Env Var',
+    labelPlural: 'App Env Vars',
   };
   cfEntityCatalog.appEnvVar = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -474,6 +482,8 @@ function generateCFAppSummaryEntity(endpointDefinition: StratosEndpointExtension
     type: appSummaryEntityType,
     schema: cfEntityFactory(appSummaryEntityType),
     endpoint: endpointDefinition,
+    label: 'App Summary',
+    labelPlural: 'App Summaries',
   };
   cfEntityCatalog.appSummary = new StratosCatalogEntity<IBasicCFMetaData, IAppSummary, AppSummaryActionBuilders>(definition, {
     dataReducers: [
@@ -496,7 +506,9 @@ function generateCFSpaceQuotaEntity(endpointDefinition: StratosEndpointExtension
   const definition: IStratosEntityDefinition = {
     type: spaceQuotaEntityType,
     schema: cfEntityFactory(spaceQuotaEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Space Quota',
+    labelPlural: 'Space Quotas',
   };
   cfEntityCatalog.spaceQuota = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -514,7 +526,9 @@ function generateCFPrivateDomainEntity(endpointDefinition: StratosEndpointExtens
   const definition: IStratosEntityDefinition = {
     type: privateDomainsEntityType,
     schema: cfEntityFactory(privateDomainsEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Private Domain',
+    labelPlural: 'Private Domains',
   };
   cfEntityCatalog.privateDomain = new StratosCatalogEntity<IBasicCFMetaData, APIResource<IPrivateDomain>>(definition, {
     dataReducers: [
@@ -847,7 +861,7 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
     definition,
     {
       actionBuilders: userActionBuilders,
-      dataReducers: [userReducer, endpointDisconnectUserReducer],
+      dataReducers: [cfUserReducer, endpointDisconnectUserReducer],
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.username || ent.entity.guid || ent.metadata.guid,

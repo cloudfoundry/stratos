@@ -1,89 +1,96 @@
 import { Action } from '@ngrx/store';
 
-import { DELETE_ORGANIZATION_SUCCESS } from '../../../../cloud-foundry/src/actions/organization.actions';
+import { SESSION_VERIFIED, VerifiedSession } from '../../actions/auth.actions';
 import {
-  GET_CURRENT_USER_CF_RELATIONS,
-  GET_CURRENT_USER_CF_RELATIONS_FAILED,
-  GET_CURRENT_USER_CF_RELATIONS_SUCCESS,
-  GET_CURRENT_USER_RELATION_SUCCESS,
   GET_CURRENT_USER_RELATIONS,
   GET_CURRENT_USER_RELATIONS_FAILED,
   GET_CURRENT_USER_RELATIONS_SUCCESS,
-  GetCurrentUserRelationsComplete,
-  GetUserCfRelations,
-} from '../../../../cloud-foundry/src/actions/permissions.actions';
-import { DELETE_SPACE_SUCCESS } from '../../../../cloud-foundry/src/actions/space.actions';
-import { ADD_ROLE_SUCCESS, REMOVE_ROLE_SUCCESS } from '../../../../cloud-foundry/src/actions/users.actions';
+} from '../../actions/permissions.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { SessionUser } from '../../types/auth.types';
 import {
-  currentUserBaseCFRolesReducer,
-} from '../../../../cloud-foundry/src/store/reducers/current-user-roles-reducer/current-user-base-cf-role.reducer';
-import {
-  updateAfterRoleChange,
-} from '../../../../cloud-foundry/src/store/reducers/current-user-roles-reducer/current-user-roles-changed.reducers';
-import { SESSION_VERIFIED, VerifiedSession } from '../../actions/auth.actions';
-import {
-  CONNECT_ENDPOINTS_SUCCESS,
-  DISCONNECT_ENDPOINTS_SUCCESS,
-  EndpointActionComplete,
-  REGISTER_ENDPOINTS_SUCCESS,
-  UNREGISTER_ENDPOINTS_SUCCESS,
-} from '../../actions/endpoint.actions';
-import { getDefaultRolesRequestState, ICurrentUserRolesState } from '../../types/current-user-roles.types';
-import { APISuccessOrFailedAction } from '../../types/request.types';
-import {
-  currentUserCfRolesRequestStateReducer,
-  currentUserRolesRequestStateReducer,
-} from './current-user-request-state.reducers';
-import { roleInfoFromSessionReducer, updateNewlyConnectedEndpoint } from './current-user-role-session.reducer';
-import { addEndpoint, removeEndpointRoles, removeOrgRoles, removeSpaceRoles } from './current-user-roles-clear.reducers';
+  getDefaultRolesRequestState,
+  ICurrentUserRolesState,
+  RolesRequestState,
+} from '../../types/current-user-roles.types';
 
 const getDefaultState = () => ({
   internal: {
     isAdmin: false,
     scopes: []
   },
-  cf: {},
+  endpoints: {},
   state: getDefaultRolesRequestState()
 });
 
 export function currentUserRolesReducer(state: ICurrentUserRolesState = getDefaultState(), action: Action): ICurrentUserRolesState {
+  const stateAfterCoreChanges = coreCurrentUserRolesReducer(state, action);
+  return entityCatalog.getAllCurrentUserReducers(stateAfterCoreChanges, action);
+}
+
+function coreCurrentUserRolesReducer(state: ICurrentUserRolesState, action: Action): ICurrentUserRolesState {
   switch (action.type) {
-    case GET_CURRENT_USER_RELATION_SUCCESS:
+    case GET_CURRENT_USER_RELATIONS:
       return {
         ...state,
-        cf: currentUserBaseCFRolesReducer(state.cf, action as GetCurrentUserRelationsComplete)
+        state: currentUserRolesRequestStateReducer(state.state, RolesRequestStateStage.START)
       };
-    case SESSION_VERIFIED:
-      return roleInfoFromSessionReducer(state, action as VerifiedSession);
-    case REGISTER_ENDPOINTS_SUCCESS:
-      return addEndpoint(state, action as EndpointActionComplete);
-    case CONNECT_ENDPOINTS_SUCCESS:
-      return updateNewlyConnectedEndpoint(state, action as EndpointActionComplete);
-    case DISCONNECT_ENDPOINTS_SUCCESS:
-    case UNREGISTER_ENDPOINTS_SUCCESS:
-      return removeEndpointRoles(state, action as EndpointActionComplete);
-    case DELETE_ORGANIZATION_SUCCESS:
-      return removeOrgRoles(state, action as APISuccessOrFailedAction);
-    case DELETE_SPACE_SUCCESS:
-      return removeSpaceRoles(state, action as APISuccessOrFailedAction);
-    case ADD_ROLE_SUCCESS:
-      return updateAfterRoleChange(state, true, action as APISuccessOrFailedAction);
-    case REMOVE_ROLE_SUCCESS:
-      return updateAfterRoleChange(state, false, action as APISuccessOrFailedAction);
-    case GET_CURRENT_USER_RELATIONS:
     case GET_CURRENT_USER_RELATIONS_SUCCESS:
+      return {
+        ...state,
+        state: currentUserRolesRequestStateReducer(state.state, RolesRequestStateStage.SUCCESS)
+      };
     case GET_CURRENT_USER_RELATIONS_FAILED:
       return {
         ...state,
-        state: currentUserRolesRequestStateReducer(state.state, action.type)
+        state: currentUserRolesRequestStateReducer(state.state, RolesRequestStateStage.FAILURE)
       };
-    case GET_CURRENT_USER_CF_RELATIONS:
-    case GET_CURRENT_USER_CF_RELATIONS_SUCCESS:
-    case GET_CURRENT_USER_CF_RELATIONS_FAILED:
-      return {
-        ...state,
-        cf: currentUserCfRolesRequestStateReducer(state.cf, action as GetUserCfRelations)
-      };
+    case SESSION_VERIFIED:
+      const svAction = action as VerifiedSession
+      return applyInternalScopes(state, svAction.sessionData.user);
   }
   return state;
+}
+
+export enum RolesRequestStateStage {
+  START,
+  SUCCESS,
+  FAILURE,
+  OTHER
+}
+
+export function currentUserRolesRequestStateReducer(state: RolesRequestState = getDefaultRolesRequestState(), stage: RolesRequestStateStage) {
+  switch (stage) {
+    case RolesRequestStateStage.START:
+      return {
+        ...state,
+        fetching: true
+      };
+    case RolesRequestStateStage.SUCCESS:
+      return {
+        ...state,
+        initialised: true,
+        fetching: false
+      };
+    case RolesRequestStateStage.FAILURE:
+      return {
+        ...state,
+        fetching: false,
+        error: true
+      };
+  }
+}
+
+function applyInternalScopes(state: ICurrentUserRolesState, user: SessionUser): ICurrentUserRolesState {
+  const internalRoles = { ...state.internal };
+  if (user) {
+    internalRoles.scopes = user.scopes || [];
+    // The admin scope is configurable - so look at the flag provided by the backend
+    internalRoles.isAdmin = user.admin;
+  }
+
+  return {
+    ...state,
+    internal: internalRoles
+  };
 }

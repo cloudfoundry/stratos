@@ -1,9 +1,8 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
+import { endpointEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { RequestEntityLocation } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { featureFlagEntityType } from '../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../entity-relations/entity-relations.types';
@@ -12,7 +11,7 @@ import { CFStartAction } from './cf-action.types';
 export class GetAllFeatureFlags extends CFStartAction implements PaginatedAction {
   constructor(public endpointGuid: string, public paginationKey: string = null) {
     super();
-    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(endpointSchemaKey, this.endpointGuid);
+    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(endpointEntityType, this.endpointGuid);
     this.options = new HttpRequest(
       'GET',
       `config/feature_flags`
@@ -25,7 +24,6 @@ export class GetAllFeatureFlags extends CFStartAction implements PaginatedAction
   actions = getActions('Feature Flags', 'Fetch all');
   options: HttpRequest<any>;
   flattenPagination = true;
-  entityLocation = RequestEntityLocation.ARRAY;
   initialParams = {
     page: 1,
     'order-direction': 'desc',

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 
 import {
@@ -27,6 +27,9 @@ import { ServicesRoutingModule } from './services.routing';
     ServicesWallComponent,
     DetachServiceInstanceComponent,
     DetachAppsComponent
+  ],
+  providers: [
+    DatePipe
   ]
 })
 export class ServicesModule { }

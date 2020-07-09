@@ -3,7 +3,7 @@
     <div class="page-header__inner">
       <div class="page-header">
         <div>
-          <mat-toolbar class="page-header__toolbar" color="primary">
+          <mat-toolbar class="page-header__toolbar">
             <div *ngIf="isMobile$ | async" class="page-header__nav-toggle-wrapper">
               <button mat-icon-button *ngIf="!hideSideNavButton" (click)="toggleSidenav()">
                 <mat-icon class="page-header__nav-toggle">menu</mat-icon>
@@ -37,7 +37,7 @@
               |
             </span>
             <button *ngIf="showHistory" class="page-header__menu-button" mat-icon-button [matMenuTriggerFor]="history">
-              <mat-icon class="page-header__nav-toggle">history</mat-icon>
+              <mat-icon class="page-header__nav-toggle">schedule</mat-icon>
             </button>
             <mat-menu #history="matMenu" [overlapTrigger]="false" class="page-header__menu">
               <div class="page-header__history">

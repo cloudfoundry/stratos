@@ -10,4 +10,13 @@ export class CreateUserProvidedServiceInstance extends Page {
     super(url);
     this.stepper = new CreateServiceInstanceStepper();
   }
+
+  isActivePage() {
+    return super.isActivePage(true);
+  }
+
+  waitForPage() {
+    return super.waitForPage(undefined, true);
+  }
+
 }

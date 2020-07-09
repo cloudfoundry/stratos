@@ -23,7 +23,7 @@ export class TableCellEventActeeComponent extends TableCellCustom<APIResource> {
         icon: 'apps',
       },
       route: {
-        icon: 'network_route',
+        icon: 'route',
         iconFont: 'stratos-icons'
       },
       service: {
@@ -55,7 +55,8 @@ export class TableCellEventActeeComponent extends TableCellCustom<APIResource> {
         icon: 'remove_red_eye',
       },
       space: {
-        icon: 'language',
+        icon: 'virtual_space',
+        iconFont: 'stratos-icons'
       },
       organization: {
         icon: 'organization',

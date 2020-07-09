@@ -6,9 +6,17 @@ export class CreateMarketplaceServiceInstance extends Page {
 
   public stepper: CreateServiceInstanceStepper;
 
-  constructor(url = '/services/new/service?base-previous-redirect=%2Fservices%2Fnew') {
+  constructor(url = '/services/new/service') {
     super(url);
     this.stepper = new CreateServiceInstanceStepper();
+  }
+
+  isActivePage() {
+    return super.isActivePage(true);
+  }
+
+  waitForPage() {
+    return super.waitForPage(undefined, true);
   }
 
 }

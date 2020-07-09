@@ -67,15 +67,18 @@ function log() {
   echo $1 | tee -a ${CHANGELOG}
 }
 
+COMPARE_REPO=${REPO}
 QUERY="repo:${REPO}+milestone:${MILESTONE}+state:closed"
 if [ -n "${FORK}" ]; then
   FORK_QUERY="repo:${FORK}+milestone:${MILESTONE}+state:closed"
+  COMPARE_REPO=${FORK}
 fi
 
 BUGS="+label:bug"
 NON_BUGS="+-label:bug"
 
 mv ${CHANGELOG} CHANGELOG.old
+
 
 echo ""
 echo -e "${CYAN}${BOLD}Generating Change log - content for version ${MILESTONE} will be shown below"
@@ -85,7 +88,7 @@ echo  "# Change Log" > ${CHANGELOG}
 log ""
 log "## ${MILESTONE}"
 log ""
-log "[Full Changelog](https://github.com/${REPO}/compare/${CURRENT}...${MILESTONE})"
+log "[Full Changelog](https://github.com/${COMPARE_REPO}/compare/${CURRENT}...${MILESTONE})"
 log ""
 log "This release contains a number of fixes and improvements:"
 log ""

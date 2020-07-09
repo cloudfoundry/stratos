@@ -1,10 +1,10 @@
 import { HttpRequest } from '@angular/common/http';
 
-import { ENDPOINT_TYPE, endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
 import { RequestTypes } from '../../actions/request.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { EntityCatalogHelpers } from '../../entity-catalog/entity-catalog.helper';
 import { EntitySchema } from '../../helpers/entity-schema';
+import { endpointEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../../helpers/stratos-entity-factory';
 import { PaginatedAction } from '../../types/pagination.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../../types/request.types';
 import { createPaginationReducer } from './pagination.reducer';
@@ -20,8 +20,8 @@ function getReducer() {
 class MockPagAction implements PaginatedAction {
   actions = ['ONE', 'TWO', 'THREE'];
   options = new HttpRequest('GET', 'fake123');
-  entity = endpointEntitySchema;
-  entityType = ENDPOINT_TYPE;
+  entity = stratosEntityFactory(endpointEntityType);
+  entityType = endpointEntityType;
   endpointType = STRATOS_ENDPOINT_TYPE;
   paginationKey = 'PaginationKey';
   type = RequestTypes.START;

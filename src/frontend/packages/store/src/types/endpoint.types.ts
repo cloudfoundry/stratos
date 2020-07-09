@@ -1,8 +1,5 @@
-import { ScopeStrings } from '../../../core/src/core/current-user-permissions.config';
-import { EndpointType } from '../../../core/src/core/extension/extension-types';
 import { MetricsAPITargets, MetricsStratosInfo } from '../actions/metrics-api.actions';
-import { endpointSchemaKey } from '../helpers/entity-factory';
-import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
+import { EndpointType } from '../extension-types';
 
 export const endpointListKey = 'endpoint-list';
 export interface INewlyConnectedEndpointInfo {
@@ -12,14 +9,6 @@ export interface INewlyConnectedEndpointInfo {
   token_expiry: number;
   user: EndpointUser;
 }
-
-export const endpointStoreNames: {
-  section: TRequestTypeKeys,
-  type: string
-} = {
-  section: RequestSectionKeys.Other,
-  type: endpointSchemaKey
-};
 
 export interface IApiEndpointInfo {
   ForceQuery: boolean;
@@ -63,12 +52,14 @@ export interface EndpointModel {
 
 export const SystemSharedUserGuid = '00000000-1111-2222-3333-444444444444';
 
+export type UserScopeStrings = string;
+
 // Metadata for the user connected to an endpoint
 export interface EndpointUser {
   guid: string;
   name: string;
   admin: boolean;
-  scopes?: ScopeStrings[];
+  scopes?: UserScopeStrings[];
 }
 
 export interface EndpointState {

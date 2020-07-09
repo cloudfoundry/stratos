@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { serviceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IService } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
@@ -18,7 +18,7 @@ export class ServicesWallService {
   }
 
   initServicesObservable = () => {
-    const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey);
+    const paginationKey = createEntityRelationPaginationKey(endpointEntityType);
     return cfEntityCatalog.service.store.getPaginationService(null, paginationKey, {}).entities$
   }
 
