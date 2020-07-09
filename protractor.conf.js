@@ -12,6 +12,9 @@ const globby = require('globby');
 const timeReporterPlugin = require('./src/test-e2e/time-reporter-plugin.js');
 const browserReporterPlugin = require('./src/test-e2e/browser-reporter-plugin.js');
 const https = require('https');
+const {
+  ProtractorBrowserLogReporter
+} = require('jasmine-protractor-browser-log-reporter');
 
 // Test report folder name
 var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
@@ -170,10 +173,7 @@ const config = {
     print: function () {}
   },
   params: secrets,
-  plugins: [{
-    package: 'protractor-console',
-    logLevels: ['info', 'warning', 'severe']
-  }],
+  plugins: [],
   onPrepare() {
     // https://webdriver.io/docs/api/chromium.html#setnetworkconditions
     // browser.driver.setNetworkConditions({
@@ -187,6 +187,8 @@ const config = {
     if (browser.baseUrl.endsWith('/')) {
       browser.baseUrl = browser.baseUrl.substr(0, browser.baseUrl.length - 1);
     }
+
+    jasmine.getEnv().addReporter(new ProtractorBrowserLogReporter());
 
     skipPlugin.install(jasmine);
     require('ts-node').register({
