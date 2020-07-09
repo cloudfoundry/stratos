@@ -14,6 +14,12 @@ import { isEndpointConnected } from '../../../features/endpoints/connect.service
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 
+interface FavoriteIconData {
+  hasIcon: boolean;
+  icon?: string;
+  iconFont?: string;
+  logoUrl?: string;
+}
 
 @Component({
   selector: 'app-favorites-meta-card',
@@ -64,6 +70,9 @@ export class FavoritesMetaCardComponent {
   // Optional icon for the favorite
   public iconUrl$: Observable<string>;
 
+  // Optional icon for the favorite
+  public icon: FavoriteIconData;
+
   @Input()
   set favoriteEntity(favoriteEntity: IFavoriteEntity) {
     if (!this.placeholder && favoriteEntity) {
@@ -87,6 +96,14 @@ export class FavoritesMetaCardComponent {
       } else {
         this.iconUrl$ = observableOf('');
       }
+
+      const entityDef = entityCatalog.getEntity(this.favorite.endpointType, this.favorite.entityType);
+      this.icon = {
+        hasIcon: !!entityDef.definition.logoUrl || !!entityDef.definition.icon,
+        icon: entityDef.definition.icon,
+        iconFont: entityDef.definition.iconFont,
+        logoUrl: entityDef.definition.logoUrl,
+      };
 
       this.setConfirmation(this.prettyName, favorite);
 

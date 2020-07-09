@@ -40,7 +40,7 @@
       background-color: mat-color($foreground, divider);
     }
     &__history {
-      color: $subdued;
+      color: mat-color($foreground, text);
     }
     &__underflow {
       background-color: $underflow-background;
