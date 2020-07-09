@@ -32,6 +32,15 @@ $spacing: 10px;
     text-align: center;
     width: 24px;
   }
+  &__icon {
+    opacity: .7;
+  }
+  &__icon-container {
+    display: flex;
+    height: 24px;
+    text-align: center;
+    width: 32px;
+  }
 }
 
 .clickable {
@@ -39,7 +48,6 @@ $spacing: 10px;
 }
 
 .recent-tab {
-  padding-top: $spacing;
   &.standalone {
     padding-top: 0;
   }
