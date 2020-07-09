@@ -35,17 +35,25 @@
   }
   &__header {
     display: flex;
-    white-space: nowrap;
   }
-  &__icon-panel {
+  &__logo-panel {
     display: flex;
-    justify-content: center;
+    justify-content: left;
     width: 56px;
   }
-  &__icon {
+  &__logo {
     height: 48px;
     margin-right: 8px;
     width: auto;
+  }
+  &__icon {
+    margin-right: 4px;
+    opacity: .7;
+  }
+  &__icon-panel {
+    display: flex;
+    justify-content: left;
+    width: 32px;
   }
   &__panel {
     display: flex;
