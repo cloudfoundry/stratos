@@ -19,6 +19,8 @@ export class StratosConfig implements Logger {
   public nodeModulesFile: string;
   public angularJsonFile: string;
 
+  public rootDir: string;
+
   // angular.json contents
   public angularJson: any;
 
@@ -44,6 +46,9 @@ export class StratosConfig implements Logger {
     this.angularJson = JSON.parse(fs.readFileSync(this.angularJsonFile, 'utf8').toString());
     this.loggingEnabled = loggingEnabled;
 
+    // Top-level folder
+    this.rootDir = path.dirname(this.angularJsonFile);
+
     // The Stratos config file is optional - allows overriding default behaviour
     this.stratosConfig = {};
     if (this.angularJsonFile) {
@@ -65,22 +70,20 @@ export class StratosConfig implements Logger {
     // Exclude the default packages... unless explicity `include`d
     this.excludeExamples()
 
-    const mainDir = options ? path.dirname(options.main) : dir;
-
-    this.packageJsonFile = this.findFileOrFolderInChain(mainDir, 'package.json');
+    this.packageJsonFile = this.findFileOrFolderInChain(this.rootDir, 'package.json');
     if (this.packageJsonFile !== null) {
       this.packageJson = JSON.parse(fs.readFileSync(this.packageJsonFile, 'utf8').toString());
     }
 
-    this.nodeModulesFile = this.findFileOrFolderInChain(mainDir, 'node_modules');
+    this.nodeModulesFile = this.findFileOrFolderInChain(this.rootDir, 'node_modules');
 
-    this.gitMetadata = new GitMetadata(path.dirname(this.angularJsonFile));
+    this.gitMetadata = new GitMetadata(this.rootDir);
     // this.log(this.gitMetadata);
     if (this.gitMetadata.exists) {
       this.log('Read git metadata file');
     }
 
-    this.newProjectRoot = this.angularJson.newProjectRoot;
+    this.newProjectRoot = path.join(this.rootDir, this.angularJson.newProjectRoot);
 
     // Discover all packages
 

@@ -2,8 +2,9 @@
 // See: https://material.io/guidelines/components/menus.html#menus-specs
 
 $desktop-font-size: 14px;
-$desktop-menu-item-height: 36px;
+$desktop-menu-item-height: 32px;
 $desktop-menu-vertical-padding: 8px;
+$desktop-page-header-height: 48px;
 
 // Remove 1px border
 $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
@@ -72,5 +73,38 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
     flex: 0 0 56px;
     font-size: $desktop-font-size;
     height: 56px;
+  }
+
+  // Smaller icons in the Toolbars in the page sub-nav
+  .page-header-sub-nav {
+    mat-icon {
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+    }
+
+    .mat-icon-button {
+      line-height: 34px;
+      height: 34px;
+      width: 34px;
+      mat-icon {
+        // Also stops the wobble on the refresh icon
+        line-height: normal;
+      }
+    }
+  }
+
+  // Smaller page header
+  .page-header .page-header__toolbar {
+    height: $desktop-page-header-height;
+  }
+
+  .dashboard .dashboard__inner {
+    height: calc(100% - #{$desktop-page-header-height});
+  }
+
+  .side-nav .side-nav__top {
+    flex: 0 0 $desktop-page-header-height;
+    height: $desktop-page-header-height;
   }
 }

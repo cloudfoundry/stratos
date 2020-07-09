@@ -128,7 +128,12 @@ export class Packages {
     // Local folders
     // Find all local packages in the folder
     getDirectories(this.localPackagesFolder).forEach(pkgDir => {
-      this.addPackage(pkgDir, true);
+      const pkgFile = Packages.loadPackageFile(pkgDir);
+      if (pkgFile !== null) {
+        this.addPackage(pkgDir, true);
+      } else {
+        getDirectories(pkgDir).forEach(pDir => this.addPackage(pDir, true));
+      }
     });
 
     // Figure out the theme

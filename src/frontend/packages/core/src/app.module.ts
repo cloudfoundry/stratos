@@ -7,8 +7,6 @@ import { Store } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
-import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
-import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry-package.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
@@ -103,7 +101,6 @@ class AppStoreDebugModule { }
   imports: [
     EntityCatalogModule.forFeature(generateStratosEntities),
     RouteModule,
-    CloudFoundryPackageModule,
     AppStoreModule,
     AppStoreDebugModule,
     BrowserModule,
@@ -118,7 +115,6 @@ class AppStoreDebugModule { }
     AboutModule,
     CustomImportModule,
     XSRFModule,
-    CfAutoscalerModule
   ],
   providers: [
     CustomizationService,
