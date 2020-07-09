@@ -51,6 +51,7 @@ export interface EntityCatalogSchemas {
 export interface IStratosEntityWithIcons {
   icon?: string;
   iconFont?: string;
+  logoUrl?: string;
 }
 
 export interface IEntityMetadata {

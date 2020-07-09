@@ -37,6 +37,9 @@ export class GetServiceInstances
     public includeRelations: string[] = [
       createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
       createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
+      // Ideally this should just be `createEntityRelationKey(serviceInstancesEntityType, serviceEntityType)`, however even though CF
+      // returns `si.service_url` and `si.service_guid` it does not return the actual service. This means the service is not fetched in the
+      // initial fetch SI request but in lots of separate ones.
       createEntityRelationKey(servicePlanEntityType, serviceEntityType),
       createEntityRelationKey(serviceInstancesEntityType, spaceEntityType),
     ],

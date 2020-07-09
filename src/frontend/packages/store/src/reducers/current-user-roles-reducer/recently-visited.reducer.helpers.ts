@@ -1,118 +1,64 @@
 import { AddRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
-import {
-  IEntityHit,
-  IRecentlyVisitedEntities,
-  IRecentlyVisitedEntity,
-  IRecentlyVisitedEntityDated,
-  IRecentlyVisitedState,
-} from '../../types/recently-visited.types';
+import { IRecentlyVisitedEntity, IRecentlyVisitedState } from '../../types/recently-visited.types';
 
-const MAX_RECENT_COUNT = 100;
+// Maximum number of recent entities to show to the user
+export const MAX_RECENT_COUNT = 100;
 
-function getEntities(entities: IRecentlyVisitedEntities, newHit: IEntityHit, recentlyVisited: IRecentlyVisitedEntityDated) {
-  if (!entities[newHit.guid]) {
-    return {
-      ...entities,
-      [newHit.guid]: recentlyVisited
-    };
-  }
-  return entities;
+// When the recent count goes above this, reduce it back down to the max
+// This avoids us having to constantly trim the list once the max is hit
+// We only ever show the max count number in the lists in the UI
+const FLUSH_RECENT_COUNT = 150;
+
+function recentArrayToMap(map: IRecentlyVisitedState, obj: IRecentlyVisitedEntity): IRecentlyVisitedState {
+  map[obj.guid] = obj;
+  return map;
 }
 
-function trimRecent(hits: IEntityHit[]) {
-  if (shouldTrim(hits)) {
-    return hits.slice(0, MAX_RECENT_COUNT - 1);
-  }
-  return hits;
-}
+// Default recent state is an empty object map
+export const getDefaultRecentState = () => ({});
 
-function shouldTrim(hits: IEntityHit[]) {
-  return hits.length >= MAX_RECENT_COUNT;
-}
-
-const endpointIdIsInList = () => {
-  const recentCache = {};
-  return (recent: IRecentlyVisitedEntity, endpointGuids: string[]) => {
-    const { endpointId } = recent;
-    const cached = recentCache[endpointId];
-    if (cached === true || cached === false) {
-      return cached;
-    }
-    recentCache[endpointId] = endpointGuids.includes(recent.endpointId);
-    return recentCache[endpointId];
-  };
-};
-
-
-const idExistsInEntityList = (id: string, recents: IRecentlyVisitedEntities) => {
-  return !!recents[id];
-};
-
-export const getDefaultRecentState = () => ({
-  entities: {},
-  hits: []
-});
-
-export function addNewHit(state: IRecentlyVisitedState, action: AddRecentlyVisitedEntityAction): IRecentlyVisitedState {
-  const entities = state.entities;
-  const newHit = {
-    guid: action.recentlyVisited.guid,
-    date: action.recentlyVisited.date
-  } as IEntityHit;
-  const hits = [
-    newHit,
-    ...trimRecent(state.hits),
-  ];
-  const newEntities = getEntities(entities, newHit, action.recentlyVisited);
+// An entity has been 'hit', so update the access date or add it to the recent history
+export function addRecentlyVisitedEntity(state: IRecentlyVisitedState, action: AddRecentlyVisitedEntityAction): IRecentlyVisitedState {
   const newState = {
-    entities: newEntities,
-    hits
+    ...state,
+    [action.recentlyVisited.guid]: action.recentlyVisited
   };
-  return shouldTrim(state.hits) ? cleanEntities(newState) : newState;
+
+  // Trim old data to keep the list in a manageable size
+  return trimRecentsList(newState);
 }
 
-export function cleanRecentsList(state: IRecentlyVisitedState, endpointGuids?: string[], inclusive = false): IRecentlyVisitedState {
-  const isInList = endpointIdIsInList();
-  if (!endpointGuids) {
-    return state;
+// Ensure the recents list stays at a manageable size
+function trimRecentsList(state: IRecentlyVisitedState): IRecentlyVisitedState {
+  if (Object.keys(state).length > FLUSH_RECENT_COUNT) {
+    // The list size has gone over the flush count
+    const entities = Object.values(state);
+    // Cap the list at the maximum we can display
+    const sorted = entities.sort((a, b) => b.date - a.date).slice(0, MAX_RECENT_COUNT);
+
+    // Turn array back into a map
+    return sorted.reduce(recentArrayToMap, {});
   }
-  if (!endpointGuids.length) {
-    return inclusive ? getDefaultRecentState() : state;
-  }
-  const entities = Object.keys(state.entities).reduce((reducedRecents, currentRecentGuid) => {
-    const currentRecent = state.entities[currentRecentGuid];
-    const inList = isInList(currentRecent, endpointGuids);
-    if (
-      (!inList && !inclusive) ||
-      (inList && inclusive)
-    ) {
-      reducedRecents[currentRecentGuid] = currentRecent;
-    }
-    return reducedRecents;
-  }, {});
-  const hits = state.hits.reduce((reducedHits, hit) => {
-    if (idExistsInEntityList(hit.guid, entities)) {
-      reducedHits.push(hit);
-    }
-    return reducedHits;
-  }, []);
-  return {
-    entities,
-    hits
-  };
+  return state;
 }
 
-export function cleanEntities(state: IRecentlyVisitedState) {
-  const entities = Object.keys(state.entities).reduce((reducedRecents, currentRecentGuid) => {
-    const currentRecent = state.entities[currentRecentGuid];
-    const hasHit = state.hits.find(hit => hit.guid === currentRecentGuid);
-    if (hasHit) {
-      reducedRecents[currentRecentGuid] = currentRecent;
-    }
-    return reducedRecents;
+// Update the recents list - either removing any that reference and endpoint in the list OR keeping only those
+// that reference an endpoint in the list
+export function cleanRecentsList(state: IRecentlyVisitedState, endpointGuids: string[], inclusive = false): IRecentlyVisitedState {
+
+  // Turn the guids into a map, for easier lookup of testing if an endpoint shold be kept or not
+  const endpointMap = endpointGuids.reduce((m, obj) => {
+    m[obj] = true;
+    return m;
   }, {});
-  return {
-    entities,
-    hits: state.hits
-  };
+
+  // Filter all of the recent entities
+  const filtered = Object.values(state).filter(entity => {
+    // Was this endpoint in the list?
+    const exists = endpointMap[entity.endpointId];
+    return exists ? inclusive : !inclusive;
+  });
+
+  // Convert the array back into a map
+  return filtered.reduce(recentArrayToMap, {});
 }

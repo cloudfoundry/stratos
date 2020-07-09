@@ -11,7 +11,7 @@ import { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from '
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../helpers/stratos-entity-factory';
 import { IRecentlyVisitedState } from '../../types/recently-visited.types';
-import { addNewHit, cleanRecentsList, getDefaultRecentState } from './recently-visited.reducer.helpers';
+import { addRecentlyVisitedEntity, cleanRecentsList, getDefaultRecentState } from './recently-visited.reducer.helpers';
 
 export function recentlyVisitedReducer(
   state: IRecentlyVisitedState = getDefaultRecentState(),
@@ -19,16 +19,14 @@ export function recentlyVisitedReducer(
 ): IRecentlyVisitedState {
   switch (action.type) {
     case AddRecentlyVisitedEntityAction.ACTION_TYPE:
-      return addNewHit(state, action as AddRecentlyVisitedEntityAction);
+      return addRecentlyVisitedEntity(state, action as AddRecentlyVisitedEntityAction);
     case SetRecentlyVisitedEntityAction.ACTION_TYPE:
       const setAction = action as SetRecentlyVisitedEntityAction;
-      return {
-        hits: state.hits,
-        entities: {
-          ...state.entities,
-          [setAction.recentlyVisited.guid]: setAction.recentlyVisited
-        }
+      const newState = {
+        ...state,
+        [setAction.recentlyVisited.guid]: setAction.recentlyVisited
       };
+      return newState;
     case DISCONNECT_ENDPOINTS_SUCCESS:
     case UNREGISTER_ENDPOINTS_SUCCESS:
       const removeEndpointAction = action as DisconnectEndpoint;

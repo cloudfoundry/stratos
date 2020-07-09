@@ -231,11 +231,12 @@ export class AppModule {
       }
     );
 
+    // This updates the names of any recents
     debouncedApiRequestData$.pipe(
       withLatestFrom(recents$)
     ).subscribe(
       ([entities, recents]) => {
-        Object.values(recents.entities).forEach(recentEntity => {
+        Object.values(recents).forEach(recentEntity => {
           const mapper = this.favoritesConfigMapper.getMapperFunction(recentEntity);
           const entityKey = entityCatalog.getEntityKey(recentEntity);
           if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
@@ -243,6 +244,7 @@ export class AppModule {
             const entityToMetadata = this.favoritesConfigMapper.getEntityMetadata(recentEntity, entity);
             const name = mapper(entityToMetadata).name;
             if (name && name !== recentEntity.name) {
+              // Update the entity name
               this.store.dispatch(new SetRecentlyVisitedEntityAction({
                 ...recentEntity,
                 name
