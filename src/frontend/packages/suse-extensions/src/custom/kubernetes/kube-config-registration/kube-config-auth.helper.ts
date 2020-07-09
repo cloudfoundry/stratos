@@ -88,8 +88,6 @@ export class KubeConfigAuthHelper {
     }
 
     const authProvider = user.user['auth-provider'];
-
-
     if (authProvider && authProvider.config) {
       if (authProvider.config['cmd-path'] && authProvider.config['cmd-path'].indexOf('gcloud') !== -1) {
         // GKE
@@ -114,6 +112,20 @@ export class KubeConfigAuthHelper {
         message: 'This endpoint will be registered but not connected (additional information is required)',
         info: true
       };
+    }
+
+    // Username and password auth
+    if (user.user.username && user.user.password) {
+      const authData = {
+        authType: 'creds',
+        subType: '',
+        values: {
+          username: user.user.username,
+          password: user.user.password
+        }
+      };
+      user._authData = authData;
+      return {};
     }
 
     return { message: 'Authentication mechanism is not supported', warning: true };
@@ -150,7 +162,16 @@ export class KubeConfigAuthHelper {
           systemShared: false,
           bodyContent: endpointFormInstance.getBody()
         };
+      } else {
+        // Use values as is
+        data = {
+          authType: authType.value,
+          authVal: user._authData.values,
+          systemShared: false,
+          bodyContent: null
+        };
       }
+
       ref.destroy();
     }
     return data;

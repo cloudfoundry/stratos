@@ -159,6 +159,7 @@ export class KubeConfigImportComponent implements OnDestroy {
 
   private doConnect(connect: KubeConfigImportAction, next: KubeConfigImportAction[]) {
     if (!connect.user) {
+      connect.state.next({ message: 'Can not connect - no user specified', error: true });
       return;
     }
     const helper = new KubeConfigAuthHelper();
@@ -175,6 +176,8 @@ export class KubeConfigImportComponent implements OnDestroy {
         }
         this.processAction(next);
       }));
+    } else {
+      connect.state.next({ message: 'Can not connect - could not get user auth data', error: true });
     }
   }
 

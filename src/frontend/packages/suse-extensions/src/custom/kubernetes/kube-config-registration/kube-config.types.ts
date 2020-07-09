@@ -52,6 +52,8 @@ export interface KubeConfigFileUserDetail {
   'client-key-data'?: string;
   token?: string;
   exec?: any
+  username?: string;
+  password?: string;
 }
 
 export interface KubeConfigFileContext {
