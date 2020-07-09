@@ -7,7 +7,7 @@ import { TestEntityCatalog } from './entity-catalog';
 import { StratosCatalogEndpointEntity, StratosCatalogEntity } from './entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogSchemas, IStratosEndpointDefinition } from './entity-catalog.types';
 
-describe('EntityCatalogService', () => {
+fdescribe('EntityCatalogService', () => {
   let entityCatalog: TestEntityCatalog;
   function getEndpointDefinition() {
     return {

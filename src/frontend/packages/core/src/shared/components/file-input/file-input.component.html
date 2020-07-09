@@ -1,6 +1,6 @@
 <div class="file-input" [ngClass]="{'file-input__disabled': disabled}">
   <input [accept]="accept" type="file" (change)="onNativeInputFileSelect($event)" #inputFile hidden />
-  <mat-form-field class="file-input__form-field">
+  <mat-form-field class="file-input__form-field" *ngIf="!buttonLabel">
     <div class="file-input__field" (click)="!disabled && selectFile($event)">
       <div *ngIf="!fileCount" class="file-input__input file-input__none">No file selected</div>
       <div *ngIf="fileCount" class="file-input__input ">{{ name }}</div>
@@ -10,4 +10,5 @@
       </button>
     </div>
   </mat-form-field>
+  <button *ngIf="buttonLabel" (click)="selectFile($event)" mat-button color="primary">{{ buttonLabel }}</button>
 </div>

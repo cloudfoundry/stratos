@@ -1,8 +1,8 @@
 <app-page-header>
-  <h1>Register a new Endpoint</h1>
+  <h1>Register Endpoint</h1>
 </app-page-header>
 
-<app-steppers cancel="/endpoints">
+<app-steppers *ngIf="!component; else customComponent" cancel="/endpoints">
   <app-step [title]="'Register'" [valid]="step1.validate | async" [onNext]="step1.onNext" [nextButtonText]="'Register'">
     <app-create-endpoint-cf-step-1 #step1 [finalStep]="!showConnectStep"></app-create-endpoint-cf-step-1>
   </app-step>
@@ -12,3 +12,5 @@
     <app-create-endpoint-connect #connect></app-create-endpoint-connect>
   </app-step>
 </app-steppers>
+
+<ng-template #customComponent></ng-template>
