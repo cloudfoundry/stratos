@@ -5,11 +5,13 @@
     "assets": {
       "assets/core": "core/assets",
       "assets/favicon.ico": "favicon.ico"
-    }<% if(!!includeLoader) { %>,<% } %><% } %><% if(!!includeLoader) { %>
-    "theme":{
+    },<% } %><% if(!!includeLoader) { %>
+    "theme": {
       "loadingCss": "loader/loading.css",
       "loadingHtml": "loader/loading.html"
-    }<% } %>
+    }<% } else { %>
+    "theme": {}
+    <% } %>
   },
   "peerDependencies": {
     "@stratosui/theme": "^<%= startosLatestVersion %>"

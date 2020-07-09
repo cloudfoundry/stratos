@@ -20,7 +20,7 @@ export class E2E {
    * Temporary location for customization, we should in future look to fetch this a better way from client side code
   */
   public static customization: CustomizationsMetadata = {
-    alwaysShowNavForEndpointTypes: (epType) => false
+    alwaysShowNavForEndpointTypes: (epType) => false // Should match implementation in suse.module
   }
 
   // General helpers

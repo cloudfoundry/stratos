@@ -1,12 +1,13 @@
 {
-  "name": "cloud-foundry",
+  "name": "@stratosui/cloud-foundry",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
     "@angular/core": "^6.0.0-rc.0 || ^6.0.0"
   },
   "stratos": {
+    "module": "CloudFoundryPackageModule",
+    "routingModule": "CloudFoundryRoutingModule",
     "theming": "sass/_all-theme#apply-theme-stratos-cloud-foundry"
   }
-
 }

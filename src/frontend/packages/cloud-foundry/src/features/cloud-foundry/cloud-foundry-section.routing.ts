@@ -427,4 +427,4 @@ const cloudFoundry: Routes = [{
 @NgModule({
   imports: [RouterModule.forChild(cloudFoundry)]
 })
-export class CloudFoundryRoutingModule { }
+export class CloudFoundrySectionRoutingModule { }
