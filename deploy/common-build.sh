@@ -43,7 +43,7 @@ function buildAndPublishImage {
 
 # Proxy support
 # Remove intermediate containers after a successful build
-BUILD_ARGS="--rm=true --squash"
+BUILD_ARGS="--rm=true"
 RUN_ARGS=""
 if [ -n "${http_proxy:-}" -o -n "${HTTP_PROXY:-}" ]; then
   BUILD_ARGS="${BUILD_ARGS} --build-arg http_proxy=${http_proxy:-${HTTP_PROXY}}"
@@ -52,6 +52,15 @@ fi
 if [ -n "${https_proxy:-}" -o -n "${HTTPS_PROXY:-}" ]; then
   BUILD_ARGS="${BUILD_ARGS} --build-arg https_proxy=${https_proxy:-${HTTPS_PROXY}}"
   RUN_ARGS="${RUN_ARGS} -e https_proxy=${https_proxy:-${HTTPS_PROXY}}"
+fi
+
+# Check if we can squash
+CAN_SQUASH=$(docker info 2>&1 | grep "Experimental: true" -c | cat)
+if [ "${CAN_SQUASH}" == "1" ]; then
+  BUILD_ARGS="${BUILD_ARGS} --squash"
+  echo "Images will be squashed"
+else
+  echo "Images will NOT be squashed"
 fi
 
 # Use correct sed command for Mac
@@ -104,7 +113,6 @@ function cleanup {
   echo "-- Cleaning up ${STRATOS_PATH}"
   rm -rf ${STRATOS_PATH}/dist
   rm -rf ${STRATOS_PATH}/node_modules
-  rm -rf ${STRATOS_PATH}/bower_components
   echo
   echo "-- Cleaning up ${STRATOS_PATH}/deploy/containers/nginx/dist"
   rm -rf ${STRATOS_PATH}/deploy/containers/nginx/dist
