@@ -47,7 +47,6 @@ import { MetaCardItemComponent } from './components/list/list-cards/meta-card/me
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { TableCellEditComponent } from './components/list/list-table/table-cell-edit/table-cell-edit.component';
 import {
   TableCellRequestMonitorIconComponent,
 } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
@@ -55,6 +54,7 @@ import {
   TableCellSidePanelComponent,
 } from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
+import { listTableCells } from './components/list/list-table/table-cell/table-cell.component';
 import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
@@ -312,7 +312,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,
     MaxListMessageComponent,
-    TableCellEditComponent
+    ...listTableCells
   ],
   providers: [
     ListConfig,

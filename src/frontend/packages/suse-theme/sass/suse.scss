@@ -1,0 +1,13 @@
+// Custom SUSE Theme
+
+// Work Sans font
+@import '~../sass/font';
+
+body.stratos {
+
+  // Round buttons
+  button.mat-button {
+    border-radius: 20px;
+  }
+
+}

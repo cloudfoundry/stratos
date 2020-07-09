@@ -18,6 +18,7 @@ $stratos-themes: stratos-theme();
 }
 
 // Import any custom scss that the theme defines
+// This import defines the mixin 'apply-theme'
 @import '~@stratosui/theme/extensions';
 
 // Default theme ( = light theme)
@@ -33,6 +34,8 @@ $theme: map-get($stratos-theme, theme);
     .dark-theme {
       @include angular-material-theme($dark-theme);
       @include app-theme($dark-stratos-theme);
+      // Apply theme to extensions
+      @include apply-theme($dark-stratos-theme);
     }
   }
 }
@@ -40,6 +43,8 @@ $theme: map-get($stratos-theme, theme);
 .default {
   @include angular-material-theme($theme);
   @include app-theme($stratos-theme);
+  // Apply theme to extensions
+  @include apply-theme($stratos-theme);
 }
 
 // Import mat-core

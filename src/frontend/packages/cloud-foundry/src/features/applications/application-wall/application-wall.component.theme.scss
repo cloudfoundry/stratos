@@ -1,9 +1,6 @@
-// For the App Wall, reduce the size of the filter and sort
+@import '../../../../sass/mixins';
+
 .app-wall {
-  .list-component__header__right-filter {
-    width: 140px;
-  }
-  .list-component__header__right-sort {
-    width: 120px;
-  }
+  @include apply-smaller-list-input;
 }
+

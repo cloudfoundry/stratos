@@ -32,7 +32,6 @@
             ],
             "styles": [
               "src/frontend/packages/core/src/styles.scss",
-              "src/frontend/packages/cf-autoscaler/src/styles.scss",
               "node_modules/xterm/css/xterm.css"
             ],
             "scripts": []

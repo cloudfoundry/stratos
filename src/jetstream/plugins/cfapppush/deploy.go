@@ -38,6 +38,7 @@ const (
 	CLOSE_NO_SESSION
 	CLOSE_NO_CNSI
 	CLOSE_NO_CNSI_USERTOKEN
+	CLOSE_ACK
 )
 
 // Events
@@ -216,9 +217,32 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		sendErrorMessage(clientWebSocket, err, CLOSE_PUSH_ERROR)
 		return err
 	}
+
+	log.Debug("Sending message to front-end to indicate push completed")
 	sendEvent(clientWebSocket, EVENT_PUSH_COMPLETED)
 
 	sendEvent(clientWebSocket, CLOSE_SUCCESS)
+
+	log.Debug("Waiting for close ackhowledgement from the client")
+
+	wait := 30 * time.Second
+	clientWebSocket.SetReadDeadline(time.Now().Add(wait))
+
+	// Wait for the client to acknowledge the close - timeout ?
+	if err := clientWebSocket.ReadJSON(&msg); err != nil {
+		log.Errorf("Error reading JSON: %v+", err)
+		return nil
+	}
+
+	if msg.Type != CLOSE_ACK {
+		log.Errorf("Expected a close acknowledgement - got: %s", string(msg.Type))
+	} else {
+		log.Debug("Got close acknowledgement from the client")
+	}
+
+	// Close the web socket - should we wait for ack from client?
+	clientWebSocket.Close()
+
 	return nil
 }
 
@@ -627,6 +651,7 @@ func (sw *SocketWriter) Write(data []byte) (int, error) {
 
 	err := sw.clientWebSocket.WriteMessage(websocket.TextMessage, message)
 	if err != nil {
+		log.Warnf("Failed to write data to web socket: %s", err)
 		return 0, err
 	}
 	return len(data), nil
@@ -647,16 +672,22 @@ func sendManifest(manifest Applications, clientWebSocket *websocket.Conn) error 
 
 func sendErrorMessage(clientWebSocket *websocket.Conn, err error, errorType MessageType) {
 	closingMessage, _ := getMarshalledSocketMessage(fmt.Sprintf("Failed due to %s!", err), errorType)
-	clientWebSocket.WriteMessage(websocket.TextMessage, closingMessage)
+	if err := clientWebSocket.WriteMessage(websocket.TextMessage, closingMessage); err != nil {
+		log.Warnf("Failed to write error message to web socket: %s", err)
+	}
 }
 
 func sendEvent(clientWebSocket *websocket.Conn, event MessageType) {
 	msg, _ := getMarshalledSocketMessage("", event)
-	clientWebSocket.WriteMessage(websocket.TextMessage, msg)
+	if err := clientWebSocket.WriteMessage(websocket.TextMessage, msg); err != nil {
+		log.Warnf("Failed to write message to web socket: %s", err)
+	}
 }
 
 // SendEvent sends a message over the web socket
 func (cfAppPush *CFAppPush) SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string) {
 	msg, _ := getMarshalledSocketMessage(data, event)
-	clientWebSocket.WriteMessage(websocket.TextMessage, msg)
+	if err := clientWebSocket.WriteMessage(websocket.TextMessage, msg); err != nil {
+		log.Warnf("Failed to write message to web socket: %s", err)
+	}
 }

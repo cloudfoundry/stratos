@@ -60,18 +60,6 @@ const appRoutes: Routes = [
       },
       { path: 'entity-list', loadChildren: () => import('./api-driven-views/api-driven-views.module').then(m => m.ApiDrivenViewsModule) },
       {
-        path: 'applications',
-        loadChildren: () => import('../../cloud-foundry/src/features/applications/applications.module').then(m => m.ApplicationsModule),
-        data: {
-          stratosNavigation: {
-            label: 'Applications',
-            matIcon: 'apps',
-            requiresEndpointType: 'cf',
-            position: 20
-          }
-        },
-      },
-      {
         path: 'endpoints',
         data: {
           stratosNavigation: {
@@ -90,45 +78,6 @@ const appRoutes: Routes = [
           path: '',
           loadChildren: () => import('./features/endpoints/endpoints.module').then(m => m.EndpointsModule),
         }]
-      },    
-      {
-        path: 'marketplace',
-        loadChildren: () => import('../../cloud-foundry/src/features/service-catalog/service-catalog.module')
-          .then(m => m.ServiceCatalogModule),
-        data: {
-          stratosNavigation: {
-            label: 'Marketplace',
-            matIcon: 'store',
-            requiresEndpointType: 'cf',
-            position: 30
-          }
-        },
-      },
-      {
-        path: 'services',
-        loadChildren: () => import('../../cloud-foundry/src/features/services/services.module').then(m => m.ServicesModule),
-        data: {
-          stratosNavigation: {
-            label: 'Services',
-            matIcon: 'service',
-            matIconFont: 'stratos-icons',
-            requiresEndpointType: 'cf',
-            position: 40
-          }
-        },
-      },
-      {
-        path: 'cloud-foundry',
-        loadChildren: () => import('../../cloud-foundry/src/features/cloud-foundry/cloud-foundry.module').then(m => m.CloudFoundryModule),
-        data: {
-          stratosNavigation: {
-            label: 'Cloud Foundry',
-            matIcon: 'cloud_foundry',
-            matIconFont: 'stratos-icons',
-            requiresEndpointType: 'cf',
-            position: 50
-          }
-        },
       },
       { path: 'about', loadChildren: () => import('./features/about/about.module').then(m => m.AboutModule) },
       { path: 'user-profile', loadChildren: () => import('./features/user-profile/user-profile.module').then(m => m.UserProfileModule) },

@@ -7,8 +7,6 @@ import { Store } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
-import { CfAutoscalerModule } from '../../cf-autoscaler/src/cf-autoscaler.module';
-import { CloudFoundryPackageModule } from '../../cloud-foundry/src/cloud-foundry-package.module';
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
@@ -103,7 +101,6 @@ class AppStoreDebugModule { }
   imports: [
     EntityCatalogModule.forFeature(generateStratosEntities),
     RouteModule,
-    CloudFoundryPackageModule,
     AppStoreModule,
     AppStoreDebugModule,
     BrowserModule,
@@ -118,7 +115,6 @@ class AppStoreDebugModule { }
     AboutModule,
     CustomImportModule,
     XSRFModule,
-    CfAutoscalerModule
   ],
   providers: [
     CustomizationService,
@@ -235,11 +231,12 @@ export class AppModule {
       }
     );
 
+    // This updates the names of any recents
     debouncedApiRequestData$.pipe(
       withLatestFrom(recents$)
     ).subscribe(
       ([entities, recents]) => {
-        Object.values(recents.entities).forEach(recentEntity => {
+        Object.values(recents).forEach(recentEntity => {
           const mapper = this.favoritesConfigMapper.getMapperFunction(recentEntity);
           const entityKey = entityCatalog.getEntityKey(recentEntity);
           if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
@@ -247,6 +244,7 @@ export class AppModule {
             const entityToMetadata = this.favoritesConfigMapper.getEntityMetadata(recentEntity, entity);
             const name = mapper(entityToMetadata).name;
             if (name && name !== recentEntity.name) {
+              // Update the entity name
               this.store.dispatch(new SetRecentlyVisitedEntityAction({
                 ...recentEntity,
                 name

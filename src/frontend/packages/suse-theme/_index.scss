@@ -1,9 +1,41 @@
 @import '~@stratosui/theme/helper';
 
-// Custom Theme
-@import './sass/custom';
+@import './sass/colors';
+
+// SUSE overrides
+@import './sass/suse';
 
 @function stratos-theme() {
   $theme: stratos-theme-helper($stratos-theme);
+
+  // Modify some of the colors
+  $app-theme: map-get($theme, app-theme);
+  $app-theme: map-merge($app-theme, (
+    header-background-color: $suse-header-bar,
+    header-foreground-color: $suse-text,
+    header-background-span: true,
+    link-color: $suse-link-color,
+    link-active-color: darken($suse-link-color, 10%),
+    stratos-title-show-text: true,
+    underflow-background-color: $suse-primary-color,
+    underflow-foreground-color: $suse-text,
+    user-avatar-background-color: $suse-primary-color,
+    user-avatar-foreground-color: $suse-text,
+    user-avatar-header-invert-colors: false,
+    intro-screen-background-color: $suse-blue,
+    side-nav: (
+      background: $suse-side-nav-bg,
+      text: $suse-side-nav-text,
+      active: $suse-side-nav-active-bg,
+      active-text: $suse-side-nav-active-text,
+      hover: $suse-side-nav-active-bg,
+      hover-text: $suse-side-nav-active-text
+    )
+  ));
+
+  $theme: map-merge($theme, (
+    app-theme: $app-theme
+  ));
+
   @return $theme
 }
