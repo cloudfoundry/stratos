@@ -1,3 +1,5 @@
+@import '../../../../sass/mat-desktop';
+
 $user-profile-avatar-size: 48px;
 
 .user-profile {
@@ -7,7 +9,7 @@ $user-profile-avatar-size: 48px;
   left: 0;
   position: absolute;
   right: 0;
-  top: 56px;
+  top: $desktop-page-header-height;
   mat-card:not(:first-child) {
     margin-top: 24px;
   }

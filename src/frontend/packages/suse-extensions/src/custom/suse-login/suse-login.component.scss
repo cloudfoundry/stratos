@@ -2,7 +2,8 @@
 
 .suse-login {
   align-items: center;
-  background-color: $suse-dark-green;
+  background-color: $suse-gray;
+  color: $suse-gray-fg;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -41,7 +42,7 @@
     width: 90%;
   }
   &__copyright {
-    color: $suse-text-gray;
+    color: $suse-gray-fg;
     flex: 1;
   }
   &__logo {
@@ -65,11 +66,12 @@
     display: flex;
     flex-direction: column;
     .mat-form-field:not(.mat-form-field-invalid).mat-form-field-appearance-legacy {
+      color: $suse-gray-fg;
       .mat-form-field-label {
-        color: $suse-text-gray;
+        color: $suse-gray-fg;
       }
       .mat-form-field-underline {
-        background-color: $suse-text-gray;
+        background-color: $suse-gray-fg;
       }
     }
   }
@@ -87,7 +89,7 @@
     margin: 0;
   }
   &__tagline {
-    color: $suse-text-gray;
+    color: $suse-gray-fg;
     font-family: "Work Sans";
     font-size: 18px;
     font-weight: 300;
@@ -100,7 +102,7 @@
     transition: opacity 250ms linear;
   }
   &__form-title {
-    color: $suse-text;
+    color: $suse-gray-fg;
     font-size: 30px;
     font-weight: 300;
     margin-bottom: 24px;

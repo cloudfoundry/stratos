@@ -19,13 +19,15 @@ $suse-dark-blue: #06253A;
 // Note - this should be accessed by themes using `map-get(map-get($theme, primary), default)`
 $suse-primary-color-hardcoded: #30BA78;
 
-// From http://mcg.mbitson.com/#!?mcgpalette0=%233f51b5 with $suse-primary-color-hardcoded
-$suse-primary: (50: #e6f7ef, 100: #c1ead7, 200: #98ddbc, 300: #6ecfa1, 400: #4fc48c, 500: #30ba78, 600: #2bb370, 700: #24ab65, 800: #1ea35b, 900: #139448, A100: #c7ffdc, A200: #94ffbc, A400: #61ff9c, A700: #47ff8c, contrast: (50: #000, 100: #000, 200: #000, 300: #000, 400: #000, 500: #000, 600: #000, 700: #fff, 800: #fff, 900: #fff, A100: #000, A200: #000, A400: #000, A700: #000));
+// From http://mcg.mbitson.com/#!?mcgpalette0=%233f51b5
+$suse-primary: (50: #e0f7f0, 100: #b3ecd9, 200: #80e0c0, 300: #4dd3a7, 400: #26c994, 500: #00c081, 600: #00ba79, 700: #00b26e, 800: #00aa64, 900: #009c51, A100: #c7ffe0, A200: #94ffc4, A400: #61ffa8, A700: #47ff9a, contrast: (50: #000, 100: #000, 200: #000, 300: #000, 400: #000, 500: #fff, 600: #fff, 700: #fff, 800: #fff, 900: #fff, A100: #000, A200: #000, A400: #000, A700: #000));
 $mat-red: ( 50: #ffebee, 100: #ffcdd2, 200: #ef9a9a, 300: #e57373, 400: #ef5350, 500: #f44336, 600: #e53935, 700: #d32f2f, 800: #c62828, 900: #b71c1c, A100: #ff8a80, A200: #ff5252, A400: #ff1744, A700: #d50000, contrast: ( 50: $black-87-opacity, 100: $black-87-opacity, 200: $black-87-opacity, 300: $black-87-opacity, 400: $black-87-opacity, 500: white, 600: white, 700: white, 800: $white-87-opacity, 900: $white-87-opacity, A100: $black-87-opacity, A200: white, A400: white, A700: white, ));
 
 $suse-theme-primary: mat-palette($suse-primary);
 $suse-theme-warn: mat-palette($mat-red);
 $stratos-theme: mat-light-theme($suse-theme-primary, $suse-theme-primary, $suse-theme-warn);
+
+$stratos-dark-theme-supported: false;
 
 // SUSE Brand primary colour
 $suse-primary-color: map-get(map-get($stratos-theme, primary), default);
@@ -34,12 +36,15 @@ $suse-blue: #073155;
 $suse-dark-green: #0c322c;
 $suse-header-bar: #0c322c;
 $suse-link-color: #008ACF;
+$suse-gray: #f2f2f2;
+$suse-gray-fg: #333;
 
 // Side nav
 $suse-side-nav-bg: #f2f2f2;
 $suse-side-nav-text: #000;
 $suse-side-nav-active-bg: $suse-primary-color;
 $suse-side-nav-active-text: #fff;
+
 
 // Dark Theme
 $suse-dark-primary-color-hardcoded: #1f8253;
@@ -56,4 +61,4 @@ $suse-dark-side-nav-text: #f2f2f2;
 $suse-dark-side-nav-active-bg: $suse-dark-primary-color;
 $suse-dark-side-nav-active-text: #f2f2f2;
 
-$suse-dark-link-color: lighten($suse-link-color, 20)
+$suse-dark-link-color: lighten($suse-link-color, 20);

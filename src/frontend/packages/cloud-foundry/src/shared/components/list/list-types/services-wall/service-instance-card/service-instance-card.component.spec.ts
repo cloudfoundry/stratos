@@ -75,7 +75,7 @@ describe('ServiceInstanceCardComponent', () => {
         dashboard_url: '',
         type: '',
         tags: [],
-        service_guid: '',
+        service_guid: 'service_guid',
         service_plan_url: '',
         service_bindings: [],
         service_bindings_url: '',

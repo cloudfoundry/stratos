@@ -17,8 +17,8 @@
           <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
             <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
           </mat-form-field>
-          <button class="suse-login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button
-            [disabled]="!loginForm.valid">
+          <button class="suse-login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button
+            mat-raised-button [disabled]="!loginForm.valid">
             {{ !ssoLogin ? 'Login' : 'Login with SSO' }}
           </button>
         </form>
@@ -37,7 +37,7 @@
       <span *ngIf="config.copyright" [innerHTML]="config.copyright"></span>
     </div>
     <div class="suse-login__logo">
-      <a href="https://www.suse.com" target="_blank"><img src="/core/assets/custom/suse_logo.svg"></a>
+      <a href="https://www.suse.com" target="_blank"><img src="/core/assets/custom/suse_login_logo.svg"></a>
     </div>
   </div>
 </div>
