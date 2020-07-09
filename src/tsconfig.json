@@ -33,10 +33,10 @@
       "@stratosui/core": ["frontend/packages/core/src/public-api.ts"],
       "@stratosui/store": ["frontend/packages/store/src/public-api.ts"],
       "@stratosui/store/testing": ["frontend/packages/store/testing/public-api.ts"],
-      "@suse/extensions": ["frontend/packages/suse-extensions/src/public-api.ts"],
       "@stratosui/cloud-foundry": ["frontend/packages/cloud-foundry/src/public_api.ts"],
       "@stratosui/cf-autoscaler": ["frontend/packages/cf-autoscaler/src/public_api.ts"],
       "@example/extensions": ["frontend/packages/example-extensions/src/public-api.ts"],
+      "@susestratos/extensions": ["frontend/packages/suse-extensions/src/public-api.ts"],
     }
   }
 }

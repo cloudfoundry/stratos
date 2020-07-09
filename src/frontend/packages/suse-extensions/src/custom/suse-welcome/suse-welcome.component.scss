@@ -1,4 +1,4 @@
-@import '../../../../suse-theme/sass/custom/suse-colors';
+@import '../../../../suse-theme/sass/colors';
 
 .no-endpoints-message {
   color: $suse-button-gray;
@@ -22,7 +22,7 @@
 .messages {
 
   &__title {
-    color: $suse-primary;
+    color: $suse-primary-color;
     font-size: 20px;
     font-weight: normal;
     margin: 20px 0;
