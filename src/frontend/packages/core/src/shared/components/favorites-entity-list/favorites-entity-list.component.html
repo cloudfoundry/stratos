@@ -20,7 +20,7 @@
       [endpointDisconnected]="endpointDisconnected"></app-favorites-meta-card>
   </div>
   <ng-container *ngIf="(searchedEntities$ | async) as searchedEntities">
-    <button class="favorite-entity-list__expand-button" *ngIf="searchedEntities.length > minLimit"
+    <button class="favorite-entity-list__expand-button" *ngIf="searchedEntities.length > minLimit && !autoExpand"
       (click)="toggleExpand()" mat-icon-button>
       <mat-icon *ngIf="(limitToggle$ | async) === null">expand_less</mat-icon>
       <mat-icon *ngIf="(limitToggle$ | async) !== null">expand_more</mat-icon>
