@@ -8,6 +8,7 @@
   "stratos": {
     "module": "SuseModule",
     "routingModule": "SuseRoutingModule",
+    "theming": "sass/_all-theme#apply-theme-suse-extensions",
     "assets": {
       "assets": "core/assets"
     }

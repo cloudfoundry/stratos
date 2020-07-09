@@ -24,7 +24,7 @@ To aid in migrating we've provided these instructions.
 1) Check that your ts config file defines the public api file.
     - `src/tsconfig.json` file's `compilerOptions/paths` section should contain something like `"@custom/extensions": ["frontend/packages/custom_extensions/src/public-api.ts"]`.
 1) Check that your new package's package.json defines your custom module and if application custom-routing module.
-    - See `src/frontend/packages/suse_extensions/package.json` file's `stratos` section.
+    - See `src/frontend/packages/custom_extensions/package.json` file's `stratos` section.
     - Note your `routingModule` entry label should not have a preceding `_`.
 1) Build Stratos in your usual way, for instance `npm run build`.
     - It could be that this fails due to TypeScript import issues, if so go through these and fix.

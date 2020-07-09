@@ -16,6 +16,9 @@ $suse-button-gray: #888;
 $suse-dark-blue: #06253A;
 
 // SUSE Primary Material Design pallette
+// Note - this should be accessed by themes using `map-get(map-get($theme, primary), default)`
+$suse-primary-color-hardcoded: #30BA78;
+
 // From http://mcg.mbitson.com/#!?mcgpalette0=%233f51b5
 $suse-primary: (50: #e0f7f0, 100: #b3ecd9, 200: #80e0c0, 300: #4dd3a7, 400: #26c994, 500: #00c081, 600: #00ba79, 700: #00b26e, 800: #00aa64, 900: #009c51, A100: #c7ffe0, A200: #94ffc4, A400: #61ffa8, A700: #47ff9a, contrast: (50: #000, 100: #000, 200: #000, 300: #000, 400: #000, 500: #fff, 600: #fff, 700: #fff, 800: #fff, 900: #fff, A100: #000, A200: #000, A400: #000, A700: #000));
 $mat-red: ( 50: #ffebee, 100: #ffcdd2, 200: #ef9a9a, 300: #e57373, 400: #ef5350, 500: #f44336, 600: #e53935, 700: #d32f2f, 800: #c62828, 900: #b71c1c, A100: #ff8a80, A200: #ff5252, A400: #ff1744, A700: #d50000, contrast: ( 50: $black-87-opacity, 100: $black-87-opacity, 200: $black-87-opacity, 300: $black-87-opacity, 400: $black-87-opacity, 500: white, 600: white, 700: white, 800: $white-87-opacity, 900: $white-87-opacity, A100: $black-87-opacity, A200: white, A400: white, A700: white, ));
@@ -27,7 +30,7 @@ $stratos-theme: mat-light-theme($suse-theme-primary, $suse-theme-primary, $suse-
 $stratos-dark-theme-supported: false;
 
 // SUSE Brand primary colour
-$suse-primary-color: #30BA78;
+$suse-primary-color: map-get(map-get($stratos-theme, primary), default);
 $suse-text: #fff;
 $suse-blue: #073155;
 $suse-dark-green: #0c322c;
@@ -41,3 +44,21 @@ $suse-side-nav-bg: #f2f2f2;
 $suse-side-nav-text: #000;
 $suse-side-nav-active-bg: $suse-primary-color;
 $suse-side-nav-active-text: #fff;
+
+
+// Dark Theme
+$suse-dark-primary-color-hardcoded: #1f8253;
+// From http://mcg.mbitson.com/#!?mcgpalette0=%233f51b5 with $suse-dark-primary-color-hardcoded
+$suse-dark-primary: (50: #e4f0ea, 100: #bcdacb, 200: #8fc1a9, 300: #62a887, 400: #41956d, 500: #1f8253, 600: #1b7a4c, 700: #176f42, 800: #126539, 900: #0a5229, A100: #87ffb5, A200: #54ff95, A400: #21ff76, A700: #08ff66, contrast: (50: #000, 100: #000, 200: #000, 300: #000, 400: #fff, 500: #fff, 600: #fff, 700: #fff, 800: #fff, 900: #fff, A100: #000, A200: #000, A400: #000, A700: #000,));
+$suse-dark-theme-primary: mat-palette($suse-dark-primary);
+$suse-dark-theme: mat-dark-theme($suse-dark-theme-primary, $suse-dark-theme-primary, $suse-theme-warn);
+
+$suse-dark-primary-color: map-get(map-get($suse-dark-theme, primary), default);
+
+$suse-dark-background: map-get(map-get($suse-dark-theme, background), background);
+$suse-dark-side-nav-bg: lighten($suse-dark-background, 1);
+$suse-dark-side-nav-text: #f2f2f2;
+$suse-dark-side-nav-active-bg: $suse-dark-primary-color;
+$suse-dark-side-nav-active-text: #f2f2f2;
+
+$suse-dark-link-color: lighten($suse-link-color, 20);

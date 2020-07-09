@@ -6,7 +6,14 @@
 @import './sass/suse';
 
 @function stratos-theme() {
-  $theme: stratos-theme-helper($stratos-theme);
+  @return (
+    default: create-suse-theme($stratos-theme),
+    dark: create-suse-dark-theme()
+  );
+}
+
+@function create-suse-theme($base-theme) {
+  $theme: stratos-theme-helper($base-theme);
 
   // Modify some of the colors
   $app-theme: map-get($theme, app-theme);
@@ -37,5 +44,30 @@
     app-theme: $app-theme
   ));
 
-  @return $theme
+  @return $theme;
+}
+
+@function create-suse-dark-theme() {
+  $theme: create-suse-theme($suse-dark-theme);
+
+  $app-theme: map-get($theme, app-theme);
+  $app-theme: map-merge($app-theme, (
+    link-color: $suse-dark-link-color,
+    link-active-color: darken($suse-dark-link-color, 10%),
+    underflow-background-color: $suse-dark-primary-color,
+    user-avatar-background-color: $suse-dark-primary-color,
+    side-nav: (
+      background: $suse-dark-side-nav-bg,
+      text: $suse-dark-side-nav-text,
+      active: $suse-dark-side-nav-active-bg,
+      active-text: $suse-dark-side-nav-active-text,
+      hover: $suse-dark-side-nav-active-bg,
+      hover-text: $suse-dark-side-nav-active-text
+    ),
+  ));
+
+  $theme: map-merge($theme, (
+    app-theme: $app-theme
+  ));
+  @return $theme;
 }

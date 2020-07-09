@@ -12,8 +12,7 @@
       "loadingHtml": "loader/loading.html"
     }
   },
-  "peerDependencies": {
-  },
+  "peerDependencies": {},
   "scripts": {
     "build": "rm -rf ../../../../dist/theme && mkdir -p ../../../../dist/theme && cp -R * ../../../../dist/theme"
   }

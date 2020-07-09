@@ -1,0 +1,10 @@
+@import '../src/custom/helm/list-types/monocular-chart-card/monocular-chart-card.component.theme';
+
+@mixin apply-theme-suse-extensions($stratos-theme) {
+
+  $theme: map-get($stratos-theme, theme);
+  $app-theme: map-get($stratos-theme, app-theme);
+
+  @include monocular-chart-card($theme, $app-theme);
+
+}
