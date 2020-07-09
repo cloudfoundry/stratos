@@ -59,7 +59,7 @@ func (c *KubeBasicAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Con
 	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
 
 	tr := &interfaces.TokenRecord{
-		AuthType:     interfaces.AuthTypeHttpBasic,
+		AuthType:     authConnectTypeBasicAuth,
 		AuthToken:    base64EncodedAuthString,
 		RefreshToken: username,
 	}

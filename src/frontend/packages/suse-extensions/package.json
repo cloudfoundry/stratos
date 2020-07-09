@@ -9,7 +9,7 @@
     "module": "SuseModule",
     "routingModule": "SuseRoutingModule",
     "assets": {
-      "assets": "core/assets/custom"
+      "assets": "core/assets"
     }
   }
 }
