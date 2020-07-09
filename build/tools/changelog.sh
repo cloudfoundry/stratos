@@ -63,6 +63,14 @@ function search() {
   curl -s "https://api.github.com/search/issues?q=${QUERY}${FILTER}" | jq -r '.items | .[] | "- \(.title) [\\#\(.number)](\(.html_url))"' | tee -a ${CHANGELOG}
 }
 
+function breaking_changes() {
+  FILTER=$1
+  if [ -n "${FORK_QUERY}" ]; then
+    curl -s "https://api.github.com/search/issues?q=${FORK_QUERY}${FILTER}" | jq -r '.items | .[] | "- **\(.title)**\n\n  \(.body)"' > ${CHANGELOG}.breaking
+  fi
+  curl -s "https://api.github.com/search/issues?q=${QUERY}${FILTER}" | jq -r '.items | .[] | "- **\(.title)**\n\n  \(.body)"' > ${CHANGELOG}.breaking
+}
+
 function log() {
   echo $1 | tee -a ${CHANGELOG}
 }
@@ -75,10 +83,10 @@ if [ -n "${FORK}" ]; then
 fi
 
 BUGS="+label:bug"
-NON_BUGS="+-label:bug"
+NON_BUGS="+-label:bug+-label:breaking-change"
+BREAKING_CHANGES="+label:breaking-change"
 
 mv ${CHANGELOG} CHANGELOG.old
-
 
 echo ""
 echo -e "${CYAN}${BOLD}Generating Change log - content for version ${MILESTONE} will be shown below"
@@ -101,6 +109,21 @@ log ""
 log "**Fixes:**"
 log ""
 search $BUGS
+
+log ""
+
+rm -f ${CHANGELOG}.breaking
+
+breaking_changes $BREAKING_CHANGES
+
+SIZE=$(wc -c ${CHANGELOG}.breaking | awk '{print $1}')
+if [ "$SIZE" -ne 0 ]; then
+  log "**Breaking Changes:**"
+  log ""
+  cat ${CHANGELOG}.breaking | tee -a ${CHANGELOG}
+fi
+
+rm -f ${CHANGELOG}.breaking
 
 log ""
 
