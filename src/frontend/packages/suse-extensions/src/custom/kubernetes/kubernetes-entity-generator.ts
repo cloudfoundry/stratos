@@ -171,7 +171,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
       }, {
         type: 'k3s',
         label: 'K3S',
-        labelShort: 'k3S',
+        labelShort: 'K3S',
         authTypes: [BaseEndpointAuth.UsernamePassword],
         logoUrl: '/core/assets/custom/k3s.svg',
         renderPriority: 6
