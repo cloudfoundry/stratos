@@ -4,6 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, mergeMap, switchMap } from 'rxjs/operators';
 
+import { EntityDeleteCompleteAction } from '../actions/entity.delete.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import {
   GetUserFavoritesAction,
@@ -143,4 +144,15 @@ export class UserFavoritesEffect {
       );
     })
   );
+
+  @Effect()
+  entityDeleteRequest$ = this.actions$.pipe(
+    ofType<EntityDeleteCompleteAction>(EntityDeleteCompleteAction.ACTION_TYPE),
+    mergeMap((action: EntityDeleteCompleteAction) => {
+      // Delete the favorite if there is one
+      this.store.dispatch(new RemoveUserFavoriteAction(action.asFavorite()));
+      return [];
+    })
+  );
+
 }
