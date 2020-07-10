@@ -18,7 +18,7 @@ export class RegisterStepper extends Page {
   }
 
   isRegisterDialog(): promise.Promise<boolean> {
-    return this.header.getTitleText().then(title => title === 'Register a new Endpoint');
+    return this.header.getTitleText().then(title => title === 'Register Endpoint');
   }
 
   getName = () => this.form.getFormField('name');
