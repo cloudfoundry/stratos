@@ -14,7 +14,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const dashboardInstallYAMLDownloadURL = "https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc2/aio/deploy/recommended.yaml"
+const dashboardInstallYAMLDownloadURL = "https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.3/aio/deploy/recommended.yaml"
 
 // Service Account definition - as per kube dashboard docs
 const serviceAccountDefinition = `{
@@ -43,7 +43,7 @@ const clusterRoleBindingDefinition = `{
 		"apiGroup": "rbac.authorization.k8s.io",
 		"kind": "ClusterRole",
 		"name": "cluster-admin"
-	}, 
+	},
 	"subjects": [
 		{
 			"kind": "ServiceAccount",
@@ -147,10 +147,18 @@ func addErrorMessage(msg, prefix string, response *interfaces.CNSIRequest, err e
 // InstallDashboard will install the dashboard into a Kubernetes cluster
 func InstallDashboard(p interfaces.PortalProxy, endpointGUID, userGUID string) error {
 	// Download the Yaml for the dashboard
-	log.Debugf("InstallDashboardL %s", dashboardInstallYAMLDownloadURL)
+	kubeDashboardImage := p.Env().String("STRATOS_KUBERNETES_DASHBOARD_IMAGE", "")
+	if len(kubeDashboardImage) == 0 {
+		kubeDashboardImage = dashboardInstallYAMLDownloadURL
+	}
+
+	log.Debugf("InstallDashboard: %s", kubeDashboardImage)
 
 	http := p.GetHttpClient(false)
-	resp, err := http.Get(dashboardInstallYAMLDownloadURL)
+	resp, err := http.Get(kubeDashboardImage)
+	if err != nil {
+		return fmt.Errorf("Could not download YAML to install the dashboard: %+v", err)
+	}
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("Could not download YAML to install the dashboard: %s", resp.Status)
 	}

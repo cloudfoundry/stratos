@@ -310,7 +310,7 @@ helm install my-console stratos/console --namespace=console --set console.localA
 
 In some scenarios it is useful to be able to add custom annotations and/or labels to the Kubernetes resources that the Stratos Helm chart creates.
 
-The Stratos Helm chart exposes a number of Helm chart values that cabe specified in order to do this - they are:
+The Stratos Helm chart exposes a number of Helm chart values that can be specified in order to do this - they are:
 
 |Parameter|Description|Default|
 |----|---|---|

@@ -65,6 +65,9 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	// NWM: Should we look up Helm Repository endpoint and use the value from that
 	httpClient := c.portalProxy.GetHttpClient(false)
 	resp, err := httpClient.Get(downloadURL)
+	if err != nil {
+		return interfaces.NewJetstreamErrorf("Could not download Chart Archive: %s", err)
+	}
 	if resp.StatusCode != 200 {
 		return interfaces.NewJetstreamErrorf("Could not download Chart Archive: %s", resp.Status)
 	}
