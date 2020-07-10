@@ -45,7 +45,6 @@ export class APIEffect {
 
   // Whenever we spot a delete success operation, look to see if the action
   // fulfils the entity delete requirements and dispatch an entity delete action if it does
-  // Dispatch an action to remove the favorite
   @Effect()
   apiDeleteRequest$ = this.actions$.pipe(
     ofType<WrapperRequestActionSuccess>(RequestTypes.SUCCESS),
