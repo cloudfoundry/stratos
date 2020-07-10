@@ -1,0 +1,17 @@
+<app-intro-screen id="app-login-page" class="logout">
+  <mat-card class="logout__card">
+    <app-stratos-title></app-stratos-title>
+    <div class="logout__body" *ngIf="error$ | async; else loading">
+      <div class="logout__msg">An error occurred logging out</div>
+      <button (click)="reload()" color="primary" mat-raised-button mat-button>Reload</button>
+    </div>
+    <ng-template #loading>
+      <div class="logout__body">
+        <div class="logout__msg">Logging out</div>
+        <div id="logout__loading" class="logout__loading">
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        </div>
+      </div>
+    </ng-template>
+  </mat-card>
+</app-intro-screen>
