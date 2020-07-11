@@ -1,6 +1,6 @@
 <nav class="side-nav side-nav__icon-mode" [ngClass]="{'side-nav__icon-mode': iconMode}">
   <div class="side-nav__inner">
-    <div class="side-nav__top">
+    <div class="side-nav__top" *ngIf="!environment.fixedSideNav">
       <div class="side-nav__top-inner">
         <div class="side-nav__logo" (click)="logoClicked.next(true)">
           <div class="side-nav__logo-img"></div>
@@ -17,6 +17,7 @@
         <a *ngIf="!tab.hidden || !(tab.hidden | async)" [matTooltip]="tab.label" matTooltipPosition="right"
           [matTooltipShowDelay]="500"
           [matTooltipDisabled]="!iconMode" class="side-nav__item" [routerLink]="[tab.link]"
+          [matTooltipShowDelay]="tooltipDelay"
           [routerLinkActive]="['side-nav__item--active']">
           <mat-icon class="side-nav__item-icon" [fontSet]="tab.matIconFont">{{ tab.matIcon }}</mat-icon> <span
             class="side-nav__item-label">{{ tab.label }}</span>

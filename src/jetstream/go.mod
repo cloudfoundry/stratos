@@ -92,6 +92,7 @@ require (
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
 	golang.org/x/net v0.0.0-20190420063019-afa5a82059c6 // indirect
 	google.golang.org/appengine v1.5.0 // indirect
+	google.golang.org/genproto v0.0.0-20200620020550-bd6e04640131 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.0.0-00010101000000-000000000000
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
 	gopkg.in/yaml.v2 v2.3.0

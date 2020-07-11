@@ -52,7 +52,7 @@
                 notifications
               </mat-icon>
             </button>
-            <button id="userMenu" *ngIf="!hideMenu" class="page-header__menu-button page-header__usermenu"
+            <button uid="userMenu" *ngIf="!hideMenu && !environment.hideUserMenu" class="page-header__menu-button page-header__usermenu"
               mat-icon-button [matMenuTriggerFor]="menu">
               <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user$ | async"></app-user-avatar>
             </button>

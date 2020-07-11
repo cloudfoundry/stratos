@@ -36,6 +36,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/factory"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -258,6 +259,10 @@ func main() {
 	// Setup the global interface for the proxy
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore, sessionStoreOptions, envLookup)
 	portalProxy.SessionDataStore = sessionDataStore
+
+	store := factory.NewDefaultStoreFactory(databaseConnectionPool)
+	portalProxy.SetStoreFactory(store)
+
 	log.Info("Initialization complete.")
 
 	c := make(chan os.Signal, 2)
@@ -1103,4 +1108,14 @@ func stopEchoWhenUpgraded(e *echo.Echo, env *env.VarSet) {
 	}
 	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
 	e.Close()
+}
+
+// GetStoreFactory gets the store factory
+func (portalProxy *portalProxy) GetStoreFactory() interfaces.StoreFactory {
+	return factory.GetStoreFactory()
+}
+
+// SetStoreFactory sets the store factory
+func (portalProxy *portalProxy) SetStoreFactory(f interfaces.StoreFactory) interfaces.StoreFactory {
+	return factory.SetStoreFactory(f)
 }

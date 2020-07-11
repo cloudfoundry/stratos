@@ -16,7 +16,6 @@ import (
 	"github.com/labstack/echo"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/stringutils"
 )
 
@@ -278,7 +277,7 @@ func (p *portalProxy) saveAuthToken(u interfaces.JWTUserTokenInfo, authTok strin
 func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) error {
 	log.Debug("setUAATokenRecord")
 
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return fmt.Errorf("Database error getting repo for UAA token: %v", err)
 	}
@@ -394,7 +393,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 func (p *portalProxy) GetUAATokenRecord(userGUID string) (interfaces.TokenRecord, error) {
 	log.Debug("GetUAATokenRecord")
 
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		log.Errorf("Database error getting repo for UAA token: %v", err)
 		return interfaces.TokenRecord{}, err

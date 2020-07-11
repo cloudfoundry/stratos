@@ -7,6 +7,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfappssh"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundryhosting"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/desktop"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/metrics"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinfo"
@@ -36,6 +37,7 @@ func (pp *portalProxy) loadPlugins() {
 		{"userfavorites", userfavorites.Init},
 		{"autoscaler", autoscaler.Init},
 		{"backup", backup.Init},
+		{"desktop", desktop.Init},
 	} {
 		plugin, err := p.Init(pp)
 		pp.Plugins[p.Name] = plugin

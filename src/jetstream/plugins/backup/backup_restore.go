@@ -9,9 +9,7 @@ import (
 	"net/http"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 )
@@ -171,7 +169,7 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 
 func (ctb *cnsiTokenBackup) getCNSITokenRecordsBackup(endpointID string) ([]interfaces.BackupTokenRecord, bool) {
 	log.Debug("getCNSITokenRecordsBackup")
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(ctb.databaseConnectionPool)
+	tokenRepo, err := ctb.p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return make([]interfaces.BackupTokenRecord, 0), false
 	}
@@ -234,7 +232,7 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 	}
 
 	// Insert/Update the endpoints and tokens
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(ctb.databaseConnectionPool)
+	cnsiRepo, err := ctb.p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to connect to db", "Failed to connect to db: %+v", err)
 	}
@@ -246,7 +244,7 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 		}
 	}
 
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(ctb.databaseConnectionPool)
+	tokenRepo, err := ctb.p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, "Failed to connect to db", "Failed to connect to db: %+v", err)
 	}

@@ -46,7 +46,7 @@ type PostgresCNSIRepository struct {
 }
 
 // NewPostgresCNSIRepository will create a new instance of the PostgresCNSIRepository
-func NewPostgresCNSIRepository(dcp *sql.DB) (Repository, error) {
+func NewPostgresCNSIRepository(dcp *sql.DB) (interfaces.EndpointRepository, error) {
 	return &PostgresCNSIRepository{db: dcp}, nil
 }
 

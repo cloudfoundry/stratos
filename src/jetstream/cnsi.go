@@ -16,9 +16,7 @@ import (
 	"encoding/base64"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesendpoints"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
 
 const dbReferenceError = "Unable to establish a database reference: '%v'"
@@ -179,7 +177,7 @@ func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
 	var cnsiList []*interfaces.CNSIRecord
 	var err error
 
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		return cnsiList, fmt.Errorf("listRegisteredCNSIs: %s", err)
 	}
@@ -225,7 +223,7 @@ func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 	}
 	userGUID := userGUIDIntf.(string)
 
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		return fmt.Errorf("listRegisteredCNSIs: %s", err)
 	}
@@ -281,7 +279,7 @@ func marshalClusterList(clusterList []*interfaces.ConnectedEndpoint) ([]byte, er
 func (p *portalProxy) UpdateEndpointMetadata(guid string, metadata string) error {
 	log.Debug("UpdateEndpointMetadata")
 
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		log.Errorf(dbReferenceError, err)
 		return fmt.Errorf(dbReferenceError, err)
@@ -299,7 +297,7 @@ func (p *portalProxy) UpdateEndpointMetadata(guid string, metadata string) error
 
 func (p *portalProxy) GetCNSIRecord(guid string) (interfaces.CNSIRecord, error) {
 	log.Debug("GetCNSIRecord")
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		return interfaces.CNSIRecord{}, err
 	}
@@ -319,7 +317,7 @@ func (p *portalProxy) GetCNSIRecordByEndpoint(endpoint string) (interfaces.CNSIR
 	log.Debug("GetCNSIRecordByEndpoint")
 	var rec interfaces.CNSIRecord
 
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		return rec, err
 	}
@@ -344,7 +342,7 @@ func (p *portalProxy) cnsiRecordExists(endpoint string) bool {
 
 func (p *portalProxy) setCNSIRecord(guid string, c interfaces.CNSIRecord) error {
 	log.Debug("setCNSIRecord")
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		log.Errorf(dbReferenceError, err)
 		return fmt.Errorf(dbReferenceError, err)
@@ -362,7 +360,7 @@ func (p *portalProxy) setCNSIRecord(guid string, c interfaces.CNSIRecord) error 
 
 func (p *portalProxy) unsetCNSIRecord(guid string) error {
 	log.Debug("unsetCNSIRecord")
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		log.Errorf(dbReferenceError, err)
 		return fmt.Errorf(dbReferenceError, err)
@@ -393,7 +391,7 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 
 func (p *portalProxy) SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord interfaces.TokenRecord) error {
 	log.Debug("SaveEndpointToken")
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return err
 	}
@@ -403,7 +401,7 @@ func (p *portalProxy) SaveEndpointToken(cnsiGUID string, userGUID string, tokenR
 
 func (p *portalProxy) DeleteEndpointToken(cnsiGUID string, userGUID string) error {
 	log.Debug("DeleteEndpointToken")
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return err
 	}
@@ -413,7 +411,7 @@ func (p *portalProxy) DeleteEndpointToken(cnsiGUID string, userGUID string) erro
 
 func (p *portalProxy) GetCNSITokenRecord(cnsiGUID string, userGUID string) (interfaces.TokenRecord, bool) {
 	log.Debug("GetCNSITokenRecord")
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return interfaces.TokenRecord{}, false
 	}
@@ -428,7 +426,7 @@ func (p *portalProxy) GetCNSITokenRecord(cnsiGUID string, userGUID string) (inte
 
 func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (interfaces.TokenRecord, bool) {
 	log.Debug("GetCNSITokenRecordWithDisconnected")
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return interfaces.TokenRecord{}, false
 	}
@@ -443,7 +441,7 @@ func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGU
 
 func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.ConnectedEndpoint, error) {
 	log.Debug("ListCEndpointsByUser")
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		log.Errorf(dbReferenceError, err)
 		return nil, fmt.Errorf(dbReferenceError, err)
@@ -461,7 +459,7 @@ func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.Connec
 // Uopdate the Access Token, Refresh Token and Token Expiry for a token
 func (p *portalProxy) updateTokenAuth(userGUID string, t interfaces.TokenRecord) error {
 	log.Debug("updateTokenAuth")
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		log.Errorf(dbReferenceError, err)
 		return fmt.Errorf(dbReferenceError, err)
@@ -479,7 +477,7 @@ func (p *portalProxy) updateTokenAuth(userGUID string, t interfaces.TokenRecord)
 
 func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t interfaces.TokenRecord) error {
 	log.Debug("setCNSITokenRecord")
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		log.Errorf(dbReferenceError, err)
 		return fmt.Errorf(dbReferenceError, err)
@@ -497,7 +495,7 @@ func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t int
 
 func (p *portalProxy) unsetCNSITokenRecord(cnsiGUID string, userGUID string) error {
 	log.Debug("unsetCNSITokenRecord")
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		msg := "Unable to establish a database reference: '%v'"
 		log.Errorf(msg, err)
@@ -516,7 +514,7 @@ func (p *portalProxy) unsetCNSITokenRecord(cnsiGUID string, userGUID string) err
 
 func (p *portalProxy) unsetCNSITokenRecords(cnsiGUID string) error {
 	log.Debug("unsetCNSITokenRecord")
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		msg := "Unable to establish a database reference: '%v'"
 		log.Errorf(msg, err)
@@ -546,7 +544,7 @@ func (p *portalProxy) updateEndpoint(c echo.Context) error {
 			"Need Endpoint ID")
 	}
 
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		log.Errorf(dbReferenceError, err)
 		return fmt.Errorf(dbReferenceError, err)

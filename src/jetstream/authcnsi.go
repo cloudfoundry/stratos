@@ -11,7 +11,6 @@ import (
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
@@ -245,7 +244,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 			err = p.setCNSITokenRecord(theCNSIrecord.GUID, u.UserGUID, uaaToken)
 
 			// Update the endpoint to indicate that SSO Login is okay
-			repo, dbErr := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+			repo, dbErr := p.GetStoreFactory().EndpointStore()
 			if dbErr == nil {
 				theCNSIrecord.SSOAllowed = true
 				repo.Update(theCNSIrecord, p.Config.EncryptionKeyInBytes)

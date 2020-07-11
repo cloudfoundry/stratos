@@ -8,6 +8,7 @@ import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-action
 import { AppState } from '../../../../../store/src/app-state';
 import { TabNavItem } from '../../../../tab-nav.types';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
+import { environment } from '../../../environments/environment';
 
 export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
@@ -35,6 +36,10 @@ export interface SideNavItem extends TabNavItem {
 export class SideNavComponent implements OnInit {
 
   public customizations: CustomizationsMetadata;
+
+  public environment = environment;
+
+  tooltipDelay = 0;
 
   constructor(
     private store: Store<AppState>,
@@ -71,5 +76,12 @@ export class SideNavComponent implements OnInit {
       map(toLength),
       filter(x => x === 3))
       .subscribe(event => this.store.dispatch(new ActionHistoryDump()));
+
+    // Default to icon mode if the environment specifies a fixed side nav
+    if (environment.fixedSideNav) {
+      this.isIconMode = true;
+      this.tooltipDelay = 2000;
+    }
+
   }
 }
