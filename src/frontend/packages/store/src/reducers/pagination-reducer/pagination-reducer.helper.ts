@@ -12,7 +12,6 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { sortStringify } from '../../../../core/src/core/utils.service';
 import { SetInitialParams } from '../../actions/pagination.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
@@ -150,6 +149,14 @@ function paginationParamsString(params: PaginationParam): string {
     ...params,
   };
   return sortStringify(clone);
+}
+
+
+function sortStringify(obj: { [key: string]: string | string[] | number }): string {
+  const keys = Object.keys(obj).sort();
+  return keys.reduce((res, key) => {
+    return res += `${key}-${obj[key]},`;
+  }, '');
 }
 
 function shouldFetchNonLocalList(pagination: PaginationEntityState): boolean {

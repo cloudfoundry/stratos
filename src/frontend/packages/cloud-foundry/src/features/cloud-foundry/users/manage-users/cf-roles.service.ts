@@ -18,7 +18,7 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
 import { IOrganization, ISpace } from '../../../../cf-api.types';
@@ -239,7 +239,7 @@ export class CfRolesService {
 
   fetchOrgs(cfGuid: string): Observable<APIResource<IOrganization>[]> {
     if (!this.cfOrgs[cfGuid]) {
-      const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
+      const paginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
       const orgs$ = cfEntityCatalog.org.store.getPaginationService(
         cfGuid,
         paginationKey,

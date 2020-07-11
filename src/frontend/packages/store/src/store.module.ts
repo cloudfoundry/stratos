@@ -14,7 +14,6 @@ import { PermissionsEffects } from './effects/permissions.effect';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
 import { RouterEffect } from './effects/router.effects';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
-import { SnackBarEffects } from './effects/snackBar.effects';
 import { SystemEffects } from './effects/system.effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
@@ -41,7 +40,6 @@ import { AppReducersModule } from './reducers.module';
       ActionHistoryEffect,
       RouterEffect,
       SystemEffects,
-      SnackBarEffects,
       SetClientFilterEffect,
       MetricsEffect,
       UserProfileEffect,

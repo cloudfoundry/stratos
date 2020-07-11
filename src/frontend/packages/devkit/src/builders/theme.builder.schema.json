@@ -1,0 +1,13 @@
+{
+  "id": "StratosThemeBuilderSchema",
+  "title": "Stratos Theme builder",
+  "description": "Timestamp builder options",
+  "properties": {
+    "outputPath": {
+      "type": "string",
+      "description": "Path for the output",
+      "default": "./dist"
+    }
+  }
+}
+  

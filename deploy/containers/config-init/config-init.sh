@@ -11,10 +11,6 @@ echo "RELEASE_NAME                : ${RELEASE_NAME}"
 echo "RELEASE_REVISION            : ${RELEASE_REVISION}"
 echo "IS_UPGRADE                  : ${IS_UPGRADE}"
 echo "CONSOLE_TLS_SECRET_NAME     : ${CONSOLE_TLS_SECRET_NAME}"
-echo "ENCRYPTION_KEY_VOLUME       : ${ENCRYPTION_KEY_VOLUME}"
-echo "ENCRYPTION_KEY_FILENAME     : ${ENCRYPTION_KEY_FILENAME}"
-echo "CONSOLE_PROXY_CERT_PATH     : ${CONSOLE_PROXY_CERT_PATH}"
-echo "CONSOLE_PROXY_CERT_KEY_PATH : ${CONSOLE_PROXY_CERT_KEY_PATH}"
 echo ""
 echo "============================================"
 echo ""
@@ -44,15 +40,6 @@ EOF
 }
 
 function generateCert {
-  if [ -n "${CONSOLE_PROXY_CERT_PATH}" ] && [ -n "${CONSOLE_PROXY_CERT_KEY_PATH}" ]; then
-    if [ -f "${CONSOLE_PROXY_CERT_PATH}" ] && [ -f "${CONSOLE_PROXY_CERT_KEY_PATH}" ]; then
-      echo "Found existing certificate on encryption key volume - going to use it"
-      CERT_CRT=$(cat ${CONSOLE_PROXY_CERT_PATH} | base64 -w 0)
-      CERT_KEY=$(cat ${CONSOLE_PROXY_CERT_KEY_PATH} | base64 -w 0)
-      return
-    fi
-  fi
-
   echo "Using cert generator to generate a self-signed certificate ..."
   export CERTS_PATH=./certs
   export DEV_CERTS_DOMAIN=tls
@@ -97,20 +84,9 @@ if [ $EXISTS -eq 0 ]; then
 else
   echo "Fresh installation - generating a new Encryption Key secret"
 
-  # Migrate existing key from the legacy encryption key volume if there is one
-  if [ ${ENCRYPTION_KEY_VOLUME} -a ${ENCRYPTION_KEY_FILENAME} ]; then
-    ekFile="${ENCRYPTION_KEY_VOLUME}/${ENCRYPTION_KEY_FILENAME}"
-    if [ -f "${ekFile}" ]; then
-      echo "Found encryption key file on the legacy encryption key volume"
-      KEY=$(cat ${ekFile} | base64 -w 0)
-    fi
-  fi
-
-  if [ -z $KEY ]; then
-    # Generate a random encryption key
-    echo "Generating a new Encryption Key ..."
-    KEY=$(openssl enc -aes-256-cbc -k secret -P -md sha1 | grep key | cut -d '=' -f2 | base64 -w 0)
-  fi
+  # Generate a random encryption key
+  echo "Generating a new Encryption Key ..."
+  KEY=$(openssl enc -aes-256-cbc -k secret -P -md sha1 | grep key | cut -d '=' -f2 | base64 -w 0)
 
   # We will create a new secret for the encryption key
   cat << EOF > create-key-secret.yaml

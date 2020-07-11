@@ -1,0 +1,11 @@
+{
+  "name": "@stratosui/shared",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/common": "^8.2.9",
+    "@angular/core": "^8.2.9"
+  },
+  "stratos": {
+    "theming": "sass/_all-theme#apply-theme-stratos-shared"
+  }
+}

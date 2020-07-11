@@ -1,6 +1,6 @@
 import { SendEventAction } from '../../actions/internal-events.actions';
 import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { endpointSchemaKey } from '../../helpers/entity-factory';
+import { endpointEntityType } from '../../helpers/stratos-entity-factory';
 import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
 import { InternalEventSeverity, InternalEventStateMetadata } from '../../types/internal-events.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
@@ -28,7 +28,7 @@ export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher)
       )
     );
     actionDispatcher(
-      new SendEventAction<InternalEventStateMetadata>(endpointSchemaKey, error.guid, {
+      new SendEventAction<InternalEventStateMetadata>(endpointEntityType, error.guid, {
         eventCode: error.errorCode,
         severity: InternalEventSeverity.ERROR,
         message: errorMessage,

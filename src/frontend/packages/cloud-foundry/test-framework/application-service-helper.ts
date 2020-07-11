@@ -1,7 +1,8 @@
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { Observable, of as observableOf, of } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
 
+import { EntityService } from '../../store/src/entity-service';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { IApp, IAppSummary, IDomain, ISpace } from '../src/cf-api.types';
@@ -81,6 +82,10 @@ export class ApplicationServiceMock {
   appSpace$: Observable<APIResource<ISpace>> = observableOf(createEntity<ISpace>({} as ISpace));
   applicationRunning$: Observable<boolean> = observableOf(false);
   orgDomains$: Observable<APIResource<IDomain>[]> = observableOf([]);
+  entityService: EntityService<APIResource<IApp<unknown>>> = {
+    waitForEntity$: of({}),
+    updatingSection$: of({})
+  } as EntityService<APIResource<IApp<unknown>>>
 }
 
 export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: string) {

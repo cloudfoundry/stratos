@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -8,13 +9,12 @@ import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import {
-  MetaCardMenuItem,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceInstance } from '../../../../../../cf-api-svc.types';
+import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
+import { IService, IServiceInstance } from '../../../../../../cf-api-svc.types';
+import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import {
   getServiceBrokerName,
@@ -25,6 +25,7 @@ import {
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
+import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
 
 @Component({
   selector: 'app-service-instance-card',
@@ -83,12 +84,43 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           row.entity.space_guid);
       }
 
-      if (!this.serviceBrokerName$) {
-        this.serviceBrokerName$ = getServiceBrokerName(
-          this.serviceInstanceEntity.entity.service_plan.entity.service.entity.service_broker_guid,
+      if (!this.service$) {
+        this.service$ = cfEntityCatalog.service.store.getEntityService(
+          this.serviceInstanceEntity.entity.service_guid,
           this.serviceInstanceEntity.entity.cfGuid,
+          {
+            includeRelations: []
+          }
+        ).waitForEntity$.pipe(
+          filter(s => !!s),
+          map(s => s.entity)
         );
       }
+
+      if (!this.serviceBrokerName$) {
+        // Note, here we just need the service's service broker. This should be available by
+        // `this.serviceInstanceEntity.entity.service_plan.entity.service.entity.service_broker_guid` however can be empty (see #4397).
+        // So fetch the service separately, as per the table way (this shouldn't start a http request if it's already in the store) 
+        this.serviceBrokerName$ = this.service$.pipe(
+          switchMap(service => getServiceBrokerName(service.entity.service_broker_guid, service.entity.cfGuid))
+        )
+      }
+
+      if (!this.serviceName$) {
+        // See note for this.serviceBrokerName$
+        this.serviceName$ = this.service$.pipe(
+          map(getServiceName)
+        )
+      }
+
+      this.servicePlanName = this.serviceInstanceEntity.entity.service_plan ?
+        getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity)
+        : null;
+
+      this.serviceUrl = getServiceSummaryUrl(
+        this.serviceInstanceEntity.entity.cfGuid,
+        this.serviceInstanceEntity.entity.service_guid
+      );
     }
   }
 
@@ -103,7 +135,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   static done = false;
   serviceInstanceEntity: APIResource<IServiceInstance>;
   cfGuid: string;
-  cardMenu: MetaCardMenuItem[];
+  cardMenu: MenuItem[];
 
   serviceInstanceTags: AppChip[];
   hasMultipleBindings = new BehaviorSubject(true);
@@ -111,6 +143,11 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   cfOrgSpace: CfOrgSpaceLabelService;
   serviceBrokerName$: Observable<string>;
+  serviceName$: Observable<string>;
+  servicePlanName: string;
+  serviceUrl: string;
+
+  private service$: Observable<APIResource<IService>>;
 
   private detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
@@ -130,26 +167,11 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.cfGuid,
-    null
-  )
-
-  getServiceName = () => {
-    return getServiceName(this.serviceInstanceEntity.entity.service_plan.entity.service);
-  }
-
-  getServicePlanName = () => {
-    if (!this.serviceInstanceEntity.entity.service_plan) {
-      return null;
+    {
+      [CSI_CANCEL_URL]: '/services'
     }
-    return getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity);
-  }
+  )
 
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
-  getServiceUrl = () => {
-    return getServiceSummaryUrl(
-      this.serviceInstanceEntity.entity.cfGuid,
-      this.serviceInstanceEntity.entity.service_plan.entity.service.metadata.guid
-    );
-  }
 }

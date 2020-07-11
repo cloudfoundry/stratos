@@ -114,7 +114,7 @@ export function generateTestCfServiceProvider() {
     useFactory: (
       store: Store<CFAppState>,
     ) => {
-      const appService = new CloudFoundryService(store);
+      const appService = new CloudFoundryService();
       return appService;
     },
     deps: [Store]

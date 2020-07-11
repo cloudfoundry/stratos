@@ -293,6 +293,15 @@ export class DeployApplicationDeployer {
     return JSON.stringify(msg);
   }
 
+  sendCloseAcknowledgement = () => {
+    const msg = {
+      message: '{}',
+      timestamp: Math.round((new Date()).getTime() / 1000),
+      type: SocketEventTypes.CLOSE_ACK
+    };
+    return JSON.stringify(msg);
+  }
+
   processWebSocketMessage = (log) => {
     switch (log.type) {
       case SocketEventTypes.MANIFEST:
@@ -316,6 +325,8 @@ export class DeployApplicationDeployer {
         this.updateStatus();
         break;
       case SocketEventTypes.CLOSE_SUCCESS:
+        // Acknowledge
+        this.inputStream.next(this.sendCloseAcknowledgement());
         this.onClose(log, null, null);
         break;
       case SocketEventTypes.CLOSE_INVALID_MANIFEST:

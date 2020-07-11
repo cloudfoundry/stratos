@@ -479,6 +479,8 @@ describe('Autoscaler -', () => {
       }
 
       function waitForRow() {
+        // Timeout after 32 attempts (each 5 seconds, which is just under 3 minutes)
+        let retries = 32;
         const sub = timer(5000, 5000).pipe(
           switchMap(() => promise.all<boolean | number>([
             findRow(),
@@ -492,15 +494,24 @@ describe('Autoscaler -', () => {
             console.log(`${moment().toString()}: Waiting for event row: Skip actions... list is refreshing`);
             return;
           }
+          retries--;
           if (foundRow) {
             console.log(`${moment().toString()}: Waiting for event row: Found row!`);
             sub.unsubscribe();
           } else {
             console.log(`${moment().toString()}: Waiting for event row: manually refreshing list`);
             eventPageBase.list.header.refresh();
+            if (retries === 0) {
+              sub.unsubscribe();
+            }
           }
         });
         browser.wait(() => sub.closed);
+        // Fail the test if the retry count made it down to 0
+        if (retries === 0) {
+          e2e.debugLog('Timed out waiting for event row');
+          fail('Timed out waiting for event row');
+        }
       }
 
       it('Go to events page', () => {

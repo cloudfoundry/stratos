@@ -12,6 +12,7 @@ import {
 } from '../../actions/users.actions';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfUserEntityType } from '../../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import {
   CfUser,
   CfUserMissingOrgRoles,
@@ -61,7 +62,7 @@ export function cfUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>
 }
 
 export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: DisconnectEndpoint) {
-  if (action.endpointType === 'cf') {
+  if (action.endpointType === CF_ENDPOINT_TYPE) {
     switch (action.type) {
       case DISCONNECT_ENDPOINTS_SUCCESS:
         const cfGuid = action.guid;

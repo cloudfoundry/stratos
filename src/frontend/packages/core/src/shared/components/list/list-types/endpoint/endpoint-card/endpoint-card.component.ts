@@ -9,28 +9,23 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/permissions/current-user-permissions.service';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   StratosCatalogEndpointEntity,
 } from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
+import { StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
-import {
-  coreEndpointListDetailsComponents,
-  getFullEndpointApiUrl,
-} from '../../../../../../features/endpoints/endpoint-helpers';
-import { StratosStatus } from '../../../../../shared.types';
-import { FavoritesConfigMapper } from '../../../../favorites-meta-card/favorite-config-mapper';
-import {
-  createMetaCardMenuItemSeparator,
-  MetaCardMenuItem,
-} from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
+import { coreEndpointListDetailsComponents } from '../../../../../../features/endpoints/endpoint-helpers';
+import { createMetaCardMenuItemSeparator } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
@@ -48,7 +43,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public rowObs = new ReplaySubject<EndpointModel>();
   public favorite: UserFavoriteEndpoint;
   public address: string;
-  public cardMenu: MetaCardMenuItem[];
+  public cardMenu: MenuItem[];
   public endpointCatalogEntity: StratosCatalogEndpointEntity;
   public hasDetails = true;
   public endpointLink: string = null;
@@ -126,7 +121,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     private endpointListHelper: EndpointListHelper,
     private componentFactoryResolver: ComponentFactoryResolver,
     private favoritesConfigMapper: FavoritesConfigMapper,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     super();
     this.endpointIds$ = this.endpointIds.asObservable();

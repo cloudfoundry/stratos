@@ -1,10 +1,33 @@
 @mixin app-user-avatar-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
+  $user-avatar-background-color: map-get($app-theme, user-avatar-background-color);
+  $user-avatar-foreground-color: map-get($app-theme, user-avatar-foreground-color);
+  $user-avatar-underflow-invert-colors: map-get($app-theme, user-avatar-underflow-invert-colors);
+  $user-avatar-header-invert-colors: map-get($app-theme, user-avatar-header-invert-colors);
 
   .user-avatar {
     &__initials {
-      background-color: mat-contrast($primary, 500);
-      color: mat-color($primary);
+      background-color: $user-avatar-background-color;
+      color: $user-avatar-foreground-color;
     }
   }
+
+  @if $user-avatar-underflow-invert-colors {
+    .user-avatar.user-avatar__large {
+      .user-avatar__initials {
+        background-color: $user-avatar-foreground-color;
+        color: $user-avatar-background-color;
+      }
+    }
+  }
+
+  @if $user-avatar-header-invert-colors {
+    .user-avatar {
+      .user-avatar__initials.user-avatar__header {
+        background-color: $user-avatar-foreground-color;
+        color: $user-avatar-background-color;
+      }
+    }
+  }
+
 }

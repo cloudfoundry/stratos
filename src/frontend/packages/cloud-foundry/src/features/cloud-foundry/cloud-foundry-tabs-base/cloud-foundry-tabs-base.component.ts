@@ -13,7 +13,7 @@ import {
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { FavoritesConfigMapper } from '../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
+import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-mapper';
 import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
@@ -68,7 +68,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
     // Default tabs + add any tabs from extensions
     this.tabLinks = [
-      { link: 'summary', label: 'Summary', icon: 'description' },
+      { link: 'summary', label: 'Summary', icon: 'cloud_foundry', iconFont: 'stratos-icons' },
       { link: 'organizations', label: 'Organizations', icon: 'organization', iconFont: 'stratos-icons' },
       {
         link: CloudFoundryTabsBaseComponent.cells,
@@ -76,7 +76,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
         icon: 'select_all',
         hidden$: cellsHidden$
       },
-      { link: 'routes', label: 'Routes', icon: 'network_route', iconFont: 'stratos-icons', },
+      { link: 'routes', label: 'Routes', icon: 'route', iconFont: 'stratos-icons', },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',

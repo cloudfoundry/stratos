@@ -28,9 +28,10 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
-import { CFFeatureFlagTypes, ISpace } from '../../cf-api.types';
+import { CFFeatureFlagTypes, IApp, ISpace } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { CFEntityConfig } from '../../cf-types';
+import { ListCfRoute } from '../../shared/components/list/list-types/cf-routes/cf-routes-data-source-base';
 import {
   CfUser,
   CfUserRoleParams,
@@ -350,10 +351,15 @@ export function fetchTotalResults(
   );
 }
 
+type CfOrgSpaceFilterTypes = IApp | ListCfRoute | IServiceInstance;
 export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
   // Filtering is done remotely when maxedResults are hit (see `setMultiFilter`)
   if (!!paginationState.maxedState.isMaxedMode && !paginationState.maxedState.ignoreMaxed) {
     return entities;
+  }
+
+  const fetchOrgGuid = (e: APIResource<CfOrgSpaceFilterTypes>): string => {
+    return e.entity.space ? e.entity.space.entity.organization_guid : null;
   }
 
   // Filter by cf/org/space
@@ -363,7 +369,7 @@ export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: Pagin
   return !cfGuid && !orgGuid && !spaceGuid ? entities : entities.filter(e => {
     e = extractActualListEntity(e);
     const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
-    const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
+    const validOrg = !(orgGuid && orgGuid !== fetchOrgGuid(e));
     const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
     return validCF && validOrg && validSpace;
   });

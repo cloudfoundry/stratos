@@ -1,8 +1,8 @@
 import { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/api.selectors';
-import { metricEntityType } from '../../../core/src/base-entity-schemas';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 
 export const appAutoscalerInfoEntityType = 'autoscalerInfo';
 export const appAutoscalerHealthEntityType = 'autoscalerHealth';
@@ -10,7 +10,7 @@ export const appAutoscalerPolicyEntityType = 'autoscalerPolicy';
 export const appAutoscalerPolicyTriggerEntityType = 'autoscalerPolicyTrigger';
 export const appAutoscalerScalingHistoryEntityType = 'autoscalerScalingHistory';
 export const appAutoscalerAppMetricEntityType = 'autoscalerAppMetric';
-export const appAutoscalerCredentialEntityType = 'autoscalerCredential'
+export const appAutoscalerCredentialEntityType = 'autoscalerCredential';
 
 export const AUTOSCALER_ENDPOINT_TYPE = 'autoscaler';
 

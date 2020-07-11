@@ -2,23 +2,23 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
+import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-mapper';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
+import { StratosStatus } from '../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { TabNavService } from '../../../../tab-nav.service';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
-import { StratosStatus } from '../../shared.types';
-import { FavoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
 import { selectDashboardState } from './../../../../../store/src/selectors/dashboard.selectors';
 import { UserProfileInfo } from './../../../../../store/src/types/user-profile.types';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
@@ -96,6 +96,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
         const { name, routerLink } = mapperFunction(favorite.metadata);
         this.store.dispatch(new AddRecentlyVisitedEntityAction({
           guid: favorite.guid,
+          date: moment().valueOf(),
           entityType: favorite.entityType,
           endpointType: favorite.endpointType,
           entityId: favorite.entityId,
@@ -140,7 +141,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   logout() {
-    this.store.dispatch(new Logout());
+    this.router.navigate(['/login/logout']);
   }
 
   public toggleSidenav() {

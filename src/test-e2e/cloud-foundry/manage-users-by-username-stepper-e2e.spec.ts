@@ -3,7 +3,7 @@ import { browser, by, element, promise } from 'protractor';
 import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/cf-user.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { UaaHelpers } from '../helpers/uaa-helpers';
 import { CFUsersListComponent } from '../po/cf-users-list.po';

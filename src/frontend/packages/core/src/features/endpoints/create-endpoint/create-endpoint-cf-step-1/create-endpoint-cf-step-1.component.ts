@@ -1,27 +1,21 @@
 import { AfterContentInit, Component, Input, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { denormalize } from 'normalizr';
 import { Observable } from 'rxjs';
-import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
+import { filter, map, pairwise } from 'rxjs/operators';
 
-import { GetAllEndpoints, RegisterEndpoint } from '../../../../../../store/src/actions/endpoint.actions';
-import { ShowSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
-import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
-import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
+import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   StratosCatalogEndpointEntity,
 } from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
-import { getAPIRequestDataState, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
-import { selectPaginationState } from '../../../../../../store/src/selectors/pagination.selectors';
-import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../base-entity-schemas';
+import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
-import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
+import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
@@ -58,23 +52,16 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   endpointTypeSupportsSSO = false;
   endpoint: StratosCatalogEndpointEntity;
 
-  private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
-
-  constructor(private store: Store<GeneralEntityAppState>, activatedRoute: ActivatedRoute, ) {
-
-    this.existingEndpoints = store.select(selectPaginationState(this.endpointEntityKey, GetAllEndpoints.storeKey))
-      .pipe(
-        withLatestFrom(store.select(getAPIRequestDataState)),
-        map(([pagination, entities]) => {
-          const pages = Object.values(pagination.ids);
-          const page = [].concat.apply([], pages);
-          const endpoints = page.length ? denormalize(page, [endpointEntitySchema], entities) : [];
-          return {
-            names: endpoints.map(ep => ep.name),
-            urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
-          };
-        })
-      );
+  constructor(
+    activatedRoute: ActivatedRoute,
+    private snackBarService: SnackBarService
+  ) {
+    this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
+      map(endpoints => ({
+        names: endpoints.map(ep => ep.name),
+        urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
+      }))
+    );
 
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
@@ -87,7 +74,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   onNext: StepOnNextFunction = () => {
     const { subType, type } = this.endpoint.getTypeAndSubtype();
-    const action = new RegisterEndpoint(
+    return stratosEntityCatalog.endpoint.api.register<ActionState>(
       type,
       subType,
       this.nameField.value,
@@ -96,15 +83,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       this.clientIDField ? this.clientIDField.value : '',
       this.clientSecretField ? this.clientSecretField.value : '',
       this.ssoAllowedField ? !!this.ssoAllowedField.value : false,
-    );
-
-    this.store.dispatch(action);
-
-    const update$ = this.store.select(
-      this.getUpdateSelector(action.guid())
-    ).pipe(filter(update => !!update));
-
-    return update$.pipe(pairwise(),
+    ).pipe(
+      pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
       map(([oldVal, newVal]) => newVal),
       map(result => {
@@ -116,7 +96,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
           ssoAllowed: this.ssoAllowedField ? !!this.ssoAllowedField.value : false
         };
         if (!result.error) {
-          this.store.dispatch(new ShowSnackBar(`Successfully registered '${this.nameField.value}'`));
+          this.snackBarService.show(`Successfully registered '${this.nameField.value}'`);
         }
         const success = !result.error;
         return {
@@ -129,13 +109,6 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     );
   }
 
-  private getUpdateSelector(guid) {
-    return selectUpdateInfo(
-      this.endpointEntityKey,
-      guid,
-      EndpointsEffect.registeringKey,
-    );
-  }
 
   ngAfterContentInit() {
     this.validate = this.form.statusChanges.pipe(

@@ -1,24 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import {
-  FetchUserProfileAction,
-  UpdateUserPasswordAction,
-  UpdateUserProfileAction,
-} from '../../../store/src/actions/user-profile.actions';
 import { AppState } from '../../../store/src/app-state';
-import { userProfilePasswordUpdatingKey } from '../../../store/src/effects/user-profile.effects';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../store/src/entity-service-factory.service';
-import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../../store/src/reducers/api-request-reducer/types';
+import { ActionState, getDefaultActionState } from '../../../store/src/reducers/api-request-reducer/types';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
-import { selectRequestInfo, selectUpdateInfo } from '../../../store/src/selectors/api.selectors';
+import { stratosEntityCatalog } from '../../../store/src/stratos-entity-catalog';
 import { SessionData } from '../../../store/src/types/auth.types';
 import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../../store/src/types/user-profile.types';
-import { userProfileEntitySchema } from '../base-entity-schemas';
 
 
 @Injectable()
@@ -32,21 +23,22 @@ export class UserProfileService {
 
   userProfile$: Observable<UserProfileInfo>;
 
-  private stratosUserConfig = entityCatalog.getEntity(userProfileEntitySchema.endpointType, userProfileEntitySchema.entityType);
+  private userGuid$: Observable<string>;
 
   constructor(
     private store: Store<AppState>,
-    esf: EntityServiceFactory
   ) {
-    if (!this.stratosUserConfig) {
-      console.error('Can not get user profile entity');
-      this.userProfile$ = of({} as UserProfileInfo);
-      return;
-    }
-
-    this.entityService = this.createFetchUserAction().pipe(
+    this.userGuid$ = this.store.select(s => s.auth).pipe(
+      filter((auth: AuthState) => !!(auth && auth.sessionData)),
+      map((auth: AuthState) => auth.sessionData),
+      filter((sessionData: SessionData) => !!sessionData.user),
       first(),
-      map(action => esf.create<UserProfileInfo>(action.guid, action)),
+      map(data => data.user.guid)
+    );
+
+    this.entityService = this.userGuid$.pipe(
+      first(),
+      map(userGuid => stratosEntityCatalog.userProfile.store.getEntityService(userGuid)),
       publishReplay(1),
       refCount()
     );
@@ -60,27 +52,16 @@ export class UserProfileService {
       switchMap(service => service.isFetchingEntity$)
     );
 
-    this.isError$ = this.store.select(selectRequestInfo(this.stratosUserConfig.entityKey, FetchUserProfileAction.guid)).pipe(
+    this.isError$ = this.entityService.pipe(
+      switchMap(es => es.entityMonitor.entityRequest$),
       filter(requestInfo => !!requestInfo && !requestInfo.fetching),
       map(requestInfo => requestInfo.error)
-    );
-  }
-
-  private createFetchUserAction(): Observable<FetchUserProfileAction> {
-    return this.store.select(s => s.auth).pipe(
-      filter((auth: AuthState) => !!(auth && auth.sessionData)),
-      map((auth: AuthState) => auth.sessionData),
-      filter((sessionData: SessionData) => !!sessionData.user),
-      first(),
-      map(data => new FetchUserProfileAction(data.user.guid))
-    );
+    )
   }
 
   fetchUserProfile() {
     // Once we have the user's guid, fetch their profile
-    this.createFetchUserAction().pipe(first()).subscribe(action => {
-      this.store.dispatch(action);
-    });
+    this.userGuid$.pipe(first()).subscribe(userGuid => stratosEntityCatalog.userProfile.api.get(userGuid));
   }
 
   getPrimaryEmailAddress(profile: UserProfileInfo): string {
@@ -135,11 +116,8 @@ export class UserProfileService {
     if (profileChanges.emailAddress) {
       this.setPrimaryEmailAddress(updatedProfile, profileChanges.emailAddress);
     }
-    this.store.dispatch(new UpdateUserProfileAction(updatedProfile, profileChanges.currentPassword));
-    const actionState = selectUpdateInfo(this.stratosUserConfig.entityKey,
-      FetchUserProfileAction.guid,
-      rootUpdatingKey);
-    return this.store.select(actionState).pipe(
+
+    return stratosEntityCatalog.userProfile.api.updateProfile<ActionState>(updatedProfile, profileChanges.currentPassword).pipe(
       filter(item => item && !item.busy)
     );
   }
@@ -149,11 +127,7 @@ export class UserProfileService {
       oldPassword: profileChanges.currentPassword,
       password: profileChanges.newPassword
     };
-    this.store.dispatch(new UpdateUserPasswordAction(profile.id, passwordUpdates));
-    const actionState = selectUpdateInfo(this.stratosUserConfig.entityKey,
-      FetchUserProfileAction.guid,
-      userProfilePasswordUpdatingKey);
-    return this.store.select(actionState).pipe(
+    return stratosEntityCatalog.userProfile.api.updatePassword<ActionState>(profile.id, passwordUpdates).pipe(
       filter(item => item && !item.busy)
     );
   }

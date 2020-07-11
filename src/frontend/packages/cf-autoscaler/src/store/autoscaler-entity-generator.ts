@@ -1,10 +1,10 @@
 import { IOrgFavMetadata } from '../../../cloud-foundry/src/cf-metadata-types';
-import { metricEntityType } from '../../../core/src/base-entity-schemas';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEntity,
 } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEndpointDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
+import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { AppAutoscalerEvent, AppAutoscalerHealth, AppAutoscalerPolicy, AppScalingTrigger } from './app-autoscaler.types';

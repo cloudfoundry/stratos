@@ -18,9 +18,6 @@ import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagi
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartListConfigService } from './app-autoscaler-metric-chart-list-config.service';
 
-/* tslint:disable:max-line-length */
-
-/* tslint:enable:max-line-length */
 
 describe('AppAutoscalerMetricChartListConfigService', () => {
   beforeEach(() => {

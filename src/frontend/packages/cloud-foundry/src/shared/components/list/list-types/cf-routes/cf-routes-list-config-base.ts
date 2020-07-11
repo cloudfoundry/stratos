@@ -78,7 +78,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
     noEntries: 'There are no routes',
     filter: 'Search by Route',
     maxedResults: {
-      icon: 'network_route',
+      icon: 'route',
       iconFont: 'stratos-icons',
       canIgnoreMaxFirstLine: 'Fetching all routes might take a long time',
       cannotIgnoreMaxFirstLine: 'There are too many routes to fetch'
