@@ -26,7 +26,11 @@ fi
 
 pushd ${STRATOS} > /dev/null
 if [ "$BUILD_FRONTEND" == "true" ]; then
+  # Ensure the desktop-extendsions are not excluded. This should be smarter
+  mv stratos.yaml stratos_.yaml
+  cp electron/stratos.yaml ./
   ng build
+  mv stratos_.yaml stratos.yaml
 fi
 if [ "$BUILD_BACKEND" == "true" ]; then
   npm run build-backend

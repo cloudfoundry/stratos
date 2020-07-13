@@ -17,5 +17,4 @@ export const environment = {
   disablePolling: false,
   hideUserMenu: true,
   fixedSideNav: true,
-  desktopApp: true
 };

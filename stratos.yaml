@@ -1,0 +1,4 @@
+packages:
+  exclude: [
+    '@stratosui/desktop-extensions'
+  ]

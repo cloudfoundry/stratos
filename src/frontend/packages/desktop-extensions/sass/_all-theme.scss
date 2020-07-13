@@ -1,0 +1,6 @@
+@mixin apply-theme-desktop-extensions($stratos-theme) {
+
+  $theme: map-get($stratos-theme, theme);
+  $app-theme: map-get($stratos-theme, app-theme);
+
+}

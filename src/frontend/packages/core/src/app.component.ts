@@ -69,10 +69,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
       this.document.body.classList.add('mat-desktop');
     }
 
-    // Stratos Desktop Application styling
-    if(environment.desktopApp) {
-      this.document.body.classList.add('stratos-desktop');
-    }
   }
 
   ngOnDestroy() {

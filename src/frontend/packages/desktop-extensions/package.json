@@ -1,0 +1,14 @@
+{
+  "name": "@stratosui/desktop-extensions",
+  "version": "0.0.0",
+  "stratos": {
+    "theme": {
+      "loadingCss": "loader/loading.css",
+      "loadingHtml": "loader/loading.html"
+    },
+    "theming": "sass/_all-theme#apply-theme-desktop-extensions"
+  },
+  "peerDependencies": {
+    "@stratosui/theme": "0.0.1"
+  }
+}
