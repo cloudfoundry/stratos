@@ -1,0 +1,19 @@
+.stratos.stratos-desktop {
+
+  // Remove some of the padding on the list header
+  .list-component__header {
+   > mat-card.list-component__header-card {
+      min-height: unset;
+    }
+  }
+
+  // User icon goes, so remove extra padding
+  .page-header__right {
+    padding-right: 0;
+  }
+
+  .page-header .page-header__toolbar {
+    background-color: #545454;
+  }
+
+}

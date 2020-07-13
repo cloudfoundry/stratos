@@ -857,6 +857,13 @@ func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.
 	return client
 }
 
+func debugLogging(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		log.Debugf("==>> REQUEST: %s %s", c.Request().Method, c.Request().URL)
+		return h(c)
+	}
+}
+
 func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	log.Debug("registerRoutes")
 
@@ -881,6 +888,12 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		e.Use(p.SetupMiddleware())
 		pp.POST("/v1/setup/check", p.setupGetAvailableScopes)
 		pp.POST("/v1/setup/save", p.setupSaveConfig)
+	}
+
+	// Debug logging of the request URL
+	if strings.ToLower(p.GetConfig().LogLevel) == "debug" {
+		log.Info("Adding debug logging")
+		e.Use(debugLogging)
 	}
 
 	loginAuthGroup := pp.Group("/v1/auth")
