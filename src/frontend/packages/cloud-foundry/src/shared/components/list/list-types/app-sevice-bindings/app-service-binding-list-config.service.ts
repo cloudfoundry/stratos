@@ -19,12 +19,12 @@ import {
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { GetAppServiceBindings } from '../../../../../actions/application-service-routes.actions';
 import { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { isServiceInstance, isUserProvidedServiceInstance } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
+import { CSI_CANCEL_URL } from '../../../add-service-instance/csi-mode.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import {
   TableCellServiceInstanceTagsComponent,
@@ -57,17 +57,15 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
 
   private listActionEdit: IListAction<APIResource<IServiceBinding>> = {
     action: (item) => {
-      // FIXME: If the user cancels stepper this leaks #4295
       this.serviceActionHelperService.startEditServiceBindingStepper(
         item.entity.service_instance_guid,
         this.appService.cfGuid,
-        { appId: this.appService.appGuid },
+        {
+          appId: this.appService.appGuid,
+          [CSI_CANCEL_URL]: `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/services`
+        },
         !!isUserProvidedServiceInstance(item.entity.service_instance.entity)
-      ).subscribe(res => {
-        if (!res.error) {
-          this.store.dispatch(new GetAppServiceBindings(this.appService.appGuid, this.appService.cfGuid));
-        }
-      });
+      );
     },
     label: 'Edit',
     createVisible: () => this.appService.waitForAppEntity$.pipe(
@@ -104,7 +102,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     return [
       {
         columnId: 'name',
-        headerCell: () => 'Service Instances',
+        headerCell: () => 'Name',
         cellDefinition: {
           getValue: (row) => row.entity.service_instance.entity.name
         },

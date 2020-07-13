@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
 import { IRequestEntityTypeState } from '../app-state';
+import { STRATOS_ENDPOINT_TYPE } from '../helpers/stratos-entity-factory';
 import { ExtraApiReducers } from '../reducers/api-request-reducers.generator.helpers';
 import { ICurrentUserRolesState } from '../types/current-user-roles.types';
 import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
@@ -218,10 +218,10 @@ class EntityCatalog {
               ...state.endpoints,
               [endpoint.type]: endpointState
             }
-          }
+          };
         }
       }
-    })
+    });
     return oneChanged ? {
       ...state
     } : state;

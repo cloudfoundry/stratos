@@ -1,17 +1,19 @@
 import { Action } from '@ngrx/store';
 
-import { STRATOS_ENDPOINT_TYPE } from '../../../core/src/base-entity-schemas';
-import { EndpointType } from '../../../core/src/core/extension/extension-types';
-import { endpointSchemaKey } from '../helpers/entity-factory';
+import { EndpointType } from '../extension-types';
+import { endpointEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../helpers/stratos-entity-factory';
 import { NormalizedResponse } from '../types/api.types';
 import { endpointListKey, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
+import { EntityRequestAction } from '../types/request.types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
-export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
-export const GET_ENDPOINTS_LOGIN = '[Endpoints] Get all at login';
 export const GET_ENDPOINTS_SUCCESS = '[Endpoints] Get all success';
 export const GET_ENDPOINTS_FAILED = '[Endpoints] Get all failed';
+
+export const GET_ENDPOINT = '[Endpoints] Get';
+export const GET_ENDPOINT_SUCCESS = '[Endpoints] Get success';
+export const GET_ENDPOINT_FAILED = '[Endpoints] Get failed';
 
 export const CONNECT_ENDPOINTS = '[Endpoints] Connect';
 export const CONNECT_ENDPOINTS_SUCCESS = '[Endpoints] Connect succeed';
@@ -37,14 +39,45 @@ export class EndpointActionComplete implements Action {
   constructor(
     public type: string,
     public guid: string,
+    /**
+     * Note - The underlying endpoints type (_cf_Endpoint, not _stratos_Endpoint)
+     */
     public endpointType: EndpointType,
     public endpoint: EndpointModel | INewlyConnectedEndpointInfo
   ) { }
 }
 
-export class EndpointAction implements Action {
-  type: string;
-  endpointType: EndpointType;
+export abstract class BaseEndpointAction implements EntityRequestAction {
+  public entityType = endpointEntityType;
+  public endpointType = STRATOS_ENDPOINT_TYPE;
+  public subType = '';
+  public entity = [stratosEntityFactory(endpointEntityType)]
+  constructor(public type: string) { }
+  actions: string[];
+}
+
+export abstract class SingleBaseEndpointAction extends BaseEndpointAction {
+  constructor(
+    actionType: string,
+    public guid: string,
+    /**
+     * The endpoint type of the endpoint
+     *    endpointType = stratos endpoint type... where it will be stored
+     *    endpointsType = specific type of the endpoint type... for instance 'metrics'
+     */
+    public endpointsType?: string
+  ) {
+    super(actionType);
+  }
+}
+
+abstract class MultipleBaseEndpointAction extends BaseEndpointAction implements PaginatedAction {
+  constructor(
+    actionType: string,
+    public paginationKey: string
+  ) {
+    super(actionType);
+  }
 }
 
 // Different Auth Type support for connecting to Endpoints
@@ -60,15 +93,34 @@ export interface AuthParamsToken {
 // All supported auth params types
 export type AuthParams = AuthParamsUsernamePassword | AuthParamsToken;
 
-export class GetAllEndpoints implements PaginatedAction {
-  public static storeKey = endpointListKey;
-  constructor(public login = false) { }
-  entityType = endpointSchemaKey;
-  endpointType = STRATOS_ENDPOINT_TYPE;
-  paginationKey = GetAllEndpoints.storeKey;
-  type = GET_ENDPOINTS;
+export class GetEndpoint extends SingleBaseEndpointAction {
+  constructor(
+    guid: string,
+  ) {
+    super(
+      GET_ENDPOINT,
+      guid
+    )
+  }
   actions = [
-    GET_ENDPOINTS_START,
+    GET_ENDPOINT,
+    GET_ENDPOINT_SUCCESS,
+    GET_ENDPOINT_FAILED
+  ];
+}
+
+export class GetAllEndpoints extends MultipleBaseEndpointAction {
+  public static storeKey = endpointListKey;
+  constructor(
+    public login = false
+  ) {
+    super(
+      GET_ENDPOINTS,
+      GetAllEndpoints.storeKey
+    )
+  }
+  actions = [
+    GET_ENDPOINTS,
     GET_ENDPOINTS_SUCCESS,
     GET_ENDPOINTS_FAILED
   ];
@@ -80,53 +132,82 @@ export class GetAllEndpoints implements PaginatedAction {
   };
 }
 
-export class GetAllEndpointsSuccess implements Action {
-  constructor(public payload: NormalizedResponse<EndpointModel>, public login = false) { }
+export class GetAllEndpointsSuccess extends GetAllEndpoints {
+  constructor(public payload: NormalizedResponse<EndpointModel>, public login = false) {
+    super(login)
+  }
   type = GET_ENDPOINTS_SUCCESS;
 }
 
-export class GetAllEndpointsFailed implements Action {
-  constructor(public message: string, public login = false) { }
-  type = GET_ENDPOINTS_FAILED;
-}
-
-export class ConnectEndpoint extends EndpointAction {
+export class ConnectEndpoint extends SingleBaseEndpointAction {
+  static UpdatingKey = 'connectingKey'
   constructor(
-    public guid: string,
-    public endpointType: EndpointType,
+    guid: string,
+    // Note - should not be called endpointType
+    connectEndpointType: EndpointType,
     public authType: string,
     public authValues: AuthParams,
     public systemShared: boolean,
     public body: string,
   ) {
-    super();
+    super(
+      CONNECT_ENDPOINTS,
+      guid,
+      connectEndpointType
+    );
   }
-  type = CONNECT_ENDPOINTS;
+  updatingKey = ConnectEndpoint.UpdatingKey;
+  actions = [
+    CONNECT_ENDPOINTS,
+    CONNECT_ENDPOINTS_SUCCESS,
+    CONNECT_ENDPOINTS_FAILED
+  ]
 }
 
-export class DisconnectEndpoint extends EndpointAction {
+export class DisconnectEndpoint extends SingleBaseEndpointAction {
+  static UpdatingKey = 'disconnecting'
   constructor(
-    public guid: string,
-    public endpointType: EndpointType,
+    guid: string,
+    // Note - should not be called endpointType
+    disconnectEndpointType: EndpointType,
   ) {
-    super();
+    super(
+      DISCONNECT_ENDPOINTS,
+      guid,
+      disconnectEndpointType
+    );
   }
-  type = DISCONNECT_ENDPOINTS;
+  updatingKey = DisconnectEndpoint.UpdatingKey;
+  actions = [
+    DISCONNECT_ENDPOINTS,
+    DISCONNECT_ENDPOINTS_SUCCESS,
+    DISCONNECT_ENDPOINTS_FAILED
+  ];
 }
 
-export class UnregisterEndpoint extends EndpointAction {
+export class UnregisterEndpoint extends SingleBaseEndpointAction {
   constructor(
-    public guid: string,
-    public endpointType: EndpointType,
+    guid: string,
+    // Note - should not be called endpointType
+    unregisterEndpointType: EndpointType,
   ) {
-    super();
+    super(
+      UNREGISTER_ENDPOINTS,
+      guid,
+      unregisterEndpointType
+    );
   }
-  type = UNREGISTER_ENDPOINTS;
+  actions = [
+    UNREGISTER_ENDPOINTS,
+    UNREGISTER_ENDPOINTS_SUCCESS,
+    UNREGISTER_ENDPOINTS_FAILED
+  ];
 }
 
-export class RegisterEndpoint extends EndpointAction {
+export class RegisterEndpoint extends SingleBaseEndpointAction {
   constructor(
-    public endpointType: EndpointType,
+    // Note - should not be called endpointType
+    registerEndpointType: EndpointType,
     public endpointSubType: string = null,
     public name: string,
     public endpoint: string,
@@ -135,21 +216,24 @@ export class RegisterEndpoint extends EndpointAction {
     public clientSecret = '',
     public ssoAllowed: boolean,
   ) {
-    super();
+    super(
+      REGISTER_ENDPOINTS,
+      '<New Endpoint>' + name,
+      registerEndpointType
+    );
   }
-  type = REGISTER_ENDPOINTS;
-
-  public guid(): string {
-    return '<New Endpoint>' + this.name;
-  }
+  updatingKey = 'registering'
+  actions = [
+    REGISTER_ENDPOINTS,
+    REGISTER_ENDPOINTS_SUCCESS,
+    REGISTER_ENDPOINTS_FAILED
+  ];
 }
 
-export class UpdateEndpoint extends EndpointAction {
-
-  type = UPDATE_ENDPOINT;
-
+export class UpdateEndpoint extends SingleBaseEndpointAction {
   constructor(
-    public endpointType: EndpointType,
+    // Note - should not be called endpointType
+    updateEndpointType: EndpointType,
     public id: string,
     public name: string,
     public skipSSL: boolean,
@@ -158,6 +242,16 @@ export class UpdateEndpoint extends EndpointAction {
     public clientSecret: string,
     public allowSSO: boolean,
   ) {
-    super();
+    super(
+      UPDATE_ENDPOINT,
+      id,
+      updateEndpointType
+    );
   }
+  updatingKey = 'updating'
+  actions = [
+    UPDATE_ENDPOINT,
+    UPDATE_ENDPOINT_SUCCESS,
+    UPDATE_ENDPOINT_FAILED
+  ];
 }

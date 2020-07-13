@@ -1,21 +1,19 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, switchMap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../store/src/app-state';
+import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
+import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { getFullEndpointApiUrl, getSSOClientRedirectURI } from '../../endpoint-helpers';
-import { UpdateEndpoint } from './../../../../../../store/src/actions/endpoint.actions';
+import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import {
   EntityCatalogSchemas,
   IStratosEndpointDefinition,
 } from './../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { endpointEntitiesSelector } from './../../../../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel } from './../../../../../../store/src/types/endpoint.types';
 import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
@@ -41,12 +39,11 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   existingEndpoints: Observable<EndpointModelMap>;
   endpoint$: Observable<EndpointModel>;
   definition$: Observable<IStratosEndpointDefinition<EntityCatalogSchemas>>;
-  existingEndpoinNames$: Observable<string[]>;
+  existingEndpointNames$: Observable<string[]>;
   formChangeSub: Subscription;
   setClientInfo = false;
 
   constructor(
-    private store: Store<AppState>,
     activatedRoute: ActivatedRoute,
   ) {
     this.editEndpoint = new FormGroup({
@@ -65,9 +62,14 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
 
     this.endpointID = getIdFromRoute(activatedRoute, 'id');
 
-    this.existingEndpoints = this.store.select(endpointEntitiesSelector);
+    this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
+      map(endpoints => endpoints.reduce((res, endpoint) => {
+        res[endpoint.guid] = endpoint;
+        return res;
+      }, {}))
+    );
 
-    this.existingEndpoinNames$ = this.existingEndpoints.pipe(
+    this.existingEndpointNames$ = this.existingEndpoints.pipe(
       map(endpoints => Object.values(endpoints).filter((ep: EndpointModel) => ep.guid !== this.endpointID)),
       map((endpoints: EndpointModel[]) => endpoints.map(ep => ep.name))
     );
@@ -127,20 +129,19 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     return this.endpoint$.pipe(
       first(),
       switchMap(endpoint => {
-        const action = new UpdateEndpoint(
-          endpoint.cnsi_type,
+        return stratosEntityCatalog.endpoint.api.update<ActionState>(
           this.endpointID,
-          this.editEndpoint.value.name,
-          this.editEndpoint.value.skipSSL,
-          this.editEndpoint.value.setClientInfo,
-          this.editEndpoint.value.clientID,
-          this.editEndpoint.value.clientSecret,
-          this.editEndpoint.value.allowSSO,
-        );
-
-        this.store.dispatch(action);
-
-        return this.store.select(selectUpdateInfo('stratosEndpoint', this.endpointID, 'updating')).pipe(
+          this.endpointID, {
+          endpointType: endpoint.cnsi_type,
+          id: this.endpointID,
+          name: this.editEndpoint.value.name,
+          skipSSL: this.editEndpoint.value.skipSSL,
+          setClientInfo: this.editEndpoint.value.setClientInfo,
+          clientID: this.editEndpoint.value.clientID,
+          clientSecret: this.editEndpoint.value.clientSecret,
+          allowSSO: this.editEndpoint.value.allowSSO,
+        }
+        ).pipe(
           pairwise(),
           filter(([oldV, newV]) => oldV.busy && !newV.busy),
           map(([, newV]) => newV),

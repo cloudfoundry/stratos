@@ -1,17 +1,13 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Observable, of, Subject } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { GetAllEndpoints } from '../../../../../../store/src/actions/endpoint.actions';
-import { AppState } from '../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { httpErrorResponseToSafeString } from '../../../../../../store/src/jetstream';
+import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { httpErrorResponseToSafeString } from '../../../../jetstream.helpers';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
@@ -74,8 +70,6 @@ export class BackupEndpointsComponent {
 
   constructor(
     public service: BackupEndpointsService,
-    private store: Store<AppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory,
     private confirmDialog: ConfirmationDialogService,
   ) {
     this.setupSelectStep();
@@ -84,17 +78,7 @@ export class BackupEndpointsComponent {
 
 
   setupSelectStep() {
-    const action = new GetAllEndpoints();
-    const endpointObs = getPaginationObservables<EndpointModel>({
-      store: this.store,
-      action,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        action.paginationKey,
-        action,
-        true
-      )
-    }, true);
-
+    const endpointObs = stratosEntityCatalog.endpoint.store.getAll.getPaginationService();
 
     const endpoints$ = endpointObs.entities$.pipe(
       filter(entities => !!entities),

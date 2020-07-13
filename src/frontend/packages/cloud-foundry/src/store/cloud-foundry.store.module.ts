@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 
+import { ActiveRouteCfOrgSpace } from '../features/cloud-foundry/cf-page.types';
 import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
 import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AppEffects } from './effects/app.effects';
@@ -30,6 +31,12 @@ import { UsersRolesEffects } from './effects/users-roles.effects';
       CfValidateEffects,
       UsersRolesEffects
     ])
+  ],
+  providers: [
+    {
+      provide: ActiveRouteCfOrgSpace,
+      useValue: {}
+    },
   ]
 })
 export class CloudFoundryStoreModule { }

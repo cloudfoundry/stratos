@@ -1,5 +1,5 @@
-import { metricEntityType } from '../../core/src/base-entity-schemas';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
+import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
 import { APIResource } from '../../store/src/types/api.types';
 import {
   CFApplicationEntitySchema,
@@ -200,24 +200,24 @@ const CFUserSchema = new CFUserEntitySchema({
     audited_spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.AUDITED_SPACES)],
   }
 }, {
-    idAttribute: getAPIResourceGuid,
-    processStrategy: (user: APIResource<CfUser>) => {
-      if (user.entity.username) {
-        return user;
-      }
-      const entity = {
-        ...user.entity,
-        username: user.metadata.guid
-      };
-
-      return user.metadata ? {
-        entity,
-        metadata: user.metadata
-      } : {
-          entity
-        };
+  idAttribute: getAPIResourceGuid,
+  processStrategy: (user: APIResource<CfUser>) => {
+    if (user.entity.username) {
+      return user;
     }
-  });
+    const entity = {
+      ...user.entity,
+      username: user.metadata.guid
+    };
+
+    return user.metadata ? {
+      entity,
+      metadata: user.metadata
+    } : {
+        entity
+      };
+  }
+});
 entityCache[cfUserEntityType] = CFUserSchema;
 
 const coreSpaceSchemaParams = {

@@ -34,14 +34,14 @@
           </app-card-number-metric>
         </app-tile>
         <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
-          <app-card-number-metric icon="content_copy" label="App Instances"
+          <app-card-number-metric icon="application_instance" iconFont="stratos-icons" label="App Instances"
             value="{{ (cfSpaceService.appInstances$ | async) }}"
             limit="{{ (cfSpaceService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
         </app-tile>
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/routes"
-            iconFont="stratos-icons" icon="network_route" label="Routes"
+            iconFont="stratos-icons" icon="route" label="Routes"
             value="{{ (cfSpaceService.routes$ | async)?.length }}"
             limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
         </app-tile>

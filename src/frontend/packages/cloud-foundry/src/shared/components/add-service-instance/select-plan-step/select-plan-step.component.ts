@@ -39,8 +39,8 @@ import {
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { StratosStatus } from '../../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { IServicePlan } from '../../../../cf-api-svc.types';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';

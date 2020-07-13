@@ -1,0 +1,11 @@
+@mixin intro-screen-theme($theme, $app-theme) {
+  $intro-bg-color: map-get($app-theme, intro-screen-background-color);
+
+  @if $intro-bg-color {
+    // Remove background image from setup screen (e.g. upgrade screen)
+    app-intro-screen > .intro {
+      background-color: $intro-bg-color;
+      background-image: none;
+    }
+  }
+}

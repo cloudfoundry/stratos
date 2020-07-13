@@ -5,10 +5,10 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subject } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { GetAllEndpoints } from '../../../../../../store/src/actions/endpoint.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
+import { httpErrorResponseToSafeString } from '../../../../../../store/src/jetstream';
+import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { getEventFiles } from '../../../../core/browser-helper';
-import { httpErrorResponseToSafeString } from '../../../../jetstream.helpers';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
@@ -79,7 +79,7 @@ export class RestoreEndpointsComponent {
     };
 
     const restoreSuccess = () => {
-      this.store.dispatch(new GetAllEndpoints());
+      stratosEntityCatalog.endpoint.api.getAll()
       result.next({
         success: true,
         redirect: true,

@@ -1,7 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { take } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import { switchMap, take } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
@@ -12,6 +13,7 @@ import { IGlobalListAction, IListConfig } from '../../../../../../../core/src/sh
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
+import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
 
 
@@ -23,11 +25,12 @@ export class CfAppRoutesListConfigService extends CfAppRoutesListConfigServiceBa
     appService: ApplicationService,
     confirmDialog: ConfirmationDialogService,
     datePipe: DatePipe,
-    currentUserPermissionsService: CurrentUserPermissionsService,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     super(store, appService, confirmDialog, datePipe, currentUserPermissionsService, null, true);
 
     this.setupList(store, appService);
+    this.allowSelection = false; // Allow the multi action visibility to determine this
   }
 
   private setupList(store: Store<CFAppState>, appService: ApplicationService) {
@@ -51,7 +54,18 @@ export class CfAppRoutesListConfigService extends CfAppRoutesListConfigServiceBa
       },
       icon: 'add',
       label: 'Add',
-      description: 'Add new route'
+      description: 'Add new route',
+      visible$: combineLatest(
+        appService.appOrg$,
+        appService.appSpace$
+      ).pipe(
+        switchMap(([org, space]) => this.currentUserPermissionsService.can(
+          CfCurrentUserPermissions.ROUTE_CREATE,
+          appService.cfGuid,
+          org.metadata.guid,
+          space.metadata.guid
+        ))
+      )
     };
     this.getGlobalActions = () => [listActionAddRoute];
   }

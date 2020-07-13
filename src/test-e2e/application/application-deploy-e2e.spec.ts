@@ -1,7 +1,7 @@
 import { browser, promise } from 'protractor';
 
 import { e2e } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { createApplicationDeployTests } from './application-deploy-helper';

@@ -1,8 +1,6 @@
-import {
-  LocalPaginationHelpers,
-} from '../../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 import { IgnorePaginationMaxedState, UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { LocalPaginationHelpers } from '../../helpers/local-list.helpers';
 import { PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagination';
 

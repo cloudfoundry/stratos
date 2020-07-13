@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
-import { StratosStatus } from '../../../../../core/src/shared/shared.types';
 import { EntityService } from '../../../../../store/src/entity-service';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { StratosStatus } from '../../../../../store/src/types/shared.types';
 import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import * as servicesHelpers from '../../../features/service-catalog/services-helper';
 import { ServicesService } from '../../../features/service-catalog/services.service';

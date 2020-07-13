@@ -1,5 +1,6 @@
-import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { StratosStatus } from '../../shared/shared.types';
+import { Component, Input, TemplateRef } from '@angular/core';
+
+import { StratosStatus } from '../../../../store/src/types/shared.types';
 
 interface IconDefinition {
   icon: string;

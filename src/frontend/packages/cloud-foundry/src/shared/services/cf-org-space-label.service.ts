@@ -2,9 +2,8 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { endpointSchemaKey } from '../../../../store/src/helpers/entity-factory';
+import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../../../store/src/helpers/stratos-entity-factory';
 import { selectEntity } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
@@ -33,7 +32,7 @@ export class CfOrgSpaceLabelService {
     private spaceGuid?: string) {
     this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
     // FIXME: hide STRATOS_ENDPOINT_TYPE from extensions - STRAT-154
-    const endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
+    const endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointEntityType);
 
     this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointEntityKey, this.cfGuid));
 

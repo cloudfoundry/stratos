@@ -8,12 +8,10 @@ import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import {
-  MetaCardMenuItem,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { ComponentEntityMonitorConfig } from '../../../../../../../../core/src/shared/shared.types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
 import {
   IService,
   IServiceBinding,
@@ -34,6 +32,7 @@ import {
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 
 
@@ -54,7 +53,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     data$: Observable<string>;
     customStyle?: string;
   }[];
-  cardMenu: MetaCardMenuItem[];
+  cardMenu: MenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>> | null>;
   serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance | IUserProvidedServiceInstance>>>;
   tags$: Observable<AppChip<IServiceInstance | IUserProvidedServiceInstance>[]>;
@@ -241,7 +240,10 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.row.entity.service_instance_guid,
     this.appService.cfGuid,
-    { appId: this.appService.appGuid },
+    {
+      appId: this.appService.appGuid,
+      [CSI_CANCEL_URL]: `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/services`
+    },
     this.isUserProvidedServiceInstance
   )
 }

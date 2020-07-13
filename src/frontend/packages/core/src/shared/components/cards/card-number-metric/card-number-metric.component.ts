@@ -4,8 +4,8 @@ import { BehaviorSubject } from 'rxjs';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
+import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { UtilsService } from '../../../../core/utils.service';
-import { StratosStatus } from '../../../shared.types';
 import { determineCardStatus } from '../card-status/card-status.component';
 
 @Component({

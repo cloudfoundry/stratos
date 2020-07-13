@@ -1,15 +1,11 @@
-import { Inject, Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { ENTITY_SERVICE } from '../../../../../../core/src/shared/entity.tokens';
 import { AppState } from '../../../../../../store/src/app-state';
-import { EntityService } from '../../../../../../store/src/entity-service';
 import { selectDashboardState } from '../../../../../../store/src/selectors/dashboard.selectors';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { IApp } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
 
@@ -19,7 +15,7 @@ export class ApplicationPollingService {
   private pollingSub: Subscription;
   private autoRefreshString = 'auto-refresh';
 
-  public isPolling$ = this.entityService.updatingSection$.pipe(map(
+  public isPolling$ = this.applicationService.entityService.updatingSection$.pipe(map(
     update => update[this.autoRefreshString] && update[this.autoRefreshString].busy
   ));
 
@@ -27,7 +23,6 @@ export class ApplicationPollingService {
 
   constructor(
     public applicationService: ApplicationService,
-    @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource<IApp>>,
     private store: Store<AppState>,
     private ngZone: NgZone,
   ) {
@@ -54,7 +49,7 @@ export class ApplicationPollingService {
 
     // Auto refresh
     this.ngZone.runOutsideAngular(() => {
-      this.pollingSub = this.entityService
+      this.pollingSub = this.applicationService.entityService
         .poll(10000, this.autoRefreshString).pipe(
           tap(() => this.ngZone.run(() => this.poll(false))))
         .subscribe();
@@ -69,12 +64,12 @@ export class ApplicationPollingService {
     const { cfGuid, appGuid } = this.applicationService;
     if (withApp) {
       const updatingApp = {
-        ...this.entityService.action,
+        ...this.applicationService.entityService.action,
         updatingKey: this.autoRefreshString
       };
       this.store.dispatch(updatingApp);
     }
-    this.entityService.entityObs$.pipe(
+    this.applicationService.entityService.entityObs$.pipe(
       first(),
     ).subscribe(resource => {
       cfEntityCatalog.appSummary.api.get(appGuid, cfGuid);

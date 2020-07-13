@@ -6,8 +6,9 @@ import { MetricsAction } from '../../../../../store/src/actions/metrics.actions'
 import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
+import { MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
-import { ITimeRange, MetricQueryType } from '../../services/metrics-range-selector.types';
+import { ITimeRange } from '../../services/metrics-range-selector.types';
 
 @Component({
   selector: 'app-metrics-range-selector',

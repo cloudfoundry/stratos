@@ -46,6 +46,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
 
   @Input() cfGuid: string;
+  @Input() orgGuid: string;
   @Input() spaceGuid: string;
   @Input() orgName: string;
   @Input() spaceName: string;
@@ -60,7 +61,6 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   sub: Subscription;
   isOrgRole = false;
   disabled = false;
-  orgGuid: string;
 
   private static hasExistingRole(role: string, roles: CfUserRolesSelected, userGuid: string, orgGuid: string, spaceGuid: string): boolean {
     if (roles && roles[userGuid] && roles[userGuid][orgGuid]) {
@@ -266,7 +266,6 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
       combineLatestOp(this.cfRolesService.newRoles$, users$, canEditRole$, selectUsersIsSetByUsername$),
       filter(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => !!users.length && !!newRoles.orgGuid)
     ).subscribe(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => {
-      this.orgGuid = newRoles.orgGuid;
       const { checked, tooltip } = CfRoleCheckboxComponent.getCheckedState(
         this.role, users, existingRoles, newRoles, this.orgGuid, this.spaceGuid);
       this.checked = checked;

@@ -7,7 +7,6 @@ import {
   PermissionConfig,
   PermissionConfigLink,
   PermissionTypes,
-  PermissionValues,
 } from '../../../core/src/core/permissions/current-user-permissions.config';
 import {
   CurrentUserPermissionsService,
@@ -21,6 +20,7 @@ import {
   IPermissionCheckCombiner,
 } from '../../../core/src/core/permissions/current-user-permissions.types';
 import { GeneralEntityAppState } from '../../../store/src/app-state';
+import { PermissionValues } from '../../../store/src/selectors/current-user-role.selectors';
 import { connectedEndpointsSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../cf-api.types';
 import { cfEntityCatalog } from '../cf-entity-catalog';
@@ -396,7 +396,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
   private getAllEndpointGuids() {
-    return this.store.select(connectedEndpointsSelector).pipe(
+    return this.store.select(connectedEndpointsSelector()).pipe(
       map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === CF_ENDPOINT_TYPE).map(endpoint => endpoint.guid))
     );
   }

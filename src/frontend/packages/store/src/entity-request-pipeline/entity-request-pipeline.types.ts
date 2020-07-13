@@ -2,13 +2,12 @@ import { HttpClient, HttpRequest } from '@angular/common/http';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { LoggerService } from '../../../core/src/core/logger.service';
-import { JetStreamErrorResponse } from '../../../core/src/jetstream.helpers';
 import { AppState, GeneralEntityAppState, InternalAppState } from '../app-state';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
 } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { JetStreamErrorResponse } from '../jetstream';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { EntityInfo, NormalizedResponse } from '../types/api.types';
 import { EndpointUser } from '../types/endpoint.types';
@@ -146,7 +145,6 @@ export interface EntityUserRolesEndpoint {
 export type EntityUserRolesFetch = (
   endpoints: string[] | EntityUserRolesEndpoint[],
   store: Store<AppState>,
-  logService: LoggerService,
   httpClient: HttpClient
 ) => Observable<boolean>;
 

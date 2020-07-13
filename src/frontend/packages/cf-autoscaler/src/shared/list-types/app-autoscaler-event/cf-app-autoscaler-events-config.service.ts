@@ -8,8 +8,9 @@ import { ApplicationService } from '../../../../../cloud-foundry/src/features/ap
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
-import { ITimeRange, MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
+import { ITimeRange } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { AppAutoscalerEvent } from '../../../store/app-autoscaler.types';
 import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
 import {

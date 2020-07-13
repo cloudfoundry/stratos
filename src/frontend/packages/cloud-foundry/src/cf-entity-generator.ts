@@ -3,10 +3,8 @@ import * as moment from 'moment';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { EndpointHealthCheck } from '../../core/endpoints-health-checks';
-import { metricEntityType } from '../../core/src/base-entity-schemas';
+import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
-import { BaseEndpointAuth } from '../../core/src/features/endpoints/endpoint-auth';
 import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
@@ -14,6 +12,7 @@ import {
   StratosCatalogEntity,
 } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
+  EndpointHealthCheck,
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../store/src/entity-catalog/entity-catalog.types';
@@ -22,6 +21,7 @@ import {
 } from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { ActionDispatcher, JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
+import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { selectSessionData } from '../../store/src/reducers/auth.reducer';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
@@ -409,7 +409,9 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
   const definition: IStratosEntityDefinition = {
     type: quotaDefinitionEntityType,
     schema: cfEntityFactory(quotaDefinitionEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Organization Quota',
+    labelPlural: 'Organization Quotas',
   };
   cfEntityCatalog.quotaDefinition = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -451,6 +453,8 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
         }
       };
     },
+    label: 'App Env Var',
+    labelPlural: 'App Env Vars',
   };
   cfEntityCatalog.appEnvVar = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -478,6 +482,8 @@ function generateCFAppSummaryEntity(endpointDefinition: StratosEndpointExtension
     type: appSummaryEntityType,
     schema: cfEntityFactory(appSummaryEntityType),
     endpoint: endpointDefinition,
+    label: 'App Summary',
+    labelPlural: 'App Summaries',
   };
   cfEntityCatalog.appSummary = new StratosCatalogEntity<IBasicCFMetaData, IAppSummary, AppSummaryActionBuilders>(definition, {
     dataReducers: [
@@ -500,7 +506,9 @@ function generateCFSpaceQuotaEntity(endpointDefinition: StratosEndpointExtension
   const definition: IStratosEntityDefinition = {
     type: spaceQuotaEntityType,
     schema: cfEntityFactory(spaceQuotaEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Space Quota',
+    labelPlural: 'Space Quotas',
   };
   cfEntityCatalog.spaceQuota = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -518,7 +526,9 @@ function generateCFPrivateDomainEntity(endpointDefinition: StratosEndpointExtens
   const definition: IStratosEntityDefinition = {
     type: privateDomainsEntityType,
     schema: cfEntityFactory(privateDomainsEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Private Domain',
+    labelPlural: 'Private Domains',
   };
   cfEntityCatalog.privateDomain = new StratosCatalogEntity<IBasicCFMetaData, APIResource<IPrivateDomain>>(definition, {
     dataReducers: [
@@ -1133,10 +1143,11 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
     label: 'Application',
     labelPlural: 'Applications',
     endpoint: endpointDefinition,
+    icon: 'apps',
     tableConfig: {
       rowBuilders: [
         ['Name', (entity) => entity.entity.name],
-        ['Creation Date', (entity) => entity.metadata.created_at]
+        ['Created', (entity) => entity.metadata.created_at]
       ]
     }
   };
@@ -1162,7 +1173,7 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
         getLines: () => ([
-          ['Creation Date', (meta) => meta.createdAt]
+          ['Created', (meta) => meta.createdAt]
         ])
       },
       actionBuilders: applicationActionBuilder
@@ -1181,6 +1192,8 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
     label: 'Space',
     labelPlural: 'Spaces',
     endpoint: endpointDefinition,
+    icon: 'virtual_space',
+    iconFont: 'stratos-icons'
   };
   cfEntityCatalog.space = new StratosCatalogEntity<ISpaceFavMetadata, APIResource<ISpace>, SpaceActionBuilders>(
     spaceDefinition,
@@ -1200,7 +1213,7 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
         getLines: () => ([
-          ['Creation Date', (meta) => meta.createdAt]
+          ['Created', (meta) => meta.createdAt]
         ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid
@@ -1217,6 +1230,8 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
     label: 'Organization',
     labelPlural: 'Organizations',
     endpoint: endpointDefinition,
+    icon: 'organization',
+    iconFont: 'stratos-icons'    
   };
   cfEntityCatalog.org = new StratosCatalogEntity<
     IOrgFavMetadata,
@@ -1242,7 +1257,7 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
         getLines: () => ([
-          ['Creation Date', (meta) => meta.createdAt]
+          ['Created', (meta) => meta.createdAt]
         ]),
         getGuid: metadata => metadata.guid
       }
