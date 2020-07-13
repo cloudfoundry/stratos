@@ -1,7 +1,9 @@
 
-const {app, BrowserWindow, Menu, shell} = require('electron')
+const {app, BrowserWindow, Menu, shell, dialog} = require('electron')
 const url = require("url");
 const path = require("path");
+const https = require('https');
+
 const findFreePort = require("./freeport");
 const { exec, spawn } = require('child_process');
 const contextMenu = require('electron-context-menu');
@@ -9,10 +11,12 @@ const mainMenu = require('./menu');
 const homeDir = require('os').homedir();
 const fs = require('fs-extra');
 const windowStateKeeper = require('electron-window-state');
+const { escapeRegExp } = require('lodash');
 
-const LOG_FILE = '/Users/nwm/stratos.log';
+//const LOG_FILE = '/Users/nwm/stratos.log';
 
-let mainWindow
+let mainWindow;
+let jetstream;
 
 function addContextMenu(mainWindow) {
   let rightClickPosition = null
@@ -35,63 +39,58 @@ function addContextMenu(mainWindow) {
 
 function createWindow () {
 
-  // mainWindow.loadURL(
-  //   url.format({
-  //     pathname: path.join(__dirname, `../dist/index.html`),
-  //     protocol: "file:",
-  //     // pathname: '127.0.0.1:5443/',
-  //     // protocol: "https:",
-  //     slashes: true
-  //   })
-  // );
+  // fs.writeFileSync(LOG_FILE, 'STRATOS\n');
+  // fs.appendFileSync(LOG_FILE, __dirname);
+
+  findFreePort(30000, 40000, '127.0.0.1', function(err, port) {
+    let url = `127.0.0.1:${port}`;
+    const prog = path.join(__dirname, `./jetstream`);
+    jetstream = spawn(prog, [], { env: getEnvironment(url),
+      cwd: __dirname, 
+      stdio: 'inherit'});
+
+    waitForBackend(`https://${url}`, () => {
+      doCreateWindow(url);
+    }, 0);
+  });
+}
+
+function doCreateWindow(url) {
+
   let mainWindowState = windowStateKeeper({
     defaultWidth: 1024,
     defaultHeight: 768
   });
 
-  fs.writeFileSync(LOG_FILE, 'STRATOS\n');
-  fs.appendFileSync(LOG_FILE, __dirname);
-
-  findFreePort(30000, 40000, '127.0.0.1', function(err, port) {
-    let url = `127.0.0.1:${port}`;
-    const prog = path.join(__dirname, `./jetstream`);
-    const jetstream = spawn(prog, [], { env: getEnvironment(url),
-      cwd: __dirname, 
-      stdio: 'inherit'});
-
-    setTimeout(function() { 
-      mainWindow = new BrowserWindow({
-        x: mainWindowState.x,
-        y: mainWindowState.y,
-        width: mainWindowState.width,
-        height: mainWindowState.height,
-        title: 'Stratos',
-        webPreferences: {
-          nodeIntegration: true
-        }
-      });
-      // Remember last position and size
-      mainWindowState.manage(mainWindow);
-      mainWindow.on('closed', function () {
-        mainWindow = null;
-        jetstream.kill();
-      });
-      contextMenu({});
-
-      const menu = Menu.buildFromTemplate(mainMenu(mainWindow));
-      Menu.setApplicationMenu(menu)
-
-      // Load the UI from the dev version beign served by `ng serve`
-      if (isDev()) {
-        url = '127.0.0.1:4200'
-      }
-  
-      mainWindow.loadURL(`https://${url}`);
-      // Open the DevTools.
-      //mainWindow.webContents.openDevTools({mode:'undocked'});
-    }, 2000);
-
+  mainWindow = new BrowserWindow({
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
+    title: 'Stratos',
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
+  // Remember last position and size
+  mainWindowState.manage(mainWindow);
+  mainWindow.on('closed', function () {
+    mainWindow = null;
+    jetstream.kill();
+  });
+  contextMenu({});
+
+  const menu = Menu.buildFromTemplate(mainMenu(mainWindow));
+  Menu.setApplicationMenu(menu)
+
+  // Load the UI from the dev version beign served by `ng serve`
+  if (isDev()) {
+    url = '127.0.0.1:4200'
+  }
+
+  mainWindow.loadURL(`https://${url}`);
+  // Open the DevTools.
+  //mainWindow.webContents.openDevTools({mode:'undocked'});
 
 }
 
@@ -136,4 +135,36 @@ function getEnvironment(url) {
 function isDev() {
   const args = process.argv
   return args.length > 1 && args[2] === 'dev';
+}
+
+function waitForBackend(url, done, retry) {
+  const opts = {
+    rejectUnauthorized: false,
+  }
+  const ping = `${url}/pp/v1/version`;
+  https.get(ping, opts, (resp) => {
+    if (resp.statusCode === 200) {
+      done();
+    } else {
+      jetstreamDidNotStart(url, done, retry + 1)
+    }
+  }).on('error', (err) => {
+    jetstreamDidNotStart(url, done, retry + 1)
+  });
+
+}
+
+function jetstreamDidNotStart(url, done, retry) {
+  if (retry === 100) {
+    dialog.showMessageBoxSync({
+      type: 'error',
+      title: 'Failed to start Stratos backend',
+      message: 'The Stratos backend could not be reached'
+    });
+    jetstream.kill();
+    app.quit();
+  } else {
+    setTimeout(() => waitForBackend(url, done, retry), 50);
+  }
+
 }
