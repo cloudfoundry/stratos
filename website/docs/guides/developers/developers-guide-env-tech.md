@@ -1,4 +1,8 @@
-# Stratos Tech + Developer Environment
+---
+id: developers-guide-env-tech
+title: Stratos Tech + Developer Environment
+sidebar_label: Dev Environment 
+---
 
 ## ES6
 

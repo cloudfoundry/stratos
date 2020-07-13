@@ -1,3 +1,9 @@
+---
+id: pull_request_template
+title: Pull request template for contributions to Stratos
+sidebar_label: PR template 
+---
+
 <!--- Provide a general summary of your changes in the Title above -->
 
 ## Description

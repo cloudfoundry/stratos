@@ -1,4 +1,8 @@
-# Deploying with the All-In-One Docker Container
+---
+id: all-in-one
+title: Deploying with the All-In-One Docker Container
+sidebar_label: Deploy as Docker Container 
+---
 
 The all-in-one container sets up the Stratos components in a single container.
 

@@ -1,4 +1,8 @@
-# E2E Tests
+---
+id: developers-guide-e2e-tests
+title: E2E Tests
+sidebar_label: E2E Tests 
+---
 
 The Stratos E2E test suite exercises the Stratos UI using protractor/web-driver.
 

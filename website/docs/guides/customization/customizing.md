@@ -1,4 +1,8 @@
-# Customizing Stratos
+---
+id: customizing
+title: Customizing Stratos 
+sidebar_label: Customizing Stratos 
+---
 
 Stratos provides a mechanism for customization - the following customizations are currently supported:
 

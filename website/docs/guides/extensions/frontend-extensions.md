@@ -1,4 +1,8 @@
-# Front-end Extensions
+---
+id: frontend-extensions
+title: Front-end Extensions
+sidebar_label: Frontend 
+---
 
 An example illustrating the various front-end extension points of Stratos is included in the folder `examples/custom-src`.
 
@@ -81,20 +85,7 @@ For example:
 The approach for all of these is the same:
 
 1. Create a new component that will provide the tab contents
-2. Ensure that your component is declared with the `ExtensionService` in the imports of your custom module, for example:
-```
-  @NgModule({
-    imports: [
-      ExtensionService.declare([
-        ExtensionComponent,
-      ])
-    ],
-    declarations: [
-      ExtensionComponent
-    ]
-  })
-```
-
+2. Ensure that your component is included in the `EntryComponent` section of your custom module
 2. Decorate the component with the `StratosTab` decorator, for example:
 
 ```
@@ -107,13 +98,13 @@ The approach for all of these is the same:
 
 Where:
 
-- <TYPE> indicates where the tab should appear and can be:
+- < TYPE > indicates where the tab should appear and can be:
   - StratosTabType.Application - Application View
   - StratosTabType.CloudFoundry - Cloud Foundry view
   - StratosTabType.CloudFoundryOrg - Cloud Foundry Org view
   - StratosTabType.CloudFoundrySpace - Cloud Foundry Space view
-- <LABEL> is the text label to use for the tab
-- <LINK> is the name to use for the route (this must only contain characters permitted in URLs)
+- < LABEL > is the text label to use for the tab
+- < LINK > is the name to use for the route (this must only contain characters permitted in URLs)
 
 An example is included in the file `examples/custom-src/frontend/app/custom/app-tab-extension`.
 
@@ -135,8 +126,8 @@ An action is a icon button that appears at the top-right of a View. For example:
 The approach for all of these is the same:
 
 1. Create a new component that will provide the contents to show when the action is clicked
-2. Ensure that your component is declared with the `ExtensionService` in the imports of your custom module
-3. Decorate the component with the `StratosAction` decorator, for example:
+2. Ensure that your component is included in the `EntryComponent` section of your custom module
+2. Decorate the component with the `StratosAction` decorator, for example:
 
 ```
 @StratosAction({
@@ -149,16 +140,16 @@ The approach for all of these is the same:
 
 Where:
 
-- <TYPE> indicates where the action should appear and can be:
+- < TYPE > indicates where the action should appear and can be:
   - StratosActionType.Applications - Application Wall View
   - StratosActionType.Application - Application View
   - StratosActionType.CloudFoundry - Cloud Foundry view
   - StratosActionType.CloudFoundryOrg - Cloud Foundry Org view
   - StratosActionType.CloudFoundrySpace - Cloud Foundry Space view
   - StratosActionType.Endpoints - Endpoints view
-- <ICON> is the icon to show
-- <LABEL> is the text label to use for the tooltip of the icon (optional)
-- <LINK> is the name to use for the route (this must only contain characters permitted in URLs)
+- < ICON > is the icon to show
+- < LABEL > is the text label to use for the tooltip of the icon (optional)
+- < LINK > is the name to use for the route (this must only contain characters permitted in URLs)
 
 An example is included in the file `examples/custom-src/frontend/app/custom/app-action-extension`.
 
@@ -256,19 +247,16 @@ export class ExampleTabExtensionComponent implements OnInit {
 Save the file.
 
 
-### Mark the component as an extensions component
+### Mark the component as an entry component
 
-The last thing we need to do is to mark our Extension component as an extensions component.
+The last thing we need to do is to mark our Extension component as an entry component.
 
-To do this, in a text editor, open the file `src/frontend/app/custom/custom.module.ts` and add the `ExtensionService.declare` to the import sesion, so it looks like this:
+To do this, in a text editor, open the file `src/frontend/app/custom/custom.module.ts` and add the entry components section so it looks like this:
 
 ```
 @NgModule({
   imports: [
-    CommonModule,
-    ExtensionService.declare([
-      ExampleTabExtensionComponent,
-    ])    
+    CommonModule
   ],
   declarations: [ExampleTabExtensionComponent],
   entryComponents: [ExampleTabExtensionComponent]

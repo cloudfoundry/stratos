@@ -1,4 +1,8 @@
-# Stratos Overview
+---
+id: overview
+title: Stratos Overview
+sidebar_label: Overview 
+---
 
 The Stratos Console provides a web-based UI to allow developers and administrators to manage their applications and cloud foundry deployment(s).
 

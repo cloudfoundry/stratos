@@ -1,5 +1,8 @@
-
-# Developing the Stratos Console
+---
+id: developers-guide
+title: Developing the Stratos Console
+sidebar_label: Stratos Development 
+---
 
 1. [Introduction](#introduction)
 1. [Frontend Development](#frontend-development)

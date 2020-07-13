@@ -1,4 +1,8 @@
-# Invite User Guide
+---
+id: invite-user-guide
+title: Invite User Guide
+sidebar_label: Invite Users 
+---
 
 Stratos provides a way for Cloud Foundry administrators and organization managers to invite users to an organization or space.
 

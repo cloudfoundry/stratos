@@ -1,4 +1,8 @@
-# Accessing Stratos
+---
+id: access
+title: Accessing Stratos
+sidebar_label: Accessing Stratos 
+---
 
 Depending on the deployment mode, you may require access to an UAA. Stratos also has the option to configure a local user account which removes the need for a UAA in non-Cloud Foundry deployments.
 

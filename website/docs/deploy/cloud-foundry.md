@@ -1,4 +1,8 @@
-# Deploying as a Cloud Foundry Application
+---
+id: cloud-foundry
+title: Deploying as a Cloud Foundry Application
+sidebar_label: Deploy on Cloud Foundry 
+---
 
 ## Deployment Steps
 
@@ -6,8 +10,8 @@ The quickest way to install Stratos is to deploy it as a Cloud Foundry applicati
 
 You can do it in two ways:
 
-1. [Deploy Stratos from source](#Deploy-Stratos-from-source)
-1. [Deploy Stratos from docker image](#Deploy-Stratos-from-docker-image)
+1. [Deploy Stratos from source](#deploy-stratos-from-source)
+1. [Deploy Stratos from docker image](#deploy-stratos-from-docker-image)
 
 You will then be able to open a web browser and navigate to the console URL:
 
@@ -15,12 +19,12 @@ You will then be able to open a web browser and navigate to the console URL:
 
 Where `<DOMAIN>` is the default domain configured for your Cloud Foundry cluster.
 
-To login use the following credentials detailed [here](../../docs/access.md).
+To login use the following credentials detailed [here](access.md).
 
 If you run into issues, please refer to the [Troubleshooting Guide](#troubleshooting) below.
 
 > The console will pre-configure the host Cloud Foundry endpoint. No other CF instance should be registered unless the instructions in
- the section [Associate Cloud Foundry database service](#Associate-Cloud-Foundry-database-service) are followed.
+ the section [Associate Cloud Foundry database service](#associate-cloud-foundry-database-service) are followed.
  All other deployment methods (helm, docker all-in-one, etc) allow the registration of multiple CF instances by default.
 
 Note:
@@ -61,7 +65,7 @@ applications:
 
 This will set the the UAA client and UAA secret used to invite users for the default CF only.
 
-See the [invite users guide](../../docs/invite-user-guide.md) for more information about user invites in Stratos.
+See the [invite users guide](../guides/admin/invite-user-guide) for more information about user invites in Stratos.
 
 #### Use of the Default Embedded SQLite Database
 
@@ -80,7 +84,7 @@ git checkout tags/stable -b stable
 cf push
 ```
 
-If the cf push exceeds the time allowed see the instructions [here](#Pre-building-the-UI)
+If the cf push exceeds the time allowed see the instructions [here](#pre-building-the-ui)
 
 #### Pre-building the UI
 
@@ -123,7 +127,7 @@ cf push console -o splatform/stratos:stable -m 128M -k 384M
 
 Alternatively cf push using a manifest
 
-- download [manifest-docker.yml](../../manifest-docker.yml) or create your own manifest file:
+- download [manifest-docker.yml](../../../manifest-docker.yml) or create your own manifest file:
     ```yaml
     applications:
     - name: console
@@ -155,7 +159,7 @@ applications:
 
 When SSO Login is enabled, Stratos will also auto-connect to the Cloud Foundry it is deployed in using the token obtained during the SSO Login flow.
 
-For more information - see [Single-Sign On](../../docs/sso.md).
+For more information - see [Single-Sign On](../guides/admin/sso).
 
 ## Troubleshooting
 

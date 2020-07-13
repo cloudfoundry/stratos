@@ -1,4 +1,8 @@
-# Single Sign On
+---
+id: sso
+title: Single Sign On
+sidebar_label: Configure Single Sign On 
+---
 
 By default, Stratos will authenticate against a UAA using username and password, for both logging into Stratos and when connecting Cloud Foundry endpoints.
 

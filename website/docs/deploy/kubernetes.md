@@ -1,4 +1,8 @@
-# Deploying in Kubernetes
+---
+id: kubernetes
+title: Deploying in Kubernetes
+sidebar_label: Deploy on Kubernetes 
+---
 
 Stratos can be deployed to Kubernetes using [Helm](https://github.com/kubernetes/helm).
 

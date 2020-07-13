@@ -1,8 +1,10 @@
+---
+id: issue_template
+title: Issue report template 
+sidebar_label: Issue report template 
+---
+
 <!--- For bugs and general issues -->
-### Stratos Version
-<!-- What version of Stratos does this related to? -->
-<!-- Version information can be seen in the `About` page reached via the User Icon top right -->
-<!-- If directly using code which branch, commit, etc did the source come from, what repository was it cloned from? -->
 ### Frontend Deployment type
 <!--- Where is the frontend deployed? -->
 <!--- Put an 'x' in one of the boxes below.  -->
@@ -25,11 +27,11 @@
 
 ### Actual behaviour
 
-### Steps to reproduce the behaviour
+### Steps to reproduce the behavior
 
 ### Log output covering before error and any error statements
 ```
-Insert your log here
+Insert log hereCopy
 ```
 
 

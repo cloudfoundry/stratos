@@ -1,4 +1,8 @@
-# Backend Plugins
+---
+id: backend-plugins
+title: Backend Plugins
+sidebar_label: Backend 
+---
 
 This document provides a brief outline for extending the Stratos backend (Jetstream).
 

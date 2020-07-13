@@ -1,4 +1,8 @@
-# Contributing to Stratos UI
+---
+id: contributing
+title: Contributing to Stratos UI
+sidebar_label: Contributing to Stratos UI 
+---
 
 ## Reporting issues
 
