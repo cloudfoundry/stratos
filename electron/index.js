@@ -1,17 +1,27 @@
-
-const {app, BrowserWindow, Menu, shell, dialog} = require('electron')
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  shell,
+  dialog
+} = require('electron')
 const url = require("url");
 const path = require("path");
 const https = require('https');
 
 const findFreePort = require("./freeport");
-const { exec, spawn } = require('child_process');
+const {
+  exec,
+  spawn
+} = require('child_process');
 const contextMenu = require('electron-context-menu');
 const mainMenu = require('./menu');
 const homeDir = require('os').homedir();
 const fs = require('fs-extra');
 const windowStateKeeper = require('electron-window-state');
-const { escapeRegExp } = require('lodash');
+const {
+  escapeRegExp
+} = require('lodash');
 
 //const LOG_FILE = '/Users/nwm/stratos.log';
 
@@ -32,22 +42,27 @@ function addContextMenu(mainWindow) {
 
   mainWindow.addEventListener('contextmenu', (e) => {
     e.preventDefault()
-    rightClickPosition = {x: e.x, y: e.y}
+    rightClickPosition = {
+      x: e.x,
+      y: e.y
+    }
     menu.popup(remote.getCurrentWindow())
   }, false);
 }
 
-function createWindow () {
+function createWindow() {
 
   // fs.writeFileSync(LOG_FILE, 'STRATOS\n');
   // fs.appendFileSync(LOG_FILE, __dirname);
 
-  findFreePort(30000, 40000, '127.0.0.1', function(err, port) {
+  findFreePort(30000, 40000, '127.0.0.1', function (err, port) {
     let url = `127.0.0.1:${port}`;
     const prog = path.join(__dirname, `./jetstream`);
-    jetstream = spawn(prog, [], { env: getEnvironment(url),
-      cwd: __dirname, 
-      stdio: 'inherit'});
+    jetstream = spawn(prog, [], {
+      env: getEnvironment(url),
+      cwd: __dirname,
+      stdio: 'inherit'
+    });
 
     waitForBackend(`https://${url}`, () => {
       doCreateWindow(url);
@@ -114,7 +129,7 @@ app.on('activate', function () {
 
 app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
 
-  if (url.indexOf('https://127.0.0.1') === 0 || url.indexOf('wss://127.0.0.1') === 0)  {
+  if (url.indexOf('https://127.0.0.1') === 0 || url.indexOf('wss://127.0.0.1') === 0) {
     // Verification logic.
     event.preventDefault()
     callback(true)
@@ -130,11 +145,12 @@ function getConfigFolder() {
 }
 
 function getEnvironment(url) {
-  return  {
+  return {
     'CONSOLE_PROXY_TLS_ADDRESS': url,
     'SQLITE_KEEP_DB': 'true',
     'SQLITE_DB_DIR': getConfigFolder(),
     //'LOG_LEVEL': 'DEBUG',
+    'SESSION_STORE_EXPIRY': Number.MAX_SAFE_INTEGER
   };
 }
 
