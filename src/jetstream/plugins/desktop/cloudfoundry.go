@@ -45,6 +45,7 @@ func ListCloudFoundry() ([]*interfaces.CNSIRecord, error) {
 		SSOAllowed:             false,
 		ClientId:               cfg.ClientID,
 		ClientSecret:           cfg.ClientSecret,
+		Local:                  true,
 	}
 	return eps, nil
 }
@@ -68,6 +69,7 @@ func ListConnectedCloudFoundry() ([]*interfaces.ConnectedEndpoint, error) {
 		AuthorizationEndpoint:  cfg.AuthorizationEndpoint,
 		DopplerLoggingEndpoint: cfg.DopplerLoggingEndpoint,
 		SkipSSLValidation:      cfg.SkipSSLValidation,
+		Local:                  true,
 	}
 	return eps, nil
 }

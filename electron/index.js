@@ -78,7 +78,13 @@ function doCreateWindow(url) {
     mainWindow = null;
     jetstream.kill();
   });
-  contextMenu({});
+
+  // Context menu
+  contextMenu({
+    window: mainWindow,
+    // Hide the 'inspect element' menu item
+    // showInspectElement: false
+  });
 
   const menu = Menu.buildFromTemplate(mainMenu(mainWindow));
   Menu.setApplicationMenu(menu)
@@ -89,9 +95,9 @@ function doCreateWindow(url) {
   }
 
   mainWindow.loadURL(`https://${url}`);
+
   // Open the DevTools.
   //mainWindow.webContents.openDevTools({mode:'undocked'});
-
 }
 
 app.on('ready', createWindow)
