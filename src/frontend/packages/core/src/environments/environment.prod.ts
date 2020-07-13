@@ -5,5 +5,5 @@ export const environment = {
   ...defaults,
   production: true,
   logLevel: LogLevel.WARN,
-  logToConsole: true
+  disablePolling: true,
 };
