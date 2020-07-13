@@ -126,3 +126,4 @@ go-vendor-*.tgz
 /electron/node_modules
 /electron/out
 /electron/dev-ssl
+/electron/jetstream
