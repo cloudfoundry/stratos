@@ -10,6 +10,8 @@ const homeDir = require('os').homedir();
 const fs = require('fs-extra');
 const windowStateKeeper = require('electron-window-state');
 
+const LOG_FILE = '/Users/nwm/stratos.log';
+
 let mainWindow
 
 function addContextMenu(mainWindow) {
@@ -47,10 +49,14 @@ function createWindow () {
     defaultHeight: 768
   });
 
+  fs.writeFileSync(LOG_FILE, 'STRATOS\n');
+  fs.appendFileSync(LOG_FILE, __dirname);
+
   findFreePort(30000, 40000, '127.0.0.1', function(err, port) {
     let url = `127.0.0.1:${port}`;
     const prog = path.join(__dirname, `./jetstream`);
     const jetstream = spawn(prog, [], { env: getEnvironment(url),
+      cwd: __dirname, 
       stdio: 'inherit'});
 
     setTimeout(function() { 

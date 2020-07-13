@@ -124,3 +124,5 @@ go-vendor-*.tgz
 # Desktop app using Electron
 /electron/dist
 /electron/node_modules
+/electron/out
+/electron/dev-ssl
