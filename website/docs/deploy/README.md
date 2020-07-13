@@ -1,4 +1,8 @@
-# Deploying Stratos
+---
+id: deploy-readme
+title: Deploying Stratos
+sidebar_label: Overview
+---
 
 Stratos can be deployed in the following environments:
 

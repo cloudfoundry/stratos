@@ -49,8 +49,8 @@ Alternatively, you can use an existing UAA Client, if one is already available w
 
 Configuration depends on how you have deployed Stratos.
 
-1. For cf push, see [Configuration for CF Push](#Configuration-for-CF-Push)
-1. For Kubernetes with Helm, see: [Configuration for Helm Installation](#Configuration-for-Helm-Installation)
+1. For cf push, see [Configuration for CF Push](#configuration-for-cf-push)
+1. For Kubernetes with Helm, see: [Configuration for Helm Installation](#configuration-for-helm-installation)
 
 ## Enabling User Invite support in Stratos
 
@@ -60,7 +60,7 @@ This action must be performed by an Administrator in Stratos.
 1) Use the `Configure` button in the `User Invitation Support` section.
 1) Supply the uaa client id and secret and click `Configure`
 
-> Note: If Stratos has been deployed via `cf push` and the steps under the `Pre-configure invite UAA client` header in the  [CF deploy guide](../deploy/cloud-foundry/README.md)  have been followed, you will not follow these steps for the default CF.
+> Note: If Stratos has been deployed via `cf push` and the steps under the `Pre-configure invite UAA client` header in the  [CF deploy guide](../../deploy/cloud-foundry)  have been followed, you will not follow these steps for the default CF.
 
 ## Configuration for CF Push
 
@@ -146,7 +146,7 @@ When developing locally, we recommend using [mailcatcher](https://mailcatcher.me
 
 To install mailcatcher via docker, use the following command: `docker run -d -p 1080:80 -p 1025:25 --name mail tophfr/mailcatcher`. Once mailcatcher is installed, continue to follow the instructions below.
 
-SMTP server details can be set via rhe usual environment variable approach or, when running locally, in the `jetstream/config.properties` file (see Backend Development - Configuration in [developers-guide](./developers-guide.md)). The config settings, with example values, are as follows:
+SMTP server details can be set via rhe usual environment variable approach or, when running locally, in the `jetstream/config.properties` file (see Backend Development - Configuration in [developers-guide](../developers/developers-guide)). The config settings, with example values, are as follows:
 
 ```
 SMTP_FROM_ADDRESS=Stratos<test@test.com>

@@ -70,7 +70,7 @@ See the [invite users guide](../guides/admin/invite-user-guide) for more informa
 #### Use of the Default Embedded SQLite Database
 
 We do not recommend deploying Stratos to a production environment using the default embedded SQLite Database. Instead we recommend creating
-and binding a database service instance to Stratos - for more information see [here](db-migration/README.md).
+and binding a database service instance to Stratos - for more information see [here](db-migration).
 
 ### Deploy Stratos from source
 
@@ -143,7 +143,7 @@ Alternatively cf push using a manifest
     ```
 
 ## Associate Cloud Foundry database service
-Follow instructions [here](db-migration/README.md).
+Follow instructions [here](db-migration).
 
 ## Use SSO Login
 

@@ -33,15 +33,15 @@ Stratos can be deployed in the following environments:
 
 ## Troubleshooting
 
-Please see our [Troubleshooting](docs/troubleshooting) page.
+Please see our [Troubleshooting](guides/troubleshooting/troubleshooting) page.
 
 ## Further Reading
  
-Take a look at the [Feature Set](docs/features.md) for details on the feature set that Stratos provides.
+Take a look at the [Feature Set](features.md) for details on the feature set that Stratos provides.
  
-Get an [Overview](docs/overview.md) of Stratos, its components and the different ways in which it can be deployed.
+Get an [Overview](overview.md) of Stratos, its components and the different ways in which it can be deployed.
 
-Take a look at the [Development Roadmap](docs/roadmap.md) to see where we are heading. We update our status page each week to summarize what we are working on - see the [Status Page](docs/status_updates.md).
+Take a look at the [Development Roadmap](roadmap.md) to see where we are heading. We update our status page each week to summarize what we are working on - see the [Status Page](status_updates.md).
 
 Browse through features and issues in the project's [issues](https://github.com/cloudfoundry/stratos/issues) page.
 
@@ -49,9 +49,9 @@ What kind of code is in Stratos? We've integrated [Code Climate](https://codecli
 
 ## Contributing
 
-We very much welcome developers who would like to get involved and contribute to the development of the Stratos project. Please refer to the [Contributing guide](CONTRIBUTING.md) for more information.
+We very much welcome developers who would like to get involved and contribute to the development of the Stratos project. Please refer to the [Contributing guide](guides/contribution/contributing.md) for more information.
 
-For information to help getting started with development, please read the [Developer's Guide](docs/developers-guide.md).
+For information to help getting started with development, please read the [Developer's Guide](guides/developers/developers-guide.md).
 
 ## Support and feedback
 

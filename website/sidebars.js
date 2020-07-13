@@ -2,8 +2,19 @@ module.exports = {
   docs: {
     Documentation: ['introduction', 'overview'],
     'Getting Started': [
-    	'deploy/cloud-foundry', 
-    	'deploy/kubernetes', 
+    	'deploy/deploy-readme',
+    	{
+    		"Cloud Foundry": [
+    			'deploy/cloud-foundry',
+    			'deploy/cloud-foundry/db-migration' 
+    		],
+    	},
+    	{
+    		Kubernetes: [
+    			'deploy/kubernetes',
+    			'deploy/kubernetes/helm-installation' 
+    		],
+    	},
     	'deploy/all-in-one',
     	'deploy/access'
     ],

@@ -1,7 +1,7 @@
 ---
 id: kubernetes
 title: Deploying in Kubernetes
-sidebar_label: Deploy on Kubernetes 
+sidebar_label: Overview 
 ---
 
 Stratos can be deployed to Kubernetes using [Helm](https://github.com/kubernetes/helm).
@@ -16,4 +16,4 @@ You will need to have both the `kubectl` and `helm` CLIs installed and available
 
 The Stratos Helm chart contains a `README.md` file that contains installation instructions and configuration documentation.
 
-This document is also available in our GitHub repository here: [README.md](https://github.com/cloudfoundry/stratos/blob/master/deploy/kubernetes/console/README.md).
+This document is also available in [here](helm-installation).

@@ -1,4 +1,8 @@
-# Stratos
+---
+id: helm-installation
+title: Stratos Installation
+sidebar_label: Deploy using Helm 
+---
 
 Stratos is an Open Source Web-based Management console for Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
