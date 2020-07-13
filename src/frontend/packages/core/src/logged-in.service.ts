@@ -13,6 +13,10 @@ import { DashboardState } from './../../store/src/reducers/dashboard-reducer';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { PageVisible } from './core/page-visible';
 
+const isAuthNone = (auth: AuthState) =>
+  auth && auth.sessionData && auth.sessionData.user && auth.sessionData.user.guid ===
+  '10000000-1111-2222-3333-444444444444'
+
 @Injectable()
 export class LoggedInService {
   constructor(
@@ -55,7 +59,7 @@ export class LoggedInService {
 
     this.sub = this.store.select(s => s.auth)
       .subscribe((auth: AuthState) => {
-        if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
+        if (auth.loggedIn && auth.sessionData && auth.sessionData.valid && !isAuthNone(auth)) {
           if (!this.sessionChecker || this.sessionChecker.closed) {
             this.openSessionCheckerPoll();
           }

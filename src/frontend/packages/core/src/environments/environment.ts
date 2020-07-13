@@ -15,7 +15,6 @@ export const environment = {
   logEnableConsoleActions: false,
   showObsDebug: false,
   disablePolling: false,
-  hideUserMenu: true,
-  fixedSideNav: true,
-  desktopApp: true
+  hideUserMenu: true, // TODO: RC Should these be in stratos.yaml?
+  fixedSideNav: true, // TODO: RC Should these be in stratos.yaml?
 };
