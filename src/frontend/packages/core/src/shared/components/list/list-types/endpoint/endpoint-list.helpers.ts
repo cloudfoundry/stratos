@@ -125,7 +125,12 @@ export class EndpointListHelper {
         },
         label: 'Edit endpoint',
         description: 'Edit the endpoint',
-        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
+        createVisible: (row$: Observable<EndpointModel>) => combineLatest(
+          this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER),
+          row$,
+        ).pipe(
+          map(([canEdit, row]) => canEdit && !row.local)
+        )
       }
     ];
   }
