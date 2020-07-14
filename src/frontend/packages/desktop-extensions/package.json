@@ -6,6 +6,7 @@
       "loadingCss": "loader/loading.css",
       "loadingHtml": "loader/loading.html"
     },
+    "routingModule": "DesktopRoutingModule",
     "theming": "sass/_all-theme#apply-theme-desktop-extensions"
   },
   "peerDependencies": {

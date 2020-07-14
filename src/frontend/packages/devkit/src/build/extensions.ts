@@ -48,7 +48,7 @@ export class ExtensionsHandler {
         modules.push(e.routingModule)
       }
 
-      fs.appendFileSync(overrideFile, 'import { ' + modules.join(',') + ' } from \'' + e.package + '\';\n');
+      fs.appendFileSync(overrideFile, 'import { ' + modules.join(', ') + ' } from \'' + e.package + '\';\n');
     });
 
     this.writeModule(overrideFile, 'CustomImportModule', moduleImports);
