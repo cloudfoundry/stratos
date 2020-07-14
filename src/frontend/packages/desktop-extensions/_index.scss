@@ -6,8 +6,10 @@
 @import './sass/colors';
 
 @function stratos-theme() {
-  $theme: create-desktop-theme($stratos-theme);
-  @return $theme;
+  @return (
+    default: create-desktop-theme($desktop-theme),
+    dark: create-desktop-theme($oss-dark-theme),
+  );
 }
 
 @function create-desktop-theme($base-theme) {
