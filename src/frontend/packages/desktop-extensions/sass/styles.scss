@@ -1,4 +1,4 @@
-.stratos.stratos-desktop {
+.stratos {
 
   // Remove some of the padding on the list header
   .list-component__header {
@@ -12,4 +12,11 @@
     padding-right: 0;
   }
 
+  // Smaller icons in the main page header
+  .page-header mat-icon {
+    font-size: 20px;
+    height: 20px;
+    line-height: 20px;
+    width: 20px;
+  }
 }

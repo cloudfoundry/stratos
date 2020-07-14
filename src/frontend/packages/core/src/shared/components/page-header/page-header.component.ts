@@ -21,7 +21,7 @@ import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { selectDashboardState } from './../../../../../store/src/selectors/dashboard.selectors';
 import { UserProfileInfo } from './../../../../../store/src/types/user-profile.types';
-import { environment } from './../../../environments/environment.prod';
+import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 
 @Component({

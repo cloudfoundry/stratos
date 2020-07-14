@@ -51,7 +51,23 @@
                 "replace": "src/frontend/packages/core/src/environments/environment.ts",
                 "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
               }]
+            },
+            "desktop": {
+              "optimization": false,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": false,
+              "fileReplacements": [{
+                "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                "with": "src/frontend/packages/core/src/environments/environment.desktop.ts"
+              }]
             }
+
           }
         },
         "serve": {
@@ -67,6 +83,9 @@
           "configurations": {
             "production": {
               "browserTarget": "stratos:build:production"
+            },
+            "desktop": {
+              "browserTarget": "stratos:build:desktop"
             }
           }
         },

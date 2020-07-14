@@ -10,7 +10,7 @@ export const environment = {
   logEnableConsoleActions: false,
   showObsDebug: false,
   disablePolling: true,
-  desktopMode: false,
-  hideUserMenu: false,
-  fixedSideNav: false,
+  desktopMode: true,
+  hideUserMenu: true,
+  fixedSideNav: true,
 };

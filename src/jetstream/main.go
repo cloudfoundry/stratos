@@ -224,9 +224,13 @@ func main() {
 		}
 	}
 
-	sSessionExpiry := envLookup.String("SESSION_STORE_EXPIRY", string(SessionExpiry*60))
-	sessionExpiry, _ := strconv.Atoi(sSessionExpiry)
-	log.Infof("Session expiration (minutes): %+v", sessionExpiry)
+	sSessionExpiry := envLookup.String("SESSION_STORE_EXPIRY", strconv.Itoa(SessionExpiry))
+	sessionExpiry, err := strconv.Atoi(sSessionExpiry)
+	if err != nil {
+		sessionExpiry = SessionExpiry
+	}
+	log.Infof("Session expiration (minutes): %d", sessionExpiry)
+	// Convert to seconds
 	sessionExpiry *= 60
 	// Initialize session store for Gorilla sessions
 	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, sessionExpiry, envLookup)
