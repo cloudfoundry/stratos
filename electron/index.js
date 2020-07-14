@@ -85,7 +85,8 @@ function doCreateWindow(url) {
     title: 'Stratos',
     webPreferences: {
       nodeIntegration: true
-    }
+    },
+    icon: __dirname + `/icon.png`
   });
   // Remember last position and size
   mainWindowState.manage(mainWindow);
