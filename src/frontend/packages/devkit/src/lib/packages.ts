@@ -246,7 +246,7 @@ export class Packages {
     };
 
     // If this is an extension, add extension metadata
-    if (pkg.stratos && pkg.stratos.module) {
+    if (pkg.stratos && (pkg.stratos.module || pkg.stratos.routingModule)) {
       info.extension = {
         package: pkg.name,
         module: pkg.stratos.module,

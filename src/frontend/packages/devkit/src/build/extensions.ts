@@ -17,7 +17,7 @@ const importModuleRegex = /src\/frontend\/packages\/core\/src\/custom-import.mod
 
 export class ExtensionsHandler {
 
-  constructor() {}
+  constructor() { }
 
   // Write out the _custom-import.module.ts file importing all of the required extensions
   public apply(webpackConfig: any, config: StratosConfig, options: any) {
@@ -33,23 +33,26 @@ export class ExtensionsHandler {
       imports: []
     };
 
-    const routingMmoduleImports = {
+    const routingModuleImports = {
       imports: []
     };
 
     config.getExtensions().forEach(e => {
-      let modules = e.module;
-      moduleImports.imports.push(e.module);
+      let modules = [];
+      if (e.module) {
+        moduleImports.imports.push(e.module);
+        modules.push(e.module);
+      }
       if (e.routingModule) {
-        routingMmoduleImports.imports.push(e.routingModule);
-        modules += ', ' + e.routingModule;
+        routingModuleImports.imports.push(e.routingModule);
+        modules.push(e.routingModule)
       }
 
-      fs.appendFileSync(overrideFile, 'import { ' + modules + ' } from \'' + e.package + '\';\n');
+      fs.appendFileSync(overrideFile, 'import { ' + modules.join(',') + ' } from \'' + e.package + '\';\n');
     });
 
     this.writeModule(overrideFile, 'CustomImportModule', moduleImports);
-    this.writeModule(overrideFile, 'CustomRoutingImportModule', routingMmoduleImports);
+    this.writeModule(overrideFile, 'CustomRoutingImportModule', routingModuleImports);
 
     webpackConfig.plugins.push(new NormalModuleReplacementPlugin(
       importModuleRegex,
