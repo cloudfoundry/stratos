@@ -151,7 +151,7 @@ function getEnvironment(url) {
     'SQLITE_KEEP_DB': 'true',
     'SQLITE_DB_DIR': getConfigFolder(),
     //'LOG_LEVEL': 'DEBUG',
-    'SESSION_STORE_EXPIRY': Number.MAX_SAFE_INTEGER
+    'SESSION_STORE_EXPIRY': 50000000
   };
 }
 
