@@ -3,7 +3,10 @@ const {
   BrowserWindow,
   Menu,
   shell,
-  dialog
+  dialog,
+  nativeTheme,
+  Notification,
+  ipcMain
 } = require('electron')
 const url = require("url");
 const path = require("path");
@@ -24,6 +27,15 @@ const {
 } = require('lodash');
 
 //const LOG_FILE = '/Users/nwm/stratos.log';
+const icon = path.join(__dirname, '/icon.png');
+
+const ELECTRON_NOTIFICATION = 'ELECTRON_NOTIFICATION';
+// See node_modules/electron/electron.d.ts NotificationConstructorOptions
+const standardNotificationSettings = {
+  title: 'Stratos',
+  silent: false,
+  icon,
+};
 
 let mainWindow;
 let jetstream;
@@ -82,11 +94,11 @@ function doCreateWindow(url) {
     y: mainWindowState.y,
     width: mainWindowState.width,
     height: mainWindowState.height,
-    title: 'Stratos',
+    // title: 'Stratos', // Set automatically by html title
     webPreferences: {
       nodeIntegration: true
     },
-    icon: __dirname + `/icon.png`
+    icon,
   });
   // Remember last position and size
   mainWindowState.manage(mainWindow);
@@ -112,6 +124,14 @@ function doCreateWindow(url) {
   Menu.setApplicationMenu(menu)
 
   mainWindow.loadURL(url);
+
+  ipcMain.on(ELECTRON_NOTIFICATION, (event, args) => {
+    new Notification({
+      ...standardNotificationSettings,
+      title: 'Stratos',
+      body: args.message,
+    }).show()
+  })
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools({mode:'undocked'});
