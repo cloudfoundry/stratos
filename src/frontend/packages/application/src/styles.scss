@@ -1,0 +1,58 @@
+/* You can add global styles to this file, and also import other style files */
+@import '~@angular/material/theming';
+
+// Import the theme
+@import '~@stratosui/theme';
+
+$stratos-dark-theme-supported: false !default;
+
+// Themes - stratos-theme() function must be supplied by the theme
+$stratos-themes: stratos-theme();
+
+// stratos-theme() can return a single theme rather than a map of default and dark themes
+@if not map-has-key($stratos-themes, 'default') {
+  $tmp: $stratos-themes;
+  $stratos-themes: (
+    default: $tmp
+  )
+}
+
+// Core styles
+@import '~@stratosui/core/styles';
+
+// Import any custom scss that the theme defines
+@import '~@stratosui/theme/extensions';
+
+// Default theme ( = light theme)
+$stratos-theme: map-get($stratos-themes, default);
+$theme: map-get($stratos-theme, theme);
+
+@if map-has-key($stratos-themes, 'dark') {
+  $stratos-dark-theme-supported: true;
+  $dark-stratos-theme: map-get($stratos-themes, dark);
+  $dark-theme: map-get($dark-stratos-theme, theme);
+
+  body.stratos {
+    .dark-theme {
+      @include angular-material-theme($dark-theme);
+      // Apply the theme to any themable packages
+      @include apply-theme($dark-stratos-theme);
+    }
+  }
+}
+
+.default {
+  @include angular-material-theme($theme);
+  // Apply the theme to any themable packages
+  @include apply-theme($stratos-theme);
+}
+
+// Import mat-core
+@include mat-core;
+
+// Add selector so that the UI can detect if a dark theme is available
+@if $stratos-dark-theme-supported {
+  .dark-theme-supported {
+    margin: 0;
+  }
+}

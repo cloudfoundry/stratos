@@ -66,11 +66,3 @@ button.mat-simple-snackbar-action {
 //   flex: 1;
 //   flex-direction: column;
 // }
-
-
-// Add selector so that the UI can detect if a dark theme is available
-@if $stratos-dark-theme-supported {
-  .dark-theme-supported {
-    margin: 0;
-  }
-}

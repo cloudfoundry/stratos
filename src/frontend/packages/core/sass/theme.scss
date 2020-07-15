@@ -1,51 +1,7 @@
-@import '~@angular/material/theming';
 @import './all-theme';
 
-// Import the theme
-@import '~@stratosui/theme';
-
-$stratos-dark-theme-supported: false !default;
-
-// Themes - stratos-theme() function must be supplied by the theme
-$stratos-themes: stratos-theme();
-
-// stratos-theme() can return a single theme rather than a map of default and dark themes
-@if not map-has-key($stratos-themes, 'default') {
-  $tmp: $stratos-themes;
-  $stratos-themes: (
-    default: $tmp
-  )
-}
-
-// Import any custom scss that the theme defines
 // This import defines the mixin 'apply-theme'
-@import '~@stratosui/theme/extensions';
-
-// Default theme ( = light theme)
-$stratos-theme: map-get($stratos-themes, default);
-$theme: map-get($stratos-theme, theme);
-
-@if map-has-key($stratos-themes, 'dark') {
-  $stratos-dark-theme-supported: true;
-  $dark-stratos-theme: map-get($stratos-themes, dark);
-  $dark-theme: map-get($dark-stratos-theme, theme);
-
-  body.stratos {
-    .dark-theme {
-      @include angular-material-theme($dark-theme);
-      @include app-theme($dark-stratos-theme);
       // Apply theme to extensions
       @include apply-theme($dark-stratos-theme);
-    }
-  }
-}
-
-.default {
-  @include angular-material-theme($theme);
-  @include app-theme($stratos-theme);
   // Apply theme to extensions
   @include apply-theme($stratos-theme);
-}
-
-// Import mat-core
-@include mat-core;
