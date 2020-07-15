@@ -9,6 +9,19 @@ const customRoutes: Routes = [
       stratosNavigationPage: true
     },
   },
+  {
+    path: 'installer',
+    loadChildren: () => import('./installer/installer.module').then(m => m.InstallerModule),
+    data: {
+      reuseRoute: true,
+      stratosNavigation: {
+        text: 'Install',
+        matIcon: 'deploy',
+        matIconFont: 'stratos-icons',
+        position: 60,
+      }
+    }
+  },
 ]
 
 @NgModule({

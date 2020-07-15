@@ -2,6 +2,9 @@
   "name": "@stratosui/desktop-extensions",
   "version": "0.0.0",
   "stratos": {
+    "assets": {
+      "assets/core": "core/assets"
+    },
     "theme": {
       "loadingCss": "loader/loading.css",
       "loadingHtml": "loader/loading.html"
