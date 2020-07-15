@@ -5,7 +5,9 @@ import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../../cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissionsService } from '../../../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import {
   ConfirmationDialogService,
 } from '../../../../../../../../../core/src/shared/components/confirmation-dialog.service';

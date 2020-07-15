@@ -1,9 +1,7 @@
 import { ActionReducer } from '@ngrx/store';
 
-import { endpointEntitySchema, STRATOS_ENDPOINT_TYPE } from '../../../../core/src/base-entity-schemas';
-import { KnownKeys, NonOptionalKeys } from '../../../../core/src/core/utils.service';
-import { getFullEndpointApiUrl } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import { IRequestEntityTypeState } from '../../app-state';
+import { getFullEndpointApiUrl } from '../../endpoint-utils';
 import {
   EntitiesFetchHandler,
   EntitiesInfoHandler,
@@ -15,6 +13,7 @@ import {
 } from '../../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../entity-request-pipeline/pipeline.types';
 import { EntitySchema } from '../../helpers/entity-schema';
+import { endpointEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../../helpers/stratos-entity-factory';
 import { EndpointModel } from '../../types/endpoint.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
 import { IEndpointFavMetadata } from '../../types/user-favorites.types';
@@ -37,6 +36,7 @@ import {
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
 import { EntityCatalogEntityStore } from './entity-catalog-entity.types';
+import { KnownKeys, NonOptionalKeys } from './type.helpers';
 
 export type KnownActionBuilders<ABC extends OrchestratedActionBuilders> = Pick<ABC, NonOptionalKeys<Pick<ABC, KnownKeys<ABC>>>>;
 
@@ -134,8 +134,8 @@ export class StratosBaseCatalogEntity<
       }
       return newSchema;
     }, {
-        default: entitySchemas.default
-      });
+      default: entitySchemas.default
+    });
   }
 
   private getEndpointType(definition: IStratosBaseEntityDefinition) {
@@ -316,7 +316,7 @@ export class StratosCatalogEntity<
 }
 
 export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndpointFavMetadata, EndpointModel> {
-  static readonly baseEndpointRender = {
+  static readonly baseEndpointRender: IStratosEntityBuilder<IEndpointFavMetadata, EndpointModel> = {
     getMetadata: endpoint => ({
       name: endpoint.name,
       guid: endpoint.guid,
@@ -332,19 +332,19 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
       ['User', (metadata) => metadata.user],
       ['Admin', (metadata) => metadata.admin]
     ]
-  } as IStratosEntityBuilder<IEndpointFavMetadata, EndpointModel>;
+  };
   // This is needed here for typing
   public definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
   constructor(
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
     getLink?: (metadata: IEndpointFavMetadata) => string
   ) {
-    const fullEntity = {
+    const fullEntity: IStratosEndpointDefinition = {
       ...entity,
       schema: {
-        default: endpointEntitySchema
+        default: stratosEntityFactory(endpointEntityType)
       }
-    } as IStratosEndpointDefinition;
+    };
     super(fullEntity, {
       entityBuilder: {
         ...StratosCatalogEndpointEntity.baseEndpointRender,

@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { combineLatest as combineLatestObs, Observable } from 'rxjs';
 import { combineLatest, map, switchMap } from 'rxjs/operators';
 
 import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { FetchApplicationMetricsAction } from '../../../../../../../cloud-foundry/src/actions/cf-metrics.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { UtilsService } from '../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -19,14 +22,14 @@ import {
   IListConfig,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
+import { IMetricApplication, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfCellHelper } from '../../../../../features/cloud-foundry/cf-cell.helpers';
+import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
@@ -158,7 +161,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     },
     label: 'Terminate',
     description: ``, // Description depends on console user permission
-
+    createVisible: () => this.canEditApp$
   };
 
   private listActionSsh: IListAction<any> = {
@@ -182,13 +185,16 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
               space.entity.allow_ssh;
           })
         );
-      }))
+      })),
+    createVisible: () => this.canEditApp$
   };
 
   private singleActions = [
     this.listActionTerminate,
     this.listActionSsh,
   ];
+
+  private canEditApp$: Observable<boolean>;
 
   constructor(
     private store: Store<CFAppState>,
@@ -197,7 +203,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
     entityServiceFactory: EntityServiceFactory,
-    paginationMonitorFactory: PaginationMonitorFactory
+    paginationMonitorFactory: PaginationMonitorFactory,
+    cups: CurrentUserPermissionsService
   ) {
     const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
 
@@ -220,6 +227,15 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       this.appService.appGuid,
       this,
     );
+
+    this.canEditApp$ = combineLatestObs(
+      appService.appOrg$,
+      appService.appSpace$
+    ).pipe(
+      switchMap(([org, space]) =>
+        cups.can(CfCurrentUserPermissions.APPLICATION_EDIT, appService.cfGuid, org.metadata.guid, space.metadata.guid)
+      )
+    )
   }
 
   getGlobalActions = () => null;

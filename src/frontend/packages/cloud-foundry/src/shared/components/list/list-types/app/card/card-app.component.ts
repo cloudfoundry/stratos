@@ -6,14 +6,12 @@ import { map, startWith } from 'rxjs/operators';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
-import { getFavoriteFromEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
-import {
-  FavoritesConfigMapper,
-} from '../../../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../core/src/shared/shared.types';
+import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';

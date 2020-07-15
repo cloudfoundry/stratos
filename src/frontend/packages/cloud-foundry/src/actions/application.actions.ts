@@ -1,4 +1,4 @@
-import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { pick } from '../../../store/src/helpers/reducer.helper';
 import { ActionMergeFunction } from '../../../store/src/types/api.types';
@@ -12,37 +12,33 @@ import { createEntityRelationPaginationKey, EntityInlineParentAction } from '../
 import { AppMetadataTypes } from './app-metadata.actions';
 import { CFStartAction } from './cf-action.types';
 
-export const GET_ALL = '[Application] Get all';
-export const GET_ALL_SUCCESS = '[Application] Get all success';
-export const GET_ALL_FAILED = '[Application] Get all failed';
+const GET_ALL = '[Application] Get all';
+const GET_ALL_SUCCESS = '[Application] Get all success';
+const GET_ALL_FAILED = '[Application] Get all failed';
 
-export const GET = '[Application] Get one';
-export const GET_SUCCESS = '[Application] Get one success';
-export const GET_FAILED = '[Application] Get one failed';
+const GET = '[Application] Get one';
+const GET_SUCCESS = '[Application] Get one success';
+const GET_FAILED = '[Application] Get one failed';
 
-export const GET_SUMMARY = '[Application] Get summary';
-export const GET_SUMMARY_SUCCESS = '[Application] Get summary success';
-export const GET_SUMMARY_FAILED = '[Application] Get summary failed';
+const CREATE = '[Application] Create';
+const CREATE_SUCCESS = '[Application] Create success';
+const CREATE_FAILED = '[Application] Create failed';
 
-export const CREATE = '[Application] Create';
-export const CREATE_SUCCESS = '[Application] Create success';
-export const CREATE_FAILED = '[Application] Create failed';
+export const CF_APP_UPDATE = '[Application] Update';
+export const CF_APP_UPDATE_SUCCESS = '[Application] Update success';
+export const CF_APP_UPDATE_FAILED = '[Application] Update failed';
 
-export const UPDATE = '[Application] Update';
-export const UPDATE_SUCCESS = '[Application] Update success';
-export const UPDATE_FAILED = '[Application] Update failed';
+const DELETE = '[Application] Delete';
+const DELETE_SUCCESS = '[Application] Delete success';
+const DELETE_FAILED = '[Application] Delete failed';
 
-export const DELETE = '[Application] Delete';
-export const DELETE_SUCCESS = '[Application] Delete success';
-export const DELETE_FAILED = '[Application] Delete failed';
+const DELETE_INSTANCE = '[Application Instance] Delete';
+const DELETE_INSTANCE_SUCCESS = '[Application Instance] Delete success';
+const DELETE_INSTANCE_FAILED = '[Application Instance] Delete failed';
 
-export const DELETE_INSTANCE = '[Application Instance] Delete';
-export const DELETE_INSTANCE_SUCCESS = '[Application Instance] Delete success';
-export const DELETE_INSTANCE_FAILED = '[Application Instance] Delete failed';
-
-export const RESTAGE = '[Application] Restage';
-export const RESTAGE_SUCCESS = '[Application] Restage success';
-export const RESTAGE_FAILED = '[Application] Restage failed';
+const RESTAGE = '[Application] Restage';
+const RESTAGE_SUCCESS = '[Application] Restage success';
+const RESTAGE_FAILED = '[Application] Restage failed';
 
 const applicationEntitySchema = cfEntityFactory(applicationEntityType);
 
@@ -140,7 +136,7 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
       newApplication
     );
   }
-  actions = [UPDATE, UPDATE_SUCCESS, UPDATE_FAILED];
+  actions = [CF_APP_UPDATE, CF_APP_UPDATE_SUCCESS, CF_APP_UPDATE_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
   options: HttpRequest<any>;
@@ -168,9 +164,6 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
       `apps/${guid}`,
       null,
       {
-        headers: new HttpHeaders({
-          'x-cap-passthrough': 'true'
-        }),
         params: new HttpParams({
           fromObject: {
             recursive: 'true'
@@ -196,12 +189,7 @@ export class DeleteApplicationInstance extends CFStartAction
     this.options = new HttpRequest(
       'DELETE',
       `apps/${appGuid}/instances/${index}`,
-      null,
-      {
-        headers: new HttpHeaders({
-          'x-cap-passthrough': 'true'
-        })
-      }
+      null
     );
     this.guid = `${appGuid}-${index}`;
   }
@@ -219,11 +207,6 @@ export class RestageApplication extends CFStartAction implements ICFAction {
       'POST',
       `apps/${guid}/restage`,
       null,
-      {
-        headers: new HttpHeaders({
-          'x-cap-passthrough': 'true'
-        })
-      }
     );
   }
   actions = [RESTAGE, RESTAGE_SUCCESS, RESTAGE_FAILED];

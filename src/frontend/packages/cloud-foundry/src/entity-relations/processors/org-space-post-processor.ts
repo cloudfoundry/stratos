@@ -8,13 +8,13 @@ import { deepMergeState, mergeEntity } from '../../../../store/src/helpers/reduc
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
-import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
+import { WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
 import { GetOrganization } from '../../actions/organization.actions';
 import { GetSpace } from '../../actions/space.actions';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../store/types/user.types';
+import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../store/types/cf-user.types';
 import {
   createEntityRelationPaginationKey,
   ValidateEntityResult,
@@ -105,7 +105,6 @@ export function orgSpacePostProcess(
       actions: [],
       endpointGuid: action.endpointGuid,
       entity: userCatalogEntity.getSchema(),
-      entityLocation: RequestEntityLocation.ARRAY,
       entityType: userCatalogEntity.definition.type,
       endpointType: CF_ENDPOINT_TYPE,
       type: '[Entity] Post-process Org/Space Users',

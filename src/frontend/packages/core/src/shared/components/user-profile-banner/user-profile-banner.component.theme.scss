@@ -1,8 +1,10 @@
 @mixin app-user-profile-banner-component-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
   $foreground: mat-color($primary, default-contrast);
+
   .user-profile-banner {
-    background-color: mat-color($primary);
+    background-color: map-get($app-theme, underflow-background-color);
+    color: map-get($app-theme, underflow-foreground-color);
     &__avatar {
       color: $foreground;
     }

@@ -3,8 +3,9 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 
-import { CurrentUserPermissions } from '../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
@@ -15,6 +16,7 @@ import { DeleteSpaceQuotaDefinition } from '../../../../../actions/quota-definit
 import { IQuotaDefinition } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { QUOTA_FROM_LIST } from '../cf-quotas/cf-quotas-list-config.service';
 import { TableCellQuotaComponent } from '../cf-quotas/table-cell-quota/table-cell-quota.component';
@@ -37,8 +39,8 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
     super();
     this.dataSource = new CfOrgSpaceQuotasDataSourceService(this.store, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.cfGuid, this);
     const { cfGuid, orgGuid } = this.activeRouteCfOrgSpace;
-    this.canEdit = this.currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
-    this.canDelete = this.currentUserPermissionsService.can(CurrentUserPermissions.SPACE_QUOTA_DELETE, cfGuid, orgGuid);
+    this.canEdit = this.currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
+    this.canDelete = this.currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_DELETE, cfGuid, orgGuid);
   }
 
   enableTextFilter = true;

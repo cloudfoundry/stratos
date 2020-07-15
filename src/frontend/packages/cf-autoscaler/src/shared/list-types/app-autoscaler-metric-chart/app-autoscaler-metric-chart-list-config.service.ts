@@ -10,9 +10,10 @@ import {
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
-import { ITimeRange, MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
+import { ITimeRange } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { ListView } from '../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { AutoscalerConstants } from '../../../core/autoscaler-helpers/autoscaler-util';
 import { AppScalingTrigger } from '../../../store/app-autoscaler.types';
 import {

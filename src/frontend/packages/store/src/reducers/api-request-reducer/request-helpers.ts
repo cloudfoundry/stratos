@@ -1,6 +1,5 @@
 import { Store } from '@ngrx/store';
 
-import { pathGet } from '../../../../core/src/core/utils.service';
 import { APIResponse } from '../../actions/request.actions';
 import { BaseRequestState, GeneralAppState } from '../../app-state';
 import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
@@ -82,7 +81,7 @@ export function createRequestStateFromResponse(
 export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete';
 
 export function getRequestTypeFromMethod(action: EntityRequestAction): ApiRequestTypes {
-  let method = pathGet('options.method', action);
+  let method = action.options ? action.options.method : undefined;
   if (typeof method === 'string') {
     method = method.toString().toLowerCase();
     if (method === 'post') {

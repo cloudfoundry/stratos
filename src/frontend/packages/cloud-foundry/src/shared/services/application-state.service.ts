@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { StratosStatus, StratosStatusMetadata } from '../../../../core/src/shared/shared.types';
+import { StratosStatus, StratosStatusMetadata } from '../../../../store/src/types/shared.types';
 import { AppStat } from '../../store/types/app-metadata.types';
 
 export interface ApplicationStateData extends StratosStatusMetadata {

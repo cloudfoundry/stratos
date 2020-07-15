@@ -23,7 +23,7 @@ export interface PackageInfo {
 export interface PackageJson {
   name: string;
   stratos?: StratosPakageMetadata;
-  scripts: {[key: string]: string};
+  scripts: { [key: string]: string };
 }
 
 // Custom stratos metadata that can be in the package.json file
@@ -33,7 +33,7 @@ export interface StratosPakageMetadata {
   ignore?: boolean;
   theme?: boolean;
   theming?: string;
-  assets?: {[src: string]: string};
+  assets?: { [src: string]: string };
 }
 
 // Theming metadata
@@ -61,7 +61,11 @@ export interface AssetMetadata {
 }
 
 // Helpers for getting list of dirs in a dir
-const isDirectory = source => fs.lstatSync(source).isDirectory();
+const isDirectory = source => {
+  const realPath = fs.realpathSync(source);
+  const stats = fs.lstatSync(realPath);
+  return stats.isDirectory();
+}
 const getDirectories = source =>
   fs.readdirSync(source).map(name => path.join(source, name)).filter(isDirectory);
 
@@ -87,7 +91,7 @@ export class Packages {
     if (fs.existsSync(pkgFile)) {
       try {
         pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8').toString());
-      } catch(e) {}
+      } catch (e) { }
     }
     return pkg;
   }
@@ -123,12 +127,13 @@ export class Packages {
 
     // Local folders
     // Find all local packages in the folder
-    const p = getDirectories(this.localPackagesFolder).forEach(pkgDir => {
-      const pkgInfo: any = {
-        dir: pkgDir
-      };
-
-      this.addPackage(pkgDir, true);
+    getDirectories(this.localPackagesFolder).forEach(pkgDir => {
+      const pkgFile = Packages.loadPackageFile(pkgDir);
+      if (pkgFile !== null) {
+        this.addPackage(pkgDir, true);
+      } else {
+        getDirectories(pkgDir).forEach(pDir => this.addPackage(pDir, true));
+      }
     });
 
     // Figure out the theme
@@ -170,7 +175,7 @@ export class Packages {
     const pkgFile = Packages.loadPackageFile(pkgDir);
     if (pkgFile !== null) {
       // Check to see if we should include this package
-      if (this.includePackage(pkgFile))  {
+      if (this.includePackage(pkgFile)) {
         // Process all of the peer dependencies first
         if (pkgFile.peerDependencies) {
           Object.keys(pkgFile.peerDependencies).forEach(dep => this.addPackage(dep));
@@ -191,7 +196,7 @@ export class Packages {
 
   // Get all of the extensions
   public getExtensions(): ExtensionMetadata[] {
-    const extensions: ExtensionMetadata[] = [];
+    const extensions: ExtensionMetadata[] = [];
     this.packages.forEach(pkg => {
       if (pkg.extension) {
         extensions.push(pkg.extension);

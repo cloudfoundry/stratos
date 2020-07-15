@@ -5,6 +5,9 @@ import { StratosConfig } from '../lib/stratos.config';
  *
  * Provides some custom resolution of sass files so that the theming
  * is applied to components and that the chosen theme is used.
+ *
+ * Essentially intercepts package imports of the form ~@startosui/theme
+ * and ensures the correct packaeg is used.
  */
 export class SassHandler {
 
@@ -64,6 +67,8 @@ export class SassHandler {
     };
   }
 
+  // Generate an import and include for each themable package so that we theme
+  // its components when the application is built.
   private getThemingForPackages(c: StratosConfig): string {
     let contents = '';
     const themedPackages = c.getThemedPackages();

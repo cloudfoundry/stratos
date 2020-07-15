@@ -23,7 +23,7 @@
             {{ (cfEndpointService.endpoint$ | async )?.entity.user.name }}
             <span *ngIf="(cfEndpointService.endpoint$ | async )?.entity.user.admin"> (Administrator)</span>
           </app-metadata-item>
-          <app-metadata-item icon="developer_mode" label="SSH Access">
+          <app-metadata-item icon="virtual_guest" iconFont="stratos-icons" label="SSH Access">
             {{ (cfEndpointService.hasSSHAccess$ | async) ? 'Available' : 'Not available'}}</app-metadata-item>
           <app-metadata-item icon="email" label="User Invitation Support">
             <div class="user-invites">

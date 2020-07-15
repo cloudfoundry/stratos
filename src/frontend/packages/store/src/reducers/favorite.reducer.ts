@@ -1,8 +1,8 @@
-import { RemoveUserFavoriteSuccessAction } from '../actions/user-favourites-actions/remove-user-favorite-action';
-import { SaveUserFavoriteSuccessAction } from '../actions/user-favourites-actions/save-user-favorite-action';
 import {
+  RemoveUserFavoriteSuccessAction,
+  SaveUserFavoriteSuccessAction,
   UpdateUserFavoriteMetadataSuccessAction,
-} from '../actions/user-favourites-actions/update-user-favorite-metadata-action';
+} from '../actions/user-favourites.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 
@@ -27,7 +27,7 @@ export function deleteUserFavoriteMetadataReducer(
 ): IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> {
   if (action.type === RemoveUserFavoriteSuccessAction.ACTION_TYPE) {
     const {
-      [action.favorite.guid]: deletedFavorite,
+      [action.guid]: deletedFavorite,
       ...newState
     } = state;
     return newState;

@@ -3,10 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { APP_GUID, CF_GUID, ENTITY_SERVICE } from '../../../../../core/src/shared/entity.tokens';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
+import { APP_GUID, CF_GUID } from '../../../../../core/src/shared/entity.tokens';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
-import { ApplicationService, createGetApplicationAction } from '../application.service';
+import { ApplicationService } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 export function applicationServiceFactory(
@@ -22,17 +21,6 @@ export function applicationServiceFactory(
     store,
     appStateService,
     appEnvVarsService,
-  );
-}
-
-export function cfApplicationEntityServiceFactory(
-  cfId: string,
-  id: string,
-  esf: EntityServiceFactory
-) {
-  return esf.create(
-    id,
-    createGetApplicationAction(id, cfId)
   );
 }
 
@@ -72,13 +60,7 @@ export function getGuids(type?: string) {
         ApplicationStateService,
         ApplicationEnvVarsHelper,
       ]
-    },
-    {
-      provide: ENTITY_SERVICE,
-      useFactory: cfApplicationEntityServiceFactory,
-      deps: [CF_GUID, APP_GUID, EntityServiceFactory]
-    },
-
+    }
   ]
 })
 export class ApplicationBaseComponent {

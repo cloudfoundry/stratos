@@ -10,8 +10,8 @@ import {
 import {
   MetricsChartHelpers,
 } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
-import { MetricQueryType } from '../../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { MetricQueryConfig } from '../../../../../../../../store/src/actions/metrics.actions';
+import { MetricQueryType } from '../../../../../../../../store/src/types/metric.types';
 import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { FetchCFCellMetricsAction } from '../../../../../../actions/cf-metrics.actions';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';

@@ -1,13 +1,11 @@
-import { metricEntityType } from '../../../core/src/base-entity-schemas';
-import { environment } from '../../../core/src/environments/environment';
-import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
+import { metricEntityType } from '../helpers/stratos-entity-factory';
+import { proxyAPIVersion } from '../jetstream';
+import { MetricQueryType } from '../types/metric.types';
 import { EntityRequestAction } from '../types/request.types';
 
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
 export const METRICS_START_FAILED = '[Metrics] Fetch Failed';
-
-const { proxyAPIVersion } = environment;
 
 export interface IMetricQueryConfigParams {
   window?: string;

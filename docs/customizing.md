@@ -8,11 +8,44 @@ Stratos provides a mechanism for customization - the following customizations ar
 - Adding new functionality
 - Changing the initial loading indicator
 
+# Migrating to Stratos V4 Customization
+In V4 there are breaking customization changes. These changes allow a much improved approach to extensions by opening the door to npm style plugins.
+To aid in migrating we've provided these instructions.
+
+1) Before updating to the latest code...
+    1) Run `npm run customize-reset` to remove all previously created sym links.
+    2) Read through the customization documentation below to get a better understanding of the new process.
+1) Update your codebase with the desired v4 code.
+1) Run `npm install` (only required first time, this will ensure you have the required version of Angular).
+1) Change directory to `./build/tools/v4-migration` and run the migration script `./migrate.sh`.
+    - This will copy your customizations from `custom-src` to a new Angular package `src/frontend/packages/custom_extensions`.
+1) Check that the new package exports your custom module and if applicable your custom-routing module.
+    - The migrate script should do this in `src/frontend/packages/custom_extensions/src/public-api.ts`.
+1) Check that your ts config file defines the public api file.
+    - `src/tsconfig.json` file's `compilerOptions/paths` section should contain something like `"@custom/extensions": ["frontend/packages/custom_extensions/src/public-api.ts"]`.
+1) Check that your new package's package.json defines your custom module and if application custom-routing module.
+    - See `src/frontend/packages/suse_extensions/package.json` file's `stratos` section.
+    - Note your `routingModule` entry label should not have a preceding `_`.
+1) Build Stratos in your usual way, for instance `npm run build`.
+    - It could be that this fails due to TypeScript import issues, if so go through these and fix.
+    - During build time the custom packages will be discovered and output, see section starting `Building with these extensions`. These should contain the modules your require.
+1) Run Stratos your usual way. Ensure you can navigate to all your custom parts.
+1) Once you are happy everything works as intended remove the old `./custom-src` directory and commit you changes.
+
 ## Approach
 
 In order to customize Stratos, you will need to fork the Stratos GitHub repository and apply customizations in your fork. Our aim is to minimize any merge conflicts that might occur when re-basing your fork with the upstream Stratos repository.
 
-All customizations are placed within a top-level folder named `custom-src`. This folder should only exist in forks and will not exist in the main Stratos repository, so any changes made within this folder should be free from merge conflicts.
+<!-- All customizations are placed within a top-level folder named `custom-src`. This folder should only exist in forks and will not exist in the main Stratos repository, so any changes made within this folder should be free from merge conflicts. -->
+Customizations are placed in angular packages in the folder named `src/frontend/packages`. In the future you will be able to host these packages in npm and bring them into Stratos in the usual npm dependency way.
+
+Each package should contain custom Stratos configuration in it's package.json pointing to the modules it will be required to import. 
+
+stratos.yaml
+custom theme
+custom styles
+custom assets
+
 
 The Stratos approach to customization uses symbolic links. We maintain a default set of resources in the folder `src/misc/custom`. When you run `npm install` or when you explicitly run `npm run customize`, a gulp task (in the file `build/fe-build.js`) runs and creates symbolic links, linking the required files to their expected locations withing the `src` folder.
 

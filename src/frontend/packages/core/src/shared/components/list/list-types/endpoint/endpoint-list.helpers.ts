@@ -4,22 +4,19 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
-import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
-import { ShowSnackBar } from '../../../../../../../store/src/actions/snackBar.actions';
-import { GetSystemInfo } from '../../../../../../../store/src/actions/system.actions';
+import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { EndpointsEffect } from '../../../../../../../store/src/effects/endpoint.effects';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { selectDeletionInfo, selectUpdateInfo } from '../../../../../../../store/src/selectors/api.selectors';
+import { ActionState } from '../../../../../../../store/src/reducers/api-request-reducer/types';
+import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { STRATOS_ENDPOINT_TYPE } from '../../../../../base-entity-schemas';
-import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { LoggerService } from '../../../../../core/logger.service';
+import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { SnackBarService } from '../../../../services/snackbar.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { IListAction } from '../../list.component.types';
@@ -42,13 +39,13 @@ function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent 
 
 @Injectable()
 export class EndpointListHelper {
-  private endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointSchemaKey);
   constructor(
     private store: Store<AppState>,
     private dialog: MatDialog,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private log: LoggerService,
+    private snackBarService: SnackBarService,
   ) { }
 
   endpointActions(): IListAction<EndpointModel>[] {
@@ -62,17 +59,17 @@ export class EndpointListHelper {
             false
           );
           this.confirmDialog.open(confirmation, () => {
-            this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
-            this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
-              this.store.dispatch(new ShowSnackBar(`Disconnected endpoint '${item.name}'`));
-              this.store.dispatch(new GetSystemInfo());
+            const obs$ = stratosEntityCatalog.endpoint.api.disconnect<ActionState>(item.guid, item.cnsi_type);
+            this.handleAction(obs$, () => {
+              this.snackBarService.show(`Disconnected endpoint '${item.name}'`);
+              stratosEntityCatalog.systemInfo.api.getSystemInfo();
             });
           });
         },
         label: 'Disconnect',
         description: ``, // Description depends on console user permission
         createVisible: (row$: Observable<EndpointModel>) => combineLatest(
-          this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER),
+          this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER),
           row$
         ).pipe(
           map(([isAdmin, row]) => {
@@ -111,44 +108,38 @@ export class EndpointListHelper {
             true
           );
           this.confirmDialog.open(confirmation, () => {
-            this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
-            this.handleDeleteAction(item, ([oldVal, newVal]) => {
-              this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
+            const obs$ = stratosEntityCatalog.endpoint.api.unregister<ActionState>(item.guid, item.cnsi_type);
+            this.handleAction(obs$, () => {
+              this.snackBarService.show(`Unregistered ${item.name}`);
             });
           });
         },
         label: 'Unregister',
         description: 'Remove the endpoint',
-        createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
+        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
+      },
+      {
+        action: (item) => {
+          const routerLink = `/endpoints/edit/${item.guid}`;
+          this.store.dispatch(new RouterNav({ path: routerLink }));
+        },
+        label: 'Edit endpoint',
+        description: 'Edit the endpoint',
+        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
       }
     ];
   }
 
-  private handleUpdateAction(item, effectKey, handleChange) {
-    this.handleAction(selectUpdateInfo(
-      this.endpointEntityKey,
-      item.guid,
-      effectKey,
-    ), handleChange);
-  }
-
-  private handleDeleteAction(item, handleChange) {
-    this.handleAction(selectDeletionInfo(
-      this.endpointEntityKey,
-      item.guid,
-    ), handleChange);
-  }
-
-  private handleAction(storeSelect, handleChange) {
-    const disSub = this.store.select(storeSelect).pipe(
-      pairwise())
-      .subscribe(([oldVal, newVal]) => {
-        // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
-        if (!newVal.error && (oldVal.busy && !newVal.busy)) {
-          handleChange([oldVal, newVal]);
-          disSub.unsubscribe();
-        }
-      });
+  private handleAction(obs$: Observable<ActionState>, handleChange: ([o, n]: [ActionState, ActionState]) => void) {
+    const disSub = obs$.pipe(
+      pairwise()
+    ).subscribe(([oldVal, newVal]) => {
+      // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
+      if (!newVal.error && (oldVal.busy && !newVal.busy)) {
+        handleChange([oldVal, newVal]);
+        disSub.unsubscribe();
+      }
+    });
   }
 
   createEndpointDetails(listDetailsComponent: any, container: ViewContainerRef, componentFactoryResolver: ComponentFactoryResolver):

@@ -8,8 +8,8 @@ import {
   CloudFoundrySpaceService,
 } from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-space.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { ShowReturnSnackBar } from '../../../../../../store/src/actions/snackBar.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 
 @Component({
@@ -24,7 +24,8 @@ export class CardCfSpaceDetailsComponent implements OnDestroy {
   constructor(
     public cfSpaceService: CloudFoundrySpaceService,
     private store: Store<AppState>,
-    private router: Router
+    private router: Router,
+    private snackBarService: SnackBarService
   ) {
     this.allowSshStatus$ = cfSpaceService.allowSsh$.pipe(
       map(status => status === 'false' ? 'Disabled' : 'Enabled')
@@ -34,7 +35,7 @@ export class CardCfSpaceDetailsComponent implements OnDestroy {
   goToOrgQuota() {
     this.quotaLinkSub = this.cfSpaceService.quotaLink$.subscribe(quotaLink => {
       this.store.dispatch(new RouterNav({ path: quotaLink }));
-      this.store.dispatch(new ShowReturnSnackBar('You were switched to an organization', this.router.url, 'Return to space'));
+      this.snackBarService.showReturn('You were switched to an organization', this.router.url, 'Return to space');
     });
   }
 
