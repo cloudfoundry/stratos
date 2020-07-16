@@ -1,9 +1,65 @@
 <html>
 <body>
   <head>
+    <style>
+      body {
+        font-family: "Lato", "Helvetica", "Arial";
+        margin: 0;
+      }
+      .about {
+        padding: 10px;
+        text-align: right;
+      }
+      .panel {
+        align-items: center;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin: 10px;
+      }
+      .title {
+        align-items: center;
+        display: flex;
+        font-family: "Lato", "Helvetica", "Arial";
+      }
+      img {
+        height: 64px;
+        width: 64px;
+      }
+      h1 {
+        margin: 0;
+        padding-left: 10px;
+      }
+      h2 {
+        font-size: 16px;
+        margin-top: 20px;
+        text-align: center;
+      }
+      P {
+        margin-top: 40px;
+      }
+      button {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+      }
+    </style>
   </head>
 </body>
-<button id="cancel-btn">Cancel</button>
+<div class="about">
+  <div class="panel">
+    <div class="title">
+      <img src="logo.png" />
+      <h1>STRATOS</h1>
+    </div>
+    <div>
+      <h2>Version: 4.0.0</h2>
+      <p>Lovingly designed & created in Bristol</p>
+    </div>
+  </div>
+  <button id="cancel-btn">Close</button>
+</div>
 <script>
  const remote = require('electron').remote;
  document.getElementById("cancel-btn").addEventListener("click", function (e) {

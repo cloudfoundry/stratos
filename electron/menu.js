@@ -19,7 +19,7 @@ function about() {
   let child = new BrowserWindow({
     parent: appMainWindow,
     modal: true,
-    width: 300,
+    width: 360,
     height: 300,
     webPreferences: {
       enableRemoteModule: true,
@@ -37,7 +37,6 @@ const template = [
         label: 'About Stratos',
         click: function () {
           about();
-          console.log('about');
         }
       },
       {

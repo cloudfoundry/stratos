@@ -1,4 +1,4 @@
-.stratos {
+.stratos.stratos-desktop {
 
   // Remove some of the padding on the list header
   .list-component__header {
@@ -19,4 +19,20 @@
     line-height: 20px;
     width: 20px;
   }
+
+  .page-header__notifications-button .mat-badge-active {
+    font-size: 10px;
+    height: 16px;
+    line-height: 16px;
+    right: -8px;
+    top: -98px;
+    width: 16px;
+  }
+
+  .page-header__left {
+    h1 {
+      font-size: 18px;
+    }
+  }
+
 }

@@ -135,6 +135,10 @@ function doCreateWindow(url) {
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools({mode:'undocked'});
+
+  // setTimeout(() => {
+  //   mainWindow.webContents.send('endpointsChanged', 'HELLO!!!!');
+  // }, 5000);
 }
 
 app.on('ready', createWindow)
