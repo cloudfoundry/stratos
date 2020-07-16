@@ -22,9 +22,9 @@ const mainMenu = require('./menu');
 const homeDir = require('os').homedir();
 const fs = require('fs-extra');
 const windowStateKeeper = require('electron-window-state');
-const {
-  escapeRegExp
-} = require('lodash');
+// const {
+//   escapeRegExp
+// } = require('lodash');
 
 //const LOG_FILE = '/Users/nwm/stratos.log';
 const icon = path.join(__dirname, '/icon.png');
