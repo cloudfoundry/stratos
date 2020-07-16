@@ -11,6 +11,7 @@ const {
 const url = require("url");
 const path = require("path");
 const https = require('https');
+const chokidar = require('chokidar');
 
 const findFreePort = require("./freeport");
 const {
@@ -136,9 +137,11 @@ function doCreateWindow(url) {
   // Open the DevTools.
   //mainWindow.webContents.openDevTools({mode:'undocked'});
 
-  // setTimeout(() => {
-  //   mainWindow.webContents.send('endpointsChanged', 'HELLO!!!!');
-  // }, 5000);
+  // Watch for the helm repository file to change
+  const watcher = chokidar.watch(getHelmRepoFolder());
+  watcher.on('all', () => {
+    mainWindow.webContents.send('endpointsChanged', 'HELM');
+  });
 }
 
 app.on('ready', createWindow)
@@ -214,5 +217,12 @@ function jetstreamDidNotStart(url, done, retry) {
   } else {
     setTimeout(() => waitForBackend(url, done, retry), 50);
   }
+}
 
+function getHelmRepoFolder() {
+  var isMac = process.platform === "darwin";
+  if (isMac) {
+    return path.join(homeDir, 'Library', 'Preferences', 'helm');
+  }
+  return path.join(homeDir, '.config', 'helm');
 }

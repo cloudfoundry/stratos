@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { ElectronService } from 'ngx-electron';
 
+import { GetSystemInfo } from '../../store/src/actions/system.actions';
 import { DesktopLoginComponent } from './desktop-login/desktop-login.component';
 
 @NgModule({
@@ -40,7 +41,7 @@ export class DesktopModule {
       console.log('Got an event - endpoints changed');
       console.log(sender);
       console.log(args);
-      //this.store.dispatch()
+      this.store.dispatch(new GetSystemInfo());
     });
   }
 }
