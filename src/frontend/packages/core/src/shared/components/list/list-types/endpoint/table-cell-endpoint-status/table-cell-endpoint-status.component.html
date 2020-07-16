@@ -1,11 +1,11 @@
 <div>
   <ng-container *ngIf="connectable; else notConnectable">
-    <ng-container *ngIf="row.connectionStatus === 'connected'">
-      <span *ngIf="config?.showLabel">Connected </span>
+    <ng-container *ngIf="row.connectionStatus === 'connected' ">
+      <span *ngIf="config?.showLabel">Connected <span *ngIf="row.local">(local)</span></span>
       <mat-icon fontSet="stratos-icons">endpoints_connected</mat-icon>
     </ng-container>
     <ng-container *ngIf="row.connectionStatus === 'disconnected'">
-      <span *ngIf="config?.showLabel">Disconnected </span>
+      <span *ngIf="config?.showLabel">Disconnected <span *ngIf="row.local">(local)</span></span>
       <mat-icon fontSet="stratos-icons">endpoints_disconnected</mat-icon>
     </ng-container>
     <ng-container *ngIf="row.connectionStatus === 'checking'">
