@@ -13,6 +13,8 @@ const path = require("path");
 const https = require('https');
 const chokidar = require('chokidar');
 
+const Store = require('./store.js');
+
 const findFreePort = require("./freeport");
 const {
   exec,
@@ -47,6 +49,14 @@ const standardNotificationSettings = {
 
 let mainWindow;
 let jetstream;
+
+const lastLocation = 'lastLocation';
+const store = new Store({
+  configName: 'settings',
+  defaults: {
+    [lastLocation]: ''
+  }
+});
 
 function addContextMenu(mainWindow) {
   let rightClickPosition = null
@@ -110,6 +120,9 @@ function doCreateWindow(url) {
   });
   // Remember last position and size
   mainWindowState.manage(mainWindow);
+  mainWindow.on('close', function () {
+    savePath(mainWindow.webContents.getURL())
+  });
   mainWindow.on('closed', function () {
     mainWindow = null;
     jetstream.kill();
@@ -127,6 +140,7 @@ function doCreateWindow(url) {
     url = '127.0.0.1:4200'
   }
   url = `https://${url}`
+  url = addPath(url);
 
   const menu = Menu.buildFromTemplate(mainMenu(mainWindow, url));
   Menu.setApplicationMenu(menu)
@@ -179,8 +193,17 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
   }
 });
 
+function addPath(url) {
+  return url + store.get(lastLocation);
+}
+
+function savePath(url) {
+  const oUrl = new URL(url);
+  store.set(lastLocation, oUrl.pathname);
+}
+
 function getConfigFolder() {
-  const configFolder = path.join(homeDir, '.config', 'stratos');
+  const configFolder = store.path;
   fs.ensureDirSync(configFolder);
   return configFolder;
 }
