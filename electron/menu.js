@@ -1,7 +1,8 @@
 const {
   app,
   Menu,
-  BrowserWindow
+  BrowserWindow,
+  autoUpdater
 } = require('electron')
 
 const isMac = process.platform === 'darwin'
@@ -69,6 +70,15 @@ const template = [
   {
     label: 'File',
     submenu: [
+      {
+        label: 'Check for Updates',
+        click: function () {
+          autoUpdater.checkForUpdates();
+        }
+      },
+      {
+        type: 'separator'
+      },
       isMac ? {
         role: 'close'
       } : {

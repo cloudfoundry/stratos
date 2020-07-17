@@ -1,6 +1,6 @@
 {
   "name": "Stratos",
-  "version": "0.0.1",
+  "version": "4.0.0",
   "main": "index.js",
   "scripts": {
     "ng": "ng",
@@ -11,11 +11,13 @@
     "e2e": "ng e2e",
     "electron": "../node_modules/.bin/electron .",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "epublish": "electron-forge publish"
   },
   "dependencies": {
     "chokidar": "^3.4.1",
     "electron-context-menu": "^2.0.1",
+    "electron-log": "^4.2.2",
     "electron-squirrel-startup": "^1.0.0",
     "electron-window-state": "^5.0.3",
     "fs-extra": "^9.0.1",
@@ -24,9 +26,11 @@
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.52",
     "@electron-forge/maker-deb": "^6.0.0-beta.52",
+    "@electron-forge/maker-dmg": "^6.0.0-beta.52",
     "@electron-forge/maker-rpm": "^6.0.0-beta.52",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.52",
     "@electron-forge/maker-zip": "^6.0.0-beta.52",
+    "@electron-forge/publisher-github": "^6.0.0-beta.52",
     "electron": "9.1.0"
   },
   "config": {
@@ -39,7 +43,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "electron_angular_demo"
+            "name": "Stratos"
           }
         },
         {
@@ -59,6 +63,18 @@
         {
           "name": "@electron-forge/maker-dmg",
           "config": {}
+        }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "nwmac",
+              "name": "stratos-desktop"
+            },
+            "prerelease": false
+          }
         }
       ]
     }

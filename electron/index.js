@@ -27,6 +27,13 @@ const windowStateKeeper = require('electron-window-state');
 //   escapeRegExp
 // } = require('lodash');
 
+// Auto-update - won't work without signed developer account
+// require('update-electron-app')({
+//   repo: 'nwmac/stratos-desktop',
+//   updateInterval: '5 minutes',
+//   //logger: require('electron-log')
+// })
+
 //const LOG_FILE = '/Users/nwm/stratos.log';
 const icon = path.join(__dirname, '/icon.png');
 
@@ -74,7 +81,7 @@ function createWindow() {
     jetstream = spawn(prog, [], {
       env: getEnvironment(url),
       cwd: __dirname,
-      stdio: 'inherit'
+      //stdio: 'inherit'
     });
 
     waitForBackend(`https://${url}`, () => {
