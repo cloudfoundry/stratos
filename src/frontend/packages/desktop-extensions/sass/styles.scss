@@ -20,12 +20,12 @@
     width: 20px;
   }
 
-  .page-header__notifications-button .mat-badge-active {
+  .page-header__notifications-button.mat-badge.mat-badge-medium .mat-badge-content.mat-badge-active {
     font-size: 10px;
     height: 16px;
     line-height: 16px;
-    right: -8px;
-    top: -98px;
+    right: -6px;
+    top: -6px;
     width: 16px;
   }
 
@@ -33,6 +33,11 @@
     h1 {
       font-size: 18px;
     }
+  }
+
+  // Hide copyright button
+  .side-nav__bottom {
+    display: none;
   }
 
 }
