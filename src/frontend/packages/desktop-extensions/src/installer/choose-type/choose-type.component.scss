@@ -1,8 +1,9 @@
 .choices {
   align-items: center;
-  display: flex;
+  // display: flex;
   justify-content: center;
   flex-direction: column;
+  width: 100%;
 
   mat-card {
     min-width: 600px;

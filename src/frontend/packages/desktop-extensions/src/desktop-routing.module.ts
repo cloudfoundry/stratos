@@ -18,7 +18,7 @@ const customRoutes: Routes = [
         text: 'Install',
         matIcon: 'deploy',
         matIconFont: 'stratos-icons',
-        position: 60,
+        position: 98,
       }
     }
   },
