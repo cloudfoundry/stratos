@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	log "github.com/sirupsen/logrus"
 )
 
 // TokenStore is a token store that combines local tokens with the usual database stored tokens
@@ -54,13 +53,11 @@ func (d *TokenStore) FindCNSIToken(cnsiGUID string, userGUID string, encryptionK
 		}
 	}
 
-	log.Infof("FindCNSIToken %s", cnsiGUID)
 	return d.store.FindCNSIToken(cnsiGUID, userGUID, encryptionKey)
 }
 
 func (d *TokenStore) FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
 	// Main method that we need to override to get the token for the given endpoint
-	log.Infof("FindCNSITokeninclude disconnected %s", cnsiGUID)
 	if IsLocalCloudFoundry(cnsiGUID) {
 		return d.FindCNSIToken(cnsiGUID, userGUID, encryptionKey)
 	}
