@@ -1,6 +1,7 @@
 import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
+import { ElectronService } from 'ngx-electron';
 import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
@@ -46,15 +47,19 @@ export class EndpointListHelper {
     private confirmDialog: ConfirmationDialogService,
     private log: LoggerService,
     private snackBarService: SnackBarService,
+    private electron: ElectronService
   ) { }
 
   endpointActions(): IListAction<EndpointModel>[] {
     return [
       {
         action: (item) => {
+          const message1 = `Are you sure you want to disconnect endpoint '${item.name}'?`;
+          // TODO: This only current applies to CF
+          const message2 = item.local ? `This will also update your local configuration.` : '';
           const confirmation = new ConfirmationDialogConfig(
             'Disconnect Endpoint',
-            `Are you sure you want to disconnect endpoint '${item.name}'?`,
+            `${message1}${message2 ? `<br><br>${message2}` : ''}`,
             'Disconnect',
             false
           );
@@ -101,9 +106,12 @@ export class EndpointListHelper {
       },
       {
         action: (item) => {
+          const message1 = `Are you sure you want to unregister endpoint '${item.name}'?`;
+          // TODO: This only current applies to CF
+          const message2 = item.local ? `This will also update your local configuration.` : '';
           const confirmation = new ConfirmationDialogConfig(
             'Unregister Endpoint',
-            `Are you sure you want to unregister endpoint '${item.name}'?`,
+            `${message1}${message2 ? `<br><br>${message2}` : ''}`,
             'Unregister',
             true
           );
