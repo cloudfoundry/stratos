@@ -62,7 +62,10 @@
         },
         {
           "name": "@electron-forge/maker-dmg",
-          "config": {}
+          "config": {
+            "background": "background.png",
+            "icon": "VolumeIcon.icns"
+          }
         }
       ],
       "publishers": [
