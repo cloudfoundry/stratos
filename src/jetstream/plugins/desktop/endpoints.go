@@ -24,7 +24,6 @@ func (d *DesktopEndpointStore) List(encryptionKey []byte) ([]*interfaces.CNSIRec
 func (d *DesktopEndpointStore) ListByUser(userGUID string) ([]*interfaces.ConnectedEndpoint, error) {
 	local, err := ListConnectedCloudFoundry()
 	db, err := d.store.ListByUser(userGUID)
-
 	merged := mergeConnectedEndpoints(db, local)
 	return merged, err
 }
@@ -71,6 +70,15 @@ func (d *DesktopEndpointStore) SaveOrUpdate(endpoint interfaces.CNSIRecord, encr
 
 // Merge endpoints, over-riding any in first with those in second
 func mergeEndpoints(first, second []*interfaces.CNSIRecord) []*interfaces.CNSIRecord {
+
+	if first == nil {
+		return second
+	}
+
+	if second == nil {
+		return first
+	}
+
 	urls := make(map[string]bool, 0)
 	for _, endpoint := range second {
 		urls[endpoint.APIEndpoint.String()] = true
@@ -92,6 +100,15 @@ func mergeEndpoints(first, second []*interfaces.CNSIRecord) []*interfaces.CNSIRe
 
 // Merge endpoints, over-riding any in first with those in second
 func mergeConnectedEndpoints(first, second []*interfaces.ConnectedEndpoint) []*interfaces.ConnectedEndpoint {
+
+	if first == nil {
+		return second
+	}
+
+	if second == nil {
+		return first
+	}
+
 	urls := make(map[string]bool, 0)
 	for _, endpoint := range second {
 		urls[endpoint.APIEndpoint.String()] = true

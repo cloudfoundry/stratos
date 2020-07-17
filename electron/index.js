@@ -81,7 +81,7 @@ function createWindow() {
     jetstream = spawn(prog, [], {
       env: getEnvironment(url),
       cwd: __dirname,
-      //stdio: 'inherit'
+      stdio: 'inherit'
     });
 
     waitForBackend(`https://${url}`, () => {
@@ -144,10 +144,15 @@ function doCreateWindow(url) {
   // Open the DevTools.
   //mainWindow.webContents.openDevTools({mode:'undocked'});
 
-  // Watch for the helm repository file to change
-  const watcher = chokidar.watch(getHelmRepoFolder());
-  watcher.on('all', () => {
-    mainWindow.webContents.send('endpointsChanged', 'HELM');
+  // Watch for changed in ant of the local configuration files
+  // We will reload endpoints when these change
+  const watcher = chokidar.watch([
+    getCFConfigFile(),
+    getKubeConfigFile(),
+    getHelmRepoFolder()
+  ]);
+  watcher.on('all', (action, filePath) => {
+    mainWindow.webContents.send('endpointsChanged', action, filePath);
   });
 }
 
@@ -232,4 +237,12 @@ function getHelmRepoFolder() {
     return path.join(homeDir, 'Library', 'Preferences', 'helm');
   }
   return path.join(homeDir, '.config', 'helm');
+}
+
+function getCFConfigFile() {
+  return path.join(homeDir, '.cf', 'config.json');
+}
+
+function getKubeConfigFile() {
+  return process.env.KUBECONFIG || path.join(homeDir, '.kube', 'config');
 }
