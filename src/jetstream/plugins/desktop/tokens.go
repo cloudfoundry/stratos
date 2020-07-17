@@ -59,8 +59,9 @@ func (d *TokenStore) FindCNSIToken(cnsiGUID string, userGUID string, encryptionK
 }
 
 func (d *TokenStore) FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
+	// Main method that we need to override to get the token for the given endpoint
 	log.Infof("FindCNSITokeninclude disconnected %s", cnsiGUID)
-	if isLocalCloudFoundry(cnsiGUID) {
+	if IsLocalCloudFoundry(cnsiGUID) {
 		return d.FindCNSIToken(cnsiGUID, userGUID, encryptionKey)
 	}
 
@@ -72,6 +73,12 @@ func (d *TokenStore) FindAllCNSITokenBackup(cnsiGUID string, encryptionKey []byt
 }
 
 func (d *TokenStore) DeleteCNSIToken(cnsiGUID string, userGUID string) error {
+	if IsLocalCloudFoundry(cnsiGUID) {
+		updates := make(map[string]string)
+		updates["AccessToken"] = ""
+		updates["RefreshToken"] = ""
+		return updateCFFIle(updates)
+	}
 	return d.store.DeleteCNSIToken(cnsiGUID, userGUID)
 }
 
@@ -85,21 +92,11 @@ func (d *TokenStore) SaveCNSIToken(cnsiGUID string, userGUID string, tokenRecord
 
 // UpdateTokenAuth will update a token's auth data
 func (d *TokenStore) UpdateTokenAuth(userGUID string, tokenRecord interfaces.TokenRecord, encryptionKey []byte) error {
-	if isLocalCloudFoundry(tokenRecord.TokenGUID) {
+	if IsLocalCloudFoundry(tokenRecord.TokenGUID) {
 		updates := make(map[string]string)
 		updates["AccessToken"] = fmt.Sprintf("bearer %s", tokenRecord.AuthToken)
 		updates["RefreshToken"] = tokenRecord.RefreshToken
 		return updateCFFIle(updates)
 	}
 	return d.store.UpdateTokenAuth(userGUID, tokenRecord, encryptionKey)
-}
-
-func isLocalCloudFoundry(cnsiGUID string) bool {
-	// Main method that we need to override to get the token for the given endpoint
-	local, err := ListCloudFoundry()
-	if err == nil {
-		return len(local) == 1 && local[0].GUID == cnsiGUID
-	}
-
-	return false
 }

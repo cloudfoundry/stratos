@@ -21,8 +21,7 @@ export class DesktopModule {
   constructor(
     router: Router,
     private _electronService: ElectronService,
-    private store: Store)
-  {
+    private store: Store) {
     // Only update the routes once
     if (!DesktopModule.init) {
       // Override the component used for the login route
@@ -31,12 +30,15 @@ export class DesktopModule {
       loginRoute.component = DesktopLoginComponent;
       router.resetConfig(routeConfig);
       DesktopModule.init = true;
-      this.init();
+      this.initElectron();
     }
   }
 
   // Listen for events from the Electron host
-  private init() {
+  private initElectron() {
+    if (!this._electronService.isElectronApp) {
+      return
+    }
     this._electronService.ipcRenderer.addListener('endpointsChanged', (sender, args) => {
       console.log('Got an event - endpoints changed');
       console.log(sender);

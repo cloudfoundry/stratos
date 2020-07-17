@@ -29,16 +29,9 @@ func (d *DesktopEndpointStore) ListByUser(userGUID string) ([]*interfaces.Connec
 }
 
 func (d *DesktopEndpointStore) Find(guid string, encryptionKey []byte) (interfaces.CNSIRecord, error) {
-
-	local, err := ListCloudFoundry()
-
-	if err == nil {
-		if len(local) > 0 {
-			if local[0].GUID == guid {
-				// Got the local endpoint
-				return *local[0], nil
-			}
-		}
+	record, _ := FindLocalCloudFoundry(guid)
+	if record != nil {
+		return *record, nil
 	}
 
 	return d.store.Find(guid, encryptionKey)
@@ -49,6 +42,11 @@ func (d *DesktopEndpointStore) FindByAPIEndpoint(endpoint string, encryptionKey 
 }
 
 func (d *DesktopEndpointStore) Delete(guid string) error {
+	if IsLocalCloudFoundry(guid) {
+		updates := make(map[string]string)
+		updates["Target"] = ""
+		return updateCFFIle(updates)
+	}
 	return d.store.Delete(guid)
 }
 

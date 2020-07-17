@@ -155,3 +155,22 @@ func updateCFFIle(updates map[string]string) error {
 	ioutil.WriteFile(cfFile, data, stats.Mode())
 	return nil
 }
+
+func IsLocalCloudFoundry(cnsiGUID string) bool {
+	record, _ := FindLocalCloudFoundry(cnsiGUID)
+	return record != nil
+}
+
+func FindLocalCloudFoundry(cnsiGUID string) (*interfaces.CNSIRecord, error) {
+
+	local, err := ListCloudFoundry()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(local) == 1 && local[0].GUID == cnsiGUID {
+		return local[0], nil
+	}
+
+	return nil, nil
+}
