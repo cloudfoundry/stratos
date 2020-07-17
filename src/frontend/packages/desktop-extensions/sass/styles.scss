@@ -12,6 +12,11 @@
     padding-right: 0;
   }
 
+  // Less padding for the icons on the right of the page header
+  .page-header .page-header__toolbar {
+    padding-right: 5px;
+  }
+
   // Smaller icons in the main page header
   .page-header mat-icon {
     font-size: 20px;
