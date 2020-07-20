@@ -20,7 +20,12 @@
                 <input matInput formControlName="clientId" placeholder="Client ID">
               </mat-form-field>
               <mat-form-field>
-                <input matInput formControlName="clientSecret" placeholder="Client Secret">
+                <input matInput formControlName="clientSecret" placeholder="Client Secret"
+                  [type]="!show ? 'password' : 'text'">
+                <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide password'"
+                  [attr.aria-pressed]="!show">
+                  <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
+                </button>
               </mat-form-field>
             </div>
             <p class="uaa-wizard__form-section">Enter the username and password of an admin user (this is used to
@@ -31,7 +36,12 @@
                 <input matInput formControlName="adminUsername" placeholder="Admin Username">
               </mat-form-field>
               <mat-form-field>
-                <input matInput type="password" formControlName="adminPassword" placeholder="Admin Password">
+                <input matInput type="password" formControlName="adminPassword" placeholder="Admin Password"
+                  [type]="!showPassword ? 'password' : 'text'">
+                <button mat-icon-button matSuffix (click)="showPassword = !showPassword"
+                  [attr.aria-label]="'Hide password'" [attr.aria-pressed]="!showPassword">
+                  <mat-icon>{{!showPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                </button>
               </mat-form-field>
             </div>
             <!-- Single Sign-on -->

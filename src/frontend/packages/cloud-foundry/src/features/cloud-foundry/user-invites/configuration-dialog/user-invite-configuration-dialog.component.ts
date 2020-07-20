@@ -37,6 +37,7 @@ export class UserInviteConfigurationDialogComponent {
   public connectDelay = 1000;
 
   guid: string;
+  public showSecret = false;
 
   constructor(
     public fb: FormBuilder,
