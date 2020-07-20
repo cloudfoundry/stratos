@@ -102,3 +102,51 @@ img.cf-logo {
 #__docusaurus .docSidebarContainer_node_modules-\@docusaurus-theme-classic-src-theme-DocPage- {
   width: 280px;
 }
+
+.home-intro {
+  margin-right: 150px;
+}
+
+.home-logo {
+  height: 300px;
+  opacity: .9;
+  position: absolute;
+  right: -150px;
+}
+
+@media screen and (max-width: 966px) {
+  .home-logo {
+    display: none;
+  }
+}
+
+/* Screenshot */
+
+.screenshot-section {
+  background-color: #2196f3;
+  color: #fff
+}
+
+.screenshot {
+  display: flex;
+  margin: 60px 0;
+}
+
+.screenshot img {
+  width: 600px;
+  -webkit-box-shadow: 0px 0px 37px 15px rgba(20,20,20,0.75);
+  -moz-box-shadow: 0px 0px 37px 15px rgba(20,20,20,0.75);
+  box-shadow: 0px 0px 37px 15px rgba(20,20,20,0.75);  
+  margin-right: 60px;
+}
+
+.screenshot div {
+  font-size: 20px;
+}
+
+@media screen and (max-width: 966px) {
+  .screenshot img {
+    display: none;
+    margin: 0;
+  }
+}

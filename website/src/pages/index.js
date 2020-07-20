@@ -96,7 +96,7 @@ function Home() {
       title={`Home`}
       description="Stratos - Web-based Management Interface for Cloud Foundry and Kubernetes">
       <header className={clsx('hero hero--primary', styles.heroBanner)}>
-        <div className="container">
+        <div className="container home-intro">
           <h1 className="hero__title">{siteConfig.title}</h1>
           <p className="hero__subtitle">{siteConfig.tagline}</p>
           <div className={styles.buttons}>
@@ -110,6 +110,7 @@ function Home() {
             </Link>
           </div>
         </div>
+        <img class="home-logo" src="img/logo.png" />
       </header>
       <main>
         {features && features.length > 0 && (
@@ -123,6 +124,17 @@ function Home() {
             </div>
           </section>
         )}
+        <section className={clsx(styles.features, 'screenshot-section')}>
+          <div className="container">
+            <div class="screenshot">
+              <img src="img/app-summary.png" />
+              <div>
+                Stratos provides a rich, modern, web-based management user interface
+                for both Cloud Foundry and Kubernetes.
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </Layout>
   );
