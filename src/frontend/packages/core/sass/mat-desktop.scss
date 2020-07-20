@@ -107,4 +107,13 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
     flex: 0 0 $desktop-page-header-height;
     height: $desktop-page-header-height;
   }
+
+  mat-drawer.dashboard__side_preview {
+    top: $desktop-page-header-height;
+    height: calc(100vw - #{$desktop-page-header-height} - 1px);
+  }
+
+  app-profile-info .user-profile {
+    top: $desktop-page-header-height;
+  }
 }
