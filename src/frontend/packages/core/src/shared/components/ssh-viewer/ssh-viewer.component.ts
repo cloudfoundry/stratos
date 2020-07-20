@@ -29,6 +29,8 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   public isConnecting = false;
   private isDestroying = false;
 
+  public message = '';
+
   @ViewChild('terminal', { static: true }) container: ElementRef;
   private xterm: Terminal;
 
@@ -66,7 +68,6 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     this.xterm = new Terminal();
     this.xterm.loadAddon(this.xtermFitAddon);
     this.xterm.open(this.container.nativeElement);
-    //    this.xtermFitAddon.fit();
     this.resize();
 
     this.xterm.onKey(e => {
@@ -115,8 +116,15 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     this.msgSubscription = this.sshStream
       .subscribe(
         (data: string) => {
-          for (const c of data.split(' ')) {
-            this.xterm.write(String.fromCharCode(parseInt(c, 16)));
+          // Check for a window title message
+          if (!this.isWindowTitle(data)) {
+            for (const c of data.split(' ')) {
+              this.xterm.write(String.fromCharCode(parseInt(c, 16)));
+            }
+          } else {
+            console.log('Error')
+            const eMsg = this.errorMessage;
+            this.errorMessage = eMsg;
           }
         },
         (err) => {
@@ -129,5 +137,25 @@ export class SshViewerComponent implements OnInit, OnDestroy {
           }
         }
       );
+  }
+  private isWindowTitle(data: string): boolean {
+    const chars = data.split(' ');
+    if (chars.length > 4 &&
+      parseInt(chars[0], 16) === 27 &&
+      parseInt(chars[1], 16) === 93 &&
+      parseInt(chars[2], 16) === 50 &&
+      parseInt(chars[3], 16) === 59) {
+        let title = '';
+        for (let i = 4; i < chars.length - 1; i++) {
+          title += String.fromCharCode(parseInt(chars[i], 16));
+        }
+        if (title.length > 0 && title.charAt(0) === '!') {
+          this.errorMessage = title.substr(1);
+          console.log(this.errorMessage);
+          return true;
+        }
+        this.message = title;
+      }
+    return false;
   }
 }

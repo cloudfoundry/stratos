@@ -31,7 +31,7 @@ export const getEntityUpdateSections = (
 export const getUpdateSectionById = (guid: string) => (
   updating
 ): ActionState => {
-  return updating[guid];
+  return updating ? updating[guid] : null;
 };
 
 export function selectUpdateInfo(

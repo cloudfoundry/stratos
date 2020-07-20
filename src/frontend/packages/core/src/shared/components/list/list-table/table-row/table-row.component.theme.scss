@@ -2,6 +2,7 @@
   $status-colors: map-get($app-theme, status);
   $error-color: map-get($status-colors, danger);
   $warn-color: map-get($status-colors, warning);
+  $info-color: map-get($status-colors, info);
   $text-color: map-get($status-colors, text);
   $primary: map-get($theme, primary);
   $primary-color: mat-color($primary);
@@ -22,26 +23,24 @@
   }
   .table-row-wrapper {
     &__errored {
-      .table-row {
-        background-color: transparentize($error-color, .9);
-      }
-      .table-row__error {
-        background-color: $error-color;
-        color: $text-color;
-      }
-      .table-row__error-message {
-        a {
-          color: $text-color;
+      .table-row__error-content {
+        mat-icon {
+          color: $error-color;
         }
       }
     }
     &__warning {
-      .table-row {
-        background-color: transparentize($warn-color, .9);
+      .table-row__error-content {
+        mat-icon {
+          color: $warn-color;
+        }
       }
-      .table-row__error {
-        background-color: $warn-color;
-        color: $text-color;
+    }
+    &__info {
+      .table-row__error-content {
+        mat-icon {
+          color: $info-color;
+        }
       }
     }
     &__highlighted {

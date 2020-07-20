@@ -54,6 +54,7 @@ import {
   TableCellSidePanelComponent,
 } from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
+import { listTableCells } from './components/list/list-table/table-cell/table-cell.component';
 import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
@@ -310,7 +311,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     SidepanelPreviewComponent,
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,
-    MaxListMessageComponent
+    MaxListMessageComponent,
+    ...listTableCells
   ],
   providers: [
     ListConfig,
