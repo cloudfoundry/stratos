@@ -1,4 +1,4 @@
-  #!/bin/bash
+#!/bin/bash
 
 echo "Stratos e2e build"
 echo "================="
