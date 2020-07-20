@@ -9,6 +9,7 @@ import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { LocaleHelper } from '../locale.helper';
 import { CFPage } from '../po/cf-page.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
+import { TableData } from '../po/list.po';
 import { CREATE_APP_DEPLOY_TEST_TYPE, createApplicationDeployTests } from './application-deploy-helper';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageAutoscalerTab } from './po/application-page-autoscaler.po';
@@ -447,7 +448,7 @@ describe('Autoscaler -', () => {
   describe('Autoscaler Event Page - ', () => {
     const loggingPrefix = 'AutoScaler Event Table:';
     let eventPageBase: PageAutoscalerEventBase;
-    describe('From autoscaler event card', () => {
+    describe('From autoscaler event card - ', () => {
       beforeAll(() => {
         const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
         appAutoscaler.goToAutoscalerTab();
@@ -482,36 +483,39 @@ describe('Autoscaler -', () => {
         // Timeout after 32 attempts (each 5 seconds, which is just under 3 minutes)
         let retries = 32;
         const sub = timer(5000, 5000).pipe(
-          switchMap(() => promise.all<boolean | number>([
+          switchMap(() => promise.all<boolean | number | TableData[]>([
             findRow(),
-            eventPageBase.list.header.isRefreshing()
+            eventPageBase.list.header.isRefreshing(),
+            eventPageBase.list.table.getTableData()
           ]))
-        ).subscribe(([foundRow, isRefreshing]) => {
+        ).subscribe(([foundRow, isRefreshing, tableData]: [boolean, number, TableData[]]) => {
           // These console.logs help by
           // .. Showing the actual time we're checking, which can be compared with schedule start/end times
           // .. Showing when successful runs complete, over time this should show on average events take to show
+          const time = moment().toString()
+          console.log(`${time}: Table Data: `, tableData);
+
           if (isRefreshing) {
-            console.log(`${moment().toString()}: Waiting for event row: Skip actions... list is refreshing`);
+            console.log(`${time}: Waiting for event row: Skip actions... list is refreshing`);
             return;
           }
           retries--;
           if (foundRow) {
-            console.log(`${moment().toString()}: Waiting for event row: Found row!`);
+            console.log(`${time}: Waiting for event row: Found row!`);
             sub.unsubscribe();
           } else {
-            console.log(`${moment().toString()}: Waiting for event row: manually refreshing list`);
-            eventPageBase.list.header.refresh();
             if (retries === 0) {
+              // Fail the test if the retry count made it down to 0
+              e2e.debugLog('Timed out waiting for event row');
+              fail('Timed out waiting for event row');
               sub.unsubscribe();
+            } else {
+              console.log(`${time}: Waiting for event row: manually refreshing list`);
+              eventPageBase.list.header.refresh();
             }
           }
         });
         browser.wait(() => sub.closed);
-        // Fail the test if the retry count made it down to 0
-        if (retries === 0) {
-          e2e.debugLog('Timed out waiting for event row');
-          fail('Timed out waiting for event row');
-        }
       }
 
       it('Go to events page', () => {
@@ -534,7 +538,7 @@ describe('Autoscaler -', () => {
         browser.wait(ApplicationPageAutoscalerTab.detect()
           .then(appAutoscaler => {
             appAutoscaler.tableEvents.clickRefreshButton();
-            expect(appAutoscaler.tableEvents.getTableRowsCount()).toBe(1);
+            expect(appAutoscaler.tableEvents.getTableRowsCount()).toBe(1, 'Expected rows to be one, could be extremely late event reporting');
             expect(appAutoscaler.tableEvents.getTableRowCellContent(0, 0)).toBe('Instances scaled up from 1 to 2');
             expect(appAutoscaler.tableEvents.getTableRowCellContent(0, 1))
               .toBe('schedule starts with instance min 2, instance max 10 and instance min initial 2 limited by min instances 2');
