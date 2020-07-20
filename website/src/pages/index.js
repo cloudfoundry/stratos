@@ -1,51 +1,85 @@
-import React from 'react';
-import clsx from 'clsx';
-import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import Layout from '@theme/Layout';
+import clsx from 'clsx';
+import React from 'react';
+
 import styles from './styles.module.css';
 
 const features = [
   {
     title: <>Easy to Use</>,
-    imageUrl: 'img/undraw_docusaurus_mountain.svg',
+    imageUrl: 'img/easy.svg',
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Stratos provides an easy to use web-based management user interface
+        designed to meet the needs of both administrators and developers.
       </>
     ),
   },
   {
-    title: <>Focus on What Matters</>,
-    imageUrl: 'img/undraw_docusaurus_tree.svg',
+    title: <>Cloud Foundry</>,
+    imageUrl: 'img/cloudfoundry.png',
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Stratos is the de-facto UI for Cloud Foundry, providing a rich management experience
+        for all you Cloud Foundry needs... and we're an offical Cloud Foundry project too!
+      </>
+    ),
+    cls: 'cf-logo'
+  },
+  {
+    title: <>Kubernetes</>,
+    imageUrl: 'img/kubernetes.svg',
+    description: (
+      <>
+        Stratos sports a growing feature set for Kubernetes developers, extened its reach further
+        towards providing a single-pane-of-glass for your Cloud Native application development needs.
       </>
     ),
   },
   {
-    title: <>Powered by React</>,
-    imageUrl: 'img/undraw_docusaurus_react.svg',
+    title: <>Extensible</>,
+    imageUrl: 'img/extend.svg',
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Stratos is built with extensibility in mind and we continue to expand and improve the
+        extensibility experience for developers
       </>
     ),
   },
+  {
+    title: <>Open Source</>,
+    imageUrl: 'img/open-source.svg',
+    description: (
+      <>
+        Stratos is Open Source with an Apache 2.0 License. Our codes lives on GitHub and we're a project within
+        the Cloud Foundry Foundation
+      </>
+    ),
+  },
+  {
+    title: <>Easy to Deploy</>,
+    imageUrl: 'img/deploy.svg',
+    description: (
+      <>
+        Stratos is easy to deploy and can be deployed as an application to Cloud Foundry, to Kubernetes
+        and run locally as a Docker container
+      </>
+    ),
+  },
+
+
 ];
 
-function Feature({imageUrl, title, description}) {
+function Feature({imageUrl, title, description, cls}) {
   const imgUrl = useBaseUrl(imageUrl);
   return (
     <div className={clsx('col col--4', styles.feature)}>
       {imgUrl && (
-        <div className="text--center">
-          <img className={styles.featureImage} src={imgUrl} alt={title} />
+        <div className="">
+          <img className={clsx(styles.featureImage, cls)} src={imgUrl} alt={title} />
         </div>
       )}
       <h3>{title}</h3>
@@ -59,8 +93,8 @@ function Home() {
   const {siteConfig = {}} = context;
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title={`Home`}
+      description="Stratos - Web-based Management Interface for Cloud Foundry and Kubernetes">
       <header className={clsx('hero hero--primary', styles.heroBanner)}>
         <div className="container">
           <h1 className="hero__title">{siteConfig.title}</h1>

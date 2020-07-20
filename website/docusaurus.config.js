@@ -1,26 +1,26 @@
 module.exports = {
-  title: 'Stratos',
-  tagline: 'Getting started with Stratos development',
+  title: 'STRATOS',
+  tagline: 'A Rich Open-Source UI for Cloud Foundry and Kubernetes',
   url: 'https://stratos.app',
   baseUrl: '/',
   favicon: 'img/favicon.ico',
-  organizationName: 'cloudfoundry', // Usually your GitHub org/user name.
-  projectName: 'stratos', // Usually your repo name.
+  organizationName: 'cloudfoundry',
+  projectName: 'stratos',
   themeConfig: {
     navbar: {
-      title: 'Stratos',
+      title: 'STRATOS',
       logo: {
-        alt: 'My Site Logo',
-        src: 'img/logo.svg',
+        alt: 'Stratos',
+        src: 'img/logo.png',
       },
       links: [
         {
           to: 'docs/',
           activeBasePath: 'docs',
           label: 'Docs',
-          position: 'left',
+          position: 'right',
         },
-        {to: 'blog', label: 'Blog', position: 'left'},
+        // {to: 'blog', label: 'Blog', position: 'left'},
         {
           href: 'https://github.com/cloudfoundry/stratos',
           label: 'GitHub',
@@ -35,11 +35,11 @@ module.exports = {
           title: 'Docs',
           items: [
             {
-              label: 'Style Guide',
+              label: 'Getting Started',
               to: 'docs/',
             },
             {
-              label: 'Second Doc',
+              label: 'Deploying Stratos',
               to: 'docs/doc2/',
             },
           ],
@@ -48,25 +48,8 @@ module.exports = {
           title: 'Community',
           items: [
             {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-            },
-            {
-              label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
-            },
-            {
-              label: 'Twitter',
-              href: 'https://twitter.com/docusaurus',
-            },
-          ],
-        },
-        {
-          title: 'More',
-          items: [
-            {
-              label: 'Blog',
-              to: 'blog',
+              label: 'Slack',
+              href: 'https://cloudfoundry.slack.com/?redir=%2Fmessages%2Fstratos',
             },
             {
               label: 'GitHub',
@@ -74,8 +57,18 @@ module.exports = {
             },
           ],
         },
+        
+        {
+          title: 'More',
+          items: [
+            {
+              label: 'Presentations and Talks',
+              to: 'docs/talks',
+            },
+          ],
+        },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Cloud Foundry Foundation`,
     },
   },
   presets: [
@@ -89,12 +82,6 @@ module.exports = {
           // Please change this to your repo.
           editUrl:
             'https://github.com/cloudfoundry/stratos/edit/master/website/',
-        },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          editUrl:
-            'https://github.com/cloudfoundry/stratos/edit/master/website/blog/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
