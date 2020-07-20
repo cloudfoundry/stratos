@@ -8,12 +8,13 @@
         }"></app-no-content-message>
       </div>
       <div class="favorite-list__group"
-        *ngFor="let favGroup of entityGroups;trackBy: trackByEndpointId; last as isLast">
+        *ngFor="let favGroup of entityGroups;trackBy: trackByEndpointId; last as isLast; count as count">
         <app-favorites-meta-card class="favorite-list__endpoint-card" [endpoint]="true"
           [endpointHasEntities]="favGroup.entities && favGroup.entities.length > 0"
           [favoriteEntity]="favGroup.endpoint"></app-favorites-meta-card>
         <app-favorites-entity-list *ngIf="favGroup.entities && favGroup.entities.length" class="favorite-list__entities"
           [endpointTypes]="favGroup.endpoint.favorite.endpointType" [entities]="favGroup.entities"
+          [autoExpand]="count === 1"
           [showFilters]="showFilters"></app-favorites-entity-list>
         <div *ngIf="favGroup.entities && favGroup.entities.length && !isLast" class="favorite-list__seperator"></div>
       </div>
