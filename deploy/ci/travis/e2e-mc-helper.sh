@@ -1,6 +1,7 @@
 # Helper for mc command
 
-mc version > /dev/null
+# Check if mc command is available (don't log error if it is not)
+mc version > /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo "mc command already installed and confgiured"
 else
