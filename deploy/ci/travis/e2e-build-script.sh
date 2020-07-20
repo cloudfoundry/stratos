@@ -51,7 +51,7 @@ function tryGetExistingBuild() {
 }
 
 # Need S3 endpoint - if we don't have it, we don't have the Travis env vars
-if [ -n "${AWS_ENDPOINT}" ] then
+if [ -n "${AWS_ENDPOINT}" ]; then
   tryGetExistingBuild
 fi
 
