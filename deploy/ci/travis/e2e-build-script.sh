@@ -70,7 +70,7 @@ else
   npm run build-backend
 
   # Only try to upload if we have the S3 configuration
-  if [ -n "${AWS_ENDPOINT}" ] then
+  if [ -n "${AWS_ENDPOINT}" ]; then
     set +e
     tar cvfz ${GZIP_NAME} dist/* src/jetstream/jetstream
 
