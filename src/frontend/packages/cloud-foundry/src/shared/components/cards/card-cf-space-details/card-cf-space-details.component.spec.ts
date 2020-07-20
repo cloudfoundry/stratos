@@ -10,7 +10,7 @@ import { MetadataItemComponent } from '../../../../../../core/src/shared/compone
 import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySpaceServiceMock } from '../../../../../test-framework/cloud-foundry-space.service.mock';
-import { CloudFoundrySpaceService } from '../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud-foundry-space.service';
 import { CardCfSpaceDetailsComponent } from './card-cf-space-details.component';
 
 describe('CardCfSpaceDetailsComponent', () => {

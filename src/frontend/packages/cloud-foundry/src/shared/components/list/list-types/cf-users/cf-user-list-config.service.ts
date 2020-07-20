@@ -23,7 +23,7 @@ import { selectPaginationState } from '../../../../../../../store/src/selectors/
 import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { IOrganization, ISpace } from '../../../../../cf-api.types';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import {
   canUpdateOrgSpaceRoles,
   createCfOrgSpaceSteppersUrl,
@@ -32,7 +32,7 @@ import {
   hasRoleWithinSpace,
   hasSpaceRoleWithinOrg,
   waitForCFPermissions,
-} from '../../../../../features/cloud-foundry/cf.helpers';
+} from '../../../../../features/cf/cf.helpers';
 import { CfUser } from '../../../../../store/types/cf-user.types';
 import { CfUserPermissionsChecker } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from './../../../../data-services/cf-user.service';

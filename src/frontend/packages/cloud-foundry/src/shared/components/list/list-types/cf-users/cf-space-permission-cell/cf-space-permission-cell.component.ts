@@ -16,7 +16,7 @@ import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization, ISpace } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { getSpaceRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { getSpaceRoles } from '../../../../../../features/cf/cf.helpers';
 import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../store/types/cf-user.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';

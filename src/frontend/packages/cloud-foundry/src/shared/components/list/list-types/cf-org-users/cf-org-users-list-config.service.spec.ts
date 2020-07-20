@@ -11,12 +11,10 @@ import {
 import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import {
-  CloudFoundryOrganizationService,
-} from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
-import { UserInviteService } from '../../../../../features/cloud-foundry/user-invites/user-invite.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import { CloudFoundryEndpointService } from '../../../../../features/cf/services/cloud-foundry-endpoint.service';
+import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
+import { UserInviteService } from '../../../../../features/cf/user-invites/user-invite.service';
 import { CfOrgUsersListConfigService } from './cf-org-users-list-config.service';
 
 describe('CfOrgUsersListConfigService', () => {

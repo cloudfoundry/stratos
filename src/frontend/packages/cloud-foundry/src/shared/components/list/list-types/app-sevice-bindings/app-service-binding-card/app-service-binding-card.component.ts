@@ -22,7 +22,7 @@ import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { serviceBindingEntityType } from '../../../../../../cf-entity-types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { isUserProvidedServiceInstance } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { isUserProvidedServiceInstance } from '../../../../../../features/cf/cf.helpers';
 import {
   getServiceBrokerName,
   getServiceName,

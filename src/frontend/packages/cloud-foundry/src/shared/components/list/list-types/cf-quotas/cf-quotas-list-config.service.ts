@@ -5,7 +5,6 @@ import { Observable, Subscription } from 'rxjs';
 
 import { DeleteQuotaDefinition } from '../../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ActiveRouteCfOrgSpace } from '../../../../../../../cloud-foundry/src/features/cloud-foundry/cf-page.types';
 import {
   BaseCfListConfig,
 } from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/base-cf/base-cf-list-config';
@@ -19,6 +18,7 @@ import { IListAction, ListViewTypes } from '../../../../../../../core/src/shared
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../../cf-api.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfQuotasDataSourceService } from './cf-quotas-data-source.service';
 import { TableCellQuotaComponent } from './table-cell-quota/table-cell-quota.component';

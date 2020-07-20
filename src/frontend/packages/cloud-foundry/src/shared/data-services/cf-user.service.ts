@@ -23,7 +23,7 @@ import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
-import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../features/cf/cf-page.types';
 import {
   fetchTotalResults,
   filterEntitiesByGuid,
@@ -35,7 +35,7 @@ import {
   isSpaceDeveloper,
   isSpaceManager,
   waitForCFPermissions,
-} from '../../features/cloud-foundry/cf.helpers';
+} from '../../features/cf/cf.helpers';
 import { selectCfPaginationState } from '../../store/selectors/pagination.selectors';
 import {
   CfUser,
