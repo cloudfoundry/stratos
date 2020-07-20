@@ -1,7 +1,6 @@
 ---
-id: frontend-extensions
-title: Front-end Extensions
-sidebar_label: Frontend 
+title: Frontend Extensions
+sidebar_label: Frontend Extensions
 ---
 
 An example illustrating the various front-end extension points of Stratos is included in the folder `examples/custom-src`.

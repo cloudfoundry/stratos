@@ -34,10 +34,6 @@ module.exports = {
     			'guides/developers/developers-guide-e2e-tests'
 
     		], 
-    		Extensions: [
-    			'guides/extensions/frontend-extensions',
-    			'guides/extensions/backend-plugins'
-    		],
     	},
 		'guides/troubleshooting/troubleshooting',
 		{
@@ -46,6 +42,13 @@ module.exports = {
 				'guides/admin/sso'
 			],
 		}
-    ],
+		],
+		'Extending Stratos': [
+			'extensions/introduction',
+			'extensions/theming',
+			'extensions/frontend',
+			'extensions/backend',
+		],
+		
   },
 };

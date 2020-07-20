@@ -76,5 +76,29 @@ img.cf-logo {
 /* Reduce the text sizes */
 
 #__docusaurus article h1 {
-  font-size: 32px;
+  font-size: 28px;
+}
+
+#__docusaurus article h2 {
+  font-size: 24px;
+}
+
+#__docusaurus article h3 {
+  font-size: 20px;
+}
+
+#__docusaurus article h4 {
+  font-size: 18px;
+}
+
+.menu__list, .menu__link {
+  font-size: 14px;
+}
+
+#__docusaurus .menu .menu__link--sublist:after {
+  background-size: 1.25rem 1.25rem;
+}
+
+#__docusaurus .docSidebarContainer_node_modules-\@docusaurus-theme-classic-src-theme-DocPage- {
+  width: 280px;
 }
