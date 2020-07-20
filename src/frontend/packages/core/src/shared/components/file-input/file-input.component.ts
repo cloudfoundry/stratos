@@ -28,7 +28,11 @@ export class FileInputComponent implements OnInit, OnDestroy {
 
   @Input() accept: string;
   @Output() onFileSelect: EventEmitter<File> = new EventEmitter();
+  @Output() onFileData: EventEmitter<string> = new EventEmitter();
+
   @Input() fileFormControlName;
+
+  @Input() buttonLabel = '';
 
   private files: File[];
 
@@ -65,7 +69,9 @@ export class FileInputComponent implements OnInit, OnDestroy {
       this.onFileSelect.emit(this.files[0]);
 
       if (!!this.formGroupControl) {
-        this.handleFormControl(this.files[0]);
+        this.handleFileData(this.files[0], (value) => this.updateFileState(value));
+      } else {
+        this.handleFileData(this.files[0], (value) => this.onFileData.emit(value));
       }
       if (this.files.length > 0) {
         this.name = this.files[0].name;
@@ -79,17 +85,18 @@ export class FileInputComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  handleFormControl(file) {
+  handleFileData(file, done) {
     const reader = new FileReader();
     reader.onload = () => {
-      this.updateFileState(reader.result);
+      done(reader.result);
     };
     reader.onerror = () => {
       // Clear the form and thus make it invalid on error
-      this.updateFileState(null);
+      done(null);
     };
     reader.readAsText(file);
   }
+
   private updateFileState(value: string | ArrayBuffer) {
     this.formGroupControl.control.controls[this.fileFormControlName].setValue(value);
   }

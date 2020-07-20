@@ -12,7 +12,7 @@ $mat-table-header-paginator-font-size: 13px;
 .stratos {
 
   // Only put right padding between cells
-  .mat-cell, .mat-header-cell {
+  .mat-cell, mat-footer-cell, mat-header-cell {
     padding: 10px 10px 10px 0;
   }
 

@@ -16,7 +16,8 @@
     }
   }
   &__errored,
-  &__warning {
+  &__warning,
+  &__info {
     .table-row__error {
       display: flex;
     }
@@ -64,14 +65,23 @@
   &__error {
     align-items: center;
     display: none;
+
     &-message {
       flex: 1;
       line-height: 20px;
-      margin: 15px 36px;
+      margin-left: 10px;
       text-align: left;
     }
-    &-icon {
-      padding-left: 24px;
+    &-spacer {
+      align-self: stretch;
+      flex: 0 0 20px;
+      &__prominentErrorBar {
+        flex: 0 0 68px;
+      }
+    }
+    &-content {
+      flex: 1;
+      padding: 0 10px 10px 0;
     }
   }
   &__blocker {
@@ -93,6 +103,7 @@
     }
 
     .table-row__inner__expansion.mat-expansion-panel {
+      border-radius: unset;
       width: 100%;
 
       .table-row__inner__expansion--header {
@@ -107,5 +118,10 @@
   }
   &.in-expanded-row {
     border-left-width: 1px;
+  }
+
+  &.has-error-row {
+    // Remove the bottom border if there's an error underneath it
+    border-bottom-width: 0;
   }
 }
