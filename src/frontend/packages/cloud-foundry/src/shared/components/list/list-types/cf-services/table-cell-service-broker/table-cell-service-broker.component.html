@@ -1,0 +1,8 @@
+<div *ngIf="row" class="service-broker">
+  <div>
+    {{row.entity.label}}
+  </div>
+  <div *ngIf="spaceLink$ | async as spaceLink">
+    Space Scoped: <a [routerLink]="spaceLink.link">{{ spaceLink.name }}</a>
+  </div>
+</div>
