@@ -22,7 +22,11 @@
     </mat-form-field>
     <mat-form-field>
       <input matInput id="client_secret" name="client_secret" ngModel #clientSecretField="ngModel"
-        placeholder="Client Secret">
+        placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
+      <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
+        [attr.aria-pressed]="!show">
+        <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
     </mat-form-field>
   </div>
   <div *ngIf="endpointTypeSupportsSSO" class="create-endpoint__sso">
