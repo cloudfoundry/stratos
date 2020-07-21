@@ -38,9 +38,10 @@
     "climate": "codeclimate analyze $(git diff --name-only master)",
     "gate-check": "npm run lint && npm run test-headless",
     "store-git-metadata": "gulp store-git-metadata",
-    "postinstall": "gulp dev-setup && npm run build-devkit && npm run clean-symlinks",
+    "postinstall": "npm run dev-setup && npm run build-devkit && npm run clean-symlinks",
     "build-devkit": "cd src/frontend/packages/devkit && npm run build",
-    "clean-symlinks": "./build/clean-symlinks.sh"
+    "clean-symlinks": "./build/clean-symlinks.sh",
+    "dev-setup": "node build/dev-setup.js"
   },
   "author": "",
   "license": "Apache-2.0",

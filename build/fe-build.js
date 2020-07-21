@@ -31,16 +31,6 @@
       .pipe(gulp.dest('.'))
   });
 
-  gulp.task('dev-setup', function (cb) {
-    // Copy proxy.conf.js so the front-end is all ready to go against a local backend - if not already exsiting
-    var proxyConf = path.resolve(__dirname, '../proxy.conf.js');
-    var localProxyConf = path.resolve(__dirname, './proxy.conf.localdev.js');
-    if (!fs.existsSync(proxyConf)) {
-      fs.copySync(localProxyConf, proxyConf);
-    }
-    cb();
-  });
-
   // Legacy task name
   gulp.task('clean:dist', gulp.series('clean'));
 
