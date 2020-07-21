@@ -236,6 +236,9 @@ describe('Autoscaler -', () => {
       scheduleEndDate2 = moment().tz('UTC').add(4, 'days');
 
       // Fill in form -- valid inputs
+      console.log('dateAndTimeFormat: ', dateAndTimeFormat);
+      console.log('scheduleStartDate1: ', scheduleStartDate1.format(dateAndTimeFormat));
+      console.log('scheduleEndDate1: ', scheduleEndDate1.format(dateAndTimeFormat));
       createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateAndTimeFormat) });
       createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateAndTimeFormat) });
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
@@ -259,6 +262,8 @@ describe('Autoscaler -', () => {
       // Fill in form -- fix invalid inputs
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
       // Fill in form -- valid inputs
+      console.log('scheduleStartDate2: ', scheduleStartDate2.format(dateAndTimeFormat));
+      console.log('scheduleEndDate2: ', scheduleEndDate2.format(dateAndTimeFormat));
       createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate2.format(dateAndTimeFormat) });
       createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate2.format(dateAndTimeFormat) });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
