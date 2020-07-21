@@ -15,14 +15,20 @@
     <div *ngIf="showAdvancedFields" class="edit-endpoint__section">
       <h1 class="edit-endpoint__section-title">Advanced Information (Optional)</h1>
 
-      <mat-checkbox matInput name="setClientInfo" formControlName="setClientInfo">Update Client ID and Client Secret</mat-checkbox>
-  
+      <mat-checkbox matInput name="setClientInfo" formControlName="setClientInfo">Update Client ID and Client Secret
+      </mat-checkbox>
+
       <mat-form-field>
         <input matInput id="client_id" name="client_id" formControlName="clientID" placeholder="Client ID" required>
         <mat-error *ngIf="clientID.errors && clientID.errors.required">Client ID is required</mat-error>
       </mat-form-field>
       <mat-form-field>
-        <input matInput id="client_secret" name="client_secret" formControlName="clientSecret" placeholder="Client Secret">
+        <input matInput id="client_secret" name="client_secret" formControlName="clientSecret"
+          placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
+        <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
+          [attr.aria-pressed]="!show">
+          <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
       </mat-form-field>
     </div>
     <div *ngIf="endpointTypeSupportsSSO" class="edit-endpoint__sso">
