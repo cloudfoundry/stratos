@@ -110,7 +110,7 @@
     "@types/request": "^2.48.4",
     "acorn": "^7.1.1",
     "browserstack-local": "^1.4.5",
-    "codecov": "^3.6.5",
+    "codecov": "^3.7.1",
     "codelyzer": "^5.1.2",
     "copy-webpack-plugin": "5.1.1",
     "delete": "^1.1.0",
