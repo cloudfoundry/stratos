@@ -1,10 +1,8 @@
-import { e2e } from './../e2e';
 import { browser, by, element, promise } from 'protractor';
 import { ElementArrayFinder, ElementFinder, protractor } from 'protractor/built';
 import { Key } from 'selenium-webdriver';
 
 import { Component } from './component.po';
-import { P } from '@angular/cdk/keycodes';
 
 const until = protractor.ExpectedConditions;
 
