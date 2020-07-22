@@ -28,14 +28,3 @@ if (!fs.existsSync(BACKEND_CONF)) {
     console.log(err);
   }
 }
-
-// _custom-import.module.ts
-const CORE_SRC_DIR = path.join(STRATOS_DIR, 'src', 'frontend', 'packages', 'core', 'src');
-const IMPORT_DEFAULT = path.join(CORE_SRC_DIR, 'custom-import.module.ts');
-const IMPORT_FILE = path.join(CORE_SRC_DIR, '_custom-import.module.ts');
-if (!fs.existsSync(IMPORT_FILE)) {
-  let err = fs.copyFileSync(IMPORT_DEFAULT, IMPORT_FILE);
-  if (err) {
-    console.log(err);
-  }
-}
