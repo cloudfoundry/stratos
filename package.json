@@ -38,9 +38,10 @@
     "climate": "codeclimate analyze $(git diff --name-only master)",
     "gate-check": "npm run lint && npm run test-headless",
     "store-git-metadata": "gulp store-git-metadata",
-    "postinstall": "gulp dev-setup && npm run build-devkit && npm run clean-symlinks",
+    "postinstall": "npm run dev-setup && npm run build-devkit && npm run clean-symlinks",
     "build-devkit": "cd src/frontend/packages/devkit && npm run build",
-    "clean-symlinks": "node build/clean-symlinks.js"
+    "clean-symlinks": "node build/clean-symlinks.js",
+    "dev-setup": "node build/dev-setup.js"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -110,7 +111,7 @@
     "@types/request": "^2.48.4",
     "acorn": "^7.1.1",
     "browserstack-local": "^1.4.5",
-    "codecov": "^3.6.5",
+    "codecov": "^3.7.1",
     "codelyzer": "^5.1.2",
     "copy-webpack-plugin": "5.1.1",
     "delete": "^1.1.0",
