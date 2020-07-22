@@ -1,16 +1,16 @@
-import { Component, OnInit, ViewEncapsulation, Inject } from '@angular/core';
+import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
 import { VerifySession } from '../../../../../store/src/actions/auth.actions';
+import { SetupConsoleGetScopes, SetupSaveConfig } from '../../../../../store/src/actions/setup.actions';
 import { InternalAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-import { SetupConsoleGetScopes, SetupSaveConfig } from '../../../../../store/src/actions/setup.actions';
 import { APP_TITLE } from '../../../core/core.types';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoints/endpoint-helpers';
 
 @Component({
@@ -34,6 +34,9 @@ export class ConsoleUaaWizardComponent implements OnInit {
   uaaScopes = [];
   selectedScope = '';
   applyingSetup$ = new BehaviorSubject<boolean>(false);
+
+  public show = false;
+  public showPassword = false;
 
   uaaFormNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetupConsoleGetScopes({

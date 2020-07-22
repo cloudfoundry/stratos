@@ -2,4 +2,5 @@
   <input matInput name="envVarValue" [value]="dataSource.editRow?.value"
     (input)="dataSource.editRow.value = $event.target.value" />
 </mat-form-field>
-<span *ngIf="row.name !== dataSource.editRow?.name" (click)="showPopup()">{{row.value}}</span>
+<span class="cell-value-variable" *ngIf="row.name !== dataSource.editRow?.name"
+  (click)="showPopup()">{{row.value}}</span>

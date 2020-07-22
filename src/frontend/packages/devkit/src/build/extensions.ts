@@ -17,7 +17,7 @@ const importModuleRegex = /src\/frontend\/packages\/core\/src\/custom-import.mod
 
 export class ExtensionsHandler {
 
-  constructor() {}
+  constructor() { }
 
   // Write out the _custom-import.module.ts file importing all of the required extensions
   public apply(webpackConfig: any, config: StratosConfig, options: any) {

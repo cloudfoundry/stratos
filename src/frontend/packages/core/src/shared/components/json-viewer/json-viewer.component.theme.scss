@@ -1,0 +1,15 @@
+@mixin app-json-view-theme($theme, $app-theme) {
+  $is-dark: map-get($theme, is-dark);
+
+  @if $is-dark == true {
+    // Keep this simple, otherwise there's a LOT of overrides.
+    // Additionally would need to bring in the non-dark mode colours to ensure the selectors work
+    app-json-viewer {
+      // There can be child json-viewers, ensure this only applies to the top level
+      &:not([root='false']) {
+        background-color: #ffffffeb;
+        border-radius: 3px;
+      }
+    }
+  }
+}
