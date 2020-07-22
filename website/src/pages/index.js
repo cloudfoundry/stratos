@@ -24,7 +24,7 @@ const features = [
     imageUrl: 'img/kubernetes.svg',
     description: (
       <>
-        Stratos sports a growing feature set for Kubernetes developers, extened its reach further
+        Stratos sports a growing feature set for Kubernetes developers, extending its reach further
         towards providing a single-pane-of-glass for your Cloud Native application development needs.
       </>
     ),
