@@ -1,8 +1,4 @@
----
-id: helm-installation
-title: Stratos Installation
-sidebar_label: Deploy using Helm 
----
+# Stratos
 
 Stratos is an Open Source Web-based Management console for Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
@@ -260,7 +256,7 @@ You will also need to specify:
 - `console.mariadb.port` as the port of the external MariaDB database server (defaults to 3306)
 - `console.mariadb.tls` as the TLS mode (default is `false,` use `true` for a TLS connection to the database server)
 - `console.mariadb.database` as the name of the database
-- `console.mariadb.user` as the username to connect to the database server
+- `console.mariadb.user` as the username to connect to the database server
 - `console.mariadb.userPassword` as the password to connect to the database server
 
 When using an external database server, Stratos expects that you have:
@@ -411,4 +407,3 @@ kubectl create -f storageclass.yaml
 ```
 
 See [Storage Class documentation](https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/) for more information.
-

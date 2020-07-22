@@ -8,9 +8,19 @@ The all-in-one container sets up the Stratos components in a single container.
 
 ## Requirements:
 
-You will need to have installed Docker, see:
+You will need to have installed Docker, see [Docker Installation Documentation](https://docs.docker.com/engine/installation/).
 
-* [Docker](https://docs.docker.com/engine/installation/)
+## Quick Start
+
+Run Stratos in Docker locally:
+
+```
+$ docker run -p 4443:443 splatform/stratos:latest 
+```
+
+Once that has finished, you can then access Stratos by visiting [https://localhost:4443](https://localhost:4443).
+
+You can configure a local admin account and set the password for future logins.
 
 ## Note regarding the Stratos Session Store Secret
 

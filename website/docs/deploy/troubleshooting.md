@@ -1,6 +1,6 @@
 ---
 id: troubleshooting
-title: Troubleshooting
+title: General Troubleshooting
 sidebar_label: Troubleshooting 
 ---
 

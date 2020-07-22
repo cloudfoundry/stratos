@@ -10,7 +10,7 @@ For Cloud Foundry, it allows users and administrators to both manage application
 
 For Kubernetes, it provides Developers with views of their Kubernetes resources, the ability to vide and deploy Helm Charts and view Workloads.
 
-![Stratos Application view](images/screenshots/app-summary.png)
+![Stratos Application view](../images/screenshots/app-summary.png)
 
 ## Quick Start
 
@@ -37,11 +37,7 @@ Please see our [Troubleshooting](guides/troubleshooting/troubleshooting) page.
 
 ## Further Reading
  
-Take a look at the [Feature Set](features.md) for details on the feature set that Stratos provides.
- 
 Get an [Overview](overview.md) of Stratos, its components and the different ways in which it can be deployed.
-
-Take a look at the [Development Roadmap](roadmap.md) to see where we are heading. We update our status page each week to summarize what we are working on - see the [Status Page](status_updates.md).
 
 Browse through features and issues in the project's [issues](https://github.com/cloudfoundry/stratos/issues) page.
 
@@ -58,12 +54,6 @@ For information to help getting started with development, please read the [Devel
 We have a channel (#stratos) on the Cloud Foundy Slack where you can ask questions, get support or give us feedback. We'd love to hear from you if you are using Stratos.
 
 You can join the Cloud Foundry Slack here - https://slack.cloudfoundry.org/  - and then join the #stratos channel.
-
-## Acknowledgements
-
-Tested with Browserstack
-
-<a href="https://www.browserstack.com"><img width="240px" src="docs/images/Browserstack-logo.svg" alt="Browserstack" /></a>
 
 ## License
 

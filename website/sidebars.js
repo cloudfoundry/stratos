@@ -5,8 +5,9 @@ module.exports = {
 			'deploy/deploy-overview',
     	{
     		"Cloud Foundry": [
-    			'deploy/cloud-foundry',
-    			'deploy/cloud-foundry/db-migration' 
+    			'deploy/cloud-foundry/cloud-foundry',
+    			'deploy/cloud-foundry/db-migration',
+    			'deploy/cloud-foundry/cf-troubleshooting'
     		],
     	},
     	{
