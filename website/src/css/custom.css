@@ -39,6 +39,14 @@ img.cf-logo {
   background-color: #333;
 }
 
+.navbar-sidebar .navbar-sidebar__brand {
+  background-color: #333;
+}
+
+.navbar__toggle {
+  color: #d0d0d0;
+}
+
 .navbar__brand:hover {
   color: var(--ifm-link-hover-color);
 }
@@ -113,6 +121,29 @@ img.cf-logo {
   .home-logo {
     display: none;
   }
+
+  .hero__subtitle {
+    font-size: 35px;
+  }
+  
+  section .screenshot {
+    margin: 0 0;
+  }
+
+
+}
+
+@media screen and (max-width: 813px) {
+  .hero__subtitle {
+    font-size: 31px;
+  }
+
+  img.feature-img {
+    height: 64px;
+    width: auto;
+  }
+
+
 }
 
 /* Screenshot */
