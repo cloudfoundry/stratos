@@ -12,7 +12,7 @@
     "build": "node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng build --prod",
     "build-cf": "node --max_old_space_size=1500 --gc_interval=100 node_modules/@angular/cli/bin/ng build --prod",
     "build-dev": "ng build --dev",
-    "prebuild-ui": "npm run build && gulp package-prebuild",
+    "prebuild-ui": "npm run build && npm run prebuild-zip",
     "prebuild-zip": "node build/prebuild-zip.js",
     "ng": "ng",
     "start": "ng serve",
