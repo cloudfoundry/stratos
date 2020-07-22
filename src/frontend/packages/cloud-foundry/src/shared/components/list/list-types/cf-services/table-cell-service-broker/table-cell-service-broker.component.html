@@ -1,4 +1,4 @@
-<div *ngIf="broker$ | async" class="service-broker">
+<div *ngIf="(broker$ | async) else noBroker" class="service-broker">
   <ng-container *ngIf="config?.mode === 'NAME'">
     {{(broker$ | async).entity.name}}
   </ng-container>
@@ -12,3 +12,5 @@
     </ng-template>
   </div>
 </div>
+<!-- Some CFs will return 403 when requesting a service's broker -->
+<ng-template #noBroker>-</ng-template>

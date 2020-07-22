@@ -114,7 +114,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
       mode: TableCellServiceBrokerComponentMode.NAME
     },
     cellFlex: '2'
-  }, , {
+  }, {
     columnId: 'brokerScope',
     headerCell: () => 'Scope',
     cellComponent: TableCellServiceBrokerComponent,
