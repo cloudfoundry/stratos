@@ -4,8 +4,6 @@
 const path = require('path');
 const fs = require('fs-extra');
 
-console.log('Copying devkit files');
-
 // __dirname is the folder where build.js is located
 const STRATOS_DIR= path.resolve(__dirname, '..');
 
@@ -26,6 +24,17 @@ const BACKEND_CONF = path.join(BACKEND_DIR, 'config.properties');
 const BACKEND_CONF_DEV = path.join(BACKEND_DIR, 'config.dev');
 if (!fs.existsSync(BACKEND_CONF)) {
   let err = fs.copySync(BACKEND_CONF_DEV, BACKEND_CONF);
+  if (err) {
+    console.log(err);
+  }
+}
+
+// _custom-import.module.ts
+const CORE_SRC_DIR = path.join(STRATOS_DIR, 'src', 'frontend', 'packages', 'core', 'src');
+const IMPORT_DEFAULT = path.join(CORE_SRC_DIR, 'custom-import.module.ts');
+const IMPORT_FILE = path.join(CORE_SRC_DIR, '_custom-import.module.ts');
+if (!fs.existsSync(IMPORT_FILE)) {
+  let err = fs.copySync(IMPORT_DEFAULT, IMPORT_FILE);
   if (err) {
     console.log(err);
   }

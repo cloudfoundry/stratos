@@ -37,8 +37,8 @@
     "headless-e2e": "xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./protractor.conf.js",
     "climate": "codeclimate analyze $(git diff --name-only master)",
     "gate-check": "npm run lint && npm run test-headless",
-    "store-git-metadata": "gulp store-git-metadata",
-    "postinstall": "npm run dev-setup && npm run build-devkit && npm run clean-symlinks",
+    "store-git-metadata": "node build/store-git-metadata.js",
+    "postinstall": "npm run dev-setup && npm run build-devkit && npm run clean-symlinks && npm run store-git-metadata",
     "build-devkit": "cd src/frontend/packages/devkit && npm run build",
     "clean-symlinks": "node build/clean-symlinks.js",
     "dev-setup": "node build/dev-setup.js"

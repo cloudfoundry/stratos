@@ -14,6 +14,10 @@
             "customWebpackConfig": {
               "path": "./dist-devkit/build/main.js"
             },
+            "fileReplacements": [{
+                "replace": "src/frontend/packages/core/src/custom-import.module.ts",
+                "with": "src/frontend/packages/core/src/_custom-import.module.ts"
+            }],
             "indexTransform": "./dist-devkit/build/index.transform.js",
             "preserveSymlinks": true,
             "outputPath": "dist",
@@ -47,10 +51,16 @@
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
-              "fileReplacements": [{
+              "fileReplacements": [
+                {
                 "replace": "src/frontend/packages/core/src/environments/environment.ts",
                 "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-              }]
+                },
+                {
+                  "replace": "src/frontend/packages/core/src/custom-import.module.ts",
+                  "with": "src/frontend/packages/core/src/_custom-import.module.ts"
+                }
+              ]
             }
           }
         },

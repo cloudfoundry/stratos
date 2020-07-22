@@ -5,8 +5,7 @@
   },
   "files": [
     "src/main.ts",
-    "src/polyfills.ts",
-    "src/_custom-import.module.ts"
+    "src/polyfills.ts"
   ],
   "include": [
     "src/frontend/packages/**/*.d.ts"
