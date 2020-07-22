@@ -120,3 +120,6 @@ stratos-frontend-prebuild.zip
 src/frontend/assets
 src/frontend/sass
 go-vendor-*.tgz
+
+website/build
+website/site-dist

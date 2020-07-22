@@ -33,19 +33,25 @@ fi
 
 msg="Website update: $(date)"
 
+tmpdir=./site-dist
+rm -rf site-dist
+mkdir -p $tmpdir
+pushd $tmpdir
 echo "Cloning web site"
-rm -rf ./site-dist
-git clone git@github.com:cf-stratos/website.git site-dist
+git clone git@github.com:cf-stratos/website.git
 
 echo "Copying newer site content ..."
-rsync --delete -r ./build/ ./site-dist
+rsync --delete --exclude=.git -r $DIR/build/ ./website
 
-cd site-dist
+cd website
 echo "Adding all files"
 git add -A
 git commit -m "${msg}"
 echo "Pushing changes ..."
 git push
-cd ..
+
+popd > /dev/null
+
+rm -rf $tmpdir
 
 popd > /dev/null
