@@ -4,6 +4,8 @@
 
 set -euo pipefail
 
+ARG=${1:-deploy}
+
 # wesbite folder
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
@@ -25,7 +27,7 @@ npm run build
 
 
 # Build only
-if [ "$1" == "-b" ]; then
+if [ "$ARG" == "-b" ]; then
   exit 0
 fi
 
