@@ -1,8 +1,12 @@
-<div *ngIf="row" class="service-broker">
-  <div>
-    {{row.entity.label}}
-  </div>
-  <div *ngIf="spaceLink$ | async as spaceLink">
-    Space Scoped: <a [routerLink]="spaceLink.link">{{ spaceLink.name }}</a>
+<div *ngIf="broker$ | async" class="service-broker">
+  <ng-container *ngIf="config?.mode === 'NAME'">
+    {{(broker$ | async).entity.name}}
+  </ng-container>
+  <div *ngIf="config?.mode === 'SCOPE'">
+    <a *ngIf="spaceLink$ | async as spaceLink; else notSpaceScoped"
+      [routerLink]="spaceLink.link">{{ spaceLink.name }}</a>
+    <ng-template #notSpaceScoped>
+      All Spaces
+    </ng-template>
   </div>
 </div>

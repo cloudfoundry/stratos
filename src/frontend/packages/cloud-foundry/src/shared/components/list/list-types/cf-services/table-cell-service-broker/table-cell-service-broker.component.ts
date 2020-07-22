@@ -4,8 +4,18 @@ import { filter, map, switchMap } from 'rxjs/operators';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IServiceBroker } from '../../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { IService } from '../../../../../../public_api';
+
+export enum TableCellServiceBrokerComponentMode {
+  NAME = 'NAME',
+  SCOPE = 'SCOPE'
+}
+
+export interface TableCellServiceBrokerComponentConfig {
+  mode: TableCellServiceBrokerComponentMode
+}
 
 @Component({
   selector: 'app-table-cell-service-broker',
@@ -14,16 +24,19 @@ import { IService } from '../../../../../../public_api';
 })
 export class TableCellServiceBrokerComponent extends TableCellCustom<APIResource<IService>> {
 
+  @Input()
+  config: TableCellServiceBrokerComponentConfig;
+
   pRow: APIResource<IService>;
   @Input()
   set row(row: APIResource<IService>) {
     this.pRow = row;
     if (row && !this.spaceLink$) {
-      const broker$ = cfEntityCatalog.serviceBroker.store.getEntityService(this.row.entity.service_broker_guid, this.row.entity.cfGuid, {}).waitForEntity$
+      this.broker$ = cfEntityCatalog.serviceBroker.store.getEntityService(this.row.entity.service_broker_guid, this.row.entity.cfGuid, {}).waitForEntity$
         .pipe(
           map(e => e.entity)
         )
-      this.spaceLink$ = broker$.pipe(
+      this.spaceLink$ = this.broker$.pipe(
         filter(broker => !!broker.entity.space_guid),
         switchMap(broker => cfEntityCatalog.space.store.getWithOrganization.getEntityService(broker.entity.space_guid, broker.entity.cfGuid).waitForEntity$),
         map(e => e.entity),
@@ -50,6 +63,7 @@ export class TableCellServiceBrokerComponent extends TableCellCustom<APIResource
     name: string,
     link: string[]
   }>;
+  public broker$: Observable<APIResource<IServiceBroker>>
 
   constructor() {
     super()

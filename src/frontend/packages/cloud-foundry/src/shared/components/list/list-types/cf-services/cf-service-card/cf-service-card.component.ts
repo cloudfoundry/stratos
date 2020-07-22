@@ -10,6 +10,10 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 import { getServiceName } from '../../../../../../features/service-catalog/services-helper';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
+import {
+  TableCellServiceBrokerComponentConfig,
+  TableCellServiceBrokerComponentMode,
+} from '../table-cell-service-broker/table-cell-service-broker.component';
 
 export interface ServiceTag {
   value: string;
@@ -26,6 +30,12 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   cfOrgSpace: CfOrgSpaceLabelService;
   extraInfo: IServiceExtra;
   tags: AppChip<ServiceTag>[] = [];
+  brokerNameConfig: TableCellServiceBrokerComponentConfig = {
+    mode: TableCellServiceBrokerComponentMode.NAME
+  }
+  brokerScopeConfig: TableCellServiceBrokerComponentConfig = {
+    mode: TableCellServiceBrokerComponentMode.SCOPE
+  }
 
   @Input() disableCardClick = false;
 

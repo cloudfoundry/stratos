@@ -15,7 +15,13 @@
   <app-meta-card-item>
     <app-meta-card-key>Service Broker</app-meta-card-key>
     <app-meta-card-value>
-      <app-table-cell-service-broker [row]="serviceEntity"></app-table-cell-service-broker>
+      <app-table-cell-service-broker [row]="serviceEntity" [config]="brokerNameConfig"></app-table-cell-service-broker>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Scope</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-service-broker [row]="serviceEntity" [config]="brokerScopeConfig"></app-table-cell-service-broker>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
