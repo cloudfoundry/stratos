@@ -26,14 +26,21 @@ module.exports = {
 		],
 		'Contributing to Development': [
 			'guides/contribution/contributing',
+			'developer/introduction',
 			{
-			Developer: [
-				'guides/developers/developers-guide',
-				'guides/developers/developers-guide-env-tech',
-				'guides/developers/developers-guide-e2e-tests'
+			Frontend: [
+				'developer/frontend',
+				'developer/frontend-tests'
 			]
-		}
-		],
+			},
+			{
+				Backend: [
+					'developer/backend',
+				]
+				},
+				'developer/developers-guide-env-tech',
+			'developer/developers-guide-e2e-tests'
+	],
 		'Extending Stratos': [
 			'extensions/introduction',
 			'guides/customization/customizing',
