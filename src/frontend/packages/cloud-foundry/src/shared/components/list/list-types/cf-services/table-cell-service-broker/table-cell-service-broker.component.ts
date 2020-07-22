@@ -14,7 +14,8 @@ export enum TableCellServiceBrokerComponentMode {
 }
 
 export interface TableCellServiceBrokerComponentConfig {
-  mode: TableCellServiceBrokerComponentMode
+  mode: TableCellServiceBrokerComponentMode;
+  altScope?: boolean;
 }
 
 @Component({

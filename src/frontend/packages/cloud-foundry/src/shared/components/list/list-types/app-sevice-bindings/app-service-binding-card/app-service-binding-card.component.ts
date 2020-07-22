@@ -159,6 +159,20 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
         })
       )
     },
+    {
+      label: 'Scope',
+      data$: this.serviceInstance$.pipe(
+        switchMap(si => {
+          if (this.isUserProvidedServiceInstance) {
+            return null;
+          }
+          return this.service$.pipe(
+            switchMap(service => cfEntityCatalog.serviceBroker.store.getEntityService(service.entity.entity.service_broker_guid, service.entity.entity.cfGuid, {}).waitForEntity$),
+            map(serviceBroker => serviceBroker.entity.entity.space_guid ? 'Space Scoped' : 'All Spaces')
+          );
+        })
+      )
+    },
     ];
     this.envVarServicesSection$ = this.service$.pipe(map(s => s.entity.entity.label));
 
