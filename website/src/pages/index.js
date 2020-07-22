@@ -9,16 +9,6 @@ import styles from './styles.module.css';
 
 const features = [
   {
-    title: <>Easy to Use</>,
-    imageUrl: 'img/easy.svg',
-    description: (
-      <>
-        Stratos provides an easy to use web-based management user interface
-        designed to meet the needs of both administrators and developers.
-      </>
-    ),
-  },
-  {
     title: <>Cloud Foundry</>,
     imageUrl: 'img/cloudfoundry.png',
     description: (
@@ -36,6 +26,16 @@ const features = [
       <>
         Stratos sports a growing feature set for Kubernetes developers, extened its reach further
         towards providing a single-pane-of-glass for your Cloud Native application development needs.
+      </>
+    ),
+  },
+  {
+    title: <>Multi-Cluster</>,
+    imageUrl: 'img/multi-cluster.svg',
+    description: (
+      <>
+        Stratos allows you to manage multiple Cloud Foundry and Kubernetes cluster from a single
+        management UI
       </>
     ),
   },
@@ -64,8 +64,8 @@ const features = [
     imageUrl: 'img/deploy.svg',
     description: (
       <>
-        Stratos is easy to deploy and can be deployed as an application to Cloud Foundry, to Kubernetes
-        and run locally as a Docker container
+        Stratos is easy to deploy and can be pushed as an application to Cloud Foundry, deployed to Kubernetes using Helm
+        or run locally in a Docker container
       </>
     ),
   },
@@ -79,7 +79,7 @@ function Feature({imageUrl, title, description, cls}) {
     <div className={clsx('col col--4', styles.feature)}>
       {imgUrl && (
         <div className="">
-          <img className={clsx(styles.featureImage, cls)} src={imgUrl} alt={title} />
+          <img className={clsx(styles.featureImage, cls, 'feature-img')} src={imgUrl} alt={title} />
         </div>
       )}
       <h3>{title}</h3>
@@ -97,9 +97,9 @@ function Home() {
       description="Stratos - Web-based Management Interface for Cloud Foundry and Kubernetes">
       <header className={clsx('hero hero--primary', styles.heroBanner)}>
         <div className="container home-intro">
-          <h1 className="hero__title">{siteConfig.title}</h1>
-          <p className="hero__subtitle">{siteConfig.tagline}</p>
-          <div className={styles.buttons}>
+        <h1 className="hero__title">{siteConfig.title}</h1>
+        <h2 className="hero__subtitle">Open-Source Multi-Cluster UI for <br/> Cloud Foundry and Kubernetes</h2>
+          <div className={clsx(styles.buttons, 'get-started')}>
             <Link
               className={clsx(
                 'button button--outline button--secondary button--lg',
@@ -124,17 +124,50 @@ function Home() {
             </div>
           </section>
         )}
-        <section className={clsx(styles.features, 'screenshot-section')}>
+        <section className={clsx(styles.features, 'screenshot-section', 'blue')}>
           <div className="container">
             <div class="screenshot">
-              <img src="img/app-summary.png" />
+              <img class="left" src="img/screens/cf-app.png" />
               <div>
-                Stratos provides a rich, modern, web-based management user interface
-                for both Cloud Foundry and Kubernetes.
+                <h2>Cloud Foundry</h2>
+                <p>Deploy and manage applications in Cloud Foundry. Stream application logs, scale applications and ssh to application instances</p>
+                <p>View and manage Cloud Foundry organizations and spaces and quotas.</p>
+                <p>Browse the Service Marketplace and create and manage service instances.</p>
+                <p>and a whole lot more ...</p>
               </div>
             </div>
           </div>
         </section>
+
+        <section className={clsx(styles.features, 'screenshot-section', 'white')}>
+          <div className="container">
+            <div class="screenshot">
+              <div>
+                <h2>Kubernetes</h2>
+                <p>View cluster-level metadata</p>
+                <p>Browse, view and install Helm Charts</p>
+                <p>View Helm Releases and see relationships between Kubernetes Resources</p>
+                <p>and lots more ...</p>
+              </div>
+              <img class="right" src="img/screens/kube-graph.png" />
+            </div>
+          </div>
+        </section>
+
+        <section className={clsx(styles.features, 'screenshot-section', 'blue')}>
+          <div className="container">
+            <div class="screenshot">
+              <img class="left" src="img/screens/endpoints.png" />
+              <div>
+                <h2>Multi-Cluster</h2>
+                <p>Add and Connect multiple Cloud Foundry and/or Kubernetes clusters.</p>
+                <p>Seemlessly switch between clusters and get aggregated views across clusters.</p>
+                <p>Favorite clusters and entities for easy access from the Home screen.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </main>
     </Layout>
   );

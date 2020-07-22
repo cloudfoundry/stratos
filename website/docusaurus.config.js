@@ -1,12 +1,13 @@
 module.exports = {
   title: 'STRATOS',
-  tagline: 'A Rich Open-Source UI for Cloud Foundry and Kubernetes',
+  tagline: 'Open-Source Multi-Cluster UI for Cloud Foundry and Kubernetes',
   url: 'https://stratos.app',
   baseUrl: '/',
   favicon: 'img/favicon.ico',
   organizationName: 'cloudfoundry',
   projectName: 'stratos',
   themeConfig: {
+    disableDarkMode: true,
     navbar: {
       title: 'STRATOS',
       logo: {
@@ -89,4 +90,7 @@ module.exports = {
       },
     ],
   ],
+  stylesheets: [
+    //'https://fonts.googleapis.com/icon?family=Material+Icons'
+  ]
 };

@@ -1,8 +1,8 @@
 module.exports = {
   docs: {
-    Documentation: ['introduction', 'overview'],
-    'Getting Started': [
-    	'deploy/deploy-readme',
+		Documentation: ['introduction', 'overview'],
+    'Deploying Stratos': [
+			'deploy/deploy-overview',
     	{
     		"Cloud Foundry": [
     			'deploy/cloud-foundry',
@@ -16,35 +16,26 @@ module.exports = {
     		],
     	},
     	'deploy/all-in-one',
-    	'deploy/access'
+			'deploy/access',
+			'deploy/troubleshooting',
     ],
-    Guides: [
-    	{
-    		Contributing: [
-    			'guides/contribution/contributing',
-    			'guides/contribution/pull_request_template',
-    			'guides/contribution/issue_template'
-    		],
-    	},
-		'guides/customization/customizing',
-		{
-    		Developer: [
-    			'guides/developers/developers-guide',
-    			'guides/developers/developers-guide-env-tech',
-    			'guides/developers/developers-guide-e2e-tests'
-
-    		], 
-    	},
-		'guides/troubleshooting/troubleshooting',
-		{
-			Administrator: [
-				'guides/admin/invite-user-guide',
-				'guides/admin/sso'
-			],
+    'Advanced Topics': [
+			'advanced/invite-user-guide',
+			'advanced/sso'
+		],
+		'Contributing to Development': [
+			'guides/contribution/contributing',
+			{
+			Developer: [
+				'guides/developers/developers-guide',
+				'guides/developers/developers-guide-env-tech',
+				'guides/developers/developers-guide-e2e-tests'
+			]
 		}
 		],
 		'Extending Stratos': [
 			'extensions/introduction',
+			'guides/customization/customizing',
 			'extensions/theming',
 			'extensions/frontend',
 			'extensions/backend',

@@ -6,7 +6,7 @@ sidebar_label: Deploy on Cloud Foundry
 
 ## Deployment Steps
 
-The quickest way to install Stratos is to deploy it as a Cloud Foundry application. 
+Stratos can be pushed as an application to Cloud Foundry. 
 
 You can do it in two ways:
 
