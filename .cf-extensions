@@ -1,7 +1,0 @@
-lead_company: SUSE
-contact_email: neil.macdougall@suse.com
-description: Stratos - Console UI for Cloud Foundry
-slack_channel: '#stratos'
-tracker_url: https://github.com/cloudfoundry-incubator/stratos/issues
-proposal_url: https://docs.google.com/document/d/1GgizNSutb3Lku1TshD333-7Dc_6fpKU9Wdi7XloKuK4
-proposed_date: 2017-12-19T11:15:00

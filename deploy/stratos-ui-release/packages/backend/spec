@@ -1,9 +1,0 @@
----
-name: backend
-
-dependencies:
-- golang
-
-files:
-- stratos/{package.json,package-lock.json,plugins.json,gulpfile.js}
-- stratos/{build,src}/**/*

@@ -1,8 +1,0 @@
-@mixin dialog-error-theme($theme, $app-theme) {
-  $warn: map-get($theme, warn);
-  .dialog-error {
-    &__content {
-      color: mat-color($warn);
-    }
-  }
-}

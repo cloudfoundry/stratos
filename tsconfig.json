@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "downlevelIteration": true,
-    "module": "esnext",
-    "rootDir": ".",
-    "target": "es2015"
-  }
-}

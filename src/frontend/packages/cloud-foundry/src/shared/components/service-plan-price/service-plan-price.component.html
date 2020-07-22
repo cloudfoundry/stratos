@@ -1,5 +1,0 @@
-<ng-container *ngIf="servicePlan && servicePlan.entity.extraTyped">
-  <div *ngFor="let cost of servicePlan.entity.extraTyped.costs">
-    {{ cost.unit | titlecase }}: {{ getCostValue(cost) | currency:getCostCurrency(cost):'symbol-narrow':'1.2-2':getCurrencyLocale(cost, false) }}
-  </div>
-</ng-container>

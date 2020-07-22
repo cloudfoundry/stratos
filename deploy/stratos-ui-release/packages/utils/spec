@@ -1,5 +1,0 @@
----
-name: utils
-files:
-- utils/pid_utils.sh
-- utils/syslog_utils.sh

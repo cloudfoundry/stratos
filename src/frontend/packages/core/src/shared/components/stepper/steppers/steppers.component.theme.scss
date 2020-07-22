@@ -1,8 +1,0 @@
-@mixin steppers-theme($theme, $app-theme) {
-  $background-colors: map-get($theme, background);
-  $foreground-colors: map-get($theme, foreground);
-  .steppers {
-    background-color: mat-color($background-colors, background);
-    color: map-get($foreground-colors, base);
-  }
-}

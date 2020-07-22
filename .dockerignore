@@ -1,9 +1,0 @@
-# Files/Folders to ignore for Docker
-node_modules
-.git
-deploy/uaa
-dev-ssl
-docs
-coverage
-dist
-.dist

@@ -1,5 +1,0 @@
-<div *ngIf="(status$ | async) as status" class="app-card-status" [ngClass]="{'app-card-status--ok': (status === cardStatus.OK),
-  'app-card-status--warning': (status === cardStatus.WARNING),
-  'app-card-status--tentative': (status === cardStatus.TENTATIVE),
-  'app-card-status--incomplete': (status === cardStatus.INCOMPLETE),
-  'app-card-status--error': (status === cardStatus.ERROR)}"></div>

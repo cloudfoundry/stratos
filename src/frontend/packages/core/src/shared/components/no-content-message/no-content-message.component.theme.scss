@@ -1,8 +1,0 @@
-@mixin app-no-content-message-theme($theme, $app-theme) {
-  $primary: map-get($theme, primary);
-  $subdued: map-get($app-theme, subdued-color);
-
-  .app-no-content-container {
-    color: $subdued;
-  }
-}

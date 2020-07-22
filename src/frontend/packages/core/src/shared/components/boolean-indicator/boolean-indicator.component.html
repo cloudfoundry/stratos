@@ -1,8 +1,0 @@
-<div class="boolean-indicator" *ngIf="booleanOutput">
-  <div class="boolean-indicator__container" [ngClass]="{'boolean-indicator__container__show-text': showText}">
-    <mat-icon
-      [ngClass]="{'boolean-indicator__container__icon-subtle': booleanOutput.subtle, 'boolean-indicator__container__icon-true': booleanOutput.isTrue, 'boolean-indicator__container__icon-false': !booleanOutput.isTrue}">
-      {{ booleanOutput.icon }}</mat-icon>
-    <div *ngIf="showText">{{ booleanOutput.text }}</div>
-  </div>
-</div>

@@ -1,8 +1,0 @@
-@mixin app-schema-form-theme($theme, $app-theme) {
-  $status-colors: map-get($app-theme, status);
-  $error-color: map-get($status-colors, danger);
-
-  .schema-form__form--data-bad {
-    background-color: transparentize($error-color, .9);
-  }
-}

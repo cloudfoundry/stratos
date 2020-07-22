@@ -1,6 +1,0 @@
-@mixin favorites-meta-card-theme($theme, $app-theme) {
-  $foreground: map-get($theme, foreground);
-  .fav-meta-card__disconnected {
-    border: 1px solid mat-color($foreground, divider);
-  }
-}

@@ -1,9 +1,0 @@
-<div class="copy" [ngClass]="{'copy__success': copySuccessWait}">
-  <div class="copy__copied-div">
-    <span class="copy__copied-msg" *ngIf="showSuccessText">Copied to clipboard</span>
-    <mat-icon class="copy__copied-icon" [ngClass]="{'copy__copy-icon-small': compact}">check_circle</mat-icon>
-  </div>
-  <mat-icon class="copy__copy-icon" [ngClass]="{'copy__copy-icon-small': compact}" *ngIf="canCopy" (click)="copyToClipboard($event)" [matTooltip]="tooltip">
-    content_copy
-  </mat-icon>
-</div>

@@ -1,4 +1,0 @@
-<div *ngIf="row.commit.author.name">
-  <app-github-commit-author *ngIf="row.author; else noCoreAuthor" [commit]="row"></app-github-commit-author>
-  <ng-template #noCoreAuthor>{{row.commit.author.name}}</ng-template>
-</div>

@@ -1,8 +1,0 @@
-<div class="app-state" [ngClass]="{'app-state__with-icon': !hideIcon}">
-  <app-application-state-icon *ngIf="!hideIcon" [status]="status$ | async "></app-application-state-icon>
-  <span class="app-state__label">{{ label$ | async }}</span>
-  <span *ngIf="!initialStateOnly && (subLabel$ | async) as subLabel">
-    <span>&nbsp;-&nbsp;</span>
-  <span class="app-state__sub-label">{{ subLabel$ | async }}</span>
-  </span>
-</div>

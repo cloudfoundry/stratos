@@ -1,8 +1,0 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" tabsHeader="Organization"
-  [favorite]="favorite$ | async">
-  <h1>{{ name$ | async }}</h1>
-</app-page-header>
-<app-loading-page [entityId]="cfOrgService.orgGuid" [entitySchema]="schema" deleteText="Deleting organization"
-  [text]="'Retrieving organization'">
-  <router-outlet></router-outlet>
-</app-loading-page>

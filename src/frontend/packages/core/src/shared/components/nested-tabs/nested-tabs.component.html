@@ -1,8 +1,0 @@
-<div class="nested-tabs">
-  <nav *ngIf="tabs" backgroundColor="grey" mat-tab-nav-bar class="summary__nav">
-    <a mat-tab-link class="mat-tab-fit" *ngFor="let tab of tabs" [routerLink]="[tab.link]" routerLinkActive="active-link" #rla="routerLinkActive" [active]="rla.isActive">
-      {{tab.label}}
-    </a>
-  </nav>
-  <ng-content *ngIf="!tabs"></ng-content>
-</div>

@@ -1,6 +1,0 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" tabsHeader="Application" [favorite]="favorite$ | async">
-  <h1>{{ (applicationService.application$ | async)?.app?.entity?.name }} </h1>
-</app-page-header>
-<app-loading-page [entityId]="applicationService.appGuid" [entitySchema]="schema" deleteText="Deleting application" text="Retrieving application" class="router-component">
-  <router-outlet></router-outlet>
-</app-loading-page>

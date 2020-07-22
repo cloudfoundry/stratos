@@ -1,7 +1,0 @@
-<div class="endpoint-name-cell" *ngIf="endpoint$ | async as endpoint">
-  <a *ngIf="endpoint.canShowLink" routerLink="{{ endpoint.link }}">{{ endpoint.name }}</a>
-  <span *ngIf="!endpoint.canShowLink">{{ endpoint.name }}</span>
-  <mat-icon *ngIf="!!endpoint.system_shared_token"
-    matTooltip="This endpoint's connection is shared by the administrator" class="endpoint-name-cell__icon">share
-  </mat-icon>
-</div>

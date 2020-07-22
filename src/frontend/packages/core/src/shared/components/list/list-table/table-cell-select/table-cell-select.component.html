@@ -1,2 +1,0 @@
-<mat-checkbox [disabled]="(dataSource.isAdding$ | async) || (disable$ | async)" [checked]="!(disable$ | async) && dataSource.selectedRows?.has(dataSource.getRowUniqueId(row))"
-  (change)="dataSource.selectedRowToggle(row)" [matTooltip]="tooltip$ | async"></mat-checkbox>

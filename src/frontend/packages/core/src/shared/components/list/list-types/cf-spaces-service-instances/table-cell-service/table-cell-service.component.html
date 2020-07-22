@@ -1,8 +1,0 @@
-<div *ngIf="isUserProvidedServiceInstance === true">
-  <div>User Provided</div>
-</div>
-<div *ngIf="isUserProvidedServiceInstance === false">
-  <div><a [routerLink]="serviceUrl$ | async">{{ serviceName$ | async }}</a></div>
-  <div>Plan: {{ row.entity.service_plan?.entity.name }}</div>
-  <div>Broker: {{ serviceBrokerName$ | async }}</div>
-</div>

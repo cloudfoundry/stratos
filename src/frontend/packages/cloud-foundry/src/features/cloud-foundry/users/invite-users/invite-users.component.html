@@ -1,6 +1,0 @@
-<app-page-header>Invite Users</app-page-header>
-<app-steppers cancel="{{defaultCancelUrl}}">
-  <app-step title="Create Users" [onNext]="create.onNext" [valid]="create.valid$ | async" [finishButtonText]="'Invite'" [cancelButtonText]="create.madeChanges ? 'Close' : 'Cancel'">
-    <app-invite-users-create #create></app-invite-users-create>
-  </app-step>
-</app-steppers>

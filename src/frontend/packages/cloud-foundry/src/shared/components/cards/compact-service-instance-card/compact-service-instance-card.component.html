@@ -1,9 +1,0 @@
-<div class="compact-service-instance-card" *ngIf="serviceInstance">
-  <div class="compact-service-instance-card__name ">
-    {{ serviceInstance.entity.name }}
-  </div>
-  <div class="compact-service-instance-card__tags" *ngIf="serviceInstanceTags.length > 0">
-    <app-chips [chips]="serviceInstanceTags"></app-chips>
-  </div>
-  <div class="compact-service-instance-card__updated ">{{ serviceInstance.metadata.updated_at | date:'medium' }}</div>
-</div>

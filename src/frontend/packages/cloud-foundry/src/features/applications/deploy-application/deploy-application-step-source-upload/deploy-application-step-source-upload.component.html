@@ -1,8 +1,0 @@
-<h1>Uploading Source files</h1>
-
-<div class="source-upload" *ngIf="(deployer.fileTransferStatus$ | async) as fsStatus">
-  <div class="source-upload__fileSize">{{ fsStatus.totalFiles }} files, {{ fsStatus.totalBytes | bytesToHumanSize }} data</div>
-  <app-upload-progress-indicator value="{{ 100 * fsStatus.filesSent / fsStatus.totalFiles }}"></app-upload-progress-indicator>
-  <div class="source-upload__fileName" *ngIf="fsStatus.filesSent !== fsStatus.totalFiles">{{ fsStatus.fileName }}</div>
-  <div class="source-upload__complete" *ngIf="fsStatus.filesSent === fsStatus.totalFiles">File upload complete</div>
-</div>

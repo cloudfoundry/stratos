@@ -1,6 +1,0 @@
-<div *ngIf="row.entity.status===0" class="app-autoscaler-event-change">
-  {{row.entity.old_instances}}
-  <mat-icon [ngClass]="row.entity.new_instances-row.entity.old_instances | tableCellAutoscalerEventChangeIcon:'class'">
-    {{row.entity.new_instances-row.entity.old_instances | tableCellAutoscalerEventChangeIcon:'icon'}}</mat-icon>
-  {{row.entity.new_instances}}
-</div>

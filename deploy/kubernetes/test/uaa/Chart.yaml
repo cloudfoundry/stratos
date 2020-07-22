@@ -1,4 +1,0 @@
-apiVersion: v1
-description: A Helm chart for deploying a UAA for testing
-name: uaa
-version: 0.1.0

@@ -1,7 +1,0 @@
-<div class="monitor-icon">
-  <div *ngIf="currentState | async as state">
-    <mat-icon class="monitor-icon__error" *ngIf="state.error">error</mat-icon>
-    <mat-progress-spinner *ngIf="!state.error && state.busy" diameter="20" mode="indeterminate"></mat-progress-spinner>
-    <mat-icon class="monitor-icon__done" *ngIf="!state.error && !state.busy && state.completed">done</mat-icon>
-  </div>
-</div>
