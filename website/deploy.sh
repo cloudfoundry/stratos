@@ -33,21 +33,12 @@ fi
 
 msg="Website update: $(date)"
 
-if [ ! -d "./site-dist" ]; then
-  echo "Cloning website project"
-  git clone git@github.com:cf-stratos/website.git site-dist
-else
-  echo "Updating site checkout"
-  cd site-dist
-  git fetch
-  git reset --hard origin/master
-  git clean -fd
-  git rebase
-  cd ..
-fi
+echo "Cloning web site"
+rm -rf ./site-dist
+git clone git@github.com:cf-stratos/website.git site-dist
 
 echo "Copying newer site content ..."
-rsync -r ./build/ ./site-dist
+rsync --delete -r ./build/ ./site-dist
 
 cd site-dist
 echo "Adding all files"
