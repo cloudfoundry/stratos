@@ -4,11 +4,10 @@
 // Implemented as a single script here so that it works on Windows, Linux and Mac
 
 const path = require('path');
-const fs = require('fs-extra');
+const fs = require('fs');
 
 // __dirname is the folder where build.js is located
 const STRATOS_DIR= path.resolve(__dirname, '..');
-const DEVKIT_DIST_DIR= path.join(STRATOS_DIR, 'dist-devkit');
 
 function processFile(filepath) {
   if (fs.existsSync(filepath)) {
