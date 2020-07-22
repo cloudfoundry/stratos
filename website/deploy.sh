@@ -20,7 +20,7 @@ sidebar_label: Deploy using Helm
 EOF
 
 # Concatentate the helm chart readme file
-cat ${DIR}/../deploy/kubernetes/console/README.md >> ./docs/deploy/kubernetes/install.md
+tail -n +2 ${DIR}/../deploy/kubernetes/console/README.md >> ./docs/deploy/kubernetes/install.md
 npm run build
 
 
