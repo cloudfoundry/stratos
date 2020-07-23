@@ -21,7 +21,7 @@ import {
   AppServiceBindingListConfigService,
 } from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { ServiceActionHelperService } from '../../../../shared/data-services/service-action-helper.service';
-import { fetchTotalResults } from '../../../cloud-foundry/cf.helpers';
+import { fetchTotalResults } from '../../../cf/cf.helpers';
 import { ApplicationService } from '../../application.service';
 
 @Injectable()

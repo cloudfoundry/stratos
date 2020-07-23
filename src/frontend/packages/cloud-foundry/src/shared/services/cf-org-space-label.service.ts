@@ -10,7 +10,7 @@ import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { CFAppState } from '../../cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
-import { haveMultiConnectedCfs } from '../../features/cloud-foundry/cf.helpers';
+import { haveMultiConnectedCfs } from '../../features/cf/cf.helpers';
 import { selectCfEntity } from '../../store/selectors/api.selectors';
 
 export class CfOrgSpaceLabelService {

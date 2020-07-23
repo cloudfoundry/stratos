@@ -28,7 +28,7 @@ import { PaginationMonitorFactory } from '../../../../../../../store/src/monitor
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CfCellHelper } from '../../../../../features/cloud-foundry/cf-cell.helpers';
+import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';

@@ -42,7 +42,7 @@ const customRoutes: Routes = [
   },
   {
     path: 'cloud-foundry',
-    loadChildren: () => import('./features/cloud-foundry/cloud-foundry-section.module').then(m => m.CloudFoundrySectionModule),
+    loadChildren: () => import('./features/cf/cloud-foundry-section.module').then(m => m.CloudFoundrySectionModule),
     data: {
       stratosNavigation: {
         label: 'Cloud Foundry',

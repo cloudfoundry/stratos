@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import {
-  CloudFoundryEndpointService,
-} from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-card-cf-user-info',

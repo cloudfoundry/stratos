@@ -22,8 +22,8 @@ import { PaginationMonitor } from '../../../../../../../store/src/monitors/pagin
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import { waitForCFPermissions } from '../../../../../features/cf/cf.helpers';
 import { CfUser, CfUserMissingRoles } from '../../../../../store/types/cf-user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
