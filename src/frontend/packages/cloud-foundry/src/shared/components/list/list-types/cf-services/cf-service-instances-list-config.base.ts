@@ -78,7 +78,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
       columnId: 'service',
       headerCell: () => 'Service',
       cellComponent: TableCellServiceComponent,
-      cellFlex: '2'
+      cellFlex: '3'
     },
     {
       columnId: 'lastOp',
@@ -119,7 +119,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
         orderKey: 'creation',
         field: 'metadata.created_at'
       },
-      cellFlex: '2'
+      cellFlex: '1'
     },
   ];
 
