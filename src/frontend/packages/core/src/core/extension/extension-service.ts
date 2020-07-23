@@ -167,7 +167,8 @@ export class ExtensionService {
 
     if (extensionMetadata.loginComponent) {
       // Override the component used for the login route
-      const loginRoute = routeConfig.find(r => r.path === 'login') || {};
+      const loginRouteRoot = routeConfig.find(r => r.path === 'login') || { children: [] };
+      const loginRoute = loginRouteRoot.children.find(c => c.path === '');
       loginRoute.component = extensionMetadata.loginComponent;
       needsReset = true;
     }
