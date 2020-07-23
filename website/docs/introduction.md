@@ -47,9 +47,9 @@ What kind of code is in Stratos? We've integrated [Code Climate](https://codecli
 
 ## Contributing
 
-We very much welcome developers who would like to get involved and contribute to the development of the Stratos project. Please refer to the [Contributing guide](guides/contribution/contributing.md) for more information.
+We very much welcome developers who would like to get involved and contribute to the development of the Stratos project. Please refer to the [Contributing guide](developer/contributing.md) for more information.
 
-For information to help getting started with development, please read the [Developer's Guide](guides/developers/developers-guide.md).
+For information to help getting started with development, please read the [Developer's Guide](developer/introduction).
 
 ## Support and feedback
 
@@ -59,5 +59,5 @@ You can join the Cloud Foundry Slack here - https://slack.cloudfoundry.org/  - a
 
 ## License
 
-The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE).
+The work done has been licensed under Apache License 2.0. The license file can be found [here](license).
 

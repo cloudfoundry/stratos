@@ -1,6 +1,6 @@
 module.exports = {
   docs: {
-		Documentation: ['introduction', 'overview'],
+		Documentation: ['introduction', 'overview', 'license'],
     'Deploying Stratos': [
 			'deploy/deploy-overview',
     	{
@@ -22,10 +22,11 @@ module.exports = {
     ],
     'Advanced Topics': [
 			'advanced/invite-user-guide',
-			'advanced/sso'
+			'advanced/sso',
+			'advanced/bosh-metrics'
 		],
-		'Contributing to Development': [
-			'guides/contribution/contributing',
+		'Development': [
+			'developer/contributing',
 			'developer/introduction',
 			{
 			Frontend: [
@@ -43,8 +44,9 @@ module.exports = {
 	],
 		'Extending Stratos': [
 			'extensions/introduction',
-			'guides/customization/customizing',
 			'extensions/theming',
+			'extensions/customizing',
+			'extensions/v4-migration',
 			'extensions/frontend',
 			'extensions/backend',
 		],

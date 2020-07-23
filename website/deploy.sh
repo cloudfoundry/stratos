@@ -23,10 +23,44 @@ EOF
 
 # Concatentate the helm chart readme file
 tail -n +2 ${DIR}/../deploy/kubernetes/console/README.md >> ./docs/deploy/kubernetes/install.md
+
+# License file
+
+cat << EOF > ./docs/license.md
+---
+id: license
+title: License
+sidebar_label: License
+---
+
+Stratos is licensed under the Apache 2.0 Software License, shown below:
+
+\`\`\`
+EOF
+
+cat ${DIR}/../LICENSE >> ./docs/license.md
+echo "\`\`\`" >> ./docs/license.md
+
+# Contributing
+
+cat << EOF > ./docs/developer/contributing.md
+---
+title: Contributing
+sidebar_label: Contributing
+---
+
+EOF
+
+tail -n +2 ${DIR}/../CONTRIBUTING.md >> ./docs/developer/contributing.md
+
+# Copy and generate files only
+if [ "$ARG" == "-g" ]; then
+  exit 0
+fi
+
 npm run build
 
-
-# Build only
+# Generate and build only
 if [ "$ARG" == "-b" ]; then
   exit 0
 fi

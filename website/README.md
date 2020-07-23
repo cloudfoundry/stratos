@@ -23,7 +23,7 @@ This command starts a local development server and open up a browser window. Mos
 ### Build
 
 ```
-$ npm build
+$ ./deploy.sh -b
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
@@ -33,5 +33,8 @@ This command generates static content into the `build` directory and can be serv
 We use GitHub pages - this command is a convenient way to build the website and push to the `gh-pages` branch.
 
 ```
-$ GIT_USER=<Your GitHub username> USE_SSH=true npm deploy
+$ ./deploy.sh
 ```
+
+
+> Note: The website is deployed to the GitHub Repository `cf-stratos/wesbite` which hosts https://stratos.app

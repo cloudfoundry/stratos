@@ -4,7 +4,7 @@ title: Stratos Overview
 sidebar_label: Overview 
 ---
 
-The Stratos Console provides a web-based UI to allow developers and administrators to manage their applications and cloud foundry deployment(s).
+Stratos provides a web-based UI to allow developers and administrators to manage their applications and cloud foundry deployment(s).
 
 It is designed to manage one or more Cloud Foundry deployments. It does so by managing "endpoints", where each endpoint is a reference to a Cloud Foundry deployment. The notion of an endpoint is not specific to Cloud Foundry, allowing Stratos to connect to other service types in the future.
 
@@ -22,7 +22,7 @@ The main components:
 
 ## Authentication
 
-Stratos UI authenticates users using a Cloud Foundry UAA service. It must be configured with the details necessary to communicate with a UAA. When the user logs in to the Console, their login will be validated with the UAA. The Console uses a scope to identify Console administrators from regular users.
+Stratos authenticates users using a Cloud Foundry UAA service. It must be configured with the details necessary to communicate with a UAA. When the user logs in to the Console, their login will be validated with the UAA. The Console uses a scope to identify Console administrators from regular users.
 
 Administrators use the 'Endpoints Dashboard' within the Console to add new endpoints to the Console. All users are then able to connect to these endpoints by providing their credentials. The Console will use these credentials to communicate with the UAA for the given endpoint (typically Cloud Foundry) and obtain a refresh and access token. These tokens are encrypted and stored in the Endpoint Datastore.
 

@@ -42,7 +42,7 @@ In the above example the client id is `stratos-invite` and client secret is `pas
 
 Alternatively, you can use an existing UAA Client, if one is already available with the appropriate scopes.
 
-> Note: You will need the Client ID and Client Secret used above when enabling User Invite support in the Stratos UI
+> Note: You will need the Client ID and Client Secret used above when enabling User Invite support in Stratos
 
 ## Configuring SMTP Server details and (optionally) modifying Email Templates
 

@@ -1,4 +1,8 @@
-# Contributing to Stratos
+---
+title: Contributing
+sidebar_label: Contributing
+---
+
 
 Stratos is an open project and welcomes contributions. These guidelines are provided to help you understand how the project works and to make contributing smooth and fun for everybody involved.
 

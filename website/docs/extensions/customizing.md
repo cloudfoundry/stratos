@@ -4,37 +4,8 @@ title: Customizing Stratos
 sidebar_label: Customizing Stratos 
 ---
 
-Stratos provides a mechanism for customization - the following customizations are currently supported:
 
-- Changing the theme colors
-- Changing certain image assets (favorite icon, login background and logo)
-- Overriding styles
-- Adding new functionality
-- Changing the initial loading indicator
-
-# Migrating to Stratos V4 Customization
-In V4 there are breaking customization changes. These changes allow a much improved approach to extensions by opening the door to npm style plugins.
-To aid in migrating we've provided these instructions.
-
-1) Before updating to the latest code...
-    1) Run `npm run customize-reset` to remove all previously created sym links.
-    2) Read through the customization documentation below to get a better understanding of the new process.
-1) Update your codebase with the desired v4 code.
-1) Run `npm install` (only required first time, this will ensure you have the required version of Angular).
-1) Change directory to `./build/tools/v4-migration` and run the migration script `./migrate.sh`.
-    - This will copy your customizations from `custom-src` to a new Angular package `src/frontend/packages/custom_extensions`.
-1) Check that the new package exports your custom module and if applicable your custom-routing module.
-    - The migrate script should do this in `src/frontend/packages/custom_extensions/src/public-api.ts`.
-1) Check that your ts config file defines the public api file.
-    - `src/tsconfig.json` file's `compilerOptions/paths` section should contain something like `"@custom/extensions": ["frontend/packages/custom_extensions/src/public-api.ts"]`.
-1) Check that your new package's package.json defines your custom module and if application custom-routing module.
-    - See `src/frontend/packages/suse_extensions/package.json` file's `stratos` section.
-    - Note your `routingModule` entry label should not have a preceding `_`.
-1) Build Stratos in your usual way, for instance `npm run build`.
-    - It could be that this fails due to TypeScript import issues, if so go through these and fix.
-    - During build time the custom packages will be discovered and output, see section starting `Building with these extensions`. These should contain the modules your require.
-1) Run Stratos your usual way. Ensure you can navigate to all your custom parts.
-1) Once you are happy everything works as intended remove the old `./custom-src` directory and commit you changes.
+> This document is out of date and is in the process of being refreshed.
 
 ## Approach
 
@@ -150,7 +121,7 @@ When you perform an `npm install` or explicitly run `npm run customize`, the cus
 
 Within the `custom-src/frontend/app/custom` folder you must create a module in the file `custom.module.ts` named `CustomModule` - this will be imported into the Stratos application and is the mechanism by which you can add custom code to the front-end.
 
-We currently expose the following extension points in the Stratos UI:
+We currently expose the following extension points in Stratos:
 
 - Changing the component to use for the login screen
 - Adding new items to the side navigation menu

@@ -1,4 +1,7 @@
-# Connecting Prometheus-boshrelease to Stratos
+---
+title: Connecting Prometheus-boshrelease to Stratos
+sidebar_label: Connecting Prometheus-boshrelease
+---
 
 Stratos can show some metrics stored in Prometheus.
 
