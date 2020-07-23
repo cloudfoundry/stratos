@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { StratosConfig } from '../lib/stratos.config';
 
 /**
@@ -52,12 +53,12 @@ export class SassHandler {
         } else {
           pkgName = pkgParts.shift();
         }
-        const pkgPath = pkgParts.join('/');
+        const pkgPath = pkgParts.join(path.sep);
         // See if we can resolve the package name
         const knownPath = config.resolveKnownPackage(pkgName);
         if (knownPath) {
           return {
-            file: knownPath + '/_' + pkgPath + '.scss'
+            file: path.join(knownPath, pkgPath + '.scss')
           };
         }
       }
