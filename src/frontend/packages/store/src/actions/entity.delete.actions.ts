@@ -11,8 +11,8 @@ export class EntityDeleteCompleteAction implements Action {
   constructor(
     public entityGuid: string,
     public entityType: string,
-    public endpointType: string,
     public endpointGuid: string,
+    public endpointType: string,
     public action: EntityRequestAction,
   ) {}
 
