@@ -4,8 +4,8 @@
   </ng-container>
   <div *ngIf="config?.mode === 'SCOPE'">
     <ng-container *ngIf="spaceLink$ | async as spaceLink; else notSpaceScoped">
-      <a *ngIf="altScope; else normScope" [routerLink]="spaceLink.link">{{ spaceLink.name }}</a>
-      <ng-template #normScope>Space</ng-template>
+      <ng-container *ngIf="config?.altScope; else normScope">Space</ng-container>
+      <ng-template #normScope><a [routerLink]="spaceLink.link">{{ spaceLink.name }}</a></ng-template>
     </ng-container>
     <ng-template #notSpaceScoped>
       All Spaces
