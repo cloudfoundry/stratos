@@ -10,6 +10,8 @@ import { PageNotFoundComponentComponent } from './core/page-not-found-component/
 import { CustomRoutingImportModule } from './custom-import.module';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 import { HomePageComponent } from './features/home/home/home-page.component';
+import { LoginPageComponent } from './features/login/login-page/login-page.component';
+import { LogoutPageComponent } from './features/login/logout-page/logout-page.component';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
 import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain-mismatch.component';
 import { LocalAccountWizardComponent } from './features/setup/local-account-wizard/local-account-wizard.component';
@@ -40,7 +42,19 @@ const appRoutes: Routes = [
   },
   { path: 'upgrade', component: UpgradePageComponent },
   { path: 'domainMismatch', component: DomainMismatchComponent },
-  { path: 'login', loadChildren: () => import('./features/login/login.module').then(m => m.LoginModule) },
+  {
+    path: 'login',
+    children: [
+      {
+        path: '',
+        component: LoginPageComponent
+      },
+      {
+        path: 'logout',
+        component: LogoutPageComponent
+      },
+    ]
+  },
   {
     path: '',
     component: DashboardBaseComponent,
