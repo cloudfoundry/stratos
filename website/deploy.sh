@@ -78,6 +78,10 @@ echo "Copying newer site content ..."
 rsync --delete --exclude=.git -r $DIR/build/ ./website
 
 cd website
+
+echo "Adding CNAME file"
+echo "stratos.app" > CNAME
+
 echo "Adding all files"
 git add -A
 git commit -m "${msg}"
