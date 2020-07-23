@@ -6,10 +6,8 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import {
-  CloudFoundryOrganizationService,
-} from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CfUser } from '../../../../../store/types/cf-user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';

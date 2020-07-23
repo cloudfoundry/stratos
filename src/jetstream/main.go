@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"net"
 	"net/http"
 	"os"
@@ -89,9 +90,6 @@ func getEnvironmentLookup() *env.VarSet {
 	// Fallback to a "config.properties" files in our directory
 	envLookup.AppendSource(config.NewConfigFileLookup("./config.properties"))
 
-	// Fall back to "default.config.properties" in our directory
-	envLookup.AppendSource(config.NewConfigFileLookup("./default.config.properties"))
-
 	// Fallback to individual files in the "/etc/secrets" directory
 	envLookup.AppendSource(config.NewSecretsDirLookup("/etc/secrets"))
 
@@ -114,6 +112,8 @@ func main() {
 			log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.UnixDate})
 		}
 	}
+
+	rand.Seed(time.Now().UnixNano())
 
 	log.SetOutput(os.Stdout)
 

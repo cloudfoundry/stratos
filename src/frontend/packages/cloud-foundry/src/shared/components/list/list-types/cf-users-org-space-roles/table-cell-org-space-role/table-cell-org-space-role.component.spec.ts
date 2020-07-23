@@ -9,8 +9,8 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserServiceTestProvider } from '../../../../../../../test-framework/user-service-helper';
 import { ISpace } from '../../../../../../cf-api.types';
-import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
-import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../../features/cf/cf-page.types';
+import { CfRolesService } from '../../../../../../features/cf/users/manage-users/cf-roles.service';
 import { CfRoleCheckboxComponent } from '../../../../cf-role-checkbox/cf-role-checkbox.component';
 import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role.component';
 

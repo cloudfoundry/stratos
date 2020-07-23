@@ -14,13 +14,17 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { connectedEndpointsOfTypesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { haveMultiConnectedCfs } from '../../../../../features/cloud-foundry/cf.helpers';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import { haveMultiConnectedCfs } from '../../../../../features/cf/cf.helpers';
 import { CfOrgSpaceItem, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CfServiceCardComponent } from './cf-service-card/cf-service-card.component';
 import { CfServicesDataSource } from './cf-services-data-source';
 import { TableCellServiceActiveComponent } from './table-cell-service-active/table-cell-service-active.component';
 import { TableCellServiceBindableComponent } from './table-cell-service-bindable/table-cell-service-bindable.component';
+import {
+  TableCellServiceBrokerComponent,
+  TableCellServiceBrokerComponentMode,
+} from './table-cell-service-broker/table-cell-service-broker.component';
 import {
   TableCellServiceCfBreadcrumbsComponent,
 } from './table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
@@ -105,10 +109,19 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   }, {
     columnId: 'broker',
     headerCell: () => 'Broker',
-    cellDefinition: {
-      valuePath: 'entity.label',
+    cellComponent: TableCellServiceBrokerComponent,
+    cellConfig: {
+      mode: TableCellServiceBrokerComponentMode.NAME
     },
-    cellFlex: '1'
+    cellFlex: '2'
+  }, {
+    columnId: 'brokerScope',
+    headerCell: () => 'Scope',
+    cellComponent: TableCellServiceBrokerComponent,
+    cellConfig: {
+      mode: TableCellServiceBrokerComponentMode.SCOPE
+    },
+    cellFlex: '2'
   }, {
     columnId: 'plans',
     headerCell: () => 'Plans',

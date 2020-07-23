@@ -17,7 +17,7 @@ import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
-import { fetchTotalResults } from '../../features/cloud-foundry/cf.helpers';
+import { fetchTotalResults } from '../../features/cf/cf.helpers';
 import { QParam, QParamJoiners } from '../q-param';
 
 

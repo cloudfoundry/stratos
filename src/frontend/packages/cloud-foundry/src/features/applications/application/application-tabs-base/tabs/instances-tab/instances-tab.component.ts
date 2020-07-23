@@ -5,8 +5,8 @@ import { CF_GUID } from '../../../../../../../../core/src/shared/entity.tokens';
 import {
   CfAppInstancesConfigService,
 } from '../../../../../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
-import { ActiveRouteCfOrgSpace } from '../../../../../cloud-foundry/cf-page.types';
-import { CloudFoundryEndpointService } from '../../../../../cloud-foundry/services/cloud-foundry-endpoint.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../cf/cf-page.types';
+import { CloudFoundryEndpointService } from '../../../../../cf/services/cloud-foundry-endpoint.service';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 
 @Component({

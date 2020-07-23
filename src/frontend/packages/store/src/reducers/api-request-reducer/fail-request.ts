@@ -26,8 +26,8 @@ export function failRequest(state, action: IFailedRequestAction) {
       busy: false,
       deleted: false,
       error: true,
+      message: action.message
     };
-    requestFailedState.message = action.message;
   } else {
     requestFailedState.fetching = false;
     requestFailedState.error = true;
