@@ -82,14 +82,20 @@ cd website
 echo "Adding CNAME file"
 echo "stratos.app" > CNAME
 
-echo "Adding all files"
-git add -A
-git commit -m "${msg}"
-echo "Pushing changes ..."
-git push
+if [ -z "$(git status --porcelain)" ]; then 
+  echo "No changes to publish"
+else
+  echo "Website has changed"
+  echo "Adding all files"
+  git add -A
+  git commit -m "${msg}"
+  echo "Pushing changes ..."
+  git push
+fi
 
 popd > /dev/null
 
+echo "Removing website dist folder"
 rm -rf $tmpdir
 
 popd > /dev/null
