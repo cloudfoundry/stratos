@@ -2,12 +2,19 @@
 
 ## 4.0.0
 
-[Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.2.1...4.0.0)
+[Full Changelog](https://github.com/SUSE/stratos/compare/3.2.1...4.0.0)
 
 This release contains a number of fixes and improvements:
 
 **Improvements:**
 
+- Add Kubernetes Terminal feature [\#422](https://github.com/SUSE/stratos/issues/422)
+- Add Dark Mode [\#410](https://github.com/SUSE/stratos/issues/410)
+- Add Security Observability support [\#401](https://github.com/SUSE/stratos/issues/401)
+- Update kube dashboard version [\#395](https://github.com/SUSE/stratos/issues/395)
+- Workload: Add warning if manifest parses with errors [\#390](https://github.com/SUSE/stratos/issues/390)
+- Workload Summary: Improve Ready/Not Ready stats when there are terminated containers [\#388](https://github.com/SUSE/stratos/issues/388)
+- Update theme to reflect new SUSE branding [\#385](https://github.com/SUSE/stratos/issues/385)
 - Extensions: Remove the need for symlinks and improve the build process [\#4472](https://github.com/cloudfoundry/stratos/issues/4472)
 - Extensions: Allow Themes to be published and installed to/from npm [\#4471](https://github.com/cloudfoundry/stratos/issues/4471)
 - Extensions: Move to extensions and themes to be packages [\#4470](https://github.com/cloudfoundry/stratos/issues/4470)
@@ -34,6 +41,9 @@ This release contains a number of fixes and improvements:
 
 **Fixes:**
 
+- Helm Chart: Icon is missing [\#393](https://github.com/SUSE/stratos/issues/393)
+- Workload Summary: Ring chart series toggled on refresh & legend vs ring colours missmatched [\#389](https://github.com/SUSE/stratos/issues/389)
+- Can't connect a K3S endpoint [\#372](https://github.com/SUSE/stratos/issues/372)
 - Ensure `cf push` works from Windows  [\#4465](https://github.com/cloudfoundry/stratos/issues/4465)
 - Visiting marketplace tab breaks service list [\#4397](https://github.com/cloudfoundry/stratos/issues/4397)
 - CF Application reports error after restage [\#4392](https://github.com/cloudfoundry/stratos/issues/4392)
