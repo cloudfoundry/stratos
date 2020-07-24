@@ -12,6 +12,7 @@ import { HelmReleaseServicesTabComponent } from './release/tabs/helm-release-ser
 import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summary-tab/helm-release-summary-tab.component';
 import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
 import { HelmReleasesTabComponent } from './releases-tab/releases-tab.component';
+import { HelmReleaseAnalysisTabComponent } from './release/tabs/helm-release-analysis-tab/helm-release-analysis-tab.component';
 
 const routes: Routes = [
   {
@@ -36,7 +37,8 @@ const routes: Routes = [
           { path: 'values', component: HelmReleaseValuesTabComponent },
           { path: 'pods', component: HelmReleasePodsTabComponent },
           { path: 'services', component: HelmReleaseServicesTabComponent },
-          { path: 'graph', component: HelmReleaseResourceGraphComponent }
+          { path: 'graph', component: HelmReleaseResourceGraphComponent },
+          { path: 'analysis', component: HelmReleaseAnalysisTabComponent },
         ]
       },
     ]

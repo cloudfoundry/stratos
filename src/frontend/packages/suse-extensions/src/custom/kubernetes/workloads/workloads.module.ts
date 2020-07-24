@@ -18,6 +18,7 @@ import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-value
 import { HelmReleasesTabComponent } from './releases-tab/releases-tab.component';
 import { WorkloadsStoreModule } from './store/workloads.store.module';
 import { WorkloadsRouting } from './workloads.routing';
+import { HelmReleaseAnalysisTabComponent } from './release/tabs/helm-release-analysis-tab/helm-release-analysis-tab.component';
 
 @NgModule({
   imports: [
@@ -39,6 +40,7 @@ import { WorkloadsRouting } from './workloads.routing';
     HelmReleaseServicesTabComponent,
     HelmReleaseResourceGraphComponent,
     HelmReleaseCardComponent,
+    HelmReleaseAnalysisTabComponent,
   ],
   entryComponents: [
     HelmReleaseCardComponent

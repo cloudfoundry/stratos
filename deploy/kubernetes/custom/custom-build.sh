@@ -25,4 +25,9 @@ function custom_image_build() {
   # Build and push an image for the Kubernetes Terminal
   log "-- Building/publishing Kubernetes Terminal"
   patchAndPushImage stratos-kube-terminal Dockerfile.kubeterminal "${STRATOS_PATH}/deploy/containers/kube-terminal"
+  
+  # Analzyers container
+  log "-- Building/publishing Stratos Analyzers"
+  patchAndPushImage stratos-analyzers Dockerfile "${STRATOS_PATH}/src/jetstream/plugins/analysis/container"
+ 
 }

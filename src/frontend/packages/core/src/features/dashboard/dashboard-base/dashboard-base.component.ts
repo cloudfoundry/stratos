@@ -17,7 +17,9 @@ import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-ca
 import { TabNavService } from '../../../../tab-nav.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { IHeaderBreadcrumbLink } from '../../../shared/components/page-header/page-header.types';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
+import { IPageSideNavTab } from '../page-side-nav/page-side-nav.component';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
 
@@ -30,7 +32,7 @@ import { SideNavItem } from './../side-nav/side-nav.component';
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
   public activeTabLabel$: Observable<string>;
-  public subNavData$: Observable<[string, Portal<any>]>;
+  public subNavData$: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
   public isMobile$: Observable<boolean>;
   public sideNavMode$: Observable<string>;
   public sideNavMode: string;
@@ -133,8 +135,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       this.tabNavService.getCurrentTabHeaderObservable().pipe(
         startWith(null)
       ),
-      this.tabNavService.tabSubNav$
-    );
+      this.tabNavService.tabSubNav$,
+      this.tabNavService.tabSubNavBreadcrumbs$
+    ).pipe(map(([tabNav, tabSubNav, tabSubNavBreadcrumb]) => [tabNav ? tabNav.label : null, tabSubNav, tabNav, tabSubNavBreadcrumb]));
 
     // Register all health checks for endpoint types that support this
     entityCatalog.getAllEndpointTypes().forEach(epType => {

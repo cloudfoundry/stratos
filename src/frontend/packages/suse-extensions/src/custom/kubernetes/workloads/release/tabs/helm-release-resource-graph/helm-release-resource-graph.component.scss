@@ -3,3 +3,9 @@
   height: 100%;
   width: 100%;
 }
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 1000;
+  }
+}

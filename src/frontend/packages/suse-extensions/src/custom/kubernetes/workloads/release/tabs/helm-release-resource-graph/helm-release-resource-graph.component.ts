@@ -1,13 +1,22 @@
 import { Component, ComponentFactoryResolver, OnDestroy, OnInit } from '@angular/core';
-import { Edge, Node } from '@swimlane/ngx-graph';
+import { Edge } from '@swimlane/ngx-graph';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Subject, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import {
   KubernetesResourceViewerComponent,
 } from '../../../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
-import { KubeAPIResource } from '../../../../store/kube.types';
+import { ResourceAlert, ResourceAlertLevel } from '../../../../services/analysis-report.types';
+import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
+import {
+  HelmReleaseGraphLink,
+  HelmReleaseGraphNode,
+  HelmReleaseGraphNodeData,
+  HelmReleaseResource,
+  HelmReleaseResources,
+} from '../../../workload.types';
+import { getIcon } from '../../icon-helper';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
 
@@ -22,6 +31,26 @@ const layouts = [
   'colaForceDirected'
 ];
 
+interface CustomHelmReleaseGraphNode extends Omit<HelmReleaseGraphNode, 'data'> {
+  data: CustomHelmReleaseGraphNodeData
+}
+
+interface CustomHelmReleaseGraphNode {
+  id: string;
+  label: string;
+  data: CustomHelmReleaseGraphNodeData
+}
+
+interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
+  missing: boolean,
+  dash: number,
+  fill: string,
+  text: string,
+  icon: any,
+  alerts: [],
+  alertSummary: {}
+}
+
 @Component({
   selector: 'app-helm-release-resource-graph',
   templateUrl: './helm-release-resource-graph.component.html',
@@ -31,7 +60,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   // see: https://swimlane.github.io/ngx-graph/#/#quick-start
 
-  public nodes: Node[] = [];
+  public nodes: CustomHelmReleaseGraphNode[] = [];
   public links: Edge[] = [];
 
   update$: BehaviorSubject<boolean> = new BehaviorSubject(false);
@@ -44,31 +73,62 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   private graph: Subscription;
 
+  private didInitialFit = false;
+
+  public path: string;
+
+  private analysisReportUpdated = new Subject<any>();
+  private analysisReportUpdated$ = this.analysisReportUpdated.pipe(
+    startWith(null),
+    distinctUntilChanged(),
+    publishReplay(1),
+    refCount()
+  );
+
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
     private helper: HelmReleaseHelperService,
-    private previewPanel: SidePanelService) { }
+    public analyzerService: KubernetesAnalysisService,
+    private previewPanel: SidePanelService) {
+    this.path = `${this.helper.namespace}/${this.helper.releaseTitle}`;
+  }
 
   ngOnInit() {
 
     // Listen for the graph
-    this.graph = this.helper.fetchReleaseGraph().subscribe(g => {
-      const newNodes = [];
-      Object.values(g.nodes).forEach((node: any) => {
+    this.graph = combineLatest(
+      this.helper.fetchReleaseGraph(),
+      this.analysisReportUpdated$
+    ).subscribe(([g, report]) => {
+      const newNodes: CustomHelmReleaseGraphNode[] = [];
+      Object.values(g.nodes).forEach((node: HelmReleaseGraphNode) => {
         const colors = this.getColor(node.data.status);
-        newNodes.push({
+        const icon = getIcon(node.data.kind);
+        const missing = node.data.status === 'missing';
+
+        const newNode: CustomHelmReleaseGraphNode = {
           id: node.id,
           label: node.label,
           data: {
             ...node.data,
+            missing: node.data.status === 'missing',
+            dash: missing ? 6 : 0,
             fill: colors.bg,
-            text: colors.fg
+            text: colors.fg,
+            icon: icon,
+            alerts: null,
+            alertSummary: {}
           },
-        });
+        };
+
+        // Does this node have any alerts?
+        this.applyAlertToNode(newNode, report)
+
+        newNodes.push(newNode);
       });
       this.nodes = newNodes;
 
-      const newLinks = [];
+      const newLinks: HelmReleaseGraphLink[] = [];
       Object.values(g.links).forEach((link: any) => {
         newLinks.push({
           id: link.id,
@@ -79,7 +139,46 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
       });
       this.links = newLinks;
       this.update$.next(true);
+
+      if (!this.didInitialFit) {
+        this.didInitialFit = true;
+        setTimeout(() => this.fitGraph(), 10);
+      }
     });
+  }
+
+  private applyAlertToNode(newNode, report) {
+    if (report && report.alerts) {
+      Object.values(report.alerts).forEach((group: ResourceAlert[]) => {
+        group.forEach(alert => {
+          if (
+            newNode.data.kind.toLowerCase() === alert.kind &&
+            newNode.data.metadata.name === alert.name
+            // namespace is undefined, however the only resources we have should be from the correct context
+          ) {
+            newNode.data.alerts = newNode.data.alerts || [];
+            newNode.data.alerts.push(alert);
+            newNode.data.alertSummary = newNode.data.alertSummary || {};
+            if (alert.level > newNode.data.alertSummary.level || !newNode.data.alertSummary.level) {
+              newNode.data.alertSummary.color = this.alertLevelToColor(alert.level);
+              newNode.data.alertSummary.level = alert.level;
+            }
+          }
+        });
+      });
+    }
+  }
+
+  private alertLevelToColor(level: ResourceAlertLevel) {
+    // These colours need to come from theme - #420
+    switch (level) {
+      case ResourceAlertLevel.Info:
+        return '#42a5f5';
+      case ResourceAlertLevel.Warning:
+        return '#ff9800';
+      case ResourceAlertLevel.Error:
+        return '#f44336';
+    }
   }
 
   ngOnDestroy() {
@@ -89,15 +188,20 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   }
 
   // Open side panel when node is clicked
-  public onNodeClick(node: any) {
-    this.previewPanel.show(
-      KubernetesResourceViewerComponent,
-      {
-        title: 'Helm Release Resource Preview',
-        resource$: this.getResource(node)
-      },
-      this.componentFactoryResolver
-    );
+  public onNodeClick(node: CustomHelmReleaseGraphNode) {
+    this.analysisReportUpdated$.pipe(first()).subscribe(analysis => {
+      this.previewPanel.show(
+        KubernetesResourceViewerComponent,
+        {
+          title: 'Helm Release Resource Preview',
+          resource$: this.getResource(node),
+          analysis,
+          resourceKind: node.data.kind
+        },
+        this.componentFactoryResolver
+      );
+    })
+
   }
 
   public fitGraph() {
@@ -138,12 +242,31 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getResource(node: any): Observable<KubeAPIResource> {
+  private getResource(node: CustomHelmReleaseGraphNode): Observable<HelmReleaseResource> {
     return this.helper.fetchReleaseResources().pipe(
       filter(r => !!r),
-      map((r: any[]) => Object.values(r).find((res: any) => res.metadata.name === node.label && res.metadata.kind === node.kind)),
+      // tap(r => {
+      //   console.log(node);
+      //   console.log(r);
+      // }),
+      map((r: HelmReleaseResources) => Object.values(r.data).find((res) => {
+        // if (!res.metadata) {
+        //   console.log(node, res);
+        // }
+        return res.metadata.name === node.label && res.kind === node.data.kind;
+      })),
       first(),
     );
+  }
+
+  public analysisChanged(report) {
+    if (report === null) {
+      this.analysisReportUpdated.next(null);
+    } else {
+      this.analyzerService.getByID(this.helper.endpointGuid, report.id).subscribe(results => {
+        this.analysisReportUpdated.next(results);
+      });
+    }
   }
 
 }

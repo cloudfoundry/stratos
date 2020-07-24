@@ -3,8 +3,9 @@
 </button>
 <mat-menu #menu="matMenu" [xPosition]="'before'" [yPosition]="'below'">
   <ng-container *ngFor="let action of actions">
-    <button class="table-cell-actions__button" mat-menu-item *ngIf="obs.visible[action.label] | async" (click)="action.action(row)"
-      [disabled]="!(obs.enabled[action.label] | async)" matTooltip="{{action.description}}" matTooltipShowDelay="2000">
+    <button class="table-cell-actions__button" mat-menu-item *ngIf="obs.visible[action.label] | async"
+      (click)="action.action(row)" [disabled]="!(obs.enabled[action.label] | async)" matTooltip="{{action.description}}"
+      matTooltipShowDelay="2000" [ngClass]="{'hasIcon': !!action.icon}">
       <mat-icon *ngIf="!!action.icon">{{action.icon}}</mat-icon>
       <span>{{action.label}}</span>
     </button>

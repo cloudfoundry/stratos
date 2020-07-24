@@ -5,7 +5,7 @@ import {
 import { StratosEndpointExtensionDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { IFavoriteMetadata } from '../../../../../../store/src/types/user-favorites.types';
 import { kubernetesEntityFactory } from '../../kubernetes-entity-factory';
-import { HelmRelease, HelmReleaseGraph, HelmReleaseResource } from '../workload.types';
+import { HelmRelease, HelmReleaseGraph, HelmReleaseResources } from '../workload.types';
 import { workloadsEntityCatalog } from '../workloads-entity-catalog';
 import {
   WorkloadGraphBuilders,
@@ -62,7 +62,7 @@ function generateReleaseResourceEntity(endpointDefinition: StratosEndpointExtens
     schema: kubernetesEntityFactory(helmReleaseResourceEntityType),
     endpoint: endpointDefinition
   };
-  workloadsEntityCatalog.resource = new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseResource, WorkloadResourceBuilders>(
+  workloadsEntityCatalog.resource = new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseResources, WorkloadResourceBuilders>(
     definition,
     {
       actionBuilders: workloadResourceBuilders

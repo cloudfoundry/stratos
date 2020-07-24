@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { KubernetesPod, KubeService } from '../store/kube.types';
+import { KubeAPIResource, KubernetesPod, KubeService, KubeStatus } from '../store/kube.types';
 
 export interface HelmRelease {
   endpointId: string;
@@ -36,11 +36,43 @@ export interface HelmReleasePod extends HelmReleaseEntity, KubernetesPod { }
 export interface HelmReleaseService extends HelmReleaseEntity, KubeService { }
 
 export interface HelmReleaseGraph extends HelmReleaseEntity {
-  nodes: {};
-  links: {};
+  nodes: { [key: string]: HelmReleaseGraphNode };
+  links: { [key: string]: HelmReleaseGraphLink };
 }
 
-export type HelmReleaseResource = any;
+export interface HelmReleaseGraphNode {
+  id: string;
+  label: string;
+  data: HelmReleaseGraphNodeData
+}
+
+export interface HelmReleaseGraphNodeData {
+  kind: string,
+  status: string,
+  metadata: {
+    name: string,
+    namespace: string
+  }
+}
+
+export interface HelmReleaseGraphLink {
+  id: string;
+  label?: string;
+  source: string;
+  target: string;
+}
+
+export interface HelmReleaseResources extends HelmReleaseEntity {
+  data: HelmReleaseResource[],
+  kind: string
+};
+
+export interface HelmReleaseKubeAPIResource extends KubeAPIResource {
+  apiVersion: string;
+  kind: string;
+}
+
+export type HelmReleaseResource = HelmReleaseKubeAPIResource | KubeStatus;
 
 @Injectable()
 export class HelmReleaseGuid {

@@ -1,0 +1,16 @@
+<div *ngIf="alertInfo">
+  <div *ngFor="let group of alertInfo">
+    <div *ngIf="showHeader" class="alert__group">{{group.name}}</div>
+    <div *ngFor="let alert of group.alerts">
+      <div class="alert__info">
+        <div [ngSwitch]="alert.level" class="alert__icon">
+          <mat-icon class="text-info" *ngSwitchCase="1">info</mat-icon>
+          <mat-icon class="text-warning" *ngSwitchCase="2">warning</mat-icon>
+          <mat-icon class="text-danger" *ngSwitchCase="3">error</mat-icon>
+          <mat-icon class="text-tentative" *ngSwitchDefault>help_outline</mat-icon>
+        </div>
+        {{ alert.message }}
+      </div>
+    </div>
+  </div>
+</div>

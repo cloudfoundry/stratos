@@ -6,10 +6,11 @@ import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/ope
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { PreviewableComponent } from '../../../../../core/src/shared/previewable-component';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
-import { BasicKubeAPIResource, KubeAPIResource } from '../store/kube.types';
+import { BasicKubeAPIResource, KubeAPIResource, KubeStatus } from '../store/kube.types';
 
 export interface KubernetesResourceViewerConfig {
   title: string;
+  analysis?: any;
   resource$: Observable<BasicKubeAPIResource>;
   resourceKind: string;
 }
@@ -44,32 +45,42 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
   public hasPodMetrics$: Observable<boolean>;
   public podRouterLink$: Observable<string[]>;
 
+  private analysis;
+  public alerts;
+
   setProps(props: KubernetesResourceViewerConfig) {
     this.title = props.title;
+    this.analysis = props.analysis;
     this.resource$ = props.resource$.pipe(
-      map((item: any) => {// KubeAPIResource
+      filter(item => !!item),
+      map((item: (KubeAPIResource | KubeStatus)) => {
         const resource: KubernetesResourceViewerResource = {} as KubernetesResourceViewerResource;
         const newItem = {} as any;
 
         resource.raw = item;
-
         Object.keys(item || []).forEach(k => {
-          if (k !== 'endpointId' && k !== 'releaseTitle' && k !== 'expandedStatus') {
+          if (k !== 'endpointId' && k !== 'releaseTitle' && k !== 'expandedStatus' && k !== '_metadata') {
             newItem[k] = item[k];
           }
         });
 
         resource.jsonView = newItem;
-        resource.age = moment(item.metadata.creationTimestamp).fromNow(true);
-        resource.creationTimestamp = item.metadata.creationTimestamp;
 
-        resource.labels = [];
-        Object.keys(item.metadata.labels || []).forEach(labelName => {
-          resource.labels.push({
-            name: labelName,
-            value: item.metadata.labels[labelName]
+        const fallback = item['_metadata'] || {};
+
+        const ts = item.metadata ? item.metadata.creationTimestamp : fallback.creationTimestamp;
+        resource.age = moment(ts).fromNow(true);
+        resource.creationTimestamp = ts;
+
+        if (item.metadata && item.metadata.labels) {
+          resource.labels = [];
+          Object.keys(item.metadata.labels || []).forEach(labelName => {
+            resource.labels.push({
+              name: labelName,
+              value: item.metadata.labels[labelName]
+            });
           });
-        });
+        }
 
         if (item.metadata && item.metadata.annotations) {
           resource.annotations = [];
@@ -81,8 +92,13 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
           });
         }
 
-        resource.kind = item.kind || props.resourceKind;
-        resource.apiVersion = item.apiVersion || this.getVersionFromSelfLink(item.metadata.selfLink);
+        resource.kind = item['kind'] || fallback.kind || props.resourceKind;
+        resource.apiVersion = item['apiVersion'] || fallback.apiVersion || this.getVersionFromSelfLink(item.metadata['selfLink']);
+
+        // Apply analysis if there is one - if this is a k8s resource (i.e. not a container)
+        if (item.metadata) {
+          this.applyAnalysis(resource);
+        }
         return resource;
       }),
       publishReplay(1),
@@ -121,6 +137,16 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
 
   private getEndpointId(res): string {
     return this.kubeEndpointService.kubeGuid || res.endpointId || res.metadata.kubeId;
+  }
+
+  private applyAnalysis(resource) {
+    let id = (resource.kind || 'pod').toLowerCase();
+    id = `${id}/${resource.raw.metadata.namespace}/${resource.raw.metadata.name}`;
+    if (this.analysis && this.analysis.alerts[id]) {
+      this.alerts = this.analysis.alerts[id];
+    } else {
+      this.alerts = null;
+    }
   }
 
 }

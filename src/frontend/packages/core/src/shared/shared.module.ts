@@ -117,6 +117,7 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
+import { SessionService } from './services/session.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
 
@@ -322,6 +323,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     InternalEventMonitorFactory,
     MetricsRangeSelectorService,
     LongRunningOperationsService,
+    SessionService
   ]
 })
 export class SharedModule { }

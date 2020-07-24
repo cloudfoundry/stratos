@@ -7,6 +7,7 @@ import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-
 import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
+import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
 import { KubernetesService } from '../services/kubernetes.service';
 
 @Component({
@@ -27,16 +28,12 @@ import { KubernetesService } from '../services/kubernetes.service';
     },
     KubernetesService,
     KubernetesEndpointService,
+    KubernetesAnalysisService,
   ]
 })
 export class KubernetesTabBaseComponent implements OnInit {
 
-  tabLinks = [
-    { link: 'summary', label: 'Summary', icon: 'kubernetes', iconFont: 'stratos-icons' },
-    { link: 'nodes', label: 'Nodes', icon: 'node', iconFont: 'stratos-icons' },
-    { link: 'namespaces', label: 'Namespaces', icon: 'namespace', iconFont: 'stratos-icons' },
-    { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons' },
-  ];
+  tabLinks = [];
 
   public isFetching$: Observable<boolean>;
   public favorite$: Observable<UserFavoriteEndpoint>;
@@ -44,7 +41,19 @@ export class KubernetesTabBaseComponent implements OnInit {
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
-    public favoritesConfigMapper: FavoritesConfigMapper) { }
+    public favoritesConfigMapper: FavoritesConfigMapper,
+    public analysisService: KubernetesAnalysisService,
+  ) {
+    this.tabLinks = [
+      { link: 'summary', label: 'Summary', icon: 'kubernetes', iconFont: 'stratos-icons' },
+      { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
+      { link: '-', label: 'Cluster' },
+      { link: 'nodes', label: 'Nodes', icon: 'node', iconFont: 'stratos-icons' },
+      { link: 'namespaces', label: 'Namespaces', icon: 'namespace', iconFont: 'stratos-icons' },
+      { link: '-', label: 'Resources' },
+      { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons' },
+    ];
+  }
 
   ngOnInit() {
     this.isFetching$ = this.kubeEndpointService.endpoint$.pipe(

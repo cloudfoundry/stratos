@@ -5,9 +5,30 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import {
+  AnalysisReportRunnerComponent,
+} from './analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
+import {
+  AnalysisReportSelectorComponent,
+} from './analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
+import { AnalysisReportViewerComponent } from './analysis-report-viewer/analysis-report-viewer.component';
+import {
+  KubeScoreReportViewerComponent,
+} from './analysis-report-viewer/kube-score-report-viewer/kube-score-report-viewer.component';
+import { PopeyeReportViewerComponent } from './analysis-report-viewer/popeye-report-viewer/popeye-report-viewer.component';
+import {
+  ResourceAlertPreviewComponent,
+} from './analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
+import {
+  ResourceAlertViewComponent,
+} from './analysis-report-viewer/resource-alert-preview/resource-alert-view/resource-alert-view.component';
+import { KubeConsoleComponent } from './kube-terminal/kube-console.component';
+import {
   KubedashConfigurationComponent,
 } from './kubernetes-dashboard/kubedash-configuration/kubedash-configuration.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
+import {
+  KubernetesNamespaceAnalysisReportComponent,
+} from './kubernetes-namespace/kubernetes-namespace-analysis-report/kubernetes-namespace-analysis-report.component';
 import {
   KubernetesNamespacePodsComponent,
 } from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
@@ -32,6 +53,7 @@ import { KubernetesResourceViewerComponent } from './kubernetes-resource-viewer/
 import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab-base.component';
 import { KubernetesRoutingModule } from './kubernetes.routing';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
+import { AnalysisStatusCellComponent } from './list-types/analysis-status-cell/analysis-status-cell.component';
 import { KubernetesLabelsCellComponent } from './list-types/kubernetes-labels-cell/kubernetes-labels-cell.component';
 import {
   KubeNamespacePodCountComponent,
@@ -87,14 +109,22 @@ import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from './services/kubernetes-node.service';
 import { KubernetesService } from './services/kubernetes.service';
+import {
+  AnalysisInfoCardComponent,
+} from './tabs/kubernetes-analysis-tab/kubernetes-analysis-info/analysis-info-card/analysis-info-card.component';
+import {
+  KubernetesAnalysisInfoComponent,
+} from './tabs/kubernetes-analysis-tab/kubernetes-analysis-info/kubernetes-analysis-info.component';
+import {
+  KubernetesAnalysisReportComponent,
+} from './tabs/kubernetes-analysis-tab/kubernetes-analysis-report/kubernetes-analysis-report.component';
+import { KubernetesAnalysisTabComponent } from './tabs/kubernetes-analysis-tab/kubernetes-analysis-tab.component';
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
-import { KubeConsoleComponent } from './kube-terminal/kube-console.component';
 
 /* tslint:disable:max-line-length */
-
 /* tslint:enable */
 
 @NgModule({
@@ -115,6 +145,7 @@ import { KubeConsoleComponent } from './kube-terminal/kube-console.component';
     KubernetesNamespacesTabComponent,
     KubernetesDashboardTabComponent,
     KubernetesSummaryTabComponent,
+    KubernetesAnalysisTabComponent,
     PodMetricsComponent,
     KubernetesNodeLinkComponent,
     KubernetesNodeIpsComponent,
@@ -149,6 +180,18 @@ import { KubeConsoleComponent } from './kube-terminal/kube-console.component';
     KubeServiceCardComponent,
     KubedashConfigurationComponent,
     KubernetesPodContainersComponent,
+    KubernetesAnalysisReportComponent,
+    KubernetesAnalysisInfoComponent,
+    AnalysisInfoCardComponent,
+    AnalysisReportViewerComponent,
+    PopeyeReportViewerComponent,
+    AnalysisReportSelectorComponent,
+    AnalysisReportRunnerComponent,
+    ResourceAlertPreviewComponent,
+    ResourceAlertViewComponent,
+    KubeScoreReportViewerComponent,
+    AnalysisStatusCellComponent,
+    KubernetesNamespaceAnalysisReportComponent,
   ],
   providers: [
     KubernetesService,
@@ -173,9 +216,22 @@ import { KubeConsoleComponent } from './kube-terminal/kube-console.component';
     KubeServiceCardComponent,
     KubernetesResourceViewerComponent,
     KubernetesPodContainersComponent,
+    PopeyeReportViewerComponent,
+    KubeScoreReportViewerComponent,
+    AnalysisReportSelectorComponent,
+    ResourceAlertPreviewComponent,
+    AnalysisStatusCellComponent,
   ],
   exports: [
-    KubernetesResourceViewerComponent
+    KubernetesResourceViewerComponent,
+    AnalysisReportViewerComponent,
+    PopeyeReportViewerComponent,
+    KubeScoreReportViewerComponent,
+    AnalysisReportSelectorComponent,
+    AnalysisReportRunnerComponent,
+    ResourceAlertPreviewComponent,
+    ResourceAlertViewComponent,
+    AnalysisStatusCellComponent,
   ]
 })
 export class KubernetesModule { }

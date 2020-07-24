@@ -1,3 +1,7 @@
+// Theming for the copmponents in the Kubernetes package
+
+@import '../src/custom/kubernetes/tabs/kubernetes-analysis-tab/kubernetes-analysis-report/kubernetes-analysis-report.component.theme';
+@import '../src/custom/kubernetes/tabs/kubernetes-analysis-tab/kubernetes-analysis-info/analysis-info-card/analysis-info-card.component.theme';
 @import '../src/custom/helm/list-types/monocular-chart-card/monocular-chart-card.component.theme';
 
 @mixin apply-theme-suse-extensions($stratos-theme) {
@@ -5,6 +9,8 @@
   $theme: map-get($stratos-theme, theme);
   $app-theme: map-get($stratos-theme, app-theme);
 
+  @include kube-analysis-report-theme($theme, $app-theme);
+  @include kube-analysis-card-theme($theme, $app-theme);
   @include monocular-chart-card($theme, $app-theme);
 
 }

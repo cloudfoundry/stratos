@@ -75,5 +75,8 @@ INVITE_USER_CLIENT_SECRET=
 # Simplify development with FDB (value is port of FDB server: 27016 for FDB, 27017 for MongoDB)
 #FDB_LOCAL_DEV=27017
 
+# Analysis services API
+#ANALYSIS_SERVICES_API=
+
 # Download link when installing the Kubernetes Dashboard in a targetted Kube Endpoint
 # STRATOS_KUBERNETES_DASHBOARD_IMAGE=

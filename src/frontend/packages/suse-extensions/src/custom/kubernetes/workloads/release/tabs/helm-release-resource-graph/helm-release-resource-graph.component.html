@@ -3,23 +3,52 @@
     <mat-icon>all_out</mat-icon>
     <span>Fit</span>
   </button>
-  <button mat-button name="toggle" (click)="toggleLayout()" matTooltip="Toggle Layout">
-    <mat-icon>view_quilt</mat-icon>
-    <span>Toggle Layout</span>
-  </button>
+
+  <app-analysis-report-runner *ngIf="analyzerService.enabled$ | async" [kubeId]="helper.endpointGuid"
+    [namespace]="helper.namespace" [app]="helper.releaseTitle">
+  </app-analysis-report-runner>
+
+  <app-analysis-report-selector *ngIf="analyzerService.enabled$ | async" (selected)="analysisChanged($event)"
+    [endpoint]="helper.endpointGuid" [path]="path"></app-analysis-report-selector>
 </app-page-sub-nav>
 
-<ngx-graph *ngIf="nodes && nodes.length" class="chart-container" [links]="links" [nodes]="nodes" [update$]="update$"
-  [zoomToFit$]="fit$" [layout]="layout">
+<ngx-graph *ngIf="nodes && nodes.length" class="chart-container" [draggingEnabled]="false" [links]="links"
+  [nodes]="nodes" [update$]="update$" [zoomToFit$]="fit$" [layout]="layout">
   <ng-template #nodeTemplate let-node>
     <svg:g class="node" (click)="onNodeClick(node)">
-      <svg:rect [attr.width]="node.dimension.width" [attr.height]="node.dimension.height" [attr.fill]="node.data.fill"
-        class="node"></svg:rect>
-      />
-      <svg:text class="no-style" alignment-baseline="central" [attr.fill]="node.data.text" [attr.x]="10"
+      <svg:rect rx="4" ry="4" [attr.width]="node.dimension.width" [attr.height]="node.dimension.height"
+        [attr.fill]="node.data.fill" class="node"></svg:rect>
+
+      <svg:text alignment-baseline="top">
+        <svg:tspan [attr.fill]="node.data.text" x="10" dy="1.2em" font-size="32px"
+          [attr.font-family]="node.data.icon.font">{{ node.data.icon.name }}</svg:tspan>
+        <svg:tspan [attr.fill]="node.data.text" x="52" dy="-1.2em" style="font-weight: bold">{{node.label}}</svg:tspan>
+        <svg:tspan [attr.fill]="node.data.text" x="52" dy="1.5em">{{node.data.kind}}</svg:tspan>
+      </svg:text>
+
+      <!--
+
+      <svg:text class="no-style" alignment-baseline="central" [attr.fill]="node.data.text" [attr.x]="30"
         [attr.y]="node.dimension.height / 2">
         {{node.label}} ({{node.data.kind}})
       </svg:text>
+      <svg:text class="no-style" alignment-baseline="central" [attr.fill]="node.data.text" [attr.x]="10"
+        [attr.y]="node.dimension.height / 2" font-size="24" font-family="stratos-icons">cloud_foundry</svg:text>
+
+    -->
+      <svg:rect *ngIf="!node.data.alerts" [attr.stroke-dasharray]="node.data.dash" x="-2" y="-2" rx="4" ry="4"
+        [attr.width]="node.dimension.width + 4" [attr.height]="node.dimension.height + 4"
+        style="stroke:black;stroke-width:2;fill:none;"></svg:rect>
+      <svg:rect *ngIf="node.data.alerts" x="-2" y="-2" rx="4" ry="4" [attr.stroke]="node.data.alertSummary.color"
+        [attr.width]="node.dimension.width + 4" [attr.height]="node.dimension.height + 4"
+        style="stroke-width:5;fill:none;"></svg:rect>
     </svg:g>
   </ng-template>
 </ngx-graph>
+<div class="resources__loading" *ngIf="nodes && !nodes.length">
+  <div class="resources__loading__content">
+    Loading resources
+    <mat-progress-bar class="" [color]="'primary'" mode="indeterminate">
+    </mat-progress-bar>
+  </div>
+</div>

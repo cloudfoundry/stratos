@@ -7,12 +7,14 @@ import { catchError, map, share, switchMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../../../../core/src/core/logger.service';
 import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
+import { SessionService } from '../../../../../../../core/src/shared/services/session.service';
 import { SnackBarService } from '../../../../../../../core/src/shared/services/snackbar.service';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityRequestAction, WrapperRequestActionSuccess } from '../../../../../../../store/src/types/request.types';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
 import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';
+import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { KubernetesPod, KubeService } from '../../../store/kube.types';
 import { KubePaginationAction } from '../../../store/kubernetes.actions';
 import { HelmReleaseGraph, HelmReleaseGuid, HelmReleasePod, HelmReleaseService } from '../../workload.types';
@@ -26,6 +28,7 @@ import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
   styleUrls: ['./helm-release-tab-base.component.scss'],
   providers: [
     HelmReleaseHelperService,
+    KubernetesAnalysisService,
     {
       provide: HelmReleaseGuid,
       useFactory: (activatedRoute: ActivatedRoute) => ({
@@ -43,8 +46,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
 
   private sub: Subscription;
 
-  // private connection: Connection;
-
   public breadcrumbs = [{
     breadcrumbs: [
       { value: 'Workloads', routerLink: '/workloads' }
@@ -53,23 +54,28 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
 
   public title = '';
 
-  tabLinks: IPageSideNavTab[] = [
-    { link: 'summary', label: 'Summary', icon: 'helm', iconFont: 'stratos-icons' },
-    { link: 'notes', label: 'Notes', icon: 'subject' },
-    { link: 'values', label: 'Values', icon: 'list' },
-    { link: '-', label: 'Resources' },
-    // { link: 'graph', label: 'Overview', icon: 'share' },
-    { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons'  },
-    { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' }
-  ];
+  tabLinks: IPageSideNavTab[];
+
   constructor(
     public helmReleaseHelper: HelmReleaseHelperService,
     private store: Store<AppState>,
     private logService: LoggerService,
-    private snackbarService: SnackBarService
+    private analysisService: KubernetesAnalysisService,
+    private snackbarService: SnackBarService,
+    sessionService: SessionService
   ) {
     this.title = this.helmReleaseHelper.releaseTitle;
 
+    this.tabLinks = [
+      { link: 'summary', label: 'Summary', icon: 'helm', iconFont: 'stratos-icons' },
+      { link: 'notes', label: 'Notes', icon: 'subject' },
+      { link: 'values', label: 'Values', icon: 'list' },
+      { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
+      { link: '-', label: 'Resources' },
+      { link: 'graph', label: 'Overview', icon: 'share', hidden$: sessionService.isTechPreview().pipe(map(tp => !tp)) },
+      { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons' },
+      { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' }
+    ];
 
     const releaseRef = this.helmReleaseHelper.guidAsUrlFragment();
     const host = window.location.host;
@@ -132,21 +138,23 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
             const releaseServicesAction = kubeEntityCatalog.service.actions.getInWorkload(
               this.helmReleaseHelper.releaseTitle,
               this.helmReleaseHelper.endpointGuid,
-            )
+            );
             this.populateList(releaseServicesAction, svcs);
           }
 
-          const resources = { ...manifest };
-          resources.endpointId = this.helmReleaseHelper.endpointGuid;
-          resources.releaseTitle = this.helmReleaseHelper.releaseTitle;
+          // const resources = { ...manifest };
+          // kind === 'Resources' is an array, really they should go into a pagination section
+          messageObj.endpointId = this.helmReleaseHelper.endpointGuid;
+          messageObj.releaseTitle = this.helmReleaseHelper.releaseTitle;
+
           const releaseResourceAction = workloadsEntityCatalog.resource.actions.get(
-            resources.releaseTitle,
-            resources.endpointId,
+            this.helmReleaseHelper.releaseTitle,
+            this.helmReleaseHelper.endpointGuid,
           );
-          this.addResource(releaseResourceAction, resources);
+          this.addResource(releaseResourceAction, messageObj);
         } else if (messageObj.kind === 'ManifestErrors') {
           if (messageObj.data) {
-            this.snackbarService.show('Errors were found when parsing this workload. Not all resources may be shown', 'Dismiss')
+            this.snackbarService.show('Errors were found when parsing this workload. Not all resources may be shown', 'Dismiss');
           }
         }
       }
@@ -181,7 +189,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
       newResource.metadata.kubeId = action.kubeGuid;
       // The service entity from manifest is missing this, but apply here to ensure any others are caught
       newResource.metadata.namespace = this.helmReleaseHelper.namespace;
-      const entityId = action.entity[0].getId(resource)
+      const entityId = action.entity[0].getId(resource);
       newResources[entityId] = newResource;
     });
 

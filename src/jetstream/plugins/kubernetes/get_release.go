@@ -102,7 +102,7 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 	// this back incrementally
 
 	// Parse the manifest
-	rel := helm.NewHelmRelease(res, endpointGUID, userID)
+	rel := helm.NewHelmRelease(res, endpointGUID, userID, c.portalProxy)
 
 	graph := helm.NewHelmReleaseGraph(rel)
 

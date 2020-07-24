@@ -5,6 +5,7 @@ import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesResourceViewerComponent } from './kubernetes-resource-viewer.component';
+import { ResourceAlertViewComponent } from './../analysis-report-viewer/resource-alert-preview/resource-alert-view/resource-alert-view.component';
 
 describe('KubernetesResourceViewerComponent', () => {
   let component: KubernetesResourceViewerComponent;
@@ -12,7 +13,7 @@ describe('KubernetesResourceViewerComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesResourceViewerComponent],
+      declarations: [KubernetesResourceViewerComponent, KubernetesResourceViewerComponent, ResourceAlertViewComponent],
       imports: KubernetesBaseTestModules,
       providers: [
         KubernetesEndpointService,

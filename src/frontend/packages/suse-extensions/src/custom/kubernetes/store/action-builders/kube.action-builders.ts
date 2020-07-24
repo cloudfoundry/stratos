@@ -3,6 +3,13 @@ import {
 } from '../../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetHelmReleasePods, GetHelmReleaseServices } from '../../workloads/store/workloads.actions';
 import {
+  DeleteAnalysisReport,
+  GetAnalysisReportById,
+  GetAnalysisReports,
+  GetAnalysisReportsByPath,
+  RunAnalysisReport,
+} from '../anaylsis.actions';
+import {
   CreateKubernetesNamespace,
   GeKubernetesDeployments,
   GetKubernetesDashboard,
@@ -144,4 +151,36 @@ export interface KubeDashboardActionBuilders extends OrchestratedActionBuilders 
 
 export const kubeDashboardActionBuilders: KubeDashboardActionBuilders = {
   get: (kubeGuid: string) => new GetKubernetesDashboard(kubeGuid)
+}
+
+export interface AnalysisReportsActionBuilders extends OrchestratedActionBuilders {
+  getMultiple: (
+    kubeGuid: string
+  ) => GetAnalysisReports;
+  getById: (
+    kubeGuid: string,
+    id: string,
+  ) => GetAnalysisReportById;
+  getByPath: (
+    kubeGuid: string,
+    path: string,
+  ) => GetAnalysisReportsByPath;
+  delete: (
+    kubeGuid: string,
+    id: string,
+  ) => DeleteAnalysisReport;
+  run: (
+    kubeGuid: string,
+    id: string,
+    namespace?: string,
+    app?: string
+  ) => RunAnalysisReport;
+}
+
+export const analysisReportsActionBuilders: AnalysisReportsActionBuilders = {
+  getMultiple: (kubeGuid: string) => new GetAnalysisReports(kubeGuid),
+  getById: (kubeGuid: string, id: string) => new GetAnalysisReportById(kubeGuid, id),
+  getByPath: (kubeGuid: string, path: string) => new GetAnalysisReportsByPath(kubeGuid, path),
+  delete: (kubeGuid: string, id: string) => new DeleteAnalysisReport(kubeGuid, id),
+  run: (kubeGuid: string, id: string, namespace?: string, app?: string) => new RunAnalysisReport(kubeGuid, id, namespace, app)
 }

@@ -1,3 +1,4 @@
+import { KubernetesNamespaceAnalysisReportComponent } from './kubernetes-namespace/kubernetes-namespace-analysis-report/kubernetes-namespace-analysis-report.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -24,6 +25,11 @@ import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernete
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 import { KubedashConfigurationComponent } from './kubernetes-dashboard/kubedash-configuration/kubedash-configuration.component';
 import { KubeConsoleComponent } from './kube-terminal/kube-console.component';
+import { KubernetesAnalysisTabComponent } from './tabs/kubernetes-analysis-tab/kubernetes-analysis-tab.component';
+import { KubernetesAnalysisReportComponent } from './tabs/kubernetes-analysis-tab/kubernetes-analysis-report/kubernetes-analysis-report.component';
+import {
+  KubernetesAnalysisInfoComponent
+} from './tabs/kubernetes-analysis-tab/kubernetes-analysis-info/kubernetes-analysis-info.component';
 
 const kubernetes: Routes = [{
   path: '',
@@ -81,7 +87,10 @@ const kubernetes: Routes = [{
       path: 'services',
       component: KubernetesNamespaceServicesComponent
     },
-
+    {
+      path: 'analysis',
+      component: KubernetesNamespaceAnalysisReportComponent
+    }
   ]
 },
 {
@@ -108,6 +117,18 @@ const kubernetes: Routes = [{
     {
       path: 'pods',
       component: KubernetesPodsTabComponent
+    },
+    {
+      path: 'analysis',
+      component: KubernetesAnalysisTabComponent
+    },
+    {
+      path: 'analysis/report/:id',
+      component: KubernetesAnalysisReportComponent
+    },
+    {
+      path: 'analysis/info',
+      component: KubernetesAnalysisInfoComponent
     },
   ]
 },

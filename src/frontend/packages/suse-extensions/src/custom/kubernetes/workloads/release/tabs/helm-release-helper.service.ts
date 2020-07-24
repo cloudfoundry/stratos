@@ -10,7 +10,7 @@ import {
   HelmReleaseChartData,
   HelmReleaseGraph,
   HelmReleaseGuid,
-  HelmReleaseResource,
+  HelmReleaseResources,
 } from '../../workload.types';
 import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
 
@@ -69,7 +69,7 @@ export class HelmReleaseHelperService {
     );
   }
 
-  public fetchReleaseResources(): Observable<HelmReleaseResource> {
+  public fetchReleaseResources(): Observable<HelmReleaseResources> {
     // Get helm release
     const action = workloadsEntityCatalog.resource.actions.get(this.releaseTitle, this.endpointGuid)
     return workloadsEntityCatalog.resource.store.getEntityMonitor(

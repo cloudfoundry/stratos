@@ -174,7 +174,7 @@ First, create the custom-src folder structure - from the top-level of the Strato
 
 ```
 mkdir -p custom-src/frontend/app/custom
-mkdir -p custom-src/frontend/assets/custom
+mkdir -p /frontend/assets/custom
 ```
 
 Next, run the customize task:

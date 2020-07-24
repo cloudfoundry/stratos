@@ -1,6 +1,6 @@
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { addKubernetesEntitySchema, KubernetesEntitySchema } from '../../kubernetes-entity-factory';
-import { HelmRelease, HelmReleaseGraph, HelmReleaseResource } from '../workload.types';
+import { HelmRelease, HelmReleaseGraph, HelmReleaseResources } from '../workload.types';
 
 export const helmReleaseEntityKey = 'helmRelease';
 export const helmReleasePodEntityType = 'helmReleasePod';
@@ -22,7 +22,7 @@ export const getHelmReleaseIdByObj = (entity: HelmRelease) => getHelmReleaseId(e
 export const getHelmReleaseGraphId = (endpointId: string, releaseTitle: string) => `${endpointId}${separator}${releaseTitle}`;
 export const getHelmReleaseGraphIdByObj = (entity: HelmReleaseGraph) => getHelmReleaseGraphId(entity.endpointId, entity.releaseTitle);
 export const getHelmReleaseResourceId = (endpointId: string, releaseTitle: string) => `${endpointId}${separator}${releaseTitle}`;
-export const getHelmReleaseResourceIdByObj = (entity: HelmReleaseResource) => getHelmReleaseResourceId(entity.endpointId, entity.releaseTitle);
+export const getHelmReleaseResourceIdByObj = (entity: HelmReleaseResources) => getHelmReleaseResourceId(entity.endpointId, entity.releaseTitle);
 
 const entityCache: {
   [key: string]: EntitySchema

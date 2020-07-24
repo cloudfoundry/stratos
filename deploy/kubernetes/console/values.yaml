@@ -57,6 +57,7 @@ console:
       servicePort: 80
       # nodePort: 30001
 
+
   # Name of config map that provides the template files for user invitation emails
   templatesConfigMapName:
 
@@ -120,6 +121,7 @@ images:
   fdbserver: stratos-fdbserver
   fdbdoclayer: stratos-fdbdoclayer
   chartsync: stratos-chartsync
+  analyzers: stratos-analyzers
 
 # Specify which storage class should be used for PVCs
 #storageClass: default

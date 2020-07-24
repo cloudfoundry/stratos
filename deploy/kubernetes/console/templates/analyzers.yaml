@@ -1,0 +1,62 @@
+---
+{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
+apiVersion: apps/v1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Deployment
+metadata:
+  name: stratos-analyzers
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos-analyzers"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "stratos"
+      app.kubernetes.io/component: "stratos-analyzers"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        app.kubernetes.io/component: "stratos-analyzers"
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        app: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: analyzers
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-analyzers:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
+        ports:
+        - name: api
+          containerPort: 8090
+        env:
+        - name: ANALYSIS_SCRIPTS_DIR
+          value: "/scripts"
+        - name: ANALYSIS_REPORTS_DIR
+          value: "/reports"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Release.Name }}-analyzers"
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos-analyzers-service"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  type: ClusterIP
+  ports:
+  - name: analyzers
+    port: 8090
+    targetPort: 8090
+  selector:
+    app: "{{ .Release.Name }}"
+    app.kubernetes.io/component: "stratos-analyzers"

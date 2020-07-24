@@ -5,6 +5,7 @@ import { asapScheduler, BehaviorSubject, combineLatest, Observable, Subject } fr
 import { filter, map, observeOn, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import { IPageSideNavTab } from './src/features/dashboard/page-side-nav/page-side-nav.component';
+import { IHeaderBreadcrumbLink } from './src/shared/components/page-header/page-header.types';
 
 
 @Injectable()
@@ -21,6 +22,9 @@ export class TabNavService {
   private tabSubNavSubject: BehaviorSubject<Portal<any>>;
   public tabSubNav$: Observable<Portal<any>>;
 
+  private tabSubNavBreadcrumbsSubject: BehaviorSubject<IHeaderBreadcrumbLink[]>;
+  public tabSubNavBreadcrumbs$: Observable<IHeaderBreadcrumbLink[]>;
+
   private pageHeaderSubject: BehaviorSubject<Portal<any>>;
   public pageHeader$: Observable<Portal<any>>;
 
@@ -36,6 +40,10 @@ export class TabNavService {
     this.tabSubNavSubject.next(portal);
   }
 
+  public setSubNavBreadcrumbs(breadcrumbs: IHeaderBreadcrumbLink[]) {
+    this.tabSubNavBreadcrumbsSubject.next(breadcrumbs);
+  }
+
   public setPageHeader(portal: Portal<any>) {
     this.pageHeaderSubject.next(portal);
   }
@@ -43,12 +51,13 @@ export class TabNavService {
   public clear() {
     this.tabNavsSubject.next(undefined);
     this.tabHeaderSubject.next(undefined);
-    this.tabSubNavSubject.next(undefined);
+    this.clearSubNav();
     this.pageHeaderSubject.next(undefined);
   }
 
   public clearSubNav() {
     this.tabSubNavSubject.next(undefined);
+    this.tabSubNavBreadcrumbsSubject.next(undefined);
   }
 
   public getCurrentTabHeaderObservable() {
@@ -63,7 +72,7 @@ export class TabNavService {
     );
   }
 
-  public getCurrentTabHeader = (tabs: IPageSideNavTab[]) => {
+  private getCurrentTabHeader = (tabs: IPageSideNavTab[]) => {
     if (!tabs) {
       return null;
     }
@@ -74,7 +83,7 @@ export class TabNavService {
     if (!activeTab) {
       return null;
     }
-    return activeTab.label;
+    return activeTab;
   }
 
   private observeSubject(subject: Subject<any>) {
@@ -93,6 +102,8 @@ export class TabNavService {
     this.tabHeader$ = this.observeSubject(this.tabHeaderSubject);
     this.tabSubNavSubject = new BehaviorSubject(undefined);
     this.tabSubNav$ = this.observeSubject(this.tabSubNavSubject);
+    this.tabSubNavBreadcrumbsSubject = new BehaviorSubject(undefined);
+    this.tabSubNavBreadcrumbs$ = this.observeSubject(this.tabSubNavBreadcrumbsSubject);
     this.pageHeaderSubject = new BehaviorSubject(undefined);
     this.pageHeader$ = this.observeSubject(this.pageHeaderSubject);
   }

@@ -127,7 +127,7 @@ export class KubernetesEffects {
             endpointIds: [action.kubeGuid],
             url: error.url || url,
             eventCode: error.status ? error.status + '' : '500',
-            message: 'Kubernetes API request error',
+            message: 'Kubernetes Dashboard request error',
             error
           })
         ]));

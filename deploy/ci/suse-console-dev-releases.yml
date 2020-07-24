@@ -66,12 +66,18 @@ resources:
     password: ((docker-password))
     repository: ((docker-repository))/stratos-chartsync
 - name: kube-terminal-image
-    type: docker-image
-    source:
-      username: ((docker-username))
-      password: ((docker-password))
-      repository: ((docker-repository))/stratos-kube-terminal
-  
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repository))/stratos-kube-terminal
+- name: analyzers-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repository))/stratos-analyzers
+    
 # Artifacts
 - name: image-tag
   type: s3
@@ -199,6 +205,14 @@ jobs:
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
+      - put: analyzers-image
+        params:
+          dockerfile: stratos/src/jetstream/plugins/analysis/container/Dockerfile
+          build: stratos/src/jetstream/plugins/analysis/container/
+          tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
+
 - name: create-chart
   plan:
   - get: stratos

@@ -1,8 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TabNavService } from 'frontend/packages/core/tab-nav.service';
 
-import { HelmReleaseProviders, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
+import { HelmReleaseProviders, KubernetesBaseTestModules, KubeBaseGuidMock } from '../../../kubernetes.testing.module';
 import { HelmReleaseTabBaseComponent } from './helm-release-tab-base.component';
+import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
+import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 
 
 describe('HelmReleaseTabBaseComponent', () => {
@@ -15,7 +17,10 @@ describe('HelmReleaseTabBaseComponent', () => {
       declarations: [HelmReleaseTabBaseComponent],
       providers: [
         ...HelmReleaseProviders,
-        TabNavService
+        TabNavService,
+        KubernetesAnalysisService,
+        KubernetesEndpointService,
+        KubeBaseGuidMock,
       ]
     })
       .compileComponents();

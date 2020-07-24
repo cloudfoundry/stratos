@@ -484,3 +484,30 @@ export interface HostPath {
 export interface Item {
   key: string;
 }
+
+export interface KubeStatus {
+  kind: string;
+  apiVersion: string;
+  metadata: Metadata;
+  status: string;
+  message: string;
+  reason: string;
+  details: {}
+  code: number
+}
+
+// Analysis Reports
+
+export interface AnalysisReport {
+  id: string;
+  endpoint: string;
+  type: string;
+  name: string;
+  path: string;
+  created: Date;
+  read: boolean;
+  status: string;
+  duration: number;
+  report?: any;
+  title?: string;
+}

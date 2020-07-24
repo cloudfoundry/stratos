@@ -14,6 +14,7 @@ import {
   IgnorePaginationMaxedState,
   REMOVE_PARAMS,
   RESET_PAGINATION,
+  RESET_PAGINATION_OF_TYPE,
   SET_CLIENT_FILTER,
   SET_CLIENT_FILTER_KEY,
   SET_CLIENT_PAGE,
@@ -119,6 +120,10 @@ function paginate(action, state = {}, updatePagination) {
 
   if (action.type === RESET_PAGINATION && !action.keepPages) {
     return paginationResetPagination(state, action);
+  }
+
+  if (action.type === RESET_PAGINATION_OF_TYPE && !action.keepPages) {
+    return paginationResetPagination(state, action, true);
   }
 
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {

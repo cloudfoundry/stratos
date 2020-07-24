@@ -5,6 +5,10 @@ import { TabNavService } from 'frontend/packages/core/tab-nav.service';
 
 import { HelmReleaseProviders, KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
 import { HelmReleaseResourceGraphComponent } from './helm-release-resource-graph.component';
+import { AnalysisReportSelectorComponent } from './../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
+import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
+import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
+import { KubeBaseGuidMock } from './../../../../kubernetes.testing.module';
 
 describe('HelmReleaseResourceGraphComponent', () => {
   let component: HelmReleaseResourceGraphComponent;
@@ -16,11 +20,14 @@ describe('HelmReleaseResourceGraphComponent', () => {
         ...KubernetesBaseTestModules,
         NgxGraphModule
       ],
-      declarations: [HelmReleaseResourceGraphComponent],
+      declarations: [HelmReleaseResourceGraphComponent, AnalysisReportSelectorComponent],
       providers: [
         ...HelmReleaseProviders,
         SidePanelService,
         TabNavService,
+        KubernetesAnalysisService,
+        KubernetesEndpointService,
+        KubeBaseGuidMock,
       ]
     })
       .compileComponents();

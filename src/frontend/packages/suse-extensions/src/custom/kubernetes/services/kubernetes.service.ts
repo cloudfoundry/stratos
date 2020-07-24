@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 
-import { endpointEntityType, stratosEntityFactory } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { endpointListKey, EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 
 @Injectable()
 export class KubernetesService {
@@ -14,18 +14,11 @@ export class KubernetesService {
   kubeEndpointsMonitor: PaginationMonitor<EndpointModel>;
   waitForAppEntity$: Observable<EntityInfo<APIResource>>;
 
-  constructor(
-    private paginationMonitorFactory: PaginationMonitorFactory
-  ) {
-    // TODO: RC update with stratos entity catalog
-    this.kubeEndpointsMonitor = this.paginationMonitorFactory.create(
-      endpointListKey,
-      stratosEntityFactory(endpointEntityType),
-      true
-    );
+  constructor() {
+    this.kubeEndpointsMonitor = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor()
 
     this.kubeEndpoints$ = this.kubeEndpointsMonitor.currentPage$.pipe(
-      map(endpoints => endpoints.filter(e => e.cnsi_type === 'k8s')),
+      map(endpoints => endpoints.filter(e => e.cnsi_type === KUBERNETES_ENDPOINT_TYPE)),
       shareReplay(1)
     );
   }

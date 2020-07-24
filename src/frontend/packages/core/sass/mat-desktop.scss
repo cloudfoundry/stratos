@@ -17,6 +17,13 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
     line-height: $desktop-menu-item-height;
     min-width: 128px;
     padding: 0 24px;
+
+    &.hasIcon {
+      padding-left: 16px;
+      .mat-icon {
+        margin-right: 12px;
+      }
+    }
   }
 
   .mat-menu-panel {

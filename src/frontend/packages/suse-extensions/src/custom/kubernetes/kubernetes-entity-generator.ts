@@ -24,6 +24,7 @@ import { KubernetesGKEAuthFormComponent } from './auth-forms/kubernetes-gke-auth
 import { KubeConfigRegistrationComponent } from './kube-config-registration/kube-config-registration.component';
 import { kubeEntityCatalog } from './kubernetes-entity-catalog';
 import {
+  analysisReportEntityType,
   KUBERNETES_ENDPOINT_TYPE,
   kubernetesDashboardEntityType,
   kubernetesDeploymentsEntityType,
@@ -35,6 +36,8 @@ import {
   kubernetesStatefulSetsEntityType,
 } from './kubernetes-entity-factory';
 import {
+  AnalysisReportsActionBuilders,
+  analysisReportsActionBuilders,
   KubeDashboardActionBuilders,
   kubeDashboardActionBuilders,
   KubeDeploymentActionBuilders,
@@ -186,6 +189,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     generateNamespacesEntity(endpointDefinition),
     generateServicesEntity(endpointDefinition),
     generateDashboardEntity(endpointDefinition),
+    generateAnalysisReportsEntity(endpointDefinition),
     generateMetricEntity(endpointDefinition),
     ...generateWorkloadsEntities(endpointDefinition)
   ];
@@ -281,6 +285,18 @@ function generateDashboardEntity(endpointDefinition: StratosEndpointExtensionDef
     actionBuilders: kubeDashboardActionBuilders
   });
   return kubeEntityCatalog.dashboard;
+}
+
+function generateAnalysisReportsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  const definition = {
+    type: analysisReportEntityType,
+    schema: kubernetesEntityFactory(analysisReportEntityType),
+    endpoint: endpointDefinition
+  };
+  kubeEntityCatalog.analysisReport = new StratosCatalogEntity<undefined, any, AnalysisReportsActionBuilders>(definition, {
+    actionBuilders: analysisReportsActionBuilders
+  });
+  return kubeEntityCatalog.analysisReport
 }
 
 function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {

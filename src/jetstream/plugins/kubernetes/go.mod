@@ -9,7 +9,6 @@ require (
 	github.com/aws/aws-sdk-go v1.17.5
 	github.com/chai2010/gettext-go v0.0.0-20170215093142-bf70f2a70fb1 // indirect
 	github.com/docker/docker v1.13.1 // indirect
-	github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385 // indirect
 	github.com/elazarl/goproxy v0.0.0-20191011121108-aa519ddbe484 // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/gorilla/websocket v1.4.0

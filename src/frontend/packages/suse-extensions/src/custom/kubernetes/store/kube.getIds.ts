@@ -14,7 +14,7 @@ const deliminate = (...args: string[]) => args.join('_:_');
 
 const debugMissingKubeId = (entity: BasicKubeAPIResource, func: (...args: string[]) => string, ...args: string[]) => {
   if (!environment.production && (!entity.metadata || !entity.metadata.kubeId)) {
-    console.log(`Kube entity does not have a kubeId, this is probably a bug: `, entity);
+    console.warn(`Kube entity does not have a kubeId, this is probably a bug: `, entity);
   }
   return func(...args);
 }

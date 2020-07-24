@@ -81,7 +81,6 @@ export const GET_KUBE_DASHBOARD = '[KUBERNETES Endpoint] Get K8S Dashboard Info'
 export const GET_KUBE_DASHBOARD_SUCCESS = '[KUBERNETES Endpoint] Get Dashboard Success';
 export const GET_KUBE_DASHBOARD_FAILURE = '[KUBERNETES Endpoint] Get Dashboard Failure';
 
-
 const defaultSortParams = {
   'order-direction': 'desc' as SortDirection,
   'order-direction-field': 'name'
@@ -371,5 +370,3 @@ export class FetchKubernetesChartMetricsAction extends MetricsChartAction {
     );
   }
 }
-
-

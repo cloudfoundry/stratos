@@ -1,0 +1,43 @@
+.report {
+  &__report-header {
+    align-items: center;
+    display: flex;
+    margin-bottom: 8px;
+  }
+  &__header {
+    align-items: center;
+    display: flex;
+  }
+  &__title {
+    flex: 1;
+  }
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 12px;
+    &>div:first-child {
+      opacity: 0.8;
+    }
+  }
+  &__score {
+    flex: 0;
+    font-size: 20px;
+  }
+  &__grade {
+    flex: 0;
+    font-size: 20px;
+  }
+  &__table {
+    margin-left: 20px;
+  }
+  &__issue {
+    align-items: center;
+    display: flex;
+  }
+  &__icon {
+    padding-right: 4px;
+  }
+  &__table-name {
+    vertical-align: top;
+  }
+}

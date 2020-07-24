@@ -109,7 +109,7 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
     );
 
   // Keep, helpful for debugging below chain via tap
-  // const debug = (val, location) => console.log(`${entity.endpointType}:${entity.entityKey}:${location}: `, val);
+  // const debug = (val, location) => console.warn(`${entity.endpointType}:${entity.entityKey}:${location}: `, val);
 
   return getRequestObjectObservable(request).pipe(
     first(),

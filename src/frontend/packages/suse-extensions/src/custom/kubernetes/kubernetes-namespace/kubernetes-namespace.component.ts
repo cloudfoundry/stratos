@@ -8,6 +8,7 @@ import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesNamespaceService } from '../services/kubernetes-namespace.service';
 import { KubernetesService } from '../services/kubernetes.service';
+import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
 
 @Component({
   selector: 'app-kubernetes-namespace',
@@ -27,21 +28,20 @@ import { KubernetesService } from '../services/kubernetes.service';
     },
     KubernetesService,
     KubernetesEndpointService,
-    KubernetesNamespaceService
+    KubernetesNamespaceService,
+    KubernetesAnalysisService,
   ]
 })
 export class KubernetesNamespaceComponent {
 
-  tabLinks = [
-    { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons'  },
-    { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' }
-  ];
+  tabLinks = [];
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
-    public kubeNamespaceService: KubernetesNamespaceService
+    public kubeNamespaceService: KubernetesNamespaceService,
+    public analysisService: KubernetesAnalysisService,
   ) {
     this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
@@ -51,5 +51,11 @@ export class KubernetesNamespaceComponent {
       }])
       )
     );
+
+    this.tabLinks = [
+      { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons' },
+      { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' },
+      { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
+    ];
   }
 }

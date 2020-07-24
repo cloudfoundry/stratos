@@ -1,8 +1,15 @@
-<app-page-sub-nav *ngIf="!(isBusy$ | async)">
+<app-page-sub-nav *ngIf="!(isBusy$ | async) || false">
   <button mat-button name="delete" (click)="deleteRelease()" matTooltip="Delete">
     <mat-icon>delete</mat-icon>
     <span>Delete</span>
   </button>
+
+  <app-analysis-report-runner [kubeId]="helmReleaseHelper.endpointGuid" [namespace]="helmReleaseHelper.namespace"
+    [app]="helmReleaseHelper.releaseTitle">
+  </app-analysis-report-runner>
+
+  <app-analysis-report-selector *ngIf="analyzerService.enabled$ | async" (selected)="analysisChanged($event)"
+    [endpoint]="helmReleaseHelper.endpointGuid" [path]="path"></app-analysis-report-selector>
 </app-page-sub-nav>
 
 <app-loading-page [isLoading]="isBusy$" [text]="loadingMessage">
@@ -59,7 +66,8 @@
       <div *ngIf="hasAllResources$ | async; else stillLoadingResources">
         <div *ngIf="resources$ | async as resources" class="grid">
           <app-card-number-metric *ngFor="let res of resources" label="{{ res.label }}" icon="{{ res.icon.name }}"
-            iconFont="{{ res.icon.font }}" value="{{ res.count }}">
+            [alerts]="res.alerts" (showAlerts)="showAlerts($event, res)"
+            iconFont="{{ res.icon.fontSet || res.icon.font }}" value="{{ res.count }}">
           </app-card-number-metric>
         </div>
       </div>
@@ -76,12 +84,11 @@
     <ng-template #loadingResources>
       <div class="resources__loading">
         <div class="resources__loading__content">
-          Loading Resources
+          Loading resources
           <mat-progress-bar class="" [color]="'primary'" mode="indeterminate">
           </mat-progress-bar>
         </div>
       </div>
-
     </ng-template>
   </ng-container>
 </app-loading-page>

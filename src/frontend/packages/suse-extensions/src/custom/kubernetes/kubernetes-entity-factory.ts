@@ -22,6 +22,7 @@ export const kubernetesServicesEntityType = 'kubernetesService';
 export const kubernetesStatefulSetsEntityType = 'kubernetesStatefulSet';
 export const kubernetesDeploymentsEntityType = 'kubernetesDeployment';
 export const kubernetesDashboardEntityType = 'kubernetesDashboard';
+export const analysisReportEntityType = 'analysisReport';
 
 export const getKubeAppId = (object: KubernetesApp) => object.name;
 
@@ -102,6 +103,13 @@ entityCache[kubernetesDashboardEntityType] = new KubernetesEntitySchema(
   kubernetesDashboardEntityType,
   {},
   { idAttribute: getGuidFromKubeDashboardObj }
+);
+
+// Analysis Reports - should not be bound to an endpoint
+entityCache[analysisReportEntityType] = new KubernetesEntitySchema(
+  analysisReportEntityType,
+  {},
+  { idAttribute: 'id' }
 );
 
 entityCache[metricEntityType] = new KubernetesEntitySchema(metricEntityType);

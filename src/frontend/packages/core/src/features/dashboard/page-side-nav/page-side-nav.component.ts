@@ -10,6 +10,7 @@ import { TabNavService } from '../../../../tab-nav.service';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
+import { map } from 'rxjs/operators';
 
 
 
@@ -54,7 +55,7 @@ export class PageSideNavComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable();
+    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable().pipe(map(item => item ? item.label : null));
   }
 
 }
