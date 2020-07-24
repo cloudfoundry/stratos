@@ -25,14 +25,10 @@ import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-fa
 import { IApp, IOrganization } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';
-import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
-import {
-  CloudFoundryEndpointService,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { OrgQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization-quota';
-import {
-  createOrgQuotaDefinition,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { getOrgRolesString } from '../../../../../../features/cf/cf.helpers';
+import { CloudFoundryEndpointService } from '../../../../../../features/cf/services/cloud-foundry-endpoint.service';
+import { OrgQuotaHelper } from '../../../../../../features/cf/services/cloud-foundry-organization-quota';
+import { createOrgQuotaDefinition } from '../../../../../../features/cf/services/cloud-foundry-organization.service';
 import { createUserRoleInOrg } from '../../../../../../store/types/cf-user.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';

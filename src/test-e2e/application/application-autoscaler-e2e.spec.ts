@@ -9,6 +9,7 @@ import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { LocaleHelper } from '../locale.helper';
 import { CFPage } from '../po/cf-page.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
+import { TableData } from '../po/list.po';
 import { CREATE_APP_DEPLOY_TEST_TYPE, createApplicationDeployTests } from './application-deploy-helper';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageAutoscalerTab } from './po/application-page-autoscaler.po';
@@ -38,6 +39,19 @@ describe('Autoscaler -', () => {
   });
 
   const { testAppName, appDetails } = createApplicationDeployTests(CREATE_APP_DEPLOY_TEST_TYPE.GIT_URL);
+
+  // Scaling rules for the policy.
+  // Note - these should not result in scaling events during the test (we only expect one scaling event due to a schedule)
+  const memoryUtilThreshold = '90';
+  const memoryUtilOperator = '>=';
+  const memoryUtilBreach = '160';
+
+  const throughputOperator = '>=';
+  const throughputThreshold = '100'
+  const throughputAdjustment = '10';
+  const throughputAdjustmentType = '% instances';
+
+  const memoryUsedThreshold = '500';
 
   describe('Tab Tests -', () => {
     beforeAll(() => {
@@ -123,9 +137,9 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.canNext()).toBeFalsy();
       // Fill in form -- valid inputs
       createPolicy.stepper.getStepperForm().fill({ metric_type: 'memoryutil' });
-      createPolicy.stepper.getStepperForm().fill({ operator: '>=' });
-      createPolicy.stepper.getStepperForm().fill({ threshold: '60' });
-      createPolicy.stepper.getStepperForm().fill({ breach_duration_secs: '60' });
+      createPolicy.stepper.getStepperForm().fill({ operator: memoryUtilOperator });
+      createPolicy.stepper.getStepperForm().fill({ threshold: memoryUtilThreshold });
+      createPolicy.stepper.getStepperForm().fill({ breach_duration_secs: memoryUtilBreach });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       // Fill in form -- invalid inputs
@@ -140,20 +154,22 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
 
+
       // Click [Add] button
       createPolicy.stepper.clickAddButton();
       expect(createPolicy.stepper.getRuleTilesCount()).toBe(2);
       expect(createPolicy.stepper.canNext()).toBeFalsy();
       // Fill in form -- valid inputs
       createPolicy.stepper.getStepperForm().fill({ metric_type: 'throughput' });
+      createPolicy.stepper.getStepperForm().fill({ operator: throughputOperator, threshold: throughputThreshold });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       // Fill in form -- invalid inputs
-      createPolicy.stepper.getStepperForm().fill({ adjustment: '10' });
+      createPolicy.stepper.getStepperForm().fill({ adjustment: throughputAdjustment });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(1);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe('true');
       // Fill in form -- fix invalid inputs
-      createPolicy.stepper.getStepperForm().fill({ adjustment_type: '% instances' });
+      createPolicy.stepper.getStepperForm().fill({ adjustment_type: throughputAdjustmentType });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
@@ -281,11 +297,11 @@ describe('Autoscaler -', () => {
 
           expect(appAutoscaler.tableTriggers.getTableRowsCount()).toBe(2);
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 0)).toBe('memoryutil');
-          expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 1)).toBe('>=60 % for 60 secs.');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 1)).toBe(`${memoryUtilOperator}${memoryUtilThreshold} % for ${memoryUtilBreach} secs.`);
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 2)).toBe('+2 instances');
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 0)).toBe('throughput');
-          expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 1)).toBe('<=10rps for 120 secs.');
-          expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 2)).toBe('-10% instances');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 1)).toBe(`${throughputOperator}${throughputThreshold}rps for 120 secs.`);
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 2)).toBe(`+${throughputAdjustment}${throughputAdjustmentType}`);
 
           expect(appAutoscaler.tableSchedules.getScheduleTableTitleText()).toBe('Scheduled Limit Rules in UTC');
           expect(appAutoscaler.tableSchedules.getRecurringTableRowsCount()).toBe(1);
@@ -349,7 +365,14 @@ describe('Autoscaler -', () => {
 
     it('Should pass ScalingRules Step', () => {
       createPolicy.stepper.clickAddButton();
+      createPolicy.stepper.getStepperForm().getControlsMap().then(map => {
+        expect(map['metric_type'].value).toBe('memoryused')
+      });
+      createPolicy.stepper.getStepperForm().fill({ threshold: memoryUsedThreshold });
+      expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
+      expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
+
       expect(createPolicy.stepper.canNext()).toBeTruthy();
       createPolicy.stepper.next();
     });
@@ -396,7 +419,7 @@ describe('Autoscaler -', () => {
           expect(appAutoscaler.cardMetric.getMetricChartTitleText(2)).toContain('memoryused');
           expect(appAutoscaler.tableTriggers.getTableRowsCount()).toBe(3);
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(2, 0)).toBe('memoryused');
-          expect(appAutoscaler.tableTriggers.getTableRowCellContent(2, 1)).toBe('<=10MB for 120 secs.');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(2, 1)).toBe(`<=${memoryUsedThreshold}MB for 120 secs.`);
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(2, 2)).toBe('-1 instances');
 
           expect(appAutoscaler.tableSchedules.getRecurringTableRowsCount()).toBe(0);
@@ -447,7 +470,7 @@ describe('Autoscaler -', () => {
   describe('Autoscaler Event Page - ', () => {
     const loggingPrefix = 'AutoScaler Event Table:';
     let eventPageBase: PageAutoscalerEventBase;
-    describe('From autoscaler event card', () => {
+    describe('From autoscaler event card - ', () => {
       beforeAll(() => {
         const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
         appAutoscaler.goToAutoscalerTab();
@@ -482,27 +505,38 @@ describe('Autoscaler -', () => {
         // Timeout after 32 attempts (each 5 seconds, which is just under 3 minutes)
         let retries = 32;
         const sub = timer(5000, 5000).pipe(
-          switchMap(() => promise.all<boolean | number>([
+          switchMap(() => promise.all<boolean | number | TableData[]>([
             findRow(),
-            eventPageBase.list.header.isRefreshing()
+            eventPageBase.list.header.isRefreshing(),
+            eventPageBase.list.table.getTableData()
           ]))
-        ).subscribe(([foundRow, isRefreshing]) => {
+        ).subscribe(([foundRow, isRefreshing, tableData]: [boolean, number, TableData[]]) => {
           // These console.logs help by
           // .. Showing the actual time we're checking, which can be compared with schedule start/end times
           // .. Showing when successful runs complete, over time this should show on average events take to show
+          const time = moment().toString()
+          console.log(`${time}: Table Data: `, tableData);
+
           if (isRefreshing) {
-            console.log(`${moment().toString()}: Waiting for event row: Skip actions... list is refreshing`);
+            console.log(`${time}: Waiting for event row: Skip actions... list is refreshing`);
             return;
           }
           retries--;
           if (foundRow) {
-            console.log(`${moment().toString()}: Waiting for event row: Found row!`);
+            console.log(`${time}: Waiting for event row: Found row!`);
             sub.unsubscribe();
           } else {
-            console.log(`${moment().toString()}: Waiting for event row: manually refreshing list`);
-            eventPageBase.list.header.refresh();
+            if (retries === 0) {
+              // Fail the test if the retry count made it down to 0
+              e2e.debugLog('Timed out waiting for event row');
+              fail('Timed out waiting for event row');
+              sub.unsubscribe();
+            } else {
+              console.log(`${time}: Waiting for event row: manually refreshing list`);
+              eventPageBase.list.header.refresh();
             if (retries === 0) {
               sub.unsubscribe();
+            }
             }
           }
         });
@@ -534,7 +568,7 @@ describe('Autoscaler -', () => {
         browser.wait(ApplicationPageAutoscalerTab.detect()
           .then(appAutoscaler => {
             appAutoscaler.tableEvents.clickRefreshButton();
-            expect(appAutoscaler.tableEvents.getTableRowsCount()).toBe(1);
+            expect(appAutoscaler.tableEvents.getTableRowsCount()).toBe(1, 'Expected rows to be one, could be extremely late event reporting');
             expect(appAutoscaler.tableEvents.getTableRowCellContent(0, 0)).toBe('Instances scaled up from 1 to 2');
             expect(appAutoscaler.tableEvents.getTableRowCellContent(0, 1))
               .toBe('schedule starts with instance min 2, instance max 10 and instance min initial 2 limited by min instances 2');

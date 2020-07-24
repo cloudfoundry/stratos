@@ -14,11 +14,9 @@ import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
 import { CloudFoundrySpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import {
-  CloudFoundryOrganizationService,
-} from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
-import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
+import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from './cf-user-list-config.service';
 

@@ -19,7 +19,7 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { ISpace } from '../../../../../cf-api.types';
-import { CfRolesService } from '../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+import { CfRolesService } from '../../../../../features/cf/users/manage-users/cf-roles.service';
 
 export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResource<ISpace>> {
 

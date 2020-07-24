@@ -14,6 +14,10 @@ export interface CardMetadata {
   click: () => void;
 }
 
+export interface TableData {
+  [columnHeader: string]: string
+}
+
 // Page Object for the List Table View
 export class ListTableComponent extends Component {
 
@@ -59,7 +63,7 @@ export class ListTableComponent extends Component {
     });
   }
 
-  getTableData(): promise.Promise<{ [columnHeader: string]: string }[]> {
+  getTableData(): promise.Promise<TableData[]> {
     return this.getTableDataRaw().then(tableData => {
       const table = [];
       tableData.rows.forEach((row: string[]) => {
