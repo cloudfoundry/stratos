@@ -22,6 +22,10 @@ import { CfServicesDataSource } from './cf-services-data-source';
 import { TableCellServiceActiveComponent } from './table-cell-service-active/table-cell-service-active.component';
 import { TableCellServiceBindableComponent } from './table-cell-service-bindable/table-cell-service-bindable.component';
 import {
+  TableCellServiceBrokerComponent,
+  TableCellServiceBrokerComponentMode,
+} from './table-cell-service-broker/table-cell-service-broker.component';
+import {
   TableCellServiceCfBreadcrumbsComponent,
 } from './table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
 import { TableCellServiceProviderComponent } from './table-cell-service-provider/table-cell-service-provider.component';
@@ -105,10 +109,19 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   }, {
     columnId: 'broker',
     headerCell: () => 'Broker',
-    cellDefinition: {
-      valuePath: 'entity.label',
+    cellComponent: TableCellServiceBrokerComponent,
+    cellConfig: {
+      mode: TableCellServiceBrokerComponentMode.NAME
     },
-    cellFlex: '1'
+    cellFlex: '2'
+  }, {
+    columnId: 'brokerScope',
+    headerCell: () => 'Scope',
+    cellComponent: TableCellServiceBrokerComponent,
+    cellConfig: {
+      mode: TableCellServiceBrokerComponentMode.SCOPE
+    },
+    cellFlex: '2'
   }, {
     columnId: 'plans',
     headerCell: () => 'Plans',

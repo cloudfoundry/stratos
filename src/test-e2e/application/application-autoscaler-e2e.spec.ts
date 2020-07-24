@@ -534,9 +534,6 @@ describe('Autoscaler -', () => {
             } else {
               console.log(`${time}: Waiting for event row: manually refreshing list`);
               eventPageBase.list.header.refresh();
-            if (retries === 0) {
-              sub.unsubscribe();
-            }
             }
           }
         });
