@@ -8,6 +8,9 @@ This release contains a number of fixes and improvements:
 
 **Improvements:**
 
+- Extensions: Remove the need for symlinks and improve the build process [\#4472](https://github.com/cloudfoundry/stratos/issues/4472)
+- Extensions: Allow Themes to be published and installed to/from npm [\#4471](https://github.com/cloudfoundry/stratos/issues/4471)
+- Extensions: Move to extensions and themes to be packages [\#4470](https://github.com/cloudfoundry/stratos/issues/4470)
 - Show service broker space scope information in service wall list [\#4458](https://github.com/cloudfoundry/stratos/issues/4458)
 - Client Secret is shown in the clear in the UI [\#4445](https://github.com/cloudfoundry/stratos/issues/4445)
 - Improve sizing of UI elements on desktop browsers [\#4419](https://github.com/cloudfoundry/stratos/issues/4419)
@@ -31,8 +34,10 @@ This release contains a number of fixes and improvements:
 
 **Fixes:**
 
+- Ensure `cf push` works from Windows  [\#4465](https://github.com/cloudfoundry/stratos/issues/4465)
 - Visiting marketplace tab breaks service list [\#4397](https://github.com/cloudfoundry/stratos/issues/4397)
 - CF Application reports error after restage [\#4392](https://github.com/cloudfoundry/stratos/issues/4392)
+- Helm Chart: Icon is missing [\#4370](https://github.com/cloudfoundry/stratos/issues/4370)
 - Permissions: Users with no developer roles can click on create app button [\#4361](https://github.com/cloudfoundry/stratos/issues/4361)
 - Edit endpoint not available in table view [\#4349](https://github.com/cloudfoundry/stratos/issues/4349)
 - CF: Routes List: Filter by org breaks when user is an org auditor [\#4343](https://github.com/cloudfoundry/stratos/issues/4343)
