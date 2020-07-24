@@ -18,7 +18,7 @@
 @import '../src/shared/components/list/list-table/table-row/table-row.component.theme';
 @import '../src/shared/components/no-content-message/no-content-message.component.theme';
 @import '../src/shared/components/boolean-indicator/boolean-indicator.component.theme';
-
+@import '../src/shared/components/json-viewer/json-viewer.component.theme';
 @import '../src/shared/components/loading-page/loading-page.component.theme';
 @import '../src/shared/components/log-viewer/log-viewer.component.theme';
 @import '../src/shared/components/chips/chips.component.theme';
@@ -126,5 +126,6 @@
   @include restore-endpoints-theme($theme, $app-theme);
   @include metrics-component-theme($theme, $app-theme);
   @include intro-screen-theme($theme, $app-theme);
+  @include app-json-view-theme($theme, $app-theme);
 
 }

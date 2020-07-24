@@ -27,6 +27,8 @@ export class AppActionMonitorComponent<T> implements OnInit {
   @Input()
   public data$: Observable<Array<T>> = observableNever();
 
+  public replayData$: Observable<Array<T>>;
+
   @Input()
   public entityKey: string;
 
@@ -81,16 +83,16 @@ export class AppActionMonitorComponent<T> implements OnInit {
       cellFlex: '0 0 24px'
     };
 
-    // Some obs will only ever emit once, once consumed in template this meant table never received emitted data
-    // so wrap in publish replay
-    const replayData = this.data$.pipe(
+    // Some data$ obs only ever emit once. If we subscribed directly to this then that emit would be consumed and will not be available
+    // in the data source connect subscription. So wrap it in a replay to ensure the last emitted value is available 
+    this.replayData$ = this.data$.pipe(
       publishReplay(1),
       refCount()
     )
 
     this.allColumns = [...this.columns, monitorColumn];
     this.dataSource = {
-      connect: () => replayData,
+      connect: () => this.replayData$,
       disconnect: () => { },
       trackBy: (index, item) => {
         const fn = monitorColumn.cellConfig(item).getId;

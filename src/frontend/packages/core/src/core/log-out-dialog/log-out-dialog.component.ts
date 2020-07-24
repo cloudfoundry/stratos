@@ -1,11 +1,8 @@
 import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Store } from '@ngrx/store';
+import { Router } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
-
-import { Logout } from '../../../../store/src/actions/auth.actions';
-import { GeneralEntityAppState } from '../../../../store/src/app-state';
 
 @Component({
   selector: 'app-log-out-dialog',
@@ -16,7 +13,8 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
   constructor(
     public dialogRef: MatDialogRef<LogOutDialogComponent>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
-    private store: Store<GeneralEntityAppState>) { }
+    private router: Router
+  ) { }
 
   private autoLogout: Subscription;
   private countDown: number;
@@ -33,7 +31,7 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
           this.countDown = this.calcCountdown();
           if (this.countDown <= 0) {
             this.autoLogout.unsubscribe();
-            this.store.dispatch(new Logout());
+            this.router.navigate(['/login/logout']);
           } else {
             this.percentage = ((this.countdownTotal - this.countDown) / this.countdownTotal) * 100;
           }

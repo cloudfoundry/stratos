@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { Router } from '@angular/router';
 
 import { CoreModule } from '../../../core/src/core/core.module';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/src/core/customizations.types';
@@ -43,20 +42,7 @@ const SuseCustomizations: CustomizationsMetadata = {
   ]
 })
 export class SuseModule {
-
-  static init = false;
-
-  constructor(router: Router, cs: CustomizationService) {
+  constructor(cs: CustomizationService) {
     cs.set(SuseCustomizations);
-
-    // Only update the routes once
-    if (!SuseModule.init) {
-      // Override the component used for the login route
-      const routeConfig = [...router.config];
-      const loginRoute = routeConfig.find(r => r.path === 'login') || {};
-      loginRoute.component = SuseLoginComponent;
-      router.resetConfig(routeConfig);
-      SuseModule.init = true;
-    }
   }
 }

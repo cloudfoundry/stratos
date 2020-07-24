@@ -13,7 +13,7 @@ import { IFavoriteEntity } from '../../../../../store/src/types/user-favorite-ma
 })
 export class FavoritesEntityListComponent implements OnInit {
 
-  constructor(private favoritesConfigMapper: FavoritesConfigMapper) { }
+  constructor(private favoritesConfigMapper: FavoritesConfigMapper) {}
 
   @Input()
   set entities(favoriteEntities: IFavoriteEntity[]) {
@@ -29,6 +29,9 @@ export class FavoritesEntityListComponent implements OnInit {
 
   @Input()
   public endpointDisconnected = false;
+
+  @Input()
+  public autoExpand = false;
 
   @Input()
   set endpointTypes(types: string[] | string) {
@@ -144,5 +147,9 @@ export class FavoritesEntityListComponent implements OnInit {
       map(([nameSearch, type, entities]) => entities.length === 0 && (!!nameSearch || !!type)),
       startWith(false)
     );
+
+    if (this.autoExpand) {
+      this.toggleExpand();
+    }
   }
 }

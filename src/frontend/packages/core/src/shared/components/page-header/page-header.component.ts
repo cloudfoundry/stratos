@@ -6,7 +6,6 @@ import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
 import { AppState } from '../../../../../store/src/app-state';
@@ -142,7 +141,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   logout() {
-    this.store.dispatch(new Logout());
+    this.router.navigate(['/login/logout']);
   }
 
   public toggleSidenav() {
