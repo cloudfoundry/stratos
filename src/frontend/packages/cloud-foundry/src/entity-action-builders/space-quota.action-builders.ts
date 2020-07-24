@@ -8,7 +8,7 @@ import {
   UpdateSpaceQuotaDefinition,
 } from '../actions/quota-definitions.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
-import { QuotaFormValues } from '../features/cloud-foundry/quota-definition-form/quota-definition-form.component';
+import { QuotaFormValues } from '../features/cf/quota-definition-form/quota-definition-form.component';
 
 export interface SpaceQuotaDefinitionActionBuilders extends OrchestratedActionBuilders {
   get: (

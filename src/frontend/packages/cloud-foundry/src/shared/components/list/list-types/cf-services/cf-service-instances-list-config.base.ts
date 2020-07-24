@@ -21,7 +21,7 @@ import {
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../cf-api-svc.types';
-import { isUserProvidedServiceInstance } from '../../../../../features/cloud-foundry/cf.helpers';
+import { isUserProvidedServiceInstance } from '../../../../../features/cf/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { CANCEL_ORG_ID_PARAM, CANCEL_SPACE_ID_PARAM, CSI_CANCEL_URL } from '../../../add-service-instance/csi-mode.service';
@@ -78,7 +78,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
       columnId: 'service',
       headerCell: () => 'Service',
       cellComponent: TableCellServiceComponent,
-      cellFlex: '2'
+      cellFlex: '3'
     },
     {
       columnId: 'lastOp',
@@ -119,7 +119,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
         orderKey: 'creation',
         field: 'metadata.created_at'
       },
-      cellFlex: '2'
+      cellFlex: '1'
     },
   ];
 

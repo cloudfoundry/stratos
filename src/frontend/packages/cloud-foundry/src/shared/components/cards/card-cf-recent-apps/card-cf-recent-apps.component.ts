@@ -4,13 +4,10 @@ import { Observable } from 'rxjs';
 import { filter, first, map, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  appDataSort,
-  CloudFoundryEndpointService,
-} from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { appDataSort, CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 const RECENT_ITEMS_COUNT = 10;
 

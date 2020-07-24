@@ -1,3 +1,10 @@
 div > div {
   padding-bottom: 5px;
 }
+
+.broker {
+  display: flex;
+  app-table-cell-service-broker {
+    padding-left: 5px;
+  }
+}

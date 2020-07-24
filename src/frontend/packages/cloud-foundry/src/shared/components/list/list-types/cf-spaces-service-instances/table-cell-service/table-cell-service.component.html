@@ -4,5 +4,12 @@
 <div *ngIf="isUserProvidedServiceInstance === false">
   <div><a [routerLink]="serviceUrl$ | async">{{ serviceName$ | async }}</a></div>
   <div>Plan: {{ row.entity.service_plan?.entity.name }}</div>
-  <div>Broker: {{ serviceBrokerName$ | async }}</div>
+  <div class="broker">
+    Broker: <app-table-cell-service-broker [row]="service$ | async" [config]="brokerNameConfig">
+    </app-table-cell-service-broker>
+  </div>
+  <div class="broker">
+    Scope: <app-table-cell-service-broker [row]="service$ | async" [config]="brokerScopeConfig">
+    </app-table-cell-service-broker>
+  </div>
 </div>

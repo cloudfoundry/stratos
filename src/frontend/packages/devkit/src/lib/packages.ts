@@ -267,7 +267,7 @@ export class Packages {
           package: pkg.name,
           scss: refParts[0],
           mixin: refParts[1],
-          importPath: path.join(packagePath, refParts[0])
+          importPath: '~' + pkg.name + '/' + refParts[0]
         };
         this.log('Found themed package: ' + pkg.name + ' (' + pkg.stratos.theming + ')');
         return themingConfig;

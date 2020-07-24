@@ -1,7 +1,6 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import {
@@ -22,9 +21,8 @@ import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { serviceBindingEntityType } from '../../../../../../cf-entity-types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { isUserProvidedServiceInstance } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { isUserProvidedServiceInstance } from '../../../../../../features/cf/cf.helpers';
 import {
-  getServiceBrokerName,
   getServiceName,
   getServicePlanName,
   getServiceSummaryUrl,
@@ -34,6 +32,10 @@ import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
+import {
+  TableCellServiceBrokerComponentConfig,
+  TableCellServiceBrokerComponentMode,
+} from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
 
 interface EnvVarData {
@@ -54,19 +56,25 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     customStyle?: string;
   }[];
   cardMenu: MenuItem[];
-  service$: Observable<EntityInfo<APIResource<IService>> | null>;
+  service$: Observable<APIResource<IService> | null>;
   serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance | IUserProvidedServiceInstance>>>;
   tags$: Observable<AppChip<IServiceInstance | IUserProvidedServiceInstance>[]>;
   entityConfig: ComponentEntityMonitorConfig;
   private envVarServicesSection$: Observable<string>;
-  private isUserProvidedServiceInstance: boolean;
+  isUserProvidedServiceInstance: boolean;
   serviceDescription$: Observable<string>;
   serviceUrl$: Observable<string>;
   serviceName$: Observable<string>;
 
+  brokerNameConfig: TableCellServiceBrokerComponentConfig = {
+    mode: TableCellServiceBrokerComponentMode.NAME
+  }
+  brokerScopeConfig: TableCellServiceBrokerComponentConfig = {
+    mode: TableCellServiceBrokerComponentMode.SCOPE,
+  }
+
   constructor(
     private dialog: MatDialog,
-    private datePipe: DatePipe,
     private appService: ApplicationService,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
@@ -105,11 +113,6 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       this.setupAsServiceInstance();
     }
 
-    this.listData.push({
-      label: 'Date Created On',
-      data$: observableOf(this.datePipe.transform(this.row.metadata.created_at, 'medium'))
-    });
-
     this.tags$ = this.serviceInstance$.pipe(
       filter(o => !!o.entity.entity.tags),
       map(o => o.entity.entity.tags.map(t => ({ value: t })))
@@ -126,7 +129,8 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     this.service$ = serviceInstance$.pipe(
       switchMap(o => cfEntityCatalog.service.store.getEntityService(o.entity.entity.service_guid, this.appService.cfGuid, {})
         .waitForEntity$),
-      filter(service => !!service)
+      filter(service => !!service),
+      map(e => e.entity)
     );
     this.listData = [{
       label: 'Service Plan',
@@ -139,39 +143,19 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
           return getServicePlanName(serviceInstance.service_plan.entity);
         })
       )
-    },
-    {
-      label: 'Service Broker',
-      data$: this.serviceInstance$.pipe(
-        switchMap(si => {
-          if (this.isUserProvidedServiceInstance) {
-            return null;
-          }
-          const serviceInstance: IServiceInstance = si.entity.entity as IServiceInstance;
-          return this.service$.pipe(
-            switchMap(service => {
-              return getServiceBrokerName(
-                service.entity.entity.service_broker_guid,
-                serviceInstance.cfGuid,
-              );
-            })
-          );
-        })
-      )
-    },
-    ];
-    this.envVarServicesSection$ = this.service$.pipe(map(s => s.entity.entity.label));
+    }];
+    this.envVarServicesSection$ = this.service$.pipe(map(s => s.entity.label));
 
     this.serviceDescription$ = this.service$.pipe(
-      map(service => service.entity.entity.description)
+      map(service => service.entity.description)
     );
 
     this.serviceUrl$ = this.service$.pipe(
-      map(service => getServiceSummaryUrl(service.entity.entity.cfGuid, service.entity.metadata.guid))
+      map(service => getServiceSummaryUrl(service.entity.cfGuid, service.metadata.guid))
     );
 
     this.serviceName$ = this.service$.pipe(
-      map(service => getServiceName(service.entity))
+      map(service => getServiceName(service))
     );
 
   }

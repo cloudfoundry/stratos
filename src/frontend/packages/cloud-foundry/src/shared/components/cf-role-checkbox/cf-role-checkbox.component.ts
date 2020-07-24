@@ -7,8 +7,8 @@ import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../clo
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
-import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+import { canUpdateOrgSpaceRoles } from '../../../features/cf/cf.helpers';
+import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles.service';
 import {
   selectCfUsersIsRemove,
   selectCfUsersIsSetByUsername,
