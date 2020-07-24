@@ -16,4 +16,4 @@ You will need to have both the `kubectl` and `helm` CLIs installed and available
 
 The Stratos Helm chart contains a `README.md` file that contains installation instructions and configuration documentation.
 
-This document is also available in [here](helm-installation).
+This document is also available in [here](kubernetes/helm-installation).

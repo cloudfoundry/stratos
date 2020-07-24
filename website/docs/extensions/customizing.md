@@ -130,7 +130,7 @@ We currently expose the following extension points in Stratos:
 
 We use Decorators to annotate components to indicate that they are Stratos extensions.
 
-See [Extensions](../extensions/frontend-extensions) for more detail and examples of front-end extensions.
+See [Extensions](../extensions/frontend) for more detail and examples of front-end extensions.
 
 
 ### Changing the Initial Loading Indicator

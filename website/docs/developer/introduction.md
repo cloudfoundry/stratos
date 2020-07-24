@@ -4,8 +4,8 @@ sidebar_label: Stratos Development
 ---
 
 1. [Introduction](#introduction)
-1. [Frontend Development](#frontend-development)
-1. [Backend Development](#backend-development)
+1. [Frontend Development](frontend)
+1. [Backend Development](backend)
 
 ## Introduction
 

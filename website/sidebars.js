@@ -2,7 +2,7 @@ module.exports = {
   docs: {
 		Documentation: ['introduction', 'overview', 'license'],
     'Deploying Stratos': [
-			'deploy/deploy-overview',
+			'deploy/overview',
     	{
     		"Cloud Foundry": [
     			'deploy/cloud-foundry/cloud-foundry',

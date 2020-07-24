@@ -3,9 +3,6 @@ title: Backend Development
 sidebar_label: Overview
 ---
 
-
-## Backend Development
-
 Jetstream is the back-end for Stratos. It is written in Go.
 
 We use Go Modules for dependency management.

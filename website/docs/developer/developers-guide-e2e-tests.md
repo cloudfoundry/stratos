@@ -28,9 +28,9 @@ The tests require an instance of Cloud Foundry with the following:
 - A number of other Cloud Foundry entities
 
 To meet the above requirements we recommend running the Stratos CF E2E set up script which is kept up to date with the latest test requirements.
-More information can be found [below](#Running-the-E2E-Set-up-Script)
+More information can be found [below](#running-the-e2e-set-up-script)
 
-Before running the E2E tests, you need to create a file named `secrets.yaml` in the root of the Stratos folder. An example template is included in [src/test-e2e/secrets.yaml.example](../src/test-e2e/secrets.yaml.example) - copy this to `secrets.yaml` and edit accordingly.
+Before running the E2E tests, you need to create a file named `secrets.yaml` in the root of the Stratos folder. An example template is included in [src/test-e2e/secrets.yaml.example](https://github.com/cloudfoundry/stratos/blob/master/src/test-e2e/secrets.yaml.example) - copy this to `secrets.yaml` and edit accordingly.
 
 If you want to run the tests in headless Chrome, add the following to the secrets file:
 
@@ -39,7 +39,7 @@ headless: true
 ```
 
 ## Running the E2E Set up Script
-The script can be found in [deploy/tools/init-cf-for-e2e.sh](../deploy/tools/init-cf-for-e2e.sh)
+The script can be found in [deploy/tools/init-cf-for-e2e.sh](https://github.com/cloudfoundry/stratos/blob/master/deploy/tools/init-cf-for-e2e.sh)
 
 ### Minimum Requirements
 - CF CLI
@@ -111,7 +111,7 @@ Given the output of the script, the following template can be used to update the
 
 ### Tidying up test generated CF entities
 If tests are stopped before completing or fail to clean old test artifacts will exist in the CF. To clean some of these please see the script
-at [deploy/ci/automation/e2e-clean-remnants.sh](../deploy/ci/automation/e2e-clean-remnants.sh)
+at [deploy/ci/automation/e2e-clean-remnants.sh](https://github.com/cloudfoundry/stratos/blob/master/deploy/ci/automation/e2e-clean-remnants.sh)
 
 ## Running the tests
 

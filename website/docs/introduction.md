@@ -16,7 +16,7 @@ For Kubernetes, it provides Developers with views of their Kubernetes resources,
 
 ## Quick Start
 
-To get started quickly, we recommend following the steps to deploy the Stratos Console as a Cloud Foundry Application - see [here](deploy/cloud-foundry).
+To get started quickly, we recommend following the steps to deploy the Stratos Console as a Cloud Foundry Application - see [here](deploy/cloud-foundry/cloud-foundry).
 
 If you have [docker](https://www.docker.com/community-edition) installed, you can quickly deploy Stratos using the all-in-one container:
 ```
@@ -29,13 +29,13 @@ Once that has finished, you can then access Stratos by visiting https://localhos
 
 Stratos can be deployed in the following environments:
 
-1. Cloud Foundry, as an application. See [guide](deploy/cloud-foundry)
+1. Cloud Foundry, as an application. See [guide](deploy/cloud-foundry/cloud-foundry)
 2. Kubernetes, using a Helm chart. See [guide](deploy/kubernetes)
 3. Docker, single container deploying all components. See [guide](deploy/all-in-one)
 
 ## Troubleshooting
 
-Please see our [Troubleshooting](guides/troubleshooting/troubleshooting) page.
+Please see our [Troubleshooting](deploy/troubleshooting) page.
 
 ## Further Reading
  

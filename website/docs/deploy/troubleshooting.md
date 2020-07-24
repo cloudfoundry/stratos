@@ -5,7 +5,7 @@ sidebar_label: Troubleshooting
 ---
 
 ## Deploying as a Cloud Foundry Application
-See the custom troubleshooting guide [here](../../deploy/cloud-foundry#troubleshooting).
+See the custom troubleshooting guide [here](cloud-foundry/cf-troubleshooting).
 
 ## Usernames appear as long random characters when connected to IBM Cloud
 

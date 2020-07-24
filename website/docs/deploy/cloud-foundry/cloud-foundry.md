@@ -19,9 +19,9 @@ You will then be able to open a web browser and navigate to the console URL:
 
 Where `<DOMAIN>` is the default domain configured for your Cloud Foundry cluster.
 
-To login use the following credentials detailed [here](access.md).
+To login use the following credentials detailed [here](../access).
 
-If you run into issues, please refer to the [Troubleshooting Guide](#troubleshooting) below.
+If you run into issues, please refer to the [Troubleshooting Guide](cf-troubleshooting) below.
 
 > The console will pre-configure the host Cloud Foundry endpoint. No other CF instance should be registered unless the instructions in
  the section [Associate Cloud Foundry database service](#associate-cloud-foundry-database-service) are followed.
@@ -159,104 +159,4 @@ applications:
 
 When SSO Login is enabled, Stratos will also auto-connect to the Cloud Foundry it is deployed in using the token obtained during the SSO Login flow.
 
-For more information - see [Single-Sign On](../guides/admin/sso).
-
-```
-[
-   {
-      "destination":"0.0.0.0-255.255.255.255",
-      "protocol":"all"
-   }
-]
-```
-
-Save this to a file, e.g. `my-asg.json`.
-
-> Note: this allows example all network traffic on all IP ranges - we don't recommend using this.
-
-Unbind the existing ASG for you organization (`ORG`) and space (`SPACE`) with:
-
-```
-cf unbind-security-group public_networks ORG SPACE
-```
-
-Create a new ASG using the definition you saved to a file and give it a name, with:
-
-```
-cf create-security-group NAME my-asg.json
-```
-
-Bind this ASG to your `ORG` and `SPACE` with:
-
-```
-cf bind-security-group NAME ORG SPACE
-```
-
-
-### Console fails to start
-
-The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api` value inside the `VCAP_APPLICATION` environment variable.
-To check if the variable is present, use the CF CLI to list environment variables, and inspect the `VCAP_APPLICATION` variable under `System-Provided`.
-
-```
-$ cf env console
-Getting env variables for app console in org SUSE / space dev as admin...
-OK
-
-System-Provided:
-
-
- {
-  "VCAP_APPLICATION": {
-   "application_id": ...,
-   "application_name": "console",
-   "application_uris": ...
-   "application_version": ...,
-   "cf_api": "http://api.cf-dev.io",
-   ...
- }
-
- No user-defined env variables have been set
- ...
-```
-
-If the `cf_api` environment variable is absent then set the `CF_API_URL` variable. See the following _Setting the `CF_API_URL` env variable in the manifest_ section.
-
-
-However, if the `cf_api` environment variable is present, and an HTTP address is specified, it is possible that insecure traffic may be blocked. See the following _Setting the `CF_API_FORCE_SECURE` env variable in the manifest_ section.
-
-
-#### Setting the `CF_API_URL` env variable in the manifest
-
-To specify the Cloud Foundry API endpoint, add the `CF_API_URL` variable to the manifest, for example:
-
-```
-applications:
-- name: console
-  memory: 256M
-  disk_quota: 256M
-  host: console
-  timeout: 180
-  buildpack: https://github.com/cloudfoundry/stratos-buildpack
-  health-check-type: port
-  env:
-    CF_API_URL: https://<<CLOUD FOUNDRY API ENDPOINT>>>
-```
-
-#### Setting the `CF_API_FORCE_SECURE` env variable in the manifest
-
-To force the console to use secured communication with the Cloud Foundry API endpoint (HTTPS rather than HTTP), specify the `CF_API_FORCE_SECURE` environment in the manifest, for example:
-
-```
-applications:
-- name: console
-  memory: 256M
-  disk_quota: 256M
-  host: console
-  timeout: 180
-  buildpack: https://github.com/cloudfoundry/stratos-buildpack
-  health-check-type: port
-  env:
-    CF_API_FORCE_SECURE: true
-```
-
+For more information - see [Single-Sign On](../../advanced/sso).

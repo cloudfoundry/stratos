@@ -13,7 +13,7 @@ Next, run the customization script (this is done automatically when you do an `n
 npm run customize
 ```
 
-You can now run Stratos locally to see the customizations - see the [Developer's Guide](../developers/developers-guide) for details.
+You can now run Stratos locally to see the customizations - see the [Developer's Guide](../developer/frontend) for details.
 
 For a walk-through of extending Stratos, see [Example: Adding a Custom Tab](#example-adding-a-custom-tab).
 

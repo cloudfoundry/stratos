@@ -1,12 +1,12 @@
 ---
-id: deploy-overview
+id: overview
 title: Deploying Stratos
 sidebar_label: Overview
 ---
 
 Stratos can be deployed in the following environments:
 
-1. Cloud Foundry, as an application. See [guide](cloud-foundry)
+1. Cloud Foundry, as an application. See [guide](cloud-foundry/cloud-foundry)
 2. Kubernetes, using a Helm chart. See [guide](kubernetes)
 3. Docker, single container deploying all components. See [guide](all-in-one)
 
@@ -27,7 +27,7 @@ In this case, the front-end web application static resources are served by the A
 
 By defaut, a non-persistent SQLite database is used - by automatically registering the cloud foundry endpoint and connecting to it on login, all data stored in the database can be treated as ephimeral, since it will be re-created next time a user logs in. Cloud Foundry Session Affinity is used to ensure that when scaling up the Console Application to multiple instances, the user is also directed to the instance which will know about them and their endpoints (since each Application instance will have its own local SQLite store).
 
-Alternatively, Stratos can be configured [with a persistent Cloud Foundry database service](deploy/cloud-foundry/db-migration), which enables features requiring persistence such as user favorites.
+Alternatively, Stratos can be configured [with a persistent Cloud Foundry database service](cloud-foundry/db-migration), which enables features requiring persistence such as user favorites.
 
 ## Deployed in Kubernetes
 
