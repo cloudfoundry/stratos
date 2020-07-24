@@ -112,6 +112,12 @@ console:
 
   # Download link when installing the Kubernetes Dashboard in a targetted Kube Endpoint
   kubeDashboardImage:
+
+  # Size for analysis reports volume
+  reportsVolumeSize: 1Gi
+
+  # Do not use a persistent volume for analysis reports
+  reportsVolumeDisabled: false
   
 images:
   console: stratos-console

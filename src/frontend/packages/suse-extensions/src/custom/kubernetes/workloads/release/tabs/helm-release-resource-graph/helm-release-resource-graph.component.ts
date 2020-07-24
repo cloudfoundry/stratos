@@ -245,16 +245,9 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   private getResource(node: CustomHelmReleaseGraphNode): Observable<HelmReleaseResource> {
     return this.helper.fetchReleaseResources().pipe(
       filter(r => !!r),
-      // tap(r => {
-      //   console.log(node);
-      //   console.log(r);
-      // }),
-      map((r: HelmReleaseResources) => Object.values(r.data).find((res) => {
-        // if (!res.metadata) {
-        //   console.log(node, res);
-        // }
-        return res.metadata.name === node.label && res.kind === node.data.kind;
-      })),
+      map((r: HelmReleaseResources) => Object.values(r.data).find((res) =>
+        res.metadata.name === node.label && res.kind === node.data.kind
+      )),
       first(),
     );
   }
