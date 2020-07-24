@@ -41,7 +41,7 @@ module.exports = {
             },
             {
               label: 'Deploying Stratos',
-              to: 'docs/doc2/',
+              to: 'docs/deploy/overview',
             },
           ],
         },
