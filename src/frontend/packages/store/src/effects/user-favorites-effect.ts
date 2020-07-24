@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, first, mergeMap, switchMap } from 'rxjs/operators';
+import { catchError, first, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityDeleteCompleteAction } from '../actions/entity.delete.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
@@ -18,13 +18,14 @@ import {
   UpdateUserFavoriteMetadataAction,
   UpdateUserFavoriteMetadataSuccessAction,
 } from '../actions/user-favourites.actions';
-import { DispatchOnlyAppState } from '../app-state';
+import { InternalAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { proxyAPIVersion } from '../jetstream';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
 import { UserFavoriteManager } from '../user-favorite-manager';
+import { STRATOS_ENDPOINT_TYPE, userFavouritesEntityType } from './../helpers/stratos-entity-factory';
 
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
 
@@ -34,7 +35,7 @@ export class UserFavoritesEffect {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<DispatchOnlyAppState>,
+    private store: Store<InternalAppState>,
     private userFavoriteManager: UserFavoriteManager
   ) {
   }
@@ -148,9 +149,14 @@ export class UserFavoritesEffect {
   @Effect()
   entityDeleteRequest$ = this.actions$.pipe(
     ofType<EntityDeleteCompleteAction>(EntityDeleteCompleteAction.ACTION_TYPE),
-    mergeMap((action: EntityDeleteCompleteAction) => {
-      // Delete the favorite if there is one
-      this.store.dispatch(new RemoveUserFavoriteAction(action.asFavorite()));
+    withLatestFrom(this.store),
+    mergeMap(([action, appState]) => {
+      // If there is a favorite, delete it
+      const fav = action.asFavorite();
+      const entityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavouritesEntityType);
+      if (appState.requestData && appState.requestData[entityKey] && appState.requestData[entityKey][fav.guid]) {
+        this.store.dispatch(new RemoveUserFavoriteAction(fav));
+      }
       return [];
     })
   );
