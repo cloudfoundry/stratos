@@ -47,10 +47,10 @@ func ParseCFEnvs(db *DatabaseConfig, env *env.VarSet) (bool, error) {
 		log.Info("No DB configurations defined, will use SQLite")
 		return false, nil
 	}
-	return findDatabaseConfig(vcapServices, db), nil
+	return findDatabaseConfig(vcapServices, db, env), nil
 }
 
-func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfig) bool {
+func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfig, env *env.VarSet) bool {
 	var service VCAPService
 	configs := findDatabaseConfigurations(vcapServices)
 	log.Infof("Found %d database service instances", len(configs))
@@ -78,7 +78,7 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 		db.Username = getDBCredentialsValue(dbCredentials["username"])
 		db.Password = getDBCredentialsValue(dbCredentials["password"])
 		db.Host = getDBCredentialsValue(dbCredentials["hostname"])
-		db.SSLMode = "disable"
+		db.SSLMode = env.String("DB_SSL_MODE", "disable")
 		db.Port, _ = strconv.Atoi(getDBCredentialsValue(dbCredentials["port"]))
 		// Note - Both isPostgresService and isMySQLService look at the credentials uri & tags
 		if isPostgresService(service) {
