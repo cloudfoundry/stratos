@@ -192,7 +192,7 @@ func (r *HelmRelease) processKubeResource(obj interface{}, t KubeResource) {
 	r.setResource(t)
 	log.Debugf("Got resource: %s : %s", t.Kind, t.Metadata.Name)
 	r.processController(t)
-	r.addJobForResource(t.Metadata.Namespace, t.Kind, t.APIVersion, t.Metadata.Name)
+	r.addJobForResource(r.Namespace, t.Kind, t.APIVersion, t.Metadata.Name)
 }
 
 func (r *HelmRelease) addJobForResource(namespace, kind, apiVersion, name string) {
@@ -200,7 +200,7 @@ func (r *HelmRelease) addJobForResource(namespace, kind, apiVersion, name string
 		ID:         fmt.Sprintf("%s-%s#Pods", kind, name),
 		Endpoint:   r.Endpoint,
 		User:       r.User,
-		Namespace:  r.Namespace,
+		Namespace:  namespace,
 		Name:       name,
 		URL:        getRestURL(namespace, kind, apiVersion, name),
 		APIVersion: apiVersion,
