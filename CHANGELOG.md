@@ -35,6 +35,7 @@ This release contains a number of fixes and improvements:
 **Fixes:**
 
 - Ensure `cf push` works from Windows  [\#4465](https://github.com/cloudfoundry/stratos/issues/4465)
+- SSLMode is not respected for database connections [\#4434](https://github.com/cloudfoundry/stratos/issues/4434)
 - Visiting marketplace tab breaks service list [\#4397](https://github.com/cloudfoundry/stratos/issues/4397)
 - CF Application reports error after restage [\#4392](https://github.com/cloudfoundry/stratos/issues/4392)
 - Helm Chart: Icon is missing [\#4370](https://github.com/cloudfoundry/stratos/issues/4370)
