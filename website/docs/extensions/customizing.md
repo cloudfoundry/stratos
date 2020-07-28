@@ -4,6 +4,7 @@ title: Customizing Stratos
 sidebar_label: Customizing Stratos 
 ---
 
+// TODO: RC REMOVE
 
 > This document is out of date and is in the process of being refreshed.
 

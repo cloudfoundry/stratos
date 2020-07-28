@@ -7,6 +7,7 @@ In version 4 of Stratos there are breaking customization changes from previous v
 
 These changes allow a much improved approach to extensions by opening the door to npm style plugins.
 
+## Basic Migration Steps
 To aid in migrating we've provided these instructions.
 
 1. Before updating to the latest code...
@@ -28,3 +29,8 @@ To aid in migrating we've provided these instructions.
     - During build time the custom packages will be discovered and output, see section starting `Building with these extensions`. These should contain the modules your require.
 1. Run Stratos your usual way. Ensure you can navigate to all your custom parts.
 1. Once you are happy everything works as intended remove the old `./custom-src` directory and commit you changes.
+
+
+## Custom Theme Colors
+There's now easier ways to customize colors. Previously a lot of custom scss was required to change things like header color, now these
+are included in the core stratos theme as properties. See docs [here](/docs/extensions/theming#customize-theme-colors).

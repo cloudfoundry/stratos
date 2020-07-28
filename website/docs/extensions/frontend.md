@@ -269,3 +269,48 @@ You should now be able to run Stratos locally and see this new tab on the applic
 
 ![Example tab extension](../images/extensions/tab-example.png)
 
+
+
+
+
+// TODO: RC
+### Adding new Features
+
+Code for new features should be placed within the `custom-src/frontend/app/custom` folder. You can create any sub-folder structure within this folder.
+
+When you perform an `npm install` or explicitly run `npm run customize`, the customize script is run and will symlink the folder `custom-src/frontend/app/custom` to `src/frontend/app/custom`. It will also create a module to import your custom code - this is placed in the file `src/frontend/app/custom/custom-import.module.ts`. You should _not_ edit this file.
+
+Within the `custom-src/frontend/app/custom` folder you must create a module in the file `custom.module.ts` named `CustomModule` - this will be imported into the Stratos application and is the mechanism by which you can add custom code to the front-end.
+
+We currently expose the following extension points in Stratos:
+
+- Changing the component to use for the login screen
+- Adding new items to the side navigation menu
+- Adding new tabs to the Application, Cloud Foundry, Organization and Space views
+- Adding new action buttons to the Application Wall, Application, Cloud Foundry, Organization and Space and Endpoint views
+
+We use Decorators to annotate components to indicate that they are Stratos extensions.
+
+See [Extensions](../extensions/frontend) for more detail and examples of front-end extensions.
+
+// TODO: RC      "assets/core/custom/acme_logo.png": "core/assets/nav-logo2.png"
+
+
+### Changing the Initial Loading Indicator
+
+On slower connections, it can take a few seconds to load the main Javascript resources for Stratos.
+
+In order to give the user some initial feedback that Stratos is loading, a loading indicator is included in the `index.html` file. This gets shown as early as possible, as soon as this main html file has loaded. Once the main code has been fetched, the view refreshes to show the application.
+
+A default loading indicator is provided that can be changed. To do so, create the following two files:
+
+- `custom-src/frontend/loading.css` - CSS styles to be included in a style block in the head of the index page
+- `custom-src/frontend/loading.html` - HTML markup to be included the the index page to render the loading indicator
+
+The files for the default indicator can be found in the `src/frontend/packages/core/misc/custom` folder.
+
+An example of a different loading indicator is included with the ACME sample in `examples/custom-src/frontend`.
+
+The customization task will insert the appropriate CSS and HTML files into the main index.html file when it runs.
+
+Take a look at the template for the `index.html` file in `src/frontend/packages/core/misc/custom/index.html`. The CSS file is inserted where the marker `/** @@LOADING_CSS@@ **/` is and the HTML file where `<!-- @@LOADING_HTML@@ -->` is.
