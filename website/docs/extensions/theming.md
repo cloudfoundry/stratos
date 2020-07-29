@@ -5,16 +5,18 @@ sidebar_label: Theming Stratos
 
 Stratos provides a mechanism for customizing the theme, including:
 
-- Changing the theme colors
+- Changing colors
 - Changing image assets (favorite icon, login background and logo)
-- Overriding styles
-- Changing the initial loading indicator
+- Using additional fonts
+- Adding/Overriding styles
 - Applying theme colors to components
 
-Theme's are best encapsulated in a new stratos package, for example like [this](https://github.com/cloudfoundry/stratos/tree/master/src/frontend/packages/example-theme). It should contain a `package.json` file with a `stratos` section which will contain some of the customization hooks (more on this later).
+Theme's are best encapsulated in a new npm package. It should contain the usual `package.json` file with a `stratos` section which will contain some of the theme customizations.
+
+An example of the type of package that can be created can be found in the [ACME example](https://github.com/cloudfoundry/stratos/tree/master/src/frontend/packages/example-theme). To run Stratos with these customizations see [here](/docs/extensions/introduction#acme).
 
 ## Colors
-Stratos uses Material Design and the [angular-material](https://material.angular.io/) library. It uses the same approach to theming.
+Stratos uses Material Design and the [angular-material](https://material.angular.io/) library and uses the same approach to theming.
 
 To create your own theme you will need to create a color pallet and provide it to Stratos as a material theme. This theme can also contain
 additional colors that customize core parts of the page (header, side navigator menu, avatar, etc).
@@ -43,9 +45,9 @@ $stratos-dark-theme: mat-dark-theme($acme-theme-primary, $acme-theme-primary, $a
 
 ### Stratos Colors
 
-Additional Stratos colors can be customized by supplying more colors to the `theme` object. Defining these colors here helps reduce the amount of custom SCSS overrides the theme has to use.
+Additional Stratos colors can be customized by supplying more colors to the `theme` object. Defining these colors helps reduce the amount of custom css the theme has to use.
 
-> Note - You do not have to specify all of these - defaults will be used if they are not set.
+> You do not have to specify all of these - defaults will be used if they are not set.
 
 |Property|Description|
 |---|---|
@@ -114,7 +116,7 @@ Terminal style set of colors to show for logging output.
 
 ### Dark theme
 
-By default the theme will not contain a dark mode and the UX for enabled/disabling will be hidden.
+By default the theme will not contain a dark mode and the UX for enabled/disabling it will be hidden.
 
 In order to add a dark mode to your theme an additional `dark` color theme should be provided by the `stratos-theme` theme function in your
 theme's `_index.scss`, for example 
@@ -140,8 +142,8 @@ Within the dark theme the default theme's additional Stratos colors can be overw
 
 
 
-Images that Stratos uses can be overwritten by a theme. To do so the new images should be added to the package and then referenced
-in the theme's `package.json` including the path of the image they overwrite. Below are some prominent examples.
+Images that Stratos uses can be overwritten by a theme, for example the logo and favicon. To do so the new images should be added to the
+package and then referenced in the theme's `package.json` including the path of the image they overwrite. Below are some prominent examples.
 
 
 |File name|Path|Description|
@@ -151,9 +153,10 @@ in the theme's `package.json` including the path of the image they overwrite. Be
 |`nav-logo.png`|`core/assets/nav-logo.png`|Logo to use in the top-left side navigation for the application logo|
 
 
-> NOTE: The `nav-logo.png` logo should have a height of 36px and a maximum width of 180 pixels. -->
+> The `nav-logo.png` logo should have a height of 36px and a maximum width of 180 pixels.
 
-> NOTE: Files written to `core/assets` should be done in one line, see below
+> Files written to `core/assets` should be done in one line. In the example below both logo.png and nav-logo.png and done via the one
+> line
 
 Example `package.json`
 
@@ -212,30 +215,10 @@ body.stratos {
 
 Note that the class `stratos` has been placed on the `BODY` tag of the Stratos application to assist with css selector specificity.
 
-## Loading Indicator
-
-The loading indicator is a page shown immediately when Stratos is visited and before any Angular loads. This helps on slow connections where
-the bulk of content may take longer to download.
-
-To add a loading indicator create a `html` and `css` file in your theme package and then reference them from your theme's `package.json`.
-For example
-
-```
-  "stratos": {
-    ...
-    "theme": {
-      "loadingCss": "loader/loading.css",
-      "loadingHtml": "loader/loading.html"
-    }
-    ...
-  },
-```
-
 ## Components
 
-Angular components in your packages can be themed, which provides them access to the theme's colors. To do this, in your extensions package that contains
-the components (this may be different to your theme package), add a `_all-theme.scss` file containing a scss function. This function should be
-referenced in the package's package.json and is called by the Stratos extension mechanism.
+Angular components in your packages can be themed, which provides them access to the theme's colors. To do this, in your extensions package that contains the components (this may be different to your theme package), add a `_all-theme.scss` file containing a scss function. This function
+should be referenced in the package's package.json and is called by the Stratos extension mechanism.
 
 The `_all-theme.scss` and `package.json` content may look like below
 

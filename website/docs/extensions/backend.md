@@ -18,9 +18,9 @@ Currently, to create an extension to the backend:
 
 1. Build Jetstream
 
-> Note: There are a few plugins in the `src/jetstream/plugins` folder that should help serve as examples of how to write a plugin.
+> There are a few plugins in the `src/jetstream/plugins` folder that should help serve as examples of how to write a plugin.
 
-> Note: Jetstream uses the [Echo web server](https://echo.labstack.com/) from Labstack - some familiarity with this is required when developing backend plugins.
+> Jetstream uses the [Echo web server](https://echo.labstack.com/) from Labstack - some familiarity with this is required when developing backend plugins.
 ## Plugin Interface
 
 All plugins must implement the interface `interfaces.StratosPlugin` - this is defined in `src/jetstream/repository/interfaces/plugin.go`.

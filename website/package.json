@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "docusaurus start",
+    "start-no-watch": "docusaurus start --no-open --poll",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "./deploy.sh"
