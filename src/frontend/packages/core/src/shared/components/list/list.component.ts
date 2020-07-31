@@ -596,13 +596,15 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   resetFilteringAndSort() {
-    // TODO: RC check for better way of doing this
+    // TODO: RC multi entity type lists
     const pAction: PaginatedAction = this.dataSource.action['length'] ? this.dataSource.action[0] : this.dataSource.action
     this.store.dispatch(new ResetPaginationSortFilter(pAction));
-    // Ensure that the changes are pushed back to the multi filter controls
+    // Ensure that the changes are pushed back to the multi filter controls. Ideally the field to store relationship would be two way..
+    // but it's not for the moment
     this.multiFilterManagers.forEach(manager => {
-      manager.value
       manager.hasOneItem$.pipe(first()).subscribe(hasOneItem => {
+        // TODO: RC Test
+        // const selectItem = hasOneItem || ''
         if (hasOneItem) {
           return;
         }

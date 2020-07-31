@@ -9,19 +9,6 @@ import { APIResource } from '../types/api.types';
 import { IFavoritesInfo } from '../types/user-favorites.types';
 
 
-// TODO: RC bring into LocalStorageService, rename
-export function getDashboardStateSessionId(username?: string) {
-  const prefix = 'stratos-';
-  if (username) {
-    return prefix + username;
-  }
-  const idElement = document.getElementById('__stratos-userid__');
-  if (idElement) {
-    return prefix + idElement.innerText;
-  }
-  return null;
-}
-
 export function getFavoriteInfoObservable(store: Store<AppState>): Observable<IFavoritesInfo> {
   return combineLatest(
     store.select(fetchingFavoritesSelector),

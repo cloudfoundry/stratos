@@ -1,15 +1,18 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 
 import { SetPollingEnabledAction, SetSessionTimeoutAction } from '../../../../../store/src/actions/dashboard-actions';
-import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
+import { AppState } from '../../../../../store/src/app-state';
+import { LocalStorageService } from '../../../../../store/src/helpers/local-storage-service';
+import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { ThemeService } from '../../../../../store/src/theme.service';
 import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { UserService } from '../../../core/user.service';
+import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { SetGravatarEnabledAction } from './../../../../../store/src/actions/dashboard-actions';
 
 @Component({
@@ -19,19 +22,22 @@ import { SetGravatarEnabledAction } from './../../../../../store/src/actions/das
 })
 export class ProfileInfoComponent {
 
-  public timeoutSession$ = this.store.select(selectDashboardState).pipe(
+  private dashboardState$ = this.store.select(selectDashboardState);
+  private sessionData$ = this.store.select(selectSessionData());
+
+  public timeoutSession$ = this.dashboardState$.pipe(
     map(dashboardState => dashboardState.timeoutSession ? 'true' : 'false')
   );
 
-  public pollingEnabled$ = this.store.select(selectDashboardState).pipe(
+  public pollingEnabled$ = this.dashboardState$.pipe(
     map(dashboardState => dashboardState.pollingEnabled ? 'true' : 'false')
   );
 
-  public gravatarEnabled$ = this.store.select(selectDashboardState).pipe(
+  public gravatarEnabled$ = this.dashboardState$.pipe(
     map(dashboardState => dashboardState.gravatarEnabled ? 'true' : 'false')
   );
 
-  public allowGravatar$ = this.store.select(selectDashboardState).pipe(
+  public allowGravatar$ = this.dashboardState$.pipe(
     map(dashboardState => dashboardState.gravatarEnabled)
   );
 
@@ -41,6 +47,8 @@ export class ProfileInfoComponent {
 
   primaryEmailAddress$: Observable<string>;
   hasMultipleThemes: boolean;
+
+  localStorageSize$: Observable<number>;
 
   public updateSessionKeepAlive(timeoutSession: string) {
     const newVal = !(timeoutSession === 'true');
@@ -69,10 +77,11 @@ export class ProfileInfoComponent {
   }
 
   constructor(
-    private userProfileService: UserProfileService,
-    private store: Store<DashboardOnlyAppState>,
+    userProfileService: UserProfileService,
+    private store: Store<AppState>,
     public userService: UserService,
-    public themeService: ThemeService
+    public themeService: ThemeService,
+    private confirmationService: ConfirmationDialogService
   ) {
     this.isError$ = userProfileService.isError$;
     this.userProfile$ = userProfileService.userProfile$;
@@ -83,6 +92,15 @@ export class ProfileInfoComponent {
     );
 
     this.hasMultipleThemes = themeService.getThemes().length > 1;
+
+    this.localStorageSize$ = this.sessionData$.pipe(
+      map(sessionData => LocalStorageService.localStorageSize(sessionData)),
+      filter(bytes => bytes != -1),
+    )
+  }
+
+  clearLocalStorage() {
+    this.sessionData$.pipe(first()).subscribe(sessionData => LocalStorageService.clear(sessionData, this.confirmationService))
   }
 
 }

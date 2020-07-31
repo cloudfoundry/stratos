@@ -160,6 +160,9 @@ function paginate(action, state: PaginationState = {}, updatePagination) {
 }
 
 // TODO: RC tidy the hell out of this
+/**
+ * Push data (in the action) from local storage back into the pagination state
+ */
 function hydratePagination(state: PaginationState, action: HydratePaginationStateAction): PaginationState {
   const hydrate = (action.paginationState || {}); // TODO: RC don't wrap when parseing
   const entityKeys = Object.keys(hydrate || {});
