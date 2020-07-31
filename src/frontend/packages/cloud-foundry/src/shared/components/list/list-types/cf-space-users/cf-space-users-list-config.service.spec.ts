@@ -6,13 +6,11 @@ import {
   CloudFoundryOrganizationServiceMock,
 } from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
 import { CloudFoundrySpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import {
-  CloudFoundryOrganizationService,
-} from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
-import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
-import { UserInviteService } from '../../../../../features/cloud-foundry/user-invites/user-invite.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import { CloudFoundryEndpointService } from '../../../../../features/cf/services/cloud-foundry-endpoint.service';
+import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
+import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
+import { UserInviteService } from '../../../../../features/cf/user-invites/user-invite.service';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfSpaceUsersListConfigService } from './cf-space-users-list-config.service';
 

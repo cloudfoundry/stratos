@@ -22,7 +22,7 @@ import {
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { cfOrgSpaceFilter } from '../../../../../features/cloud-foundry/cf.helpers';
+import { cfOrgSpaceFilter } from '../../../../../features/cf/cf.helpers';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';

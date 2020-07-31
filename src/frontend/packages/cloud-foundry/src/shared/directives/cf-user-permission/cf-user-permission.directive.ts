@@ -5,7 +5,7 @@ import { switchMap } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { AppState } from '../../../../../store/src/app-state';
-import { waitForCFPermissions } from '../../../features/cloud-foundry/cf.helpers';
+import { waitForCFPermissions } from '../../../features/cf/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 @Directive({

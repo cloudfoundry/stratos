@@ -51,6 +51,7 @@ export interface EntityCatalogSchemas {
 export interface IStratosEntityWithIcons {
   icon?: string;
   iconFont?: string;
+  logoUrl?: string;
 }
 
 export interface IEntityMetadata {
@@ -67,6 +68,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   readonly type?: string;
   readonly schema: T;
   readonly label?: string;
+  readonly labelShort?: string;
   readonly labelPlural?: string;
   readonly renderPriority?: number;
   /**
@@ -77,6 +79,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
   readonly paginationConfig?: PaginationPageIteratorConfig;
   readonly tableConfig?: EntityTableConfig<any>;
+  readonly registrationComponent?: any;
   /**
    * Hook that will fire before an entity is emitted by an entity service. This could be used, for example, entity validation
    */

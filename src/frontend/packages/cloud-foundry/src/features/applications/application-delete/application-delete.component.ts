@@ -47,7 +47,7 @@ import {
 import {
   TableCellTCPRouteComponent,
 } from '../../../shared/components/list/list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
-import { isServiceInstance, isUserProvidedServiceInstance } from '../../cloud-foundry/cf.helpers';
+import { isServiceInstance, isUserProvidedServiceInstance } from '../../cf/cf.helpers';
 import { ApplicationService } from '../application.service';
 
 

@@ -23,7 +23,7 @@ import { IRoute } from '../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { getRoute, isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
-import { cfOrgSpaceFilter } from '../../../../../features/cloud-foundry/cf.helpers';
+import { cfOrgSpaceFilter } from '../../../../../features/cf/cf.helpers';
 import { CFListDataSource } from '../../../../cf-list-data-source';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
 

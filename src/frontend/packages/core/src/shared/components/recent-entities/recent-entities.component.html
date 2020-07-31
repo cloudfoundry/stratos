@@ -1,27 +1,7 @@
+<!-- history is set when used in the dropdown menu to only show recent history-->
+
 <mat-card *ngIf="!history && ((hasHits$ | async) === true)">
-  <mat-tab-group dynamicHeight="true" animationDuration="0ms"
-    mat-stretch-tabs>
-    <mat-tab label="Top">
-      <div class="recent-tab" *ngIf="frecentEntities$ | async as frecentEntities">
-        <div *ngIf="frecentEntities && frecentEntities.length > 0" class="recent-entities">
-          <div [routerLink]="countedEntity.entity.routerLink" [ngClass]="{clickable: !!countedEntity.entity.routerLink}"
-            class="recent-entity" *ngFor="let countedEntity of frecentEntities">
-            <a class="recent-entity--name" *ngIf="countedEntity.entity.routerLink as routerLink; else noLink">{{
-              countedEntity.entity.name }}</a>
-            <ng-template #noLink>
-              <div class="recent-entity--name">{{ countedEntity.entity.name }}</div>
-            </ng-template>
-            <div class="type-info">
-              <span>{{ countedEntity.subText$ | async }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </mat-tab>
-    <mat-tab label="Recent">
-      <ng-container *ngTemplateOutlet="historyTemplate"></ng-container>
-    </mat-tab>
-  </mat-tab-group>
+  <ng-container *ngTemplateOutlet="historyTemplate"></ng-container>
 </mat-card>
 
 <ng-container *ngIf="!history && ((hasHits$ | async) === false)">
@@ -39,16 +19,23 @@
     <div *ngIf="recentEntities && recentEntities.length > 0" class="recent-entities">
       <div [routerLink]="countedEntity.entity.routerLink" [ngClass]="{clickable: !!countedEntity.entity.routerLink}"
         class="recent-entity" *ngFor="let countedEntity of recentEntities">
-        <a class="recent-entity--name" *ngIf="countedEntity.entity.routerLink as routerLink; else noLink">{{
-          countedEntity.entity.name }}</a>
-        <ng-template #noLink>
-          <div class="recent-entity--name">{{ countedEntity.entity.name }}</div>
-        </ng-template>
-        <div class="type-info" *ngIf="countedEntity.mostRecentHit">
-          {{ countedEntity.mostRecentHit | amTimeAgo }}
+        <div class="recent-entity__icon-container" *ngIf="countedEntity.icon">
+          <mat-icon class="recent-entity__icon" [fontSet]="countedEntity.iconFont">{{ countedEntity.icon }}</mat-icon>
         </div>
-        <div class="type-info">
-          <span>{{ countedEntity.subText$ | async }}</span>
+        <div>
+          <a class="recent-entity--name" *ngIf="countedEntity.entity.routerLink as routerLink; else noLink">{{
+            countedEntity.entity.name }}</a>
+          <ng-template #noLink>
+            <div class="recent-entity--name">{{ countedEntity.entity.name }}</div>
+          </ng-template>
+          <!-- Don't show the date 
+          <div class="type-info" *ngIf="countedEntity.mostRecentHit">
+            {{ countedEntity.mostRecentHit | amTimeAgo }}
+          </div>
+          -->
+          <div class="type-info">
+            <span>{{ countedEntity.subText$ | async }}</span>
+          </div>
         </div>
       </div>
     </div>

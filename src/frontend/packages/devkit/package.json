@@ -1,8 +1,8 @@
 {
-  "name": "@stratosui/tools",
+  "name": "@stratosui/devkit",
   "version": "0.0.1",
   "scripts": {
-    "build": "./build.sh",
+    "build": "tsc && node build.js",
     "tsc": "tsc"
   },
   "dependencies": {

@@ -13,9 +13,7 @@ import {
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import {
-  CloudFoundryOrganizationService,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { CloudFoundryOrganizationService } from '../../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import {
   CloudFoundryUserProvidedServicesService,

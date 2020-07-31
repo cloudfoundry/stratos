@@ -3,6 +3,7 @@ import {
   LOGIN_FAILED,
   LOGIN_SUCCESS,
   LoginFailed,
+  LOGOUT_FAILED,
   RESET_AUTH,
   SESSION_INVALID,
   SESSION_VERIFIED,
@@ -12,6 +13,7 @@ import { RouterActions, RouterNav } from '../actions/router.actions';
 import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
 import { AuthOnlyAppState } from '../app-state';
 import { SessionData } from '../types/auth.types';
+import { LogoutFailed } from './../actions/auth.actions';
 import { RouterRedirect } from './routing.reducer';
 
 export interface AuthUser {
@@ -51,6 +53,10 @@ export function authReducer(state: AuthState = defaultState, action): AuthState 
     case LOGIN_FAILED:
       const loginFailed = action as LoginFailed;
       return { ...state, error: true, errorResponse: loginFailed.error, loggingIn: false, loggedIn: false };
+    case LOGOUT_FAILED:
+      const logoutFailed = action as LogoutFailed;
+      console.error(logoutFailed.error);
+      return { ...state, loggingIn: false, loggedIn: true, error: true, errorResponse: logoutFailed.error };
     case VERIFY_SESSION:
       return { ...state, error: false, errorResponse: undefined, verifying: true };
     case SESSION_VERIFIED:

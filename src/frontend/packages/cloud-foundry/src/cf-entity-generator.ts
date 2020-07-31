@@ -1143,10 +1143,11 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
     label: 'Application',
     labelPlural: 'Applications',
     endpoint: endpointDefinition,
+    icon: 'apps',
     tableConfig: {
       rowBuilders: [
         ['Name', (entity) => entity.entity.name],
-        ['Creation Date', (entity) => entity.metadata.created_at]
+        ['Created', (entity) => entity.metadata.created_at]
       ]
     }
   };
@@ -1172,7 +1173,7 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
         getLines: () => ([
-          ['Creation Date', (meta) => meta.createdAt]
+          ['Created', (meta) => meta.createdAt]
         ])
       },
       actionBuilders: applicationActionBuilder
@@ -1191,6 +1192,8 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
     label: 'Space',
     labelPlural: 'Spaces',
     endpoint: endpointDefinition,
+    icon: 'virtual_space',
+    iconFont: 'stratos-icons'
   };
   cfEntityCatalog.space = new StratosCatalogEntity<ISpaceFavMetadata, APIResource<ISpace>, SpaceActionBuilders>(
     spaceDefinition,
@@ -1210,7 +1213,7 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
         getLines: () => ([
-          ['Creation Date', (meta) => meta.createdAt]
+          ['Created', (meta) => meta.createdAt]
         ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid
@@ -1227,6 +1230,8 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
     label: 'Organization',
     labelPlural: 'Organizations',
     endpoint: endpointDefinition,
+    icon: 'organization',
+    iconFont: 'stratos-icons'    
   };
   cfEntityCatalog.org = new StratosCatalogEntity<
     IOrgFavMetadata,
@@ -1252,7 +1257,7 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
         getLines: () => ([
-          ['Creation Date', (meta) => meta.createdAt]
+          ['Created', (meta) => meta.createdAt]
         ]),
         getGuid: metadata => metadata.guid
       }

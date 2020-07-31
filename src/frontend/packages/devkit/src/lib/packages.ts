@@ -128,7 +128,12 @@ export class Packages {
     // Local folders
     // Find all local packages in the folder
     getDirectories(this.localPackagesFolder).forEach(pkgDir => {
-      this.addPackage(pkgDir, true);
+      const pkgFile = Packages.loadPackageFile(pkgDir);
+      if (pkgFile !== null) {
+        this.addPackage(pkgDir, true);
+      } else {
+        getDirectories(pkgDir).forEach(pDir => this.addPackage(pDir, true));
+      }
     });
 
     // Figure out the theme
@@ -262,7 +267,7 @@ export class Packages {
           package: pkg.name,
           scss: refParts[0],
           mixin: refParts[1],
-          importPath: path.join(packagePath, refParts[0])
+          importPath: '~' + pkg.name + '/' + refParts[0]
         };
         this.log('Found themed package: ' + pkg.name + ' (' + pkg.stratos.theming + ')');
         return themingConfig;

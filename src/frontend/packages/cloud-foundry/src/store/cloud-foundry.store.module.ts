@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 
-import { ActiveRouteCfOrgSpace } from '../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../features/cf/cf-page.types';
 import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
 import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AppEffects } from './effects/app.effects';

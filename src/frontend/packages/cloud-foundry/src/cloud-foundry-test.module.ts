@@ -11,7 +11,7 @@ import { generateStratosEntities } from '../../store/src/stratos-entity-generato
 import { testSCFEndpointGuid } from '../../store/testing/public-api';
 import { BaseCfOrgSpaceRouteMock } from '../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateCFEntities } from './cf-entity-generator';
-import { ActiveRouteCfOrgSpace } from './features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from './features/cf/cf-page.types';
 import { CfUserService } from './shared/data-services/cf-user.service';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { GitSCMService } from './shared/data-services/scm/scm.service';

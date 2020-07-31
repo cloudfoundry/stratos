@@ -1,10 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { NormalModuleReplacementPlugin } from 'webpack';
 
+import { NormalModuleReplacementPlugin } from 'webpack';
 import { StratosConfig } from '../lib/stratos.config';
 
 const importModuleRegex = /src\/frontend\/packages\/core\/src\/custom-import.module.ts/;
+
+const isWindows = process.platform === 'win32';
 
 /**
  * Generates the file _custom-import.module.ts containing the code to import
@@ -17,13 +19,13 @@ const importModuleRegex = /src\/frontend\/packages\/core\/src\/custom-import.mod
 
 export class ExtensionsHandler {
 
-  constructor() {}
+  constructor() { }
 
   // Write out the _custom-import.module.ts file importing all of the required extensions
   public apply(webpackConfig: any, config: StratosConfig, options: any) {
 
     // Generate the module file to import the appropriate extensions
-    const dir = path.dirname(options.main);
+    const dir = path.join(config.rootDir, path.dirname(options.main));
     const overrideFile = path.resolve(path.join(dir, './_custom-import.module.ts'));
 
     fs.writeFileSync(overrideFile, '// This file is auto-generated - DO NOT EDIT\n\n');
@@ -51,8 +53,18 @@ export class ExtensionsHandler {
     this.writeModule(overrideFile, 'CustomImportModule', moduleImports);
     this.writeModule(overrideFile, 'CustomRoutingImportModule', routingMmoduleImports);
 
+    let regex;
+    // On windows, use an absolute path with backslashes escaped
+    if (isWindows) {
+      let p = path.resolve(path.join(dir, 'custom-import.module.ts'));
+      p = p.replace(/\\/g, '\\\\');
+      regex = new RegExp(p);
+    } else {
+      regex = importModuleRegex
+    }
+
     webpackConfig.plugins.push(new NormalModuleReplacementPlugin(
-      importModuleRegex,
+      regex,
       overrideFile
     ));
   }

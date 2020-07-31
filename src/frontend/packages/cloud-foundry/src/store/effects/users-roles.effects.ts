@@ -4,7 +4,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import {
   ManageUsersSetUsernamesHelper,
-} from 'frontend/packages/cloud-foundry/src/features/cloud-foundry/users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
+} from 'frontend/packages/cloud-foundry/src/features/cf/users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
 import { combineLatest as observableCombineLatest, combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 

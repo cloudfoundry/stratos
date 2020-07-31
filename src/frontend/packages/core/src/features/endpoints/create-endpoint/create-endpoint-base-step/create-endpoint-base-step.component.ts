@@ -1,16 +1,16 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
-import { selectSessionData } from '../../../../../../store/src/reducers/auth.reducer';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
+import { IStratosEndpointDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
+import { selectSessionData } from '../../../../../../store/src/reducers/auth.reducer';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
-import { Observable } from 'rxjs';
-import { IStratosEndpointDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 
 interface ICreateEndpointTilesData extends ITileData {
   type: string;
@@ -103,7 +103,8 @@ export class CreateEndpointBaseStepComponent {
                 },
               {
                 type: endpoint.type,
-                parentType: endpoint.parentType
+                parentType: endpoint.parentType,
+                component: endpoint.registrationComponent,
               }
             );
           });

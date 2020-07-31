@@ -16,7 +16,7 @@ import {
   generateActiveRouteCfOrgSpaceMock,
   generateCfBaseTestModulesNoShared,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfUserService } from '../../../data-services/cf-user.service';
 import { CardCfRecentAppsComponent } from './card-cf-recent-apps.component';
 import { CompactAppCardComponent } from './compact-app-card/compact-app-card.component';

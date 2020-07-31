@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -12,10 +13,10 @@ import { CardCell } from '../../../../../../../../core/src/shared/components/lis
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
-import { IServiceInstance } from '../../../../../../cf-api-svc.types';
+import { IService, IServiceInstance } from '../../../../../../cf-api-svc.types';
+import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import {
-  getServiceBrokerName,
   getServiceName,
   getServicePlanName,
   getServiceSummaryUrl,
@@ -24,6 +25,10 @@ import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
+import {
+  TableCellServiceBrokerComponentConfig,
+  TableCellServiceBrokerComponentMode,
+} from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
 @Component({
   selector: 'app-service-instance-card',
@@ -82,12 +87,34 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           row.entity.space_guid);
       }
 
-      if (!this.serviceBrokerName$) {
-        this.serviceBrokerName$ = getServiceBrokerName(
-          this.serviceInstanceEntity.entity.service_plan.entity.service.entity.service_broker_guid,
+      if (!this.service$) {
+        this.service$ = cfEntityCatalog.service.store.getEntityService(
+          this.serviceInstanceEntity.entity.service_guid,
           this.serviceInstanceEntity.entity.cfGuid,
+          {
+            includeRelations: []
+          }
+        ).waitForEntity$.pipe(
+          filter(s => !!s),
+          map(s => s.entity)
         );
       }
+
+      if (!this.serviceName$) {
+        // See note for this.serviceBrokerName$
+        this.serviceName$ = this.service$.pipe(
+          map(getServiceName)
+        )
+      }
+
+      this.servicePlanName = this.serviceInstanceEntity.entity.service_plan ?
+        getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity)
+        : null;
+
+      this.serviceUrl = getServiceSummaryUrl(
+        this.serviceInstanceEntity.entity.cfGuid,
+        this.serviceInstanceEntity.entity.service_guid
+      );
     }
   }
 
@@ -109,7 +136,19 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   entityConfig: ComponentEntityMonitorConfig;
 
   cfOrgSpace: CfOrgSpaceLabelService;
-  serviceBrokerName$: Observable<string>;
+  serviceName$: Observable<string>;
+  servicePlanName: string;
+  serviceUrl: string;
+
+  service$: Observable<APIResource<IService>>;
+
+  brokerNameConfig: TableCellServiceBrokerComponentConfig = {
+    mode: TableCellServiceBrokerComponentMode.NAME
+  }
+  brokerScopeConfig: TableCellServiceBrokerComponentConfig = {
+    mode: TableCellServiceBrokerComponentMode.SCOPE,
+    altScope: true
+  }
 
   private detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
@@ -134,23 +173,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     }
   )
 
-  getServiceName = () => {
-    return getServiceName(this.serviceInstanceEntity.entity.service_plan.entity.service);
-  }
-
-  getServicePlanName = () => {
-    if (!this.serviceInstanceEntity.entity.service_plan) {
-      return null;
-    }
-    return getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity);
-  }
-
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 
-  getServiceUrl = () => {
-    return getServiceSummaryUrl(
-      this.serviceInstanceEntity.entity.cfGuid,
-      this.serviceInstanceEntity.entity.service_plan.entity.service.metadata.guid
-    );
-  }
 }

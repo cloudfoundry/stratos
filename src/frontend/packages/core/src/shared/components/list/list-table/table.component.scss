@@ -5,7 +5,6 @@
 mat-cell,
 mat-header-cell {
   flex: 1 1 200px;
-  padding: 10px;
 
   app-table-cell {
     width: 100%;
@@ -86,6 +85,19 @@ mat-header-cell {
         // white-space: nowrap;
         word-break: break-all;
       }
+    }
+
+    &--table-centred {
+      app-table-cell {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        text-align: center;
+      }
+    }
+
+    &--table-no-v-padding {
+      padding: 0 10px 0 0;
     }
 
     &--table-column-additional-padding {

@@ -15,7 +15,7 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { DeleteSpaceQuotaDefinition } from '../../../../../actions/quota-definitions.actions';
 import { IQuotaDefinition } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { QUOTA_FROM_LIST } from '../cf-quotas/cf-quotas-list-config.service';

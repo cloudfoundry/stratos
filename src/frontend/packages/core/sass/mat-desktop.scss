@@ -4,6 +4,7 @@
 $desktop-font-size: 14px;
 $desktop-menu-item-height: 32px;
 $desktop-menu-vertical-padding: 8px;
+$desktop-page-header-height: 48px;
 
 // Remove 1px border
 $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
@@ -91,6 +92,28 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
         line-height: normal;
       }
     }
+  }
 
+  // Smaller page header
+  .page-header .page-header__toolbar {
+    height: $desktop-page-header-height;
+  }
+
+  .dashboard .dashboard__inner {
+    height: calc(100% - #{$desktop-page-header-height});
+  }
+
+  .side-nav .side-nav__top {
+    flex: 0 0 $desktop-page-header-height;
+    height: $desktop-page-header-height;
+  }
+
+  mat-drawer.dashboard__side_preview {
+    top: $desktop-page-header-height;
+    height: calc(100vw - #{$desktop-page-header-height} - 1px);
+  }
+
+  app-profile-info .user-profile {
+    top: $desktop-page-header-height;
   }
 }
