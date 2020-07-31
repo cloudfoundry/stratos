@@ -41,6 +41,7 @@ This release contains a number of fixes and improvements:
 
 **Fixes:**
 
+- Memory leak in stratos-chartstore (fdbdoclayer) [\#429](https://github.com/SUSE/stratos/issues/429)
 - Helm Chart: Icon is missing [\#393](https://github.com/SUSE/stratos/issues/393)
 - Workload Summary: Ring chart series toggled on refresh & legend vs ring colours missmatched [\#389](https://github.com/SUSE/stratos/issues/389)
 - Can't connect a K3S endpoint [\#372](https://github.com/SUSE/stratos/issues/372)
