@@ -24,7 +24,7 @@ export class LocalStorageService {
   // TODO: RC cleaning sessions storage (entities that don't exist, etc, can be done by storeagesync??)
   // TODO: RC backward compatible (load 'user-dashboard' into 'user')
   // TODO: RC todos!
-  // TODO: RC add clear session data from local storage button
+  // TODO: RC only store pagination settings for those that power lists
 
   /**
    * Normally used on app init, move local storage data into the console's store
@@ -189,7 +189,7 @@ export class LocalStorageService {
    */
   public static clear(sessionData: SessionData, confirmationService: ConfirmationDialogService, reloadTo = '/user-profile') {
     const config: ConfirmationDialogConfig = {
-      message: 'This will clear your local storage for this console and reload this window',
+      message: 'This will clear your settings in local storage for this address and reload this window',
       confirm: 'Clear',
       critical: true,
       title: 'Are you sure?'
