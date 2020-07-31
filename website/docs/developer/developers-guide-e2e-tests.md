@@ -10,7 +10,7 @@ The tests require a Stratos instance to be running (front-end and back-end) and 
 
 Developers' should be aware that:
 
-- The E2E tests are destructive on the Stratos system being tested - since they test endpoint registration, they will un-register any existing endpoints
+- The E2E tests are destructive on the Stratos system being tested - since they test endpoint registration, they will un-register any existing endpoints.
 - The E2E tests will create orgs, spaces, applications, routes, etc in the Cloud Foundry instance that is specified. Tests should automatically tidy up afterwards unless stopped abruptly.
 
 ## Pre-requisites
@@ -28,7 +28,7 @@ The tests require an instance of Cloud Foundry with the following:
 - A number of other Cloud Foundry entities
 
 To meet the above requirements we recommend running the Stratos CF E2E set up script which is kept up to date with the latest test requirements.
-More information can be found [below](#running-the-e2e-set-up-script)
+More information can be found [below](#running-the-e2e-set-up-script).
 
 Before running the E2E tests, you need to create a file named `secrets.yaml` in the root of the Stratos folder. An example template is included in [src/test-e2e/secrets.yaml.example](https://github.com/cloudfoundry/stratos/blob/master/src/test-e2e/secrets.yaml.example) - copy this to `secrets.yaml` and edit accordingly.
 
@@ -117,7 +117,11 @@ at [deploy/ci/automation/e2e-clean-remnants.sh](https://github.com/cloudfoundry/
 
 To run the tests against an instance of Stratos execute
 ```
-npm run e2e -- --dev-server-target= --base-url=<URL of stratos
+STRATOS_E2E_BASE_URL=<URL of stratos> ng e2e --dev-server-target= --base-url=<URL of stratos>
+```
+If running Stratos on `https://127.0.0.1:4200` then instead execute
+```
+npm run e2e-dev
 ```
 
 

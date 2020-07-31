@@ -5,66 +5,25 @@ sidebar_label: Overview
 
 ## Introduction to the stack
 
-Have a look through the [Env + Tech](developers-guide-env-tech.md) page to get acquainted with some of the new technologies used in v2.
-These include video's, tutorials and examples of Angular 2+, Typescript and Redux. There's also some advice on helpful plugins to use if
-using Visual Studio Code. If you feel comfortable with these and are happy with your dev environment please skip straight to
-[Set up Dependencies](#set-up-dependencies)
+Before making changes to the frontend code you should be familiar with
+
+1. Angular
+1. Typescript / ES6
+1. Redux / NGRX / Observables
+1. Node / NPM
+
+There are a some introduction style resources [here](/docs/developer/developers-guide-env-tech.md). There's also some advice on helpful [VS code plugins](/docs/developer/developers-guide-env-tech#vs-code-plug-ins). If you feel comfortable with these and are happy with your dev environment please skip straight to
+[Set up Dependencies](#set-up-dependencies).
 
 ## Set up Dependencies
 
-* Set up a Stratos backend - The frontend cannot run without a backend. Both backend and frontend exist in this same repo.
-  * Don't need to make changes to the backend code? To set up a backend run through the [deploy section](../deploy/overview),
-    choose a deployment method and bring one up. These deployments will bring up the entire backend, including api service and database
-    along with a V2 frontend.
-  * Need to make changes to the backend code? Follow the [Backend Development](backend) set up guide
-* Install [NodeJs](https://nodejs.org) (minimum node version 12.13.0)
-* Install [Angular CLI](https://cli.angular.io/) - `npm install -g @angular/cli`
+* Set up a Stratos backend. Both backend and frontend exist in this same repo. Follow the [Backend Development](/docs/developer/introduction#build--run-locally) set up guide.
+* Install [NodeJs](https://nodejs.org) (if not already install) (minimum node version 12.13.0)
+* Install [Angular CLI](https://cli.angular.io/) (if not already install) - `npm install -g @angular/cli`
 
-## Configuration
-
-Configuration information can be found in two places
-
-* `./proxy.conf.js`
-  * In new forks this is missing and needs to be created using `./proxy.conf.template.js` as a template.
-  * Contains the address of the backend. Which will either be...
-     * If the backend is deployed via the instructions in the [deploy section](../deploy/overview)
-       the url will be the same address as the V1 console's frontend address. For instance `https://localhost` would translate to
-        ```
-        const PROXY_CONFIG = {
-          "/pp": {
-            "target": {
-            "host": "localhost",
-            "protocol": "https:",
-            "port": 443
-          },
-          "secure": false,
-          "changeOrigin": true,
-          "ws": true,
-        }
-        ```
-      * If the backend is running locally using the instructions in [Backend Development](backend), the url will local host
-        with a port of the `CONSOLE_PROXY_TLS_ADDRESS` value from `src/jetstream/config.properties`. By default this will be 5445. For
-        instance
-        ```
-        const PROXY_CONFIG = {
-          "/pp": {
-            "target": {
-              "host": "localhost",
-              "protocol": "https:",
-              "port": 5443
-            },
-            "ws": true,
-            "secure": false,
-            "changeOrigin": true,
-          }
-        }
-        ```
-* `./src/frontend/environments/environment.ts` for developer vs production like config
-  * This contains more general settings for the frontend and does not usually need to be changed
 
 ## Run the frontend
 
-1. (First time only) Copy `./proxy.conf.template.js` to `./proxy.conf.js` and update with required Jetstream url (see above for more info)
 1. Run `npm install`
 1. Run `npm start` for a dev server. (the app will automatically reload if you change any of the source files)
    * If this times out please use `npm run start-high-mem` instead
@@ -75,6 +34,8 @@ Configuration information can be found in two places
    to the guides used when setting up the backend for more information
 
 ## Build
+
+> The normal dev cycle does not require a direct build.
 
 Run `npm run build` to build the project.
 
@@ -88,3 +49,25 @@ items `ng generate <directive|pipe|service|class|guard|interface|enum|module> <n
 ## Theming
 
 We use the angular material theming mechanism. See [here](https://material.angular.io/guide/theming-your-components) for more information about theming new components added to stratos.
+
+
+## Additional Information
+
+### Extensions
+
+Documentation on extensions can be found [here](/docs/extensions/introduction). From a developers perspective extensions are managed by npm packages.
+The default set are in `./src/frontend/packages`, any package added directly here will be automatically included by the build.
+
+At build time the Stratos Devkit (`./src/frontend/packages/devkit`) will ensure all packages are imported correctly and theming, both component and console level, are applied correctly.
+The devkit is automatically built in `postinstall` after `npm install` is ran. To directly build it `npm run dev-setup` can be executed.
+
+### Configuration
+
+Configuration information can be found in two places
+
+* `./proxy.conf.js`
+  * Informs the frontent where the backend is
+* `./src/frontend/packages/core/src/environments/environment.ts` for developer vs production like config
+  * This contains more general settings for the frontend and does not usually need to be changed
+* `config.properies`
+  * Backend configuration

@@ -39,8 +39,8 @@ module.exports = {
           'developer/backend',
         ]
       },
+      'developer/developers-guide-e2e-tests',
       'developer/developers-guide-env-tech',
-      'developer/developers-guide-e2e-tests'
     ],
     'Extending Stratos': [
       'extensions/introduction',
