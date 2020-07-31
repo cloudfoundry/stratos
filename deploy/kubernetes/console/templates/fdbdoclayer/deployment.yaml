@@ -86,6 +86,11 @@ spec:
         - name: certs
           mountPath: "/etc/secrets"
           readOnly: true
+        resources:
+          limits:
+            memory: 384Mi
+          requests:
+            memory: 256Mi
       - name: fdbserver
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.fdbserver}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
