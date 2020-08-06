@@ -1,6 +1,6 @@
 module.exports = {
   docs: {
-		Documentation: ['introduction', 'overview', 'license'],
+	Documentation: ['introduction', 'overview', 'license'],
     'Deploying Stratos': [
 			'deploy/overview',
     	{
@@ -29,17 +29,17 @@ module.exports = {
 			'developer/contributing',
 			'developer/introduction',
 			{
-			Frontend: [
-				'developer/frontend',
-				'developer/frontend-tests'
-			]
+    			Frontend: [
+    				'developer/frontend',
+    				'developer/frontend-tests'
+    			]
 			},
 			{
 				Backend: [
 					'developer/backend',
 				]
-				},
-				'developer/developers-guide-env-tech',
+			},
+			'developer/developers-guide-env-tech',
 			'developer/developers-guide-e2e-tests'
 	],
 		'Extending Stratos': [

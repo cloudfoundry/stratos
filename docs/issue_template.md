@@ -5,6 +5,7 @@ sidebar_label: Issue report template
 ---
 
 <!--- For bugs and general issues -->
+### Stratos Version
 ### Frontend Deployment type
 <!--- Where is the frontend deployed? -->
 <!--- Put an 'x' in one of the boxes below.  -->
@@ -31,7 +32,7 @@ sidebar_label: Issue report template
 
 ### Log output covering before error and any error statements
 ```
-Insert log hereCopy
+Insert log here
 ```
 
 
