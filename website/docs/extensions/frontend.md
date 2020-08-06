@@ -79,7 +79,7 @@ Tabs can be added to the following views in Stratos:
 
 For example:
 
-![Example Application tab extension](../images/extensions/app-tab-example.png)
+![Example Application tab extension](../../images/extensions/app-tab-example.png)
 
 The approach for all of these is the same:
 
