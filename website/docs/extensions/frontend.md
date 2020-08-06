@@ -120,7 +120,7 @@ Actions can be added to the following views in Stratos:
 
 An action is a icon button that appears at the top-right of a View. For example:
 
-![Example Application action extension](../images/extensions/appwall-action-example.png)
+![Example Application action extension](../../images/extensions/appwall-action-example.png)
 
 The approach for all of these is the same:
 
@@ -267,5 +267,5 @@ export class CustomModule { }
 
 You should now be able to run Stratos locally and see this new tab on the application page for an application - as illustrated below:
 
-![Example tab extension](../images/extensions/tab-example.png)
+![Example tab extension](../../images/extensions/tab-example.png)
 

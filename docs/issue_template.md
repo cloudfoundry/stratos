@@ -1,11 +1,9 @@
----
-id: issue_template
-title: Issue report template 
-sidebar_label: Issue report template 
----
-
-<!--- For bugs and general issues -->
+<!--------- For bugs and general issues --------->
 ### Stratos Version
+<!-- What version of Stratos does this related to? -->
+<!-- Version information can be seen in the `About` page reached via the User Icon top right -->
+<!-- If directly using code which branch, commit, etc did the source come from, what repository was it cloned from? -->
+
 ### Frontend Deployment type
 <!--- Where is the frontend deployed? -->
 <!--- Put an 'x' in one of the boxes below.  -->
@@ -28,15 +26,15 @@ sidebar_label: Issue report template
 
 ### Actual behaviour
 
-### Steps to reproduce the behavior
+### Steps to reproduce the behaviour
 
 ### Log output covering before error and any error statements
 ```
-Insert log here
+Insert your log here
 ```
 
 
-<!--- For feature requests -->
+<!--------- For feature requests --------->
 ### Detailed Description
 <!--- Provide a detailed description of the change or addition you are proposing -->
 

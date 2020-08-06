@@ -7,7 +7,7 @@ This website is built using [Docusaurus 2](https://v2.docusaurus.io/), a modern 
 ### Installing Dependencies
 
 ```
-$ npm Install
+$ npm install
 ```
 
 ### Local Development
