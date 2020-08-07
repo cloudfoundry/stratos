@@ -42,7 +42,7 @@ db provider this can be done by deleting `src/jetstream/console-database.db`
 
 #### Configure by Environment Variables and/or Config File
 
-By default, the configuration in file `src/jetstream/default.config.properties` will be used. These can be changed by environment variables
+By default, the configuration in file `./src/jetstream/config.dev` will be used. These can be changed by environment variables
 or an overrides file.
 
 ##### Environment variable
@@ -68,7 +68,7 @@ If you have a custom uaa, ensure you have set the following environment variable
 
 ##### Config File
 
-To easily persist configuration settings copy `src/jetstream/default.config.properties` to `src/jetstream/config.properties`. The backend will load its
+To easily persist configuration settings copy `src/jetstream/config.dev` to `src/jetstream/config.properties`. The backend will load its
 configuration from this file in preference to the default config file, if it exists. You can also modify individual configuration settings
 by setting the corresponding environment variable.
 
@@ -101,7 +101,7 @@ this process, validating that the UAA address and credentials are correct. It wi
 Execute the following file from `src/jetstream`
 
 ```
-jetstream
+./jetstream
 ```
 
 You should see the log as the backend starts up. You can press CTRL+C to stop the backend.
