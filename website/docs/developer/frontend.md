@@ -69,5 +69,5 @@ Configuration information can be found in two places
   * Informs the frontend where the backend is
 * `./src/frontend/packages/core/src/environments/environment.ts` for developer vs production like config
   * This contains more general settings for the frontend and does not usually need to be changed
-* `config.properies`
+* `config.properties`
   * Backend configuration
