@@ -1,5 +1,76 @@
 # Change Log
 
+## 4.0.0
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.2.1...4.0.0)
+
+This release contains a number of fixes and improvements:
+
+**Improvements:**
+
+- Extensions: Allow typed access to store entities and their actions [\#4494](https://github.com/cloudfoundry/stratos/issues/4494)
+- Extensions: Remove the need for symlinks and improve the build process [\#4472](https://github.com/cloudfoundry/stratos/issues/4472)
+- Extensions: Allow Themes to be published and installed to/from npm [\#4471](https://github.com/cloudfoundry/stratos/issues/4471)
+- Extensions: Move to extensions and themes to be packages [\#4470](https://github.com/cloudfoundry/stratos/issues/4470)
+- Show service broker space scope information in service wall list [\#4458](https://github.com/cloudfoundry/stratos/issues/4458)
+- Client Secret is shown in the clear in the UI [\#4445](https://github.com/cloudfoundry/stratos/issues/4445)
+- Improve sizing of UI elements on desktop browsers [\#4419](https://github.com/cloudfoundry/stratos/issues/4419)
+- Theming: Allow more control over link and side navigation colors [\#4406](https://github.com/cloudfoundry/stratos/issues/4406)
+- Update to latest set of icons [\#4403](https://github.com/cloudfoundry/stratos/issues/4403)
+- Theming: Allow more control over page header colors and style [\#4396](https://github.com/cloudfoundry/stratos/issues/4396)
+- Helm Chart: Remove encryption volume [\#4351](https://github.com/cloudfoundry/stratos/issues/4351)
+- Improve app summary responsiveness [\#4348](https://github.com/cloudfoundry/stratos/issues/4348)
+- Improve UI for the case when we can't determine cf app deployment info [\#4347](https://github.com/cloudfoundry/stratos/issues/4347)
+- Change recent activity icon to avoid confusion with the refresh button [\#4346](https://github.com/cloudfoundry/stratos/issues/4346)
+- Helm Chart: Change default image pull policy to Always [\#4342](https://github.com/cloudfoundry/stratos/issues/4342)
+- Permissions: Org Managers: Disable org role checkboxes in roles stepper if not admin/org manager [\#4332](https://github.com/cloudfoundry/stratos/issues/4332)
+- Autoscaler: Add support for custom metrics [\#4298](https://github.com/cloudfoundry/stratos/issues/4298)
+- Add support for copying endpoint address in list view [\#4238](https://github.com/cloudfoundry/stratos/issues/4238)
+- Update to Angular 9 framework [\#4214](https://github.com/cloudfoundry/stratos/issues/4214)
+- Update docker logo in deploy app stepper [\#4133](https://github.com/cloudfoundry/stratos/issues/4133)
+- Helm Chart: Remove need for --recreate-pods when upgrading [\#4132](https://github.com/cloudfoundry/stratos/issues/4132)
+- Make permissions model extension friendly [\#3789](https://github.com/cloudfoundry/stratos/issues/3789)
+- User Favourites: Add icons to cards [\#3409](https://github.com/cloudfoundry/stratos/issues/3409)
+- Improve log out experience [\#2587](https://github.com/cloudfoundry/stratos/issues/2587)
+
+**Fixes:**
+
+- Ensure `cf push` works from Windows  [\#4465](https://github.com/cloudfoundry/stratos/issues/4465)
+- SSLMode is not respected for database connections [\#4434](https://github.com/cloudfoundry/stratos/issues/4434)
+- Visiting marketplace tab breaks service list [\#4397](https://github.com/cloudfoundry/stratos/issues/4397)
+- CF Application reports error after restage [\#4392](https://github.com/cloudfoundry/stratos/issues/4392)
+- Helm Chart: Icon is missing [\#4370](https://github.com/cloudfoundry/stratos/issues/4370)
+- Permissions: Users with no developer roles can click on create app button [\#4361](https://github.com/cloudfoundry/stratos/issues/4361)
+- Edit endpoint not available in table view [\#4349](https://github.com/cloudfoundry/stratos/issues/4349)
+- CF: Routes List: Filter by org breaks when user is an org auditor [\#4343](https://github.com/cloudfoundry/stratos/issues/4343)
+- Permissions: Only space developers should be able to see add service instance buttons [\#4331](https://github.com/cloudfoundry/stratos/issues/4331)
+- Permissions: Only Space Developers should be able to change count, terminate or ssh to instances [\#4330](https://github.com/cloudfoundry/stratos/issues/4330)
+- App: Gitlab Tab: Fix console errors [\#4325](https://github.com/cloudfoundry/stratos/issues/4325)
+- Permissions: Only space developers should be able to create/unbind/delete routes in app routes list [\#4324](https://github.com/cloudfoundry/stratos/issues/4324)
+- Permissions: Only Space Developers should be able to create/edit/delete an Autoscaler policy [\#4323](https://github.com/cloudfoundry/stratos/issues/4323)
+- Permissions: Only space developers should be able to see the app summary deployment card [\#4322](https://github.com/cloudfoundry/stratos/issues/4322)
+- Duplicated documentation between deploy/kubernetes and Helm Chart README.md [\#4315](https://github.com/cloudfoundry/stratos/issues/4315)
+- App Service Edit Binding: cancel of stepper results in leaked subscription [\#4295](https://github.com/cloudfoundry/stratos/issues/4295)
+- Exceptions thrown when navigating back from marketplace [\#4287](https://github.com/cloudfoundry/stratos/issues/4287)
+- Unbind services stepper fails to show bound services [\#4246](https://github.com/cloudfoundry/stratos/issues/4246)
+- Progress icon appears too close to right-hand size of table [\#4234](https://github.com/cloudfoundry/stratos/issues/4234)
+- Cancel/create in service instance stepper returns to incorrect locations [\#4052](https://github.com/cloudfoundry/stratos/issues/4052)
+- Exception thrown in setup steppers [\#3897](https://github.com/cloudfoundry/stratos/issues/3897)
+- Logout leaves the UI as is if the verify or logout call fails [\#2633](https://github.com/cloudfoundry/stratos/issues/2633)
+- Cf Build Packs: file name should wrap to next line if too long [\#1803](https://github.com/cloudfoundry/stratos/issues/1803)
+
+**Breaking Changes:**
+
+- **Customizations in `custom-src` are now npm packages**
+
+  Stratos customizations were previously in `./custom-src` and included in the build via symlinks. These customizations have now moved into local npm packages located in `./src/frontend/packages`. For more details please see our customization documentation at `./website/docs/extensions/introduction.md` or `https://stratos.app/docs/extensions/introduction`. There you will also find instructions on migrating to npm packages and a tool to help automate most of the process. 
+- **Kubernetes: Upgrade only possible from version 3.0.0 or later**
+
+  When deploying into Kubernetes using Helm and upgrading from an earlier version of Stratos using `helm upgrade`, upgrade is **only** supported from version 3.0.0 or later. If you are using an earlier version, first upgrade to version 3.x before then upgrading to the latest version.
+- **Angular 9 requires extensions to be declared**
+
+  Extension components must now be made known to the extensions system in the module that they are declared in, using `ExtensionService.declare`. Please check the documentation. This is required to ensure that the new Angular compiler for Ivy does not remove these components for being unreferenced in the application.
+
 ## 3.2.1
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.2.0...3.2.1)

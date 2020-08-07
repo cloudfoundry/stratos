@@ -66,7 +66,7 @@ The devkit is automatically built in `postinstall` after `npm install` is ran. T
 Configuration information can be found in two places
 
 * `./proxy.conf.js`
-  * Informs the frontent where the backend is
+  * Informs the frontend where the backend is
 * `./src/frontend/packages/core/src/environments/environment.ts` for developer vs production like config
   * This contains more general settings for the frontend and does not usually need to be changed
 * `config.properies`

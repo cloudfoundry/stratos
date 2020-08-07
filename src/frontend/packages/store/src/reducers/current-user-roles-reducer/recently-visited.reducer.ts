@@ -7,17 +7,25 @@ import {
   GetAllEndpointsSuccess,
   UNREGISTER_ENDPOINTS_SUCCESS,
 } from '../../actions/endpoint.actions';
+import { EntityDeleteCompleteAction } from '../../actions/entity.delete.actions';
 import { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../helpers/stratos-entity-factory';
 import { IRecentlyVisitedState } from '../../types/recently-visited.types';
-import { addRecentlyVisitedEntity, cleanRecentsList, getDefaultRecentState } from './recently-visited.reducer.helpers';
+import {
+  addRecentlyVisitedEntity,
+  cleanRecentsList,
+  clearEntityFromRecentsList,
+  getDefaultRecentState,
+} from './recently-visited.reducer.helpers';
 
 export function recentlyVisitedReducer(
   state: IRecentlyVisitedState = getDefaultRecentState(),
   action: Action
 ): IRecentlyVisitedState {
   switch (action.type) {
+    case EntityDeleteCompleteAction.ACTION_TYPE:
+      return clearEntityFromRecentsList(state, action as EntityDeleteCompleteAction);
     case AddRecentlyVisitedEntityAction.ACTION_TYPE:
       return addRecentlyVisitedEntity(state, action as AddRecentlyVisitedEntityAction);
     case SetRecentlyVisitedEntityAction.ACTION_TYPE:
