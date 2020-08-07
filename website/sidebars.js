@@ -44,9 +44,8 @@ module.exports = {
     ],
     'Extending Stratos': [
       'extensions/introduction',
-      'extensions/theming',
-      'extensions/customizing',
       'extensions/v4-migration',
+      'extensions/theming',
       'extensions/frontend',
       'extensions/backend',
     ],
