@@ -44,7 +44,7 @@ Take a look at the [Feature Set](docs/features.md) for details on the feature se
  
 Get an [Overview](docs/overview.md) of Stratos, its components and the different ways in which it can be deployed.
 
-Take a look at the [Development Roadmap](docs/roadmap.md) to see where we are heading. We update our status page each week to summarize what we are working on - see the [Status Page](docs/status_updates.md).
+Take a look at the [Development Roadmap](docs/roadmap.md) to see where we are heading.
 
 Browse through features and issues in the project's [issues](https://github.com/cloudfoundry/stratos/issues) page.
 
