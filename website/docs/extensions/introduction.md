@@ -29,7 +29,7 @@ More information can be found in the [custom plugins page](/docs/extensions/back
 ## Examples
 
 ### ACME
-The ACME example contains a number of [theming](https://github.com/cloudfoundry/stratos/tree/master/src/frontend/packages/example-theme) and [functionality](https://github.com/cloudfoundry/stratos/tree/master/src/frontend/packages/example-extensions)customization.
+The ACME example contains a number of [theming](https://github.com/cloudfoundry/stratos/tree/master/src/frontend/packages/example-theme) and [functionality](https://github.com/cloudfoundry/stratos/tree/master/src/frontend/packages/example-extensions) customization.
 
 To run Stratos with these customizations
 
