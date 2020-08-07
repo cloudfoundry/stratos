@@ -14,5 +14,3 @@ $stratos-dark-theme: mat-dark-theme($acme-theme-primary, $acme-theme-primary, $a
 
 // Default Theme
 $stratos-theme: mat-light-theme($acme-theme-primary, $acme-theme-primary, $acme-theme-warn);
-
-@import 'custom/acme';

@@ -123,3 +123,4 @@ go-vendor-*.tgz
 
 website/build
 website/site-dist
+website/.docusaurus
