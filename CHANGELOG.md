@@ -15,6 +15,7 @@ This release contains a number of fixes and improvements:
 - Workload: Add warning if manifest parses with errors [\#390](https://github.com/SUSE/stratos/issues/390)
 - Workload Summary: Improve Ready/Not Ready stats when there are terminated containers [\#388](https://github.com/SUSE/stratos/issues/388)
 - Update theme to reflect new SUSE branding [\#385](https://github.com/SUSE/stratos/issues/385)
+- Extensions: Allow typed access to store entities and their actions [\#4494](https://github.com/cloudfoundry/stratos/issues/4494)
 - Extensions: Remove the need for symlinks and improve the build process [\#4472](https://github.com/cloudfoundry/stratos/issues/4472)
 - Extensions: Allow Themes to be published and installed to/from npm [\#4471](https://github.com/cloudfoundry/stratos/issues/4471)
 - Extensions: Move to extensions and themes to be packages [\#4470](https://github.com/cloudfoundry/stratos/issues/4470)
@@ -71,6 +72,9 @@ This release contains a number of fixes and improvements:
 
 **Breaking Changes:**
 
+- **Customizations in `custom-src` are now npm packages**
+
+  Stratos customizations were previously in `./custom-src` and included in the build via symlinks. These customizations have now moved into local npm packages located in `./src/frontend/packages`. For more details please see our customization documentation at `./website/docs/extensions/introduction.md` or `https://stratos.app/docs/extensions/introduction`. There you will also find instructions on migrating to npm packages and a tool to help automate most of the process. 
 - **Kubernetes: Upgrade only possible from version 3.0.0 or later**
 
   When deploying into Kubernetes using Helm and upgrading from an earlier version of Stratos using `helm upgrade`, upgrade is **only** supported from version 3.0.0 or later. If you are using an earlier version, first upgrade to version 3.x before then upgrading to the latest version.
