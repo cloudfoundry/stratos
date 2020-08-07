@@ -43,4 +43,4 @@ To aid in migrating we've provided these instructions.
 ## Further Guidance
 Our ACME demo (`src/frontend/packages/example-extensions` and `src/frontend/packages/example-theme`) and SUSE repo ([theme](https://github.com/SUSE/stratos/tree/master/src/frontend/packages/suse-theme) and [extensions](https://github.com/SUSE/stratos/tree/master/src/frontend/packages/suse-extensions)) have both been updated and are fully compatible with the 4.0 changes. Both are a good source for examples.
 
-If there any questions or issues please reach out to us either on out Github [repo](https://github.com/cloudfoundry/stratos) or Slack room [#stratos](https://cloudfoundry.slack.com/?redir=%2Fmessages%2Fstratos).
+If there any questions or issues please reach out to us either on our Github [repo](https://github.com/cloudfoundry/stratos) or Slack room [#stratos](https://cloudfoundry.slack.com/?redir=%2Fmessages%2Fstratos).
