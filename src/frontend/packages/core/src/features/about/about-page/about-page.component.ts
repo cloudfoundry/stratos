@@ -36,12 +36,18 @@ export class AboutPageComponent implements OnInit, OnDestroy {
 
   customizations: CustomizationsMetadata;
 
+  gitHubRepository = 'cloudfoundry/stratos';
+  gitHubRepositoryLink = `https://github.com/${this.gitHubRepository}`;
+
+  stratosDocs = 'Stratos Docs Website';
+  stratosDocumentationLink = 'https://stratos.app';
+
   constructor(
     private store: Store<GeneralEntityAppState>,
     private resolver: ComponentFactoryResolver,
-    cs: CustomizationService
+    private cs: CustomizationService
   ) {
-    this.customizations = cs.get();
+    this.customizations = this.cs.get();
   }
 
   ngOnInit() {
@@ -88,5 +94,10 @@ export class AboutPageComponent implements OnInit, OnDestroy {
       const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.supportInfoComponent);
       this.componentRef = this.supportInfoContainer.createComponent(factory);
     }
+  }
+
+  onHideButtonClick(): void {
+    this.customizations.hideAboutAdditionalContent = true;
+    this.cs.set(this.customizations);
   }
 }

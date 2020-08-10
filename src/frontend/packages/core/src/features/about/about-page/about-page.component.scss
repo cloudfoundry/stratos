@@ -26,6 +26,14 @@
       font-weight: 500;
     }
   }
+  &__additional-content {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+  }
+  &__additional-content-resources {
+    flex: 1;
+  }
   &__admin-card {
     border-left-style: solid;
     border-left-width: 4px;

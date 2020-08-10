@@ -20,6 +20,22 @@
   <app-metadata-item icon="person" label="User">{{ session.user.name }}</app-metadata-item>
 </mat-card>
 
+<mat-card *ngIf="!customizations.hideAboutAdditionalContent" class="about-page__card">
+  <div class="about-page__additional-content">
+    <div class="about-page__additional-content-resources">
+      <app-metadata-item icon="description" label="Docs Website">
+        <a [href]="stratosDocumentationLink" rel="noopener noreferrer" target="_blank">{{ stratosDocs }}</a>
+      </app-metadata-item>
+      <app-metadata-item icon="storage" label="GitHub Repository">
+        <a [href]="gitHubRepositoryLink" rel="noopener noreferrer" target="_blank">{{ gitHubRepository }}</a>
+      </app-metadata-item>
+    </div>
+    <div >
+      <button mat-button mat-raised-button color="primary" (click)="onHideButtonClick()">Hide Content</button>
+    </div>
+  </div>
+</mat-card>
+
 <mat-card *ngIf="(this.userIsAdmin$ | async)" class="about-page__card about-page__admin-card">
   <div class="about-page__admin">
     <mat-icon class="about-page__warning-icon">security</mat-icon>

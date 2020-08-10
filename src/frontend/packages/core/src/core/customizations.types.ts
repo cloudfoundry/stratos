@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
  */
 export interface CustomizationsMetadata {
   hasEula?: boolean;
+  hideAboutAdditionalContent?: boolean;
   copyright?: string;
   logoText?: string;
   aboutInfoComponent?: any;
