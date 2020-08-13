@@ -72,6 +72,12 @@ img.cf-logo {
   padding-top: 20px;
 }
 
+/* Fix for dark mode, given the backgrounds are hardcoded below */
+.hero__title,
+.hero__subtitle {
+  color: #fff;
+}
+
 .hero__subtitle {
   font-size: 36px;
 }
@@ -94,7 +100,8 @@ img.cf-logo {
   font-size: 18px;
 }
 
-.menu__list, .menu__link {
+.menu__list,
+.menu__link {
   font-size: 14px;
 }
 
@@ -125,7 +132,7 @@ img.cf-logo {
   .hero__subtitle {
     font-size: 35px;
   }
-  
+
   section .screenshot {
     margin: 0 0;
   }
@@ -166,9 +173,9 @@ img.cf-logo {
 
 .screenshot img {
   width: 600px;
-  -webkit-box-shadow: 0px 0px 37px 15px rgba(20,20,20,0.75);
-  -moz-box-shadow: 0px 0px 37px 15px rgba(20,20,20,0.75);
-  box-shadow: 0px 0px 37px 15px rgba(20,20,20,0.75);  
+  -webkit-box-shadow: 0px 0px 37px 15px rgba(20, 20, 20, 0.75);
+  -moz-box-shadow: 0px 0px 37px 15px rgba(20, 20, 20, 0.75);
+  box-shadow: 0px 0px 37px 15px rgba(20, 20, 20, 0.75);
 }
 
 .screenshot img.right {

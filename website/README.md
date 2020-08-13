@@ -38,3 +38,18 @@ $ ./deploy.sh
 
 
 > Note: The website is deployed to the GitHub Repository `cf-stratos/wesbite` which hosts https://stratos.app
+
+### Versioning
+
+To create a new version of the docs run the following
+
+```
+npm run version -- 4.0.0
+```
+
+This will
+- copy the current state of the docs into `versioned_docs`
+- set up the links in the version menu drop down
+- become the new default when visiting the docs route (on merge of PR)
+
+The files is `docs/` will be marked as `next`.

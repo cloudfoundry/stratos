@@ -1,0 +1,175 @@
+{
+  "version-4.0.0/docs": [
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Documentation",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-4.0.0/introduction"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/overview"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/license"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Deploying Stratos",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-4.0.0/deploy/overview"
+        },
+        {
+          "collapsed": true,
+          "type": "category",
+          "label": "Cloud Foundry",
+          "items": [
+            {
+              "type": "doc",
+              "id": "version-4.0.0/deploy/cloud-foundry/cloud-foundry"
+            },
+            {
+              "type": "doc",
+              "id": "version-4.0.0/deploy/cloud-foundry/db-migration"
+            },
+            {
+              "type": "doc",
+              "id": "version-4.0.0/deploy/cloud-foundry/cf-troubleshooting"
+            }
+          ]
+        },
+        {
+          "collapsed": true,
+          "type": "category",
+          "label": "Kubernetes",
+          "items": [
+            {
+              "type": "doc",
+              "id": "version-4.0.0/deploy/kubernetes"
+            },
+            {
+              "type": "doc",
+              "id": "version-4.0.0/deploy/kubernetes/helm-installation"
+            }
+          ]
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/deploy/all-in-one"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/deploy/access"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/deploy/troubleshooting"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Advanced Topics",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-4.0.0/advanced/invite-user-guide"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/advanced/sso"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/advanced/bosh-metrics"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Development",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-4.0.0/developer/contributing"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/developer/introduction"
+        },
+        {
+          "collapsed": true,
+          "type": "category",
+          "label": "Frontend",
+          "items": [
+            {
+              "type": "doc",
+              "id": "version-4.0.0/developer/frontend"
+            },
+            {
+              "type": "doc",
+              "id": "version-4.0.0/developer/frontend-tests"
+            }
+          ]
+        },
+        {
+          "collapsed": true,
+          "type": "category",
+          "label": "Backend",
+          "items": [
+            {
+              "type": "doc",
+              "id": "version-4.0.0/developer/backend"
+            }
+          ]
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/developer/developers-guide-e2e-tests"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/developer/developers-guide-env-tech"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Extending Stratos",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-4.0.0/extensions/introduction"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/extensions/v4-migration"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/extensions/theming"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/extensions/frontend"
+        },
+        {
+          "type": "doc",
+          "id": "version-4.0.0/extensions/backend"
+        }
+      ]
+    }
+  ]
+}
