@@ -15,7 +15,7 @@ We use Decorators to annotate components to indicate that they are Stratos exten
 
 An example illustrating the various front-end extension points of Stratos is included in the folder `src/frontend/packages/example-extensions`.
 
-To run Stratos with these customizations see [here](/docs/extensions/introduction#acme).
+To run Stratos with these customizations see [here](./introduction#acme).
 
 For a walk-through of extending Stratos, see [Example: Adding a Custom Tab](#example-adding-a-custom-tab).
 
@@ -60,7 +60,7 @@ Your route should have the following metadata in the `data` field of the route:
 
 Where `<TITLE>` is the text label to show in the side navigation and `<ICON NAME>` is the icon to use.
 
-> The routing module must be, or referenced by, the core routing module as described [above](/docs/extensions/frontend#including-modules-and-routes)
+> The routing module must be, or referenced by, the core routing module as described [above](./frontend#including-modules-and-routes)
 
 An example routing module would be:
 
@@ -101,7 +101,7 @@ Tabs can be added to the following views in Stratos:
 - The Cloud Foundry Org view that shows detail for a Cloud Foundry organization
 - The Cloud Foundry Space view that shows detail for a Cloud Foundry space
 
-A step by step guide on how to create a custom tab can be found [below](/docs/extensions/frontend#example-adding-a-custom-tab).
+A step by step guide on how to create a custom tab can be found [below](./frontend#example-adding-a-custom-tab).
 
 For example:
 
@@ -130,14 +130,13 @@ The approach for all of these is the same:
     - < LABEL > is the text label to use for the tab
     - < LINK > is the name to use for the route (this must only contain characters permitted in URLs)
     An example is included in the file `src/frontend/packages/example-extensions/src/app-tab-extension/app-tab-extension.component.ts`.
-1. Declare the component to avoid Angular tree shaking
-   - In the same module that the component is 'declared' in add the following to `imports`
+1. Declare the component to avoid Angular tree shaking. In the same module that the component is 'declared' in add the following to `imports`
     ```
       ExtensionService.declare([
         <component name>,
       ])
     ```
-> The module referencing the component, or another referencing it, must be imported by the core module as described [above](/docs/extensions/frontend#including-modules-and-routes).
+  > The module referencing the component, or another referencing it, must be imported by the core module as described [above](./frontend#including-modules-and-routes).
 
 ### Custom Actions
 
@@ -179,15 +178,14 @@ The approach for all of these is the same:
     - < LABEL > is the text label to use for the tooltip of the icon (optional)
     - < LINK > is the name to use for the route (this must only contain characters permitted in URLs)
     An example is included in the file `src/frontend/packages/example-extensions/src/app-action-extension/app-action-extension.component.ts`.
-1. Declare the component to avoid Angular tree shaking
-   - In the same module that the component is 'declared' in add the following to `imports`.
-    ```
-      ExtensionService.declare([
-        <component name>,
+1. Declare the component to avoid Angular tree shaking. In the same module that the component is 'declared' in add the following to `imports`.
+     ```
+     ExtensionService.declare([
+      <component name>,
       ])
-    ```
+     ```
 
-> The module referencing the component, or another referencing it, must be imported by the core module as described in [above](/docs/extensions/frontend#including-modules-and-routes)
+  > The module referencing the component, or another referencing it, must be imported by the core module as described in [above](./frontend#including-modules-and-routes)
 
 ### Loading Indicator
 
@@ -268,7 +266,7 @@ A customization service provides a number of smaller extension points.
 
 |Property | Description|
 |--|--|
-|hasEula| True if there's a EULA to show. When set to true the asset `/core/eula.html` must exist. For information about custom package assets see the images section [here](/docs/extensions/theming#new-images).  |
+|hasEula| True if there's a EULA to show. When set to true the asset `/core/eula.html` must exist. For information about custom package assets see the images section [here](./theming#new-images).  |
 |copyright| Text shown at the bottom of the side nav|
 |logoText| Text shown with the side nav logo|
 |aboutInfoComponent| Replace the component used in the Stratos `About` page|
@@ -456,4 +454,4 @@ export class MyExampleModule { }
 
 ### Run it
 
-You should now be able to run Stratos [locally](/docs/developer/introduction) and see this new tab on the application page for an application.
+You should now be able to run Stratos [locally](../developer/introduction#build--run-locally) and see this new tab on the application page for an application.
