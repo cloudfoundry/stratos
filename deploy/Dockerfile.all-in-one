@@ -9,11 +9,9 @@ COPY --chown=stratos:users deploy/all-in-one/config.all-in-one.properties config
 
 ARG USE_PREBUILT_UI=false
 
-USER root
+USER stratos
 RUN node --version
 RUN deploy/all-in-one/src-build.sh
-
-USER stratos
 
 # Generate dev-certs
 RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh
@@ -136,6 +134,11 @@ RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nFORCE_ENABLE_PERSISTENCE_FEA
 
 # Enable tech preview features if canary build flag is set
 RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nENABLE_TECH_PREVIEW=true\n" >> /srv/config.properties ; fi
+
+# Fix dig to resolve localhost to 127.0.0.1
+RUN mv /usr/bin/dig /usr/bin/digit
+COPY deploy/all-in-one/dig.sh /usr/bin/dig
+RUN chmod +x /usr/bin/dig
 
 EXPOSE 443
 

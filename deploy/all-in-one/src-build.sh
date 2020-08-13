@@ -9,7 +9,6 @@ if [ "${USE_PREBUILT_UI}" = "true" ]; then
 else
   echo "Building frontend"
   npm install
-  npm run customize
   npm run build
   if [ $? -ne 0 ]; then
     echo "Frontend build failed"
