@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	. "github.com/smartystreets/goconvey/convey"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
@@ -107,13 +107,13 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 
 		//  p.GetCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
 
-		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso"}).
-			AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true, mockCNSI.ClientId, cipherClientSecret, true)
+		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso", "sub_type", "meta_data"}).
+			AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true, mockCNSI.ClientId, cipherClientSecret, true, "", "")
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
 
-		res, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		res, err := pp.DoOAuthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -238,8 +238,8 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 			WillReturnRows(expectedCNSITokenRow)
 
 		//  p.GetCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
-		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso"}).
-			AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true, mockCNSI.ClientId, cipherClientSecret, true)
+		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso", "sub_type", "meta_data"}).
+			AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true, mockCNSI.ClientId, cipherClientSecret, true, "", "")
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
@@ -255,7 +255,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		//
-		res, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		res, err := pp.DoOAuthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -386,7 +386,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 			WillReturnError(errors.New("Unknown Database Error"))
 
 		//
-		_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		_, err := pp.DoOAuthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -430,7 +430,7 @@ func TestDoOauthFlowRequestWithMissingCNSITokenRecord(t *testing.T) {
 	}
 	pp.setCNSITokenRecord("not-the-right-guid", mockUserGUID, mockTokenRecord)
 
-	_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+	_, err := pp.DoOAuthFlowRequest(&interfaces.CNSIRequest{
 		GUID:     mockCNSIGUID,
 		UserGUID: mockUserGUID,
 	}, req)
@@ -476,7 +476,7 @@ func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
 			UserGUID: "",
 		}
 
-		_, err := pp.doOauthFlowRequest(invalidCNSIRequest, req)
+		_, err := pp.DoOAuthFlowRequest(invalidCNSIRequest, req)
 
 		Convey("Oauth flow request erroneously succeeded", func() {
 			So(err, ShouldNotBeNil)
@@ -642,7 +642,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 		mock.ExpectExec(updateTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
 		//
-		_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
+		_, err := pp.DoOAuthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)

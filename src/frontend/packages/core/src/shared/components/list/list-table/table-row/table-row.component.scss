@@ -1,0 +1,127 @@
+.table-row-wrapper {
+  &__blocked {
+    .table-row {
+      cursor: not-allowed;
+      mat-checkbox {
+        cursor: not-allowed;
+      }
+      &__inner {
+        * {
+          opacity: .65;
+        }
+      }
+    }
+    .table-row__blocker {
+      display: block;
+    }
+  }
+  &__errored,
+  &__warning,
+  &__info {
+    .table-row__error {
+      display: flex;
+    }
+  }
+  &__highlighted.mat-expansion-panel {
+    border-left-style: solid;
+    border-left-width: 4px;
+    border-radius: 0;
+    mat-expansion-panel-header {
+      margin-left: -4px; // Cancel out highlighted padding (border left in theme)
+    }
+  }
+}
+
+.table-row {
+  align-items: center;
+  border-style: solid;
+  border-width: 0 0 1px;
+  display: flex;
+  transition: opacity .25s;
+  &-wrapper {
+    position: relative;
+  }
+  &__deletion-bar {
+    &-inner {
+      flex: .5;
+      max-width: 200px;
+    }
+    &-text {
+      padding-bottom: 5px;
+      text-align: center;
+    }
+    &-wrapper {
+      align-items: center;
+      bottom: 0;
+      display: flex;
+      justify-content: center;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: 999;
+    }
+  }
+  &__error {
+    align-items: center;
+    display: none;
+
+    &-message {
+      flex: 1;
+      line-height: 20px;
+      margin-left: 10px;
+      text-align: left;
+    }
+    &-spacer {
+      align-self: stretch;
+      flex: 0 0 20px;
+      &__prominentErrorBar {
+        flex: 0 0 68px;
+      }
+    }
+    &-content {
+      flex: 1;
+      padding: 0 10px 10px 0;
+    }
+  }
+  &__blocker {
+    bottom: 0;
+    display: none;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 999;
+  }
+  &__inner {
+    display: flex;
+    flex: 1;
+    width: 100%;
+
+    .mat-expansion-panel-body {
+      padding: 0;
+    }
+
+    .table-row__inner__expansion.mat-expansion-panel {
+      border-radius: unset;
+      width: 100%;
+
+      .table-row__inner__expansion--header {
+        padding-left: 0;
+        padding-right: 0;
+
+        &.in-expanded-row {
+          padding: 0;
+        }
+      }
+    }
+  }
+  &.in-expanded-row {
+    border-left-width: 1px;
+  }
+
+  &.has-error-row {
+    // Remove the bottom border if there's an error underneath it
+    border-bottom-width: 0;
+  }
+}

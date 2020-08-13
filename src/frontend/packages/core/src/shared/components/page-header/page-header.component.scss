@@ -1,0 +1,144 @@
+$top-index: 2;
+$bottom-index: $top-index - 1;
+.page-header {
+  $breadcrumb-opacity: .7;
+  $breadcrumb-hover-opacity: 1;
+  $breadcrumb-padding: 3px;
+  position: relative;
+  z-index: $top-index;
+  &__toolbar {
+    padding: 0 20px;
+  }
+  &__left {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+  &__filler {
+    flex: 1 1 auto;
+  }
+  &__right {
+    align-items: center;
+    display: flex;
+    flex: 0;
+  }
+  &__notification-button {
+    margin-right: 5px;
+  }
+  &__notifications-button {
+    display: inline-block;
+  }
+  &__menu-icon {
+    border-radius: 50%;
+    box-shadow: 0 6px 8px 3px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, 0);
+    height: 26px;
+    padding: 1px;
+    position: absolute;
+    right: -5px;
+    top: -5px;
+    width: 26px;
+  }
+  &__warning-count {
+    border-radius: 50%;
+    font-size: 10px;
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+    width: 25px;
+  }
+  &__warning-button {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+  }
+  &__history {
+    min-width: 200px;
+  }
+  &__history-title {
+    font-size: 14px;
+    margin: 0 0 10px;
+    padding: 2px 10px 10px;
+  }
+  &__nav-toggle-wrapper {
+    margin-right: 20px;
+  }
+  &__nav-toggle,
+  &__logout {
+    cursor: pointer;
+  }
+  &__breadcrumb,
+  &__breadcrumb-separator {
+    opacity: $breadcrumb-opacity;
+  }
+  &__breadcrumb-separator {
+    font-size: 26px;
+    margin: 0 $breadcrumb-padding;
+    user-select: none;
+  }
+  &__breadcrumbs {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  }
+  &__breadcrumb-link {
+    cursor: pointer;
+    outline: none;
+    &:hover {
+      opacity: $breadcrumb-hover-opacity;
+    }
+  }
+  &__outer {
+    z-index: 1;
+  }
+  &__menu-separator {
+    height: 1px;
+    margin: 6px 0;
+  }
+  &__underflow {
+    height: 20vh;
+  }
+  &__divider {
+    opacity: .3;
+    padding: 0 10px 0 5px;
+  }
+  &__menu-button {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  }
+  &__usermenu {
+    margin-left: 8px;
+  }
+  &__username {
+    align-items: center;
+    display: flex;
+    margin-top: -8px;
+    padding: 15px;
+  }
+  &__username-text {
+    margin-left: 10px;
+  }
+  &__menu-inner {
+    max-width: 400px;
+    min-width: 200px;
+  }
+  &__favorite {
+    margin-left: 10px;
+  }
+}
+
+.mat-toolbar-row,
+.mat-toolbar-single-row {
+  height: 56px;
+}
+
+.subheader {
+  display: block;
+  position: relative;
+  z-index: $top-index;
+}
+
+.header-events {
+  z-index: $bottom-index;
+}

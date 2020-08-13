@@ -20,6 +20,7 @@ type AuthProvider struct {
 	UserInfo GetUserInfoFromToken
 }
 
+// V2Info is the response for the Cloud Foundry /v2/info API
 type V2Info struct {
 	AuthorizationEndpoint    string `json:"authorization_endpoint"`
 	TokenEndpoint            string `json:"token_endpoint"`
@@ -27,6 +28,10 @@ type V2Info struct {
 	AppSSHEndpoint           string `json:"app_ssh_endpoint"`
 	AppSSHHostKeyFingerprint string `json:"app_ssh_host_key_fingerprint"`
 	AppSSHOauthCLient        string `json:"app_ssh_oauth_client"`
+	APIVersion               string `json:"api_version"`
+	RoutingEndpoint          string `json:"routing_endpoint"`
+	MinCLIVersion            string `json:"min_cli_version"`
+	MinRecommendedCLIVersion string `json:"min_recommended_cli_version"`
 }
 
 type InfoFunc func(apiEndpoint string, skipSSLValidation bool) (CNSIRecord, interface{}, error)
@@ -44,6 +49,8 @@ type CNSIRecord struct {
 	ClientId               string   `json:"client_id"`
 	ClientSecret           string   `json:"-"`
 	SSOAllowed             bool     `json:"sso_allowed"`
+	SubType                string   `json:"sub_type"`
+	Metadata               string   `json:"metadata"`
 }
 
 // ConnectedEndpoint
@@ -58,17 +65,17 @@ type ConnectedEndpoint struct {
 	AuthorizationEndpoint  string   `json:"-"`
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 	TokenMetadata          string   `json:"-"`
+	SubType                string   `json:"sub_type"`
+	EndpointMetadata       string   `json:"metadata"`
 }
 
 const (
 	// AuthTypeOAuth2 means OAuth2
 	AuthTypeOAuth2 = "OAuth2"
-	// AuthTypeOIDC means no OIDC
+	// AuthTypeOIDC means OIDC
 	AuthTypeOIDC = "OIDC"
 	// AuthTypeHttpBasic means HTTP Basic auth
 	AuthTypeHttpBasic = "HttpBasic"
-	// AuthTypeAKS means AKS
-	AuthTypeAKS = "AKS"
 )
 
 const (
@@ -78,13 +85,21 @@ const (
 	AuthConnectTypeNone = "none"
 )
 
-// Token record for an endpoint (includes the Endpoint GUID)
-type EndpointTokenRecord struct {
-	*TokenRecord
-	EndpointGUID    string
-	EndpointType    string
-	APIEndpint      string
-	LoggingEndpoint string
+// // Token record for an endpoint (includes the Endpoint GUID)
+// type EndpointTokenRecord struct {
+// 	*TokenRecord
+// 	EndpointGUID    string
+// 	EndpointType    string
+// 	APIEndpint      string
+// 	LoggingEndpoint string
+// }
+
+// BackupTokenRecord used when backing up tokens
+type BackupTokenRecord struct {
+	TokenRecord  TokenRecord
+	UserGUID     string
+	EndpointGUID string
+	TokenType    string
 }
 
 // TokenRecord repsrents and endpoint or uaa token
@@ -129,7 +144,15 @@ type LoginRes struct {
 	User        *ConnectedUser `json:"user"`
 }
 
+type LocalLoginRes struct {
+	User *ConnectedUser `json:"user"`
+}
+
 type LoginHookFunc func(c echo.Context) error
+type LoginHook struct {
+	Priority int
+	Function LoginHookFunc
+}
 
 type ProxyRequestInfo struct {
 	EndpointGUID string
@@ -183,17 +206,24 @@ type GooseDBVersionRecord struct {
 
 // Info - this represents user specific info
 type Info struct {
-	Versions     *Versions                             `json:"version"`
-	User         *ConnectedUser                        `json:"user"`
-	Endpoints    map[string]map[string]*EndpointDetail `json:"endpoints"`
-	CloudFoundry *CFInfo                               `json:"cloud-foundry,omitempty"`
-	PluginConfig map[string]string                     `json:"plugin-config,omitempty"`
-	Diagnostics  *Diagnostics                          `json:"diagnostics,omitempty"`
+	Versions      *Versions                             `json:"version"`
+	User          *ConnectedUser                        `json:"user"`
+	Endpoints     map[string]map[string]*EndpointDetail `json:"endpoints"`
+	CloudFoundry  *CFInfo                               `json:"cloud-foundry,omitempty"`
+	Plugins       map[string]bool                       `json:"plugins"`
+	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
+	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
+	Configuration struct {
+		TechPreview        bool  `json:"enableTechPreview"`
+		ListMaxSize        int64 `json:"listMaxSize,omitempty"`
+		ListAllowLoadMaxed bool  `json:"listAllowLoadMaxed,omitempty"`
+	} `json:"config"`
 }
 
-// Extends CNSI Record and adds the user
+// EndpointDetail extends CNSI Record and adds the user
 type EndpointDetail struct {
 	*CNSIRecord
+	EndpointMetadata  interface{}       `json:"endpoint_metadata,omitempty"`
 	User              *ConnectedUser    `json:"user"`
 	Metadata          map[string]string `json:"metadata,omitempty"`
 	TokenMetadata     string            `json:"-"`
@@ -206,14 +236,78 @@ type Versions struct {
 	DatabaseVersion int64  `json:"database_version"`
 }
 
+//AuthEndpointType - Restrict the possible values of the configured
+type AuthEndpointType string
+
+const (
+	//Remote - String representation of remote auth endpoint type
+	Remote AuthEndpointType = "remote"
+	//Local - String representation of remote auth endpoint type
+	Local AuthEndpointType = "local"
+)
+
+//AuthEndpointTypes - Allows lookup of internal string representation by the
+//value of the AUTH_ENDPOINT_TYPE env variable
+var AuthEndpointTypes = map[string]AuthEndpointType{
+	"remote": Remote,
+	"local":  Local,
+}
+
+// ConsoleConfig is essential configuration settings
 type ConsoleConfig struct {
-	UAAEndpoint         *url.URL `json:"uaa_endpoint"`
-	ConsoleAdminScope   string   `json:"console_admin_scope"`
-	ConsoleClient       string   `json:"console_client"`
-	ConsoleClientSecret string   `json:"console_client_secret"`
-	SkipSSLValidation   bool     `json:"skip_ssl_validation"`
-	IsSetupComplete     bool     `json:"is_setup_complete"`
-	UseSSO              bool     `json:"use_sso"`
+	UAAEndpoint           *url.URL `json:"uaa_endpoint" configName:"UAA_ENDPOINT"`
+	AuthorizationEndpoint *url.URL `json:"authorization_endpoint" configName:"AUTHORIZATION_ENDPOINT"`
+	ConsoleAdminScope     string   `json:"console_admin_scope" configName:"CONSOLE_ADMIN_SCOPE"`
+	ConsoleClient         string   `json:"console_client" configName:"CONSOLE_CLIENT"`
+	ConsoleClientSecret   string   `json:"console_client_secret" configName:"CONSOLE_CLIENT_SECRET"`
+	LocalUser             string   `json:"local_user"`
+	LocalUserPassword     string   `json:"local_user_password"`
+	LocalUserScope        string   `json:"local_user_scope"`
+	AuthEndpointType      string   `json:"auth_endpoint_type" configName:"AUTH_ENDPOINT_TYPE"`
+	SkipSSLValidation     bool     `json:"skip_ssl_validation" configName:"SKIP_SSL_VALIDATION"`
+	UseSSO                bool     `json:"use_sso" configName:"SSO_LOGIN"`
+}
+
+const defaultAdminScope = "stratos.admin"
+
+// IsSetupComplete indicates if we have enough config
+func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
+
+	// Local user - check setup complete
+	if AuthEndpointTypes[consoleConfig.AuthEndpointType] == Local {
+
+		// Need LocalUser and LocalUserPassword
+		if len(consoleConfig.LocalUser) == 0 || len(consoleConfig.LocalUserPassword) == 0 {
+			return false
+		}
+
+		// Also, we will make sure that admin scopes are set up for admin, if not specified
+		if len(consoleConfig.LocalUserScope) == 0 {
+			if len(consoleConfig.ConsoleAdminScope) == 0 {
+				// Neither set, so use default for both
+				consoleConfig.LocalUserScope = defaultAdminScope
+				consoleConfig.ConsoleAdminScope = defaultAdminScope
+			} else {
+				// admin scope set, so just use that
+				consoleConfig.LocalUserScope = consoleConfig.ConsoleAdminScope
+			}
+		} else {
+			if len(consoleConfig.ConsoleAdminScope) == 0 {
+				// Console admin scope not set, so use local user scope
+				consoleConfig.ConsoleAdminScope = consoleConfig.LocalUserScope
+			}
+		}
+
+		// Setup is complete if we have LocalUser and LocalUserPassword set
+		return true
+	}
+
+	// UAA - check setup complete for UAA
+	if consoleConfig.UAAEndpoint == nil {
+		return false
+	}
+
+	return len(consoleConfig.UAAEndpoint.String()) > 0 && len(consoleConfig.ConsoleAdminScope) > 0
 }
 
 // CNSIRequest
@@ -228,6 +322,7 @@ type CNSIRequest struct {
 	StatusCode  int         `json:"statusCode"`
 	Status      string      `json:"status"`
 	PassThrough bool        `json:"-"`
+	LongRunning bool        `json:"-"`
 
 	Response     []byte `json:"-"`
 	Error        error  `json:"-"`
@@ -235,36 +330,52 @@ type CNSIRequest struct {
 }
 
 type PortalConfig struct {
-	HTTPClientTimeoutInSecs         int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
-	HTTPClientTimeoutMutatingInSecs int64    `configName:"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS"`
-	HTTPConnectionTimeoutInSecs     int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
-	TLSAddress                      string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
-	TLSCert                         string   `configName:"CONSOLE_PROXY_CERT"`
-	TLSCertKey                      string   `configName:"CONSOLE_PROXY_CERT_KEY"`
-	TLSCertPath                     string   `configName:"CONSOLE_PROXY_CERT_PATH"`
-	TLSCertKeyPath                  string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
-	CFClient                        string   `configName:"CF_CLIENT"`
-	CFClientSecret                  string   `configName:"CF_CLIENT_SECRET"`
-	AllowedOrigins                  []string `configName:"ALLOWED_ORIGINS"`
-	SessionStoreSecret              string   `configName:"SESSION_STORE_SECRET"`
-	EncryptionKeyVolume             string   `configName:"ENCRYPTION_KEY_VOLUME"`
-	EncryptionKeyFilename           string   `configName:"ENCRYPTION_KEY_FILENAME"`
-	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
-	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
-	AutoRegisterCFName              string   `configName:"AUTO_REG_CF_NAME"`
-	SSOLogin                        bool     `configName:"SSO_LOGIN"`
-	SSOOptions                      string   `configName:"SSO_OPTIONS"`
-	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
-	LogLevel                        string   `configName:"LOG_LEVEL"`
-	CFAdminIdentifier               string
-	CloudFoundryInfo                *CFInfo
-	HTTPS                           bool
-	EncryptionKeyInBytes            []byte
-	ConsoleVersion                  string
-	IsCloudFoundry                  bool
-	LoginHook                       LoginHookFunc
-	SessionStore                    SessionStorer
-	ConsoleConfig                   *ConsoleConfig
-	PluginConfig                    map[string]string
-	DatabaseProviderName            string
+	HTTPClientTimeoutInSecs            int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
+	HTTPClientTimeoutMutatingInSecs    int64    `configName:"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS"`
+	HTTPClientTimeoutLongRunningInSecs int64    `configName:"HTTP_CLIENT_TIMEOUT_LONGRUNNING_IN_SECS"`
+	HTTPConnectionTimeoutInSecs        int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
+	TLSAddress                         string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
+	TLSCert                            string   `configName:"CONSOLE_PROXY_CERT"`
+	TLSCertKey                         string   `configName:"CONSOLE_PROXY_CERT_KEY"`
+	TLSCertPath                        string   `configName:"CONSOLE_PROXY_CERT_PATH"`
+	TLSCertKeyPath                     string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
+	CFClient                           string   `configName:"CF_CLIENT"`
+	CFClientSecret                     string   `configName:"CF_CLIENT_SECRET"`
+	AllowedOrigins                     []string `configName:"ALLOWED_ORIGINS"`
+	SessionStoreSecret                 string   `configName:"SESSION_STORE_SECRET"`
+	EncryptionKeyVolume                string   `configName:"ENCRYPTION_KEY_VOLUME"`
+	EncryptionKeyFilename              string   `configName:"ENCRYPTION_KEY_FILENAME"`
+	EncryptionKey                      string   `configName:"ENCRYPTION_KEY"`
+	AutoRegisterCFUrl                  string   `configName:"AUTO_REG_CF_URL"`
+	AutoRegisterCFName                 string   `configName:"AUTO_REG_CF_NAME"`
+	SSOLogin                           bool     `configName:"SSO_LOGIN"`
+	SSOOptions                         string   `configName:"SSO_OPTIONS"`
+	SSOWhiteList                       string   `configName:"SSO_WHITELIST"`
+	AuthEndpointType                   string   `configName:"AUTH_ENDPOINT_TYPE"`
+	CookieDomain                       string   `configName:"COOKIE_DOMAIN"`
+	LogLevel                           string   `configName:"LOG_LEVEL"`
+	UIListMaxSize                      int64    `configName:"UI_LIST_MAX_SIZE"`
+	UIListAllowLoadMaxed               bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
+	CFAdminIdentifier                  string
+	CloudFoundryInfo                   *CFInfo
+	HTTPS                              bool
+	EncryptionKeyInBytes               []byte
+	ConsoleVersion                     string
+	IsCloudFoundry                     bool
+	LoginHooks                         []LoginHook
+	SessionStore                       SessionStorer
+	ConsoleConfig                      *ConsoleConfig
+	PluginConfig                       map[string]string
+	DatabaseProviderName               string
+	EnableTechPreview                  bool `configName:"ENABLE_TECH_PREVIEW"`
+	CanMigrateDatabaseSchema           bool
+	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
+	// This depends on the deployment mechanism and the database config
+	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance
+	// can perform migrations
+}
+
+// SetCanPerformMigrations updates the state that records if we can perform Database migrations
+func (c *PortalConfig) SetCanPerformMigrations(value bool) {
+	c.CanMigrateDatabaseSchema = c.CanMigrateDatabaseSchema && value
 }

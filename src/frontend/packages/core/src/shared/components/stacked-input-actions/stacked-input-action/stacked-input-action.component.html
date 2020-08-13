@@ -1,0 +1,27 @@
+<div class="input-action">
+  <form class="input-action__form stepper-form">
+    <mat-form-field>
+      <input matInput [placeholder]="config.text.placeholder" [formControl]="textFormControl" #inputElement
+        [name]="position">
+      <mat-error *ngIf="textFormControl.hasError('email') && !textFormControl.hasError('required')">
+        Please enter a valid email address
+      </mat-error>
+      <mat-error *ngIf="textFormControl.hasError('required')">
+        {{config.text.requiredError}}
+      </mat-error>
+      <mat-error *ngIf="textFormControl.hasError('notUnique') && !textFormControl.hasError('email')">
+        {{config.text.uniqueError}}
+      </mat-error>
+    </mat-form-field>
+  </form>
+  <div class="input-action__detail">
+    <mat-icon *ngIf="showRemove" class="input-action__detail__remove" [ngClass]="{'disabled': textFormControl.disabled}"
+      (click)="!textFormControl.disabled && remove.emit()" [matTooltip]="'Remove'">indeterminate_check_box</mat-icon>
+    <ng-container *ngIf="state && result && (state.result === result.SUCCEEDED || state.result === result.FAILED)"
+      class="input-action__detail__result">
+      <app-boolean-indicator [isTrue]="state.result === result.SUCCEEDED" type="succeeded-failed" [subtle]="false"
+        [showText]="false"></app-boolean-indicator>
+      <span>{{ state.message }}</span>
+    </ng-container>
+  </div>
+</div>

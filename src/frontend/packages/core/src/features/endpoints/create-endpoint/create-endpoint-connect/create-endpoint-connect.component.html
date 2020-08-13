@@ -1,0 +1,25 @@
+<div class="connect">
+  <div class="connect__option">
+    <p class="connect__successful-reg-text">
+      <b>{{ connectService?.config.name }}</b> has been successfully registered.
+    </p>
+    <mat-checkbox class="connect__checkbox" [(ngModel)]="doConnect">Connect to
+      <b>{{ connectService?.config.name }}</b> now
+      (optional).
+    </mat-checkbox>
+    <div class="connect__subtext">You may connect this endpoint at a later date from the
+      endpoints page.
+    </div>
+  </div>
+  <div>
+    <div class="connect__title">
+      <span class="connect__title-inner">Connection Credentials</span>
+      <button *ngIf="helpDocumentUrl" [appBlur]="true" class="connect__title-help" mat-icon-button (click)="showHelp()">
+        <mat-icon>help</mat-icon>
+      </button>
+    </div>
+    <app-connect-endpoint [disabled]="!doConnect" class="stepper-form" (valid)="valid = $event"
+      (authType)="helpDocumentUrl = $event.help" [connectService]="connectService">
+    </app-connect-endpoint>
+  </div>
+</div>

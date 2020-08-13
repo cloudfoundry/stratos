@@ -123,7 +123,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when username is missing", func() {
 
 				mockDatabaseConfigNoSSL.Username = ""
-				expectedErrorMessage := "parameter validation failed:\tParameter was nil: username"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: username"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigNoSSL)
@@ -134,7 +134,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when password is missing", func() {
 
 				mockDatabaseConfigNoSSL.Password = ""
-				expectedErrorMessage := "parameter validation failed:\tParameter was nil: password"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: password"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigNoSSL)
@@ -145,7 +145,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when database is missing", func() {
 
 				mockDatabaseConfigNoSSL.Database = ""
-				expectedErrorMessage := "parameter validation failed:\tParameter was nil: database"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: database name"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigNoSSL)
@@ -156,7 +156,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when host is missing", func() {
 
 				mockDatabaseConfigNoSSL.Host = ""
-				expectedErrorMessage := "parameter validation failed:\tParameter was nil: host"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: host/hostname"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigNoSSL)
@@ -167,7 +167,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when port is 0", func() {
 
 				mockDatabaseConfigNoSSL.Port = 0
-				expectedErrorMessage := "parameter validation failed:\tParameter's length was not greater than:  port(0) < 0"
+				expectedErrorMessage := "parameter validation failed: Parameter's length was not greater than:  port(0) < 0"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigNoSSL)
@@ -178,7 +178,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when port is < 0", func() {
 
 				mockDatabaseConfigNoSSL.Port = -1
-				expectedErrorMessage := "parameter validation failed:\tParameter's length was not greater than:  port(-1) < 0"
+				expectedErrorMessage := "parameter validation failed: Parameter's length was not greater than:  port(-1) < 0"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigNoSSL)
@@ -189,7 +189,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when port is > 65535", func() {
 
 				mockDatabaseConfigNoSSL.Port = 65536
-				expectedErrorMessage := "parameter validation failed:\tNot()"
+				expectedErrorMessage := "parameter validation failed: Not()"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigNoSSL)
@@ -200,7 +200,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when connection timeout is zero", func() {
 
 				mockDatabaseConfigNoSSL.Port = 65536
-				expectedErrorMessage := "parameter validation failed:\tNot()"
+				expectedErrorMessage := "parameter validation failed: Not()"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigNoSSL)
@@ -313,7 +313,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when username is missing", func() {
 
 				mockDatabaseConfigSSL.Username = ""
-				expectedErrorMessage := "parameter validation failed:\tParameter was nil: username"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: username"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigSSL)
@@ -324,7 +324,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when password is missing", func() {
 
 				mockDatabaseConfigSSL.Password = ""
-				expectedErrorMessage := "parameter validation failed:\tParameter was nil: password"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: password"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigSSL)
@@ -335,7 +335,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when database is missing", func() {
 
 				mockDatabaseConfigSSL.Database = ""
-				expectedErrorMessage := "parameter validation failed:\tParameter was nil: database"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: database name"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigSSL)
@@ -346,7 +346,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when host is missing", func() {
 
 				mockDatabaseConfigSSL.Host = ""
-				expectedErrorMessage := "parameter validation failed:\tParameter was nil: host"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: host/hostname"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigSSL)
@@ -357,7 +357,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when port is 0", func() {
 
 				mockDatabaseConfigSSL.Port = 0
-				expectedErrorMessage := "parameter validation failed:\tParameter's length was not greater than:  port(0) < 0"
+				expectedErrorMessage := "parameter validation failed: Parameter's length was not greater than:  port(0) < 0"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigSSL)
@@ -368,7 +368,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when port is < 0", func() {
 
 				mockDatabaseConfigSSL.Port = -1
-				expectedErrorMessage := "parameter validation failed:\tParameter's length was not greater than:  port(-1) < 0"
+				expectedErrorMessage := "parameter validation failed: Parameter's length was not greater than:  port(-1) < 0"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigSSL)
@@ -379,7 +379,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when port is > 65535", func() {
 
 				mockDatabaseConfigSSL.Port = 65536
-				expectedErrorMessage := "parameter validation failed:\tNot()"
+				expectedErrorMessage := "parameter validation failed: Not()"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigSSL)

@@ -1,7 +1,10 @@
-import { by, element, promise } from 'protractor';
+import { browser, by, element, ElementFinder, promise, protractor } from 'protractor';
 
+import { e2e } from './../e2e';
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
+
+const until = protractor.ExpectedConditions;
 
 export class DialogButton {
   index: number;
@@ -39,7 +42,7 @@ export class ConfirmDialogComponent extends Component {
 
     dialog.confirm();
     // Wait until not shown
-    dialog.waitUntilNotShown();
+    return dialog.waitUntilNotShown();
   }
 
   constructor(locator = element(by.css('app-dialog-confirm'))) {
@@ -48,12 +51,12 @@ export class ConfirmDialogComponent extends Component {
 
   // Cancel
   cancel(): promise.Promise<void> {
-    return this.getButtons().then(btns => btns[0].click());
+    return this.getButtons().then(btns => btns[0].click()).then(() => e2e.sleep(50));
   }
 
   // Confirm
   confirm(): promise.Promise<void> {
-    return this.getButtons().then(btns => btns[1].click());
+    return this.getButtons().then(btns => btns[1].click()).then(() => e2e.sleep(50));
   }
 
   confirmEnabled(): promise.Promise<boolean> {
@@ -69,15 +72,23 @@ export class ConfirmDialogComponent extends Component {
     return this.locator.element(by.className('confirm-dialog__header-title')).getText();
   }
 
+  getMessageElement(): ElementFinder {
+    return this.locator.element(by.className('confirm-dialog__message'));
+  }
+
   getMessage(): promise.Promise<string> {
-    return this.locator.element(by.className('confirm-dialog__message')).getText();
+    return this.getMessageElement().getText();
+  }
+
+  waitForMessage(message: string): promise.Promise<any> {
+    return browser.wait(until.textToBePresentInElement(this.getMessageElement(), message), 5000);
   }
 
   // Get metadata for all of the fields in the form
   getButtons(): promise.Promise<DialogButton[]> {
     return this.locator.all(by.tagName('button')).map((elm, index) => {
       return {
-        index: index,
+        index,
         label: elm.getText(),
         class: elm.getAttribute('class'),
         isWarning: elm.getAttribute('class').then(v => v.indexOf('mat-warn') >= 0),

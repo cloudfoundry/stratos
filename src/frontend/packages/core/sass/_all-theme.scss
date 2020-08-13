@@ -1,0 +1,131 @@
+@import '../src/core/page-not-found-component/page-not-found-component.theme.component';
+@import '../src/features/dashboard/side-nav/side-nav.component.theme';
+@import '../src/features/dashboard/dashboard-base/dashboard-base.component.theme';
+@import '../src/features/home/home/home-page.component.theme';
+@import '../src/features/login/login-page/login-page.component.theme';
+@import '../src/features/dashboard/page-side-nav/page-side-nav.component.theme';
+@import '../src/features/about/about-page/about-page.component.theme';
+@import '../src/shared/components/display-value/display-value.component.theme';
+@import '../src/shared/components/stepper/steppers/steppers.component.theme';
+@import '../src/shared/components/list/list.component.theme';
+@import '../src/shared/components/code-block/code-block.component.theme';
+@import '../src/shared/components/copy-to-clipboard/copy-to-clipboard.component.theme';
+@import '../src/shared/components/list/list-cards/cards.components.theme';
+@import '../src/shared/components/dialog-error/dialog-error.component.theme';
+@import '../src/shared/components/cards/card-status/card-status.component.theme';
+@import '../src/shared/components/usage-gauge/usage-gauge.component.theme';
+@import '../src/shared/components/ssh-viewer/ssh-viewer.component.theme';
+@import '../src/shared/components/list/list-table/table-row/table-row.component.theme';
+@import '../src/shared/components/no-content-message/no-content-message.component.theme';
+@import '../src/shared/components/boolean-indicator/boolean-indicator.component.theme';
+@import '../src/shared/components/json-viewer/json-viewer.component.theme';
+@import '../src/shared/components/loading-page/loading-page.component.theme';
+@import '../src/shared/components/log-viewer/log-viewer.component.theme';
+@import '../src/shared/components/chips/chips.component.theme';
+@import '../src/shared/components/cards/card-number-metric/card-number-metric.component.theme';
+@import '../src/shared/components/cards/card-boolean-metric/card-boolean-metric.component.theme';
+@import '../src/shared/components/simple-usage-chart/simple-usage-chart.component.theme';
+@import '../src/core/dot-content/dot-content.component.theme';
+@import '../src/shared/components/stratos-title/stratos-title.component.theme';
+@import '../src/shared/components/page-header/page-header.component.theme';
+@import '../src/shared/components/page-header/page-header-events/page-header-events.component.theme';
+@import '../src/shared/components/user-profile-banner/user-profile-banner.component.theme';
+@import '../src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component.theme';
+@import '../src/shared/components/upload-progress-indicator/upload-progress-indicator.component.theme';
+@import '../src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component.theme';
+@import '../src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component.theme';
+@import '../src/shared/components/start-end-date/start-end-date.component.theme';
+@import '../src/shared/components/metrics-chart/metrics-chart.component.theme';
+@import '../src/shared/components/metrics-range-selector/metrics-range-selector.component.theme';
+@import '../src/shared/components/tile-selector-tile/tile-selector-tile.component.theme';
+@import '../src/shared/components/entity-summary-title/entity-summary-title.component.theme';
+@import '../src/shared/components/multiline-title/multiline-title.component.theme';
+@import '../src/shared/components/intro-screen/intro-screen.component.theme';
+@import '../src/features/user-profile/profile-info/profile-info.component.theme';
+@import '../src/core/stateful-icon/stateful-icon.component.theme';
+@import './components/mat-snack-bar.theme';
+@import './components/ngx-charts-gauge.theme';
+@import '../src/shared/components/sidepanel-preview/sidepanel-preview.component.theme';
+@import '../src/shared/components/user-avatar/user-avatar.component.theme';
+@import './components/text-status.theme';
+@import './components/hyperlinks.theme';
+@import './mat-desktop';
+@import './fonts';
+@import './ansi-colors';
+@import '../src/shared/components/favorites-global-list/favorites-global-list.component.theme';
+@import '../src/shared/components/favorites-meta-card/favorites-meta-card.component.theme';
+
+@import '../../core/src/features/error-page/error-page/error-page.component.theme';
+@import '../../core/src/features/endpoints/backup-restore/restore-endpoints/restore-endpoints.component.theme';
+@import '../../core/src/features/metrics/metrics/metrics.component.theme';
+
+
+// Creates the app theme and applies it to the application
+// $theme = Angular Material Theme
+// $nav-theme - Colors for the Side Nav (optional)
+// $status-theme - Colors for status (optional)
+@mixin app-theme($stratos-theme, $nav-theme: null, $status-theme: null) {
+  $theme: map-get($stratos-theme, theme);
+  $app-theme: map-get($stratos-theme, app-theme);
+  $app-background-color: map-get($app-theme, app-background-color);
+
+  html {
+    background-color: $app-background-color;
+  }
+
+  @include dialog-error-theme($theme, $app-theme);
+  @include login-page-theme($theme, $app-theme);
+  @include side-nav-theme($theme, $app-theme);
+  @include dashboard-page-theme($theme, $app-theme);
+  @include display-value-theme($theme, $app-theme);
+  @include steppers-theme($theme, $app-theme);
+  @include list-theme($theme, $app-theme);
+  @include app-mat-snack-bar-theme($theme, $app-theme);
+  @include ngx-charts-gauge($theme, $app-theme);
+  @include app-text-status-theme($theme, $app-theme);
+  @include app-card-status-theme($theme, $app-theme);
+  @include app-usage-gauge-theme($theme, $app-theme);
+  @include app-ssh-viewer-theme($theme, $app-theme);
+  @include table-row-theme($theme, $app-theme);
+  @include app-hyperlinks($theme, $app-theme);
+  @include app-no-content-message-theme($theme, $app-theme);
+  @include app-boolean-indicator-theme($theme, $app-theme);
+  @include loading-page-theme($theme, $app-theme);
+  @include app-log-viewer-theme($theme, $app-theme);
+  @include app-card-number-metric-theme($theme, $app-theme);
+  @include app-card-boolean-metric-theme($theme, $app-theme);
+  @include app-dot-content($theme, $app-theme);
+  @include stratos-title-component-theme($theme, $app-theme);
+  @include app-page-header-theme($theme, $app-theme);
+  @include app-page-header-events($theme, $app-theme);
+  @include app-user-profile-banner-component-theme($theme, $app-theme);
+  @include action-monitor-icon-theme($theme, $app-theme);
+  @include app-upload-progress-indicator-component-theme($theme, $app-theme);
+  @include page-404($theme, $app-theme);
+  @include about-page-theme($theme, $app-theme);
+  @include meta-card-component($theme, $app-theme);
+  @include start-end-theme($theme, $app-theme);
+  @include metrics-chart-theme($theme, $app-theme);
+  @include metrics-range-selector-theme($theme, $app-theme);
+  @include app-multiline-title-theme($theme, $app-theme);
+  @include app-sidepanel-preview-theme($theme, $app-theme);
+  @include tile-selector-theme($theme, $app-theme);
+  @include profile-page-theme($theme, $app-theme);
+  @include stateful-icon($theme, $app-theme);
+  @include app-simple-usage-chart($theme, $app-theme);
+  @include home-page-theme($theme, $app-theme);
+  @include favorites-global-list-theme($theme, $app-theme);
+  @include favorites-meta-card-theme($theme, $app-theme);
+  @include page-side-nav-theme($theme, $app-theme);
+  @include entity-summary-title-theme($theme, $app-theme);
+  @include app-meta-card-item-theme($theme, $app-theme);
+  @include error-page-theme($theme, $app-theme);
+  @include code-block-theme($theme, $app-theme);
+  @include copy-to-clipboard-theme($theme, $app-theme);
+  @include app-user-avatar-theme($theme, $app-theme);
+  @include restore-endpoints-theme($theme, $app-theme);
+  @include metrics-component-theme($theme, $app-theme);
+  @include intro-screen-theme($theme, $app-theme);
+  @include app-json-view-theme($theme, $app-theme);
+
+}

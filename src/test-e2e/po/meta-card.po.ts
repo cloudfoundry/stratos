@@ -17,9 +17,9 @@ export enum MetaCardTitleType {
   CUSTOM = '.meta-card__title'
 }
 
-export interface MetaCardItem {
-  key: promise.Promise<string>;
-  value: promise.Promise<string>;
+export interface MetaCardItem<T = promise.Promise<string>> {
+  key: T;
+  value: T;
 }
 
 export class MetaCard extends Component {
@@ -62,6 +62,16 @@ export class MetaCard extends Component {
       key: row.element(by.css('.meta-card-item__key')).getText(),
       value: row.element(by.css('.meta-card-item__value')).getText()
     })));
+  }
+
+  getMetaCardItemsAsText(): promise.Promise<MetaCardItem<string>[]> {
+    return this.getMetaCardItems()
+      .then((rows: MetaCardItem[]) => rows.map(row => promise.all([row.key, row.value])))
+      .then(promises => promise.all(promises))
+      .then(res => res.map(a => ({
+        key: a[0].replace(':', ''),
+        value: a[1]
+      })));
   }
 
   click() {

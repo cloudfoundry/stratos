@@ -1,0 +1,42 @@
+<app-page-header>
+  <h1>Edit User Profile</h1>
+  <div class="page-header-right">
+    <button mat-icon-button mat-button routerLink="/user-profile">
+        <mat-icon>clear</mat-icon>
+      </button>
+  </div>
+</app-page-header>
+<app-steppers cancel="/user-profile">
+  <app-step [title]="'Edit User Profile'" [valid]="editProfileForm.valid && editProfileForm.dirty" [onNext]="updateProfile" finishButtonText="Save">
+    <div>
+      <form [formGroup]="editProfileForm" validate class="edit-profile edit-profile__group">
+        <mat-form-field>
+          <input matInput placeholder="Given Name" formControlName="givenName">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Family Name" formControlName="familyName">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Primary Email Address" formControlName="emailAddress">
+        </mat-form-field>
+        <p *ngIf="!(canChangePassword | async) && needsPasswordForEmailChange">Current password is required when changing email address</p>
+        <p *ngIf="(canChangePassword | async) && needsPasswordForEmailChange">Current password is required when changing email address or password</p>
+        <mat-form-field *ngIf="needsPasswordForEmailChange">
+          <input matInput placeholder="Current Password" type="password" formControlName="currentPassword" [required]="passwordRequired">
+        </mat-form-field>
+        <div *ngIf="(canChangePassword | async)" class="edit-profile__group">
+          <p>Change Password (Leave blank to keep current password)</p>
+          <mat-form-field *ngIf="!needsPasswordForEmailChange">
+            <input matInput placeholder="Current Password" type="password" formControlName="currentPassword" [required]="passwordRequired">
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput placeholder="New Password" type="password" formControlName="newPassword">
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput placeholder="Confirm New Password" type="password" formControlName="confirmPassword">
+          </mat-form-field>
+        </div>
+      </form>
+    </div>
+  </app-step>
+</app-steppers>

@@ -1,0 +1,153 @@
+.list-component {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  mat-progress-bar {
+    position: absolute;
+    top: -5px;
+  }
+
+  *,
+  .sort,
+  .filter,
+  .add-container {
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .list-component__header-card {
+    padding-left: 20px;
+  }
+
+  &__cards {
+    .list-component__header-card {
+      margin-bottom: 20px;
+    }
+  }
+
+  &__table {
+    .list-component__header-card {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .list-component__paginator {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+  }
+
+  &__body-inner {
+    position: relative;
+  }
+
+  $title-left-padding: 25px;
+  $title-content-padding: 10px;
+
+  &__header {
+    mat-card {
+      display: flex;
+    }
+
+    &-card {
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    &__left,
+    &__right {
+      align-items: center;
+      display: flex;
+      flex-direction: row;
+
+      > div {
+        &:not(:last-of-type) {
+          padding-right: $title-content-padding;
+        }
+
+        &:not([hidden]) {
+          align-items: center;
+          display: flex;
+        }
+      }
+    }
+
+    &__right {
+      justify-content: flex-end;
+    }
+
+    &__left {
+      flex: 1;
+
+      &--text {
+        padding: 10px 10px 10px 0;
+      }
+
+      &--multi-actions {
+        button {
+          &:first-of-type {
+            margin-left: -10px;
+          }
+        }
+      }
+
+      &--multi-filters {
+        mat-form-field {
+          padding-right: $title-content-padding;
+        }
+      }
+    }
+
+    > mat-card {
+      min-height: 74px;
+      padding: 0 24px;
+      width: 100%;
+    }
+  }
+
+  &__body {
+    .no-rows {
+      padding: 20px $title-left-padding;
+    }
+
+    mat-card {
+      &[hidden] {
+        display: none;
+      }
+    }
+  }
+
+  &__paginator {
+    height: 67px;
+    padding: 4px;
+
+    mat-paginator-container {
+      padding: 0;
+    }
+  }
+
+  &__no-entries {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    justify-content: center;
+  }
+
+  &__default-no-entries {
+    width: 100%;
+
+    mat-card-content {
+      padding-left: 10px;
+    }
+  }
+}
+
+.refresh-button {
+  &__no-header {
+    display: flex;
+    flex-direction: row-reverse;
+    margin: 24px;
+  }
+}

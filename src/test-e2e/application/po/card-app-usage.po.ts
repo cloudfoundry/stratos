@@ -1,4 +1,4 @@
-import { by, element, ElementFinder, promise } from 'protractor';
+import { by, element, ElementFinder } from 'protractor';
 
 import { MetaCard, MetaCardTitleType } from '../../po/meta-card.po';
 

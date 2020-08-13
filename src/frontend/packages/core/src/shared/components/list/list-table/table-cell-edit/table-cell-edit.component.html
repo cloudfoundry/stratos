@@ -1,0 +1,14 @@
+<div class="edit" [ngClass]="{'edit--subtle': subtle}">
+  <button mat-icon-button *ngIf="!isEditing() else editing" (click)="dataSource.startEdit(row)"
+    [disabled]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
+    <mat-icon>edit</mat-icon>
+  </button>
+  <ng-template #editing>
+    <button id="table-cell-edit-done" mat-icon-button (click)="dataSource.saveEdit()">
+      <mat-icon>done</mat-icon>
+    </button>
+    <button id="table-cell-edit-cancel" mat-icon-button (click)="dataSource.cancelEdit()">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </ng-template>
+</div>

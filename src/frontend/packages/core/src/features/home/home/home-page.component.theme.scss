@@ -1,0 +1,9 @@
+@mixin home-page-theme($theme, $app-theme) {
+  $primary: map-get($theme, primary);
+  $background-colors: map-get($theme, background);
+  $foreground: map-get($theme, foreground);
+  .recent-list {
+    background-color: darken(mat-color($background-colors, background), 5%);
+    border-left: 1px solid mat-color($foreground, divider);
+  }
+}

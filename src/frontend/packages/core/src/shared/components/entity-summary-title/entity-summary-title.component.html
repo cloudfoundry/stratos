@@ -1,0 +1,23 @@
+<div class="entity-summary">
+  <div class="entity-summary__header-section">
+    <!-- <img *ngIf="imagePath" class="entity-summary__logo" title="{{ title }}'s image" src="{{ imagePath }}"> -->
+    <img *ngIf="image; else noIcon" class="entity-summary__img" title="{{ title }}'s image" [src]="image"
+      (error)="failedImageLoad()">
+    <ng-template #noIcon>
+      <mat-icon class="entity-summary__logo" fontSet="{{fallBackIconFont}}">{{fallBackIcon}}</mat-icon>
+    </ng-template>
+
+    <div class="entity-summary__header-inner">
+      <div class="entity-summary__header-wrapper">
+        <h1 class="entity-summary__header">{{ title }} </h1>
+        <mat-icon *ngIf="info" class="entity-summary__header-info" matTooltip="{{ info }}">
+          info</mat-icon>
+      </div>
+      <div class="entity-summary__sub-header" *ngIf="subTitle"> {{ subTitle }}</div>
+      <div class="entity-summary__sub-text" *ngIf="subText"> {{ subText }}</div>
+    </div>
+  </div>
+  <div class="entity-summary__content">
+    <ng-content></ng-content>
+  </div>
+</div>

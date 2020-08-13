@@ -1,7 +1,7 @@
 FROM splatform/bosh-cli
 
-RUN curl https://storage.googleapis.com/golang/go1.9.7.linux-amd64.tar.gz -o go1.9.7.linux-amd64.tar.gz
-RUN tar -C /usr/local -xzf go1.9.7.linux-amd64.tar.gz
+RUN curl https://storage.googleapis.com/golang/go1.13.4.linux-amd64.tar.gz -o go1.13.4.linux-amd64.tar.gz
+RUN tar -C /usr/local -xzf go1.13.4.linux-amd64.tar.gz
 RUN curl https://deb.nodesource.com/setup_6.x -o install_node.sh
 RUN chmod +x install_node.sh && \
     ./install_node.sh && \

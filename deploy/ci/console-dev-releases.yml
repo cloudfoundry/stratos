@@ -5,7 +5,6 @@ resource_types:
   privileged: true
   source:
     repository: ((docker-resource-image))
-    tag: ((docker-resource-image-tag))
 resources:
 # Stratos Git Repository
 - name: stratos
@@ -14,8 +13,8 @@ resources:
     uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
     branch: ((stratos-repository-branch))
     private_key: ((github-private-key))
-    # Match any Version 2 release (alpha, beta, rc) other than the actual release
-    tag_filter: "2*-*"
+    # Match any Version 3 release (alpha, beta, rc) other than the actual release
+    tag_filter: "3*-*"
 - name: helm-repo
   type: git
   source:
@@ -29,12 +28,12 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-repository))/stratos-jetstream
-- name: postflight-image
+- name: config-init-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-repository))/stratos-postflight-job
+    repository: ((docker-repository))/stratos-config-init
 - name: mariadb-image
   type: docker-image
   source:
@@ -81,13 +80,34 @@ jobs:
       params:
         file: image-tag/*.tar
         acl: public-read
-- name: build-images
+- name: check-github
   plan:
   - get: stratos
     passed: [generate-tag-files]
     trigger: true
   - get: image-tag
-    passed: [generate-tag-files]
+    passed: [generate-tag-files] 
+    params:
+     unpack: true
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos/deploy/ci/tasks/dev-releases/check-gh-release.yml
+      params:
+        GITHUB_TOKEN: ((github-access-token))
+        GITHUB_USER: ((helm-repo-github-organization))
+        GITHUB_REPO: ((helm-repo-github-repository))
+        GIT_USER: ((concourse-user))
+        GIT_EMAIL: ((concourse-email))
+        GIT_PRIVATE_KEY: ((github-private-key))
+- name: build-images
+  plan:
+  - get: stratos
+    passed: [check-github]
+    trigger: true
+  - get: image-tag
+    passed: [check-github]
     params:
       unpack: true
   - aggregate:
@@ -101,18 +121,18 @@ jobs:
           build_args_file: image-tag/build-args
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      - put: postflight-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.bk
-          build: stratos/
-          target_name:  postflight-job
-          tag: image-tag/v2-alpha-tag
-          patch_base_reg: ((patch-base-reg))
-          patch_base_tag: ((patch-base-tag))
       - put: mariadb-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
+          tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
+    - do:
+      - put: config-init-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.init
+          build: stratos/
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))

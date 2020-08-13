@@ -1,0 +1,33 @@
+<form [formGroup]="formGroup" class="stepper-form">
+  <mat-form-field>
+    <input matInput formControlName="name" placeholder="Space Quota Name" required [appFocus]="true">
+    <mat-error *ngIf="formGroup.controls.name?.hasError('nameTaken')">
+      A space quota with this name already exists. Please enter a different one.
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field>
+    <input type="number" matInput formControlName="memoryLimit" placeholder="Total amount of memory an space can have"
+      required>
+    <span matSuffix>MB</span>
+  </mat-form-field>
+  <app-unlimited-input name="instanceMemoryLimit" placeholder="Max amount of memory an app instance can have"
+    suffix="MB" [required]="true"></app-unlimited-input>
+
+  <app-unlimited-input name="appInstanceLimit" placeholder="Total number of application instances" [required]="true">
+  </app-unlimited-input>
+  <app-unlimited-input name="appTasksLimit" placeholder="Total number of tasks that can be run per app">
+  </app-unlimited-input>
+
+  <app-unlimited-input name="totalServices" placeholder="Total number of service instances an space can have"
+    [required]="true"></app-unlimited-input>
+  <app-unlimited-input name="totalServiceKeys" placeholder="Total number of service keys an space can have">
+  </app-unlimited-input>
+
+  <app-unlimited-input name="totalRoutes" placeholder="Total number of routes" [required]="true">
+  </app-unlimited-input>
+  <app-unlimited-input name="totalReservedRoutePorts" placeholder="Max number of routes with reserved ports">
+  </app-unlimited-input>
+
+  <mat-checkbox matInput formControlName="nonBasicServicesAllowed">Can provision instances of paid service plans
+  </mat-checkbox>
+</form>

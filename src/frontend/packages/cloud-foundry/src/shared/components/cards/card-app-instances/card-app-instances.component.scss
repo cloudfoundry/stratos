@@ -1,0 +1,18 @@
+.card-app-instances {
+  &__large {
+    font-size: 16px;
+  }
+
+  &__compact {
+    margin-bottom: 0;
+  }
+
+  &__actions {
+    bottom: 24px;
+    padding-top: 0;
+    position: absolute;
+    right: 24px;
+    text-align: right;
+  }
+
+}

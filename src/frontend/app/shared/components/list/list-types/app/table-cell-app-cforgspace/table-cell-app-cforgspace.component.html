@@ -1,6 +1,0 @@
-<span *ngIf="multipleConnectedEndpoints$ | async; else singleEndpoint">
-  {{endpointName$ | async }}/{{ row.entity.space.entity.organization.entity.name }}/{{ row.entity.space.entity.name }}
-</span>
-<ng-template #singleEndpoint>
-  {{ row.entity.space.entity.organization.entity.name }}/{{ row.entity.space.entity.name }}
-</ng-template>

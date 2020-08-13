@@ -1,16 +1,15 @@
-import { by, element, ElementFinder } from 'protractor';
-import { browser, promise } from 'protractor';
+import { browser, by, element, ElementFinder, promise } from 'protractor';
 import { protractor } from 'protractor/built';
 
+import { e2e } from '../e2e';
 import { Component } from './component.po';
-
 
 const until = protractor.ExpectedConditions;
 
 /**
  * Page Object for snack bar component
  */
-export class SnackBarComponent extends Component {
+export class SnackBarPo extends Component {
 
   constructor() {
     super(element(by.css('.mat-simple-snackbar')));
@@ -53,11 +52,21 @@ export class SnackBarComponent extends Component {
   }
 
   // Wait for snackbar with given message
-  waitForMessage(message): promise.Promise<void> {
+  waitForMessage(message: string): promise.Promise<void> {
     const mesgElm = element(by.cssContainingText('.mat-simple-snackbar', message));
-    return browser.wait(until.presenceOf(mesgElm), 5000,
-      'Snackbar: ' + message + ' taking too long to appear in the DOM').then(() => {
-        return browser.driver.sleep(100);
-      });
+    return browser.wait(
+      until.presenceOf(mesgElm),
+      10000,
+      'Snackbar: "' + message + '" taking too long to appear in the DOM'
+    )
+      .catch(e => this.getMessage()
+        .then(actualMessage => e2e.log('Actual snackbar text: ', actualMessage))
+        .then(() => { throw e; })
+        .catch(() => {
+          e2e.log('No snackbard text');
+          throw e;
+        })
+      )
+      .then(() => browser.driver.sleep(100));
   }
 }

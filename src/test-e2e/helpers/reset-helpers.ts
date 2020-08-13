@@ -1,4 +1,5 @@
 import { promise } from 'protractor';
+
 import { e2e } from '../e2e';
 import { E2EEndpointConfig } from '../e2e.types';
 import { ConsoleUserType } from './e2e-helpers';
@@ -145,11 +146,28 @@ export class ResetsHelpers {
     });
   }
 
+  removeEndpoint(req, endpointName): promise.Promise<any> {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' }).then((data) => {
+      if (!data || !data.length) {
+        return;
+      }
+      data = data.trim();
+      data = JSON.parse(data);
+      const p = promise.fulfilled({});
+      data.forEach((c) => {
+        if (c.name === endpointName) {
+          p.then(() => reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/unregister' }, null, { cnsi_guid: c.guid }));
+        }
+      });
+      return p;
+    });
+  }
+
   private doConnectEndpoint(req, cnsiGuid, username, password) {
     return reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/cnsi' }, null, {
       cnsi_guid: cnsiGuid,
-      username: username,
-      password: password
+      username,
+      password
     });
   }
 

@@ -1,0 +1,24 @@
+<app-intro-screen id="app-login-page" class="login login__busy" [ngClass]="{'login__busy': busy$ | async }">
+  <mat-card class="login__card">
+    <app-stratos-title></app-stratos-title>
+    <div class="login__body">
+      <div class="login__form-outer" [ngClass]="{'login-sso': ssoLogin}">
+        <form class="login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
+          <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
+            <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
+          </mat-form-field>
+          <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
+            <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
+          </mat-form-field>
+          <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!ssoLogin && !loginForm.valid">Login</button>
+        </form>
+      </div>
+      <div id="login__loading" class="login__loading">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </div>
+    </div>
+  </mat-card>
+  <div id="login-error-message" class="login-message" [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
+    {{ message }}
+  </div>
+</app-intro-screen>

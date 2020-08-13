@@ -1,0 +1,48 @@
+.user-avatar {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+
+  &__placeholder {
+    font-size: 36px;
+    height: 36px;
+    line-height: initial;
+    width: 36px;
+  }
+  &__initials {
+    border-radius: 50%;
+    font-size: 14px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    width: 30px;
+  }
+  &__gravatar {
+    border-radius: 50%;
+    height: 36px;
+    width: 36px;
+  }
+  &__large {
+    height: 64px;
+    width: 64px;
+
+    .user-avatar {
+      &__initials {
+        font-size: 26px;
+        height: 60px;
+        line-height: 60px;
+        width: 60px;
+      }
+      &__gravatar {
+        border-radius: 50%;
+        height: 64px;
+        width: 64px;
+      }
+      &__placeholder {
+        font-size: 64px;
+        height: 64px;
+        width: 64px;
+      }
+    }
+  }
+}

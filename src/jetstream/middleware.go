@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/gorilla/context"
+	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
@@ -29,6 +29,8 @@ const StratosSSOHeader = "x-stratos-sso-login"
 const StratosSSOErrorHeader = "x-stratos-sso-error"
 
 func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error, doNotLog bool, msg string) error {
+	log.Debug("handleSessionError")
+
 	// Add header so front-end knows SSO login is enabled
 	if config.SSOLogin {
 		// A non-empty SSO Header means SSO is enabled
@@ -48,10 +50,14 @@ func handleSessionError(config interfaces.PortalConfig, c echo.Context, err erro
 		)
 	}
 
-	var logMessage = ""
-	if !doNotLog {
-		logMessage = msg + ": %v"
+	if doNotLog {
+		return interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			msg, msg,
+		)
 	}
+
+	var logMessage = msg + ": %v"
 
 	return interfaces.NewHTTPShadowError(
 		http.StatusUnauthorized,
@@ -103,6 +109,12 @@ func (p *portalProxy) xsrfMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		if c.Request().Method == "GET" || c.Request().Method == "HEAD" {
 			return h(c)
 		}
+
+		// Routes registered with /apps are assumed to be web apps that do their own XSRF
+		if strings.HasPrefix(c.Request().URL.String(), "/pp/v1/apps/") {
+			return h(c)
+		}
+
 		errMsg := "Failed to get stored XSRF token from user session"
 		token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
 		if err == nil {
@@ -162,8 +174,8 @@ func (p *portalProxy) urlCheckMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
 func (p *portalProxy) setStaticCacheContentMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		log.Debug("setStaticContentHeadersMiddleware")
 		c.Response().Header().Set("cache-control", "no-cache")
+		c.Response().Header().Set("pragma", "no-cache")
 		return h(c)
 	}
 }
@@ -171,6 +183,7 @@ func (p *portalProxy) setStaticCacheContentMiddleware(h echo.HandlerFunc) echo.H
 func (p *portalProxy) setSecureCacheContentMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		c.Response().Header().Set("cache-control", "no-store")
+		c.Response().Header().Set("pragma", "no-cache")
 		return h(c)
 	}
 }
@@ -183,7 +196,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		userID, err := p.GetSessionValue(c, "user_id")
 		if err == nil {
 			// check their admin status in UAA
-			u, err := p.GetUAAUser(userID.(string))
+			u, err := p.StratosAuthService.GetUser(userID.(string))
 			if err != nil {
 				return c.NoContent(http.StatusUnauthorized)
 			}
@@ -206,19 +219,27 @@ func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 				log.Error(shadowError.LogMessage)
 			}
 			return shadowError.HTTPError
+		} else if jetstreamError, ok := err.(interfaces.JetstreamError); ok {
+			return jetstreamError.HTTPErrorInContext(c)
 		}
 
 		return err
 	}
 }
 
-func retryAfterUpgradeMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+func bindToEnv(f func(echo.HandlerFunc, *env.VarSet) echo.HandlerFunc, e *env.VarSet) func(echo.HandlerFunc) echo.HandlerFunc {
+	return func(h echo.HandlerFunc) echo.HandlerFunc {
+		return f(h, e)
+	}
+}
 
-	upgradeVolume, noUpgradeVolumeErr := config.GetValue(UpgradeVolume)
-	upgradeLockFile, noUpgradeLockFileNameErr := config.GetValue(UpgradeLockFileName)
+func retryAfterUpgradeMiddleware(h echo.HandlerFunc, env *env.VarSet) echo.HandlerFunc {
+
+	upgradeVolume, noUpgradeVolumeOK := env.Lookup(UpgradeVolume)
+	upgradeLockFile, noUpgradeLockFileNameOK := env.Lookup(UpgradeLockFileName)
 
 	// If any of those properties are not set, disable upgrade middleware
-	if noUpgradeVolumeErr != nil || noUpgradeLockFileNameErr != nil {
+	if !noUpgradeVolumeOK || !noUpgradeLockFileNameOK {
 		return func(c echo.Context) error {
 			return h(c)
 		}

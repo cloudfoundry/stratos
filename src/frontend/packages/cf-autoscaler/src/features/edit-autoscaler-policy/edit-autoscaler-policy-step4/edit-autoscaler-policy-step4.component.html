@@ -1,0 +1,103 @@
+<div *ngIf="appAutoscalerPolicy$ | async as policy">
+  <p>Add schedules for specific dates and times that overwrite the default instance limits. Like reoccuring schedules,
+    during these time periods all dynamic scaling rules are still effective.</p>
+  <app-tile-grid class="app-autoscaler-tile-grid-100">
+    <app-tile-group *ngFor="let rule of policy.schedules && policy.schedules.specific_date; let index = index">
+      <app-tile>
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              Schedule {{index+1}}:
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div *ngIf="editIndex!=index">
+              <span *ngIf="rule.initial_min_instance_count">The initial number of application instances is
+                {{rule.initial_min_instance_count}}, and the range </span>
+              <span *ngIf="!rule.initial_min_instance_count">The number of application instances </span>
+              <span>is limited from {{rule.instance_min_count}} to {{rule.instance_max_count}} from
+                {{rule.start_date_time}} to {{rule.end_date_time}}.</span>
+            </div>
+            <div *ngIf="editIndex==index">
+              <form [formGroup]="editSpecificDateForm" validate class="autoscaler-policy-edit-specific">
+                <div class="app-metadata">
+                  <div class="app-metadata__two-cols autoscaler-policy-edit-specific-left">
+                    <app-metadata-item label="Effective Date Time">
+                      <mat-form-field class="form-field-left">
+                        <input matInput placeholder="Start" type="datetime-local" name="start_date_time"
+                          formControlName="start_date_time" required>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <input matInput placeholder="End" type="datetime-local" name="end_date_time"
+                          formControlName="end_date_time" required>
+                      </mat-form-field>
+                    </app-metadata-item>
+                  </div>
+                  <div class="app-metadata__two-cols">
+                    <app-metadata-item label="Instance Count">
+                      <mat-form-field class="form-field-left form-field-30">
+                        <input matInput placeholder="Minimum" type="number" name="instance_min_count"
+                          formControlName="instance_min_count" required>
+                      </mat-form-field>
+                      <mat-form-field class="form-field-left form-field-30">
+                        <input matInput placeholder="Initial Minimum" type="number" name="initial_min_instance_count"
+                          formControlName="initial_min_instance_count">
+                      </mat-form-field>
+                      <mat-form-field class="form-field-30">
+                        <input matInput placeholder="Maximum" type="number" name="instance_max_count"
+                          formControlName="instance_max_count" required>
+                      </mat-form-field>
+                    </app-metadata-item>
+                  </div>
+                </div>
+              </form>
+              <mat-error
+                *ngIf="editSpecificDateForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')">
+                {{policyAlert.alertInvalidPolicyMinimumRange}}
+              </mat-error>
+              <mat-error
+                *ngIf="editSpecificDateForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')">
+                {{policyAlert.alertInvalidPolicyMaximumRange}}
+              </mat-error>
+              <mat-error
+                *ngIf="editSpecificDateForm.get('initial_min_instance_count').hasError('alertInvalidPolicyInitialMaximumRange')">
+                {{policyAlert.alertInvalidPolicyInitialMaximumRange}}
+              </mat-error>
+              <mat-error
+                *ngIf="editSpecificDateForm.get('start_date_time').hasError('alertInvalidPolicyScheduleStartDateTimeBeforeNow')">
+                {{policyAlert.alertInvalidPolicyScheduleStartDateTimeBeforeNow}}
+              </mat-error>
+              <mat-error
+                *ngIf="editSpecificDateForm.get('start_date_time').hasError('alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime')">
+                {{policyAlert.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime}}
+              </mat-error>
+              <mat-error
+                *ngIf="editSpecificDateForm.get('start_date_time').hasError('alertInvalidPolicyScheduleSpecificConflict')">
+                {{policyAlert.alertInvalidPolicyScheduleSpecificConflict}}
+              </mat-error>
+              <mat-error
+                *ngIf="editSpecificDateForm.get('end_date_time').hasError('alertInvalidPolicyScheduleEndDateTimeBeforeNow')">
+                {{policyAlert.alertInvalidPolicyScheduleEndDateTimeBeforeNow}}
+              </mat-error>
+            </div>
+          </mat-card-content>
+          <mat-card-actions class="autoscaler-policy-edit__actions">
+            <button id="autoscaler-policy-edit-edit" *ngIf="editIndex!=index" (click)="editSpecificDate(index)"
+              [disabled]="editIndex!=-1" mat-icon-button>
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button id="autoscaler-policy-edit-done" *ngIf="editIndex==index" (click)="finishSpecificDate()"
+              [disabled]="editSpecificDateForm.invalid" mat-icon-button>
+              <mat-icon>done</mat-icon>
+            </button>
+            <button id="autoscaler-policy-edit-delete" (click)="removeSpecificDate(index)" mat-icon-button>
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
+  </app-tile-grid>
+  <button id="autoscaler-policy-edit-add" color="accent" mat-button mat-raised-button (click)="addSpecificDate()"
+    [disabled]="editIndex!=-1">Add</button>
+</div>

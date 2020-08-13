@@ -1,0 +1,17 @@
+.boolean-indicator {
+  &__container {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    mat-icon {
+      font-size: 20px;
+      height: 20px;
+      width: 20px;
+    }
+    &__show-text {
+      mat-icon {
+        margin-right: 4px;
+      }
+    }
+  }
+}

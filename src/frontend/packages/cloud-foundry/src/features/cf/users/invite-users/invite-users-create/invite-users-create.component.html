@@ -1,0 +1,21 @@
+<div class="create-users">
+  <div class="create-users__intro">
+    <p>Invite users to the <b>{{(org$ | async)?.entity.name}}</b> organization<span *ngIf="isSpace"> and the
+        <b>{{(space$ | async)?.entity.name}}</b> space</span>.</p>
+    <p>A verification email will be sent to each user you invite, they can then follow the link provided
+      in the email to activate and set up their account.</p>
+    <p>You are free to update the invited user's roles whilst waiting for their accounts to be activated.</p>
+  </div>
+  <div class="create-users__roles">
+    <div *ngIf="isSpace" class="create-users__roles__space">
+      Please select the users initial space role:
+      <mat-radio-group class="create-users__roles__space__radio-buttons" [(ngModel)]="spaceRole">
+        <mat-radio-button *ngFor="let season of spaceRoles" [value]="season.value">
+          {{season.label}}
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
+  </div>
+  <app-stacked-input-actions [stateIn$]="stateIn.asObservable()" (stateOut)="stateOut($event)">
+  </app-stacked-input-actions>
+</div>

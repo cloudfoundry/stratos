@@ -1,9 +1,11 @@
 import { browser, by, element, promise, protractor } from 'protractor';
 
 import { CFPage } from '../../po/cf-page.po';
+import { Component } from '../../po/component.po';
+import { ConfirmDialogComponent } from '../../po/confirm-dialog';
 import { ListComponent } from '../../po/list.po';
+import { MetaCardTitleType } from '../../po/meta-card.po';
 import { MetaDataItemComponent } from '../../po/meta-data-item.po';
-
 
 export class CfTopLevelPage extends CFPage {
 
@@ -35,10 +37,46 @@ export class CfTopLevelPage extends CFPage {
 
   // Goto the Organizations view (tab)
   goToOrgView(): ListComponent {
-    this.subHeader.clickItem('Organizations');
+    this.tabs.clickItem('Organizations');
     const cardView = new ListComponent();
     cardView.cards.waitUntilShown();
     return cardView;
+  }
+
+  deleteOrg(orgName) {
+    const cardView = this.goToOrgView();
+
+    cardView.cards.findCardByTitle(orgName, MetaCardTitleType.CUSTOM, true).then(card => {
+      card.openActionMenu().then(menu => {
+        menu.clickItem('Delete');
+        ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Organization', orgName);
+        card.waitUntilNotShown();
+      });
+    });
+  }
+
+  clickOnQuota(quotaName: string) {
+    const { table, header } = new ListComponent();
+    table.waitUntilShown();
+    header.setSearchText(quotaName);
+
+    const row = table.findRowByCellContent(quotaName);
+    row.element(by.css('a')).click();
+  }
+
+  deleteQuota(quotaName: string, waitUntilNotShown = true) {
+    const { table, header } = new ListComponent();
+    table.waitUntilShown();
+    header.setSearchText(quotaName);
+
+    const row = table.findRowByCellContent(quotaName);
+    const menu = table.openRowActionMenuByRow(row);
+    menu.clickItem('Delete');
+    ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Quota', quotaName);
+
+    if (waitUntilNotShown) {
+      browser.wait(this.until.invisibilityOf(row), 20000);
+    }
   }
 
   isSummaryView(): promise.Promise<boolean> {
@@ -55,6 +93,10 @@ export class CfTopLevelPage extends CFPage {
     return this.waitForMetaDataItemComponent('Instance Address');
   }
 
+  waitForInstanceAddressValue(): promise.Promise<string> {
+    return this.waitForInstanceAddress().getValue().then(val => val.replace('content_copy', '').trim());
+  }
+
   waitForApiVersion(): MetaDataItemComponent {
     return this.waitForMetaDataItemComponent('CF API Version');
   }
@@ -63,14 +105,36 @@ export class CfTopLevelPage extends CFPage {
     return this.waitForMetaDataItemComponent('Account Username');
   }
 
-  waitForAdministrator(): MetaDataItemComponent {
-    return this.waitForMetaDataItemComponent('Administrator');
-  }
-
   private waitForMetaDataItemComponent(label: string): MetaDataItemComponent {
     const comp = MetaDataItemComponent.withLabel(element(by.css('app-cloud-foundry-summary-tab')), label);
     comp.waitUntilShown();
     return comp;
+  }
+
+  isUserInviteConfigured(isAdmin: boolean = true): promise.Promise<boolean> {
+    return this.waitForMetaDataItemComponent('User Invitation Support').getValue().then(value =>
+      isAdmin ? value.startsWith('Configured') : value.startsWith('Enabled')
+    );
+  }
+
+  getInviteConfigureButton(): Component {
+    return new Component(element(by.cssContainingText('.user-invites button', 'Configure')));
+  }
+
+  getInviteDisableButton(): Component {
+    return new Component(element(by.cssContainingText('.user-invites button', 'Disable')));
+  }
+
+  canConfigureUserInvite(): promise.Promise<boolean> {
+    return this.waitForMetaDataItemComponent('User Invitation Support').getValue().then(value => value.endsWith('Configure'));
+  }
+
+  clickInviteConfigure(): promise.Promise<any> {
+    return this.getInviteConfigureButton().getComponent().click();
+  }
+
+  clickInviteDisable(): promise.Promise<any> {
+    return this.getInviteDisableButton().getComponent().click();
   }
 
   goToSummaryTab() {
@@ -79,6 +143,10 @@ export class CfTopLevelPage extends CFPage {
 
   goToOrgTab() {
     return this.goToTab('Organizations', 'organizations');
+  }
+
+  goToQuotasTab() {
+    return this.goToTab('Organization Quotas', 'quota-definitions');
   }
 
   goToRoutesTab() {
@@ -113,11 +181,19 @@ export class CfTopLevelPage extends CFPage {
     return this.goToTab('Security Groups', 'security-groups');
   }
 
+  clickOnCard(orgName: string) {
+    const list = new ListComponent();
+    list.cards.findCardByTitle(orgName).then((card) => {
+      expect(card).toBeDefined();
+      card.click();
+    });
+  }
+
   private goToTab(label: string, urlSuffix: string): promise.Promise<any> {
     // Some tabs don't appear until the page has fully loaded - so wait until the tab is present
-    const tabElement = this.subHeader.getItem(label);
+    const tabElement = this.tabs.getItem(label);
     browser.wait(this.until.presenceOf(tabElement), 10000, 'Tab: ' + label);
-    return this.subHeader.goToItemAndWait(label, this.navLink, urlSuffix);
+    return this.tabs.goToItemAndWait(label, this.navLink, urlSuffix);
   }
 
 }

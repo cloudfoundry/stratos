@@ -1,0 +1,39 @@
+.app-autoscaler-tile-grid-100 {
+  width: 100%;
+}
+
+.autoscaler-policy-edit {
+  display: flex;
+  position: relative;
+  width: 100%;
+  &__actions {
+    bottom: 10px;
+    padding-top: 0;
+    position: absolute;
+    right: 24px;
+    text-align: right;
+  }
+}
+
+.autoscaler-policy-edit-trigger-item {
+  .autoscaler-policy-edit-trigger-item-desc {
+    margin-bottom: .5em;
+  }
+  .autoscaler-policy-edit-trigger-item__unit {
+    display: inline-block;
+    width: 23px;
+  }
+  mat-error {
+    font-size: 85%;
+  }
+}
+
+.autoscaler-edit-select {
+  input {
+    left: 0;
+    position: absolute;
+    top: .5em;
+    width: 90%;
+    z-index: 200;
+  }
+}

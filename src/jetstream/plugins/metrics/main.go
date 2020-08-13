@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/labstack/echo"
@@ -115,11 +114,7 @@ func (m *MetricsSpecification) GetType() string {
 }
 
 func (m *MetricsSpecification) GetClientId() string {
-	if clientId, err := config.GetValue(CLIENT_ID_KEY); err == nil {
-		return clientId
-	}
-
-	return "metrics"
+	return m.portalProxy.Env().String(CLIENT_ID_KEY, "metrics")
 }
 
 func (m *MetricsSpecification) Register(echoContext echo.Context) error {
@@ -200,7 +195,14 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 		return tr, false, nil
 	} else if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
-		return nil, false, interfaces.LogHTTPError(res, err)
+		errMessage := ""
+		if res.StatusCode == http.StatusUnauthorized {
+			errMessage = ": Unauthorized"
+		}
+		return nil, false, interfaces.NewHTTPShadowError(
+			res.StatusCode,
+			fmt.Sprintf("Could not connect to the endpoint%s", errMessage),
+			"Could not connect to the endpoint: %s", err)
 	}
 
 	defer res.Body.Close()
@@ -267,14 +269,17 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 		url = fmt.Sprintf("wss://%s", environment)
 	}
 
+	// Array for case that metrics are provided for multiple endpoints
+	var metricsMetadata []*MetricsProviderMetadata
 	storeMetadata := &MetricsProviderMetadata{
 		Type:        "cf",
 		URL:         url,
 		Job:         job,
 		Environment: environment,
 	}
+	metricsMetadata = append(metricsMetadata, storeMetadata)
 
-	jsonMsg, err := json.Marshal(storeMetadata)
+	jsonMsg, err := json.Marshal(metricsMetadata)
 	if err != nil {
 		return "", interfaces.LogHTTPError(res, err)
 	}
@@ -363,11 +368,45 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 
 func hasMetricsProvider(providers []MetricsMetadata, url string) (*MetricsMetadata, bool) {
 	for _, provider := range providers {
-		if provider.URL == url {
+		if compareURL(provider.URL, url) {
 			return &provider, true
 		}
 	}
 	return nil, false
+}
+
+// Compare two URLs, taking into account default HTTP/HTTPS ports and ignoring query string
+func compareURL(a, b string) bool {
+
+	ua, err := url.Parse(a)
+	if err != nil {
+		return false
+	}
+
+	ub, err := url.Parse(b)
+	if err != nil {
+		return false
+	}
+
+	aPort := getPort(ua)
+	bPort := getPort(ub)
+	return ua.Scheme == ub.Scheme && ua.Hostname() == ub.Hostname() && aPort == bPort && ua.Path == ub.Path
+}
+
+func getPort(u *url.URL) string {
+	port := u.Port()
+	if len(port) == 0 {
+		switch u.Scheme {
+		case "http":
+			port = "80"
+		case "https":
+			port = "443"
+		default:
+			port = ""
+		}
+	}
+
+	return port
 }
 
 func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []string) (map[string]EndpointMetricsRelation, error) {
@@ -424,7 +463,7 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 	for _, metricProviderInfo := range metricsProviders {
 		for guid, info := range endpointsMap {
 			// Depends on the type
-			if info.CNSIType == metricProviderInfo.Type && info.DopplerLoggingEndpoint == metricProviderInfo.URL {
+			if info.CNSIType == metricProviderInfo.Type && compareURL(info.DopplerLoggingEndpoint, metricProviderInfo.URL) {
 				relate := EndpointMetricsRelation{}
 				relate.endpoint = info
 				// Make a copy
@@ -437,10 +476,12 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 			// K8s
 			log.Debugf("Processing endpoint: %+v", info)
 			log.Debugf("Processing endpoint Metrics provider: %+v", metricProviderInfo)
-			if info.APIEndpoint.String() == metricProviderInfo.URL {
+			if compareURL(info.APIEndpoint.String(), metricProviderInfo.URL) {
 				relate := EndpointMetricsRelation{}
 				relate.endpoint = info
-				relate.metrics = &metricProviderInfo
+				// Make a copy
+				relate.metrics = &MetricsMetadata{}
+				*relate.metrics = metricProviderInfo
 				results[guid] = relate
 				delete(endpointsMap, guid)
 				break

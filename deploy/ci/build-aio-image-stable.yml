@@ -1,0 +1,102 @@
+# Stable image build pipeline
+# This pipeline builds the stable Docker image for the AIO when the stable tag is updated
+# It also tags this stable image with the tag of the release version - e.g. 2.3.0
+# The latest tag is also updated as this track 'stable'
+---
+resource_types:
+- name: docker-image
+  type: docker-image
+  privileged: true
+  source:
+    repository: ((docker-resource-image))
+- name: stratos-git-resource
+  type: docker-image
+  source:
+    repository: splatform/stratos-git-tag-resource
+
+resources:
+# Stratos Git Repository
+- name: stratos
+  type: stratos-git-resource
+  source:
+    uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
+    branch: ((stratos-repository-branch))
+    private_key: ((github-private-key))
+    # Match stable tag
+    tag_filter: "stable"
+
+# Artifacts
+- name: image-tag
+  type: s3
+  source:
+    bucket: ((minio-bucket))
+    endpoint: ((minio-server-endpoint))
+    regexp: temp-artifacts/release-(.*).tar
+    access_key_id: ((minio-access-key))
+    secret_access_key: ((minio-secret-access-key))
+    region_name: eu-central-1
+
+# Docker Images
+- name: aio-docker-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-organization))/((aio-docker-image-name))
+    tag: stable
+
+jobs:
+- name: generate-tag-files
+  plan:
+  - get: stratos
+    trigger: true
+  - do:
+    - task: generate-tag
+      file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
+      params:
+        TAG_SUFFIX: ((tag-suffix))
+    - put: image-tag
+      params:
+        file: image-tag/*.tar
+        acl: public-read
+- name: check-docker-image
+  plan:
+  - get: stratos
+    passed: [generate-tag-files]
+    trigger: true
+  - get: image-tag
+    passed: [generate-tag-files] 
+    params:
+     unpack: true
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos/deploy/ci/tasks/dev-releases/check-docker-image.yml
+      params:
+        DOCKER_REGISTRY: ((docker-registry))
+        DOCKER_ORG: ((docker-organization))
+        DOCKER_USERNAME: ((docker-username))
+        DOCKER_PASSWORD: ((docker-password))
+        IMAGE_NAME: ((aio-docker-image-name))
+        TAG_NAME: stable
+- name: build-aio-image
+  public: true
+  serial: true
+  plan:
+  - get: stratos
+    passed: [check-docker-image]
+    trigger: true
+  - get: image-tag
+    passed: [check-docker-image]
+    params:
+     unpack: true
+  - put: aio-docker-image
+    params:
+      build: stratos
+      dockerfile: stratos/deploy/Dockerfile.all-in-one
+      tag: stratos/deploy/ci/tasks/build-images/stable-tag
+      tag_as_latest: true
+      labels_file: image-tag/image-labels
+      additional_tags: image-tag/v2-version      
+      build_args_file: image-tag/ui-build-args

@@ -11,7 +11,11 @@ const until = protractor.ExpectedConditions;
 export interface CardMetadata {
   index: number;
   title: string;
-  click: Function;
+  click: () => void;
+}
+
+export interface TableData {
+  [columnHeader: string]: string
 }
 
 // Page Object for the List Table View
@@ -33,6 +37,20 @@ export class ListTableComponent extends Component {
     return this.getRows().get(row).all(by.css('.app-table__cell')).get(column);
   }
 
+  waitForCellText(row: number, column: number, text: string) {
+    const component = new Component(this.getCell(row, column));
+    return component.waitForText(text);
+  }
+
+  findRowByCellContent(content) {
+    const cell = this.locator.all(by.css('.app-table__cell')).filter(elem =>
+      elem.getText().then(text => text === content)
+    ).first();
+
+    browser.wait(until.presenceOf(cell));
+    return cell.element(by.xpath('ancestor::app-table-row'));
+  }
+
   // Get the data in the table
   getTableDataRaw(): promise.Promise<any> {
     const getHeaders = this.locator.all(by.css('.app-table__header-cell')).map(headerCell => headerCell.getText());
@@ -45,7 +63,7 @@ export class ListTableComponent extends Component {
     });
   }
 
-  getTableData(): promise.Promise<{ [columnHeader: string]: string }[]> {
+  getTableData(): promise.Promise<TableData[]> {
     return this.getTableDataRaw().then(tableData => {
       const table = [];
       tableData.rows.forEach((row: string[]) => {
@@ -60,6 +78,23 @@ export class ListTableComponent extends Component {
     });
   }
 
+  findRow(columnHeader: string, value: string, expected = true): promise.Promise<number> {
+    return this.getTableData().then(data => {
+      const rowIndex = data.findIndex(row => row[columnHeader] === value);
+      if (rowIndex >= 0) {
+        if (expected) {
+          return rowIndex;
+        }
+        throw new Error(`Found row with header '${columnHeader}' and value '${value}' when not expecting one`);
+      } else {
+        if (expected) {
+          throw new Error(`Could not find row with header '${columnHeader}' and value '${value}'`);
+        }
+        return -1;
+      }
+    });
+  }
+
   selectRow(index: number, radioButton = true): promise.Promise<any> {
     return this.locator.all(by.css('.app-table__row')).then(rows => {
       expect(rows.length).toBeGreaterThan(index);
@@ -67,11 +102,13 @@ export class ListTableComponent extends Component {
     });
   }
 
-  waitUntilNotBusy() {
+  waitUntilNotBusy(failMsg?: string) {
     return Component.waitUntilNotShown(
-      this.locator.element(by.css('.table-row__deletion-bar-wrapper'))
+      this.locator.element(by.css('.table-row__deletion-bar-wrapper')),
+      'Failed to wait for list busy indicator to be shown'
     ).then(() => Component.waitUntilNotShown(
-      this.locator.element(by.css('.table-row-wrapper__blocked'))
+      this.locator.element(by.css('.table-row-wrapper__blocked')),
+      'Failed to wait for list busy indicator to be not shown'
     ));
   }
 
@@ -105,7 +142,9 @@ export class ListTableComponent extends Component {
 
   openRowActionMenuByRow(row: ElementFinder): MenuComponent {
     row.element(by.css('app-table-cell-actions button')).click();
-    return new MenuComponent();
+    const menu = new MenuComponent();
+    menu.waitUntilShown();
+    return menu;
   }
 
   toggleSort(headerTitle: string): promise.Promise<any> {
@@ -142,7 +181,7 @@ export class ListCardComponent extends Component {
   }
 
   private findCardElementByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): ElementFinder {
-    const card = this.locator.all(by.cssContainingText(`${ListCardComponent.cardsCss} ${metaType}`, title)).filter(elem =>
+    const card = this.locator.all(by.css(`${ListCardComponent.cardsCss} ${metaType}`)).filter(elem =>
       elem.getText().then(text => text === title)
     ).first();
     browser.wait(until.presenceOf(card));
@@ -174,7 +213,7 @@ export class ListCardComponent extends Component {
   getCardsMetadata(): promise.Promise<CardMetadata[]> {
     return this.getCards().map((elem, index) => {
       return {
-        index: index,
+        index,
         title: elem.element(by.css('.meta-card__title')).getText(),
         click: elem.click,
       };
@@ -209,7 +248,7 @@ export class ListHeaderComponent extends Component {
   }
 
   getSearchInputField(): ElementFinder {
-    return this.getRightHeaderSection().all(by.css('.filter')).first().element(by.css('input'));
+    return this.getRightHeaderSection().all(by.css('#listSearchFilter')).first().element(by.css('input'));
   }
 
   setSearchText(text: string): promise.Promise<void> {
@@ -279,7 +318,7 @@ export class ListHeaderComponent extends Component {
   }
 
   getRefreshListButtonAnimated(): ElementFinder {
-    return this.getRefreshListButton().element(by.css('.refresh-icon.refreshing'));
+    return this.getRefreshListButton().element(by.css('.poll-icon.polling'));
   }
 
   refresh() {
@@ -288,7 +327,7 @@ export class ListHeaderComponent extends Component {
   }
 
   isRefreshing(): promise.Promise<boolean> {
-    return this.getRefreshListButton().element(by.css('.refresh-icon')).getCssValue('animation-play-state').then(state =>
+    return this.getRefreshListButton().element(by.css('.poll-icon')).getCssValue('animation-play-state').then(state =>
       state === 'running'
     );
   }
@@ -364,12 +403,20 @@ export class ListPaginationComponent extends Component {
   }
 
   getPageSize(customCtrlName?: string): promise.Promise<string> {
-    return this.getPageSizeForm().getText(customCtrlName || 'mat-select-1');
+    return this.getPageSizeForm().getText(customCtrlName || 'mat-select-2');
   }
 
   setPageSize(pageSize, customCtrlName?: string): promise.Promise<void> {
-    const name = customCtrlName || 'mat-select-1';
-    return this.getPageSizeForm().fill({ [name]: pageSize });
+    const name = customCtrlName || 'mat-select-2';
+    // Only try to set the page size, if the page size control is shown
+    // Pagination controls will be hidden if there are not enough items to require more than 1 page
+    return this.getPageSizeForm().isDisplayed().then(displayed => {
+      if (displayed) {
+        this.scrollToBottom();
+        this.getPageSizeForm().fill({ [name]: pageSize });
+        return this.scrollToTop();
+      }
+    });
   }
 
   getPageSizeForm(): FormComponent {
@@ -426,7 +473,7 @@ export class ListComponent extends Component {
 
   public empty: ListEmptyComponent;
 
-  constructor(locator: ElementFinder = element(by.tagName('app-list'))) {
+  constructor(public locator: ElementFinder = element(by.tagName('app-list'))) {
     super(locator);
     this.table = new ListTableComponent(locator);
     this.header = new ListHeaderComponent(locator);
@@ -457,8 +504,8 @@ export class ListComponent extends Component {
     return browser.wait(until.visibilityOf(this.getLoadingIndicator()), 1000);
   }
 
-  waitForNoLoadingIndicator(): promise.Promise<any> {
-    return browser.wait(until.invisibilityOf(this.getLoadingIndicator()), 10000);
+  waitForNoLoadingIndicator(timeout = 10000): promise.Promise<any> {
+    return browser.wait(until.invisibilityOf(this.getLoadingIndicator()), timeout);
   }
 
   getTotalResults(): promise.Promise<number> {
@@ -476,5 +523,17 @@ export class ListComponent extends Component {
     });
   }
 
+  /**
+   *
+   * @param count Wait until the list has the specified total number of results
+   */
+  waitForTotalResultsToBe(count: number, timeout = 5000, timeoutMsg = 'Timed out waiting for total results') {
+    const totalResultsIs = async (): Promise<boolean> => {
+      const actual = await this.getTotalResults();
+      return actual === count;
+    };
+
+    browser.wait(totalResultsIs, 10000, timeoutMsg);
+  }
 }
 

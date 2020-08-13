@@ -13,3 +13,9 @@ func (p *portalProxy) AddAuthProvider(name string, provider interfaces.AuthProvi
 func (p *portalProxy) GetAuthProvider(name string) interfaces.AuthProvider {
 	return p.AuthProviders[name]
 }
+
+func (p *portalProxy) HasAuthProvider(name string) bool {
+	_, ok := p.AuthProviders[name]
+	return ok
+}
+

@@ -1,0 +1,45 @@
+$spacing: 10px;
+.type-info {
+  font-size: 12px;
+  line-height: 20px;
+  opacity: .6;
+}
+.recent-entity {
+  display: flex;
+  outline: 0;
+  padding: $spacing;
+  & + & {
+    border-top: 1px solid rgba(0, 0, 0, .08);
+  }
+  &__favorite {
+    margin-left: auto;
+  }
+  &:focus,
+  &:hover {
+    background-color: rgba(0, 0, 0, .02);
+  }
+
+  &--name {
+    line-height: 24px;
+    word-break: break-all;
+  }
+  &__icon {
+    opacity: .7;
+  }
+  &__icon-container {
+    display: flex;
+    height: 24px;
+    text-align: center;
+    width: 32px;
+  }
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.recent-tab {
+  &.standalone {
+    padding-top: 0;
+  }
+}

@@ -1,0 +1,9 @@
+<div class="cf-details" *ngIf="row?.user as user else noUser">
+  <div class="cf-details__line">
+    <span class="cf-details__icon">
+      <mat-icon matTooltip="Username">person</mat-icon>
+    </span>
+    {{ user.name}} <ng-container *ngIf="user.admin">(Administrator)</ng-container>
+  </div>
+</div>
+<ng-template #noUser>-</ng-template>

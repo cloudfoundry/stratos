@@ -12,10 +12,11 @@ import (
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 
@@ -135,9 +136,11 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 		SessionStoreSecret:   "hiddenraisinsohno!",
 		EncryptionKeyInBytes: mockEncryptionKey,
 		CFAdminIdentifier:    CFAdminIdentifier,
+		AuthEndpointType:     "remote",
 	}
 
-	pp := newPortalProxy(pc, db, nil, nil)
+
+	pp := newPortalProxy(pc, db, nil, nil, env.NewVarSet())
 	pp.SessionStore = setupMockPGStore(db)
 	initialisedEndpoint := initCFPlugin(pp)
 	pp.Plugins = make(map[string]interfaces.StratosPlugin)
@@ -155,18 +158,18 @@ func expectOneRow() sqlmock.Rows {
 
 func expectCFRow() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, true)
+		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, true, "", "")
 }
 
 func expectCERow() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret, true)
+		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret, true, "", "")
 }
 
 func expectCFAndCERows() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret).
-		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret)
+		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "").
+		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret, false, "", "")
 }
 
 func expectTokenRow() sqlmock.Rows {
@@ -251,7 +254,7 @@ const mockUAAToken = `eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eX
 
 var mockTokenExpiry = time.Now().AddDate(0, 0, 1).Unix()
 
-var mockUAAResponse = UAAResponse{
+var mockUAAResponse = interfaces.UAAResponse{
 	AccessToken:  mockUAAToken,
 	RefreshToken: mockUAAToken,
 }
@@ -272,10 +275,16 @@ const (
 	updateTokens        = `UPDATE tokens`
 	selectAnyFromCNSIs  = `SELECT (.+) FROM cnsis WHERE (.+)`
 	insertIntoCNSIs     = `INSERT INTO cnsis`
+	findUserGUID        = `SELECT user_guid FROM local_users WHERE (.+)`
+	addLocalUser        = `INSERT INTO local_users (.+)`
+	findPasswordHash    = `SELECT password_hash FROM local_users WHERE (.+)`
+	findUserScope       = `SELECT user_scope FROM local_users WHERE (.+)`
+	updateLastLoginTime = `UPDATE local_users (.+)`
+	findLastLoginTime   = `SELECT last_login FROM local_users WHERE (.+)`
 	getDbVersion        = `SELECT version_id FROM goose_db_version WHERE is_applied = '1' ORDER BY id DESC LIMIT 1`
 )
 
-var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso"}
+var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso", "sub_type", "meta_data"}
 
 var mockEncryptionKey = make([]byte, 32)
 

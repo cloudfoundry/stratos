@@ -24,12 +24,21 @@ func (e ErrHTTPShadow) Error() string {
 	return fmt.Sprintf("HTTP Error: %v\nLog Message: %s", e.HTTPError, e.LogMessage)
 }
 
+func NewHTTPError(status int, userFacingError string) error {
+	return NewHTTPShadowError(status, userFacingError, "")
+}
+
 func NewHTTPShadowError(status int, userFacingError string, fmtString string, args ...interface{}) error {
+	//Only set the HTTPError field of the ErrHTTPShadow struct if we have been passed an error message intended for logging
+	httpErrorMsg := ""
+	if len(userFacingError) > 0 {
+		httpErrorMsg = fmt.Sprintf(`{"error":%q}`, userFacingError)
+	}
 	shadowError := ErrHTTPShadow{
 		UserFacingError: userFacingError,
-		HTTPError:       echo.NewHTTPError(status, fmt.Sprintf(`{"error":%q}`, userFacingError)),
+		HTTPError:       echo.NewHTTPError(status, httpErrorMsg),
 	}
-	if len(fmtString) > 0 {
+	if args != nil {
 		shadowError.LogMessage = fmt.Sprintf(fmtString, args...)
 	}
 	return shadowError

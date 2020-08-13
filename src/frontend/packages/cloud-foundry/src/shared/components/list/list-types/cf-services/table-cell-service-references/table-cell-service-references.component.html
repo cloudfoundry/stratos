@@ -1,0 +1,15 @@
+<div class="service-card__links">
+  <div class="service-card__link" *ngIf="hasDocumentationUrl()">
+    <a class="service-card__icon-link" [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>
+      <mat-icon>launch</mat-icon>
+    </a>
+    <a [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>Docs</a>
+  </div>
+  <div class="service-card__link" *ngIf="hasSupportUrl()">
+    <a class="service-card__icon-link" [href]="getSupportUrl()" target="_blank" appClickStopPropagation>
+      <mat-icon>launch</mat-icon>
+    </a>
+    <a [href]="getSupportUrl()" target="_blank" appClickStopPropagation>Support</a>
+  </div>
+</div>
+<!-- <div *ngIf="!hasDocumentationUrl() && !hasSupportUrl()">-</div> -->

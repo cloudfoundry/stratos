@@ -1,6 +1,5 @@
-import { browser } from 'protractor';
-
-import { e2e } from '../e2e';
+import { CF_ENDPOINT_TYPE } from '../../frontend/packages/cloud-foundry/src/cf-types';
+import { E2E, e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ListComponent } from '../po/list.po';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
@@ -17,18 +16,24 @@ describe('CF Endpoints Dashboard - ', () => {
         .clearAllEndpoints();
     });
 
-    beforeEach(() => {
-      nav.goto(SideNavMenuItem.CloudFoundry);
-      cloudFoundry.loadingIndicator.waitUntilNotShown();
-    });
+    if (!E2E.customization.alwaysShowNavForEndpointTypes || E2E.customization.alwaysShowNavForEndpointTypes(CF_ENDPOINT_TYPE)) {
+      beforeEach(() => {
+        nav.goto(SideNavMenuItem.CloudFoundry);
+        cloudFoundry.loadingIndicator.waitUntilNotShown();
+      });
 
-    it('should be the Endpoints page', () => {
-      expect(cloudFoundry.isActivePage()).toBeTruthy();
-    });
+      it('should be the Endpoints page', () => {
+        expect(cloudFoundry.isActivePage()).toBeTruthy();
+      });
 
-    it('should show the `no registered endpoints` message', () => {
-      expect(cloudFoundry.hasNoCloudFoundryMessage).toBeTruthy();
-    });
+      it('should show the `no registered endpoints` message', () => {
+        expect(cloudFoundry.hasNoCloudFoundryMessage).toBeTruthy();
+      });
+    } else {
+      it('No CF side nav when no CF connected', () => {
+        expect(nav.isMenuItemPresent(SideNavMenuItem.CloudFoundry)).toBeFalsy();
+      });
+    }
   });
 
   describe('Single endpoint - ', () => {
@@ -54,26 +59,28 @@ describe('CF Endpoints Dashboard - ', () => {
     });
   });
 
-  describe('Multiple endpoints - ', e2e.secrets.haveSingleCloudFoundryEndpoint, () => {
-    beforeAll(() => {
-      e2e.setup(ConsoleUserType.admin)
-        .clearAllEndpoints()
-        .registerMultipleCloudFoundries()
-        .connectAllEndpoints();
-    });
-
-    beforeEach(() => {
-      nav.goto(SideNavMenuItem.CloudFoundry);
-      cloudFoundry.waitForPage();
-    });
-
-    it('should be the CF Endpoints page', () => {
-      const list = new ListComponent();
-      list.cards.getCards().then(cards => {
-        expect(cards.length).toBeGreaterThan(1);
-        cards[0].click();
-        expect(cloudFoundry.header.getTitleText()).toBe(cfEndpoint.name);
+  describe('Multiple endpoints - ', () => {
+    if (!e2e.secrets.haveSingleCloudFoundryEndpoint) {
+      beforeAll(() => {
+        e2e.setup(ConsoleUserType.admin)
+          .clearAllEndpoints()
+          .registerMultipleCloudFoundries()
+          .connectAllEndpoints();
       });
-    });
+
+      beforeEach(() => {
+        nav.goto(SideNavMenuItem.CloudFoundry);
+        cloudFoundry.waitForPage();
+      });
+
+      it('should be the CF Endpoints page', () => {
+        const list = new ListComponent();
+        list.cards.getCards().then(cards => {
+          expect(cards.length).toBeGreaterThan(1);
+          cards[0].click();
+          expect(cloudFoundry.header.getTitleText()).toBe(cfEndpoint.name);
+        });
+      });
+    }
   });
 });

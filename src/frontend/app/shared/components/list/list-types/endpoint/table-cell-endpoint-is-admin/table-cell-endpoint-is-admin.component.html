@@ -1,3 +1,0 @@
-<app-boolean-indicator *ngIf="row.cnsi_type === 'cf' && row.user; else noUser" [isTrue]="row.user ? row.user.admin : false" type="yes-no">
-</app-boolean-indicator>
-<ng-template #noUser>-</ng-template>

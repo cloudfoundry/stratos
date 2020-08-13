@@ -1,10 +1,11 @@
-import { Page } from '../po/page.po';
-import { E2EHelpers } from '../helpers/e2e-helpers';
-import { StepperComponent } from '../po/stepper.po';
-import { FormComponent } from '../po/form.po';
-import { protractor, promise } from 'protractor';
+import { promise } from 'protractor';
 
-export class RegisterDialog extends Page {
+import { E2EHelpers } from '../helpers/e2e-helpers';
+import { FormComponent } from '../po/form.po';
+import { Page } from '../po/page.po';
+import { StepperComponent } from '../po/stepper.po';
+
+export class RegisterStepper extends Page {
 
   helpers = new E2EHelpers();
 
@@ -17,7 +18,7 @@ export class RegisterDialog extends Page {
   }
 
   isRegisterDialog(): promise.Promise<boolean> {
-    return this.header.getTitleText().then(title => title === 'Register new Endpoint');
+    return this.header.getTitleText().then(title => title === 'Register Endpoint');
   }
 
   getName = () => this.form.getFormField('name');

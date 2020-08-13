@@ -1,0 +1,9 @@
+<!-- Ensure any key presses are retained within this element. This stops parent mat-expansion-panel from gobbling space
+  key (see edit env var) -->
+<div (keydown)="$event.stopPropagation()">
+  <div #target>
+    <div *ngIf="func && !component">
+      {{func(row)}}
+    </div>
+  </div>
+</div>

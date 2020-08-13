@@ -1,0 +1,36 @@
+@mixin app-page-header-events($theme, $app-theme) {
+  $primary: map-get($theme, primary);
+  $primary-color: mat-color($primary);
+  $status-colors: map-get($app-theme, status);
+  $error: map-get($status-colors, danger);
+  $warning: map-get($status-colors, warning);
+  $info: lighten($primary-color, 20%);
+  .header-event {
+    background: $info;
+    color: #fff;
+    &__outer {
+      border-color: $info
+    }
+  }
+  .header-event__details-link,
+  .header-event__details-link:hover,
+  .header-event__details-link:visited {
+    color: #fff;
+  }
+  .header-event--error {
+    .header-event {
+      background: $error;
+      &__outer {
+        border-color: $error;
+      }
+    }
+  }
+  .header-event--warn {
+    .header-event {
+      background: $warning;
+      &__outer {
+        border-color: $warning;
+      }
+    }
+  }
+}

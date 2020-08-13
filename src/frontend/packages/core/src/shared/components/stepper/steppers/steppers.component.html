@@ -1,0 +1,50 @@
+<div class="steppers__wrapper">
+  <div class="steppers" *ngIf="steps && steps.length">
+    <div class="steppers__inner">
+      <div class="steppers__headers" *ngIf="steps.length > 1">
+        <div *ngFor="let step of steps; let i = index"
+          [ngClass]="{'steppers__header--active': step.active, 'steppers__header--busy': step.blocked || step.showBusy}"
+          class="steppers__header">
+          <div class="steppers__header-inner" *ngIf="steps.length !== 1">
+            <!-- Blocked -->
+            <mat-spinner *ngIf="(step.blocked || step.showBusy); else notBlocked" diameter="20"></mat-spinner>
+            <!-- Not Blocked -->
+            <ng-template #notBlocked>
+              <app-dot-content [disabled]="step.skip">
+                <mat-icon class="steppers__header-complete" *ngIf="step.complete">{{ this.getIconLigature() }}
+                </mat-icon>
+                <div *ngIf="!step.complete ">{{ i + 1 }}</div>
+              </app-dot-content>
+            </ng-template>
+            <span class="steppers__header-text">{{ step.title }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="steppers__contents">
+        <span *ngTemplateOutlet="steps[currentIndex].content"></span>
+      </div>
+      <div class="steppers__navigation">
+        <div class="steppers__navigation-left">
+          <button id="stepper_previous" *ngIf="steps.length !== 1 || basePreviousRedirect" color="accent" mat-button
+            mat-raised-button (click)="setActive(currentIndex - 1)"
+            [disabled]="!canGoto(currentIndex - 1) || steps[currentIndex].disablePrevious">Previous</button>
+        </div>
+        <div class="steppers__navigation-right">
+          <button id="stepper_cancel" color="primary" mat-button [routerLink]="cancel$ | async"
+            [queryParams]="cancelQueryParams$ | async" [disabled]="!canCancel(currentIndex)"
+            *ngIf="!steps[currentIndex].hideCloseButton && cancel"
+            (click)="steps[currentIndex].onLeave(false)">{{ this.getCancelButtonText(currentIndex) }}</button>
+          <button id="stepper_next" *ngIf="!steps[currentIndex].hideNextButton" class="steppers__navigation-right__next"
+            [color]="steps[currentIndex].destructiveStep ? 'warn' : 'primary'" type="submit" mat-button
+            mat-raised-button (click)="goNext(currentIndex)"
+            [disabled]="steps[currentIndex].busy || steps[currentIndex].blocked || !canGoNext(currentIndex)">
+            <mat-progress-spinner *ngIf="showNextButtonProgress; else nextButtonText" diameter="20" mode="indeterminate"
+              color="accent"></mat-progress-spinner>&nbsp;
+            <!--white space added to ensure line height is applied (important for situations where there's no cancel)-->
+            <ng-template #nextButtonText>{{ this.getNextButtonText(currentIndex) }}</ng-template>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -13,6 +13,8 @@ CF_API_ENDPOINT=https://api.local.pcfdev.io
 # Skip login - run against whatever target the cf CLI is configured for
 SKIP_LOGIN=false
 
+BROKER_CRED=broker
+
 while getopts ":o:s:u:p:a:n" opt ; do
     case $opt in
         o)
@@ -46,6 +48,8 @@ function pushBrokerApp {
   cf set-env $APPNAME SERVICE_NAME $SERVICE
   cf set-env $APPNAME SERVICE_PLAN_NAME shared
   cf set-env $APPNAME TAGS simple,shared
+  cf set-env $APPNAME AUTH_USER $BROKER_CRED
+  cf set-env $APPNAME AUTH_PASSWORD $BROKER_CRED
   cf env $APPNAME
   cf start $APPNAME
   popd
@@ -62,7 +66,7 @@ function createService {
     cf target -o $ORG -s $SPACE
     SPACE_ARGS="--space-scoped"
   fi
-  cf create-service-broker $SERVICE $USER_NAME $USER_PASS https://$SERVICE_URL $SPACE_ARGS
+  cf create-service-broker $SERVICE $BROKER_CRED $BROKER_CRED https://$SERVICE_URL $SPACE_ARGS
 }
 
 function makeServicePublic {

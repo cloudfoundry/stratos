@@ -2,11 +2,13 @@ package datastore
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
+	"github.com/govau/cf-common/env"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -27,13 +29,13 @@ type VCAPService struct {
 }
 
 // Discover cf db services via their 'uri' env var and apply settings to the DatabaseConfig objects
-func ParseCFEnvs(db *DatabaseConfig) (bool, error) {
-	if config.IsSet(SERVICES_ENV) == false {
+func ParseCFEnvs(db *DatabaseConfig, env *env.VarSet) (bool, error) {
+	if !env.IsSet(SERVICES_ENV) {
 		return false, nil
 	}
 
 	// Extract struts from VCAP_SERVICES env
-	vcapServicesStr := config.GetString(SERVICES_ENV)
+	vcapServicesStr := env.MustString(SERVICES_ENV)
 	var vcapServices map[string][]VCAPService
 	err := json.Unmarshal([]byte(vcapServicesStr), &vcapServices)
 	if err != nil {
@@ -45,10 +47,10 @@ func ParseCFEnvs(db *DatabaseConfig) (bool, error) {
 		log.Info("No DB configurations defined, will use SQLite")
 		return false, nil
 	}
-	return findDatabaseConfig(vcapServices, db), nil
+	return findDatabaseConfig(vcapServices, db, env), nil
 }
 
-func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfig) bool {
+func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfig, env *env.VarSet) bool {
 	var service VCAPService
 	configs := findDatabaseConfigurations(vcapServices)
 	log.Infof("Found %d database service instances", len(configs))
@@ -69,24 +71,63 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 	// If we found a service, then use it
 	if len(service.Name) > 0 {
 		dbCredentials := service.Credentials
-		db.Username = fmt.Sprintf("%v", dbCredentials["username"])
-		db.Password = fmt.Sprintf("%v", dbCredentials["password"])
-		db.Host = fmt.Sprintf("%v", dbCredentials["hostname"])
-		db.SSLMode = "disable"
-		db.Port, _ = strconv.Atoi(fmt.Sprintf("%v", dbCredentials["port"]))
+
+		log.Infof("Attempting to apply Cloud Foundry database service config from VCAP_SERVICES credentials")
+
+		// 1) Check db config in credentials
+		db.Username = getDBCredentialsValue(dbCredentials["username"])
+		db.Password = getDBCredentialsValue(dbCredentials["password"])
+		db.Host = getDBCredentialsValue(dbCredentials["hostname"])
+		db.SSLMode = env.String("DB_SSL_MODE", "disable")
+		db.Port, _ = strconv.Atoi(getDBCredentialsValue(dbCredentials["port"]))
+		// Note - Both isPostgresService and isMySQLService look at the credentials uri & tags
 		if isPostgresService(service) {
 			db.DatabaseProvider = "pgsql"
-			db.Database = fmt.Sprintf("%v", dbCredentials["dbname"])
-			log.Infof("Discovered Cloud Foundry postgres service and applied config")
-			return true
+			db.Database = getDBCredentialsValue(dbCredentials["dbname"])
 		} else if isMySQLService(service) {
 			db.DatabaseProvider = "mysql"
-			db.Database = fmt.Sprintf("%v", dbCredentials["name"])
-			log.Infof("Discovered Cloud Foundry mysql service and applied config")
-			return true
+			db.Database = getDBCredentialsValue(dbCredentials["name"])
+		} else {
+			log.Infof("Cloud Foundry database service contains unsupported db type")
+			return false
 		}
+		err := validateRequiredDatabaseParams(db.Username, db.Password, db.Database, db.Host, db.Port)
+
+		if err != nil {
+			// 2) Check for db config in credentials uri
+			log.Infof("Failed to find required Cloud Foundry database service config, falling back on credential's `%v`\n%v", DB_URI, err)
+			uri := getDBCredentialsValue(dbCredentials[DB_URI])
+			if len(uri) == 0 {
+				log.Warnf("Failed to find Cloud Foundry service credential's `%v`", DB_URI)
+				return false
+			}
+
+			db.Username, db.Password, db.Host, db.Port, db.Database, err = findDatabaseConfigurationFromURI(uri, defaultDBProviderPort(service))
+
+			if err != nil {
+				log.Warnf("Failed to find Cloud Foundry service config from `%v` (failed to parse)", DB_URI)
+				return false
+			}
+
+			err := validateRequiredDatabaseParams(db.Username, db.Password, db.Database, db.Host, db.Port)
+			if err != nil {
+				log.Warnf("Failed to find Cloud Foundry service config from `%v` (missing values)\n%v", DB_URI, err)
+				return false
+			}
+		}
+
+		log.Infof("Applied Cloud Foundry database service config (provider: %s)", db.DatabaseProvider)
+		return true
 	}
 	return false
+}
+
+func getDBCredentialsValue(val interface{}) string {
+	// First ensure that the value is not null, otherwise fmt print will convert to the string "<nil>"
+	if val == nil {
+		val = ""
+	}
+	return fmt.Sprintf("%v", val)
 }
 
 func findDatabaseConfigurations(vcapServices map[string][]VCAPService) map[string]VCAPService {
@@ -106,12 +147,12 @@ func findDatabaseConfigurations(vcapServices map[string][]VCAPService) map[strin
 }
 
 func isPostgresService(service VCAPService) bool {
-	uri := fmt.Sprintf("%v", service.Credentials[DB_URI])
+	uri := getDBCredentialsValue(service.Credentials[DB_URI])
 	return strings.HasPrefix(uri, URI_POSTGRES) || stringInSlice(TAG_POSTGRES, service.Tags)
 }
 
 func isMySQLService(service VCAPService) bool {
-	uri := fmt.Sprintf("%v", service.Credentials[DB_URI])
+	uri := getDBCredentialsValue(service.Credentials[DB_URI])
 	return strings.HasPrefix(uri, URI_MYSQL) || stringInSlice(TAG_MYSQL, service.Tags)
 }
 
@@ -122,4 +163,43 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func findDatabaseConfigurationFromURI(uri string, defaultPort int) (string, string, string, int, string, error) {
+	re := regexp.MustCompile(`(?P<provider>.+)://(?P<username>[^:]+)(?::(?P<password>.+))?@(?P<host>[^:]+)(?::(?P<port>.+))?\/(?P<dbname>.+)`)
+	n1 := re.SubexpNames()
+	matches := re.FindAllStringSubmatch(uri, -1)
+	if len(matches) < 1 {
+		return "", "", "", 0, "", errors.New("Failed to parse database URI")
+	}
+
+	r2 := matches[0]
+	md := map[string]string{}
+	for i, n := range r2 {
+		md[n1[i]] = n
+	}
+
+	username := md["username"]
+	password := md["password"]
+	host := md["host"]
+	portStr := fmt.Sprintf("%v", md["port"])
+	var port int
+	if portStr != "<nil>" {
+		port, _ = strconv.Atoi(portStr)
+	} else {
+		port = defaultPort
+	}
+	dbname := md["dbname"]
+
+	return username, password, host, port, dbname, nil
+
+}
+
+func defaultDBProviderPort(service VCAPService) int {
+	if isPostgresService(service) {
+		return 5432
+	} else if isMySQLService(service) {
+		return 3306
+	}
+	return 0
 }

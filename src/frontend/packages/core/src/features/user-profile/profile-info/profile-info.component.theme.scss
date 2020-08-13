@@ -1,0 +1,13 @@
+@mixin profile-page-theme($theme, $app-theme) {
+  $status-colors: map-get($app-theme, status);
+  $error: map-get($status-colors, danger);
+  $warning: map-get($status-colors, warning);
+  .user-profile {
+    &__option-warning {
+      background-color: transparentize($error, .9);
+    }
+    &__option-warning-icon {
+      color: $warning;
+    }
+  }
+}

@@ -1,0 +1,20 @@
+@mixin stateful-icon($theme, $app-theme) {
+  $primary: map-get($theme, primary);
+  $status-colors: map-get($app-theme, status);
+  $status-success: map-get($status-colors, success);
+  $status-warning: map-get($status-colors, warning);
+  $status-danger: map-get($status-colors, danger);
+  $status-tentative: map-get($status-colors, tentative);
+
+  .stateful-icon {
+    .warning {
+      color: $status-warning;
+    }
+    .error {
+      color: $status-danger;
+    }
+    .ok {
+      color: $status-success;
+    }
+  }
+}

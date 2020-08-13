@@ -1,0 +1,45 @@
+.simple-graph {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  &__title {
+    align-items: center;
+    display: flex;
+    font-size: 14px;
+    font-weight: bold;
+    justify-content: center;
+    margin: 0;
+    text-align: center;
+    &-inner-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    &-unknown-warning {
+      margin-left: 5px;
+    }
+  }
+  &__counts {
+    $line-height: 30px;
+    align-items: baseline;
+    display: flex;
+    margin-top: -#{$line-height / 2};
+    position: absolute;
+    top: 50%;
+    &-count {
+      font-size: 26px;
+      line-height: $line-height;
+    }
+    &-divider {
+      padding: 0 5px;
+    }
+  }
+  &__inner {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    width: 100%;
+  }
+}

@@ -1,0 +1,13 @@
+:host {
+  flex: 1;
+}
+
+.specify-details {
+  &__radio-group {
+    display: flex;
+    flex-direction: column;
+    &__radio:first-of-type {
+      padding-bottom: 10px;
+    }
+  }
+}

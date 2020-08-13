@@ -2,7 +2,7 @@ FROM bosh/cli2
 
 RUN apt-get update
 RUN apt-get install -y git curl wget
-RUN curl https://storage.googleapis.com/golang/go1.9.7.linux-amd64.tar.gz -o /go1.9.7.tar.gz
+RUN curl https://storage.googleapis.com/golang/go1.13.4.linux-amd64.tar.gz -o /go1.9.7.tar.gz
 RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash - && \
     sudo apt-get install -y nodejs git
 RUN tar -C /usr/local -xzf /go1.9.7.tar.gz

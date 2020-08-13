@@ -1,10 +1,8 @@
 import { e2e, E2ESetup } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
 import { ConsoleUserType } from '../../helpers/e2e-helpers';
-import { CfTopLevelPage } from './cf-top-level-page.po';
 import { SideNavMenuItem } from '../../po/side-nav.po';
-import { CFPage } from '../../po/cf-page.po';
-import { ListComponent } from '../../po/list.po';
+import { CfTopLevelPage } from './cf-top-level-page.po';
 
 describe('CF - Top Level - ', () => {
 
@@ -14,7 +12,7 @@ describe('CF - Top Level - ', () => {
 
   function navToCfPage() {
     // There is only one CF endpoint registered (since that is what we setup)
-    const page = new CFPage();
+    const page = new CfTopLevelPage();
     page.sideNav.goto(SideNavMenuItem.CloudFoundry);
     CfTopLevelPage.detect().then(p => {
       cfPage = p;
@@ -32,25 +30,23 @@ describe('CF - Top Level - ', () => {
       .connectAllEndpoints(ConsoleUserType.user);
   });
 
-  describe('As Admin', () => {
+  describe('As Admin -', () => {
     beforeAll(() => {
       e2eSetup.loginAs(ConsoleUserType.admin);
     });
 
     describe('Basic Tests -', () => {
-      beforeEach(navToCfPage);
-
-      beforeEach(() => {
-      });
+      it('Nav to CF Page', navToCfPage);
 
       it('Breadcrumb', () => {
         expect(cfPage.header.getTitleText()).toBe(defaultCf.name);
       });
 
       it('Summary Panel', () => {
-        expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
-        expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.admin.username);
-        expect(cfPage.waitForAdministrator().getBooleanIndicator().getLabel()).toBe('Yes');
+        expect(cfPage.waitForInstanceAddressValue()).toBe(defaultCf.url);
+        expect(cfPage.waitForUsername().getValue()).toBe(`${defaultCf.creds.admin.username} (Administrator)`);
+        expect(cfPage.isUserInviteConfigured(true)).toBeFalsy();
+        expect(cfPage.canConfigureUserInvite()).toBeTruthy();
       });
 
       it('Walk Tabs', () => {
@@ -77,34 +73,29 @@ describe('CF - Top Level - ', () => {
 
     describe('Basic Tests -', () => {
 
-      beforeEach(navToCfPage);
+      it('Nav to CF Page', navToCfPage);
 
       it('Breadcrumb', () => {
         expect(cfPage.header.getTitleText()).toBe(defaultCf.name);
       });
 
       it('Summary Panel', () => {
-        expect(cfPage.waitForInstanceAddress().getValue()).toBe(defaultCf.url);
+        expect(cfPage.waitForInstanceAddressValue()).toBe(defaultCf.url);
         expect(cfPage.waitForUsername().getValue()).toBe(defaultCf.creds.nonAdmin.username);
-        expect(cfPage.waitForAdministrator().getBooleanIndicator().getLabel()).toBe('No');
+        expect(cfPage.isUserInviteConfigured(false)).toBeFalsy();
+        expect(cfPage.canConfigureUserInvite()).toBeFalsy();
       });
 
       it('Walk Tabs', () => {
         cfPage.goToOrgTab();
-        const orgs = new ListComponent();
-        orgs.waitUntilShown();
-        orgs.getTotalResults().then(totalOrgs => {
-          if (totalOrgs <= 12) {
-            cfPage.goToUsersTab();
-          }
-          cfPage.goToRoutesTab();
-          // cfPage.goToFirehoseTab();// Is not shown to non-admins
-          cfPage.goToFeatureFlagsTab();
-          cfPage.goToBuildPacksTab();
-          cfPage.goToStacksTab();
-          cfPage.goToSecurityGroupsTab();
-          cfPage.goToSummaryTab();
-        });
+        // cfPage.goToUsersTab();// Is not shown to non-admins
+        cfPage.goToRoutesTab();
+        // cfPage.goToFirehoseTab();// Is not shown to non-admins
+        cfPage.goToFeatureFlagsTab();
+        cfPage.goToBuildPacksTab();
+        cfPage.goToStacksTab();
+        cfPage.goToSecurityGroupsTab();
+        cfPage.goToSummaryTab();
       });
     });
   });

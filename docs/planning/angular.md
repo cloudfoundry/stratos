@@ -80,7 +80,6 @@ Adopt material design while keeping essence of the current Angular 1 app:
 - Theming/Branding
 - Deployment support
   - cf push
-  - docker compose
   - helm
   - bosh
 

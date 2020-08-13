@@ -8,8 +8,6 @@ The Stratos team uses these scripts with a Jenkins instance to monitor systems a
 
 - cfallinonetest.sh - Builds the Docker All-in-One image, runs it locally and then runs the E2E tests.
 
-- cfdockercomposetest.sh - Builds the Docker Compose images, runs it locally and then runs the E2E tests.
-
 - check-cf.sh - Simple check that a CF System is responding to API requests.
 
 - check-docker-images.sh - Checks that the Stratos nightly docker images have been updated. We use this to ensure the nightly jobs are operational.

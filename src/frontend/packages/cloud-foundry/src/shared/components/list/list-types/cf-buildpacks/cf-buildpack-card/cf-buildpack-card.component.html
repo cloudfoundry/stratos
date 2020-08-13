@@ -1,0 +1,34 @@
+<app-meta-card class="buildpack-card">
+  <app-meta-card-title class="buildpack-card__title">
+    <div class="buildpack-card__title">
+      <app-multiline-title class="buildpack-card__title-name">{{ row.entity.name }}</app-multiline-title>
+      <app-dot-content class="buildpack-card__title-dot">{{ row.entity.position }}</app-dot-content>
+    </div>
+  </app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>Enabled</app-meta-card-key>
+    <app-meta-card-value>
+      <app-boolean-indicator [isTrue]="row.entity.enabled" type="enabled-disabled">
+      </app-boolean-indicator>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Locked</app-meta-card-key>
+    <app-meta-card-value>
+      <app-boolean-indicator [isTrue]="!row.entity.locked" type="unlocked-locked">
+      </app-boolean-indicator>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Created</app-meta-card-key>
+    <app-meta-card-value>{{ row.metadata.created_at | date: 'medium' }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Updated</app-meta-card-key>
+    <app-meta-card-value>{{ row.metadata.updated_at | date: 'medium' }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item customStyle="multiline">
+    <app-meta-card-key>File Name</app-meta-card-key>
+    <app-meta-card-value>{{ row.entity.filename }}</app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

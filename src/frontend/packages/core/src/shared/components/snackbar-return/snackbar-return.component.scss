@@ -1,0 +1,13 @@
+.app-snackbar-return {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  line-height: 20px;
+  opacity: 1;
+}
+
+.app-snackbar-return-action {
+  flex-shrink: 0;
+  margin: -8px -8px -8px 8px;
+}

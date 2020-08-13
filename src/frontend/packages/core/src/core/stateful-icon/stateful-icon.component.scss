@@ -1,0 +1,12 @@
+$size: 24px;
+.stateful-icon {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  line-height: $size;
+}
+.stateful-icon,
+mat-spinner {
+  height: $size;
+  width: $size;
+}

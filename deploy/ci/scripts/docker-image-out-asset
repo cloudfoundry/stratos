@@ -70,6 +70,9 @@ labels_file=$(jq -r '.params.labels_file // ""' < $payload)
 patch_base_reg=$(jq -r '.params.patch_base_reg // ""' < $payload)
 patch_base_tag=$(jq -r '.params.patch_base_tag // ""' < $payload)
 
+# Support squashing the layers
+squash=$(jq -r '.params.squash // "false"' < $payload)
+
 tag_name=""
 if [ -n "$tag_params" ]; then
   if [ ! -f "$tag_params" ]; then
@@ -125,6 +128,14 @@ elif [ -n "$build" ]; then
     exit 1
   fi
 
+  # Squash support
+  squashArg=""
+  if [ "${squash}" == "true" ]; then
+    squashArg=" --squash "
+  fi
+
+  echo "Squash ${squash} => args: ${squashArg}"
+
   # Patch Base registry in Dockerfile
   # Must be '@' delimited
   if [ -n "${patch_base_reg}" ]; then
@@ -166,8 +177,9 @@ elif [ -n "$build" ]; then
   cache_from_args=()
 
   if [ "$cache" = "true" ]; then
-    docker_pull "${repository}:${cache_tag}"
-    cache_from_args+=("--cache-from ${repository}:${cache_tag}")
+    if docker_pull "${repository}:${cache_tag}"; then
+      cache_from_args+=("--cache-from ${repository}:${cache_tag}")
+    fi
   fi
 
   if [ -n "$cache_from" ]; then
@@ -248,7 +260,7 @@ elif [ -n "$build" ]; then
   fi
 
   ECR_REGISTRY_PATTERN='/[a-zA-Z0-9][a-zA-Z0-9_-]*\.dkr\.ecr\.[a-zA-Z0-9][a-zA-Z0-9_-]*\.amazonaws\.com(\.cn)?[^ ]*/'
-  ecr_images=$(grep '^\s*FROM' ${dockerfile} | \
+  ecr_images=$(egrep '^\s*FROM|^\s*ARG' ${dockerfile} | \
              awk "match(\$0,${ECR_REGISTRY_PATTERN}){print substr(\$0, RSTART, RLENGTH)}" )
   if [ -n "$ecr_images" ]; then
     for ecr_image in $ecr_images
@@ -262,7 +274,7 @@ elif [ -n "$build" ]; then
     done    
   fi
 
-  docker build -t "${repository}:${tag_name}" "${target[@]}" "${expanded_build_args[@]}" "${expanded_labels[@]}" -f "$dockerfile" $cache_from "$build"
+  docker build ${squashArg} -t "${repository}:${tag_name}" "${target[@]}" "${expanded_build_args[@]}" "${expanded_labels[@]}" -f "$dockerfile" $cache_from "$build"
 elif [ -n "$load_file" ]; then
   if [ -n "$load_repository" ]; then
     docker load -i "$load_file"
@@ -302,7 +314,7 @@ if [ -e /tmp/push-failed ]; then
   exit 1
 fi
 
-digest="$(tail -1 push-output | awk '{print $3}')"
+digest="$(grep 'digest' push-output | awk '{print $3}')"
 
 if [ "$need_tag_as_latest" = "true" ] && [ "${tag_name}" != "latest"  ]; then
   docker tag "${repository}:${tag_name}" "${repository}:latest"

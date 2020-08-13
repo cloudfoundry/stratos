@@ -33,7 +33,7 @@ func TestRegisterCFCluster(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectExec(insertIntoCNSIs).
-		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false).
+		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", "").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	if err := pp.RegisterEndpoint(ctx, getCFPlugin(pp, "cf").Info); err != nil {

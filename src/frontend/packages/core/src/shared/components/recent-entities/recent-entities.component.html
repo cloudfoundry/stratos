@@ -1,0 +1,47 @@
+<!-- history is set when used in the dropdown menu to only show recent history-->
+
+<mat-card *ngIf="!history && ((hasHits$ | async) === true)">
+  <ng-container *ngTemplateOutlet="historyTemplate"></ng-container>
+</mat-card>
+
+<ng-container *ngIf="!history && ((hasHits$ | async) === false)">
+  <ng-container *ngTemplateOutlet="noActivity"></ng-container>
+</ng-container>
+
+<div *ngIf="history">
+  <div *ngIf="(hasHits$ | async) === true; else noActivity">
+    <ng-container *ngTemplateOutlet="historyTemplate"></ng-container>
+  </div>
+</div>
+
+<ng-template #historyTemplate>
+  <div class="recent-tab" [ngClass]="{standalone: !!history}" *ngIf="recentEntities$ | async as recentEntities">
+    <div *ngIf="recentEntities && recentEntities.length > 0" class="recent-entities">
+      <div [routerLink]="countedEntity.entity.routerLink" [ngClass]="{clickable: !!countedEntity.entity.routerLink}"
+        class="recent-entity" *ngFor="let countedEntity of recentEntities">
+        <div class="recent-entity__icon-container" *ngIf="countedEntity.icon">
+          <mat-icon class="recent-entity__icon" [fontSet]="countedEntity.iconFont">{{ countedEntity.icon }}</mat-icon>
+        </div>
+        <div>
+          <a class="recent-entity--name" *ngIf="countedEntity.entity.routerLink as routerLink; else noLink">{{
+            countedEntity.entity.name }}</a>
+          <ng-template #noLink>
+            <div class="recent-entity--name">{{ countedEntity.entity.name }}</div>
+          </ng-template>
+          <!-- Don't show the date 
+          <div class="type-info" *ngIf="countedEntity.mostRecentHit">
+            {{ countedEntity.mostRecentHit | amTimeAgo }}
+          </div>
+          -->
+          <div class="type-info">
+            <span>{{ countedEntity.subText$ | async }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #noActivity>
+  <app-no-content-message [mode]="mode" icon="schedule" [secondLine]="{text: 'Session activity will appear here'}"></app-no-content-message>
+</ng-template>

@@ -29,3 +29,33 @@ generateReleaseTitle() {
     RELEASE_DESCRIPTION="$RELEASE_TITLE"
   fi
 }
+
+downloadReleaseFile() {
+  local TOKEN=$1
+  local REPO=$2
+  local VERSION=$3
+  local FILE=$4
+  local GITHUB="https://api.github.com"
+  local parser=". | map(select(.tag_name == \"$VERSION\"))[0].assets | map(select(.name == \"$FILE\"))[0].id"
+  
+  # Get release information from GitHub
+  curl -L -H "Authorization: token $TOKEN" -H "Accept: application/vnd.github.v3.raw" -s $GITHUB/repos/$REPO/releases > releases.json
+  if [ $? -ne 0 ]; then
+    echo "Could not download release information for ${REPO}"
+    exit 1
+  fi
+
+  # Find the Asset ID for the artifact
+  asset_id=`cat releases.json | jq "$parser"`
+  if [ $? -ne 0 ]; then
+    echo "Could not determine asset ID for ${VERSION}, file ${FILE}"
+    exit 1
+  fi
+
+  # Download the artifact
+  wget -q --auth-no-challenge --header='Accept:application/octet-stream' https://$TOKEN:@api.github.com/repos/$REPO/releases/assets/$asset_id -O $FILE
+  if [ $? -ne 0 ]; then
+    echo "Could not download asset ID for ${VERSION}, file ${FILE}"
+    exit 1
+  fi
+}

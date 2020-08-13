@@ -1,0 +1,12 @@
+.app-autoscaler-event-status {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  .mat-icon {
+    height: 14px;
+    width: 14px;
+  }
+  .material-icons {
+    font-size: 14px;
+  }
+}

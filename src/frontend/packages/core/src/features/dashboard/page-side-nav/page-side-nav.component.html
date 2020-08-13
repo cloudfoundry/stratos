@@ -1,0 +1,22 @@
+<nav class="page-side-nav" [ngClass]="{'page-side-nav__desktop': !(isMobile$ | async)}">
+  <div class="page-side-nav__items-header">
+    {{ header }}
+  </div>
+  <div class="page-side-nav__items-compact-header">
+    <mat-icon class="page-side-nav__items-compact-dropdown">arrow_drop_down</mat-icon>
+    <small> {{ header }}</small>
+    <div class="page-side-nav__items-compact-tab-label"> {{ activeTab$ | async }}</div>
+  </div>
+  <ul class="page-side-nav__items">
+    <li tabindex="1" *ngFor="let tab of tabs">
+      <div *ngIf="!tab.link" class="page-side-nav__item-sep">{{ tab.label }}</div>
+      <a *ngIf="tab.link && (!tab.hidden$ || !(tab.hidden$ | async))" class="page-side-nav__item"
+        [routerLink]="[tab.link]" [routerLinkActive]="['page-side-nav__item--active']">
+        <mat-icon class="page-side-nav__icon" *ngIf="tab.icon" [fontSet]="tab.iconFont">{{ tab.icon }}
+        </mat-icon>
+        <mat-icon class="page-side-nav__icon" *ngIf="!tab.icon"></mat-icon>
+        <span>{{ tab.label }}</span>
+      </a>
+    </li>
+  </ul>
+</nav>

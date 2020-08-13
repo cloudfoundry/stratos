@@ -1,0 +1,4 @@
+<div *ngIf="!(endpointsService.disablePersistenceFeatures$ | async)" class="favorite-star" [ngSwitch]="isFavorite$ | async" (click)="toggleFavorite($event)">
+  <mat-icon *ngSwitchCase="true" matTooltip="Unset as favorite" aria-label="Set as Favorite">star</mat-icon>
+  <mat-icon *ngSwitchCase="false" matTooltip="Set as favorite" aria-label="Unset as Favorite">star_border</mat-icon>
+</div>

@@ -1,0 +1,82 @@
+{{- if .Values.console.service -}}
+{{- if .Values.console.service.ingress -}}
+{{- if .Values.console.service.ingress.enabled -}}
+
+{{- if not .Values.console.service.ingress.secretName -}}
+---
+# The certificate and key for the TLS secret are passed through ingress.tls.crt and ingress.tls.key
+# respectively. If the operator does not provide these values at installation time, the TLS secret
+# will contain empty values. The standard behaviour for NGINX ingress controller is to provide a
+# fake certificate instead. It is useful only for testing and development. It is expected that for
+# production use the operator will provide these values.
+apiVersion: "v1"
+kind: "Secret"
+type: kubernetes.io/tls
+metadata:
+  name: "{{ .Release.Name }}-ingress-tls"
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "console-ingress-tls"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+data:
+{{ template "console.generateIngressCertificate" . }}
+{{- end }}
+
+---
+# Ingress for the Console UI service
+{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) ) }}
+apiVersion: "networking.k8s.io/v1beta1"
+{{- else }}
+apiVersion: "extensions/v1beta1"
+{{- end }}
+kind: "Ingress"
+metadata:
+  name: "{{ .Release.Name }}-ingress"
+  annotations:
+    {{- if hasKey .Values.console.service.ingress.annotations "kubernetes.io/ingress.class" | not -}}
+      {{ $_ := set .Values.console.service.ingress.annotations "kubernetes.io/ingress.class" "nginx" }}
+    {{- end }}
+    {{- if hasKey .Values.console.service.ingress.annotations "kubernetes.io/ingress.allow-http" | not -}}
+      {{ $_ := set .Values.console.service.ingress.annotations "kubernetes.io/ingress.allow-http" "false" }}
+    {{- end }}
+    {{- if hasKey .Values.console.service.ingress.annotations "nginx.ingress.kubernetes.io/secure-backends" | not -}}
+      {{ $_ := set .Values.console.service.ingress.annotations "nginx.ingress.kubernetes.io/secure-backends" "true" }}
+    {{- end }}
+    {{- if hasKey .Values.console.service.ingress.annotations "nginx.ingress.kubernetes.io/backend-protocol" | not -}}
+      {{ $_ := set .Values.console.service.ingress.annotations "nginx.ingress.kubernetes.io/backend-protocol" "HTTPS" }}
+    {{- end }}
+    {{- if hasKey .Values.console.service.ingress.annotations "nginx.ingress.kubernetes.io/ssl-redirect" | not -}}
+      {{ $_ := set .Values.console.service.ingress.annotations "nginx.ingress.kubernetes.io/ssl-redirect" "false" }}
+    {{- end }}
+    {{- if hasKey .Values.console.service.ingress.annotations "nginx.ingress.kubernetes.io/proxy-body-size" | not -}}
+      {{ $_ := set .Values.console.service.ingress.annotations "nginx.ingress.kubernetes.io/proxy-body-size" "200m" }}
+    {{- end }}
+    {{ $_ := set .Values.console.service.ingress.annotations "nginx.org/websocket-services" (print .Release.Name "-ui-ext") }}
+{{ toYaml .Values.console.service.ingress.annotations | indent 4 }}
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/component: "console-ingress"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- range $key, $value := .Values.console.service.ingress.extraLabels }}
+    {{ $key }}: {{ $value }}
+{{- end }}    
+spec:
+  tls:
+  - secretName: {{ default (print .Release.Name "-ingress-tls") .Values.console.service.ingress.secretName | quote }}
+    hosts:
+    - {{ template "ingress.host" . }}
+  rules:
+    - host: {{ template "ingress.host" . }}
+      http:
+        paths:
+          - path: "/"
+            backend:
+              serviceName: "{{ .Release.Name }}-ui-ext"
+              servicePort: 443
+{{- end }}
+{{- end }}
+{{- end }}

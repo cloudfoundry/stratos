@@ -1,0 +1,46 @@
+mat-dialog-actions {
+  justify-content: flex-end;
+}
+
+.logout-dialog {
+  &__content {
+    padding: 20px;
+  }
+  &__progress {
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  &__outer {
+    margin: -24px;
+    padding: 24px 50px;
+    position: relative;
+  }
+  &__actions {
+    justify-content: center;
+  }
+  &__message {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+
+    > mat-icon {
+      flex: 0;
+      font-size: 48px;
+      height: 48px;
+      margin-right: 20px;
+      opacity: .7;
+      width: 48px;
+    }
+    > div {
+      flex: 1;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  }
+}
+
+mat-dialog-container {
+  position: relative;
+}

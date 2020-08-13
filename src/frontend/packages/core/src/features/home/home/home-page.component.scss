@@ -1,0 +1,49 @@
+@import '../../../../sass/mixins';
+$page-padding: 20px;
+.favorites-list {
+  display: flex;
+  flex: 2;
+  flex-direction: column;
+  &__header {
+    align-items: center;
+    display: flex;
+    margin-bottom: 12px;
+  }
+}
+.recent-list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin: 0 -#{$page-padding} -#{$page-padding};
+  padding: 20px;
+  @include breakpoint(tablet) {
+    margin: -#{$page-padding} -#{$page-padding} -#{$page-padding} $page-padding;
+  }
+}
+
+.home-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  &__header {
+    margin-top: 0;
+  }
+  &__list-header {
+    display: flex;
+    line-height: 40px;
+    .home-page__header {
+      flex: 1;
+      margin-bottom: 12px;
+    }
+  }
+
+  @include breakpoint(tablet) {
+    flex-direction: row;
+  }
+
+  &__scroller {
+    margin: 0 -#{$page-padding} -#{$page-padding};
+    overflow: auto;
+    padding: 0 $page-padding $page-padding;
+  }
+}

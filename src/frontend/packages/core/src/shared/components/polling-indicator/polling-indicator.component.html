@@ -1,0 +1,10 @@
+<ng-container *ngIf="!fabButton else fabButtonTemplate">
+  <button mat-icon-button [disabled]="!manualPoll" (click)="poll.emit()">
+    <mat-icon class="poll-icon" [ngClass]="{polling: isPolling}" aria-label="Poll">refresh</mat-icon>
+  </button>
+</ng-container>
+<ng-template #fabButtonTemplate>
+  <button mat-icon-button [disabled]="!manualPoll" (click)="poll.emit()" mat-mini-fab>
+    <mat-icon class="poll-icon" [ngClass]="{polling: isPolling}" aria-label="Poll">refresh</mat-icon>
+  </button>
+</ng-template>

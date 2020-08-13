@@ -1,0 +1,59 @@
+.entity-summary {
+  margin: 10px 0;
+  &__img,
+  &__logo {
+    flex: 0 0 64px;
+    max-height: 64px;
+  }
+  &__img {
+    align-self: center;
+    height: 64px;
+    object-fit: contain;
+    width: 64px;
+  }
+  &__logo {
+    font-size: 54px;
+  }
+  &__sub-header {
+    font-size: 16px;
+    margin-top: -3px;
+    opacity: .6;
+  }
+  &__sub-text {
+    font-size: 16px;
+    opacity: .6;
+    padding-top: 10px;
+  }
+  &__header {
+    margin: 0;
+  }
+  &__header-inner {
+    flex: 1;
+    margin-left: 10px;
+  }
+  &__header-wrapper {
+    align-items: baseline;
+    display: flex;
+  }
+  &__header-info {
+    font-size: 20px;
+    margin-left: 10px;
+    opacity: .4;
+  }
+  &__header-section {
+    display: flex;
+    margin: 10px;
+  }
+  &__content {
+    margin: 0 -20px -20px;
+    padding: 0 20px 20px;
+  }
+  &__dashboard {
+    font-size: 14px;
+    margin: -24px 20px 24px 24px;
+  }
+  &__spacing {
+    font-size: 14px;
+    margin: 12px 0;
+  }
+}

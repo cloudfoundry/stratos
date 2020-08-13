@@ -32,7 +32,7 @@ export class ApplicationPageVariablesTab extends ApplicationBasePage {
     this.list.table.openRowActionMenuByIndex(rowIndex).clickItem('Delete');
     const confirm = new ConfirmDialogComponent();
     confirm.waitUntilShown();
-    expect(confirm.getMessage()).toBe(`Are you sure you want to delete '${variableName}'?`);
+    confirm.waitForMessage(`Are you sure you want to delete '${variableName}'?`);
     confirm.confirm();
     return this.list.table.waitUntilNotBusy();
   }

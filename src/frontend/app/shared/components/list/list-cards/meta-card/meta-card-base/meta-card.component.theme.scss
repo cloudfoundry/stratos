@@ -1,7 +1,0 @@
-@import '~@angular/material/theming';
-@mixin meta-card-component($theme, $app-theme) {
-  $background: map-get($theme, background);
-  .meta-card__deleting-overlay {
-    background: transparentize(mat-color($background, card), .2);
-  }
-}

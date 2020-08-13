@@ -1,0 +1,85 @@
+.meta-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+
+  &__deleting-overlay {
+    align-items: center;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    &-inner {
+      width: 50%;
+    }
+  }
+
+  &__deleting-text {
+    margin-bottom: 5px;
+    text-align: center;
+  }
+
+  &__header {
+    align-content: center;
+    display: flex;
+    flex-direction: row;
+    padding-bottom: 4px;
+    word-break: break-all;
+
+    &__button {
+      margin-right: -10px;
+      margin-top: -8px;
+    }
+
+    &__popup-separator {
+      height: 1px;
+      margin: 6px 0;
+    }
+  }
+
+  &__favorite {
+    opacity: .6;
+  }
+
+  &__header-container {
+
+    &__title,
+    &__title--with-icon {
+      display: flex;
+      flex: 1;
+    }
+
+    &__title {
+      justify-content: space-between;
+
+      &__content {
+        flex: 1;
+      }
+    }
+
+    &__title--with-icon {
+      justify-content: flex-start;
+
+      &__icon {
+        margin-top: -1px;
+      }
+    }
+
+    &__actions {
+      flex: 0 0 15px;
+    }
+  }
+
+  &-pointer {
+    cursor: pointer;
+  }
+
+  &:focus {
+    outline: 0;
+  }
+}

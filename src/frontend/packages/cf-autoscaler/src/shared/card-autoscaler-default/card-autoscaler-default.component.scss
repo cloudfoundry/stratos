@@ -1,0 +1,10 @@
+.card-autoscaler-default {
+  &__min-max {
+    display: flex;
+    flex-direction: row;
+
+    app-metadata-item {
+      padding-right: 10px;
+    }
+  }
+}

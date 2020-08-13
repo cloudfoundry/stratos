@@ -3,7 +3,6 @@ package cfapppush
 import (
 	"errors"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush/pushapp"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 )
@@ -11,7 +10,6 @@ import (
 // CFAppPush is a plugin to allow applications to be pushed to Cloud Foundry from Stratos
 type CFAppPush struct {
 	portalProxy interfaces.PortalProxy
-	cfPush      pushapp.CFPush
 }
 
 // Init creates a new CFAppPush

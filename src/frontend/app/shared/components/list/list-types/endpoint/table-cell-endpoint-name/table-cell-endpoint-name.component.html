@@ -1,5 +1,0 @@
-<div class="endpoint-name-cell">
-  <a *ngIf="row.connectionStatus === 'connected'"  routerLink="{{ getLinkForEndpoint(row) }}">{{ row.name }}</a>
-  <span *ngIf="row.connectionStatus !== 'connected'">{{ row.name }}</span>
-  <mat-icon *ngIf="!!row.system_shared_token" matTooltip="This endpoint's connection is shared by the administrator" class="endpoint-name-cell__icon">share</mat-icon>
-</div>

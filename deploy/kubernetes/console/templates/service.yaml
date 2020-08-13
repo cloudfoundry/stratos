@@ -13,6 +13,11 @@ metadata:
     app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
     app.kubernetes.io/component: "console-ext-service"
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- if .Values.console.service -}}
+{{- if .Values.console.service.extraLabels }}
+{{ toYaml .Values.console.service.extraLabels | indent 4 }}
+{{- end }}
+{{- end }}
   name: "{{ .Release.Name }}-ui-ext"
 spec:
   selector:
@@ -35,7 +40,7 @@ spec:
   {{- range $cidr := .Values.console.service.loadBalancerSourceRanges }}
     - {{ $cidr }}
   {{- end }}
-{{- end }}
+{{ end }}
 {{- end }}
 {{- if .Values.console.service -}}
 {{- if .Values.console.service.externalName }}
@@ -74,17 +79,29 @@ spec:
     {{ else if .Release.IsUpgrade }}
     nodePort:
     {{- end }}
+{{- if not .Values.mariadb.external }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: "{{ .Release.Name }}-mariadb"
+{{- if .Values.console.service -}}
+{{- if .Values.console.service.annotations }}
+  annotations:
+{{ toYaml .Values.console.service.annotations | indent 4 }}
+{{- end }}
+{{- end }}
   labels:
     app.kubernetes.io/name: "stratos"
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
     app.kubernetes.io/component: "stratos-db-service"
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- if .Values.console.service -}}
+{{- if .Values.console.service.extraLabels }}
+{{ toYaml .Values.console.service.extraLabels | indent 4 }}
+{{- end }}
+{{- end }}
 spec:
   type: ClusterIP
   ports:
@@ -93,4 +110,5 @@ spec:
     targetPort: mysql
   selector:
     app: "{{ .Release.Name }}"
-
+    app.kubernetes.io/component: stratos-db
+{{- end -}}

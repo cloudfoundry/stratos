@@ -1,11 +1,15 @@
-<!--- For bugs and general issues -->
+<!--------- For bugs and general issues --------->
+### Stratos Version
+<!-- What version of Stratos does this related to? -->
+<!-- Version information can be seen in the `About` page reached via the User Icon top right -->
+<!-- If directly using code which branch, commit, etc did the source come from, what repository was it cloned from? -->
+
 ### Frontend Deployment type
 <!--- Where is the frontend deployed? -->
 <!--- Put an 'x' in one of the boxes below.  -->
 <!--- Put an 'x' in one or more boxes below.  -->
 * [ ] Cloud Foundry Application (cf push)
 * [ ] Kubernetes, using a helm chart
-* [ ] Docker, using docker compose
 * [ ] Docker, single container deploying all components
 * [ ] npm run start
 * [ ] Other (please specify below)
@@ -15,7 +19,6 @@
 <!--- Put an 'x' in one or more boxes below.  -->
 * [ ] Cloud Foundry Application (cf push)
 * [ ] Kubernetes, using a helm chart
-* [ ] Docker, using docker compose
 * [ ] Docker, single container deploying all components
 * [ ] Other (please specify below)
 
@@ -31,7 +34,7 @@ Insert log hereCopy
 ```
 
 
-<!--- For feature requests -->
+<!--------- For feature requests --------->
 ### Detailed Description
 <!--- Provide a detailed description of the change or addition you are proposing -->
 

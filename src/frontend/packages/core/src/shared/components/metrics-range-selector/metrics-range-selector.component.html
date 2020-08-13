@@ -1,0 +1,43 @@
+<div class="metrics-range-selector">
+  <div
+    [ngClass]="{'metrics-range-selector__overlay-show': rangeSelectorManager.selectedTimeRange && rangeSelectorManager.selectedTimeRange.queryType === rangeTypes.RANGE_QUERY && showOverlay}"
+    class="metrics-range-selector__overlay">
+    <div class="metrics-range-selector__overlay-inner">
+      <h3>Choose time window</h3>
+      <app-start-end-date (isValid)="rangeSelectorManager.dateValid = $event" [(start)]="rangeSelectorManager.start"
+        [(end)]="rangeSelectorManager.end" [validate]="validate"></app-start-end-date>
+      <div class="metrics-range-selector__overlay-buttons">
+        <button mat-raised-button color="primary" class="metrics-range-selector__overlay-set"
+          (click)="rangeSelectorManager.commit(); showOverlay = false"
+          [disabled]="!rangeSelectorManager.dateValid || !rangeSelectorManager.commit">Set</button>
+        <button mat-raised-button (click)="showOverlay = false">Cancel</button>
+      </div>
+    </div>
+    <div class="metrics-range-selector__overlay-click" (click)="showOverlay = false"></div>
+  </div>
+  <mat-form-field>
+    <mat-select [(value)]="rangeSelectorManager.selectedTimeRange">
+      <mat-option *ngFor="let time of rangeSelectorManager.times" [value]="time">
+        {{time.label}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <div class="metrics-range-selector__selected-range"
+    *ngIf="rangeSelectorManager.selectedTimeRange && rangeSelectorManager.selectedTimeRange.queryType === rangeTypes.RANGE_QUERY">
+    <div class="metrics-range-selector__selected-range-dates"
+      *ngIf="rangeSelectorManager.committedStartEnd[0] && rangeSelectorManager.committedStartEnd[1] ; else noDatesSelected">
+      <div class="metrics-range-selector__selected-range-date">{{ rangeSelectorManager.committedStartEnd[0] |
+        amDateFormat:'Do MMM YYYY,
+        HH:mm' }}
+      </div>
+      <div class="metrics-range-selector__selected-range-to">to</div>
+      <div class="metrics-range-selector__selected-range-date"> {{ rangeSelectorManager.committedStartEnd[1] |
+        amDateFormat:'Do MMM YYYY,
+        HH:mm' }}
+      </div>
+    </div>
+    <ng-template #noDatesSelected class="metrics-range-selector__selected-range-date">No dates selected</ng-template>
+    <a class="metrics-range-selector__selected-range-edit" (click)="showOverlay = true"
+      *ngIf="rangeSelectorManager.selectedTimeRange && rangeSelectorManager.selectedTimeRange.queryType === rangeTypes.RANGE_QUERY && !showOverlay">Change</a>
+  </div>
+</div>

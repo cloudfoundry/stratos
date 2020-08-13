@@ -1,0 +1,30 @@
+.file-input {
+  display: flex;
+  flex-direction: column;
+
+  &__disabled {
+    opacity: .5;
+    pointer-events: none;
+  }
+  &__field {
+    align-items: center;
+    display: flex;
+  }
+  &__input {
+    cursor: pointer;
+    flex: 1;
+  }
+  &__none {
+    opacity: .4;
+  }
+  &__button {
+    flex: 0;
+    line-height: inherit;
+    min-width: auto;
+    padding: 0 4px;
+  }
+  &__hint {
+    font-size: 75%;
+    margin-top: -16px;
+  }
+}

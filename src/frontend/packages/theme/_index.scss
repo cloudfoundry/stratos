@@ -1,0 +1,6 @@
+@import './helper';
+
+// This just returns the default open-source theme
+@function stratos-theme() {
+  @return stratos-default-theme();
+}

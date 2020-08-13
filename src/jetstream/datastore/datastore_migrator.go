@@ -15,27 +15,33 @@ type StratosMigration func(txn *sql.Tx, conf *goose.DBConf) error
 
 // RegisterMigration registers a migration step. This should be called from an init() function
 func RegisterMigration(version int64, name string, f StratosMigration) {
-	migrationSteps = append(migrationSteps, stratosMigrationStep{
+	migrationSteps = append(migrationSteps, StratosMigrationStep{
 		Version: version,
 		Name:    name,
 		Apply:   f,
 	})
 }
 
-type stratosMigrationStep struct {
+// StratosMigrationStep represents a migaration step
+type StratosMigrationStep struct {
 	Version int64
 	Name    string
 	Apply   StratosMigration
 }
 
-var migrationSteps []stratosMigrationStep
+var migrationSteps []StratosMigrationStep
 
 // GetOrderedMigrations returns an order list of migrations to run
-func GetOrderedMigrations() []stratosMigrationStep {
+func GetOrderedMigrations() []StratosMigrationStep {
 	sort.Slice(migrationSteps, func(i, j int) bool {
 		return migrationSteps[i].Version < migrationSteps[j].Version
 	})
 	return migrationSteps
+}
+
+// SetMigrations replces the current list of migrations - used only by tests internally
+func SetMigrations(steps []StratosMigrationStep) {
+	migrationSteps = steps
 }
 
 // ApplyMigrations will perform the migrations

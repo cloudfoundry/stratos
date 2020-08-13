@@ -5,6 +5,7 @@ import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
@@ -12,12 +13,15 @@ import { ServicesWallPage } from './services-wall.po';
 describe('Service Instances Wall', () => {
   const servicesWallPage = new ServicesWallPage();
   const secretsHelper = new SecretsHelpers();
-  let servicesHelperE2E: ServicesHelperE2E;
-  let e2eSetup;
 
   // When there's only one CF connected no filter is shown, hence we can't test the filter.
   // Ideally we should test with both one and more than one cf's connected, however for the moment we're just testing without
   const hasCfFilter = false; // e2e.secrets.getCloudFoundryEndpoints().length > 1;, registerMultipleCloudFoundries()
+
+  const createServiceInstance = new CreateServiceInstance();
+  let e2eSetup;
+  let servicesHelperE2E: ServicesHelperE2E;
+  let serviceInstanceName: string;
 
   beforeAll(() => {
     e2eSetup = e2e.setup(ConsoleUserType.admin)
@@ -30,6 +34,7 @@ describe('Service Instances Wall', () => {
   beforeEach(() => {
     servicesWallPage.sideNav.goto(SideNavMenuItem.Services);
     servicesWallPage.waitForPage();
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, new CreateMarketplaceServiceInstance(), servicesHelperE2E);
   });
 
   describe('', () => {
@@ -37,17 +42,18 @@ describe('Service Instances Wall', () => {
     extendE2ETestTime(timeout);
 
     it('- should create service instance all tests depend on', () => {
-      // Create service instance
-      const createServiceInstance = new CreateServiceInstance();
-      servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createServiceInstance);
       // FIXME: To save time the service should be created via api call
       createServiceInstance.navigateTo();
       createServiceInstance.waitForPage();
-      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name);
+      createServiceInstance.selectMarketplace();
+      serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
+      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName);
     });
   });
 
   it('- should reach service instances wall page', () => {
+    servicesWallPage.sideNav.goto(SideNavMenuItem.Services);
+    servicesWallPage.waitForPage();
     expect(servicesWallPage.isActivePage()).toBeTruthy();
   });
 
@@ -91,9 +97,9 @@ describe('Service Instances Wall', () => {
   });
 
   it('- should be able to search', () => {
-    servicesWallPage.serviceInstancesList.header.setSearchText(servicesHelperE2E.serviceInstanceName).then(
+    servicesWallPage.serviceInstancesList.header.setSearchText(serviceInstanceName).then(
       () => {
-        expect(servicesWallPage.serviceInstancesList.header.getSearchText()).toEqual(servicesHelperE2E.serviceInstanceName);
+        expect(servicesWallPage.serviceInstancesList.header.getSearchText()).toEqual(serviceInstanceName);
         servicesWallPage.getServiceInstances().then(s => {
           expect(s.length).toEqual(1);
         });
@@ -115,24 +121,27 @@ describe('Service Instances Wall', () => {
   });
 
   it('- should be able to Edit Service Instance', () => {
-    servicesHelperE2E.getServiceCardWithTitle(servicesWallPage.serviceInstancesList, servicesHelperE2E.serviceInstanceName, false)
+    servicesHelperE2E.getServiceCardWithTitle(servicesWallPage.serviceInstancesList, serviceInstanceName, false)
       .then(metaCard => metaCard.openActionMenu())
       .then(menu => {
         const editMenuItem = menu.getItem('Edit');
         expect(editMenuItem.getText()).toEqual('Edit');
         expect(editMenuItem.isEnabled()).toBeTruthy();
         editMenuItem.click();
+
         browser.getCurrentUrl().then(url => {
-          expect(url.endsWith('edit')).toBeTruthy();
+          const query = url.indexOf('?');
+          const urlWithoutQuery = query >= 0 ? url.substring(0, query) : url;
+          expect(urlWithoutQuery.endsWith('edit')).toBeTruthy();
         });
-        const createServiceInstance = new CreateServiceInstance();
-        createServiceInstance.stepper.cancel();
+        const createMarketplaceServiceInstance = new CreateMarketplaceServiceInstance();
+        createMarketplaceServiceInstance.stepper.cancel();
         servicesWallPage.isActivePage();
       });
   });
 
   it('- should be able to delete Service Instance', () => {
-    servicesHelperE2E.getServiceCardWithTitle(servicesWallPage.serviceInstancesList, servicesHelperE2E.serviceInstanceName, false)
+    servicesHelperE2E.getServiceCardWithTitle(servicesWallPage.serviceInstancesList, serviceInstanceName, false)
       .then(metaCard => metaCard.openActionMenu())
       .then(menu => {
         const deleteMenuItem = menu.getItem('Delete');
@@ -141,5 +150,5 @@ describe('Service Instances Wall', () => {
       });
   });
 
-  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(servicesHelperE2E.serviceInstanceName));
+  afterAll(() => servicesHelperE2E.cleanUpServiceInstance(serviceInstanceName));
 });

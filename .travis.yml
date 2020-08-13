@@ -1,77 +1,97 @@
 language: node_js
 node_js:
-- '8.11.2'
+  - "12.13.0"
 sudo: required
-dist: trusty
+dist: bionic
 services:
-- docker
+  - docker
 addons:
   chrome: stable
 before_install:
-- export DISPLAY=:99.0
-- "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1366x768x24"
-- sleep 3
+  - export DISPLAY=:99.0
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1366x768x24"
+  - sleep 3
 install:
-- npm install npm@5.6.0 -g
-- npm install
-- ssh-keyscan -t rsa bitbucket.org >> ~/.ssh/known_hosts
+  - npm install
+  - ssh-keyscan -t rsa bitbucket.org >> ~/.ssh/known_hosts
 filter_secrets: false
 branches:
   only:
-  - master
-  - v2-master
-  - e2e-tests
+    - master
+    - v2-master
+    - e2e-tests
 cache:
   directories:
-  - "$HOME/.npm"
-  - "$HOME/.cache"
-  - node_modules
+    - "$HOME/.npm"
+    - "$HOME/.cache"
+    - node_modules
 stages:
-- Lint
-- Test
+  - Lint
+  - Build
+  - Test
 jobs:
   include:
-  - stage: Lint
-    name: Frontend Lint
-    script:
-    - npm run lint
-  - name: Backend Lint
-    before_script:
-    - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-    - chmod +x ~/bin/gimme
-    - eval "$(gimme 1.9)"
-    - go get -u golang.org/x/lint/golint
-    script:
-    - golint src/jetstream/...
-    - ./deploy/ci/travis/update-go-report-card.sh
-  - stage: Test
-    name: Frontend Unit Tests
-    env:
-    - CI_ENV=true
-    script:
-    - npm test
-    - npm run codecov
-  - name: Backend Unit Tests
-    before_script:
-    - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-    - chmod +x ~/bin/gimme
-    - eval "$(gimme 1.9)"
-    - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-    script:
-    - npm run test-backend
-  - name: Helm Chart Unit Tests
-    script:
-    - "./deploy/ci/travis/helm-chart-unit-tests.sh"
-  - name: E2E Tests - Long Suite
-    before_script:
-    - "./deploy/ci/travis/job-e2e-before_script.sh"
-    script:
-    - "./deploy/ci/travis/job-e2e-script.sh longSuite"
-  - name: E2E Tests - All Other Suite
-    before_script:
-    - "./deploy/ci/travis/job-e2e-before_script.sh"
-    script:
-    - "./deploy/ci/travis/job-e2e-script.sh fullMinusLongSuite"
+    - stage: Lint
+      name: Frontend Lint
+      script:
+        - npm run lint
+    - name: Backend Lint
+      before_script:
+        - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+        - chmod +x ~/bin/gimme
+        - eval "$(gimme 1.13.4)"
+        - go get -u golang.org/x/lint/golint
+      script:
+        - golint src/jetstream/...
+        - ./deploy/ci/travis/update-go-report-card.sh
+    - stage: Build
+      name: Build Frontend and Backend
+      env:
+        - CI_ENV=true
+      script:
+        - "./deploy/ci/travis/e2e-build-script.sh build"
+    - stage: Test
+      name: Frontend Unit Tests
+      env:
+        - CI_ENV=true
+      script:
+        - npm run test
+        - npm run codecov
+    - name: Backend Unit Tests
+      before_script:
+        - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+        - chmod +x ~/bin/gimme
+        - eval "$(gimme 1.13.4)"
+      script:
+        - npm run test-backend
+    - name: Helm Chart Unit Tests
+      script:
+        - "./deploy/ci/travis/helm-chart-unit-tests.sh"
+    - name: E2E Tests - Long Suites
+      before_script:
+        - "./deploy/ci/travis/job-e2e-before_script.sh"
+      script:
+        - "./deploy/ci/travis/job-e2e-script.sh longSuite"
+    - name: E2E Tests - Manage Users
+      before_script:
+        - "./deploy/ci/travis/job-e2e-before_script.sh true"
+      script:
+        - "./deploy/ci/travis/job-e2e-script.sh manageUsers"
+    - name: E2E Tests - Core
+      before_script:
+        - "./deploy/ci/travis/job-e2e-before_script.sh true"
+      script:
+        - "./deploy/ci/travis/job-e2e-script.sh core"
+    - name: E2E Tests - Autoscaler
+      before_script:
+        - "./deploy/ci/travis/job-e2e-before_script.sh"
+      script:
+        - "./deploy/ci/travis/job-e2e-script.sh autoscaler"
+    - name: E2E Tests - All Other Suite
+      before_script:
+        - "./deploy/ci/travis/job-e2e-before_script.sh"
+      script:
+        - "./deploy/ci/travis/job-e2e-script.sh fullMinusOtherSuites"
 notifications:
   slack:
     secure: s5SFnFKwzfxLrjGR5lJ2AJG1FSWCKtHdQi8K2Kmx5ZhrYL/7P+KLc/ks18WnzCPoy705LbHCBSULcnWbLjqCpnkKxNjsFAyFl2nZZPxBjl2/mHpulbr3gmultDOrMDbmYL4oWPKBlxKResElz9nQwknlLWZ/L94AIx8zuMfRIWdEt1bJBDAQts4fx2D4cIEx0yZUq7JGAKjSiXKR9eDyMWFb+SWw6mvr5WtFM8uq35rPvRVEfm56LIgSuMUpVeYtnYiY2JP7W8iKX0gD+54wAiSXRZiQVCLJq606/TlJo7j8Na9Dn1Q5XDkX3b3XzcgmEZThoO1GFtv3yNYOVxv+50p2tSnc8CT0VEVOYOGJuz17AESZAYK+AyjEmeZmDiroj1czmIq8/ZYKbmvDYSZgGuDcSkQurX/6BPac6ra69WmSQmwv0tS3A/IzDw7X+CuC+3QubQ7GfaiVe25PUU+tRSEDM4PMUJY8QRF5Q+oeN5NjjWmJBqf/ic2TO2xTU1j+qysdqK34qIV1qyVcPMUIiYW+5ltH71qiy05TSvvfGS+oatRBMzINRl3zl2gOV1CKNU801XehRKCx9XDCw5NL1HSx5HD5psOyBRpAMYYBOqa+rv9VAza9MsfpslCoibg5rdrq4rZqqUgRhayNp/LKzlhe/g62+qbGNT+iFuHtB+Y=

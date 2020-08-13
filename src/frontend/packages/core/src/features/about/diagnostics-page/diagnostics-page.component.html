@@ -1,0 +1,87 @@
+<app-page-header [breadcrumbs]="breadcrumbs">
+  <h1>Diagnostics</h1>
+</app-page-header>
+
+<div *ngIf="(sessionData$ | async) as session">
+  <mat-card class="diagnostics-page__card">
+    <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
+    <app-metadata-item icon="date_range" label="Build Date">{{ buildDate }}</app-metadata-item>
+    <div *ngIf="(this.userIsAdmin$ | async) as isAdminUser">
+      <app-metadata-item *ngIf="!isAdminUser" icon="person" label="User">{{ session.user.name }}</app-metadata-item>
+      <app-metadata-item class="about-page__mat-warning-icon" *ngIf="isAdminUser" icon="security" label="User">
+        {{ session.user.name }} (You have administrative privileges)</app-metadata-item>
+      <app-metadata-item *ngIf="session.config.enableTechPreview" class="about-page__mat-warning-icon" icon="whatshot"
+        label="Tech Preview">Tech Preview features are enabled</app-metadata-item>
+      <app-metadata-item class="about-page__mat-warning-icon diagnostics-page__maxed" icon="list"
+        label="Lists - Jetstream Configuration">
+        <div class="diagnostics-page__maxed__content">
+          <span>List max size: {{session.config.listMaxSize || 'Not Set'}}</span>
+          <span>Allow fetch of all entities of a maxed list: {{!!session.config.listAllowLoadMaxed}}</span>
+        </div>
+      </app-metadata-item>
+    </div>
+  </mat-card>
+
+  <mat-card class="diagnostics-page__card diagnostics-page__columns">
+    <div class="diagnostics-page__two-column">
+      <div *ngIf="!!gitHubRepository">
+        <app-metadata-item icon="storage" label="GitHub Repository">
+          <a [href]="gitHubRepositoryLink" rel="noopener noreferrer" target="_blank">{{ gitHubRepository }}</a>
+        </app-metadata-item>
+        <app-metadata-item *ngIf="!!gitBranch" icon="storage" label="Branch">
+          <a *ngIf="!!gitBranch" [href]="gitBranchLink" rel="noopener noreferrer" target="_blank">{{ gitBranch }}</a>
+          <span *ngIf="!gitBranch">Not available</span>
+        </app-metadata-item>
+        <app-metadata-item icon="storage" label="Commit">
+          <a *ngIf="!!gitCommit" [href]="gitCommitLink" rel="noopener noreferrer"
+            target="_blank">{{ gitCommit | slice:0:8 }}</a>
+          <span *ngIf="!gitCommit">Not available</span>
+        </app-metadata-item>
+      </div>
+      <app-metadata-item icon="info_outline" label="Git Client Version">
+        {{ session.diagnostics.gitClientVersion || 'N/A' }}</app-metadata-item>
+    </div>
+    <div class="diagnostics-page__two-column">
+      <app-metadata-item icon="storage" label="Deployment Type">{{ session.diagnostics.deploymentType }}
+      </app-metadata-item>
+      <div *ngIf="session.diagnostics.deploymentType === 'Kubernetes'">
+        <app-metadata-item icon="storage" label="Helm Chart Version">{{ session.diagnostics.helmChartVersion || 'N/A' }}
+        </app-metadata-item>
+        <app-metadata-item icon="storage" label="Helm Release">{{ session.diagnostics.helmName || 'N/A' }}
+        </app-metadata-item>
+        <app-metadata-item icon="storage" label="Helm Revision">{{ session.diagnostics.helmRevision || 'N/A' }}
+        </app-metadata-item>
+        <app-metadata-item icon="date_range" label="Helm Last Modified">{{ helmLastModified$ | async | date:'medium' }}
+        </app-metadata-item>
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-card class="diagnostics-page__card">
+    <app-metadata-item icon="storage" label="Database">{{ session.diagnostics.databaseBackend || 'N/A' }}
+    </app-metadata-item>
+    <app-metadata-item icon="storage" label="Database Migrations"></app-metadata-item>
+    <table mat-table [dataSource]="session.diagnostics.databaseMigrations" class="diagnostics-page__migrations">
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef> ID </th>
+        <td mat-cell *matCellDef="let row"> {{row.id}} </td>
+      </ng-container>
+      <ng-container matColumnDef="applied">
+        <th mat-header-cell *matHeaderCellDef> Applied </th>
+        <td mat-cell *matCellDef="let row">
+          <app-boolean-indicator [isTrue]="row.is_applied" type="yes-no" subtle="true"></app-boolean-indicator>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="version">
+        <th mat-header-cell *matHeaderCellDef> Version </th>
+        <td mat-cell *matCellDef="let row"> {{row.version_id}} </td>
+      </ng-container>
+      <ng-container matColumnDef="timestamp">
+        <th mat-header-cell *matHeaderCellDef> Timestamp </th>
+        <td mat-cell *matCellDef="let row"> {{row.timestamp}} </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="['id', 'version', 'applied', 'timestamp']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['id', 'version', 'applied', 'timestamp']"></tr>
+    </table>
+  </mat-card>
+</div>

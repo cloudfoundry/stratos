@@ -1,0 +1,3 @@
+<app-sidepanel-preview [title]="title">
+  <div #markdown class="markdown-preview__content" [innerHtml]="markdownHtml" appMarkdownContentObserver (innerHtmlRendered)="markdownRendered()"></div>
+</app-sidepanel-preview>

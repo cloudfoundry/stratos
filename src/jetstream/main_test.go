@@ -1,8 +1,9 @@
 package main
 
 import (
-	"os"
 	"testing"
+
+	"github.com/govau/cf-common/env"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -59,23 +60,22 @@ func (e *echoContextMock) Reset(engine.Request, engine.Response)               {
 */
 
 func TestLoadPortalConfig(t *testing.T) {
-
-	os.Unsetenv("DATABASE_PROVIDER")
-	os.Setenv("HTTP_CLIENT_TIMEOUT_IN_SECS", "10")
-	os.Setenv("HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS", "35")
-	os.Setenv("SKIP_SSL_VALIDATION", "true")
-	os.Setenv("CONSOLE_PROXY_TLS_ADDRESS", ":8080")
-	os.Setenv("CONSOLE_CLIENT", "portal-proxy")
-	os.Setenv("CONSOLE_CLIENT_SECRET", "ohsosecret!")
-	os.Setenv("CF_CLIENT", "portal-proxy")
-	os.Setenv("CF_CLIENT_SECRET", "ohsosecret!")
-	os.Setenv("UAA_ENDPOINT", "https://login.cf.org.com:443")
-	os.Setenv("ALLOWED_ORIGINS", "https://localhost,https://127.0.0.1")
-	os.Setenv("SESSION_STORE_SECRET", "cookiesecret")
-
 	var pc interfaces.PortalConfig
 
-	result, err := loadPortalConfig(pc)
+	result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"HTTP_CLIENT_TIMEOUT_IN_SECS":             "10",
+		"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS":    "35",
+		"HTTP_CLIENT_TIMEOUT_LONGRUNNING_IN_SECS": "123",
+		"SKIP_SSL_VALIDATION":                     "true",
+		"CONSOLE_PROXY_TLS_ADDRESS":               ":8080",
+		"CONSOLE_CLIENT":                          "portal-proxy",
+		"CONSOLE_CLIENT_SECRET":                   "ohsosecret!",
+		"CF_CLIENT":                               "portal-proxy",
+		"CF_CLIENT_SECRET":                        "ohsosecret!",
+		"UAA_ENDPOINT":                            "https://login.cf.org.com:443",
+		"ALLOWED_ORIGINS":                         "https://localhost,https://127.0.0.1",
+		"SESSION_STORE_SECRET":                    "cookiesecret",
+	})))
 
 	if err != nil {
 		t.Errorf("Unable to load portal config from env vars: %v", err)
@@ -121,19 +121,17 @@ func TestLoadPortalConfig(t *testing.T) {
 }
 
 func TestLoadDatabaseConfig(t *testing.T) {
-
-	os.Unsetenv("DATABASE_PROVIDER")
-	os.Setenv("DB_USER", "console")
-	os.Setenv("DB_PASSWORD", "console")
-	os.Setenv("DB_DATABASE_NAME", "console-db")
-	os.Setenv("DB_HOST", "localhost")
-	os.Setenv("DB_PORT", "5432")
-	os.Setenv("DB_CONNECT_TIMEOUT_IN_SECS", "5")
-	os.Setenv("DB_SSL_MODE", "disable")
-
 	var dc datastore.DatabaseConfig
 
-	_, err := loadDatabaseConfig(dc)
+	_, err := loadDatabaseConfig(dc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"DB_USER":                    "console",
+		"DB_PASSWORD":                "console",
+		"DB_DATABASE_NAME":           "console-db",
+		"DB_HOST":                    "localhost",
+		"DB_PORT":                    "5432",
+		"DB_CONNECT_TIMEOUT_IN_SECS": "5",
+		"DB_SSL_MODE":                "false",
+	})))
 
 	if err != nil {
 		t.Errorf("Unable to load database config from env vars: %v", err)
@@ -141,18 +139,17 @@ func TestLoadDatabaseConfig(t *testing.T) {
 }
 
 func TestLoadDatabaseConfigWithInvalidSSLMode(t *testing.T) {
-
-	os.Setenv("DB_USER", "console")
-	os.Setenv("DB_PASSWORD", "console")
-	os.Setenv("DB_DATABASE_NAME", "console-db")
-	os.Setenv("DB_HOST", "localhost")
-	os.Setenv("DB_PORT", "5432")
-	os.Setenv("DATABASE_PROVIDER", "pgsql")
-	os.Setenv("DB_SSL_MODE", "invalid.ssl.mode")
-
 	var dc datastore.DatabaseConfig
 
-	_, err := loadDatabaseConfig(dc)
+	_, err := loadDatabaseConfig(dc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"DB_USER":           "console",
+		"DB_PASSWORD":       "console",
+		"DB_DATABASE_NAME":  "console-db",
+		"DB_HOST":           "localhost",
+		"DB_PORT":           "5432",
+		"DATABASE_PROVIDER": "pgsql",
+		"DB_SSL_MODE":       "invalid.ssl.mode",
+	})))
 
 	if err == nil {
 		t.Errorf("Unexpected success - should not be able to load database configs with an invalid SSL Mode specified.")

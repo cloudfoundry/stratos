@@ -1,0 +1,13 @@
+@import '~@angular/material/theming';
+@mixin meta-card-component($theme, $app-theme) {
+  $background: map-get($theme, background);
+  $foreground: map-get($theme, foreground);
+
+  .meta-card__deleting-overlay {
+    background: transparentize(mat-color($background, card), .2);
+  }
+
+  .meta-card__header__popup-separator {
+    background-color: mat-color($foreground, divider);
+  }
+}

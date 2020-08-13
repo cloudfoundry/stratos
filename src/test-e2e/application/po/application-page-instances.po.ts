@@ -3,7 +3,6 @@ import { ApplicationBasePage } from './application-page.po';
 import { CardAppInstances } from './card-app-instances.po';
 import { CardAppStatus } from './card-app-status.po';
 import { CardAppUsage } from './card-app-usage.po';
-import { getLocaleTimeFormat } from '@angular/common';
 
 export class ApplicationPageInstancesTab extends ApplicationBasePage {
 
@@ -41,7 +40,7 @@ export class ApplicationPageInstancesTab extends ApplicationBasePage {
   getUptime(index: number) {
     // Get the uptime for the instance
     return this.list.table.getTableDataRaw().then(table => {
-      if (index <= (table.rows.length - 1) ) {
+      if (index <= (table.rows.length - 1)) {
         const row = table.rows[index];
         return this.parseUptime(row[5]);
       }

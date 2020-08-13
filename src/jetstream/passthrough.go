@@ -9,7 +9,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
@@ -19,6 +21,12 @@ import (
 
 // API Host Prefix to replace if the custom header is supplied
 const apiPrefix = "api."
+
+const longRunningTimeoutHeader = "x-cap-long-running"
+
+// Timeout for long-running requests, after which we will return indicating request it still active
+// to prevent hitting the 2 minute browser timeout
+const longRunningRequestTimeout = 30
 
 type PassthroughErrorStatus struct {
 	StatusCode int    `json:"statusCode"`
@@ -164,7 +172,8 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method 
 
 	cnsiRequest.URL = new(url.URL)
 	*cnsiRequest.URL = *cnsiRec.APIEndpoint
-	cnsiRequest.URL.Path = uri.Path
+	// The APIEndpoint might have a path already - so join the request URI to it
+	cnsiRequest.URL.Path = path.Join(cnsiRequest.URL.Path, uri.Path)
 	cnsiRequest.URL.RawQuery = uri.RawQuery
 
 	return cnsiRequest, nil
@@ -188,8 +197,11 @@ func fwdCNSIStandardHeaders(cnsiRequest *interfaces.CNSIRequest, req *http.Reque
 		// Skip these
 		//  - "Referer" causes CF to fail with a 403
 		//  - "Connection", "X-Cap-*" and "Cookie" are consumed by us
-		// - "Accept-Encoding" must be excluded otherwise the transport will expect us to handle the encoding/compression
-		case k == "Connection", k == "Cookie", k == "Referer", k == "Accept-Encoding", strings.HasPrefix(strings.ToLower(k), "x-cap-"):
+		//  - "Accept-Encoding" must be excluded otherwise the transport will expect us to handle the encoding/compression
+		//  - X-Forwarded-* headers - these will confuse Cloud Foundry in some cases (e.g. load balancers)
+		case k == "Connection", k == "Cookie", k == "Referer", k == "Accept-Encoding",
+			strings.HasPrefix(strings.ToLower(k), "x-cap-"),
+			strings.HasPrefix(strings.ToLower(k), "x-forwarded-"):
 
 		// Forwarding everything else
 		default:
@@ -212,6 +224,7 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*in
 	log.Debug("proxy")
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 	shouldPassthrough := "true" == c.Request().Header.Get("x-cap-passthrough")
+	longRunning := "true" == c.Request().Header.Get(longRunningTimeoutHeader)
 
 	if err := p.validateCNSIList(cnsiList); err != nil {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -237,6 +250,14 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*in
 		}
 	}
 
+	// Only support one endpoint for long running operation (due to way we do timeout with the response channel)
+	if longRunning {
+		if len(cnsiList) > 1 {
+			err := errors.New("Requested long-running proxy to multiple CNSIs. Only single CNSI is supported for long running passthrough")
+			return nil, echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+	}
+
 	// send the request to each CNSI
 	done := make(chan *interfaces.CNSIRequest)
 	for _, cnsi := range cnsiList {
@@ -244,6 +265,7 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*in
 		if buildErr != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
 		}
+		cnsiRequest.LongRunning = longRunning
 		// Allow the host part of the API URL to be overridden
 		apiHost := c.Request().Header.Get("x-cap-api-host")
 		// Don't allow any '.' chars in the api name
@@ -262,15 +284,63 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*in
 		go p.doRequest(&cnsiRequest, done)
 	}
 
+	// Wait for all responses
 	responses := make(map[string]*interfaces.CNSIRequest)
-	for range cnsiList {
-		res := <-done
-		responses[res.GUID] = res
+
+	if !longRunning {
+		for range cnsiList {
+			res := <-done
+			responses[res.GUID] = res
+		}
+	} else {
+		// Long running has a timeout
+		for range cnsiList {
+			select {
+			case res := <-done:
+				responses[res.GUID] = res
+			case <-time.After(longRunningRequestTimeout * time.Second):
+				// For all those that have not completed, add a timeout response
+				for _, id := range cnsiList {
+					if _, ok := responses[id]; !ok {
+						// Did not get a response for the endpoint
+						responses[id] = &interfaces.CNSIRequest{
+							GUID:         id,
+							UserGUID:     portalUserGUID,
+							Method:       req.Method,
+							StatusCode:   http.StatusAccepted,
+							Status:       "Long Running Operation still active",
+							Response:     makeLongRunningTimeoutError(),
+							Error:        nil,
+							ResponseGUID: id,
+						}
+					}
+				}
+				break
+			}
+		}
 	}
 
 	return responses, nil
 }
 
+func makeLongRunningTimeoutError() []byte {
+	description := "Long Running Operation still active"
+	var errorStatus = &PassthroughErrorStatus{
+		StatusCode: http.StatusAccepted,
+		Status:     description,
+	}
+	errorResponse := []byte(fmt.Sprint("{\"longRunningTimeout\": true, \"description\": \"" + description + "\", \"error_code\": \"longRunningTimeout\"}"))
+	passthroughError := &PassthroughError{}
+	passthroughError.Error = errorStatus
+	passthroughError.ErrorResponse = (*json.RawMessage)(&errorResponse)
+	res, e := json.Marshal(passthroughError)
+	if e != nil {
+		log.Errorf("makeLongRunningTimeoutError: could not marshal JSON: %+v", e)
+	}
+	return res
+}
+
+// TODO: This should be used by the function above
 func (p *portalProxy) DoProxyRequest(requests []interfaces.ProxyRequestInfo) (map[string]*interfaces.CNSIRequest, error) {
 	log.Debug("DoProxyRequest")
 
@@ -295,7 +365,7 @@ func (p *portalProxy) DoProxyRequest(requests []interfaces.ProxyRequestInfo) (ma
 }
 
 // Convenience helper for a single request
-func (p *portalProxy) DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string) (*interfaces.CNSIRequest, error) {
+func (p *portalProxy) DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string, headers http.Header, body []byte) (*interfaces.CNSIRequest, error) {
 	requests := make([]interfaces.ProxyRequestInfo, 0)
 
 	proxyURL, err := url.Parse(requestUrl)
@@ -309,6 +379,15 @@ func (p *portalProxy) DoProxySingleRequest(cnsiGUID, userGUID, method, requestUr
 	req.EndpointGUID = cnsiGUID
 	req.Method = method
 	req.URI = proxyURL
+
+	if headers != nil {
+		req.Headers = headers
+	}
+
+	if body != nil {
+		req.Body = body
+	}
+
 	requests = append(requests, req)
 
 	responses, err := p.DoProxyRequest(requests)
@@ -356,7 +435,7 @@ func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*
 }
 
 func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<- *interfaces.CNSIRequest) {
-	log.Debug("doRequest")
+	log.Debugf("doRequest for URL: %s", cnsiRequest.URL.String())
 	var body io.Reader
 	var res *http.Response
 	var req *http.Request
@@ -389,12 +468,17 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	// Copy original headers through, except custom portal-proxy Headers
 	fwdCNSIStandardHeaders(cnsiRequest, req)
 
+	// If this is a long running request, add a header which we can use at request time to change the timeout
+	if cnsiRequest.LongRunning {
+		req.Header.Set(longRunningTimeoutHeader, "true")
+	}
+
 	// Find the auth provider for the auth type - default ot oauthflow
 	authHandler := p.GetAuthProvider(tokenRec.AuthType)
 	if authHandler.Handler != nil {
 		res, err = authHandler.Handler(cnsiRequest, req)
 	} else {
-		res, err = p.doOauthFlowRequest(cnsiRequest, req)
+		res, err = p.DoOAuthFlowRequest(cnsiRequest, req)
 	}
 
 	if err != nil {

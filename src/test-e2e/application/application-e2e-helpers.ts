@@ -1,10 +1,10 @@
 import { browser, promise } from 'protractor';
 
-import { IApp, IRoute, ISpace } from '../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../frontend/app/store/types/api.types';
+import { IApp, IRoute, ISpace } from '../../frontend/packages/cloud-foundry/src/cf-api.types';
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 
@@ -27,8 +27,8 @@ export class ApplicationE2eHelper {
 
   /**
    * Get default sanitized URL name for App
-   * @param {string} appName Name of the app
-   * @returns {string} URL friendly name
+   * @param appName Name of the app
+   * @returns URL friendly name
    */
   static getHostName = (appName) => appName.replace(/[\.:-]/g, '_');
 

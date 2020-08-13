@@ -1,10 +1,10 @@
 import { promise } from 'protractor';
 
-import { CFResponse } from '../../frontend/app/store/types/api.types';
-import { EndpointModel } from '../../frontend/app/store/types/endpoint.types';
-import { E2ESetup, e2e } from '../e2e';
+import { EndpointModel } from '../../frontend/packages/store/src/types/endpoint.types';
+import { e2e, E2ESetup } from '../e2e';
 import { E2EHelpers } from './e2e-helpers';
 import { RequestHelpers } from './request-helpers';
+import { CFResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
 
 export class CFRequestHelpers extends RequestHelpers {
 
@@ -26,6 +26,10 @@ export class CFRequestHelpers extends RequestHelpers {
         const cnsis = JSON.parse(response) as EndpointModel[];
         return cnsis.find(cnsi => cnsi.name === cfName);
       });
+  }
+
+  getDefaultCFEndpoint = () => {
+    return this.e2eHelper.secrets.getDefaultCFEndpoint();
   }
 
   getCfGuid = (cfName?: string): promise.Promise<string> =>

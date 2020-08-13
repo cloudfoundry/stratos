@@ -1,0 +1,43 @@
+.diagnostics-page {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 0;
+  &__version {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  &__card {
+    margin-bottom: 24px;
+    z-index: 1;
+  }
+  &__admin-card {
+    border-left-style: solid;
+    border-left-width: 4px;
+  }
+  &__admin {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+  }
+  &__migrations {
+    padding-left: 36px;
+    width: 100%;
+  }
+  &__columns {
+    display: flex;
+    flex-direction: row;
+  }
+  &__two-column {
+    flex: 1;
+  }
+  &__maxed {
+    &__content {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}

@@ -37,16 +37,32 @@ function clean() {
   local ITEMS=$1
   local PREFIX=$2
   local CMD=$3
-  local REGEX="^($PREFIX)(.*)\.([0-9]*)[Tt]([0-9]*)[zZ].*"
+  local REGEX=""
   local NOW=$(date "+%s")
+
+  if [ -z "$4" ]; then
+    local REGEX="^($PREFIX)(.*)\.([0-9\-]*)[Tt]([0-9:]*)([zZ]|\.[0-9]*z).*"
+  else
+    local REGEX="$4"
+  fi
 
   while IFS= read -r line
   do
-    NAME="${line%% *}"
+    if [ -z "$5" ]; then
+      NAME="${line%% *}"
+    else
+      NAME="${line}"
+    fi
+
     if [[ $NAME =~ $REGEX ]]; then
       DS="${BASH_REMATCH[3]}"
+      DS=${DS//_/}
+      DS=${DS//-/}
       TS="${BASH_REMATCH[4]}"
+      TS=${TS//_/}
+      TS=${TS//:/}
       TS="${TS:0:6}"
+
       if [[ "$unamestr" == 'Darwin' ]]; then
         EPOCH=$(date -j -f "%Y%m%d:%H%M%S" "$DS:$TS" "+%s")
       else
@@ -54,8 +70,8 @@ function clean() {
         EPOCH=$(date -d "$TIMESTAMP" "+%s")
       fi
       DIFF=$(($NOW-$EPOCH))
-      # Delete anything older than 6 hours
-      if [ $DIFF -gt 21600 ]; then
+      # Delete anything older than 2 hours
+      if [ $DIFF -gt 7200 ]; then
         if [ $DRYRUN == "false" ]; then
           echo "$NAME  [DELETE]"
           cf $CMD $NAME -f
@@ -84,4 +100,35 @@ echo "Cleaning old Service Instances in e2e org/space"
 SERVICES="$(cf services)"
 clean "$SERVICES" "acceptance\.e2e\." "delete-service"
 
+cf target -o e2e
+echo "Cleaning old Spaces in e2e org"
+SPACES="$(cf spaces)"
+clean "$SPACES" "acceptance\.e2e\." "delete-space"
+
+# Users
+echo "Cleaning test Users"
+USERS=$(cf space-users e2e e2e | grep "accept" | sed -e 's/^[[:space:]]*//')
+clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+
+# user -a with org users so we get all users (including those without roles)
+USERS=$(cf org-users -a e2e | grep "accept" | sed -e 's/^[[:space:]]*//')
+clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+
+# Users without roles
+echo "Cleaning users without roles"
+USERS=$(cf curl "/v2/users?results-per-page=100" | jq -r .resources[].entity.username)
+clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travisci)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travis)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travisci)(-manage-by-username)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+
+# Routes
+echo "Cleaning routes"
+ROUTES=$(cf curl "v2/routes?results-per-page=100&inline-relations-depth=2&include-relations=domain" | jq -r '.resources[].entity | .domain.entity.name + " --hostname=" + .host + " --path=" + .path')
+clean "$ROUTES" "-" "delete-route" "([0-9a-z\.])*( --hostname=acceptance_e2e_travisci_)(20[0-9_]*)[Tt]([0-9_]*)[zZ].*" "true"
+clean "$ROUTES" "-" "delete-route" "([0-9a-z\.])*( --hostname=acceptance_e2e_travis_)(20[0-9_]*)[Tt]([0-9_]*)[zZ].*" "true"
+
 echo "Done"
+
+# Get users without usernames
+#cf curl "/v2/users?results-per-page=10" | jq '.resources[] | { "username": .entity.username, "guid": .metadata.guid, "created": .metadata.created_at }' | jq 'select(.username==null)' | jq '. | select(.guid|match("^[0-9a-z]*-[0-9a-z]*-[0-9a-z]*[0-9a-z]*"))'

@@ -1,5 +1,5 @@
 #!/bin/bash
-CREATE=true
+CREATE="true"
 ORG=many-apps
 SPACE=many-apps
 APP_PREFIX=many-apps
@@ -25,12 +25,12 @@ done
 echo "Creating $COUNT apps in org '$ORG' space '$SPACE'"
 
 # cf login -a https://api.local.pcfdev.io --skip-ssl-validation
-if [ "$CREATE" = true ]; then
+if [ "$CREATE" = "true" ]; then
     cf create-org $ORG
 fi
 cf target -o $ORG
 
-if [ "$CREATE" = true ]; then
+if [ "$CREATE" = "true" ]; then
     cf create-space $SPACE
 fi
 cf target -s $SPACE
@@ -48,4 +48,4 @@ do
       cf bind-service $APP $SERVICE
     fi
 done
-echo "Created $COUNT apps in org '$ORG' space '$SPACE'"
+echo "Created $counter apps in org '$ORG' space '$SPACE'"

@@ -1,0 +1,127 @@
+suite: test stratos user invite configuration
+templates:
+  - deployment.yaml
+  - secrets.yaml
+
+tests:
+  - it: should have default SMTP configuration
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: proxy
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: SMTP_AUTH
+            value: "false"
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: SMTP_HOST
+            value: ""
+tests:
+  - it: should allow SMTP configuration to be set
+    set:
+      env.SMTP_AUTH: "true"
+      env.SMTP_FROM_ADDRESS: "test@email.com"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: proxy
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: SMTP_AUTH
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: SMTP_FROM_ADDRESS
+            value: "test@email.com"
+  - it: should allow SMTP configuration to be set for host/port
+    set:
+      env.SMTP_HOST: "test_host"
+      env.SMTP_PORT: "4567"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: proxy
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: SMTP_HOST
+            value: "test_host"
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: SMTP_PORT
+            value: "4567"
+  - it: should allow SMTP configuration to be set for email sibject
+    set:
+      console.userInviteSubject: "test subject"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: proxy
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: INVITE_USER_SUBJECT
+            value: "test subject"
+  - it: should allow template configuration to be set
+    set:
+      console.templatesConfigMapName: "templateCMName"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: proxy
+      - contains:
+          path: spec.template.spec.containers[1].volumeMounts
+          content:
+            mountPath: /etc/templates/
+            name: "RELEASE-NAME-templates"
+            readOnly: true
+  - it: should allow template configuration to be set and volume used
+    set:
+      console.templatesConfigMapName: "templateCMName"
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: "RELEASE-NAME-templates"
+            configMap:
+              name: templateCMName
+  - it: should allow SMTP configuration to be set for username/password
+    set:
+      env.SMTP_USER: "test_user"
+      env.SMTP_PASSWORD: "test_password"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: proxy
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: SMTP_USER
+            valueFrom:
+              secretKeyRef:
+                key: smtpUser
+                name: RELEASE-NAME-secret
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: SMTP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: smtpPassword
+                name: RELEASE-NAME-secret
+      - equal:
+          path: data.smtpUser
+          value: dGVzdF91c2Vy
+        template: secrets.yaml
+        documentIndex: 0
+      - equal:
+          path: data.smtpPassword
+          value: dGVzdF9wYXNzd29yZA==
+        template: secrets.yaml
+        documentIndex: 0

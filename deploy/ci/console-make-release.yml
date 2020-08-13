@@ -4,7 +4,6 @@ resource_types:
   type: docker-image
   source:
     repository: splatform/stratos-git-tag-resource
-    tag: "latest"
 resources:
 # Stratos Git Repository
 - name: stratos
@@ -68,9 +67,16 @@ jobs:
         GITHUB_REPO: ((helm-repo-github-repository))
         GITHUB_TOKEN: ((github-access-token))
         GIT_PRIVATE_KEY: ((github-private-key))
-        GITHUB_TOKEN: ((github-access-token))
         DOCKER_ORG: ((docker-organization))
         DOCKER_REGISTRY: ((docker-registry))
         HELM_REPO_PATH: ((helm-repo-path))
         HELM_REPO_BRANCH: ((helm-repo-branch))
-
+        SOURCE_REPO_ORG: ((stratos-repository-organization))
+        SOURCE_REPO_REPO: ((stratos-repository))
+        HELM_MIRROR_BASE_URL: ((web-server-base-url))
+        HELM_RELEASE_GITCLONE: ((release-helm-repo))
+        HELM_RELEASE_REPO_NAME: ((release-helm-repo-name))
+        HELM_RELEASE_REPO_BRANCH: ((release-helm-repo-branch))
+        HELM_RELEASE_REPO_FOLDER: ((release-helm-stable-folder))
+        HELM_RELEASE_REGISTRY_HOST: ((release-repository))
+        HELM_RELEASE_REGISTRY_ORG: ((release-repository-organization))

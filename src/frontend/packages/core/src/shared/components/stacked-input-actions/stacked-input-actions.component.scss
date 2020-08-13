@@ -1,0 +1,11 @@
+.stacked-input {
+  &__add {
+    &--content {
+      align-items: center;
+      display: flex;
+      mat-icon {
+        padding-left: 5px;
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+<app-page-header>
+  Select Endpoint
+</app-page-header>
+<app-api-entity-type-selector [entityTypes]="connectedEndpointsOfType$ | async"
+  (entitySelected)="endpointSelected($event)">
+</app-api-entity-type-selector>

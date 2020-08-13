@@ -1,0 +1,8 @@
+# Values to be used to render the Helm Chart to ensure we get the full list of images in the Chart
+
+# i.e. with all features enabled
+
+# Use empty docker repository so names are consistent
+kube:
+  registry:
+    hostname:

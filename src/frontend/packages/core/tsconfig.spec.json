@@ -1,0 +1,8 @@
+{
+  "extends": "../../../tsconfig.spec.json",
+  "compilerOptions": {
+    "outDir": "../../../../out-tsc"
+  },
+  "files": ["src/test.ts", "src/polyfills.ts"],
+  "include": ["**/*.spec.ts", "**/*.d.ts"]
+}

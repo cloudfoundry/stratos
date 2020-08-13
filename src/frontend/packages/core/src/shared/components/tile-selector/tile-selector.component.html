@@ -1,0 +1,17 @@
+<div class="tile-selectors">
+  <ng-container *ngTemplateOutlet="tile; context:{ options: options, selected: selected }"></ng-container>
+  <ng-container *ngIf="showingMore && hiddenOptions.length > 0">
+    <ng-container *ngTemplateOutlet="tile; context:{ options: hiddenOptions, selected: selected }"></ng-container>
+  </ng-container>
+  <ng-container *ngIf="hiddenOptions.length > 0">
+    <div (click)="toggleMore()" class="tile-selector__more">
+      {{ showingMore ? 'Show less' : 'Show more' }}
+    </div>
+  </ng-container>
+</div>
+
+<ng-template #tile let-options="options" let-selected="selected">
+  <app-tile-selector-tile *ngFor="let tile of options"
+    (tileSelect)="selectionChange(tile)" [tile]="tile" [active]="selected === tile || !selected">
+  </app-tile-selector-tile>
+</ng-template>

@@ -5,10 +5,11 @@ set -e
 echo "Stratos e2e tests"
 echo "================="
 
+DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../.. && pwd)"
+
 echo "Checking docker version"
 
 docker version
-docker-compose version
 
 echo "Preparing for e2e tests..."
 
@@ -17,9 +18,6 @@ wget https://travis.capbristol.com/yaml --no-check-certificate -O ./secrets.yaml
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
 ./deploy/tools/generate_cert.sh
-
-# There are two ways of running - building and deploying a full docker-compose deployment
-# or doing a local build and running that with sqlite
 
 # Single arg if set to 'video' will use ffmpeg to capture the browser window as a video as the tests run
 CAPTURE_VIDEO=$1
@@ -44,26 +42,30 @@ fi
 
 echo "Using local deployment for e2e tests"
 # Quick deploy locally
-# Start a local UAA - this will take a few seconds to come up in the background
-docker run -d -p 8080:8080 splatform/stratos-uaa
 
-# Get go 1.0 and dep
-curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-chmod +x ~/bin/gimme
-eval "$(gimme 1.9)"
-curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-go version
-dep version
+# Build if needed or use existing build for this commit
+DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+set +e
+source "${DIRNAME}/e2e-build-script.sh"
+set -e
 
-npm run build
-npm run build-backend
 # Copy travis config.properties file
 cp deploy/ci/travis/config.properties src/jetstream/
 pushd src/jetstream
 ./jetstream > backend.log &
 popd
 
-E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
+CHROME_VERSION=$(google-chrome --version | grep -iEo "[0-9.]{10,20}")
+echo "Chrome version: ${CHROME_VERSION}"
+
+npm run update-webdriver -- --versions.chrome=${CHROME_VERSION}
+
+export STRATOS_E2E_BASE_URL="https://127.0.0.1:5443"
+
+E2E_TARGET="e2e -- --no-webdriver-update --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
+
+# Set Stratos debug if running a PR with the appropriate label
+source "${DIRPATH}/deploy/ci/travis/check-e2e-pr.sh"
 
 # Capture video if configured
 if [ "$CAPTURE_VIDEO" == "video" ]; then

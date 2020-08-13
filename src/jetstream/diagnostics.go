@@ -6,7 +6,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -35,10 +34,11 @@ func (p *portalProxy) StoreDiagnostics() {
 	}
 
 	// Deployment information - when deployed via Helm
-	diagnostics.HelmName = config.GetString("HELM_NAME")
-	diagnostics.HelmRevision = config.GetString("HELM_REVISION")
-	diagnostics.HelmChartVersion = config.GetString("HELM_CHART_VERSION")
-	diagnostics.HelmLastModified = config.GetString("HELM_LAST_MODIFIED")
+
+	diagnostics.HelmName = p.Env().String("HELM_NAME", "")
+	diagnostics.HelmRevision = p.Env().String("HELM_REVISION", "")
+	diagnostics.HelmChartVersion = p.Env().String("HELM_CHART_VERSION", "")
+	diagnostics.HelmLastModified = p.Env().String("HELM_LAST_MODIFIED", "")
 
 	// Deployment type
 	switch {
@@ -46,9 +46,9 @@ func (p *portalProxy) StoreDiagnostics() {
 		diagnostics.DeploymentType = "Kubernetes"
 	case p.Config.IsCloudFoundry:
 		diagnostics.DeploymentType = "Cloud Foundry"
-	case len(config.GetString("STRATOS_DEPLOYMENT_DOCKER")) > 0:
+	case len(p.Env().String("STRATOS_DEPLOYMENT_DOCKER", "")) > 0:
 		diagnostics.DeploymentType = "Docker"
-	case len(config.GetString("STRATOS_DEPLOYMENT_DOCKER_AIO")) > 0:
+	case len(p.Env().String("STRATOS_DEPLOYMENT_DOCKER_AIO", "")) > 0:
 		diagnostics.DeploymentType = "Docker All-in-One"
 	default:
 		diagnostics.DeploymentType = "Development"

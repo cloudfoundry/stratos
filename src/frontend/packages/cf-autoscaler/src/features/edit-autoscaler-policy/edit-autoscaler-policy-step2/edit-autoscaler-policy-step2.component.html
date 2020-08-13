@@ -1,0 +1,130 @@
+<div *ngIf="appAutoscalerPolicy$ | async as policy">
+  <p>Add scaling rules that work with built-in metrics to scale your application. Metrics are averaged over all the
+    instances of your application.</p>
+  <app-tile-grid class="app-autoscaler-tile-grid-100">
+    <app-tile-group *ngFor="let rule of policy.scaling_rules_form; let index = index">
+      <app-tile>
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              Rule {{index+1}}:
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="autoscaler-policy-edit-trigger-item">
+            <div *ngIf="editIndex!=index" class="autoscaler-policy-edit-trigger-item-desc">
+              If average {{rule.metric_type}} {{rule.operator}} {{rule.threshold}}
+              {{getMetricUnit(rule.metric_type, rule.unit)}}
+              for {{rule.breach_duration_secs}} seconds, then {{rule.adjustment}} instances. Cooldown:
+              {{rule.cool_down_secs}} seconds.
+            </div>
+            <div *ngIf="editIndex==index">
+              <form [formGroup]="editTriggerForm" validate>
+                If average
+                <mat-form-field *ngIf="metricTypes.length > 1">
+                  <input matInput placeholder="Metric Type" type="text" name="metric_type" formControlName="metric_type"
+                    [matAutocomplete]="metricTypeAuto" required>
+                  <mat-autocomplete #metricTypeAuto="matAutocomplete">
+                    <mat-option *ngFor="let metricType of filteredMetricTypes$ | async" [value]="metricType">
+                      {{metricType}}</mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+                <mat-form-field *ngIf="metricTypes.length > 1">
+                  <mat-select class="reset-margin" placeholder="Operator" name="operator" formControlName="operator"
+                    required>
+                    <mat-option *ngFor="let operator of operatorTypes" [value]="operator">
+                      {{ operator }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field>
+                  <input matInput placeholder="Threshold" type="number" name="threshold" formControlName="threshold"
+                    required>
+                </mat-form-field>
+                <mat-form-field *ngIf="getMetricUnit(editMetricType) == ''">
+                  <input matInput placeholder="Unit" type="text" name="unit" formControlName="unit">
+                </mat-form-field>
+                {{getMetricUnit(editMetricType)}} for
+                <mat-form-field>
+                  <input matInput placeholder="Breach Duration" type="number" name="breach_duration_secs"
+                    formControlName="breach_duration_secs">
+                </mat-form-field>
+                seconds, then {{editScaleType=='upper'?'add':'remove'}}
+                <mat-form-field>
+                  <input matInput placeholder="Adjustment" type="number" name="adjustment" formControlName="adjustment"
+                    required>
+                </mat-form-field>
+                <mat-form-field *ngIf="metricTypes.length > 1">
+                  <mat-select class="reset-margin" placeholder="Adjustment Type" name="adjustment_type"
+                    formControlName="adjustment_type" required>
+                    <mat-option [value]="'value'">instances</mat-option>
+                    <mat-option [value]="'percentage'">% instances</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                . Cooldown:
+                <mat-form-field>
+                  <input matInput placeholder="Cooldown" type="number" name="cool_down_secs"
+                    formControlName="cool_down_secs">
+                </mat-form-field>
+                seconds.
+              </form>
+              <mat-error *ngIf="editTriggerForm.get('metric_type').hasError('required')">
+                Metric type is required
+              </mat-error>
+              <mat-error *ngIf="editTriggerForm.get('metric_type').hasError('alertInvalidPolicyTriggerMetricName')">
+                {{policyAlert.alertInvalidPolicyTriggerMetricName}}
+              </mat-error>
+              <mat-error *ngIf="editTriggerForm.get('threshold').hasError('required')">
+                Threshold is required
+              </mat-error>
+              <mat-error *ngIf="editTriggerForm.get('threshold').hasError('alertInvalidPolicyTriggerThreshold100')">
+                {{policyAlert.alertInvalidPolicyTriggerThreshold100}}
+              </mat-error>
+              <mat-error *ngIf="editTriggerForm.get('threshold').hasError('alertInvalidPolicyTriggerThresholdRange')">
+                <span *ngIf="editScaleType=='upper'">
+                  {{policyAlert.alertInvalidPolicyTriggerUpperThresholdRange}}
+                </span>
+                <span *ngIf="editScaleType!='upper'">
+                  {{policyAlert.alertInvalidPolicyTriggerLowerThresholdRange}}
+                </span>
+              </mat-error>
+              <mat-error
+                *ngIf="editTriggerForm.get('breach_duration_secs').hasError('min') || editTriggerForm.get('breach_duration_secs').hasError('max')">
+                {{policyAlert.alertInvalidPolicyTriggerBreachDurationRange}}
+              </mat-error>
+              <mat-error *ngIf="editTriggerForm.get('adjustment').hasError('required')">
+                Adjustment is required
+              </mat-error>
+              <mat-error *ngIf="editTriggerForm.get('adjustment').hasError('alertInvalidPolicyTriggerStepRange')">
+                <span *ngIf="editAdjustmentType=='value'">
+                  {{policyAlert.alertInvalidPolicyTriggerStepRange}}
+                </span>
+                <span *ngIf="editAdjustmentType!='value'">
+                  {{policyAlert.alertInvalidPolicyTriggerStepPercentageRange}}
+                </span>
+              </mat-error>
+              <mat-error
+                *ngIf="editTriggerForm.get('cool_down_secs').hasError('min') || editTriggerForm.get('cool_down_secs').hasError('max')">
+                {{policyAlert.alertInvalidPolicyTriggerCooldownRange}}
+              </mat-error>
+            </div>
+          </mat-card-content>
+          <mat-card-actions class="autoscaler-policy-edit__actions">
+            <button id="autoscaler-policy-edit-edit" *ngIf="editIndex!=index" (click)="editTrigger(index)"
+              [disabled]="editIndex!=-1" mat-icon-button>
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button id="autoscaler-policy-edit-done" *ngIf="editIndex==index" (click)="finishTrigger()"
+              [disabled]="editTriggerForm.invalid" mat-icon-button>
+              <mat-icon>done</mat-icon>
+            </button>
+            <button id="autoscaler-policy-edit-delete" (click)="removeTrigger(index)" mat-icon-button>
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
+  </app-tile-grid>
+  <button id="autoscaler-policy-edit-add" color="accent" mat-button mat-raised-button (click)="addTrigger()"
+    [disabled]="editIndex!=-1">Add</button>
+</div>

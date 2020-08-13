@@ -1,10 +1,10 @@
 import { browser, promise } from 'protractor';
 
-import { ISpace } from '../../../frontend/app/core/cf-api.types';
-import { APIResource } from '../../../frontend/app/store/types/api.types';
+import { ISpace } from '../../../frontend/packages/cloud-foundry/src/cf-api.types';
+import { APIResource } from '../../../frontend/packages/store/src/types/api.types';
 import { e2e } from '../../e2e';
 import { E2EConfigCloudFoundry } from '../../e2e.types';
-import { CFHelpers } from '../../helpers/cf-helpers';
+import { CFHelpers } from '../../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { ListComponent } from '../../po/list.po';
 import { CfSpaceLevelPage } from './cf-space-level-page.po';
@@ -136,7 +136,7 @@ describe('Space Routes List -', () => {
 
       let expectedOrder: string[];
       routesList.table.getTableData().then(rows => {
-        const originalOrder = rows.map(row => row['route']);
+        const originalOrder = rows.map(row => row.route);
         expectedOrder = new Array(originalOrder.length);
         for (let i = 0; i < originalOrder.length; i++) {
           expectedOrder[originalOrder.length - i - 1] = originalOrder[i];
@@ -146,7 +146,7 @@ describe('Space Routes List -', () => {
       routesList.table.toggleSort('Creation Date');
 
       routesList.table.getTableData().then(rows => {
-        const newOrder = rows.map(row => row['route']);
+        const newOrder = rows.map(row => row.route);
         expect(expectedOrder).toEqual(newOrder);
       });
     }
@@ -174,9 +174,10 @@ describe('Space Routes List -', () => {
     const spaceName = E2EHelpers.createCustomName(customRouteLabel) + '-multi-page';
 
     let routeHosts;
+    const initialPageSize = 9;
 
     beforeAll(() => {
-      routeHosts = createRouteHosts(7);
+      routeHosts = createRouteHosts(10);
       setup(spaceName, routeHosts, true);
       expect(routesList.getTotalResults()).toBeGreaterThanOrEqual(routeHosts.length);
     }, timeAllowed);
@@ -188,10 +189,10 @@ describe('Space Routes List -', () => {
       expect(routesList.getTotalResults()).toBeLessThan(80);
       expect(routesList.pagination.isPresent()).toBeTruthy();
 
-      expect(routesList.table.getRowCount()).toBe(5);
-      expect(routesList.pagination.getPageSize()).toEqual('5');
-      expect(routesList.pagination.getTotalResults()).toBeGreaterThan(5);
-      expect(routesList.pagination.getTotalResults()).toBeLessThanOrEqual(7);
+      expect(routesList.table.getRowCount()).toBe(initialPageSize);
+      expect(routesList.pagination.getPageSize()).toEqual(initialPageSize.toString());
+      expect(routesList.pagination.getTotalResults()).toBeGreaterThan(initialPageSize);
+      expect(routesList.pagination.getTotalResults()).toBeLessThanOrEqual(11);
 
       expect(routesList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
       expect(routesList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeFalsy();
@@ -232,15 +233,15 @@ describe('Space Routes List -', () => {
     it('Change Page Size', () => {
 
       routesList.pagination.setPageSize('80');
-      expect(routesList.table.getRowCount()).toBeGreaterThan(5);
+      expect(routesList.table.getRowCount()).toBeGreaterThan(initialPageSize);
 
       expect(routesList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
       expect(routesList.pagination.getNavPreviousPage().getComponent().isEnabled()).toBeFalsy();
       expect(routesList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
       expect(routesList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
 
-      routesList.pagination.setPageSize('5');
-      expect(routesList.table.getRowCount()).toBe(5);
+      routesList.pagination.setPageSize(initialPageSize.toString());
+      expect(routesList.table.getRowCount()).toBe(initialPageSize);
 
     });
 

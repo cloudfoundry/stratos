@@ -1,0 +1,19 @@
+<span *ngIf="!chips || !chips.length">None</span>
+<mat-chip-list class="app-chips" [ngClass]="{'mat-chip-list__stacked': stacked, 'mat-chip-list__rtl': orientation==='rtl'}" *ngIf="chips && chips.length">
+  <mat-chip class="app-chip" *ngFor="let chip of chips | slice:0:limit" [ngClass]="chip.color ? chip.color : ''">
+    <div class="app-chip__container">
+      <a *ngIf="!!chip.url; else notALink" [routerLink]="[chip.url.link]" [queryParams]="chip.url.params">{{chip[displayProperty]}}</a>
+      <ng-template #notALink>
+        <div class="app-chip__label">{{chip[displayProperty]}}</div>
+      </ng-template>
+      <ng-container *ngIf="chip.clearAction && !(chip.hideClearButton$ | async)">
+        <mat-icon *ngIf="!chip.busy || !(chip.busy | async)" (click)="chip.clearAction(chip)" class="app-chip__close">close</mat-icon>
+        <mat-spinner *ngIf="chip.busy && (chip.busy | async)" diameter="15" class="app-chip__busy-spinner"></mat-spinner>
+      </ng-container>
+      </div>
+  </mat-chip>
+  <button mat-button color="primary" class="app-chips__limit" [ngClass]="{'app-chips__show-more': atLowerLimit, 'app-chips__show-less': !atLowerLimit}" *ngIf="chips.length > lowerLimit" (click)="toggleLimit()" appClickStopPropagation>
+    <span *ngIf="atLowerLimit">+{{ chips.length - limit }}</span>
+    <span *ngIf="!atLowerLimit">Show less</span>
+  </button>
+</mat-chip-list>

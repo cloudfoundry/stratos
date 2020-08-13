@@ -67,7 +67,7 @@ http {
 
         location / {
             root                    /var/vcap/packages/frontend;
-            add_header X-Frame-Options DENY;
+            add_header X-Frame-Options SAMEORIGIN;
             add_header Cache-Control no-cache;
         }
     }

@@ -1,0 +1,56 @@
+@mixin table-row-theme($theme, $app-theme) {
+  $status-colors: map-get($app-theme, status);
+  $error-color: map-get($status-colors, danger);
+  $warn-color: map-get($status-colors, warning);
+  $info-color: map-get($status-colors, info);
+  $text-color: map-get($status-colors, text);
+  $primary: map-get($theme, primary);
+  $primary-color: mat-color($primary);
+  $foreground: map-get($theme, foreground);
+  .table-row {
+    border-bottom-color: mat-color($foreground, divider);
+    &.in-expanded-row {
+      border-left-color: mat-color($foreground, divider);
+    }
+
+    &__inner {
+      .table-row__inner__expansion.mat-expansion-panel {
+        box-shadow: none;
+        box-sizing: inherit;
+      }
+    }
+
+  }
+  .table-row-wrapper {
+    &__errored {
+      .table-row__error-content {
+        mat-icon {
+          color: $error-color;
+        }
+      }
+    }
+    &__warning {
+      .table-row__error-content {
+        mat-icon {
+          color: $warn-color;
+        }
+      }
+    }
+    &__info {
+      .table-row__error-content {
+        mat-icon {
+          color: $info-color;
+        }
+      }
+    }
+    &__highlighted {
+      background-color: transparentize($primary-color, .95);
+      border-left-color: $primary-color;
+    }
+  }
+  .meta-card {
+    &.error {
+      background-color: transparentize($error-color, .9);
+    }
+  }
+}

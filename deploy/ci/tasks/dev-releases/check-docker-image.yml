@@ -1,0 +1,44 @@
+---
+platform: linux
+inputs:
+- name: stratos
+- name: image-tag
+image_resource:
+  type: docker-image
+  source:
+   # Generated using scripts/Dockerfile.stratos-ci
+   repository: splatform/stratos-ci-concourse
+
+run:
+  path: sh
+  args:
+    - -c
+    - |
+      # Check that an image with the same Commit DOES NOT exist
+      ROOT_DIR=${PWD}
+      VERSION=$(cat image-tag/v2-version)
+      FULL_VERSION=$(cat image-tag/v2-alpha-tag) 
+      GIT_TAG=$(cat image-tag/v2-tag) 
+      STRATOS=${ROOT_DIR}/stratos
+      COMMIT_HASH=$(cat image-tag/v2-commit)
+
+      source ${STRATOS}/deploy/ci/tasks/dev-releases/docker-image-helper.sh
+
+      cat $GIT_TAG
+      cat $FULL_VERSION
+      cat $VERSION
+      cat $COMMIT_HASH
+
+      # Get the Commit Label for the image
+      COMMIT=`getDockerImageCommitLabel $DOCKER_REGISTRY $DOCKER_USERNAME $DOCKER_PASSWORD $DOCKER_ORG $IMAGE_NAME $TAG_NAME`
+
+      echo "Current Docker Image has Commit $COMMIT"
+
+      if [ "$COMMIT" == "$COMMIT_HASH" ]; then
+        echo "Image has already been built and published for commit ${COMMIT_HASH}"
+        exit 1
+      fi
+
+      echo "Docker Image has not been build from this commit"
+
+      echo "OK"

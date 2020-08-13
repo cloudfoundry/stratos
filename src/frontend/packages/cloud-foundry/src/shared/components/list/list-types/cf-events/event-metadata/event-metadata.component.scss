@@ -1,0 +1,21 @@
+.details {
+  &__section {
+    display: flex;
+    flex-direction: column;
+
+    &:not(:last-of-type) {
+      padding-bottom: 5px;
+    }
+
+    &__key {
+      font-style: italic;
+    }
+  }
+}
+
+.dialog {
+  &__actions{
+    display: flex;
+    justify-content: center;
+  }
+}

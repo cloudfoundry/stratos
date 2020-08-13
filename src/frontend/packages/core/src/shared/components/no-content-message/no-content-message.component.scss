@@ -1,0 +1,62 @@
+.app-no-content-container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 15vh;
+  text-align: center;
+  width: 100%;
+  & > * {
+    margin-bottom: 20px;
+  }
+  > mat-icon {
+    font-size: 96px;
+    height: 96px;
+    width: 96px;
+  }
+  .first-line {
+    font-size: 30px;
+  }
+  .second-line {
+    font-size: 24px;
+  }
+  .first-line,
+  .second-line {
+    max-width: 700px;
+  }
+  &__link {
+    display: flex;
+    position: absolute;
+    right: 113px;
+    top: 54px;
+    &-icon {
+      font-size: 44px;
+      height: 44px;
+      transform: rotate(90deg);
+      width: 44px;
+    }
+    &-text {
+      font-size: 16px;
+      margin-top: 26px;
+    }
+  }
+  &__menu {
+    margin-top: 0;
+    // When in a menu, we don't want the menu to be too wide
+    max-width: 200px;
+    padding: 10px;
+
+    > mat-icon {
+      font-size: 72px;
+      height: 72px;
+      width: 72px;
+    }
+
+    .first-line {
+      font-size: 22px;
+    }
+    .second-line {
+      font-size: 16px;
+    }
+  }
+}

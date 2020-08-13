@@ -1,5 +1,6 @@
+import { browser, promise, ElementArrayFinder, Locator } from 'protractor';
 import { ElementFinder, protractor } from 'protractor/built';
-import { browser, promise } from 'protractor';
+
 import { E2EHelpers } from '../helpers/e2e-helpers';
 
 const until = protractor.ExpectedConditions;
@@ -9,8 +10,14 @@ const until = protractor.ExpectedConditions;
  */
 export class Component {
 
-  public static waitUntilNotShown(elm): promise.Promise<void> {
-    return browser.wait(until.invisibilityOf(elm), 5000);
+  public static waitUntilShown(elm, failMsg?: string): promise.Promise<void> {
+    const comp = new Component(elm);
+    return comp.waitUntilShown(failMsg);
+  }
+
+  public static waitUntilNotShown(elm, failMsg?: string): promise.Promise<void> {
+    const comp = new Component(elm);
+    return comp.waitUntilNotShown(failMsg);
   }
 
   public static scrollIntoView(elm: ElementFinder): promise.Promise<void> {
@@ -18,6 +25,10 @@ export class Component {
   }
 
   constructor(protected locator: ElementFinder) { }
+
+  all(allLocator: Locator): ElementArrayFinder {
+    return this.locator.all(allLocator);
+  }
 
   getComponent(): ElementFinder {
     return this.locator;
@@ -32,22 +43,32 @@ export class Component {
   }
 
   // Pass an optional description to help when debugging test issues
-  waitUntilShown(elementDescription = 'Element'): promise.Promise<void> {
-    return browser.wait(until.presenceOf(this.locator), 5000,
-      elementDescription + ' taking too long to appear in the DOM').then(() => {
-        return browser.wait(until.visibilityOf(this.locator), 5000, elementDescription + ' not visible timing out').then(v => {
-          // Slight delay for animations
-          return browser.driver.sleep(100);
-        });
-      });
+  waitUntilShown(elementDescription = 'Element', waitDuration = 5000): promise.Promise<void> {
+    return browser.wait(until.presenceOf(this.locator), waitDuration, elementDescription + ' taking too long to appear in the DOM')
+      .then(() => browser.wait(until.visibilityOf(this.locator), waitDuration, elementDescription + ' not visible timing out'))
+      // Slight delay for animations
+      .then(() => browser.driver.sleep(250));
   }
 
   waitUntilNotShown(description = 'Element', timeout = 20000): promise.Promise<void> {
     return browser.wait(until.invisibilityOf(this.locator), timeout, description);
   }
 
+  waitForText(text: string, elementDescription = 'Element', waitDuration = 5000) {
+    return browser.wait(until.textToBePresentInElement(this.getComponent(), text), waitDuration,
+      `${elementDescription} with text '${text}' taking too long to appear in the DOM`);
+  }
+
   scrollIntoView(): promise.Promise<void> {
     return Component.scrollIntoView(this.locator);
+  }
+
+  scrollToTop(): promise.Promise<any> {
+    return new E2EHelpers().scrollToTop();
+  }
+
+  scrollToBottom(): promise.Promise<any> {
+    return new E2EHelpers().scrollToBottom();
   }
 
   protected hasClass(cls, element = this.locator): promise.Promise<boolean> {

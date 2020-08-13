@@ -1,0 +1,6 @@
+<ng-template #noEntries>
+  <app-no-content-message iconFont="stratos-icons" icon="route" [firstLine]="'This application has no routes'" [secondLine]="{
+      text: ''
+    }"></app-no-content-message>
+</ng-template>
+<app-list [noEntries]="noEntries"></app-list>

@@ -1,4 +1,5 @@
-import { by, element, promise } from 'protractor';
+import { browser, by, element, ElementFinder, promise } from 'protractor';
+
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { Component } from './component.po';
 
@@ -11,10 +12,9 @@ export enum SideNavMenuItem {
 }
 
 /**
- * Page Objeet for side navigation
+ * Page Object for side navigation
  */
 export class SideNavigation extends Component {
-
   private helpers = new E2EHelpers();
 
   constructor() {
@@ -23,7 +23,17 @@ export class SideNavigation extends Component {
 
   // Goto the specified menu item
   goto(menuItem: SideNavMenuItem): promise.Promise<void> {
-    return this.helpers.waitForElementAndClick(element(by.cssContainingText('.side-nav__item', menuItem)));
+    return this.helpers.waitForElementAndClick(this.getMenuItem(menuItem))
+      .then(() => browser.actions().mouseMove({ x: 500, y: 0 }).perform())
+      .then(() => browser.sleep(500));
+  }
+
+  isMenuItemPresent(menuItem: SideNavMenuItem) {
+    return this.getMenuItem(menuItem).isPresent();
+  }
+
+  getMenuItem(menuItem: SideNavMenuItem): ElementFinder {
+    return this.locator.element(by.cssContainingText('.side-nav__item', menuItem));
   }
 
 }
