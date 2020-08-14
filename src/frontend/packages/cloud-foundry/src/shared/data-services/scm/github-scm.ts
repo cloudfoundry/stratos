@@ -1,9 +1,11 @@
 import { HttpClient } from '@angular/common/http';
+import { flattenPagination } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { getGitHubAPIURL } from '../../../../../core/src/core/github.helpers';
 import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
+import { GithubFlattenerForArrayPaginationConfig, GithubFlattenerPaginationConfig } from './github-pagination.helper';
 import { GitSCM, SCMIcon } from './scm';
 import { GitSCMType } from './scm.service';
 
@@ -37,7 +39,14 @@ export class GitHubSCM implements GitSCM {
   }
 
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
-    return httpClient.get(`${this.gitHubURL}/repos/${projectName}/branches`) as Observable<GitBranch[]>;
+    const url = `${this.gitHubURL}/repos/${projectName}/branches`;
+    const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url)
+    const firstRequest = config.fetch(...config.buildFetchParams(1))
+    return flattenPagination(
+      null,
+      firstRequest,
+      config
+    )
   }
 
   getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
@@ -70,12 +79,18 @@ export class GitHubSCM implements GitSCM {
     if (prjParts.length > 1) {
       url = `${this.gitHubURL}/search/repositories?q=${prjParts[1]}+in:name+fork:true+user:${prjParts[0]}`;
     }
-    return httpClient.get(url).pipe(
-      filter((repos: any) => !!repos.items),
+
+    const config = new GithubFlattenerPaginationConfig<GitRepo>(httpClient, url)
+    const firstRequest = config.fetch(...config.buildFetchParams(1))
+    return flattenPagination(
+      null,
+      firstRequest,
+      config
+    ).pipe(
       map(repos => {
-        return repos.items.map(item => item.full_name);
+        return repos.map(item => item.full_name);
       })
-    );
+    )
   }
 
   public convertCommit(projectName: string, commit: any): GitCommit {
