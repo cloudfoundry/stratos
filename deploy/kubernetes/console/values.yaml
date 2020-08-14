@@ -108,6 +108,10 @@ console:
 
   # Node Selector for console Pod
   nodeSelector: {}
+
+  # ssl protocols and ciphers overrides - leave empty for defaults
+  sslProtocols:
+  sslCiphers:
   
 images:
   console: stratos-console
