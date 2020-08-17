@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs');
 
 // __dirname is the folder where build.js is located
-const STRATOS_DIR= path.resolve(__dirname, '..');
+const STRATOS_DIR = path.resolve(__dirname, '..');
 
 function processFile(filepath) {
   if (fs.existsSync(filepath)) {
@@ -23,14 +23,18 @@ function processFolder(dir) {
   if (!fs.existsSync(dir)) {
     return
   }
-  fs.readdirSync(dir).forEach( f => {
+  fs.readdirSync(dir).forEach(f => {
     let dirPath = path.join(dir, f);
-    const realPath = fs.realpathSync(dirPath);
-    const stats = fs.lstatSync(realPath);
-    if (stats.isDirectory()) {
-      processFolder(dirPath);
+    if (!fs.existsSync(dirPath)) {
+      fs.unlinkSync(dirPath);
     } else {
-      processFile(dirPath);
+      const realPath = fs.realpathSync(dirPath);
+      const stats = fs.lstatSync(realPath);
+      if (stats.isDirectory()) {
+        processFolder(dirPath);
+      } else {
+        processFile(dirPath);
+      }
     }
   });
 };
