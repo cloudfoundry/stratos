@@ -5,7 +5,12 @@ import { map } from 'rxjs/operators';
 
 import { getGitHubAPIURL } from '../../../../../core/src/core/github.helpers';
 import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
-import { GithubFlattenerForArrayPaginationConfig, GithubFlattenerPaginationConfig } from './github-pagination.helper';
+import {
+  GITHUB_PER_PAGE_PARAM,
+  GITHUB_PER_PAGE_PARAM_VALUE,
+  GithubFlattenerForArrayPaginationConfig,
+  GithubFlattenerPaginationConfig,
+} from './github-pagination.helper';
 import { GitSCM, SCMIcon } from './scm';
 import { GitSCMType } from './scm.service';
 
@@ -58,7 +63,12 @@ export class GitHubSCM implements GitSCM {
   }
 
   getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]> {
-    return httpClient.get(`${this.gitHubURL}/repos/${projectName}/commits?sha=${ref}`) as Observable<GitCommit[]>;
+    return httpClient.get<GitCommit[]>(
+      `${this.gitHubURL}/repos/${projectName}/commits?sha=${ref}`, {
+      params: {
+        [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()
+      }
+    });
   }
 
   getCloneURL(projectName: string): string {

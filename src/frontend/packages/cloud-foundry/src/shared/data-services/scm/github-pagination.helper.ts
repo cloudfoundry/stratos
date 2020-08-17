@@ -26,8 +26,8 @@ type GithubPaginationResponse<T = any> = {
  */
 type GithubPaginationArrayResponse<T = any> = T[];
 
-const GITHUB_PER_PAGE_PARAM = 'per_page';
-const GITHUB_PER_PAGE_PARAM_VALUE = 100;
+export const GITHUB_PER_PAGE_PARAM = 'per_page';
+export const GITHUB_PER_PAGE_PARAM_VALUE = 100;
 const GITHUB_MAX_PAGES = 5;
 const GITHUB_PAGE_PARAM = 'page';
 const GITHUB_LINK_PAGE_REGEX = /page=([\d]*)/

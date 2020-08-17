@@ -8,6 +8,8 @@ import { GitSCM, SCMIcon } from './scm';
 import { GitSCMType } from './scm.service';
 
 const gitLabAPIUrl = 'https://gitlab.com/api/v4';
+const GITLAB_PER_PAGE_PARAM = 'per_page';
+const GITLAB_PER_PAGE_PARAM_VALUE = 100;
 
 export class GitLabSCM implements GitSCM {
 
@@ -59,7 +61,13 @@ export class GitLabSCM implements GitSCM {
 
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
     const prjNameEncoded = encodeURIComponent(projectName);
-    return httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches`).pipe(
+    return httpClient.get(
+      `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches`, {
+      params: {
+        [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
+      }
+    }
+    ).pipe(
       map((data: any) => {
         const branches = [];
         data.forEach(b => {
@@ -87,7 +95,13 @@ export class GitLabSCM implements GitSCM {
 
   getCommits(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit[]> {
     const prjNameEncoded = encodeURIComponent(projectName);
-    return httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits?ref_name=${commitSha}`).pipe(
+    return httpClient.get(
+      `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits?ref_name=${commitSha}`, {
+      params: {
+        [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
+      }
+    }
+    ).pipe(
       map((data: any) => {
         const commits = [];
         data.forEach(c => commits.push(this.convertCommit(projectName, c)));
@@ -114,7 +128,11 @@ export class GitLabSCM implements GitSCM {
     if (prjParts.length > 1) {
       url = `${gitLabAPIUrl}/users/${prjParts[0]}/projects?search=${prjParts[1]}`;
     }
-    return httpClient.get(url).pipe(
+    return httpClient.get(url, {
+      params: {
+        [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
+      }
+    }).pipe(
       map((repos: any) => {
         return repos.map(item => item.path_with_namespace);
       })
