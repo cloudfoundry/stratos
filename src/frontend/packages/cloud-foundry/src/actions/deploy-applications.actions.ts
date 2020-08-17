@@ -86,6 +86,7 @@ export class FetchBranchesForProject implements PaginatedAction {
   type = FETCH_BRANCHES_FOR_PROJECT;
   entityType = gitBranchesEntityType;
   paginationKey: string;
+  flattenPagination = true;
 
   static createPaginationKey = (scm: GitSCM, projectName: string) => scm.getType() + ':' + projectName;
 }
