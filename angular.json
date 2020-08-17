@@ -106,15 +106,8 @@
         "build": {
           "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
-            "preserveSymlinks": true,
-            "outputPath": "dist/core",
-            "index": "src/frontend/packages/core/src/index.html",
-            "main": "src/frontend/packages/core/src/main.ts",
-            "polyfills": "src/frontend/packages/core/src/polyfills.ts",
-            "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
-            "assets": [],
-            "styles": [],
-            "scripts": []
+            "project": "src/frontend/packages/core/ng-package.json",
+            "tsConfig": "src/frontend/packages/core/tsconfig.app.json"
           },
           "configurations": {
             "production": {
