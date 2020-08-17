@@ -14,7 +14,7 @@ export const endpointStatusSelector = (state: InternalAppState): EndpointState =
 const endpointEntityKey = EntityCatalogHelpers.buildEntityKey(endpointEntityType, STRATOS_ENDPOINT_TYPE);
 export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointEntityKey);
 
-const endpointOfType = (type: string) =>
+export const endpointOfType = (type: string) =>
   (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
     return Object.values(endpoints || {}).reduce((endpointsOfType, endpoint) => {
       if (endpoint.cnsi_type === type) {

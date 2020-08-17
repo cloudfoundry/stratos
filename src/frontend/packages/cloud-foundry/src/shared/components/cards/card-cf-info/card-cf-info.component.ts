@@ -7,14 +7,11 @@ import { map, tap } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { ICfV2Info } from '../../../../cf-api.types';
-import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {
   UserInviteConfigurationDialogComponent,
-} from '../../../../features/cloud-foundry/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
-import {
-  UserInviteConfigureService,
-  UserInviteService,
-} from '../../../../features/cloud-foundry/user-invites/user-invite.service';
+} from '../../../../features/cf/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
+import { UserInviteConfigureService, UserInviteService } from '../../../../features/cf/user-invites/user-invite.service';
 
 @Component({
   selector: 'app-card-cf-info',

@@ -4,13 +4,11 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import {
-  CloudFoundrySpaceService,
-} from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-space.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
+import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud-foundry-space.service';
 
 @Component({
   selector: 'app-card-cf-space-details',

@@ -1,7 +1,7 @@
 <app-meta-card class="app-service-card" [actionMenu]="cardMenu" [entityConfig]="entityConfig">
   <app-meta-card-title>
     <div class="app-service-card__title">
-      {{ (serviceInstance$ | async)?.entity.entity.name}}
+      {{ (serviceInstance$ | async)?.entity.name}}
       <app-service-icon [service]="service$ | async"></app-service-icon>
     </div>
   </app-meta-card-title>
@@ -18,7 +18,25 @@
     <app-meta-card-key>{{ data.label }}</app-meta-card-key>
     <app-meta-card-value>{{ data.data$ | async }} </app-meta-card-value>
   </app-meta-card-item>
-
+  <app-meta-card-item *ngIf="!isUserProvidedServiceInstance">
+    <app-meta-card-key>Service Broker</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-service-broker [row]="service$ | async" [config]="brokerNameConfig">
+      </app-table-cell-service-broker>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item *ngIf="!isUserProvidedServiceInstance">
+    <app-meta-card-key>Service Scope</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-service-broker [row]="service$ | async" [config]="brokerScopeConfig">
+      </app-table-cell-service-broker>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Date Created On</app-meta-card-key>
+    <app-meta-card-value>{{ row.metadata.created_at | date:'medium'}}
+    </app-meta-card-value>
+  </app-meta-card-item>
   <app-meta-card-item *ngIf="envVarsAvailable$ | async as envVarData">
     <app-meta-card-key>Environment Variables</app-meta-card-key>
     <app-meta-card-value>

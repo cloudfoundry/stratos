@@ -137,6 +137,9 @@ import {
   TableCellServiceBindableComponent,
 } from './components/list/list-types/cf-services/table-cell-service-bindable/table-cell-service-bindable.component';
 import {
+  TableCellServiceBrokerComponent,
+} from './components/list/list-types/cf-services/table-cell-service-broker/table-cell-service-broker.component';
+import {
   TableCellServiceCfBreadcrumbsComponent,
 } from './components/list/list-types/cf-services/table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
 import {
@@ -248,6 +251,7 @@ const cfListTableCells: Type<TableCellCustom<any>>[] = [
   TableCellServiceReferencesComponent,
   TableCellServiceInstanceTagsComponent,
   TableCellCommitAuthorComponent,
+  TableCellServiceBrokerComponent
 ];
 
 const cfListCards: Type<CardCell<any>>[] = [

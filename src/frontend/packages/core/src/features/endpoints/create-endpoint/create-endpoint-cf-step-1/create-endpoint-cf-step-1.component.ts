@@ -51,6 +51,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   endpointTypeSupportsSSO = false;
   endpoint: StratosCatalogEndpointEntity;
+  show = false;
 
   constructor(
     activatedRoute: ActivatedRoute,

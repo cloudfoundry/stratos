@@ -14,7 +14,7 @@ import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { CoreTestingModule } from '../../../../../core/test-framework/core-test.modules';
 import { AppStoreModule } from '../../../../../store/src/store.module';
 import { CFAppState } from '../../../cf-app-state';
-import { ActiveRouteCfOrgSpace } from '../../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../../features/cf/cf-page.types';
 import { CfUserService } from '../../data-services/cf-user.service';
 import { AppNameUniqueDirective } from './app-name-unique.directive';
 

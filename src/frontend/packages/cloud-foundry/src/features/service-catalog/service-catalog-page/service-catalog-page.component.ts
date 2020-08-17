@@ -7,7 +7,7 @@ import {
   CfServicesListConfigService,
 } from '../../../shared/components/list/list-types/cf-services/cf-services-list-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
+import { getActiveRouteCfOrgSpaceProvider } from '../../cf/cf.helpers';
 
 @Component({
   selector: 'app-service-catalog-page',

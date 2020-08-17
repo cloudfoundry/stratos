@@ -7,8 +7,8 @@ import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserServiceTestProvider } from '../../../../../../../test-framework/user-service-helper';
-import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
-import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../../features/cf/cf-page.types';
+import { CfRolesService } from '../../../../../../features/cf/users/manage-users/cf-roles.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { TableCellSelectOrgComponent } from './table-cell-select-org.component';
 

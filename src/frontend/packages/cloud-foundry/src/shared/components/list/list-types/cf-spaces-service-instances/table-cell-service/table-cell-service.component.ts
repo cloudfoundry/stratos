@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import { cfEntityCatalog } from '../../../../../../../../cloud-foundry/src/cf-entity-catalog';
 import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -9,7 +9,11 @@ import { getServiceName } from '../../../../../../../../cloud-foundry/src/featur
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceInstance } from '../../../../../../cf-api-svc.types';
+import { IService, IServiceInstance } from '../../../../../../cf-api-svc.types';
+import {
+  TableCellServiceBrokerComponentConfig,
+  TableCellServiceBrokerComponentMode,
+} from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
 @Component({
   selector: 'app-table-cell-service',
@@ -20,12 +24,20 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
 
   serviceName$: Observable<string>;
   serviceUrl$: Observable<string>;
-  serviceBrokerName$: Observable<string>;
+  service$: Observable<APIResource<IService>>;
   // tslint:disable-next-line:ban-types
   isUserProvidedServiceInstance: Boolean;
 
   @Input() row: APIResource<IServiceInstance>;
   @Input() entityKey: string;
+
+  brokerNameConfig: TableCellServiceBrokerComponentConfig = {
+    mode: TableCellServiceBrokerComponentMode.NAME
+  }
+  brokerScopeConfig: TableCellServiceBrokerComponentConfig = {
+    mode: TableCellServiceBrokerComponentMode.SCOPE,
+    altScope: true
+  }
 
 
   ngOnInit() {
@@ -46,18 +58,9 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
         map(service => `/marketplace/${service.entity.entity.cfGuid}/${service.entity.metadata.guid}/summary`)
       );
 
-      this.serviceBrokerName$ = service$.pipe(
-        first(),
-        switchMap(service => {
-          const brokerGuid = service.entity.entity.service_broker_guid;
-          return cfEntityCatalog.serviceBroker.store.getEntityService(brokerGuid, service.entity.entity.cfGuid, {})
-            .waitForEntity$.pipe(
-              map(a => a.entity),
-              filter(res => !!res),
-              map(a => a.entity.name),
-              first()
-            );
-        })
+      this.service$ = service$.pipe(
+        filter(res => !!res),
+        map(a => a.entity),
       );
     }
   }

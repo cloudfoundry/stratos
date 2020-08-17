@@ -27,15 +27,13 @@ import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';
-import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
-import {
-  CloudFoundryEndpointService,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { getSpaceRolesString } from '../../../../../../features/cf/cf.helpers';
+import { CloudFoundryEndpointService } from '../../../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {
   CloudFoundryOrganizationService,
   createSpaceQuotaDefinition,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
-import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-quota';
+} from '../../../../../../features/cf/services/cloud-foundry-organization.service';
+import { SpaceQuotaHelper } from '../../../../../../features/cf/services/cloud-foundry-space-quota';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 

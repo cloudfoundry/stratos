@@ -12,7 +12,7 @@ import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointService,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { UserInviteService } from '../../../../features/cloud-foundry/user-invites/user-invite.service';
+import { UserInviteService } from '../../../../features/cf/user-invites/user-invite.service';
 import { CardCfInfoComponent } from './card-cf-info.component';
 
 describe('CardCfInfoComponent', () => {
