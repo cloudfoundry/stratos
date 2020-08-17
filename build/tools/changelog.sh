@@ -88,6 +88,7 @@ BREAKING_CHANGES="+label:breaking-change"
 
 mv ${CHANGELOG} CHANGELOG.old
 
+
 echo ""
 echo -e "${CYAN}${BOLD}Generating Change log - content for version ${MILESTONE} will be shown below"
 echo -e "---------------------------------------------------------------------${RESET}"
