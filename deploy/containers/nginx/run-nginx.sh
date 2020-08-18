@@ -33,7 +33,7 @@ NGINX_CIPHERS=${SSL_CIPHERS:-$DEFAULT_CIPHERS}
 echo "SSL Protocols : $NGINX_PROTOCOLS"
 echo "SSL Ciphers   : $NGINX_CIPHERS"
 
-sed -e 's/__PROTOCOLS__/'"${NGINX_PROTOCOLS}"'/g' /etc/nginx/nginx.conf
+sed -i -e 's/__PROTOCOLS__/'"${NGINX_PROTOCOLS}"'/g' /etc/nginx/nginx.conf
 sed -i -e 's/__CIPHERS__/'"${NGINX_CIPHERS}"'/g' /etc/nginx/nginx.conf
 
 echo "Starting nginx ..."
