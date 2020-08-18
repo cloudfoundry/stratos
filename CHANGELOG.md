@@ -1,5 +1,22 @@
 # Change Log
 
+## 4.0.1
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/4.0.0...4.0.1)
+
+This release contains a number of fixes and improvements:
+
+**Improvements:**
+
+- Helm Deployment: Allow nginx protocols and ciphers to be configured via values [\#4512](https://github.com/cloudfoundry/stratos/issues/4512)
+
+**Fixes:**
+
+- npm install can sometimes fail when symlinks from a previous Stratos version exist [\#4513](https://github.com/cloudfoundry/stratos/issues/4513)
+- Helm Deployment: Default nginx ciphers are too restrictive [\#4503](https://github.com/cloudfoundry/stratos/issues/4503)
+
+
+
 ## 4.0.0
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/3.2.1...4.0.0)
