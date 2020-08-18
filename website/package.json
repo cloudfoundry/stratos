@@ -9,6 +9,7 @@
     "swizzle": "docusaurus swizzle",
     "deploy": "./deploy.sh",
     "version": "docusaurus docs:version",
+    "versions": "./build-versions.sh",
     "docusaurus": "docusaurus"
   },
   "dependencies": {
