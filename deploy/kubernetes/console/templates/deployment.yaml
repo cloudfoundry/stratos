@@ -69,6 +69,10 @@ spec:
           value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         - name: CONSOLE_CERT_PATH
           value: "/{{ .Release.Name }}-cert-volume"
+        - name: SSL_PROTOCOLS
+          value: "{{ .Values.console.sslProtocols }}"
+        - name: SSL_CIPHERS
+          value: "{{ .Values.console.sslCiphers }}"
         volumeMounts:
         - mountPath: "/{{ .Release.Name }}-cert-volume"
           name: "{{ .Release.Name }}-cert-volume"
