@@ -905,8 +905,19 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// All routes in the session group need the user to be authenticated
 	sessionGroup := pp.Group("/v1")
-	sessionGroup.Use(p.sessionMiddleware)
-	sessionGroup.Use(p.xsrfMiddleware)
+	sessionGroup.Use(p.sessionMiddleware())
+	sessionGroup.Use(p.xsrfMiddleware())
+
+	sessionGroup.POST("/api_keys", p.addAPIKey)
+	sessionGroup.GET("/api_keys", p.listAPIKeys)
+	sessionGroup.DELETE("/api_keys", p.deleteAPIKey)
+
+	apiKeyGroupConfig := MiddlewareConfig{Skipper: p.apiKeySkipper}
+
+	apiKeyGroup := pp.Group("/v1")
+	apiKeyGroup.Use(p.apiKeyMiddleware)
+	apiKeyGroup.Use(p.sessionMiddlewareWithConfig(apiKeyGroupConfig))
+	apiKeyGroup.Use(p.xsrfMiddlewareWithConfig(apiKeyGroupConfig))
 
 	for _, plugin := range p.Plugins {
 		middlewarePlugin, err := plugin.GetMiddlewarePlugin()
@@ -932,8 +943,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	sessionAuthGroup.GET("/session/verify", p.verifySession)
 
 	// CNSI operations
-	sessionGroup.GET("/cnsis", p.listCNSIs)
-	sessionGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
+	apiKeyGroup.GET("/cnsis", p.listCNSIs)
+	apiKeyGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
 
 	// Info
 	sessionGroup.GET("/info", p.info)
