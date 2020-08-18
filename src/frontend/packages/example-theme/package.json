@@ -6,7 +6,7 @@
       "assets/core": "core/assets",
       "assets/favicon.ico": "favicon.ico"
     },
-    "theme":{
+    "theme": {
       "loadingCss": "loader/loading.css",
       "loadingHtml": "loader/loading.html"
     }

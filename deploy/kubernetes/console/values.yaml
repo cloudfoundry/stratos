@@ -118,6 +118,10 @@ console:
 
   # Do not use a persistent volume for analysis reports
   reportsVolumeDisabled: false
+
+  # ssl protocols and ciphers overrides - leave empty for defaults
+  sslProtocols:
+  sslCiphers:
   
 images:
   console: stratos-console

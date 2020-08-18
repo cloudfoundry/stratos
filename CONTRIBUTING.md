@@ -1,12 +1,12 @@
-# Contributing to Stratos UI
+# Contributing to Stratos
 
-Stratos UI is an open project and welcomes contributions. These guidelines are provided to help you understand how the project works and to make contributing smooth and fun for everybody involved.
+Stratos is an open project and welcomes contributions. These guidelines are provided to help you understand how the project works and to make contributing smooth and fun for everybody involved.
 
 There are two main forms of contribution: reporting issues and performing code changes.
 
 ## Reporting Issues
 
-If you find a problem with Stratos UI, report it using [GitHub issues](https://github.com/suse/stratos/issues/new).
+If you find a problem with Stratos, report it using [GitHub issues](https://github.com/suse/stratos/issues/new).
 
 Before reporting a new issue, please take a moment to check whether it has already been reported
 [here](https://github.com/suse/stratos/issues). If this is the case, please:
@@ -29,7 +29,7 @@ This information will help to determine the cause and prepare a fix as fast as p
 ## Code Changes
 
 Code contributions come in various forms and sizes, from simple bug fixes to implementation
-of new features. Before making any non-trivial change, get in touch with the Stratos UI developers first. This can prevent wasted effort later.
+of new features. Before making any non-trivial change, get in touch with the Stratos developers first. This can prevent wasted effort later.
 
 To send your code change, use GitHub pull requests. The workflow is as follows:
 
@@ -43,7 +43,7 @@ To send your code change, use GitHub pull requests. The workflow is as follows:
 
   1. Publish the branch and create a pull request.
 
-  1. Stratos UI developers will review your change and possibly point out issues.
+  1. Stratos developers will review your change and possibly point out issues.
      Adapt the code under their guidance until all issues are resolved.
 
   1. Finally, the pull request will get merged or rejected.
