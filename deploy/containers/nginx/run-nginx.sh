@@ -5,6 +5,9 @@ echo "Stratos UI Container (nginx)"
 echo "============================================"
 echo ""
 
+# Copy the template config to the /etc/nging/nginx.conf
+cp /etc/nginx/nginx.conf.tmpl /etc/nginx/nginx.conf
+
 sed -i -e 's@CONSOLE_CERT_PATH@'"${CONSOLE_CERT_PATH}"'@g' /etc/nginx/nginx.conf
 echo "Checking for certificate at ${CONSOLE_CERT_PATH} ..."
 
@@ -30,9 +33,8 @@ NGINX_CIPHERS=${SSL_CIPHERS:-$DEFAULT_CIPHERS}
 echo "SSL Protocols : $NGINX_PROTOCOLS"
 echo "SSL Ciphers   : $NGINX_CIPHERS"
 
-sed -e 's/__PROTOCOLS__/'"${NGINX_PROTOCOLS}"'/g' /etc/nginx/nginx.conf.tmpl > /etc/nginx/nginx.conf
-sed -i.bak -e 's/__CIPHERS__/'"${NGINX_CIPHERS}"'/g' /etc/nginx/nginx.conf
-rm /etc/nginx/nginx.conf.bak
+sed -e 's/__PROTOCOLS__/'"${NGINX_PROTOCOLS}"'/g' /etc/nginx/nginx.conf
+sed -i -e 's/__CIPHERS__/'"${NGINX_CIPHERS}"'/g' /etc/nginx/nginx.conf
 
 echo "Starting nginx ..."
 nginx -g "daemon off;"
