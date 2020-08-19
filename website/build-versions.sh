@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+set -o pipefail
 
 function logInner() (
   echo ..... $1
@@ -18,10 +20,21 @@ function cleanUpBefore() (
 
 function gitClone() (
   rurl="$1" localdir="$2"
-  logInner "Cloning from $rurl into $localdir"
+  echo "Cloning from $rurl into $localdir"
   git clone --depth 1 --no-single-branch $rurl $localdir
   pushd $localdir/website
   npm install
+  popd
+)
+
+function checkoutAndTag() (
+  logInner "Checking out: $versionsHash"
+  pushd $tempDirForGit
+  git checkout $versionsHash
+  pushd website
+  logInner "Tagging with version $versionsLabel"
+  npm run version -- $versionsLabel
+  popd
   popd
 )
 
@@ -46,8 +59,10 @@ function createVersiondSidebar() (
 )
 
 function updateVersionsFile() (
-  echo Updating versions file from $1
-  versions=${1::-1}\]
+  vString=$1
+  echo Updating versions file from $vString
+  versions="[${vString:1}"
+
   echo to $versions
   echo $versions > $versionsFile
 )
@@ -61,11 +76,8 @@ function cleanUpAfter() (
 # wesbite folder
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-
-# // TODO: RC Add script to build ? publish action
-
 # tempDirForGit=$(mktemp -d)
-tempDirForGit=$DIR/temp-checkout
+tempDirForGit=$DIR/versions-repo
 mkdir -p $tempDirForGit
 
 gitUrl=$(git remote get-url origin)
@@ -82,17 +94,23 @@ echo Current Directory: $DIR
 
 gitClone $gitUrl $tempDirForGit
 
-versions="["
+versions="]"
 
 cleanUpBefore $DIR
+
+internalVersions=$(jq -r '.[]' $internalVersionsFile)
+export internalVersionsArray=($internalVersions)
 
 # Loop through each version 
 # .. checkout that version in the temp dir
 # .. tag that version with it's label using docusaurus
 # .. copy the files docusaurus creates back into the main repo
 # .. store the label 
-
-for row in $(jq -r '.[]' $internalVersionsFile); do
+# The versions are reveresed, not so important at the moment but it's useful for future improvements
+# if the docusaurus labelling works from oldest to newest. The order in the versions.json file should
+# go from newest (first in array) to oldest (last in array)
+for ((i = ${#internalVersionsArray[@]} - 1;i >= 0;i--)); do
+  row=${internalVersionsArray[i]}
   IFS=: read versionsLabel versionsHash <<< $row
 
   if [ -z "$versionsLabel" ]; then
@@ -105,24 +123,16 @@ for row in $(jq -r '.[]' $internalVersionsFile); do
     exit 1
   fi
 
-  echo Process version \'$versionsLabel\' with checkout target  of \'versionsHash\'
+  echo Process version \'$versionsLabel\' with checkout target of \'$versionsHash\'
 
-  logInner "checking out: $versionsHash"
-  pushd $tempDirForGit
-  git checkout $versionsHash
-  pushd website
-  logInner "tagging with version $versionsLabel"
-  npm run version -- $versionsLabel
-  popd
-  popd
-
+  checkoutAndTag
   createVersionedDocs $tempDirForGit/ $DIR $versionsLabel
   createVersiondSidebar $tempDirForGit $DIR $versionsLabel
-  versions=$versions\"$versionsLabel\",  
+  versions=,\"$versionsLabel\"$versions
 
   echo Finished processing \'$versionsLabel\'
 
 done
 
 updateVersionsFile $versions
-cleanUp $tempDirForGit
+cleanUpAfter $tempDirForGit
