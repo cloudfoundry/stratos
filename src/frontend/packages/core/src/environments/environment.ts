@@ -1,5 +1,5 @@
-import { LogLevel } from '../../../store/src/actions/log.actions';
-import { cfAPIVersion, proxyAPIVersion } from '../../../store/src/jetstream';
+import { LogLevel } from '@stratosui/store';
+import { cfAPIVersion, proxyAPIVersion } from '@stratosui/store';
 
 // The file contents for the current environment will overwrite these during build.
 // The build system defaults to the dev environment which uses `environment.ts`, but if you do

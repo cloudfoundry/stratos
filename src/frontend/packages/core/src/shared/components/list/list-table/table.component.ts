@@ -6,7 +6,7 @@ import { tap } from 'rxjs/operators';
 import { ITableListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
 import { ListExpandedComponentType } from '../list.component.types';
-import { ListSort } from './../../../../../../store/src/actions/list.actions';
+import { ListSort } from '@stratosui/store';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
 import { TableCellExpanderComponent, TableCellExpanderConfig } from './table-cell-expander/table-cell-expander.component';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';

@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { StratosStatus } from '../../../../store/src/types/shared.types';
+import { StratosStatus } from '@stratosui/store';
 import { MDAppModule } from '../md.module';
 import { StatefulIconComponent } from './stateful-icon.component';
 

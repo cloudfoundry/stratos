@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
-import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { getFullEndpointApiUrl } from '@stratosui/store';
+import { PaginationMonitor } from '@stratosui/store';
+import { stratosEntityCatalog } from '@stratosui/store';
+import { APIResource, EntityInfo } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 
 export interface MetricsEndpointProvider {
   provider: EndpointModel;

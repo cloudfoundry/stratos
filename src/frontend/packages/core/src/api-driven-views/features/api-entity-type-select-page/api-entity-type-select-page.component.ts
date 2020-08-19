@@ -4,9 +4,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { GeneralAppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { connectedEndpointsOfTypesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import { GeneralAppState } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
+import { connectedEndpointsOfTypesSelector } from '@stratosui/store';
 import { TabNavService } from '../../../../tab-nav.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 

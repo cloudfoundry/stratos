@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { RouterNav } from '../../../store/src/actions/router.actions';
-import { InternalAppState } from '../../../store/src/app-state';
+import { RouterNav } from '@stratosui/store';
+import { InternalAppState } from '@stratosui/store';
 
 export function queryParamMap(): { [key: string]: string } {
   const paramMap = {};

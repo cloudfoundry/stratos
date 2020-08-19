@@ -3,9 +3,9 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { buffer, debounceTime, filter, map } from 'rxjs/operators';
 
-import { ActionHistoryDump } from '../../../../../store/src/actions/action-history.actions';
-import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { ActionHistoryDump } from '@stratosui/store';
+import { ToggleSideNav } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
 import { TabNavItem } from '../../../../tab-nav.types';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 

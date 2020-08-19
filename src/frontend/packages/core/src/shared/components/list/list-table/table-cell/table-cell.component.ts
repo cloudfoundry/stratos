@@ -9,7 +9,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
-import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
+import { MultiActionListEntity } from '@stratosui/store';
 import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {

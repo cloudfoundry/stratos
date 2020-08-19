@@ -1,9 +1,9 @@
 import { Subscription } from 'rxjs';
 
-import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import { EntityCatalogEntityConfig } from '@stratosui/store';
+import { EntityMonitorFactory } from '@stratosui/store';
+import { PaginationMonitor } from '@stratosui/store';
+import { PaginationMonitorFactory } from '@stratosui/store';
 import { TableRowStateManager } from './list-table/table-row/table-row-state-manager';
 
 export type ListRowStateSetUpManager = (

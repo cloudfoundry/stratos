@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
-import { getFavoriteInfoObservable } from '../../../../../store/src/helpers/store-helpers';
-import { IFavoriteEntity, IGroupedFavorites } from '../../../../../store/src/types/user-favorite-manager.types';
-import { IFavoritesInfo } from '../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
+import { AppState } from '@stratosui/store';
+import { getFavoriteInfoObservable } from '@stratosui/store';
+import { IFavoriteEntity, IGroupedFavorites } from '@stratosui/store';
+import { IFavoritesInfo } from '@stratosui/store';
+import { UserFavoriteManager } from '@stratosui/store';
 
 
 @Component({

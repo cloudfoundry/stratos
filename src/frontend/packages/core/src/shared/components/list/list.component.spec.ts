@@ -6,12 +6,12 @@ import { createBasicStoreModule } from '@stratosui/store/testing';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
-import { ListView } from '../../../../../store/src/actions/list.actions';
-import { GeneralAppState } from '../../../../../store/src/app-state';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { ListView } from '@stratosui/store';
+import { GeneralAppState } from '@stratosui/store';
+import { EntityMonitorFactory } from '@stratosui/store';
+import { PaginationMonitorFactory } from '@stratosui/store';
+import { APIResource } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';

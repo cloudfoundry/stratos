@@ -4,13 +4,13 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
+import { getFullEndpointApiUrl } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
 import {
   StratosCatalogEndpointEntity,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
+} from '@stratosui/store';
+import { ActionState } from '@stratosui/store';
+import { stratosEntityCatalog } from '@stratosui/store';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SnackBarService } from '../../../../shared/services/snackbar.service';

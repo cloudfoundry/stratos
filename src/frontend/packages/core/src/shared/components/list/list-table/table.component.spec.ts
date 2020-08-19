@@ -5,7 +5,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 import { EMPTY, of as observableOf } from 'rxjs';
 
-import { ListSort } from '../../../../../../store/src/actions/list.actions';
+import { ListSort } from '@stratosui/store';
 import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../../core/core.module';
 import { UtilsService } from '../../../../core/utils.service';

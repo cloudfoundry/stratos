@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store';
 import { CoreModule } from '../../../../../core/core.module';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { TableCellRadioComponent } from './table-cell-radio.component';

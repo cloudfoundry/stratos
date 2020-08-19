@@ -3,8 +3,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { Logout } from '../../../../../store/src/actions/auth.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { Logout } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
 
 @Component({
   selector: 'app-logout-page',

@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { EndpointModel } from '@stratosui/store';
 import { BaseTestModules } from '../../../../../../../test-framework/core-test.helper';
 import {
   MetricsEndpointDetailsComponent,

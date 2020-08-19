@@ -3,8 +3,8 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
-import { InternalAppState } from '../../../../store/src/app-state';
-import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
+import { InternalAppState } from '@stratosui/store';
+import { stratosEntityCatalog } from '@stratosui/store';
 import { LoggerService } from '../logger.service';
 import {
   CurrentUserPermissions,

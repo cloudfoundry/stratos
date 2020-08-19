@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import * as moment from 'moment';
 
-import { MetricQueryConfig, MetricsAction } from '../../../../store/src/actions/metrics.actions';
-import { IMetrics } from '../../../../store/src/types/base-metric.types';
-import { MetricQueryType } from '../../../../store/src/types/metric.types';
+import { MetricQueryConfig, MetricsAction } from '@stratosui/store';
+import { IMetrics } from '@stratosui/store';
+import { MetricQueryType } from '@stratosui/store';
 import { ITimeRange, StoreMetricTimeRange } from './metrics-range-selector.types';
 
 @Injectable()

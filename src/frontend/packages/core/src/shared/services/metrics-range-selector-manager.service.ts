@@ -3,10 +3,10 @@ import * as moment from 'moment';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, takeWhile, tap } from 'rxjs/operators';
 
-import { MetricsAction } from '../../../../store/src/actions/metrics.actions';
-import { EntityMonitor } from '../../../../store/src/monitors/entity-monitor';
-import { IMetrics } from '../../../../store/src/types/base-metric.types';
-import { MetricQueryType } from '../../../../store/src/types/metric.types';
+import { MetricsAction } from '@stratosui/store';
+import { EntityMonitor } from '@stratosui/store';
+import { IMetrics } from '@stratosui/store';
+import { MetricQueryType } from '@stratosui/store';
 import { MetricsRangeSelectorService } from './metrics-range-selector.service';
 import { ITimeRange } from './metrics-range-selector.types';
 

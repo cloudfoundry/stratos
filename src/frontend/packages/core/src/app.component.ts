@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
-import { AuthOnlyAppState } from '../../store/src/app-state';
-import { ThemeService } from '../../store/src/theme.service';
+import { AuthOnlyAppState } from '@stratosui/store';
+import { ThemeService } from '@stratosui/store';
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
 

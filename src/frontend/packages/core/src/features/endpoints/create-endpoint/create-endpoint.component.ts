@@ -1,7 +1,7 @@
 import { Component, ViewChild, ViewContainerRef, ComponentRef, OnInit, OnDestroy, ComponentFactory, ComponentFactoryResolver } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { entityCatalog } from '@stratosui/store';
 import { getIdFromRoute } from '../../../core/utils.service';
 
 

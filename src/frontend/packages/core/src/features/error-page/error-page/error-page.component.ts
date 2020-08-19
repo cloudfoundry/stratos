@@ -5,15 +5,15 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { first, map, withLatestFrom } from 'rxjs/operators';
 
-import { SendClearEndpointEventsAction } from '../../../../../store/src/actions/internal-events.actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
-import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { InternalEventState } from '../../../../../store/src/types/internal-events.types';
-import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
-import { StratosStatus } from '../../../../../store/src/types/shared.types';
+import { SendClearEndpointEventsAction } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
+import { endpointEntityType } from '@stratosui/store';
+import { InternalEventMonitorFactory } from '@stratosui/store';
+import { stratosEntityCatalog } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
+import { InternalEventState } from '@stratosui/store';
+import { getPreviousRoutingState } from '@stratosui/store';
+import { StratosStatus } from '@stratosui/store';
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 
 @Component({

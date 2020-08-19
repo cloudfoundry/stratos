@@ -9,8 +9,8 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { entityCatalog } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 import { TableCellCustom } from '../../../list.types';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 

@@ -12,9 +12,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { GeneralEntityAppState } from '../../../../../store/src/app-state';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
-import { SessionData } from '../../../../../store/src/types/auth.types';
+import { GeneralEntityAppState } from '@stratosui/store';
+import { AuthState } from '@stratosui/store';
+import { SessionData } from '@stratosui/store';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 
 @Component({

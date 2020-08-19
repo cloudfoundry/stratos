@@ -14,9 +14,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Subscription } from 'rxjs';
 import { delay, first, map, tap } from 'rxjs/operators';
 
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { EndpointOnlyAppState } from '../../../../../store/src/app-state';
-import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
+import { RouterNav } from '@stratosui/store';
+import { EndpointOnlyAppState } from '@stratosui/store';
+import { selectDashboardState } from '@stratosui/store';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {

@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { EndpointModel } from '@stratosui/store';
 import { CoreModule } from '../../../../../../core/core.module';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status.component';
 

@@ -4,10 +4,10 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { GeneralEntityAppState } from '../../../../../store/src/app-state';
-import { BrowserStandardEncoder } from '../../../../../store/src/browser-encoder';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { GeneralEntityAppState } from '@stratosui/store';
+import { BrowserStandardEncoder } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 import {
   BackupEndpointConfigUI,
   BackupEndpointConnectionTypes,

@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map, publishReplay, refCount, share } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../store/src/app-state';
+import { AppState } from '@stratosui/store';
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
 
 

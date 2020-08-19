@@ -4,17 +4,17 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, switchMap } from 'rxjs/operators';
 
-import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
+import { getFullEndpointApiUrl } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
+import { ActionState } from '@stratosui/store';
+import { stratosEntityCatalog } from '@stratosui/store';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import {
   EntityCatalogSchemas,
   IStratosEndpointDefinition,
-} from './../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from './../../../../../../store/src/types/endpoint.types';
+} from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
 

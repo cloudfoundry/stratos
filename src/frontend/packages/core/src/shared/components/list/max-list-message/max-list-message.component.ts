@@ -3,12 +3,12 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { EntityCatalogEntityConfig } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
+import { AppState } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
+import { EntityCatalogEntityConfig } from '@stratosui/store';
 import {
   PaginationPageIteratorConfig,
-} from '../../../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
+} from '@stratosui/store';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { NoContentMessageLine } from '../../no-content-message/no-content-message.component';
 import { ITableTextMaxed } from '../list-table/table.types';

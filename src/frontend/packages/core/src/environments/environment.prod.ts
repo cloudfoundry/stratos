@@ -1,5 +1,5 @@
-import { cfAPIVersion, proxyAPIVersion } from '../../../store/src/jetstream';
-import { LogLevel } from './../../../store/src/actions/log.actions';
+import { cfAPIVersion, proxyAPIVersion } from '@stratosui/store';
+import { LogLevel } from '@stratosui/store';
 
 export const environment = {
   production: true,

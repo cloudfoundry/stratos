@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { EndpointModel } from '@stratosui/store';
 import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointTypes } from '../backup-restore.types';

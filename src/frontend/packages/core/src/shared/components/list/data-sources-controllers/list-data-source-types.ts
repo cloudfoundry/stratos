@@ -2,12 +2,12 @@ import { DataSource } from '@angular/cdk/table';
 import { Action } from '@ngrx/store';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 
-import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
-import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
-import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
-import { EntityCatalogEntityConfig } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
+import { ListFilter, ListSort } from '@stratosui/store';
+import { MetricsAction } from '@stratosui/store';
+import { IRequestEntityTypeState } from '@stratosui/store';
+import { EntityCatalogEntityConfig } from '@stratosui/store';
+import { EntitySchema } from '@stratosui/store';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '@stratosui/store';
 
 export interface IEntitySelectItem {
   page: number;

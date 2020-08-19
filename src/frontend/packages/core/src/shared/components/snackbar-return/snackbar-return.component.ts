@@ -2,8 +2,8 @@ import { Component, Inject } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { RouterNav } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
 
 @Component({
   selector: 'app-snackbar-return',

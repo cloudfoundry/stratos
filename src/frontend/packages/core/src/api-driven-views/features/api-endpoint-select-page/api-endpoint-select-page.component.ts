@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { GeneralAppState } from '../../../../../store/src/app-state';
+import { GeneralAppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { ApiEntityType } from '../../api-drive-views.types';
 import { Store } from '@ngrx/store';
-import { connectedEndpointsOfTypesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import { connectedEndpointsOfTypesSelector } from '@stratosui/store';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map, filter } from 'rxjs/operators';
 

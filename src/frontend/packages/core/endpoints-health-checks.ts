@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 
-import { entityCatalog } from '../store/src/entity-catalog/entity-catalog';
-import { EndpointHealthCheck } from '../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from '../store/src/types/endpoint.types';
+import { entityCatalog } from '@stratosui/store';
+import { EndpointHealthCheck } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 
 @Injectable({
   providedIn: 'root'

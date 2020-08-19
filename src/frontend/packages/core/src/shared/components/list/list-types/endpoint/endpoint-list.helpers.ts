@@ -4,12 +4,12 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
-import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { ActionState } from '../../../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { RouterNav } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
+import { ActionState } from '@stratosui/store';
+import { stratosEntityCatalog } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 import { LoggerService } from '../../../../../core/logger.service';
 import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
 
-import { IRouterNavPayload } from '../../../../../../store/src/actions/router.actions';
+import { IRouterNavPayload } from '@stratosui/store';
 
 export interface IStepperStep {
   validate: Observable<boolean>;

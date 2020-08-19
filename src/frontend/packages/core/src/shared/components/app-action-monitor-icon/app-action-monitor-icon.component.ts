@@ -2,10 +2,10 @@ import { Component, Input, OnInit, Output } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
 
-import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
-import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { ActionState, RequestInfoState, rootUpdatingKey } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { EntitySchema } from '@stratosui/store';
+import { EntityMonitor } from '@stratosui/store';
+import { EntityMonitorFactory } from '@stratosui/store';
+import { ActionState, RequestInfoState, rootUpdatingKey } from '@stratosui/store';
 
 export enum AppMonitorComponentTypes {
   UPDATE = 'MONITOR_UPDATE',

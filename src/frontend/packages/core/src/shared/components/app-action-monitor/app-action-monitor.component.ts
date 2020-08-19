@@ -3,9 +3,9 @@ import { schema } from 'normalizr';
 import { never as observableNever, Observable, of as observableOf } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { rootUpdatingKey } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { EntitySchema } from '@stratosui/store';
+import { EntityMonitorFactory } from '@stratosui/store';
+import { rootUpdatingKey } from '@stratosui/store';
 import {
   ActionMonitorComponentState,
   AppMonitorComponentTypes,

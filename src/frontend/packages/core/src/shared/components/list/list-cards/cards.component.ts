@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { MultiActionListEntity } from '../../../../../../store/src/monitors/pagination-monitor';
+import { MultiActionListEntity } from '@stratosui/store';
 import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { CardCell } from '../list.types';
 import { CardTypes } from './card/card.component';

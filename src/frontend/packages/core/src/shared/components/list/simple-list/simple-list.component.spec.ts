@@ -2,14 +2,14 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../../../store/src/entity-catalog-test.module';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '@stratosui/store-test.module';
 import {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { StratosEndpointExtensionDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
-import { AppReducersModule } from '../../../../../../store/src/reducers.module';
+} from '@stratosui/store';
+import { StratosEndpointExtensionDefinition } from '@stratosui/store';
+import { EntitySchema } from '@stratosui/store';
+import { AppReducersModule } from '.@stratosui/store';
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../shared.module';
 import { SimpleListComponent } from './simple-list.component';

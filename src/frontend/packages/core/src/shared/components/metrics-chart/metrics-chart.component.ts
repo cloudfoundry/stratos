@@ -3,16 +3,16 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 
-import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { MetricsAction } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
+import { EntityMonitor } from '@stratosui/store';
+import { EntityMonitorFactory } from '@stratosui/store';
 import {
   ChartSeries,
   IMetrics,
   MetricResultTypes,
   MetricsFilterSeries,
-} from '../../../../../store/src/types/base-metric.types';
+} from '@stratosui/store';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { MetricsChartTypes, MetricsLineChartConfig, YAxisTickFormattingFunc } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';

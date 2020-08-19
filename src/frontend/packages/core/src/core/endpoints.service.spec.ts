@@ -1,7 +1,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '@stratosui/store';
 import { CoreTestingModule } from '../../test-framework/core-test.modules';
 import { CoreModule } from './core.module';
 import { EndpointsService } from './endpoints.service';

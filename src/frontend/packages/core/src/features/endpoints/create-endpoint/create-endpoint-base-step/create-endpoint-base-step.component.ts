@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { IStratosEndpointDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { selectSessionData } from '../../../../../../store/src/reducers/auth.reducer';
+import { RouterNav } from '@stratosui/store';
+import { GeneralEntityAppState } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
+import { IStratosEndpointDefinition } from '@stratosui/store';
+import { selectSessionData } from '@stratosui/store';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';

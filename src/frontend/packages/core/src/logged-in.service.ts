@@ -5,11 +5,11 @@ import { Store } from '@ngrx/store';
 import { fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
-import { VerifySession } from '../../store/src/actions/auth.actions';
-import { AppState } from '../../store/src/app-state';
-import { AuthState } from '../../store/src/reducers/auth.reducer';
-import { selectDashboardState } from '../../store/src/selectors/dashboard.selectors';
-import { DashboardState } from './../../store/src/reducers/dashboard-reducer';
+import { VerifySession } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
+import { AuthState } from '@stratosui/store';
+import { selectDashboardState } from '@stratosui/store';
+import { DashboardState } from '@stratosui/store';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { PageVisible } from './core/page-visible';
 

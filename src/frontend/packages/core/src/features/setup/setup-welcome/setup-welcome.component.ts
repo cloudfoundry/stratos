@@ -2,8 +2,8 @@ import { APP_TITLE } from './../../../core/core.types';
 import { Component, Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { GeneralEntityAppState } from '../../../../../store/src/app-state';
+import { RouterNav } from '@stratosui/store';
+import { GeneralEntityAppState } from '@stratosui/store';
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
 import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
 

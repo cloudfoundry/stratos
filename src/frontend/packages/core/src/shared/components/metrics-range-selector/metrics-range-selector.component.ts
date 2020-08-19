@@ -2,11 +2,11 @@ import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 
-import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
-import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { IMetrics } from '../../../../../store/src/types/base-metric.types';
-import { MetricQueryType } from '../../../../../store/src/types/metric.types';
+import { MetricsAction } from '@stratosui/store';
+import { EntityMonitor } from '@stratosui/store';
+import { EntityMonitorFactory } from '@stratosui/store';
+import { IMetrics } from '@stratosui/store';
+import { MetricQueryType } from '@stratosui/store';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { ITimeRange } from '../../services/metrics-range-selector.types';
 

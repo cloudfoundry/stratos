@@ -3,9 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 
-import { AppState } from '../../../../../store/src/app-state';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
+import { AppState } from '@stratosui/store';
+import { EntityServiceFactory } from '@stratosui/store';
+import { selectIsMobile } from '@stratosui/store';
 import { TabNavService } from '../../../../tab-nav.service';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';

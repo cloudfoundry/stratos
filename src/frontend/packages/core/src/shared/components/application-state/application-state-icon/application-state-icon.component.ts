@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { StratosStatus } from '@stratosui/store';
 
 
 @Component({

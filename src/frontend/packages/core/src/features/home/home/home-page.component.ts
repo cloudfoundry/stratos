@@ -3,12 +3,12 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { AppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
-import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
-import { IUserFavoritesGroups } from '../../../../../store/src/types/favorite-groups.types';
-import { UserFavorite } from '../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
+import { RouterNav } from '@stratosui/store';
+import { AppState, IRequestEntityTypeState } from '@stratosui/store';
+import { EntityCatalogHelpers } from '@stratosui/store';
+import { IUserFavoritesGroups } from '@stratosui/store';
+import { UserFavorite } from '@stratosui/store';
+import { UserFavoriteManager } from '@stratosui/store';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { LoggerService } from '../../../core/logger.service';
 

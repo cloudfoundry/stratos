@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 
-import { AppState } from '../../../../../store/src/app-state';
+import { AppState } from '@stratosui/store';
 import {
   getActionsFromExtensions,
   StratosActionMetadata,

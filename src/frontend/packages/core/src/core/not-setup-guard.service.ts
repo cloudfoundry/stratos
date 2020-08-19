@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 
-import { RouterNav } from '../../../store/src/actions/router.actions';
-import { AppState } from '../../../store/src/app-state';
+import { RouterNav } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
 

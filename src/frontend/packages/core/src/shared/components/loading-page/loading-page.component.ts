@@ -3,9 +3,9 @@ import { Component, Input, OnInit } from '@angular/core';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
 
-import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
-import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EntitySchema } from '@stratosui/store';
+import { EntityMonitor } from '@stratosui/store';
+import { EntityMonitorFactory } from '@stratosui/store';
 
 
 @Component({

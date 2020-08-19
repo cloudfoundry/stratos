@@ -3,13 +3,13 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { AppState } from '../../../store/src/app-state';
-import { EntityService } from '../../../store/src/entity-service';
-import { ActionState, getDefaultActionState } from '../../../store/src/reducers/api-request-reducer/types';
-import { AuthState } from '../../../store/src/reducers/auth.reducer';
-import { stratosEntityCatalog } from '../../../store/src/stratos-entity-catalog';
-import { SessionData } from '../../../store/src/types/auth.types';
-import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../../store/src/types/user-profile.types';
+import { AppState } from '@stratosui/store';
+import { EntityService } from '@stratosui/store';
+import { ActionState, getDefaultActionState } from '@stratosui/store';
+import { AuthState } from '@stratosui/store';
+import { stratosEntityCatalog } from '@stratosui/store';
+import { SessionData } from '@stratosui/store';
+import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '@stratosui/store';
 
 
 @Injectable()

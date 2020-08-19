@@ -14,9 +14,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 
-import { IRouterNavPayload, RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
-import { getPreviousRoutingState } from '../../../../../../store/src/types/routing.type';
+import { IRouterNavPayload, RouterNav } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
+import { getPreviousRoutingState } from '@stratosui/store';
 import { LoggerService } from '../../../../core/logger.service';
 import { BASE_REDIRECT_QUERY } from '../stepper.types';
 import { SteppersService } from '../steppers.service';

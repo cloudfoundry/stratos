@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../store/src/app-state';
+import { AppState } from '@stratosui/store';
 
 @Injectable()
 export class LongRunningOperationsService {

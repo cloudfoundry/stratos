@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { UserProfileInfo } from 'frontend/packages/store/src/types/user-profile.types';
+import { UserProfileInfo } from '@stratosui/store';
 import { MD5 } from './md5';
 
 @Component({

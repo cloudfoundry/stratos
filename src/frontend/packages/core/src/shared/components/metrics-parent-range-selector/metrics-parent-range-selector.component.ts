@@ -1,9 +1,9 @@
 import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { IMetrics } from '../../../../../store/src/types/base-metric.types';
-import { MetricQueryType } from '../../../../../store/src/types/metric.types';
+import { EntityMonitorFactory } from '@stratosui/store';
+import { IMetrics } from '@stratosui/store';
+import { MetricQueryType } from '@stratosui/store';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';
 

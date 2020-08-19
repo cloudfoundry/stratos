@@ -4,7 +4,7 @@ import { PageHeaderEventsComponent } from './page-header-events.component';
 import { SharedModule } from '../../../shared.module';
 import { StoreModule } from '@ngrx/store';
 import { RouterTestingModule } from '@angular/router/testing';
-import { InternalEventMonitorFactory } from '../../../../../../store/src/monitors/internal-event-monitor.factory';
+import { InternalEventMonitorFactory } from '@stratosui/store';
 
 describe('PageHeaderEventsComponent', () => {
   let component: PageHeaderEventsComponent;

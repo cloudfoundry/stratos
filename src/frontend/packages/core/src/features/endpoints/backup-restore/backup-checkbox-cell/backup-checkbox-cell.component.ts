@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { EndpointModel } from '@stratosui/store';
 import { TableCellCustom } from '../../../../shared/components/list/list.types';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 

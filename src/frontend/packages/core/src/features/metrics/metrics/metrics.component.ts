@@ -8,8 +8,8 @@ import {
   MetricsAPIAction,
   MetricsAPITargets,
   MetricsStratosAction,
-} from '../../../../../store/src/actions/metrics-api.actions';
-import { AppState } from '../../../../../store/src/app-state';
+} from '@stratosui/store';
+import { AppState } from '@stratosui/store';
 import { getIdFromRoute } from '../../../core/utils.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { EndpointIcon } from '../../endpoints/endpoint-helpers';

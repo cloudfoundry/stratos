@@ -6,7 +6,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
-import { appReducers } from '../../../../../store/src/reducers.module';
+import { appReducers } from '@stratosui/store';
 import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';
 import { PageHeaderService } from '../../../core/page-header-service/page-header.service';

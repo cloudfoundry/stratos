@@ -1,18 +1,18 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
+import { entityCatalog } from '@stratosui/store';
 import {
   MAX_RECENT_COUNT,
-} from 'frontend/packages/store/src/reducers/current-user-roles-reducer/recently-visited.reducer.helpers';
+} from '@stratosui/store';
 import * as moment from 'moment';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
-import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
-import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
-import { recentlyVisitedSelector } from '../../../../../store/src/selectors/recently-visitied.selectors';
-import { IRecentlyVisitedEntity } from '../../../../../store/src/types/recently-visited.types';
+import { AppState } from '@stratosui/store';
+import { endpointEntityType } from '@stratosui/store';
+import { endpointEntitiesSelector } from '@stratosui/store';
+import { recentlyVisitedSelector } from '@stratosui/store';
+import { IRecentlyVisitedEntity } from '@stratosui/store';
 
 class RenderableRecent {
   public mostRecentHit: moment.Moment;

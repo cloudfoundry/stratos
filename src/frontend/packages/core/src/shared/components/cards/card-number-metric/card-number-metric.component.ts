@@ -2,9 +2,9 @@ import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { RouterNav } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
+import { StratosStatus } from '@stratosui/store';
 import { UtilsService } from '../../../../core/utils.service';
 import { determineCardStatus } from '../card-status/card-status.component';
 

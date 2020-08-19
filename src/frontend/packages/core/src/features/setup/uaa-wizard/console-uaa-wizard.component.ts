@@ -4,11 +4,11 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
-import { VerifySession } from '../../../../../store/src/actions/auth.actions';
-import { SetupConsoleGetScopes, SetupSaveConfig } from '../../../../../store/src/actions/setup.actions';
-import { InternalAppState } from '../../../../../store/src/app-state';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
-import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
+import { VerifySession } from '@stratosui/store';
+import { SetupConsoleGetScopes, SetupSaveConfig } from '@stratosui/store';
+import { InternalAppState } from '@stratosui/store';
+import { AuthState } from '@stratosui/store';
+import { UAASetupState } from '@stratosui/store';
 import { APP_TITLE } from '../../../core/core.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoints/endpoint-helpers';

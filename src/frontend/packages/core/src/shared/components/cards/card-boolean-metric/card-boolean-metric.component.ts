@@ -1,8 +1,8 @@
 import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { RouterNav } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
 
 @Component({
   selector: 'app-card-boolean-metric',

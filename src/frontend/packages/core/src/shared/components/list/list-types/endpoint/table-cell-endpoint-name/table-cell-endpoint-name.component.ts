@@ -3,9 +3,9 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
 import { filter } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { stratosEntityCatalog } from '../../../../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { entityCatalog } from '@stratosui/store';
+import { stratosEntityCatalog } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { TableCellCustom } from '../../../list.types';
 

@@ -3,8 +3,8 @@ import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform
 import { createBasicStoreModule } from '@stratosui/store/testing';
 import { of } from 'rxjs';
 
-import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EntitySchema } from '@stratosui/store';
+import { EntityMonitorFactory } from '@stratosui/store';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { MDAppModule } from '../../../core/md.module';
 import { SharedModule } from '../../shared.module';

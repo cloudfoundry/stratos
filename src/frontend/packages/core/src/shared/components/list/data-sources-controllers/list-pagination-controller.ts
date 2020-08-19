@@ -4,19 +4,19 @@ import { asyncScheduler, BehaviorSubject, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import { bufferTime, distinctUntilChanged, filter, first, map, observeOn, tap } from 'rxjs/operators';
 
-import { ListFilter, ListPagination, ListSort } from '../../../../../../store/src/actions/list.actions';
+import { ListFilter, ListPagination, ListSort } from '@stratosui/store';
 import {
   AddParams,
   SetClientFilter,
   SetClientPage,
   SetClientPageSize,
   SetPage,
-} from '../../../../../../store/src/actions/pagination.actions';
-import { GeneralAppState } from '../../../../../../store/src/app-state';
+} from '@stratosui/store';
+import { GeneralAppState } from '@stratosui/store';
 import {
   defaultClientPaginationPageSize,
-} from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
-import { PaginationClientFilter, PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
+} from '@stratosui/store';
+import { PaginationClientFilter, PaginationEntityState } from '@stratosui/store';
 import { enterZone, leaveZone } from '../../../../leaveEnterAngularZone';
 import { IListMultiFilterConfig } from '../list.component.types';
 import { IListDataSource, ListPaginationMultiFilterChange } from './list-data-source-types';

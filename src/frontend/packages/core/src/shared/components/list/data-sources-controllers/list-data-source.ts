@@ -25,16 +25,16 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
-import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
-import { IgnorePaginationMaxedState, SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
-import { LocalPaginationHelpers } from '../../../../../../store/src/helpers/local-list.helpers';
-import { PaginationMonitor } from '../../../../../../store/src/monitors/pagination-monitor';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
+import { ListFilter, ListSort } from '@stratosui/store';
+import { MetricsAction } from '@stratosui/store';
+import { IgnorePaginationMaxedState, SetResultCount } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
+import { EntitySchema } from '@stratosui/store';
+import { LocalPaginationHelpers } from '@stratosui/store';
+import { PaginationMonitor } from '@stratosui/store';
+import { getPaginationObservables } from '@stratosui/store';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '@stratosui/store';
 import { IListDataSourceConfig, MultiActionConfig } from './list-data-source-config';
 import {
   EntitySelectConfig,

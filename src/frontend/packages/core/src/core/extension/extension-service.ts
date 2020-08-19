@@ -3,8 +3,8 @@ import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { AppState, GeneralEntityAppState } from '../../../../store/src/app-state';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
+import { AppState, GeneralEntityAppState } from '@stratosui/store';
+import { EntityServiceFactory } from '@stratosui/store';
 import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
 import { CurrentUserPermissionsService } from '../permissions/current-user-permissions.service';
 

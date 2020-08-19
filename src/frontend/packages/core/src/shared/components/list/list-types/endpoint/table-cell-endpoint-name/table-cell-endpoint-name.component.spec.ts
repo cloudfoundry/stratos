@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
+import { EntityMonitorFactory } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 import { BaseTestModules } from '../../../../../../../test-framework/core-test.helper';
 import { CoreModule } from '../../../../../../core/core.module';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.component';

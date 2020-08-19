@@ -5,7 +5,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
-import { appReducers } from '../../../../../store/src/reducers.module';
+import { appReducers } from '@stratosui/store';
 import { SharedModule } from '../../../public-api';
 import { LogoutPageComponent } from './logout-page.component';
 

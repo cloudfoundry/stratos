@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { endpointEntityType, stratosEntityFactory } from '../../../../../store/src/helpers/stratos-entity-factory';
+import { endpointEntityType, stratosEntityFactory } from '@stratosui/store';
 import { BaseTestModules } from '../../../../test-framework/core-test.helper';
 import { AppActionMonitorIconComponent } from './app-action-monitor-icon.component';
 

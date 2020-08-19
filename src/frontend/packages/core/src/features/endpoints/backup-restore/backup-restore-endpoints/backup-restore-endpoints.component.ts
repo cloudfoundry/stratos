@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { RouterNav } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 
 interface IAppTileData extends ITileData {

@@ -1,9 +1,9 @@
 import { Observable, of as observableOf } from 'rxjs';
 
-import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
-import { StratosStatus } from '../../../../store/src/types/shared.types';
+import { getFullEndpointApiUrl } from '@stratosui/store';
+import { StratosStatus } from '@stratosui/store';
 import { EndpointIcon } from '../endpoints/endpoint-helpers';
-import { entityCatalog } from './../../../../store/src/entity-catalog/entity-catalog';
+import { entityCatalog } from '@stratosui/store';
 import { MetricsEndpointProvider } from './services/metrics-service';
 
 // Info for an endpoint that a metrics endpoint provides for

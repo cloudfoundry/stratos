@@ -1,6 +1,6 @@
-import { ChartSeries, MetricsFilterSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
+import { ChartSeries, MetricsFilterSeries, IMetricMatrixResult } from '@stratosui/store';
 import { YAxisTickFormattingFunc, MetricsLineChartConfig } from './metrics-chart.types';
-import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
+import { MetricsAction } from '@stratosui/store';
 import { MetricsConfig } from './metrics-chart.component';
 
 export class MetricsChartHelpers {

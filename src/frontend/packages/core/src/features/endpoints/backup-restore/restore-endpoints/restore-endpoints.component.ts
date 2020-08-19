@@ -5,9 +5,9 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subject } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
-import { httpErrorResponseToSafeString } from '../../../../../../store/src/jetstream';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
+import { GeneralEntityAppState } from '@stratosui/store';
+import { httpErrorResponseToSafeString } from '@stratosui/store';
+import { stratosEntityCatalog } from '@stratosui/store';
 import { getEventFiles } from '../../../../core/browser-helper';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';

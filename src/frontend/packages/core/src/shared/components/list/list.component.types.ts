@@ -3,11 +3,11 @@ import * as moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { ListView } from '../../../../../store/src/actions/list.actions';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { ListView } from '@stratosui/store';
+import { ActionState } from '@stratosui/store';
 import {
   defaultClientPaginationPageSize,
-} from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
+} from '@stratosui/store';
 import { ITimeRange } from '../../services/metrics-range-selector.types';
 import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';

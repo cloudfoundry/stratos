@@ -1,9 +1,9 @@
 import { Action, Store } from '@ngrx/store';
 import { Observable, OperatorFunction } from 'rxjs';
 
-import { AppState } from '../../../../../../store/src/app-state';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
-import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
+import { AppState } from '@stratosui/store';
+import { EntitySchema } from '@stratosui/store';
+import { PaginatedAction } from '@stratosui/store';
 import { IListConfig } from '../list.component.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';

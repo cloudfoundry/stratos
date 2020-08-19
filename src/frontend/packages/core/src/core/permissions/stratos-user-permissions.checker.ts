@@ -1,12 +1,12 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { GeneralEntityAppState } from '../../../../store/src/app-state';
+import { GeneralEntityAppState } from '@stratosui/store';
 import {
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
   PermissionValues,
-} from '../../../../store/src/selectors/current-user-role.selectors';
+} from '@stratosui/store';
 import { IPermissionConfigs, PermissionConfig, PermissionTypes } from './current-user-permissions.config';
 import {
   BaseCurrentUserPermissionsChecker,

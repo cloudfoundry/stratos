@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../tab-nav.service';
 import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '@stratosui/store';
 import { PageSideNavComponent } from './page-side-nav.component';
 
 describe('PageSideNavComponent', () => {

@@ -48,13 +48,13 @@ import {
   ListSort,
   ListView,
   SetListViewAction,
-} from '../../../../../store/src/actions/list.actions';
-import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pagination.actions';
-import { GeneralAppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
+} from '@stratosui/store';
+import { SetClientFilterKey, SetPage } from '@stratosui/store';
+import { GeneralAppState } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
+import { EntityCatalogEntityConfig } from '@stratosui/store';
+import { ActionState } from '@stratosui/store';
+import { getListStateObservables } from '@stratosui/store';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
   EntitySelectConfig,

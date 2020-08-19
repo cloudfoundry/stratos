@@ -1,4 +1,4 @@
-import { PermissionValues } from '../../../../store/src/selectors/current-user-role.selectors';
+import { PermissionValues } from '@stratosui/store';
 
 export type PermissionConfigType = PermissionConfig[] | PermissionConfig | PermissionConfigLink;
 export interface IPermissionConfigs {

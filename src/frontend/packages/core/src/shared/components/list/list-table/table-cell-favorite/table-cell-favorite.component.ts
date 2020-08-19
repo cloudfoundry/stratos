@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
-import { FavoritesConfigMapper } from '../../../../../../../store/src/favorite-config-mapper';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
+import { FavoritesConfigMapper } from '@stratosui/store';
+import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 import { TableCellCustom } from '../../list.types';
 import { ITableColumn } from '../table.types';
 

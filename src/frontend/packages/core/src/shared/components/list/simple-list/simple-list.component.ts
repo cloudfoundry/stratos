@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import {
   StratosCatalogEntity,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+} from '@stratosui/store';
 import { ListComponent } from '../list.component';
 import { ListConfig } from '../list.component.types';
 import { CatalogEntityDrivenListDataSource } from './entity-catalog-datasource';

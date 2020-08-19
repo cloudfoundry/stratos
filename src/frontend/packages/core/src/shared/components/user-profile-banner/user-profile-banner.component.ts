@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { UserProfileInfo } from 'frontend/packages/store/src/types/user-profile.types';
+import { UserProfileInfo } from '@stratosui/store';
 
 @Component({
   selector: 'app-user-profile-banner',

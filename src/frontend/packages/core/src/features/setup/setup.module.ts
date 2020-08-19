@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import { ThemeService } from '../../../../store/src/theme.service';
+import { ThemeService } from '@stratosui/store';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
 import { DomainMismatchComponent } from './domain-mismatch/domain-mismatch.component';

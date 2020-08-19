@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, first, map, share, switchMap, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
-import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
+import { AppState } from '@stratosui/store';
+import { getPreviousRoutingState } from '@stratosui/store';
 import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
 
 export const eventReturnUrlParam = 'returnFromEvents';

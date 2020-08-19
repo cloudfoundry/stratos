@@ -5,9 +5,9 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
-import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
-import { appReducers } from '../../store/src/reducers.module';
+import { EntityCatalogHelper } from '@stratosui/store-entity/entity-catalog.service';
+import { EntityCatalogHelpers } from '@stratosui/store';
+import { appReducers } from '@stratosui/store';
 import { CoreModule } from '../src/core/core.module';
 import { CurrentUserPermissionsService } from '../src/core/permissions/current-user-permissions.service';
 import {

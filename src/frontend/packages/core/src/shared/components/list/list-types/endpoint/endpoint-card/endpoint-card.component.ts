@@ -9,27 +9,27 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from 'frontend/packages/store/src/app-state';
+import { AppState } from '@stratosui/store';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
+import { getFullEndpointApiUrl } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
 import {
   StratosCatalogEndpointEntity,
-} from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
-import { StratosStatus } from '../../../../../../../../store/src/types/shared.types';
-import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
+} from '@stratosui/store';
+import { FavoritesConfigMapper } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
+import { MenuItem } from '@stratosui/store';
+import { StratosStatus } from '@stratosui/store';
+import { UserFavoriteEndpoint } from '@stratosui/store';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { coreEndpointListDetailsComponents } from '../../../../../../features/endpoints/endpoint-helpers';
 import { createMetaCardMenuItemSeparator } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
-import { RouterNav } from './../../../../../../../../store/src/actions/router.actions';
+import { RouterNav } from '@stratosui/store';
 import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 
 @Component({

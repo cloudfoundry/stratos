@@ -3,7 +3,7 @@ import { CoreModule } from '../../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CardComponent, listCards } from './card.component';
 import { SharedModule } from '../../../../shared.module';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { EntityInfo } from '@stratosui/store';
 
 describe('CardComponent', () => {
   let component: CardComponent<EntityInfo>;

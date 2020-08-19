@@ -1,6 +1,6 @@
 import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChild, ViewContainerRef } from '@angular/core';
 
-import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
+import { MultiActionListEntity } from '@stratosui/store';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
 import { CardCell } from '../../list.types';
