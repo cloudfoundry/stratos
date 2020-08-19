@@ -60,6 +60,10 @@ function createVersiondSidebar() (
 
 function updateVersionsFile() (
   vString=$1
+  if [ $vString = "]" ]; then
+    echo No content \for versions file
+    return
+  fi
   echo Updating versions file from $vString
   versions="[${vString:1}"
 
