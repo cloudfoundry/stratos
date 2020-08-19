@@ -24,7 +24,7 @@ import { stratosEntityCatalog } from '@stratosui/store';
 import { EndpointModel } from '@stratosui/store';
 import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 import { UserFavoriteManager } from '@stratosui/store';
-import { TabNavService } from '../tab-nav.service';
+import { TabNavService } from './tab-nav.service';
 // import { XSRFModule } from '../xsrf.module';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';

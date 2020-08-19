@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { TabNavService } from 'frontend/packages/core/tab-nav.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { generateBaseTestStoreModules } from 'frontend/packages/core/test-framework/core-test.helper';
 
 import { CoreModule } from '../../../core/core.module';

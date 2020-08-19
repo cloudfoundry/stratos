@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { TabNavService } from '../../../../tab-nav.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
 import { SidePanelService } from '../../../shared/services/side-panel.service';

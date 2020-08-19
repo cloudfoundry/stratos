@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { TabNavService } from '../../../../../tab-nav.service';
+import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../../core/core.module';
 import { ShowPageHeaderComponent } from './show-page-header.component';
 

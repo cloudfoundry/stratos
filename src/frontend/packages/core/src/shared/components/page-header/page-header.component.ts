@@ -15,7 +15,7 @@ import { selectIsMobile } from '@stratosui/store';
 import { InternalEventSeverity } from '@stratosui/store';
 import { StratosStatus } from '@stratosui/store';
 import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
-import { TabNavService } from '../../../../tab-nav.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';

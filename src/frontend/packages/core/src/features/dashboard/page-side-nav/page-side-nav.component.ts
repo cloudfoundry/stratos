@@ -6,7 +6,7 @@ import { Observable, of } from 'rxjs';
 import { AppState } from '@stratosui/store';
 import { EntityServiceFactory } from '@stratosui/store';
 import { selectIsMobile } from '@stratosui/store';
-import { TabNavService } from '../../../../tab-nav.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';

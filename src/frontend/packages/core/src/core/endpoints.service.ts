@@ -11,7 +11,7 @@ import { EndpointHealthCheck } from '@stratosui/store';
 import { AuthState } from '@stratosui/store';
 import { endpointEntitiesSelector, endpointStatusSelector } from '@stratosui/store';
 import { EndpointModel, EndpointState } from '@stratosui/store';
-import { EndpointHealthChecks } from '../../endpoints-health-checks';
+import { EndpointHealthChecks } from '../endpoints-health-checks';
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
 import { UserService } from './user.service';
 

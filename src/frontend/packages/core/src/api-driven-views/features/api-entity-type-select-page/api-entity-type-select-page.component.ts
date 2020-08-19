@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 import { GeneralAppState } from '@stratosui/store';
 import { entityCatalog } from '@stratosui/store';
 import { connectedEndpointsOfTypesSelector } from '@stratosui/store';
-import { TabNavService } from '../../../../tab-nav.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 
 @Component({

@@ -6,7 +6,7 @@ import { buffer, debounceTime, filter, map } from 'rxjs/operators';
 import { ActionHistoryDump } from '@stratosui/store';
 import { ToggleSideNav } from '@stratosui/store';
 import { AppState } from '@stratosui/store';
-import { TabNavItem } from '../../../../tab-nav.types';
+import { TabNavItem } from '../../../tab-nav.types';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 
 export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');

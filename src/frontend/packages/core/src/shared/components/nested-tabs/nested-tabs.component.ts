@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { TabNavItem } from '../../../../tab-nav.types';
+import { TabNavItem } from '../../../tab-nav.types';
 
 
 @Component({

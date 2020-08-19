@@ -14,7 +14,7 @@ import { entityCatalog } from '@stratosui/store';
 import { DashboardState } from '@stratosui/store';
 import { selectDashboardState } from '@stratosui/store';
 import { stratosEntityCatalog } from '@stratosui/store';
-import { TabNavService } from '../../../../tab-nav.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { SidePanelService } from '../../../shared/services/side-panel.service';

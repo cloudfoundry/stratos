@@ -6,7 +6,7 @@ import { StoreModule } from '@ngrx/store';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { appReducers } from '@stratosui/store';
-import { TabNavService } from '../../../../tab-nav.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
