@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 
-import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '@stratosui/store.module';
+import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '@stratosui/store';
 import { entityCatalog, TestEntityCatalog } from '@stratosui/store';
-import { generateStratosEntities } from '../../store/src/stratos-entity-generator';
+import { generateStratosEntities } from '@stratosui/store';
 
 @NgModule({
   imports: [

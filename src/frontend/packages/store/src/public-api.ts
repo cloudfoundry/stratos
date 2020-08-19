@@ -97,6 +97,9 @@
  // AppStoreModule
  export * from './store.module';
 
+ // Stratos entity generator
+ export * from './stratos-entity-generator';
+
  // Jetstream
  export * from './jetstream';
 

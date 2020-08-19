@@ -1,12 +1,12 @@
-import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
-import {
-  MetricsEndpointDetailsComponent,
-} from '../../core/src/features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
+// import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
+// import {
+//  MetricsEndpointDetailsComponent,
+// } from '../../core/src/features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+} from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
   endpointEntityType,
   STRATOS_ENDPOINT_TYPE,
@@ -14,13 +14,13 @@ import {
   systemInfoEntityType,
   userFavouritesEntityType,
   userProfileEntityType,
-} from '../../store/src/helpers/stratos-entity-factory';
+} from './helpers/stratos-entity-factory';
 import {
   addOrUpdateUserFavoriteMetadataReducer,
   deleteUserFavoriteMetadataReducer,
-} from '../../store/src/reducers/favorite.reducer';
-import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
-import { EndpointModel } from '../../store/src/types/endpoint.types';
+} from './reducers/favorite.reducer';
+import { systemEndpointsReducer } from './reducers/system-endpoints.reducer';
+import { EndpointModel } from './types/endpoint.types';
 import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import {
   EndpointActionBuilder,
@@ -145,6 +145,8 @@ function generateUserProfile(stratosType) {
 
 function generateMetricsEndpoint() {
   // TODO: metrics location to be sorted - STRAT-152
+/*
+// Block commented by varadhan to resolve circular dependency as part of ext-thin-app build of store lib
   stratosEntityCatalog.metricsEndpoint = new StratosCatalogEndpointEntity({
     type: 'metrics',
     label: 'Metrics',
@@ -158,4 +160,6 @@ function generateMetricsEndpoint() {
     metadata => `/endpoints/metrics/${metadata.guid}`
   )
   return stratosEntityCatalog.metricsEndpoint;
+  */
+ return null;
 }

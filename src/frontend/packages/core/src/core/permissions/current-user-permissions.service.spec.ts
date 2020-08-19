@@ -6,7 +6,7 @@ import { AppState } from '@stratosui/store';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '@stratosui/store-test.module';
 import { EntityCatalogEntityConfig } from '@stratosui/store';
 import { endpointEntityType, stratosEntityFactory } from '@stratosui/store';
-import { generateStratosEntities } from '../../../../store/src/stratos-entity-generator';
+import { generateStratosEntities } from '@stratosui/store';
 import { EndpointModel } from '@stratosui/store';
 import { BaseEntityValues } from '@stratosui/store';
 import { PaginationState } from '@stratosui/store';
