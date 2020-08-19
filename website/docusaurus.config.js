@@ -14,9 +14,6 @@ module.exports = {
         src: 'img/logo.png',
       },
       items: [{
-        type: 'docsVersionDropdown',
-        position: 'right',
-      }, {
         to: 'docs/',
         activeBasePath: 'docs',
         label: 'Docs',
