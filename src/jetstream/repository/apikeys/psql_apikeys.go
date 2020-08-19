@@ -3,6 +3,7 @@ package apikeys
 import (
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -11,9 +12,12 @@ import (
 )
 
 var insertAPIKey = `INSERT INTO api_keys (guid, secret, user_guid, comment) VALUES ($1, $2, $3, $4)`
-var getAPIKeyUserID = `SELECT user_guid FROM api_keys WHERE secret = $1`
-var listAPIKeys = `SELECT guid, user_guid, comment FROM api_keys WHERE user_guid = $1`
+var getAPIKeyBySecret = `SELECT guid, user_guid, comment, last_used FROM api_keys WHERE secret = $1`
+var listAPIKeys = `SELECT guid, user_guid, comment, last_used FROM api_keys WHERE user_guid = $1`
 var deleteAPIKey = `DELETE FROM api_keys WHERE user_guid = $1 AND guid = $2`
+var updateAPIKeyLastUsed = `UPDATE api_keys SET last_used = $1 WHERE guid = $2`
+
+// UpdateAPIKeyLastUsed
 
 // PgsqlAPIKeysRepository - Postgresql-backed API keys repository
 type PgsqlAPIKeysRepository struct {
@@ -30,9 +34,10 @@ func NewPgsqlAPIKeysRepository(dcp *sql.DB) (Repository, error) {
 func InitRepositoryProvider(databaseProvider string) {
 	// Modify the database statements if needed, for the given database type
 	insertAPIKey = datastore.ModifySQLStatement(insertAPIKey, databaseProvider)
-	getAPIKeyUserID = datastore.ModifySQLStatement(getAPIKeyUserID, databaseProvider)
+	getAPIKeyBySecret = datastore.ModifySQLStatement(getAPIKeyBySecret, databaseProvider)
 	deleteAPIKey = datastore.ModifySQLStatement(deleteAPIKey, databaseProvider)
 	listAPIKeys = datastore.ModifySQLStatement(listAPIKeys, databaseProvider)
+	updateAPIKeyLastUsed = datastore.ModifySQLStatement(updateAPIKeyLastUsed, databaseProvider)
 }
 
 // AddAPIKey - Add a new API key to the datastore.
@@ -78,20 +83,24 @@ func (p *PgsqlAPIKeysRepository) AddAPIKey(userID string, comment string) (*inte
 	return apiKey, err
 }
 
-// GetAPIKeyUserID - gets user ID for an API key
-func (p *PgsqlAPIKeysRepository) GetAPIKeyUserID(keySecret string) (string, error) {
-	log.Debug("GetAPIKeyUserID")
+// GetAPIKeyBySecret - gets user ID for an API key
+func (p *PgsqlAPIKeysRepository) GetAPIKeyBySecret(keySecret string) (*interfaces.APIKey, error) {
+	log.Debug("GetAPIKeyBySecret")
 
-	var (
-		err      error
-		userGUID string
+	var apiKey interfaces.APIKey
+
+	err := p.db.QueryRow(getAPIKeyBySecret, keySecret).Scan(
+		&apiKey.GUID,
+		&apiKey.UserGUID,
+		&apiKey.Comment,
+		&apiKey.LastUsed,
 	)
 
-	if err = p.db.QueryRow(getAPIKeyUserID, keySecret).Scan(&userGUID); err != nil {
-		return "", err
+	if err != nil {
+		return nil, err
 	}
 
-	return userGUID, nil
+	return &apiKey, nil
 }
 
 // ListAPIKeys - list API keys for a given user GUID
@@ -107,7 +116,7 @@ func (p *PgsqlAPIKeysRepository) ListAPIKeys(userID string) ([]interfaces.APIKey
 	result := []interfaces.APIKey{}
 	for rows.Next() {
 		var apiKey interfaces.APIKey
-		err = rows.Scan(&apiKey.GUID, &apiKey.UserGUID, &apiKey.Comment)
+		err = rows.Scan(&apiKey.GUID, &apiKey.UserGUID, &apiKey.Comment, &apiKey.LastUsed)
 		if err != nil {
 			log.Errorf("Scan: %v", err)
 			return nil, err
@@ -132,6 +141,25 @@ func (p *PgsqlAPIKeysRepository) DeleteAPIKey(userGUID string, keyGUID string) e
 		return errors.New("unable to DELETE api key: could not determine number of rows that were updated")
 	} else if rowsUpdates < 1 {
 		return errors.New("unable to DELETE api key: no rows were updated")
+	}
+
+	return nil
+}
+
+// UpdateAPIKeyLastUsed - sets API key last_used field to current time
+func (p *PgsqlAPIKeysRepository) UpdateAPIKeyLastUsed(keyGUID string) error {
+	log.Debug("UpdateAPIKeyLastUsed")
+
+	result, err := p.db.Exec(updateAPIKeyLastUsed, time.Now(), keyGUID)
+	if err != nil {
+		return err
+	}
+
+	rowsUpdates, err := result.RowsAffected()
+	if err != nil {
+		return errors.New("unable to UPDATE api key: could not determine number of rows that were updated")
+	} else if rowsUpdates < 1 {
+		return errors.New("unable to UPDATE api key: no rows were updated")
 	}
 
 	return nil

@@ -319,7 +319,7 @@ func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Debug("apiKeyMiddleware")
 
-		apiKey, err := getAPIKeyFromHeader(c)
+		apiKeySecret, err := getAPIKeyFromHeader(c)
 		if err != nil {
 			log.Debugf("apiKeyMiddleware: %v", err)
 			return h(c)
@@ -331,25 +331,30 @@ func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			return h(c)
 		}
 
-		userID, err := apiKeysRepo.GetAPIKeyUserID(apiKey)
+		apiKey, err := apiKeysRepo.GetAPIKeyBySecret(apiKeySecret)
 		if err != nil {
 			switch {
 			case err == sql.ErrNoRows:
 				log.Debug("apiKeyMiddleware: Invalid API key supplied")
 			default:
-				log.Warnf("apiKeyMiddleware: %v", err)
+				log.Errorf("apiKeyMiddleware: %v", err)
 			}
 
 			return h(c)
 		}
 
 		c.Set(APIKeySkipperContextKey, true)
-		c.Set("user_id", userID)
+		c.Set("user_id", apiKey.UserGUID)
 
 		// some endpoints check not only the context store, but also the contents of the session store
 		sessionValues := make(map[string]interface{})
-		sessionValues["user_id"] = userID
+		sessionValues["user_id"] = apiKey.UserGUID
 		p.setSessionValues(c, sessionValues)
+
+		err = apiKeysRepo.UpdateAPIKeyLastUsed(apiKey.GUID)
+		if err != nil {
+			log.Errorf("apiKeyMiddleware: %v", err)
+		}
 
 		return h(c)
 	}

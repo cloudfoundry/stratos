@@ -13,6 +13,7 @@ func init() {
 		apiTokenTable += "secret          VARCHAR(36) NOT NULL UNIQUE,"
 		apiTokenTable += "user_guid       VARCHAR(36) NOT NULL,"
 		apiTokenTable += "comment         VARCHAR(255) NOT NULL,"
+		apiTokenTable += "last_used       TIMESTAMP,"
 		apiTokenTable += "PRIMARY KEY (guid) );"
 
 		_, err := txn.Exec(apiTokenTable)
