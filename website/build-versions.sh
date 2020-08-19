@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+function logInner() (
+  echo ..... $1
+)
 
 function cleanUpBefore() (
   currentWebsite=$1
@@ -15,7 +18,7 @@ function cleanUpBefore() (
 
 function gitClone() (
   rurl="$1" localdir="$2"
-  echo Cloning from $rurl into $localdir
+  logInner "Cloning from $rurl into $localdir"
   git clone --depth 1 --no-single-branch $rurl $localdir
   pushd $localdir/website
   npm install
@@ -23,7 +26,7 @@ function gitClone() (
 )
 
 function createVersionedDocs() (
-  echo Updating versioned docs folder
+  logInner "Updating versioned docs folder"
   checkedOutRepo=$1
   currentWebsite=$2
   label=$3
@@ -33,7 +36,7 @@ function createVersionedDocs() (
 )
 
 function createVersiondSidebar() (
-  echo Updating versioned sidebar
+  logInner "Updating versioned sidebar"
   checkedOutRepo=$1
   currentWebsite=$2
   label=$3
@@ -50,6 +53,7 @@ function updateVersionsFile() (
 )
 
 function cleanUpAfter() (
+  echo Removing folder: $tempDirForGit 
   rm -rf $tempDirForGit
 ) 
 
@@ -57,29 +61,36 @@ function cleanUpAfter() (
 # wesbite folder
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-tempDirForGit=$(mktemp -d)#// TODO: RC FIX ME
-# // TODO: RC Add script to build ? publish action
-# tempDirForGit=$DIR/temp
-# mkdir -p $tempDirForGit
 
+# // TODO: RC Add script to build ? publish action
+
+# tempDirForGit=$(mktemp -d)
+tempDirForGit=$DIR/temp-checkout
+mkdir -p $tempDirForGit
 
 gitUrl=$(git remote get-url origin)
 versionsFile="versions.json"
 internalVersionsFile="internal-versions.json"
 
-echo ---------- Input  -------------
+echo ---------- Values  -------------
 # echo Hashes to treat as version: $hashes
 echo Temp Dir: $tempDirForGit. This will be removed
 echo GIT Url: $gitUrl
 echo Versions File: $versionsFile
 echo Internal Versions File: $internalVersionsFile
+echo Current Directory: $DIR
 
-gitClone $gitUrl $tempDirForGit #// TODO: RC
+gitClone $gitUrl $tempDirForGit
 
 versions="["
 
 cleanUpBefore $DIR
 
+# Loop through each version 
+# .. checkout that version in the temp dir
+# .. tag that version with it's label using docusaurus
+# .. copy the files docusaurus creates back into the main repo
+# .. store the label 
 
 for row in $(jq -r '.[]' $internalVersionsFile); do
   IFS=: read versionsLabel versionsHash <<< $row
@@ -94,10 +105,13 @@ for row in $(jq -r '.[]' $internalVersionsFile); do
     exit 1
   fi
 
-  
+  echo Process version \'$versionsLabel\' with checkout target  of \'versionsHash\'
+
+  logInner "checking out: $versionsHash"
   pushd $tempDirForGit
   git checkout $versionsHash
   pushd website
+  logInner "tagging with version $versionsLabel"
   npm run version -- $versionsLabel
   popd
   popd
@@ -106,10 +120,9 @@ for row in $(jq -r '.[]' $internalVersionsFile); do
   createVersiondSidebar $tempDirForGit $DIR $versionsLabel
   versions=$versions\"$versionsLabel\",  
 
+  echo Finished processing \'$versionsLabel\'
+
 done
 
 updateVersionsFile $versions
-cleanUp $tempDirForGit  #// TODO: RC
-
-
-
+cleanUp $tempDirForGit
