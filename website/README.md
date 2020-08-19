@@ -26,7 +26,7 @@ This command starts a local development server and open up a browser window. Mos
 $ ./deploy.sh -b
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+This command generates static content into the `build` directory and can be served using any static contents hosting service, or `npm run serve` to see locally.
 
 ### Deployment
 
@@ -39,17 +39,24 @@ $ ./deploy.sh
 
 > Note: The website is deployed to the GitHub Repository `cf-stratos/wesbite` which hosts https://stratos.app
 
-### Versioning
+### Version
 
-To create a new version of the docs run the following
+Versions is handled automatically by `npm run versions` which is called as part of `npm run build`. The `versions` target runs `build-versions.sh` which
 
-```
-npm run version -- 4.0.0
-```
+> The files is `docs/` will be marked as `next`.
 
-This will
-- copy the current state of the docs into `versioned_docs`
-- set up the links in the version menu drop down
-- become the new default when visiting the docs route (on merge of PR)
+1. clones a local copy of the repo
+1. cleans up any previous run (repo aside)
+1. Loop through each version defined in `internal-versions.json` (latest version is highest)
+  - checkout that version in temp repo
+  - tag that version with it's version label using docusaurus
+  - copy the files docusaurus creates back into the main repo
+  - store the label
 
-The files is `docs/` will be marked as `next`.
+#### Add a new version
+
+1. Open `internal-versions.json`
+1. Add to the top `<label of version to be displayed in website>:<version of repo to checkout that contains required docs>`. For example `[ "4.0.0:4.0.0"]`
+1. Commit, push and merge changes
+
+Everything else should be handled by the CI process (building with all versions in file and publishing)
