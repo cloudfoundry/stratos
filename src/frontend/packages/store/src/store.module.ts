@@ -19,7 +19,7 @@ import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-client.service';
-import { AppReducersModule } from './reducers.module';
+// import { AppReducersModule } from './reducers.module';
 
 
 @NgModule({
@@ -27,7 +27,7 @@ import { AppReducersModule } from './reducers.module';
     PipelineHttpClient
   ],
   imports: [
-    AppReducersModule,
+//    AppReducersModule,
     HttpClientModule,
     EffectsModule.forRoot([
       DashboardEffect,

@@ -9,7 +9,7 @@ import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
 import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
-import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
+// import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
@@ -18,14 +18,14 @@ import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../store/src/helpe
 import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
 import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
 import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
-import { AppStoreModule } from '../../store/src/store.module';
+// import { AppStoreModule } from '../../store/src/store.module';
 import { stratosEntityCatalog } from '../../store/src/stratos-entity-catalog';
-import { generateStratosEntities } from '../../store/src/stratos-entity-generator';
+// import { generateStratosEntities } from '../../store/src/stratos-entity-generator';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../store/src/user-favorite-manager';
 import { TabNavService } from '../tab-nav.service';
-import { XSRFModule } from '../xsrf.module';
+//import { XSRFModule } from '../xsrf.module';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
@@ -99,9 +99,9 @@ class AppStoreDebugModule { }
     NoEndpointsNonAdminComponent,
   ],
   imports: [
-    EntityCatalogModule.forFeature(generateStratosEntities),
+//    EntityCatalogModule.forFeature(generateStratosEntities),
     RouteModule,
-    AppStoreModule,
+//    AppStoreModule,
     AppStoreDebugModule,
     BrowserModule,
     SharedModule,
@@ -114,7 +114,7 @@ class AppStoreDebugModule { }
     StoreRouterConnectingModule.forRoot({ serializer: DefaultRouterStateSerializer }), // Create action for router navigation
     AboutModule,
     CustomImportModule,
-    XSRFModule,
+//    XSRFModule,
   ],
   providers: [
     CustomizationService,
