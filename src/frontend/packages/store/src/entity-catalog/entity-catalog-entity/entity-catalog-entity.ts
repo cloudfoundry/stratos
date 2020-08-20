@@ -12,6 +12,7 @@ import {
   PaginationPageIteratorConfig,
 } from '../../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../entity-request-pipeline/pipeline.types';
+import { EndpointAuthTypeConfig } from '../../extension-types';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../../helpers/stratos-entity-factory';
 import { EndpointModel } from '../../types/endpoint.types';
@@ -352,5 +353,20 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
       }
     });
   }
+
+  public setListComponent(component: any) {
+    // Can only be set once
+    if (!this.definition.listDetailsComponent) {
+      (this.definition as any).listDetailsComponent = component;
+    }
+  }
+
+  public setAuthTypes(authTypes: EndpointAuthTypeConfig[]) {
+    // Can only be set once
+    if (!this.definition.authTypes || this.definition.authTypes.length === 0) {
+      (this.definition as any).authTypes = authTypes;
+    }
+  }
+  
 }
 

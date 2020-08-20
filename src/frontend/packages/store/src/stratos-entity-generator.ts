@@ -1,7 +1,3 @@
-import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
-import {
-  MetricsEndpointDetailsComponent,
-} from '../../core/src/features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -151,9 +147,8 @@ function generateMetricsEndpoint() {
     labelPlural: 'Metrics',
     tokenSharing: true,
     logoUrl: '/core/assets/endpoint-icons/metrics.svg',
-    authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None],
-    renderPriority: 1,
-    listDetailsComponent: MetricsEndpointDetailsComponent,
+    authTypes: [],
+    renderPriority: 1
   },
     metadata => `/endpoints/metrics/${metadata.guid}`
   )
