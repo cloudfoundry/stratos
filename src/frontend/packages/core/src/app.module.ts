@@ -24,7 +24,6 @@ import { generateStratosEntities } from '../../store/src/stratos-entity-generato
 import { EndpointModel } from '../../store/src/types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../store/src/user-favorite-manager';
-import { XSRFModule } from '../xsrf.module';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
@@ -47,6 +46,7 @@ import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/
 import { SidePanelService } from './shared/services/side-panel.service';
 import { SharedModule } from './shared/shared.module';
 import { TabNavService } from './tab-nav.service';
+import { XSRFModule } from './xsrf.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
