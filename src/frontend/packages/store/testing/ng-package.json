@@ -2,6 +2,9 @@
   "$schema": "../../../../../node_modules/ng-packagr/ng-package.schema.json",
   "dest": "../../../../dist/store/testing",
   "lib": {
-    "entryFile": "public-api.ts"
+    "entryFile": "public-api.ts",
+    "umdModuleIds": {
+      "@ngrx/store": "ngrx_store"
+    }
   }
 }
