@@ -363,7 +363,7 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
 
   public setAuthTypes(authTypes: EndpointAuthTypeConfig[]) {
     // Can only be set once
-    if (!this.definition.authTypes) {
+    if (!this.definition.authTypes || this.definition.authTypes.length === 0) {
       (this.definition as any).authTypes = authTypes;
     }
   }

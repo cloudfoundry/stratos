@@ -147,7 +147,7 @@ function generateMetricsEndpoint() {
     labelPlural: 'Metrics',
     tokenSharing: true,
     logoUrl: '/core/assets/endpoint-icons/metrics.svg',
-    authTypes: null,
+    authTypes: [],
     renderPriority: 1
   },
     metadata => `/endpoints/metrics/${metadata.guid}`
