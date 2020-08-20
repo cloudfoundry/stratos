@@ -2,9 +2,11 @@ package apikeys
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"errors"
 	"time"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	uuid "github.com/satori/go.uuid"
@@ -52,12 +54,18 @@ func (p *PgsqlAPIKeysRepository) AddAPIKey(userID string, comment string) (*inte
 		log.Debug(msg)
 		err = errors.New(msg)
 	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	randomBytes, err := crypto.GenerateRandomBytes(48)
 	if err != nil {
 		return nil, err
 	}
 
 	keyGUID := uuid.NewV4().String()
-	keySecret := uuid.NewV4().String()
+	keySecret := base64.URLEncoding.EncodeToString(randomBytes)
 
 	var result sql.Result
 	if result, err = p.db.Exec(insertAPIKey, keyGUID, keySecret, userID, comment); err != nil {
