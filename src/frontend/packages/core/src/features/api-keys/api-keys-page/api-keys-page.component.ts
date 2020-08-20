@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subject } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { ApiKeyListConfigService } from '../../../shared/components/list/list-types/apiKeys/apiKey-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { AddApiKeyDialogComponent } from '../add-api-key-dialog/add-api-key-dialog.component';
@@ -16,20 +17,24 @@ import { AddApiKeyDialogComponent } from '../add-api-key-dialog/add-api-key-dial
     useClass: ApiKeyListConfigService,
   }]
 })
-export class ApiKeysPageComponent implements OnInit {
+export class ApiKeysPageComponent {
 
   public keyDetails = new Subject<string>();
   public keyDetails$ = this.keyDetails.asObservable();
+  public hasKeys$: Observable<boolean>;
 
   constructor(
     private dialog: MatDialog,
-  ) { }
-
-  ngOnInit(): void {
+  ) {
+    this.hasKeys$ = stratosEntityCatalog.apiKey.store.getPaginationMonitor().currentPage$.pipe(
+      map(page => page && !!page.length)
+    )
   }
 
   addApiKey() {
     this.showDialog().pipe(first()).subscribe(key => {
+      // TODO: RC test cancel
+      console.log('DIAG RESULT:', key)
       this.keyDetails.next(key);
     })
   }
@@ -39,13 +44,15 @@ export class ApiKeysPageComponent implements OnInit {
   }
 
   private showDialog(): Observable<string> {
-    // return of('TEST');
     return this.dialog.open(AddApiKeyDialogComponent, {
       disableClose: true,
     }).afterClosed().pipe(
-      map(a => {
-        console.log('RESULT: ', a);
-        return 'FINISHED'
+      map(newApiKey => {
+        if (newApiKey && newApiKey.guid) {
+          stratosEntityCatalog.apiKey.api.getMultiple();
+          return newApiKey;
+        }
+        return;
       })
     );
   }

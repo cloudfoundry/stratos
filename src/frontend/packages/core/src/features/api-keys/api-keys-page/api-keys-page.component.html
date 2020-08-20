@@ -1,12 +1,23 @@
 <app-page-header>
   <h1>API Keys</h1>
-  <button mat-icon-button (click)="addApiKey()">
-    <mat-icon>add</mat-icon>
-  </button>
+  <div class="page-header-right">
+    <button id="stratos-api-key" mat-icon-button (click)="addApiKey()" matTooltip="Create API Key">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
 </app-page-header>
+
 <div *ngIf="keyDetails$ | async as keyDetails">
   Your API Key has been successfully created. Please record your key secret, there will be no later way to view it:
   {{keyDetails.secret}}
   <button (click)="clearKeyDetails()">remove</button>
 </div>
-<app-list></app-list>
+
+<app-list *ngIf="hasKeys$ | async; else noEntries"></app-list>
+<ng-template #noEntries>
+  <app-no-content-message icon="vpn_key" [firstLine]="'You have no API keys'" [secondLine]="{
+      text: ''
+    }" [toolbarLink]="{
+      text: 'Create a new API key'
+    }" toolbarAlign="stratos-api-key"></app-no-content-message>
+</ng-template>
