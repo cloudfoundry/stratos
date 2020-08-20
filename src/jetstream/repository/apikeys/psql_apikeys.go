@@ -50,7 +50,7 @@ func (p *PgsqlAPIKeysRepository) AddAPIKey(userID string, comment string) (*inte
 
 	// Validate args
 	if len(comment) > 255 {
-		msg := "comment must be less than 255 characters long"
+		msg := "comment maximum length is 255 characters"
 		log.Debug(msg)
 		err = errors.New(msg)
 	}
