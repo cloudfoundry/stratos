@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -14,7 +14,10 @@ import {
 } from '../actions/apiKey.actions';
 import { ApiKey } from '../apiKey.types';
 import { InternalAppState } from '../app-state';
+import { BrowserStandardEncoder } from '../browser-encoder';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { proxyAPIVersion } from '../jetstream';
+import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 
 const apiKeyUrlPath = `/pp/${proxyAPIVersion}/api_keys`;
@@ -34,17 +37,31 @@ export class ApiKeyEffect {
     mergeMap(action => {
       const actionType = 'create';
       this.store.dispatch(new StartRequestAction(action, actionType))
-      return this.http.post<ApiKey>(apiKeyUrlPath, {
-        comment: action.comment
-      }).pipe(
+      const params = new HttpParams({
+        encoder: new BrowserStandardEncoder(),
+        fromObject: {
+          comment: action.comment
+        }
+      });
+
+      return this.http.post<ApiKey>(apiKeyUrlPath, params).pipe(
         switchMap(newApiKey => {
           // TODO: RC FIX array/dispatch
-          // TODO: RC add to store?
-          this.store.dispatch(new WrapperRequestActionSuccess(null, action, actionType));
+          const guid = action.entity[0].getId(newApiKey);
+          const entityKey = entityCatalog.getEntityKey(action);
+          const response: NormalizedResponse<ApiKey> = {
+            entities: {
+              [entityKey]: {
+                [guid]: newApiKey
+              }
+            },
+            result: [guid]
+          }
+          this.store.dispatch(new WrapperRequestActionSuccess(response, action, actionType));
           return [];
         }),
-        catchError(() => {
-          this.store.dispatch(new WrapperRequestActionFailed('Failed to add api key', action, actionType));
+        catchError(err => {
+          this.store.dispatch(new WrapperRequestActionFailed(this.convertErrorToString(err), action, actionType));
           return [];
         })
       );
@@ -68,8 +85,8 @@ export class ApiKeyEffect {
           this.store.dispatch(new WrapperRequestActionSuccess(null, action, actionType));
           return [];
         }),
-        catchError(() => {
-          this.store.dispatch(new WrapperRequestActionFailed('Failed to delete api key', action, actionType));
+        catchError(err => {
+          this.store.dispatch(new WrapperRequestActionFailed(this.convertErrorToString(err), action, actionType));
           return [];
         })
       );
@@ -82,18 +99,37 @@ export class ApiKeyEffect {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType))
       return this.http.get(apiKeyUrlPath).pipe(
-        switchMap(res => {
+        switchMap((res: ApiKey[]) => {
+          const entityKey = entityCatalog.getEntityKey(action);
+          const response: NormalizedResponse<ApiKey> = {
+            entities: {
+              [entityKey]: {
+              }
+            },
+            result: []
+          }
+
+          res.forEach(apiKey => {
+            const guid = action.entity[0].getId(apiKey);
+            response.entities[entityKey][guid] = apiKey;
+            response.result.push(guid);
+          });
+
+
           // TODO: RC FIX array/dispatch
-          // TODO: RC add res to wrapper success
-          this.store.dispatch(new WrapperRequestActionSuccess(null, action, actionType));
+          this.store.dispatch(new WrapperRequestActionSuccess(response, action, actionType));
           return [];
         }),
-        catchError(() => {
-          this.store.dispatch(new WrapperRequestActionFailed('Failed to get all api keys', action, actionType));
+        catchError(err => {
+          this.store.dispatch(new WrapperRequestActionFailed(this.convertErrorToString(err), action, actionType));
           return [];
         })
       );
     })
   );
 
+  private convertErrorToString(err: any): string {
+    // TODO: RC beef up
+    return err && err.error ? err.error : 'Failed API Key action';
+  }
 }

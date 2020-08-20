@@ -178,10 +178,6 @@ function generateAPIKeys(stratosType) {
   >(
     definition,
     {
-      dataReducers: [
-        addOrUpdateUserFavoriteMetadataReducer,
-        deleteUserFavoriteMetadataReducer,
-      ],
       actionBuilders: apiKeyActionBuilder
     }
   )

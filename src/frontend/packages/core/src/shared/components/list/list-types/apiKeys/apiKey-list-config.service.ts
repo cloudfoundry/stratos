@@ -20,28 +20,28 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
   // TODO: RC Flesh out, get correct paths
   public readonly columns: ITableColumn<ApiKey>[] = [
     {
-      columnId: 'id',
-      headerCell: () => 'ID',
+      columnId: 'guid',
+      headerCell: () => 'guid',
       cellDefinition: {
-        valuePath: 'unknown'
+        valuePath: 'guid'
       },
       sort: {
         type: 'sort',
-        orderKey: 'id',
-        field: 'unknown'
+        orderKey: 'guid',
+        field: 'guid'
       },
       cellFlex: '2'
     },
     {
-      columnId: 'type',
-      headerCell: () => 'Type',
+      columnId: 'comment',
+      headerCell: () => 'comment',
       cellDefinition: {
-        valuePath: 'unknown'
+        valuePath: 'comment'
       },
       sort: {
         type: 'sort',
-        orderKey: 'type',
-        field: 'cnsi_type'
+        orderKey: 'comment',
+        field: 'comment'
       },
       cellFlex: '2'
     },
@@ -55,7 +55,7 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
     title: '',
     filter: 'Filter API Keys'
   };
-  enableTextFilter = false; // TODO: RC
+  enableTextFilter = true; // TODO: RC
 
   constructor(
     store: Store<AppState>,

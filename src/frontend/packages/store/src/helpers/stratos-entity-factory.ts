@@ -32,7 +32,7 @@ entityCache[endpointEntityType] = EndpointSchema;
 const UserProfileInfoSchema = new StratosEntitySchema(userProfileEntityType, 'id');
 entityCache[userProfileEntityType] = UserProfileInfoSchema;
 
-const ApiKeySchema = new StratosEntitySchema(apiKeyEntityType, 'id'); // TODO: RC check id
+const ApiKeySchema = new StratosEntitySchema(apiKeyEntityType, 'guid');
 entityCache[apiKeyEntityType] = ApiKeySchema;
 
 export function stratosEntityFactory(key: string): EntitySchema {

@@ -35,7 +35,7 @@ export class ApiKeyDataSource extends ListDataSource<ApiKey> {
       transformEntities: [
         {
           type: 'filter',
-          field: 'name' // TODO: RC assign correct column id
+          field: 'comment' // TODO: RC assign correct column id
         },
       ],
       listConfig,
