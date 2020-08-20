@@ -15,7 +15,12 @@ import { ApiKeyDataSource } from './apiKey-data-source';
 @Injectable()
 export class ApiKeyListConfigService implements IListConfig<ApiKey> {
 
-  private singleActions: IListAction<ApiKey>[];
+  private deleteAction: IListAction<ApiKey> = {
+    action: (item: ApiKey) => stratosEntityCatalog.apiKey.api.delete(item.guid),
+    label: 'Delete',
+    description: 'Delete API Key',
+  }
+  private singleActions: IListAction<ApiKey>[] = [this.deleteAction];
 
   // TODO: RC Flesh out, get correct paths
   public readonly columns: ITableColumn<ApiKey>[] = [
@@ -60,7 +65,6 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
   constructor(
     store: Store<AppState>,
   ) {
-    this.singleActions = []; // TODO: RC add 'delete'
     this.dataSource = new ApiKeyDataSource(
       store,
       this,
