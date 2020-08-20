@@ -2,6 +2,17 @@
   "$schema": "../../../../node_modules/ng-packagr/ng-package.schema.json",
   "dest": "../../../../dist/store",
   "lib": {
-    "entryFile": "src/public-api.ts"
+    "entryFile": "src/public-api.ts",
+    "umdModuleIds": {
+      "normalizr": "normalizr",
+      "rxjs-spy/operators": "rxjsSpy_operators",
+      "rxjs-spy/operators/tag": "rxjsSpy_operators_tag",
+      "ngrx-store-localstorage": "ngrxStoreLocalstorage",
+      "@ngrx/store": "ngrx_store",
+      "@ngrx/effects": "effects",
+      "immer": "immer",
+      "util": "util",
+      "@ngrx/router-store": "ngrx_routerSstore"
+    }
   }
 }
