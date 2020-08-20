@@ -1,5 +1,5 @@
 import { apiKeyEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../helpers/stratos-entity-factory';
-import { PaginatedAction } from '../types/pagination.types';
+import { PaginatedAction, PaginationParam } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';
 
 export const API_KEY_ADD = '[API Key] Add API Key'
@@ -13,20 +13,12 @@ abstract class BaseApiKeyAction implements EntityRequestAction {
   constructor(public type: string) { }
 }
 
-export interface PaginationApiKeyAction extends PaginatedAction, EntityRequestAction {
+interface PaginationApiKeyAction extends PaginatedAction, EntityRequestAction {
   flattenPagination: boolean;
 }
-export interface SingleApiKeyAction extends EntityRequestAction {
+interface SingleApiKeyAction extends EntityRequestAction {
   guid: string;
 }
-
-
-// TODO: RC add to backend
-// export class GetApiKey implements BaseApiKeyAction {
-
-// }
-
-// TODO: RC expand backend to allow stratos admins to manage other peoples keys
 
 export class AddApiKey extends BaseApiKeyAction implements SingleApiKeyAction {
   constructor(public comment: string) {
@@ -48,4 +40,5 @@ export class GetAllApiKeys extends BaseApiKeyAction implements PaginationApiKeyA
   }
   flattenPagination = true;
   paginationKey: string;
+  initialParams: PaginationParam
 }

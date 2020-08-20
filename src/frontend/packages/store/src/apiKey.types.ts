@@ -1,4 +1,3 @@
-// TODO: RC fill out
 export interface ApiKey {
   comment: string;
   guid: string;

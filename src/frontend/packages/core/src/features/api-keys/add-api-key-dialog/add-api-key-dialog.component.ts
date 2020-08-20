@@ -1,7 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import { ApiKey } from '../../../../../store/src/apiKey.types';
@@ -16,11 +16,11 @@ import { safeUnsubscribe } from '../../../core/utils.service';
   templateUrl: './add-api-key-dialog.component.html',
   styleUrls: ['./add-api-key-dialog.component.scss']
 })
-export class AddApiKeyDialogComponent implements OnInit, OnDestroy {
+export class AddApiKeyDialogComponent implements OnDestroy {
 
-  private hasErrored = new Subject<string>()
+  private hasErrored = new BehaviorSubject(null);
   public hasErrored$ = this.hasErrored.asObservable();
-  private isBusy = new Subject<boolean>()
+  private isBusy = new BehaviorSubject(false)
   public isBusy$ = this.isBusy.asObservable();
 
   private sub: Subscription;
@@ -34,10 +34,7 @@ export class AddApiKeyDialogComponent implements OnInit, OnDestroy {
     this.formGroup = this.fb.group({
       comment: ['', Validators.required],
     });
-
-  }
-
-  ngOnInit(): void {
+    // this.isBusy.next(false);
   }
 
   ngOnDestroy(): void {

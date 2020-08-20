@@ -1,24 +1,26 @@
-<div class="connection-dialog__loading-wrapper">
-  <mat-progress-bar class="connection-dialog__loading"
+<div class="key-dialog__loading-wrapper">
+  <mat-progress-bar class="key-dialog__loading"
     [color]="(hasErrored$ | async) && !(isBusy$ | async) ? 'warn' : 'primary'"
     [mode]="(isBusy$ | async) ? 'indeterminate' : 'solid'">
   </mat-progress-bar>
 </div>
-<div class="connection-dialog">
-  <div class="connection-dialog__title">
+<div class="key-dialog">
+  <div class="key-dialog__title">
     <h2 mat-dialog-title>
       Create an API Key
     </h2>
   </div>
+  <div>
+  </div>
   <div [formGroup]="formGroup">
     <mat-form-field>
-      <input matInput placeholder="comment" formControlName="comment" required>
+      <input matInput placeholder="Description" formControlName="comment" required>
     </mat-form-field>
   </div>
 
   <app-dialog-error message="{{hasErrored$ | async}}" [show]="(hasErrored$ | async) && !(isBusy$ | async)">
   </app-dialog-error>
-  <mat-dialog-actions class="connection-dialog__actions">
+  <mat-dialog-actions class="key-dialog__actions">
     <button [mat-dialog-close]="true" mat-button color="warn" [disabled]="(isBusy$ | async)">Cancel</button>
     <button (click)="submit()" [disabled]="(isBusy$ | async) || !formGroup.valid" mat-button
       color="primary">Create</button>

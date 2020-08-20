@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -37,16 +37,14 @@ export class ApiKeyEffect {
     mergeMap(action => {
       const actionType = 'create';
       this.store.dispatch(new StartRequestAction(action, actionType))
-      const params = new HttpParams({
+
+      return this.http.post<ApiKey>(apiKeyUrlPath, new HttpParams({
         encoder: new BrowserStandardEncoder(),
         fromObject: {
           comment: action.comment
         }
-      });
-
-      return this.http.post<ApiKey>(apiKeyUrlPath, params).pipe(
+      })).pipe(
         switchMap(newApiKey => {
-          // TODO: RC FIX array/dispatch
           const guid = action.entity[0].getId(newApiKey);
           const entityKey = entityCatalog.getEntityKey(action);
           const response: NormalizedResponse<ApiKey> = {
@@ -74,14 +72,15 @@ export class ApiKeyEffect {
       const actionType = 'delete';
       this.store.dispatch(new StartRequestAction(action, actionType))
 
-      return this.http.request('delete', apiKeyUrlPath, {
-        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-        body: {
-          guid: action.guid
-        }
+      return this.http.delete(apiKeyUrlPath, {
+        params: new HttpParams({
+          encoder: new BrowserStandardEncoder(),
+          fromObject: {
+            guid: action.guid
+          }
+        })
       }).pipe(
         switchMap(() => {
-          // TODO: RC FIX array/dispatch
           this.store.dispatch(new WrapperRequestActionSuccess(null, action, actionType));
           return [];
         }),
@@ -115,8 +114,6 @@ export class ApiKeyEffect {
             response.result.push(guid);
           });
 
-
-          // TODO: RC FIX array/dispatch
           this.store.dispatch(new WrapperRequestActionSuccess(response, action, actionType));
           return [];
         }),
@@ -129,7 +126,7 @@ export class ApiKeyEffect {
   );
 
   private convertErrorToString(err: any): string {
-    // TODO: RC beef up
+    // We should look into beefing this up / combining with generic error handling
     return err && err.error ? err.error : 'Failed API Key action';
   }
 }

@@ -6,7 +6,6 @@ import { AppState } from '../../../../../../../store/src/app-state';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 
-
 export class ApiKeyDataSource extends ListDataSource<ApiKey> {
 
   constructor(
@@ -14,17 +13,6 @@ export class ApiKeyDataSource extends ListDataSource<ApiKey> {
     listConfig: IListConfig<ApiKey>,
     action: GetAllApiKeys,
   ) {
-    // TODO: RC use for 'deleteing'?
-    // const rowStateHelper = new ListRowSateHelper();
-    // const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
-    //   paginationMonitorFactory,
-    //   entityMonitorFactory,
-    //   action.paginationKey,
-    //   action,
-    //   EndpointRowStateSetUpManager,
-    //   false
-    // );
-
     super({
       store,
       action,
@@ -35,7 +23,7 @@ export class ApiKeyDataSource extends ListDataSource<ApiKey> {
       transformEntities: [
         {
           type: 'filter',
-          field: 'comment' // TODO: RC assign correct column id
+          field: 'comment'
         },
       ],
       listConfig,

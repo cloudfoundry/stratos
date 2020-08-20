@@ -26,15 +26,13 @@ export class ApiKeysPageComponent {
   constructor(
     private dialog: MatDialog,
   ) {
-    this.hasKeys$ = stratosEntityCatalog.apiKey.store.getPaginationMonitor().currentPage$.pipe(
-      map(page => page && !!page.length)
+    this.hasKeys$ = stratosEntityCatalog.apiKey.store.getPaginationService().entities$.pipe(
+      map(entities => entities && !!entities.length)
     )
   }
 
   addApiKey() {
     this.showDialog().pipe(first()).subscribe(key => {
-      // TODO: RC test cancel
-      console.log('DIAG RESULT:', key)
       this.keyDetails.next(key);
     })
   }
@@ -52,7 +50,7 @@ export class ApiKeysPageComponent {
           stratosEntityCatalog.apiKey.api.getMultiple();
           return newApiKey;
         }
-        return;
+        return null;
       })
     );
   }

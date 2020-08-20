@@ -7,10 +7,21 @@
   </div>
 </app-page-header>
 
-<div *ngIf="keyDetails$ | async as keyDetails">
-  Your API Key has been successfully created. Please record your key secret, there will be no later way to view it:
-  {{keyDetails.secret}}
-  <button (click)="clearKeyDetails()">remove</button>
+<div class="keys-page__new" *ngIf="keyDetails$ | async as keyDetails">
+
+  <mat-card class="autoscaler-credential__card">
+    <mat-card-header>
+      <mat-icon>vpn_key</mat-icon>New API Key
+    </mat-card-header>
+    <mat-card-content>
+      <p>Your API Key has been successfully created. Use the following information to connect to Stratos.</p>
+      <p><i>Please safely record these details, there is no later way to view them</i></p>
+      <ul>
+        <li>Secret: {{keyDetails.secret}}</li>
+      </ul>
+      <button (click)="clearKeyDetails()" mat-button color="warn">Close</button>
+    </mat-card-content>
+  </mat-card>
 </div>
 
 <app-list *ngIf="hasKeys$ | async; else noEntries"></app-list>
@@ -18,6 +29,6 @@
   <app-no-content-message icon="vpn_key" [firstLine]="'You have no API keys'" [secondLine]="{
       text: ''
     }" [toolbarLink]="{
-      text: 'Create a new API key'
+      text: 'Create an API key'
     }" toolbarAlign="stratos-api-key"></app-no-content-message>
 </ng-template>

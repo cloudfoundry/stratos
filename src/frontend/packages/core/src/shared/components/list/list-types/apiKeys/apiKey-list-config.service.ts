@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { SortDirection } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
 import { filter } from 'rxjs/operators';
 
@@ -6,40 +7,38 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { ApiKey } from '../../../../../../../store/src/apiKey.types';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { ApiKeyDataSource } from './apiKey-data-source';
-
 
 
 @Injectable()
 export class ApiKeyListConfigService implements IListConfig<ApiKey> {
 
   private deleteAction: IListAction<ApiKey> = {
-    action: (item: ApiKey) => stratosEntityCatalog.apiKey.api.delete(item.guid),
+    action: (item: ApiKey) => {
+      const confirmation = new ConfirmationDialogConfig(
+        'Delete Key',
+        `Are you sure?`,
+        'Delete',
+        true
+      );
+      this.confirmDialog.open(
+        confirmation,
+        () => stratosEntityCatalog.apiKey.api.delete(item.guid)
+      );
+    },
     label: 'Delete',
     description: 'Delete API Key',
   }
   private singleActions: IListAction<ApiKey>[] = [this.deleteAction];
 
-  // TODO: RC Flesh out, get correct paths
   public readonly columns: ITableColumn<ApiKey>[] = [
     {
-      columnId: 'guid',
-      headerCell: () => 'guid',
-      cellDefinition: {
-        valuePath: 'guid'
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'guid',
-        field: 'guid'
-      },
-      cellFlex: '2'
-    },
-    {
       columnId: 'comment',
-      headerCell: () => 'comment',
+      headerCell: () => 'Description',
       cellDefinition: {
         valuePath: 'comment'
       },
@@ -60,15 +59,21 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
     title: '',
     filter: 'Filter API Keys'
   };
-  enableTextFilter = true; // TODO: RC
+  enableTextFilter = true;
 
   constructor(
     store: Store<AppState>,
+    private confirmDialog: ConfirmationDialogService,
   ) {
+    const action = stratosEntityCatalog.apiKey.actions.getMultiple();
+    action.initialParams = {
+      'order-direction': 'desc' as SortDirection,
+      'order-direction-field': 'comment'
+    };
     this.dataSource = new ApiKeyDataSource(
       store,
       this,
-      stratosEntityCatalog.apiKey.actions.getMultiple()
+      action
     );
   }
 
