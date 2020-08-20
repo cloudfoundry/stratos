@@ -34,7 +34,6 @@ export class AddApiKeyDialogComponent implements OnDestroy {
     this.formGroup = this.fb.group({
       comment: ['', Validators.required],
     });
-    // this.isBusy.next(false);
   }
 
   ngOnDestroy(): void {

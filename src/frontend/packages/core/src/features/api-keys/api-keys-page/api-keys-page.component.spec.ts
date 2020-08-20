@@ -1,16 +1,33 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialogRef } from '@angular/material/dialog';
 
+import { TabNavService } from '../../../../tab-nav.service';
+import { BaseTestModules } from '../../../../test-framework/core-test.helper';
 import { ApiKeysPageComponent } from './api-keys-page.component';
 
 describe('ApiKeysPageComponent', () => {
   let component: ApiKeysPageComponent;
   let fixture: ComponentFixture<ApiKeysPageComponent>;
 
+  const mockDialogRef = {
+    close: () => { }
+  };
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ApiKeysPageComponent ]
+      imports: [
+        ...BaseTestModules,
+      ],
+      declarations: [ApiKeysPageComponent],
+      providers: [
+        {
+          provide: MatDialogRef,
+          useValue: mockDialogRef
+        },
+        TabNavService
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
