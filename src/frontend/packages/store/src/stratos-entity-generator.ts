@@ -8,6 +8,7 @@ import {
   StratosCatalogEntity,
 } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
+  apiKeyEntityType,
   endpointEntityType,
   STRATOS_ENDPOINT_TYPE,
   stratosEntityFactory,
@@ -21,8 +22,11 @@ import {
 } from '../../store/src/reducers/favorite.reducer';
 import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
 import { EndpointModel } from '../../store/src/types/endpoint.types';
+import { ApiKey } from './apiKey.types';
 import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import {
+  ApiKeyActionBuilder,
+  apiKeyActionBuilder,
   EndpointActionBuilder,
   endpointActionBuilder,
   SystemInfoActionBuilder,
@@ -52,7 +56,8 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
     generateSystemInfo(stratosType),
     generateUserFavorite(stratosType),
     generateUserProfile(stratosType),
-    generateMetricsEndpoint()
+    generateMetricsEndpoint(),
+    generateAPIKeys(stratosType)
   ]
 }
 
@@ -158,4 +163,27 @@ function generateMetricsEndpoint() {
     metadata => `/endpoints/metrics/${metadata.guid}`
   )
   return stratosEntityCatalog.metricsEndpoint;
+}
+
+function generateAPIKeys(stratosType) {
+  const definition: IStratosEntityDefinition = {
+    schema: stratosEntityFactory(apiKeyEntityType),
+    type: apiKeyEntityType,
+    endpoint: stratosType,
+  }
+  stratosEntityCatalog.apiKey = new StratosCatalogEntity<
+    undefined,
+    ApiKey,
+    ApiKeyActionBuilder
+  >(
+    definition,
+    {
+      dataReducers: [
+        addOrUpdateUserFavoriteMetadataReducer,
+        deleteUserFavoriteMetadataReducer,
+      ],
+      actionBuilders: apiKeyActionBuilder
+    }
+  )
+  return stratosEntityCatalog.apiKey;
 }
