@@ -7,8 +7,8 @@ import { map } from 'rxjs/operators';
 import { GeneralAppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { connectedEndpointsOfTypesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
-import { TabNavService } from '../../../../tab-nav.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
+import { TabNavService } from '../../../tab-nav.service';
 
 @Component({
   selector: 'app-api-entity-type-select-page',

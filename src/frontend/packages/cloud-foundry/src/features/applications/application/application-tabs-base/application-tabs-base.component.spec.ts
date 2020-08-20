@@ -9,7 +9,7 @@ import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../core/src/core/github.helpers';
 import { MDAppModule } from '../../../../../../core/src/core/md.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../../core/src/tab-nav.service';
 import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationStateService } from '../../../../shared/services/application-state.service';

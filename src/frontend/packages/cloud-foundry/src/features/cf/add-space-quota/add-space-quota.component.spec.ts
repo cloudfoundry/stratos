@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TabNavService } from '../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { CFBaseTestModules } from '../../../../test-framework/cf-test-helper';
 import { SpaceQuotaDefinitionFormComponent } from '../space-quota-definition-form/space-quota-definition-form.component';
 import { AddSpaceQuotaComponent } from './add-space-quota.component';

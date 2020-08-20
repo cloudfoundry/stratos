@@ -1,7 +1,7 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TabNavService } from '../../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../../core/src/tab-nav.service';
 import {
   generateCfActiveRouteMock,
   generateCfBaseTestModules,

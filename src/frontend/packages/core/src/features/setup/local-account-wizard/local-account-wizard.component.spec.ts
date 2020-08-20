@@ -4,11 +4,11 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
 
-import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { TabNavService } from '../../../tab-nav.service';
 import { SetupModule } from '../setup.module';
 import { LocalAccountWizardComponent } from './local-account-wizard.component';
 
