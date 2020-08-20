@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { CFAppState } from 'frontend/packages/cloud-foundry/src/cf-app-state';
-import { CurrentUserPermissionsService } from 'frontend/packages/core/src/core/permissions/current-user-permissions.service';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
 import { CFFeatureFlagTypes } from '../../../../../../../cf-api.types';
+import { CFAppState } from '../../../../../../../cf-app-state';
 import {
   CfSpaceUsersListConfigService,
 } from '../../../../../../../shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service';
