@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 
-import { TabNavService } from '../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   generateCfBaseTestModules,

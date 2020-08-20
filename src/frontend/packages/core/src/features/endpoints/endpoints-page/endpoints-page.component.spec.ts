@@ -6,11 +6,11 @@ import { StoreModule } from '@ngrx/store';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { appReducers } from '../../../../../store/src/reducers.module';
-import { TabNavService } from '../../../../tab-nav.service';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { TabNavService } from '../../../tab-nav.service';
 import { SidePanelService } from './../../../shared/services/side-panel.service';
 import { EndpointsPageComponent } from './endpoints-page.component';
 

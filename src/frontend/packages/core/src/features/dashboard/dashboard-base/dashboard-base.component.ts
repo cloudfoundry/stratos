@@ -14,10 +14,10 @@ import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-ca
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { TabNavService } from '../../../../tab-nav.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
 
