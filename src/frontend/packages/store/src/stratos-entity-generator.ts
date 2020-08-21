@@ -1,12 +1,9 @@
-import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
-import {
-  MetricsEndpointDetailsComponent,
-} from '../../core/src/features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+} from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import {
   endpointEntityType,
   STRATOS_ENDPOINT_TYPE,
@@ -14,14 +11,9 @@ import {
   systemInfoEntityType,
   userFavouritesEntityType,
   userProfileEntityType,
-} from '../../store/src/helpers/stratos-entity-factory';
-import {
-  addOrUpdateUserFavoriteMetadataReducer,
-  deleteUserFavoriteMetadataReducer,
-} from '../../store/src/reducers/favorite.reducer';
-import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
-import { EndpointModel } from '../../store/src/types/endpoint.types';
-import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
+} from './helpers/stratos-entity-factory';
+import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './reducers/favorite.reducer';
+import { systemEndpointsReducer } from './reducers/system-endpoints.reducer';
 import {
   EndpointActionBuilder,
   endpointActionBuilder,
@@ -33,6 +25,7 @@ import {
   userProfileActionBuilder,
 } from './stratos-action-builders';
 import { stratosEntityCatalog } from './stratos-entity-catalog';
+import { EndpointModel } from './types/endpoint.types';
 import { SystemInfo } from './types/system.types';
 import { UserFavorite } from './types/user-favorites.types';
 import { UserProfileInfo } from './types/user-profile.types';
@@ -151,9 +144,8 @@ function generateMetricsEndpoint() {
     labelPlural: 'Metrics',
     tokenSharing: true,
     logoUrl: '/core/assets/endpoint-icons/metrics.svg',
-    authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None],
-    renderPriority: 1,
-    listDetailsComponent: MetricsEndpointDetailsComponent,
+    authTypes: [],
+    renderPriority: 1
   },
     metadata => `/endpoints/metrics/${metadata.guid}`
   )
