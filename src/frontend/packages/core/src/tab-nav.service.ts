@@ -4,7 +4,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { asapScheduler, BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { filter, map, observeOn, publishReplay, refCount, startWith } from 'rxjs/operators';
 
-import { IPageSideNavTab } from './src/features/dashboard/page-side-nav/page-side-nav.component';
+import { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
 
 
 @Injectable()
