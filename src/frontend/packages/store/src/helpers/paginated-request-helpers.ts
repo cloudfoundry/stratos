@@ -1,6 +1,6 @@
-import { HttpClient, HttpRequest } from '@angular/common/http';
-import { forkJoin, Observable, of as observableOf } from 'rxjs';
-import { first, map, mergeMap } from 'rxjs/operators';
+import { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
+import { forkJoin, Observable, of as observableOf, of } from 'rxjs';
+import { first, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
 import { ActionDispatcher } from '../entity-request-pipeline/entity-request-pipeline.types';
@@ -9,15 +9,10 @@ import { ActionDispatcher } from '../entity-request-pipeline/entity-request-pipe
 // TODO: See #4208. This should be replaced with
 // src/frontend/packages/store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe.ts
 
-export interface PaginationFlattenerConfig<T = any, C = any> extends Pick<
-  PaginationFlattener<T, C>,
-  'getTotalPages' | 'getTotalResults' | 'mergePages' | 'clearResults'
-  > { }
-
 export interface PaginationFlattener<T = any, C = any> {
   getTotalPages: (res: C) => number;
   getTotalResults: (res: C) => number;
-  mergePages: (res: T[]) => T;
+  mergePages: (res: C[]) => T;
   fetch: (...args) => Observable<C>;
   buildFetchParams: (i: number) => any[];
   clearResults: (res: C, allResults: number) => Observable<C>;
@@ -66,6 +61,39 @@ export class BaseHttpFetcher {
   }
 }
 
+/**
+ * T is what we get back per request, C is what we return in the observable
+ */
+export interface IteratePaginationConfig<T, C> {
+  getFirst: (url: string) => Observable<HttpResponse<T>>;
+  getNext: (response: HttpResponse<T>) => Observable<HttpResponse<T>>;
+  getResult: (response: HttpResponse<T>) => C[];
+}
+/**
+ * T is what we get back per request, C is what we return in the observable
+ */
+export function iteratePagination<T, C>(
+  results: C[] = [],
+  request: Observable<HttpResponse<T>>,
+  iterator: IteratePaginationConfig<T, C>
+): Observable<C[]> {
+  return request.pipe(
+    first(),
+    switchMap(response => {
+      const nextRequest = iterator.getNext(response);
+      results.push(...iterator.getResult(response));
+      if (!nextRequest) {
+        return of(results);
+      }
+      return iteratePagination<T, C>(
+        results,
+        nextRequest,
+        iterator
+      );
+    }),
+  );
+}
+
 export function flattenPagination<T, C>(
   actionDispatcher: ActionDispatcher,
   firstRequest: Observable<C>,
@@ -90,7 +118,6 @@ export function flattenPagination<T, C>(
           return forkJoin([flattener.clearResults(firstResData, allResults)]);
         }
       }
-      // Discover the endpoint with the most pages. This is the amount of request we will need to make to fetch all pages from all
       // Make those requests
       const maxRequests = flattener.getTotalPages(firstResData);
       const requests = [];
@@ -102,7 +129,7 @@ export function flattenPagination<T, C>(
       }
       return forkJoin(requests);
     }),
-    map((responses: T[]) => {
+    map((responses: C[]) => {
       // Merge all responses into the first page
       return flattener.mergePages(responses);
     }),
