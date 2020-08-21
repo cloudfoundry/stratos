@@ -683,6 +683,12 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		Handler: pp.DoOidcFlowRequest,
 	})
 
+	var err error
+	pp.APIKeysRepository, err = apikeys.NewPgsqlAPIKeysRepository(pp.DatabaseConnectionPool)
+	if err != nil {
+		panic(fmt.Errorf("Can't initialize APIKeysRepository: %v", err))
+	}
+
 	return pp
 }
 
