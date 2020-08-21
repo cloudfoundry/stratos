@@ -52,8 +52,8 @@ export function createFailedGithubRequestMessage(error: any, logger: LoggerServi
   const response = parseHttpPipeError(error, logger);
   const message = response.message || '';
   return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
-    'Github ' + message.substring(0, message.indexOf('(')) :
-    'Github request failed';
+    'Git ' + message.substring(0, message.indexOf('(')) :
+    'Git request failed';
 }
 
 @Injectable()

@@ -247,7 +247,7 @@ export class DeployApplicationStep2Component
       .pipe(
         // Wait for a new project name change
         filter(state => state && !state.checking && !state.error && state.exists),
-        distinctUntilChanged((x, y) => x.name === y.name),
+        distinctUntilChanged((x, y) => x.name.toLowerCase() === y.name.toLowerCase()),
         // Convert project name into branches pagination observable
         switchMap(state =>
           cfEntityCatalog.gitBranch.store.getPaginationService(null, null, {

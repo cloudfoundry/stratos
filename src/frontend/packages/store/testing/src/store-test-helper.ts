@@ -1,20 +1,24 @@
 import { ModuleWithProviders } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
-
-import { AppState } from '../../src/app-state';
-import { entityCatalog } from '../../src/entity-catalog/entity-catalog';
-import { EntityCatalogEntityConfig } from '../../src/entity-catalog/entity-catalog.types';
-import { endpointEntityType, stratosEntityFactory } from '../../src/helpers/stratos-entity-factory';
-import { appReducers } from '../../src/reducers.module';
-import { getDefaultRequestState, rootUpdatingKey } from '../../src/reducers/api-request-reducer/types';
-import { getDefaultPaginationEntityState } from '../../src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
-import { NormalizedResponse } from '../../src/types/api.types';
-import { SessionData, SessionDataEndpoint } from '../../src/types/auth.types';
-import { getDefaultRolesRequestState } from '../../src/types/current-user-roles.types';
-import { EndpointModel } from '../../src/types/endpoint.types';
-import { BaseEntityValues } from '../../src/types/entity.types';
-import { WrapperRequestActionSuccess } from '../../src/types/request.types';
+import {
+  appReducers,
+  AppState,
+  BaseEntityValues,
+  endpointEntityType,
+  EndpointModel,
+  entityCatalog,
+  EntityCatalogEntityConfig,
+  getDefaultPaginationEntityState,
+  getDefaultRequestState,
+  getDefaultRolesRequestState,
+  NormalizedResponse,
+  rootUpdatingKey,
+  SessionData,
+  SessionDataEndpoint,
+  stratosEntityFactory,
+  WrapperRequestActionSuccess,
+} from '@stratosui/store';
 
 export const testSCFEndpointGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 const testSCFSessionEndpoint: SessionDataEndpoint = {
