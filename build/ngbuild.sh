@@ -15,18 +15,42 @@ RED="\033[91m"
 RESET="\033[0m"
 BOLD="\033[1m"
 
-echo -e "${CYAN}${BOLD}=============================${RESET}"
-echo -e "${CYAN}${BOLD}= Building Stratos packages =${RESET}"
-echo -e "${CYAN}${BOLD}=============================${RESET}"
-
 BUILD="false"
 PUBLISH="false"
 UNPUBLISH="false"
 LINK="false"
 INSTALL_LINKS="false"
 
-while getopts "bpuli" opt; do
+function show_help() {
+
+  echo
+  echo -e "${CYAN}${BOLD}ngbuild - tool to help build Stratos as packages${RESET}"
+  echo
+  echo -e "Run with: ${BOLD}build/ngbuild.sh <Flags> <Packages>${RESET}"
+  echo
+  echo "Flags can be:"
+  echo
+  echo "  -b Build packages"
+  echo "  -p Publish packages to npm"
+  echo "  -u Unpublish packages from npm"
+  echo "  -l Link packages using npm link"
+  echo "  -i Install linked packages into node_modules"
+  echo
+  echo "With no packages specified, all are used, otherwise you can specify one or more of:"
+  echo "  core"
+  echo "  store"
+  echo "  devkit"
+  echo "  theme"
+  echo "  shared"
+  echo
+}
+
+while getopts "hbpuli" opt; do
   case $opt in
+    h)
+      show_help
+      exit 0
+      ;;
     b)
       BUILD="true"
       ;;
@@ -51,6 +75,10 @@ PKGS="$@"
 if [ -z "$PKGS" ]; then
   PKGS="shared store devkit theme core"
 fi
+
+echo -e "${CYAN}${BOLD}=============================${RESET}"
+echo -e "${CYAN}${BOLD}= Building Stratos packages =${RESET}"
+echo -e "${CYAN}${BOLD}=============================${RESET}"
 
 # ===================================================================================================
 # Store
@@ -175,7 +203,34 @@ if [ ${BUILD} == "true" ]; then
     $BUILD_TARGET
   done
 fi
+<!--- Provide a general summary of your changes in the Title above -->
+a
+## Description
+<!--- Describe your changes in detail -->
 
+## Motivation and Context
+<!--- Why is this change required? What problem does it solve? -->
+<!--- If it fixes an open issue, please link to the issue here. -->
+
+## How Has This Been Tested?
+<!--- Please describe in detail how you tested your changes. -->
+<!--- Include details of your testing environment, tests ran to see how -->
+<!--- your change affects other areas of the code, etc. -->
+
+## Types of changes
+<!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] Docs update
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+
+## Checklist:
+<!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
+<!--- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
+- [ ] My code follows the code style of this project.
+- [ ] My change requires a change to the documentation.
+- [ ] I have updated the documentation accordingly.
+- [ ] I have followed the guidelines in CONTRIBUTING.md, including the required formatting of the commit message
 if [ "${UNPUBLISH}" == "true" ]; then
   for PKG in "$PKGS"
   do
