@@ -61,7 +61,7 @@ function createVersiondSidebar() (
 function updateVersionsFile() (
   vString=$1
   if [ $vString = "]" ]; then
-    echo No content \for versions file
+    echo "No content for versions file"
     return
   fi
   echo Updating versions file from $vString
@@ -115,7 +115,12 @@ export internalVersionsArray=($internalVersions)
 # go from newest (first in array) to oldest (last in array)
 for ((i = ${#internalVersionsArray[@]} - 1;i >= 0;i--)); do
   row=${internalVersionsArray[i]}
-  IFS=: read versionsLabel versionsHash <<< $row
+  IFS=: read versionsLabel versionsHash includeInDropDown <<< $row
+
+  if [ $includeInDropDown != "true" ]; then
+    echo Skipping version: $versionsLabel \"$includeInDropDown\"
+    continue
+  fi
 
   if [ -z "$versionsLabel" ]; then
     echo Invalid row \(no version label\): $row 
