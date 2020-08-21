@@ -133,7 +133,9 @@ function build_theme() {
   echo -e "${YELLOW}${BOLD}= Package: @stratosui/theme${RESET}"
   echo
 
+  pushd ${STRATOS} > /dev/null
   ng build theme
+  popd > /dev/null
 
   rm -rf ${STRATOS}/npm_pkg/theme
   cp -r ${STRATOS}/dist/theme ${STRATOS}/npm_pkg
