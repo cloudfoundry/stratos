@@ -63,7 +63,7 @@ func TestAddAPIKey(t *testing.T) {
 			apiKey, err := repository.AddAPIKey(userID, comment)
 
 			Convey("an error should be returned", func() {
-				So(err, ShouldResemble, errors.New("unable to INSERT api key: no rows were updated"))
+				So(err, ShouldResemble, errors.New("AddAPIKey: no rows were updated"))
 			})
 
 			Convey("should return nil", func() {
@@ -270,7 +270,7 @@ func TestDeleteAPIKey(t *testing.T) {
 			err := repository.DeleteAPIKey(userID, keyID)
 
 			Convey("an error should be returned", func() {
-				So(err, ShouldResemble, errors.New("unable to DELETE api key: no rows were updated"))
+				So(err, ShouldResemble, errors.New("DeleteAPIKey: no rows were updated"))
 			})
 		})
 
@@ -316,7 +316,7 @@ func TestUpdateAPIKeyLastUsed(t *testing.T) {
 			err := repository.UpdateAPIKeyLastUsed(keyID)
 
 			Convey("an error should be returned", func() {
-				So(err, ShouldResemble, errors.New("unable to UPDATE api key: no rows were updated"))
+				So(err, ShouldResemble, errors.New("UpdateAPIKeyLastUsed: no rows were updated"))
 			})
 		})
 
