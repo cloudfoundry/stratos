@@ -12,7 +12,8 @@
       "@ngrx/effects": "effects",
       "immer": "immer",
       "util": "util",
-      "@ngrx/router-store": "ngrx_routerSstore"
+      "@ngrx/router-store": "ngrx_routerSstore",
+      "moment": "moment"
     }
   }
 }
