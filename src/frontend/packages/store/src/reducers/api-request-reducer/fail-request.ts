@@ -1,7 +1,6 @@
-import { isNullOrUndefined } from 'util';
-
 import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
 import { IFailedRequestAction } from '../../types/request.types';
+import { isNullOrUndefined } from '../../utils';
 import { getEntityRequestState, mergeUpdatingState, setEntityRequestState } from './request-helpers';
 
 export function failRequest(state, action: IFailedRequestAction) {
