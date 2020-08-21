@@ -8,7 +8,7 @@
  // App State
  export { AppState } from './app-state';
 
- // Used by stoer testing moduekl
+ // Used by store testing module
  export { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from './entity-catalog.module';
  export { entityCatalog, TestEntityCatalog } from './entity-catalog/entity-catalog';
  export { EntityCatalogEntityConfig } from './entity-catalog/entity-catalog.types';
