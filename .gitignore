@@ -111,7 +111,7 @@ src/frontend/packages/core/sass/custom
 src/frontend/packages/core/src/index.html
 
 # Customisation - generated import module
-src/frontend/packages/core/src/_custom-import.module.ts
+_custom-import.module.ts
 
 # Prebuild package
 

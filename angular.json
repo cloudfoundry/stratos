@@ -4,8 +4,8 @@
   "newProjectRoot": "src/frontend/packages",
   "projects": {
     "stratos": {
-      "root": "src/frontend/packages",
-      "sourceRoot": "src/frontend/packages",
+      "root": "src/frontend/packages/application",
+      "sourceRoot": "src/frontend/packages/application",
       "projectType": "application",
       "architect": {
         "build": {
@@ -17,22 +17,13 @@
             "indexTransform": "./dist-devkit/build/index.transform.js",
             "preserveSymlinks": true,
             "outputPath": "dist",
-            "index": "src/frontend/packages/core/src/index.html",
-            "main": "src/frontend/packages/core/src/main.ts",
-            "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
-            "polyfills": "src/frontend/packages/core/src/polyfills.ts",
-            "assets": [
-              "src/frontend/packages/core/assets",
-              {
-                "glob": "**/*",
-                "input": "custom-src/frontend/assets/custom",
-                "output": "/core/assets/custom"
-              },
-              "src/frontend/packages/core/favicon.ico"
-            ],
+            "index": "src/frontend/packages/application/src/index.html",
+            "main": "src/frontend/packages/application/src/main.ts",
+            "tsConfig": "src/frontend/packages/application/tsconfig.app.json",
+            "polyfills": "src/frontend/packages/application/src/polyfills.ts",
+            "assets": [],
             "styles": [
-              "src/frontend/packages/core/src/styles.scss",
-              "node_modules/xterm/css/xterm.css"
+              "src/frontend/packages/application/src/styles.scss"
             ],
             "scripts": []
           },
@@ -48,8 +39,8 @@
               "vendorChunk": false,
               "buildOptimizer": true,
               "fileReplacements": [{
-                "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+                  "replace": "src/frontend/packages/application/src/environments/environment.ts",
+                  "with": "src/frontend/packages/application/src/environments/environment.prod.ts"
               }]
             }
           }
@@ -115,15 +106,8 @@
         "build": {
           "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
-            "preserveSymlinks": true,
-            "outputPath": "dist/core",
-            "index": "src/frontend/packages/core/src/index.html",
-            "main": "src/frontend/packages/core/src/main.ts",
-            "polyfills": "src/frontend/packages/core/src/polyfills.ts",
-            "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
-            "assets": [],
-            "styles": [],
-            "scripts": []
+            "project": "src/frontend/packages/core/ng-package.json",
+            "tsConfig": "src/frontend/packages/core/tsconfig.app.json"
           },
           "configurations": {
             "production": {

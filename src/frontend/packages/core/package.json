@@ -4,6 +4,7 @@
   "stratos": {
     "assets": {
       "assets": "core/assets"
-    }
+    },
+    "theming": "sass/_all-theme#app-theme"
   }
 }
