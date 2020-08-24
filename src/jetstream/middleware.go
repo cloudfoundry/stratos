@@ -15,7 +15,6 @@ import (
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/apikeys"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
@@ -30,7 +29,7 @@ const StratosSSOHeader = "x-stratos-sso-login"
 // Header to communicate any error during SSO
 const StratosSSOErrorHeader = "x-stratos-sso-error"
 
-// APIKeyContextKey - context
+// APIKeySkipperContextKey - name of a context key that indicates that valid API key was supplied
 const APIKeySkipperContextKey = "valid_api_key"
 
 // APIKeyHeader - API key authentication header name
@@ -80,7 +79,7 @@ type (
 	// Skipper - skipper function for middlewares
 	Skipper func(echo.Context) bool
 
-	// MiddlewareConfig defines the config for Logger middleware.
+	// MiddlewareConfig defines the config for the middleware.
 	MiddlewareConfig struct {
 		// Skipper defines a function to skip middleware.
 		Skipper Skipper
@@ -152,6 +151,11 @@ func (p *portalProxy) xsrfMiddlewareWithConfig(config MiddlewareConfig) echo.Mid
 	return func(h echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			log.Debug("xsrfMiddleware")
+
+			if config.Skipper(c) {
+				log.Debug("Skipping xsrfMiddleware")
+				return h(c)
+			}
 
 			// Only do this for mutating requests - i.e. we can ignore for GET or HEAD requests
 			if c.Request().Method == "GET" || c.Request().Method == "HEAD" {
@@ -325,13 +329,7 @@ func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			return h(c)
 		}
 
-		apiKeysRepo, err := apikeys.NewPgsqlAPIKeysRepository(p.DatabaseConnectionPool)
-		if err != nil {
-			log.Errorf("apiKeyMiddleware: %v", err)
-			return h(c)
-		}
-
-		apiKey, err := apiKeysRepo.GetAPIKeyBySecret(apiKeySecret)
+		apiKey, err := p.APIKeysRepository.GetAPIKeyBySecret(apiKeySecret)
 		if err != nil {
 			switch {
 			case err == sql.ErrNoRows:
@@ -351,7 +349,7 @@ func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		sessionValues["user_id"] = apiKey.UserGUID
 		p.setSessionValues(c, sessionValues)
 
-		err = apiKeysRepo.UpdateAPIKeyLastUsed(apiKey.GUID)
+		err = p.APIKeysRepository.UpdateAPIKeyLastUsed(apiKey.GUID)
 		if err != nil {
 			log.Errorf("apiKeyMiddleware: %v", err)
 		}
