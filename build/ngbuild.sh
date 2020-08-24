@@ -187,8 +187,8 @@ function build_core {
   jq '.version = "'${VERSION}'"' ${STRATOS}/npm_pkg/core/package.json > ${STRATOS}/npm_pkg/core/package.json.up
   mv ${STRATOS}/npm_pkg/core/package.json.up ${STRATOS}/npm_pkg/core/package.json
 
-  # # Need to copy other files - sass files for shared
-  # cp -r ${STRATOS}/src/frontend/packages/shared/sass ${STRATOS}/npm_pkg/shared/sass
+  # Delete node_modules
+  rm -rf ${STRATOS}/npm_pkg/core/node_modules
 
   # Delete test files
   rm -f ${STRATOS}/npm_pkg/core/src/test.ts
