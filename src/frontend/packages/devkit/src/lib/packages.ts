@@ -66,7 +66,6 @@ const isDirectory = source => {
   const stats = fs.lstatSync(realPath);
   return stats.isDirectory();
 }
-
 const getDirectories = source => {
   if (!fs.existsSync(source)) {
     return [];

@@ -16,7 +16,7 @@ class StratosBuilder {
 
   public run() {
     const dir = this.webpackConfig.context || __dirname;
-
+    
     // Read in the Stratos config file if present (and do so config initialization)
     const sConfig = new StratosConfig(dir, this.options);
 

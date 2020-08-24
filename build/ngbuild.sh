@@ -192,7 +192,7 @@ function build_core {
 
   # Delete test files
   rm -f ${STRATOS}/npm_pkg/core/src/test.ts
-  find ${STRATOS}/npm_pkg/core/src -type f -name "*.spec.ts" -delete  
+  find ${STRATOS}/npm_pkg/core/src -type f -name "*.spec.ts" -delete
 }
 
 echo -e "${CYAN}${BOLD}Packages: $PKGS${RESET}"
