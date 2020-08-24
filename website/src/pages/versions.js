@@ -51,7 +51,8 @@ function Version() {
               <tr>
                 <th>master</th>
                 <td>
-                  <Link to={useBaseUrl('/docs/next')}>Documentation</Link>
+                  {/* TODO: RC Uncomment in next PR when 4.0 sha is known */}
+                  {/* <Link to={useBaseUrl('/docs/next')}>Documentation</Link> */}
                 </td>
                 <td>
                   <a href={repoUrl}>Source Code</a>
