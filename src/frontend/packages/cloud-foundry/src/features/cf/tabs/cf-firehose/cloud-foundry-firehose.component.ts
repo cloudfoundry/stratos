@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
-import { catchError, filter, share, map, switchMap } from 'rxjs/operators';
+import { catchError, filter, map, share, switchMap } from 'rxjs/operators';
 
-import { LoggerService } from '../../../../../../core/src/core/logger.service';
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
 import { environment } from '../../../../../../core/src/environments/environment.prod';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
@@ -25,7 +24,6 @@ export class CloudFoundryFirehoseComponent implements OnInit {
 
   constructor(
     private cfEndpointService: CloudFoundryEndpointService,
-    private logService: LoggerService,
     private utilsService: UtilsService
   ) { }
 

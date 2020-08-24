@@ -4,7 +4,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { LoggerService } from '../../../../core/src/core/logger.service';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import {
   StartRequestAction,
@@ -29,7 +28,6 @@ export class GithubEffects {
     private actions$: Actions,
     private store: Store<CFAppState>,
     private scmService: GitSCMService,
-    private logger: LoggerService,
     private httpClient: HttpClient
   ) { }
   @Effect()

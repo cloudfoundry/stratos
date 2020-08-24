@@ -24,7 +24,6 @@ import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favor
 import { EventWatcherService } from './event-watcher/event-watcher.service';
 import { InfinityPipe } from './infinity.pipe';
 import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component';
-import { LoggerService } from './logger.service';
 import { MDAppModule } from './md.module';
 import { NotSetupGuardService } from './not-setup-guard.service';
 import { PageHeaderService } from './page-header-service/page-header.service';
@@ -75,7 +74,6 @@ import { WindowRef } from './window-ref/window-ref.service';
     EventWatcherService,
     WindowRef,
     UtilsService,
-    LoggerService,
     EndpointsService,
     UserService,
     EntityServiceFactory,

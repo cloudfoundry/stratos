@@ -1,8 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, Input, OnInit } from '@angular/core';
 
-import { LoggerService } from '../../../core/logger.service';
-
 @Component({
   selector: 'app-copy-to-clipboard',
   templateUrl: './copy-to-clipboard.component.html',
@@ -63,7 +61,7 @@ export class CopyToClipboardComponent implements OnInit {
       this.copySuccessWait = true;
       setTimeout(() => this.copySuccessWait = false, 2000);
     } catch (err) {
-      this.logService.warn('Failed to copy to clipboard');
+      console.warn('Failed to copy to clipboard');
     }
 
     this.document.body.removeChild(textArea);

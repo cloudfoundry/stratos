@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { LoggerService } from '../../../../core/src/core/logger.service';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { NormalizedResponse } from '../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
@@ -43,7 +42,7 @@ function parseHttpPipeError(res: any, logger: LoggerService): { message?: string
   try {
     return res.json ? res.json() : res;
   } catch (e) {
-    logger.warn('Failed to parse response body', e);
+    console.warn('Failed to parse response body', e);
   }
   return {};
 }

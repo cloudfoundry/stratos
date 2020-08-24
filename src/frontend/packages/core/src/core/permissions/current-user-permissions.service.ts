@@ -5,7 +5,6 @@ import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
 import { InternalAppState } from '../../../../store/src/app-state';
 import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
-import { LoggerService } from '../logger.service';
 import {
   CurrentUserPermissions,
   PermissionConfig,
@@ -28,7 +27,6 @@ export class CurrentUserPermissionsService {
   constructor(
     private store: Store<InternalAppState>,
     @Optional() @Inject(CUSTOM_USER_PERMISSION_CHECKERS) customCheckers: ICurrentUserPermissionsChecker[],
-    private logger: LoggerService
   ) {
     // Cannot set default value for parameter as the Optional decorator sets it to null
     const nullSafeCustomCheckers = customCheckers || [];
@@ -179,14 +177,14 @@ export class CurrentUserPermissionsService {
       }
     }
     if (res.length == 0) {
-      this.logger.warn(`Permissions: Failed to find a '${checkNoun}' for '${checkType}'. Permission Denied.`);
+      console.warn(`Permissions: Failed to find a '${checkNoun}' for '${checkType}'. Permission Denied.`);
       return failureValue;
     }
     if (res.length === 1) {
       return res[0];
     }
     if (res.length > 1) {
-      this.logger.warn(`Permissions: Found too many '${checkNoun}' for '${checkType}'. Permission Denied.`);
+      console.warn(`Permissions: Found too many '${checkNoun}' for '${checkType}'. Permission Denied.`);
       return failureValue;
     }
   }
