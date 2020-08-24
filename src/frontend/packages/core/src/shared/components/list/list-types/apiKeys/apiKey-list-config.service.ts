@@ -12,6 +12,7 @@ import { ConfirmationDialogService } from '../../../confirmation-dialog.service'
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { ApiKeyDataSource } from './apiKey-data-source';
+import moment from 'moment';
 
 
 @Injectable()
@@ -48,6 +49,19 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
         field: 'comment'
       },
       cellFlex: '2'
+    },
+    {
+      columnId: 'last_used',
+      headerCell: () => 'Last Used',
+      cellDefinition: {
+        getValue: row => row.last_used ? moment(row.last_used).format('LLL') : null
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'last_used',
+        field: 'last_used'
+      },
+      cellFlex: '1'
     },
   ];
 
