@@ -4,7 +4,7 @@ import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity
 import {
   MAX_RECENT_COUNT,
 } from 'frontend/packages/store/src/reducers/current-user-roles-reducer/recently-visited.reducer.helpers';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 

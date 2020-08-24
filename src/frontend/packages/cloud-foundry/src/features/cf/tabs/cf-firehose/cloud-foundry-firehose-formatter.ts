@@ -1,13 +1,13 @@
-/**
- * Formats log messages from the Cloud Foundry firehose
- */
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { LoggerService } from '../../../../../../core/src/core/logger.service';
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
 import { AnsiColorizer } from '../../../../../../core/src/shared/components/log-viewer/ansi-colorizer';
 import { FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
 
+/**
+ * Formats log messages from the Cloud Foundry firehose
+ */
 
 /* eslint-disable no-control-regex */
 const ANSI_ESCAPE_MATCHER = new RegExp('\x1B\\[([0-9;]*)m', 'g');

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Observable, of, Subject } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
