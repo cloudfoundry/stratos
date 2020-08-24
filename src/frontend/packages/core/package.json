@@ -1,6 +1,10 @@
 {
   "name": "@stratosui/core",
   "version": "0.0.1",
+  "description": "Stratos Core",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/cloudfoundry/stratos",
+
   "stratos": {
     "assets": {
       "assets": "core/assets"

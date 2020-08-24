@@ -66,8 +66,14 @@ const isDirectory = source => {
   const stats = fs.lstatSync(realPath);
   return stats.isDirectory();
 }
-const getDirectories = source =>
-  fs.readdirSync(source).map(name => path.join(source, name)).filter(isDirectory);
+
+const getDirectories = source => {
+  if (!fs.existsSync(source)) {
+    return [];
+  }
+
+  return fs.readdirSync(source).map(name => path.join(source, name)).filter(isDirectory);
+}
 
 // Default theme to use
 export const DEFAULT_THEME = '@stratosui/theme';
