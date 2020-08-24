@@ -25,7 +25,7 @@ import { TabNavService } from '../../../tab-nav.service';
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 
-import * as moment from 'moment';
+import moment from 'moment';
 
 @Component({
   selector: 'app-page-header',

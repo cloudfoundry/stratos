@@ -14,7 +14,7 @@ import { BackupConnectionCellComponent } from '../backup-connection-cell/backup-
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointTypes } from '../backup-restore.types';
 
-import * as moment from 'moment';
+import moment from 'moment';
 
 @Component({
   selector: 'app-backup-endpoints',

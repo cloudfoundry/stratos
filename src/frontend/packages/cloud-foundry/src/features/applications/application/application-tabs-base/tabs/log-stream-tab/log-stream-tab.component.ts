@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import * as moment from 'moment';
+import moment from 'moment';
 import { NEVER, Observable, Subject } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
-import { catchError, share, switchMap, map, first, startWith, debounceTime } from 'rxjs/operators';
+import { catchError, debounceTime, first, map, share, startWith, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { LoggerService } from '../../../../../../../../core/src/core/logger.service';

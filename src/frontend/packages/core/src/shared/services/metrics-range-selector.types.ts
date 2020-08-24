@@ -1,6 +1,6 @@
 import { MetricQueryType } from '@stratosui/store';
 
-import * as moment from 'moment';
+import moment from 'moment';
 
 export type momentTuple = [moment.DurationInputArg1, moment.unitOfTime.DurationConstructor];
 export interface ITimeRange {

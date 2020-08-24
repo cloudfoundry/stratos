@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { ITimeRange } from '../../services/metrics-range-selector.types';
 
-import * as moment from 'moment';
+import moment from 'moment';
 
 @Component({
   selector: 'app-metrics-range-selector',

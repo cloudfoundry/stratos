@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { SharedModule } from './../../shared.module';
 import { StartEndDateComponent } from './start-end-date.component';

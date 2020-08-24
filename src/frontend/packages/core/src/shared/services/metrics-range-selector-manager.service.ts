@@ -6,7 +6,7 @@ import { debounceTime, takeWhile, tap } from 'rxjs/operators';
 import { MetricsRangeSelectorService } from './metrics-range-selector.service';
 import { ITimeRange } from './metrics-range-selector.types';
 
-import * as moment from 'moment';
+import moment from 'moment';
 
 @Injectable()
 export class MetricsRangeSelectorManagerService {

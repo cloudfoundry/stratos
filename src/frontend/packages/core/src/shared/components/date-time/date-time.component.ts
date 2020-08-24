@@ -5,7 +5,7 @@ import { tap, map, filter, shareReplay, debounceTime } from 'rxjs/operators';
 
 import { SetupModule } from './../../../features/setup/setup.module';
 
-import * as moment from 'moment';
+import moment from 'moment';
 
 @Component({
   selector: 'app-date-time',

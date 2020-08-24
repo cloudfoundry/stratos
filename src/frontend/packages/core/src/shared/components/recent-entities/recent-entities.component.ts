@@ -12,7 +12,7 @@ import {
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import * as moment from 'moment';
+import moment from 'moment';
 
 class RenderableRecent {
   public mostRecentHit: moment.Moment;
