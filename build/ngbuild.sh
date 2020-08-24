@@ -189,6 +189,10 @@ function build_core {
 
   # # Need to copy other files - sass files for shared
   # cp -r ${STRATOS}/src/frontend/packages/shared/sass ${STRATOS}/npm_pkg/shared/sass
+
+  # Delete test files
+  rm -f ${STRATOS}/npm_pkg/core/src/test.ts
+  find ${STRATOS}/npm_pkg/core/src -type f -name "*.spec.ts" -delete  
 }
 
 echo -e "${CYAN}${BOLD}Packages: $PKGS${RESET}"
@@ -222,7 +226,9 @@ if [ ${PUBLISH} == "true" ]; then
   echo
 
   for PKG in $PKGS
-  do
+  do  # Delete test files
+  rm -f ${STRATOS}/npm_pkg/core/src/test.ts
+  find ${STRATOS}/npm_pkg/core/src -type f -name "*.spec.ts" -delete
     echo
     echo -e "${YELLOW}${BOLD}= Publishing package: @stratosui/${PKG}${RESET}"
     echo    
