@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { TabNavService } from '../../../../../tab-nav.service';
 import { CoreModule } from '../../../../core/core.module';
+import { TabNavService } from '../../../../tab-nav.service';
 import { ShowPageHeaderComponent } from './show-page-header.component';
 
 describe('ShowPageHeaderComponent', () => {

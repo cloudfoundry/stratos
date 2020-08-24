@@ -6,10 +6,10 @@ import { Observable, of } from 'rxjs';
 import { AppState } from '../../../../../store/src/app-state';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
-import { TabNavService } from '../../../../tab-nav.service';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
+import { TabNavService } from '../../../tab-nav.service';
 
 
 

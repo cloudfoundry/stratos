@@ -3,13 +3,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
-import { appReducers } from 'frontend/packages/store/src/reducers.module';
 
-import { TabNavService } from '../../../../tab-nav.service';
+import { appReducers } from '../../../../../store/src/reducers.module';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { TabNavService } from '../../../tab-nav.service';
 import { SetupModule } from '../setup.module';
 import { ConsoleUaaWizardComponent } from './console-uaa-wizard.component';
 
