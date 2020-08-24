@@ -9,10 +9,10 @@
       "rxjs-spy/operators/tag": "rxjsSpy_operators_tag",
       "ngrx-store-localstorage": "ngrxStoreLocalstorage",
       "@ngrx/store": "ngrx_store",
-      "@ngrx/effects": "effects",
+      "@ngrx/effects": "ngrx_effects",
       "immer": "immer",
       "util": "util",
-      "@ngrx/router-store": "ngrx_routerSstore",
+      "@ngrx/router-store": "ngrx_routerStore",
       "moment": "moment"
     }
   }
