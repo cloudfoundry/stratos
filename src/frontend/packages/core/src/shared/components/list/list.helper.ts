@@ -1,9 +1,11 @@
+import {
+  EntityCatalogEntityConfig,
+  EntityMonitorFactory,
+  PaginationMonitor,
+  PaginationMonitorFactory,
+} from '@stratosui/store';
 import { Subscription } from 'rxjs';
 
-import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { TableRowStateManager } from './list-table/table-row/table-row-state-manager';
 
 export type ListRowStateSetUpManager = (

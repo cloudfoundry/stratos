@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
+import {
+  getFullEndpointApiUrl,
+  PaginationMonitor,
+  stratosEntityCatalog,
+  APIResource,
+  EntityInfo,
+  EndpointModel,
+} from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
-
-import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
-import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 
 export interface MetricsEndpointProvider {
   provider: EndpointModel;

@@ -6,7 +6,6 @@ import { filter, map, observeOn, publishReplay, refCount, startWith } from 'rxjs
 
 import { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
 
-
 @Injectable()
 export class TabNavService {
 
@@ -84,7 +83,6 @@ export class TabNavService {
       observeOn(asapScheduler)
     );
   }
-
 
   constructor(private router: Router) {
     this.tabNavsSubject = new BehaviorSubject(undefined);

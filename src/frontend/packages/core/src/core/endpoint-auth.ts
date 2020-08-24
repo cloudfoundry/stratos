@@ -1,6 +1,6 @@
 import { Validators } from '@angular/forms';
+import { EndpointAuthTypeConfig, EndpointType } from '@stratosui/store';
 
-import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
 import {
   CredentialsAuthFormComponent,
 } from '../features/endpoints/connect-endpoint-dialog/auth-forms/credentials-auth-form.component';

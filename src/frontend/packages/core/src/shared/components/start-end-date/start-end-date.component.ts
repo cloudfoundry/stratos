@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+
 import * as moment from 'moment';
 
 @Component({
@@ -92,7 +93,6 @@ export class StartEndDateComponent {
     this.validMessage = this.validate(start, end);
     return !this.validMessage;
   }
-
 
   private isDifferentDate(oldDate: moment.Moment, newDate: moment.Moment) {
     return !oldDate || !newDate || !oldDate.isSame(newDate);

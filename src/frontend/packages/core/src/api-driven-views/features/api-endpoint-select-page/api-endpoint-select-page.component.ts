@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { GeneralAppState } from '../../../../../store/src/app-state';
-import { Observable } from 'rxjs';
-import { ApiEntityType } from '../../api-drive-views.types';
-import { Store } from '@ngrx/store';
-import { connectedEndpointsOfTypesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { GeneralAppState, connectedEndpointsOfTypesSelector } from '@stratosui/store';
+import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
+
+import { ApiEntityType } from '../../api-drive-views.types';
 
 @Component({
   selector: 'app-api-endpoint-select-page',

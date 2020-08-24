@@ -1,13 +1,17 @@
 import { DataSource } from '@angular/cdk/table';
 import { Action } from '@ngrx/store';
+import {
+  PaginatedAction,
+  PaginationEntityState,
+  PaginationParam,
+  ListFilter,
+  ListSort,
+  MetricsAction,
+  EntitySchema,
+  IRequestEntityTypeState,
+  EntityCatalogEntityConfig,
+} from '@stratosui/store';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
-
-import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
-import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
-import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
-import { EntityCatalogEntityConfig } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
 
 export interface IEntitySelectItem {
   page: number;
@@ -111,8 +115,6 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, ICoreTableLi
   maxedStateStartAt$: Observable<number>;
   filter$: Observable<ListFilter>;
   sort$: Observable<ListSort>;
-
-
 
   getRowUniqueId: getRowUniqueId<T>;
   entitySelectConfig?: EntitySelectConfig; // For multi action lists, this is used to configure the entity select.

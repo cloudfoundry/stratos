@@ -1,4 +1,5 @@
-import { MultiActionListEntity } from '../../../../../../store/src/monitors/pagination-monitor';
+import { MultiActionListEntity } from '@stratosui/store';
+
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 
 export function getDataFunctionList(entityFunctions: (DataFunction<any> | DataFunctionDefinition)[]): DataFunction<any>[] {

@@ -1,10 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { FavoritesConfigMapper, IFavoriteTypes, IFavoriteEntity } from '@stratosui/store';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
 import { distinctUntilChanged, map, scan, startWith } from 'rxjs/operators';
-
-import { FavoritesConfigMapper, IFavoriteTypes } from '../../../../../store/src/favorite-config-mapper';
-import { IFavoriteEntity } from '../../../../../store/src/types/user-favorite-manager.types';
-
 
 @Component({
   selector: 'app-favorites-entity-list',

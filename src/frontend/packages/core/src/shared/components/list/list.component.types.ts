@@ -1,20 +1,17 @@
 import { Type } from '@angular/core';
-import * as moment from 'moment';
+import { defaultClientPaginationPageSize, ListView, ActionState } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { ListView } from '../../../../../store/src/actions/list.actions';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import {
-  defaultClientPaginationPageSize,
-} from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
 import { ITimeRange } from '../../services/metrics-range-selector.types';
 import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
-import { Injectable } from "@angular/core";
 import { CardCell } from './list.types';
+
+import * as moment from 'moment';
+import { Injectable } from "@angular/core";
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',

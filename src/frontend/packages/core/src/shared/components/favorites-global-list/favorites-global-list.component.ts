@@ -1,14 +1,15 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import {
+  getFavoriteInfoObservable,
+  IFavoriteEntity,
+  IGroupedFavorites,
+  AppState,
+  IFavoritesInfo,
+  UserFavoriteManager,
+} from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-import { AppState } from '../../../../../store/src/app-state';
-import { getFavoriteInfoObservable } from '../../../../../store/src/helpers/store-helpers';
-import { IFavoriteEntity, IGroupedFavorites } from '../../../../../store/src/types/user-favorite-manager.types';
-import { IFavoritesInfo } from '../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
-
 
 @Component({
   selector: 'app-favorites-global-list',

@@ -1,6 +1,6 @@
-import * as moment from 'moment';
+import { MetricQueryType } from '@stratosui/store';
 
-import { MetricQueryType } from '../../../../store/src/types/metric.types';
+import * as moment from 'moment';
 
 export type momentTuple = [moment.DurationInputArg1, moment.unitOfTime.DurationConstructor];
 export interface ITimeRange {
@@ -15,5 +15,4 @@ export interface StoreMetricTimeRange {
   end?: moment.Moment;
   step?: number;
 }
-
 

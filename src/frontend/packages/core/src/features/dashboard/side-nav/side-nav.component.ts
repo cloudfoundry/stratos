@@ -1,11 +1,9 @@
 import { Component, EventEmitter, InjectionToken, Input, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { ActionHistoryDump, ToggleSideNav, AppState } from '@stratosui/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { buffer, debounceTime, filter, map } from 'rxjs/operators';
 
-import { ActionHistoryDump } from '../../../../../store/src/actions/action-history.actions';
-import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
-import { AppState } from '../../../../../store/src/app-state';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { TabNavItem } from '../../../tab-nav.types';
 

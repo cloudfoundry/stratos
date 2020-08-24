@@ -1,14 +1,12 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { RouterNav, AppState } from '@stratosui/store';
 
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 
 interface IAppTileData extends ITileData {
   type: string;
 }
-
 
 @Component({
   selector: 'app-backup-restore-endpoints',

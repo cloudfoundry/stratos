@@ -1,4 +1,5 @@
 import { Component, Input, EventEmitter, Output } from '@angular/core';
+
 import { ITileConfig, ITileIconConfig, ITileImgConfig, ITileData } from '../tile/tile-selector.types';
 
 @Component({

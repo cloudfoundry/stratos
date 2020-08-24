@@ -1,12 +1,15 @@
+import {
+  EndpointType,
+  AuthParams,
+  ConnectEndpoint,
+  entityCatalog,
+  ActionState,
+  stratosEntityCatalog,
+  EndpointModel,
+} from '@stratosui/store';
 import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
-import { AuthParams, ConnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { EndpointType } from '../../../../store/src/extension-types';
-import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../core/endpoints.service';
 import { safeUnsubscribe } from '../../core/utils.service';
 

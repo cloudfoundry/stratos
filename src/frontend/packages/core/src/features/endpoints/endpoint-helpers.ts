@@ -1,16 +1,16 @@
 import { Type } from '@angular/core';
 import { Store } from '@ngrx/store';
+import {
+  AppState,
+  EndpointOnlyAppState,
+  endpointEntitiesSelector,
+  endpointsEntityRequestDataSelector,
+  EndpointModel,
+} from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { AppState, EndpointOnlyAppState } from '../../../../store/src/app-state';
-import {
-  endpointEntitiesSelector,
-  endpointsEntityRequestDataSelector,
-} from '../../../../store/src/selectors/endpoint.selectors';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
-
 
 export function getEndpointUsername(endpoint: EndpointModel) {
   return endpoint && endpoint.user ? endpoint.user.name : '-';

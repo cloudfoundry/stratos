@@ -1,7 +1,8 @@
 import { Component, OnInit, Input, Output } from '@angular/core';
-import { ApiEntityType } from '../../api-drive-views.types';
-import { ITileConfig, ITileImgConfig } from '../../../shared/components/tile/tile-selector.types';
 import { Subject } from 'rxjs';
+
+import { ITileConfig, ITileImgConfig } from '../../../shared/components/tile/tile-selector.types';
+import { ApiEntityType } from '../../api-drive-views.types';
 
 @Component({
   selector: 'app-api-entity-type-selector',

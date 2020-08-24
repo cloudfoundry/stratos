@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { InternalEventMonitorFactory } from '@stratosui/store';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
-import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
 import { CoreModule } from '../core/core.module';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
@@ -118,7 +118,6 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
-
 
 @NgModule({
   imports: [

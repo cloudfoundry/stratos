@@ -1,18 +1,18 @@
 import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription, timer } from 'rxjs';
-import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
-
-import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import {
   ChartSeries,
   IMetrics,
   MetricResultTypes,
   MetricsFilterSeries,
-} from '../../../../../store/src/types/base-metric.types';
+  AppState,
+  EntityMonitor,
+  EntityMonitorFactory,
+  MetricsAction,
+} from '@stratosui/store';
+import { combineLatest, Observable, Subscription, timer } from 'rxjs';
+import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
+
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { MetricsChartTypes, MetricsLineChartConfig, YAxisTickFormattingFunc } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';

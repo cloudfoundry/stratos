@@ -1,10 +1,8 @@
 import { Component, ComponentFactoryResolver, Injector, Input, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { StratosCatalogEntity } from '@stratosui/store';
 
-import {
-  StratosCatalogEntity,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { ListComponent } from '../list.component';
 import { ListConfig } from '../list.component.types';
 import { CatalogEntityDrivenListDataSource } from './entity-catalog-datasource';

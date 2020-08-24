@@ -1,12 +1,8 @@
+import { PaginationMonitor, EndpointModel, DisconnectEndpoint, EntityMonitorFactory } from '@stratosui/store';
 import { combineLatest } from 'rxjs';
 import { distinctUntilChanged, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import { DisconnectEndpoint } from '../../../../../../../store/src/actions/endpoint.actions';
-import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitor } from '../../../../../../../store/src/monitors/pagination-monitor';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
-
 
 export function EndpointRowStateSetUpManager(
   paginationMonitor: PaginationMonitor<EndpointModel>,

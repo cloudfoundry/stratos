@@ -4,23 +4,26 @@ import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewCon
 import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import {
+  DashboardState,
+  selectDashboardState,
+  stratosEntityCatalog,
+  GetCurrentUsersRelations,
+  entityCatalog,
+  CloseSideNav,
+  DisableMobileNav,
+  EnableMobileNav,
+  DashboardOnlyAppState,
+} from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
-import { CloseSideNav, DisableMobileNav, EnableMobileNav } from '../../../../../store/src/actions/dashboard-actions';
-import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
-import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
-import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { TabNavService } from '../../../tab-nav.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
-
 
 @Component({
   selector: 'app-dashboard-base',

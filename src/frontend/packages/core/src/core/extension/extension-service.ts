@@ -1,15 +1,13 @@
 import { Injectable, ModuleWithProviders, NgModule } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { AppState, GeneralEntityAppState, EntityServiceFactory } from '@stratosui/store';
 import { Observable } from 'rxjs';
 
-import { AppState, GeneralEntityAppState } from '../../../../store/src/app-state';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
 import { CurrentUserPermissionsService } from '../permissions/current-user-permissions.service';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
-
 
 // The different types of Tab
 export enum StratosTabType {

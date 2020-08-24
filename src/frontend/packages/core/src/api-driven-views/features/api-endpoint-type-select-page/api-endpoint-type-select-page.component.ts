@@ -1,12 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { GeneralAppState, endpointEntitiesSelector, entityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { GeneralAppState } from '../../../../../store/src/app-state';
-import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { ApiEntityType } from '../../api-drive-views.types';
 
 @Component({

@@ -1,15 +1,10 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { AppState, MetricsAPIAction, MetricsAPITargets, MetricsStratosAction } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import {
-  MetricsAPIAction,
-  MetricsAPITargets,
-  MetricsStratosAction,
-} from '../../../../../store/src/actions/metrics-api.actions';
-import { AppState } from '../../../../../store/src/app-state';
 import { getIdFromRoute } from '../../../core/utils.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { EndpointIcon } from '../../endpoints/endpoint-helpers';

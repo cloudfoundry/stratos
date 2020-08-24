@@ -2,8 +2,8 @@ import { ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy } from 
 
 import { AppComponent } from './app.component';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
-import { Injectable } from "@angular/core";
 
+import { Injectable } from "@angular/core";
 
 @Injectable()
 export class CustomReuseStrategy extends RouteReuseStrategy {

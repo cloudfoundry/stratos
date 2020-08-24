@@ -1,17 +1,20 @@
 import { Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList } from '@angular/core';
+import {
+  FavoritesConfigMapper,
+  MenuItem,
+  IFavoriteMetadata,
+  UserFavorite,
+  ComponentEntityMonitorConfig,
+  StratosStatus,
+  getFavoriteFromEntity,
+  EntityMonitorFactory,
+} from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
-
 
 export function createMetaCardMenuItemSeparator() {
   return {

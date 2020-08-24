@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-
 import {
   LoggerDebugAction,
   LoggerErrorAction,
   LoggerInfoAction,
   LoggerWarnAction,
   LogLevel,
-} from '../../../store/src/actions/log.actions';
-import { GeneralEntityAppState } from '../../../store/src/app-state';
+  GeneralEntityAppState,
+} from '@stratosui/store';
+
 import { environment } from '../environments/environment.prod';
 
 export enum LogLevelStringToNumber {

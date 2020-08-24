@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, Input, SecurityContext, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import * as markdown from 'marked';
 
 import { LoggerService } from '../../../core/logger.service';
 import { PreviewableComponent } from '../../previewable-component';
+
+import * as markdown from 'marked';
 
 @Component({
   selector: 'app-markdown-preview',

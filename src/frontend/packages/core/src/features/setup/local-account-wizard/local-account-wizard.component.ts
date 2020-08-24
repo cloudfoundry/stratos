@@ -1,15 +1,19 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormControl, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
-import { Observable, BehaviorSubject, of as obsof } from 'rxjs';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { Store } from '@ngrx/store';
-import { InternalAppState } from '../../../../../store/src/app-state';
+import {
+  VerifySession,
+  AuthState,
+  InternalAppState,
+  UAASetupState,
+  LocalAdminSetupData,
+  SetupSaveConfig,
+} from '@stratosui/store';
+import { Observable, BehaviorSubject, of as obsof } from 'rxjs';
 import { filter, delay, take, map, tap } from 'rxjs/operators';
-import { UAASetupState, LocalAdminSetupData } from '../../../../../store/src/types/uaa-setup.types';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
-import { VerifySession } from '../../../../../store/src/actions/auth.actions';
-import { SetupSaveConfig } from '../../../../../store/src/actions/setup.actions';
+
 import { APP_TITLE } from '../../../core/core.types';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 
 @Component({
   selector: 'app-local-account-wizard',

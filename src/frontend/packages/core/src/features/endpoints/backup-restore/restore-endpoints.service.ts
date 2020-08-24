@@ -1,13 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { GeneralEntityAppState, selectSessionData, SessionData, BrowserStandardEncoder } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
-import { GeneralEntityAppState } from '../../../../../store/src/app-state';
-import { BrowserStandardEncoder } from '../../../../../store/src/browser-encoder';
-import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
-import { SessionData } from '../../../../../store/src/types/auth.types';
 import { LoggerService } from '../../../core/logger.service';
 
 interface BackupContent {

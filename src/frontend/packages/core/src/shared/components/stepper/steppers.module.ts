@@ -6,7 +6,6 @@ import { StepComponent } from './step/step.component';
 import { StepperFormComponent } from './stepper-form/stepper-form.component';
 import { SteppersComponent } from './steppers/steppers.component';
 
-
 @NgModule({
     imports: [
         CommonModule,

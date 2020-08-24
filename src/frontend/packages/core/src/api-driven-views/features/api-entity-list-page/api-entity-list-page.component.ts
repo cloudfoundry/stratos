@@ -1,10 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import {
-  StratosBaseCatalogEntity,
-} from '../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { entityCatalog, StratosBaseCatalogEntity } from '@stratosui/store';
 
 @Component({
   selector: 'app-api-entity-list-page',

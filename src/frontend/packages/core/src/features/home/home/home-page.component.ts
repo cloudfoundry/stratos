@@ -1,14 +1,17 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
+import {
+  RouterNav,
+  EntityCatalogHelpers,
+  IUserFavoritesGroups,
+  UserFavorite,
+  AppState,
+  IRequestEntityTypeState,
+  UserFavoriteManager,
+} from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { AppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
-import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
-import { IUserFavoritesGroups } from '../../../../../store/src/types/favorite-groups.types';
-import { UserFavorite } from '../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { LoggerService } from '../../../core/logger.service';
 

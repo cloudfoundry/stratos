@@ -1,13 +1,9 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import * as moment from 'moment';
+import { httpErrorResponseToSafeString, stratosEntityCatalog, EndpointModel, entityCatalog } from '@stratosui/store';
 import { Observable, of, Subject } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { httpErrorResponseToSafeString } from '../../../../../../store/src/jetstream';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
@@ -17,6 +13,8 @@ import { BackupCheckboxCellComponent } from '../backup-checkbox-cell/backup-chec
 import { BackupConnectionCellComponent } from '../backup-connection-cell/backup-connection-cell.component';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointTypes } from '../backup-restore.types';
+
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-backup-endpoints',
@@ -75,7 +73,6 @@ export class BackupEndpointsComponent {
     this.setupSelectStep();
     this.setupPasswordStep();
   }
-
 
   setupSelectStep() {
     const endpointObs = stratosEntityCatalog.endpoint.store.getAll.getPaginationService();
@@ -163,7 +160,6 @@ export class BackupEndpointsComponent {
 
     return result.asObservable();
   }
-
 
   private getEndpointTypeString(endpoint: EndpointModel): string {
     return entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition.label;

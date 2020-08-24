@@ -1,8 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { StratosStatus, StratosStatusMetadata } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-
-import { StratosStatus, StratosStatusMetadata } from '../../../../../store/src/types/shared.types';
 
 @Component({
   selector: 'app-application-state',
