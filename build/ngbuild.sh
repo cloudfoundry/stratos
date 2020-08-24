@@ -192,7 +192,12 @@ function build_core {
 
   # Delete test files
   rm -f ${STRATOS}/npm_pkg/core/src/test.ts
-  find ${STRATOS}/npm_pkg/core/src -type f -name "*.spec.ts" -delete  
+  find ${STRATOS}/npm_pkg/core/src -type f -name "*.spec.ts" -delete
+
+  # Dev files
+  mkdir ${STRATOS}/npm_pkg/core/dev
+  cp ${STRATOS}/dev-ssl/server.* ${STRATOS}/npm_pkg/core/dev/
+  cp ${STRATOS}/proxy.conf.js ${STRATOS}/npm_pkg/core/dev/
 }
 
 echo -e "${CYAN}${BOLD}Packages: $PKGS${RESET}"
