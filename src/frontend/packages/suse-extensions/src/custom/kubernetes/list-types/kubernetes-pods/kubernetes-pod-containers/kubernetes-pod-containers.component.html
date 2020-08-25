@@ -1,4 +1,45 @@
-<div class="pod-containers">
-  <app-table [dataSource]="containerDataSource" [columns]="columns" [inExpandedRow]="true">
-  </app-table>
+<div *ngIf="containers$ | async as containers" class="pod-containers">
+  <div *ngFor="let container of containers" class="pod-containers__container">
+    <div class="pod-containers__container__icon">
+      <mat-icon *ngIf="icon[container.isInit] as iconDetail" class="" [fontSet]="iconDetail.font"
+        [ngClass]="{'container-icon': iconDetail.icon === 'container'}" [matTooltip]="iconDetail.tooltip">
+        {{ iconDetail.icon }}</mat-icon>
+    </div>
+    <div class="pod-containers__container__details">
+      <div class="pod-containers__container__details--header">
+        <app-boolean-indicator [isTrue]="container.containerStatus.ready" type="yes-no" [subtle]="false"
+          [showText]="false">
+        </app-boolean-indicator>
+        <span>
+          {{container.container.name}}
+        </span>
+      </div>
+      <div class="pod-containers__container__details--content">
+        <div>
+          <span>
+            Image:
+          </span>
+          <span>
+            {{container.container.image}}
+          </span>
+        </div>
+        <div>
+          <span>
+            State:
+          </span>
+          <span>
+            {{container.status}}
+          </span>
+        </div>
+        <div *ngIf="!container.isInit">
+          <span>
+            Probes (L:R):
+          </span>
+          <span>
+            {{container.container.livenessProbe ? 'on' : 'off'}}:{{container.container.readinessProbe ? 'on' : 'off'}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

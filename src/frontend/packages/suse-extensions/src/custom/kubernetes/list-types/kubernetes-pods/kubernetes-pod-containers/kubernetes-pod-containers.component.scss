@@ -1,8 +1,61 @@
+$detail-padding: 28px;
+
 .pod-containers {
   display: flex;
-  app-table {
-    flex: 1;
-    padding-bottom: 10px;
-    padding-left: 57px;
+  flex-direction: column;
+  padding-left: 54px;
+  &__container {
+    display: flex;
+    flex-direction: row;
+    height: 100px;
+    &__icon {
+      align-items: center;
+      display: flex;
+      height: 60px;
+      width: 50px;
+      mat-icon {
+        font-size: 35px;
+        height: 35px;
+        width: 35px;
+      }
+      .container-icon {
+        padding-left: 4px;
+      }
+    }
+
+    &__details {
+      display: flex;
+      flex-direction: column;
+      min-width: 75%;
+
+      &--header {
+        display: flex;
+        flex-direction: row;
+        font-size: 15px;
+        font-weight: 500;
+        margin-top: 10px;
+        app-boolean-indicator {
+          width: $detail-padding;
+        }
+      }
+      &--content {
+        font-size: 13px;
+        margin-left: $detail-padding;
+        padding-bottom: 10px;
+        & > div {
+          display: flex;
+          flex-direction: row;
+        }
+        span:first-of-type {
+          min-width: 90px;
+        }
+      }
+    }
+
+    &:not(:last-of-type) {
+      .pod-containers__container__details {
+        border-bottom: 2px solid rgba(0, 0, 0, .1);
+      }
+    }
   }
 }
