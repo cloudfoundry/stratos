@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 
-import { TabNavService } from '../../../../tab-nav.service';
 import { BaseTestModules } from '../../../../test-framework/core-test.helper';
+import { TabNavService } from '../../../tab-nav.service';
 import { ApiKeysPageComponent } from './api-keys-page.component';
 
 describe('ApiKeysPageComponent', () => {
