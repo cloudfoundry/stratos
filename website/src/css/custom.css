@@ -196,3 +196,9 @@ img.cf-logo {
     margin: 0;
   }
 }
+
+
+/* Hide versions drop down and versions link on home page */
+.stratosIsNotDocsPage .navbar__item.dropdown--right {
+  display: none;
+}

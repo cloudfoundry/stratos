@@ -117,10 +117,11 @@ for ((i = ${#internalVersionsArray[@]} - 1;i >= 0;i--)); do
   row=${internalVersionsArray[i]}
   IFS=: read versionsLabel versionsHash includeInDropDown <<< $row
 
-  if [ $includeInDropDown != "true" ]; then
-    echo Skipping version: $versionsLabel \"$includeInDropDown\"
-    continue
-  fi
+  # This is donw via the website now
+  # if [ $includeInDropDown != "true" ]; then
+  #   echo Skipping version: $versionsLabel \"$includeInDropDown\"
+  #   continue
+  # fi
 
   if [ -z "$versionsLabel" ]; then
     echo Invalid row \(no version label\): $row 

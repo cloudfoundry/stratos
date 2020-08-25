@@ -20,10 +20,9 @@ function Version() {
   return (
     <Layout
       title="Versions"
-      permalink="/versions"
-      description="Docusaurus 2 Versions page listing all documented site versions">
+      permalink="/versions">
       <main className="container margin-vert--lg">
-        <h1>Docusaurus documentation versions</h1>
+        <h1>All Versions</h1>
         <div className="margin-bottom--lg">
           <h3 id="latest">Latest version (Stable)</h3>
           <p>Here you can find the latest documentation.</p>
@@ -51,8 +50,7 @@ function Version() {
               <tr>
                 <th>master</th>
                 <td>
-                  {/* TODO: RC Uncomment in next PR when 4.0 sha is known */}
-                  {/* <Link to={useBaseUrl('/docs/next')}>Documentation</Link> */}
+                  <Link to={useBaseUrl('/docs/next')}>Documentation</Link>
                 </td>
                 <td>
                   <a href={repoUrl}>Source Code</a>
@@ -74,11 +72,9 @@ function Version() {
                   <tr key={version[0]}>
                     <th>{version[0]}</th>
                     <td>
-                      {version[2] === 'true' &&
-                        <Link to={useBaseUrl(`/docs/${version[0]}`)}>
-                          Documentation
+                      <Link to={useBaseUrl(`/docs/${version[0]}`)}>
+                        Documentation
                         </Link>
-                      }
                     </td>
                     <td>
                       <a href={`${repoUrl}/releases/tag/${version[0]}`}>

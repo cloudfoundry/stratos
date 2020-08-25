@@ -1,16 +1,3 @@
-/* TODO: RC Add back into navbar in next PR when 4.0 sha is known
-{
-        type: 'docsVersionDropdown',
-        position: 'right',
-        nextVersionLabel: 'Latest',
-      },
-      {
-          to: '/versions',
-          label: 'All versions',
-          position: 'right',
-        }
-*/
-
 module.exports = {
   title: 'STRATOS',
   tagline: 'Open-Source Multi-Cluster UI for Cloud Foundry and Kubernetes',
@@ -26,17 +13,21 @@ module.exports = {
         alt: 'Stratos',
         src: 'img/logo.png',
       },
-      items: [
-        {
-          to: 'docs/',
-          activeBasePath: 'docs',
-          label: 'Docs',
-          position: 'right',
-        }, {
-          href: 'https://github.com/cloudfoundry/stratos',
-          label: 'GitHub',
-          position: 'right',
-        }],
+      items: [{
+        type: 'docsVersionDropdown',
+        position: 'right',
+        nextVersionLabel: 'Latest',
+      },
+      {
+        to: 'docs/',
+        activeBasePath: 'docs',
+        label: 'Docs',
+        position: 'right',
+      }, {
+        href: 'https://github.com/cloudfoundry/stratos',
+        label: 'GitHub',
+        position: 'right',
+      }],
     },
     footer: {
       style: 'dark',
