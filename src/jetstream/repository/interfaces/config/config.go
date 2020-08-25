@@ -20,6 +20,39 @@ import (
 
 const secretsDir = "/etc/secrets"
 
+// APIKeysConfigValue - special type for configuring whether API keys feature is enabled
+type APIKeysConfigValue string
+
+// APIKeysConfigEnum - defines possible configuration values for Stratos API keys feature
+var APIKeysConfigEnum = struct {
+	Disabled  APIKeysConfigValue
+	AdminOnly APIKeysConfigValue
+	AllUsers  APIKeysConfigValue
+}{
+	Disabled:  "disabled",
+	AdminOnly: "admin_only",
+	AllUsers:  "all_users",
+}
+
+// verifies that given string is a valid config value (i.e., present in APIKeysConfigEnum)
+func parseAPIKeysConfigValue(input string) (APIKeysConfigValue, error) {
+	t := reflect.TypeOf(APIKeysConfigEnum)
+	v := reflect.ValueOf(APIKeysConfigEnum)
+
+	var allowedValues []string
+
+	for i := 0; i < t.NumField(); i++ {
+		allowedValue := string(v.Field(i).Interface().(APIKeysConfigValue))
+		if allowedValue == input {
+			return APIKeysConfigValue(input), nil
+		}
+
+		allowedValues = append(allowedValues, allowedValue)
+	}
+
+	return "", fmt.Errorf("Invalid value %q, allowed values: %q", input, allowedValues)
+}
+
 var urlType *url.URL
 
 // Load the given pointer to struct with values from the environment and the
@@ -119,7 +152,12 @@ func SetStructFieldValue(value reflect.Value, field reflect.Value, val string) e
 		b, err = strconv.ParseBool(val)
 		newVal = b
 	case reflect.String:
-		newVal = val
+		apiKeysConfigType := reflect.TypeOf((*APIKeysConfigValue)(nil)).Elem()
+		if typ == apiKeysConfigType {
+			newVal, err = parseAPIKeysConfigValue(val)
+		} else {
+			newVal = val
+		}
 	default:
 		if typ == reflect.TypeOf(urlType) {
 			newVal, err = url.Parse(val)
