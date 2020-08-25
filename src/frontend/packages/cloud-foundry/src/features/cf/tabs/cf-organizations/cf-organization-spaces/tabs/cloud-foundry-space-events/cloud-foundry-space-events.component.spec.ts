@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  generateActiveRouteCfOrgSpaceMock,
-} from 'frontend/packages/cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
 
 import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
 import { CFBaseTestModules } from '../../../../../../../../test-framework/cf-test-helper';
+import {
+  generateActiveRouteCfOrgSpaceMock,
+} from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   CloudFoundryEventsListComponent,
 } from '../../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
