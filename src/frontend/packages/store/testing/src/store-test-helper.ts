@@ -168,7 +168,6 @@ function getDefaultInitialTestStratosStoreState() {
       headerEventMinimized: true,
       gravatarEnabled: false,
     },
-    actionHistory: [],
     lists: {},
     routing: {
       previousState: {

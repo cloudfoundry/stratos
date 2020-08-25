@@ -7,13 +7,12 @@ import {
 import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import {
   apiKeyEntityType,
-  endpointEntityType,
   STRATOS_ENDPOINT_TYPE,
-  stratosEntityFactory,
   systemInfoEntityType,
   userFavouritesEntityType,
   userProfileEntityType,
 } from './helpers/stratos-entity-factory';
+import { endpointEntityType, EndpointModel, stratosEntityFactory } from './public-api';
 import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './reducers/favorite.reducer';
 import { systemEndpointsReducer } from './reducers/system-endpoints.reducer';
 import {
@@ -29,7 +28,6 @@ import {
   userProfileActionBuilder,
 } from './stratos-action-builders';
 import { stratosEntityCatalog } from './stratos-entity-catalog';
-import { EndpointModel } from './types/endpoint.types';
 import { SystemInfo } from './types/system.types';
 import { UserFavorite } from './types/user-favorites.types';
 import { UserProfileInfo } from './types/user-profile.types';
