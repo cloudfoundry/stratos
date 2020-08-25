@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { MetricQueryConfig, MetricsAction } from '../../../../store/src/actions/metrics.actions';
 import { IMetrics } from '../../../../store/src/types/base-metric.types';

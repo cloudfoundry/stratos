@@ -1,4 +1,4 @@
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 import { by, ElementArrayFinder, ElementFinder, promise } from 'protractor';
 
 import { FormComponent } from '../../po/form.po';
