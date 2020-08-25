@@ -3,7 +3,6 @@ import { Component, ElementRef, Input, SecurityContext, ViewChild } from '@angul
 import { DomSanitizer } from '@angular/platform-browser';
 import * as markdown from 'marked';
 
-import { LoggerService } from '../../../core/logger.service';
 import { PreviewableComponent } from '../../previewable-component';
 
 @Component({
@@ -30,7 +29,6 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
 
   constructor(
     private httpClient: HttpClient,
-    private logger: LoggerService,
     private domSanitizer: DomSanitizer
   ) { }
 
@@ -56,7 +54,7 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
           this.markdownHtml = markdown(markText, { renderer });
         }
       },
-      (error) => this.logger.warn(`Failed to fetch markdown with url ${this.documentUrl}: `, error));
+      (error) => console.warn(`Failed to fetch markdown with url ${this.documentUrl}: `, error));
   }
 
   public markdownRendered() {

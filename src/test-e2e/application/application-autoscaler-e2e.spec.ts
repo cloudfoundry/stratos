@@ -22,6 +22,17 @@ let applicationE2eHelper: ApplicationE2eHelper;
 
 describe('Autoscaler -', () => {
 
+  const validateFormDate = (fromForm: promise.Promise<any>, toEqual: moment.Moment, label: string) => {
+    fromForm.then(fieldInput => {
+      const momentFieldInput = moment(fieldInput)
+      expect(momentFieldInput.year).toBe(toEqual.year, `Failed for '${label}'`);
+      expect(momentFieldInput.month).toBe(toEqual.month, `Failed for '${label}'`);
+      expect(momentFieldInput.day).toBe(toEqual.day, `Failed for '${label}'`);
+      expect(momentFieldInput.hour).toBe(toEqual.hour, `Failed for '${label}'`);
+      expect(momentFieldInput.minute).toBe(toEqual.minute, `Failed for '${label}'`);
+    })
+  }
+
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
@@ -92,6 +103,7 @@ describe('Autoscaler -', () => {
 
     beforeAll(() => new LocaleHelper().getWindowDateTimeFormats().then(formats => {
       timeFormat = formats.timeFormat;
+      // Note - sendMultipleKeys interprets this as containing a right arrow key to skip between date and time
       dateAndTimeFormat = `${formats.dateFormat},${timeFormat}`;
     }));
 
@@ -229,7 +241,7 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.canNext()).toBeFalsy();
 
       // Schedule dates should not overlap
-      // scheduleStartDate1 should be set close to time it's entered, this is what triggers the scaling event tested below
+      // scheduleStartDate1 should be set close to time it's entered, this is what triggers the scaling event tested below (is this true given rules are deleted in edit?)
       const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(30, 'seconds');
       scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
       scheduleStartDate2 = moment().tz('UTC').add(3, 'days');
@@ -237,13 +249,17 @@ describe('Autoscaler -', () => {
 
       // Fill in form -- valid inputs
       createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('start_date_time'), scheduleStartDate1, 'Create Policy: Schedule 1: Start Date');
       createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('end_date_time'), scheduleEndDate1, 'Create Policy: Schedule 1: End Date');
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10' });
-      expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
+      expect(createPolicy.stepper.getMatErrorsCount()).toBe(0, 'Form errors are shown where there should be none');
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
+
+      expect(createPolicy.stepper.getRuleTilesCount()).toBe(1, 'There should be one specific date rules, rest of test will fail');
 
       // Bad form, have seen errors where the first schedule isn't shown in ux but is submitted. When submitted the start time is already
       // in the past and the create policy request fails. Needs a better solution
@@ -260,9 +276,13 @@ describe('Autoscaler -', () => {
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
       // Fill in form -- valid inputs
       createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate2.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('start_date_time'), scheduleStartDate2, 'Create Policy: Schedule 2: Start Date');
       createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate2.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('end_date_time'), scheduleEndDate2, 'Create Policy: Schedule 2: Start Date');
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       createPolicy.stepper.clickDoneButton();
+
+      expect(createPolicy.stepper.getRuleTilesCount()).toBe(2, 'There should be two specific date rules, rest of test will fail');
 
       expect(createPolicy.stepper.canNext()).toBeTruthy();
       createPolicy.stepper.next();
@@ -384,6 +404,8 @@ describe('Autoscaler -', () => {
     });
 
     it('Should pass SpecificDates Step', () => {
+      expect(createPolicy.stepper.getRuleTilesCount()).toBe(2, 'There should be two specific date rules, rest of test will fail');
+
       createPolicy.stepper.clickDeleteButton(1);
       expect(createPolicy.stepper.canNext()).toBeTruthy();
 
@@ -397,7 +419,9 @@ describe('Autoscaler -', () => {
       console.log(`Setting schedule. Now: ${moment().tz('UTC').toString()}. Start: ${scheduleStartDate1.toString()}. End ${scheduleEndDate1.toString()}`);
       createPolicy.stepper.getStepperForm().waitUntilShown();
       createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('start_date_time'), scheduleStartDate1, 'Edit Policy: Schedule 1: Start Date');
       createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('end_date_time'), scheduleEndDate1, 'Edit Policy: Schedule 1: Start Date');
       createPolicy.stepper.clickDoneButton();
 
       expect(createPolicy.stepper.canNext()).toBeTruthy();

@@ -4,10 +4,10 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { TabNavService } from '../../../../tab-nav.service';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { TabNavService } from '../../../tab-nav.service';
 import { MetricsService } from '../services/metrics-service';
 import { MetricsComponent } from './metrics.component';
 

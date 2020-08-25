@@ -2,7 +2,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 
-import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
 import { ApiKeyEffect } from './effects/apiKey.effects';
 import { AuthEffect } from './effects/auth.effects';
@@ -38,7 +37,6 @@ import { AppReducersModule } from './reducers.module';
       UAASetupEffect,
       EndpointsEffect,
       PaginationEffects,
-      ActionHistoryEffect,
       RouterEffect,
       SystemEffects,
       SetClientFilterEffect,

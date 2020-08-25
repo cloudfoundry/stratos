@@ -72,7 +72,6 @@ const appRoutes: Routes = [
           }
         }
       },
-      { path: 'entity-list', loadChildren: () => import('./api-driven-views/api-driven-views.module').then(m => m.ApiDrivenViewsModule) },
       {
         path: 'endpoints',
         data: {

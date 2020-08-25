@@ -8,7 +8,6 @@ import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { BrowserStandardEncoder } from '../../../../../store/src/browser-encoder';
 import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
 import { SessionData } from '../../../../../store/src/types/auth.types';
-import { LoggerService } from '../../../core/logger.service';
 
 interface BackupContent {
   payload: string;
@@ -47,7 +46,6 @@ export class RestoreEndpointsService {
   constructor(
     private store: Store<GeneralEntityAppState>,
     private http: HttpClient,
-    private logger: LoggerService
   ) {
     this.setupStep1();
   }
@@ -97,7 +95,7 @@ export class RestoreEndpointsService {
       parsedContent = JSON.parse(content);
       this.unparsableFileContent = null;
     } catch (err) {
-      this.logger.warn('Failed to parse file contents: ', err);
+      console.warn('Failed to parse file contents: ', err);
       parsedContent = null;
       this.unparsableFileContent = `${err instanceof Error ? err.message : String(err)}`;
     }

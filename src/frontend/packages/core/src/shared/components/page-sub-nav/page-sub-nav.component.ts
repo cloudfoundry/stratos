@@ -1,7 +1,7 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 
-import { TabNavService } from '../../../../tab-nav.service';
+import { TabNavService } from '../../../tab-nav.service';
 
 @Component({
   selector: 'app-page-sub-nav',

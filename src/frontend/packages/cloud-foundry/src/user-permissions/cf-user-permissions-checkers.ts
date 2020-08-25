@@ -191,7 +191,9 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     allSpacesWithinOrg = false
-  ) {
+  ): Observable<boolean> {
+    // In some situations the observable returned here is not subscribed to (for example due to applyAdminCheck).
+    // This is bad (we should skip this function entirely) and should be fixed. This would require a thorough appraisal and overhaul.
     if (type === CfPermissionTypes.ENDPOINT_SCOPE) {
       if (!endpointGuid) {
         return of(false);
@@ -357,6 +359,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
           return of(true);
         }
         if (isReadOnly) {
+          // This is bad, we should not assume that the check type wants a negative result if the user only has 'read only' rights.
           return of(false);
         }
         return check$;

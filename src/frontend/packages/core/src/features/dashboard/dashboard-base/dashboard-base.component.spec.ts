@@ -7,11 +7,11 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { appReducers } from '../../../../../store/src/reducers.module';
-import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';
 import { PageHeaderService } from '../../../core/page-header-service/page-header.service';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { TabNavService } from '../../../tab-nav.service';
 import { MetricsService } from '../../metrics/services/metrics-service';
 import { PageSideNavComponent } from '../page-side-nav/page-side-nav.component';
 import { SideNavComponent } from '../side-nav/side-nav.component';

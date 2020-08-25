@@ -24,6 +24,16 @@ export class MetricsRangeSelectorService {
       queryType: MetricQueryType.QUERY
     },
     {
+      value: '1:day',
+      label: 'The past day',
+      queryType: MetricQueryType.QUERY
+    },
+    {
+      value: '3:day',
+      label: 'The past 3 days',
+      queryType: MetricQueryType.QUERY
+    },
+    {
       value: '1:week',
       label: 'The past week',
       queryType: MetricQueryType.QUERY
