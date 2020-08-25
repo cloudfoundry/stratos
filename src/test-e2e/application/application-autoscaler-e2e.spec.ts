@@ -1,4 +1,4 @@
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 import { browser, promise } from 'protractor';
 import { timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';

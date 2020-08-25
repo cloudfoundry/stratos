@@ -1,5 +1,5 @@
 import * as intersect from 'intersect';
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 
 import { AppRecurringSchedule, AppScalingRule, AppSpecificDate } from '../../store/app-autoscaler.types';
 import { AutoscalerConstants } from './autoscaler-util';
