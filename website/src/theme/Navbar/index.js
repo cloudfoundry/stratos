@@ -1,3 +1,4 @@
+import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useHideableNavbar from '@theme/hooks/useHideableNavbar';
@@ -27,15 +28,13 @@ const DefaultNavItemPosition = 'right'; // If split links by left/right
 let stratosVersionsTweaked = false;
 let stratosIsNotDocsPage = false;
 function stratosTweak() {
-  const context = useDocusaurusContext();
-  stratosIsNotDocsPage = !window.location.pathname.toLocaleLowerCase().startsWith('/docs');
-
   if (stratosVersionsTweaked) {
     return;
   }
   stratosVersionsTweaked = true;
 
   // Remove certain versions from version drop down
+  const context = useDocusaurusContext();
   const versions = context.globalData['docusaurus-plugin-content-docs'].default.versions;
   const newVersions = [];
   const pastVersions = versionsWithHash.map(versionWithHash => versionWithHash.split(':'))
@@ -71,6 +70,13 @@ function stratosAddAllVersions() {
   const li = document.createElement("li");
   li.appendChild(a);
   ul.appendChild(li);
+}
+
+function stratosUpdateIsNotDocsPage() {
+  const path = ExecutionEnvironment.canUseDOM ? window.location.pathname : null;
+  if (path) {
+    stratosIsNotDocsPage = !path.toLocaleLowerCase().startsWith('/docs');
+  }
 }
 
 
@@ -122,6 +128,7 @@ function Navbar() {
 
   useEffect(() => {
     stratosAddAllVersions();
+    stratosUpdateIsNotDocsPage();
   }, []);
   stratosTweak();
 
