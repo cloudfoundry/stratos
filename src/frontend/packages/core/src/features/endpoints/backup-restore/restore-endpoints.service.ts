@@ -46,7 +46,6 @@ export class RestoreEndpointsService {
   constructor(
     private store: Store<GeneralEntityAppState>,
     private http: HttpClient,
-    private logger: LoggerService
   ) {
     this.setupStep1();
   }

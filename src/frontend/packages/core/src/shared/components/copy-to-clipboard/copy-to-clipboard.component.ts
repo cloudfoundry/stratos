@@ -21,7 +21,6 @@ export class CopyToClipboardComponent implements OnInit {
 
   constructor(
     @Inject(DOCUMENT) document: Document,
-    private logService: LoggerService
   ) {
     this.document = document;
   }

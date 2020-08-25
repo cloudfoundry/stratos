@@ -35,7 +35,7 @@ import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { GitCommit } from '../types/git.types';
 
-function parseHttpPipeError(res: any, logger: LoggerService): { message?: string } {
+function parseHttpPipeError(res: any): { message?: string } {
   if (!res.status) {
     return res;
   }
@@ -47,7 +47,7 @@ function parseHttpPipeError(res: any, logger: LoggerService): { message?: string
   return {};
 }
 
-export function createFailedGithubRequestMessage(error: any, logger: LoggerService) {
+export function createFailedGithubRequestMessage(error: any) {
   const response = parseHttpPipeError(error, logger);
   const message = response.message || '';
   return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
@@ -60,7 +60,6 @@ export class DeployAppEffects {
   constructor(
     private actions$: Actions,
     private store: Store<CFAppState>,
-    private logger: LoggerService,
     private httpClient: HttpClient
   ) { }
 
@@ -76,7 +75,7 @@ export class DeployAppEffects {
         map(res => new ProjectExists(action.projectName, res)),
         catchError(err => observableOf(err.status === 404 ?
           new ProjectDoesntExist(action.projectName) :
-          new ProjectFetchFail(action.projectName, createFailedGithubRequestMessage(err, this.logger))
+          new ProjectFetchFail(action.projectName, createFailedGithubRequestMessage(err))
         ))
       );
     })
@@ -119,7 +118,7 @@ export class DeployAppEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err, this.logger), apiAction, actionType)
+          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
         ]));
     }));
 
@@ -151,7 +150,7 @@ export class DeployAppEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err, this.logger), apiAction, actionType)
+          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
         ]));
     }));
 
@@ -210,7 +209,7 @@ export class DeployAppEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err, this.logger), apiAction, actionType)
+          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
         ]));
     }));
 

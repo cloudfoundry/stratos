@@ -34,7 +34,7 @@ export class CloudFoundryFirehoseComponent implements OnInit {
       }/firehose`;
 
     this.setupFirehoseStream(streamUrl);
-    this.formatter = new CloudFoundryFirehoseFormatter(this.logService, this.utilsService);
+    this.formatter = new CloudFoundryFirehoseFormatter(this.utilsService);
     this.filter = this.formatter.jsonFilter.bind(this.formatter);
   }
 

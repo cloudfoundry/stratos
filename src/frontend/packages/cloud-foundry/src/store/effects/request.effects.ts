@@ -25,7 +25,6 @@ export class CfValidateEffects {
   constructor(
     private actions$: Actions,
     private store: Store<CFAppState>,
-    private logger: LoggerService,
   ) { }
 
   /**
