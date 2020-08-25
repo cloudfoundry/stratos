@@ -1,4 +1,4 @@
-import * as intersect from 'intersect';
+import intersect from 'intersect';
 import moment from 'moment-timezone';
 
 import { AppRecurringSchedule, AppScalingRule, AppSpecificDate } from '../../store/app-autoscaler.types';
