@@ -55,7 +55,7 @@ export class GithubEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err, this.logger), apiAction, actionType)
+          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
         ]
         ));
     }));

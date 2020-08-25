@@ -48,7 +48,7 @@ function parseHttpPipeError(res: any): { message?: string } {
 }
 
 export function createFailedGithubRequestMessage(error: any) {
-  const response = parseHttpPipeError(error, logger);
+  const response = parseHttpPipeError(error);
   const message = response.message || '';
   return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
     'Git ' + message.substring(0, message.indexOf('(')) :
@@ -178,7 +178,7 @@ export class DeployAppEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err, this.logger), apiAction, actionType)
+          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
         ]));
     }));
 

@@ -4,8 +4,6 @@ export const environment = {
   production: true,
   proxyAPIVersion,
   cfAPIVersion,
-  logToConsole: true,
-  logEnableConsoleActions: false,
   showObsDebug: false,
   disablePolling: false
 };
