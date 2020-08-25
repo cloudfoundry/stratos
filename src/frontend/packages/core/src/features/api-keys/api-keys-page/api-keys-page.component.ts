@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subject } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { first, map, startWith } from 'rxjs/operators';
 
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { ApiKeyListConfigService } from '../../../shared/components/list/list-types/apiKeys/apiKey-list-config.service';
@@ -21,13 +21,14 @@ export class ApiKeysPageComponent {
 
   public keyDetails = new Subject<string>();
   public keyDetails$ = this.keyDetails.asObservable();
-  public hasKeys$: Observable<boolean>;
+  public hasKeys$: Observable<Boolean>;
 
   constructor(
     private dialog: MatDialog,
   ) {
     this.hasKeys$ = stratosEntityCatalog.apiKey.store.getPaginationService().entities$.pipe(
-      map(entities => entities && !!entities.length)
+      map(entities => entities && !!entities.length),
+      startWith(null),
     )
   }
 

@@ -24,11 +24,10 @@
   </mat-card>
 </div>
 
-<app-list *ngIf="hasKeys$ | async; else noEntries"></app-list>
-<ng-template #noEntries>
-  <app-no-content-message icon="vpn_key" [firstLine]="'You have no API keys'" [secondLine]="{
+<app-list *ngIf="(hasKeys$ | async) === true"></app-list>
+<app-no-content-message *ngIf="(hasKeys$ | async) === false" icon="vpn_key" [firstLine]="'You have no API keys'"
+  [secondLine]="{
       text: ''
     }" [toolbarLink]="{
       text: 'Create an API key'
     }" toolbarAlign="stratos-api-key"></app-no-content-message>
-</ng-template>
