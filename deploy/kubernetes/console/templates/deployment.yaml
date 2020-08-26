@@ -9,7 +9,7 @@ metadata:
   name: stratos
 {{- if .Values.console.deploymentAnnotations }}
   annotations:
-    checksum/config: {{ randAlphaNum 5 | quote }}    
+    checksum/config: {{ default (randAlphaNum 5 | quote) .Values.console.checksum }}
 {{ toYaml .Values.console.deploymentAnnotations | indent 4 }}
 {{- end }}
   labels:
