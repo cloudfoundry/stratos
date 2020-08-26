@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { ApiKey } from '../../../../../../../store/src/apiKey.types';
