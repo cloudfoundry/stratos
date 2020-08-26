@@ -36,7 +36,7 @@ describe('API Keys -', () => {
 
     it('New key does not exist', () => {
       // Validation check
-      return page.list.isDisplayed().then(isDisplayed => {
+      return page.list.isPresent().then(isDisplayed => {
         if (isDisplayed) {
           expect(page.list.table.findRow('comment', newKeysComment, false)).toBeLessThan(0);
           currentKeysCount = page.list.table.getRowCount();
@@ -70,7 +70,7 @@ describe('API Keys -', () => {
         page.addKeyButton().click();
 
         const dialog = new ApiKeyAddDialogPo();
-        expect(dialog.isDisplayed()).toBeTruthy();
+        dialog.waitUntilShown();
         expect(dialog.canCreate()).toBeFalsy();
 
         dialog.form.fill({
@@ -103,7 +103,7 @@ describe('API Keys -', () => {
           page.list.table.openRowActionMenuByIndex(rowIndex).clickItem('Delete');
           ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Key');
           page.waitForPage();
-          return page.list.isDisplayed();
+          return page.list.isPresent();
         })
         .then(isListDisplayed => {
           if (isListDisplayed) {
