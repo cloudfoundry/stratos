@@ -1,5 +1,5 @@
 import { Action, Store } from '@ngrx/store';
-import * as moment from 'moment';
+import moment from 'moment';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 

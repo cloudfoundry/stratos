@@ -1,4 +1,4 @@
-import * as path from 'path';
+import path from 'path';
 import { browser, by, element, protractor } from 'protractor';
 
 import { ApplicationsPage } from '../applications/applications.po';

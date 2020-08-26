@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import * as moment from 'moment';
+import moment from 'moment';
 import { NEVER, Observable, Subject } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, debounceTime, first, map, share, startWith, switchMap } from 'rxjs/operators';
