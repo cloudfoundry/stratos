@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { MetricQueryType } from '../../../../store/src/types/metric.types';
 

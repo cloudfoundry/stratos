@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 import { browser, promise } from 'protractor';
 
 export class LocaleHelper {
