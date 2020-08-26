@@ -67,28 +67,30 @@ tests:
           value: r23453463456
         template: database.yaml
                                                                 
-# Stateful set
+# Stratos Deployment
 
-  - it: statefulset should not have annotaions unless configured
+  - it: stratos deploymentment should not have annotaions unless configured
     asserts:
       - isNull:
           path: metadata.annotations
         template: deployment.yaml
   - it: statefulset should support custom annotations
     set:
-      console.statefulSetAnnotations:
+      console.checksum: checksum-test
+      console.deploymentAnnotations:
         test-annotation: 172623
         test-annotation2: r23453463456
     asserts:
       - equal:
           path: metadata.annotations
           value:
+            checksum/config: checksum-test        
             test-annotation: 172623
             test-annotation2: r23453463456
         template: deployment.yaml
-  - it: statefulset should support custom labels
+  - it: stratos deploymentment should support custom labels
     set:
-      console.statefulSetExtraLabels:
+      console.deploymentExtraLabels:
         test-label: 172623
         test-label2: r23453463456
     asserts:
@@ -99,7 +101,7 @@ tests:
           path: metadata.labels.test-label2
           value: r23453463456
         template: deployment.yaml
-  - it: statefulset should support custom labels and annotations on its pods
+  - it: stratos deploymentment should support custom labels and annotations on its pods
     set:
       console.podExtraLabels:
         test-label: 172623
