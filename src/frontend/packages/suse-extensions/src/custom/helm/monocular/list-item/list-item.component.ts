@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-list-item',
@@ -8,5 +8,8 @@ import { Component } from '@angular/core';
   inputs: ['detailUrl']
 })
 export class ListItemComponent {
+
+  @Input() height = 'default';
+
   public detailUrl: string;
 }

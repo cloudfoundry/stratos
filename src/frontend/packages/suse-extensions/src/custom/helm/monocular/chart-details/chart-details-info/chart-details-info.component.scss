@@ -1,5 +1,9 @@
 .chartInfo {
 
+  h1 {
+    font-size: 18px;
+  }
+
   app-panel {
     box-shadow: 1px 1px 10px rgba(black, 0.07);
     border: 0 !important;
@@ -9,6 +13,14 @@
     a {
       word-break: break-all;
     }
+  }
+
+  &__related {
+    max-width: 280px;
+  }
+
+  &__related-link {
+    font-size: 14px;
   }
 
   &__properties {

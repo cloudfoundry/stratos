@@ -3,6 +3,7 @@
 
 // Vars
 $list-item-content-height: 200px;
+$list-item-content-min-height: 140px;
 
 .list-item {
   border-radius: $border-radius;
@@ -46,5 +47,13 @@ $list-item-content-height: 200px;
     justify-content: center;
     word-wrap: break-word;
     text-align: center;
+  }
+
+  &__auto-height {
+    height: auto;
+
+    .list-item-info {
+      padding: 10px 0;
+    }
   }
 }

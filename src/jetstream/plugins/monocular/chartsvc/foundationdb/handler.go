@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/helm/monocular/chartsvc/foundationdb/datastore"
 	"github.com/helm/monocular/chartsvc/models"
@@ -461,7 +462,11 @@ func SearchCharts(w http.ResponseWriter, req *http.Request, params Params) {
 }
 
 func newChartResponse(c *models.Chart) *utils.ApiResponse {
-	latestCV := c.ChartVersions[0]
+
+	// NWM: This was: latestCV := c.ChartVersions[0] - but this includes development charts
+	// FIX: This ignores development versions
+	latestCV := findFirstNonDevelopmentVersion(c)
+
 	return &utils.ApiResponse{
 		Type:       "chart",
 		ID:         c.ID,
@@ -474,6 +479,15 @@ func newChartResponse(c *models.Chart) *utils.ApiResponse {
 			},
 		},
 	}
+}
+
+func findFirstNonDevelopmentVersion(c *models.Chart) models.ChartVersion {
+	for _, chartVersion := range c.ChartVersions {
+		if strings.Index(chartVersion.Version, "-") == -1 {
+			return chartVersion
+		}
+	}
+	return c.ChartVersions[0]
 }
 
 func newChartListResponse(charts []*models.Chart) utils.ApiListResponse {

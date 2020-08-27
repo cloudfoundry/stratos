@@ -16,6 +16,7 @@ $chart-item-logo-width: 80px;
     &__title {
       margin: 0;
       font-weight: 500;
+      font-size: 16px;
       cursor: pointer;
       margin-bottom: 4px;
 
@@ -26,6 +27,10 @@ $chart-item-logo-width: 80px;
 
     p {
       margin: 0;
+    }
+
+    &__version {
+      font-size: 14px;
     }
 
     // Remove this when chips are ready:

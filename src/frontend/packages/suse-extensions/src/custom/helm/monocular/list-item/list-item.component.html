@@ -1,6 +1,6 @@
 <div class="list-item">
   <a [href]="detailUrl" [routerLink]="detailUrl">
-    <div class="list-item-content">
+    <div class="list-item-content" [ngClass]="{'list-item__auto-height': height === 'auto'}">
       <div class="list-item-logo">
         <ng-content select=".list-item-logo"></ng-content>
       </div>

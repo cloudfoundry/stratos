@@ -1,11 +1,15 @@
 <div class="versions">
   <h1>Chart Versions</h1>
-  <div class="version" *ngFor="let version of shownVersions()">
-    <span class='number' [class.selected]="isSelected(version)">
-      <a [href]="goToVersionUrl(version)" [routerLink]="goToVersionUrl(version)">
-        {{ version.attributes.version }}</a>
-    </span> -
-    <span class='creation-date'>{{ version.attributes.created | date: 'MMM d, y' }}</span>
+  <div class="version__table">
+    <div class="version__row" *ngFor="let version of shownVersions()">
+      <div class='version__cell number' [class.selected]="isSelected(version)">
+        <a [href]="goToVersionUrl(version)" [routerLink]="goToVersionUrl(version)">
+          <span *ngIf="version.attributes.version.length>15">{{ version.attributes.version | slice:0:16 }}...</span>
+          <span *ngIf="version.attributes.version.length<16">{{ version.attributes.version }}</span>
+          </a>
+        </div>
+      <div class='version__cell creation-date'>{{ version.attributes.created | date: 'MMM d, y' }}</div>
+    </div>
   </div>
   <div class="more-link" *ngIf="showMoreLink()">
     <a (click)="setShowAllVersions()">show all...</a>

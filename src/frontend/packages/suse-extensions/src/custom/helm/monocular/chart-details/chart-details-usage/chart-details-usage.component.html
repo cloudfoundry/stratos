@@ -1,35 +1,4 @@
-<mat-card class="chart-details-usage">
-  <h1>Install</h1>
-  <mat-tab-group>
-    <mat-tab label="UI" *ngIf="endpointsService.hasConnectedEndpointType('k8s') | async">
-      <p>You can install this Helm Chart from here.</p>
-      <button class="chart-details-usage__install" color="primary" mat-button mat-raised-button
-        routerLink="/monocular/install/{{chart.id}}/{{currentVersion}}">Install</button>
-    </mat-tab>
-
-    <mat-tab label="Helm CLI">
-      <div *ngIf="showRepoInstructions" class="chart-details-usage__repository chart-details-usage__section">
-        <h2 class="chart-details-usage__label">Add {{ chart.attributes.repo.name }} repository</h2>
-        <mat-form-field>
-          <input matInput floatingPlaceholder=false [value]=repoAddInstructions>
-        </mat-form-field>
-        <button mat-button angulartics2On="click" angularticsEvent="RepositoryCopy">
-          <mat-icon svgIcon="content-copy"></mat-icon>
-        </button>
-      </div>
-      <div class="chart-details-usage__section">
-        <h2 class="chart-details-usage__label">Install chart</h2>
-        <mat-form-field>
-          <input matInput readonly floatingPlaceholder=false [value]=installInstructions>
-        </mat-form-field>
-        <button mat-button ngxClipboard angulartics2On="click">
-          <mat-icon svgIcon="content-copy"></mat-icon>
-        </button>
-      </div>
-      <p class="help-link">
-        <a href="https://github.com/kubernetes/helm/blob/master/docs/quickstart.md" target="_blank"
-          title="How to install Helm">Need Helm?</a>
-      </p>
-    </mat-tab>
-  </mat-tab-group>
-</mat-card>
+<div class="chart-details-usage__install">
+  <button class="chart-details-usage__install-btn" color="primary" mat-button mat-raised-button
+  routerLink="/monocular/install/{{chart.id}}/{{currentVersion}}">Install Chart</button>
+</div>

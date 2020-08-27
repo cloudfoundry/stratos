@@ -3,6 +3,7 @@
 .versions {
 
   h1 {
+    font-size: 18px;
     margin-top: 0;
   }
   .more-link {
@@ -10,14 +11,32 @@
   }
 }
 
-.version {
-  display: block;
+.version__cell {
 
-  .creation-date {
+  &.creation-date {
     color: lighten($layout-base, 20%);
   }
 
-  .number.selected {
+  &.number.selected {
     font-weight: bold;
+  }
+}
+
+.version {
+  &__table {
+    display: table;
+    width: 100%;
+  }
+  &__row {
+    display: table-row;
+  }
+  &__cell {
+    display: table-cell;
+  }
+}
+
+.app-version {
+  h1 {
+    font-size: 18px;
   }
 }

@@ -9,6 +9,7 @@ mat-tab-body {
   margin: 2em 0;
   box-shadow: 1px 1px 10px rgba(black, 0.07);
   h1 {
+    font-size: 18px;
     margin: 0;
   }
 
@@ -24,6 +25,12 @@ mat-tab-body {
   &__section {
     display: flex;
     flex-direction: column;
+  }
+
+  &__install {
+    display: flex;
+    justify-content: flex-end;
+    margin: 35px 0;
   }
 
   .mat-input-element {

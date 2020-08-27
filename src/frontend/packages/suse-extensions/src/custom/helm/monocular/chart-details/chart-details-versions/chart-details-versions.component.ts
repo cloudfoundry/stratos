@@ -32,8 +32,18 @@ export class ChartDetailsVersionsComponent {
 
   shownVersions(): ChartVersion[] {
     if (this.versions) {
-      return this.showAllVersions ? this.versions : this.versions.slice(0, 5);
+      return this.showAllVersions ? this.versions : this.getNonDevelopmentVersion().slice(0, 5);
     }
     return [];
+  }
+
+  getNonDevelopmentVersion(): ChartVersion[] {
+    const nonDevel: ChartVersion[] = [];
+    for (const version of this.versions) {
+      if (version.attributes.version.indexOf('-') === -1) {
+        nonDevel.push(version);
+      }
+    }
+    return nonDevel;
   }
 }

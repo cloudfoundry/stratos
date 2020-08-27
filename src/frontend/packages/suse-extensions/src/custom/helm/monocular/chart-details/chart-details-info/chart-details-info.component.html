@@ -13,7 +13,7 @@
         <a href="{{ chart.attributes.home }}" target="_blank">{{chart.attributes.home}}</a>
       </div>
     </div>
-    <div class="chartInfo__maintainers">
+    <div class="chartInfo__maintainers" *ngIf="maintainers.length">
       <h1>Maintainers</h1>
       <div *ngFor="let maintainer of maintainers">
         <a href="{{ maintainerUrl(maintainer) }}" target="_blank">{{ maintainer.name }}</a>
@@ -22,7 +22,7 @@
     <div class="chartInfo__related" *ngIf="sources.length">
       <h1>Related</h1>
       <div *ngFor="let source of sources">
-        <a href="{{ source }}" target="_blank">{{ source }}</a>
+        <a href="{{ source }}" class="chartInfo__related-link" target="_blank">{{ source }}</a>
       </div>
     </div>
   </mat-card>
