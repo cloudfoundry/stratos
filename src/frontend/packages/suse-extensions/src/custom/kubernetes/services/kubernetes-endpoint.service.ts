@@ -20,6 +20,28 @@ import {
   KubeService,
 } from '../store/kube.types';
 import { KubeDashboardStatus } from '../store/kubernetes.effects';
+import { Annotations } from './../store/kube.types';
+
+const CAASP_VERSION_ANNOTATION = 'caasp.suse.com/caasp-release-version';
+const CAASP_DISRUPTIVE_UPDATES_ANNOTATION = 'caasp.suse.com/has-disruptive-updates';
+const CAASP_SECURITY_UPDATES_ANNOTATION = 'caasp.suse.com/has-security-updates';
+const CAASP_HAS_UPDATES_ANNOTATION = 'caasp.suse.com/has-updates';
+
+export interface CaaspNodesData {
+  version: string;
+  versionMismatch: boolean;
+  updates: number;
+  disruptiveUpdates: number;
+  securityUpdates: number;
+}
+
+export interface CaaspNodeData {
+  version: string;
+  updates: boolean;
+  disruptiveUpdates: boolean;
+  securityUpdates: boolean;
+}
+
 
 @Injectable()
 export class KubernetesEndpointService {
@@ -63,6 +85,61 @@ export class KubernetesEndpointService {
     );
 
     this.constructCoreObservables();
+  }
+
+  getCaaspNodesData(nodes$: Observable<KubernetesNode[]> = this.nodes$): Observable<CaaspNodesData> {
+    return nodes$.pipe(
+      map(nodes => {
+        const info: CaaspNodesData = {
+          version: 'Unknown',
+          versionMismatch: false,
+          updates: 0,
+          disruptiveUpdates: 0,
+          securityUpdates: 0
+        };
+        const versions = {};
+
+        nodes.forEach(n => {
+          const nodeData = this.getCaaspNodeData(n);
+          if (!nodeData) {
+            return;
+          }
+
+          if (!versions[nodeData.version]) {
+            versions[nodeData.version] = 0;
+          }
+          versions[nodeData.version]++;
+
+          info.updates += nodeData.updates ? 1 : 0;
+          info.disruptiveUpdates += nodeData.disruptiveUpdates ? 1 : 0;
+          info.securityUpdates += nodeData.securityUpdates ? 1 : 0;
+        });
+
+        if (Object.keys(versions).length === 0) {
+          return null;
+        }
+
+        info.version = Object.keys(versions).join(', ');
+        info.versionMismatch = Object.keys(versions).length !== 1;
+        return info;
+      })
+    )
+  }
+
+  getCaaspNodeData(n: KubernetesNode): CaaspNodeData {
+    if (n && n.metadata && n.metadata.annotations) {
+      return {
+        version: n.metadata.annotations[CAASP_VERSION_ANNOTATION],
+        updates: this.hasBooleanAnnotation(n.metadata.annotations, CAASP_HAS_UPDATES_ANNOTATION),
+        disruptiveUpdates: this.hasBooleanAnnotation(n.metadata.annotations, CAASP_DISRUPTIVE_UPDATES_ANNOTATION),
+        securityUpdates: this.hasBooleanAnnotation(n.metadata.annotations, CAASP_SECURITY_UPDATES_ANNOTATION)
+      }
+    }
+  }
+
+  // Check for the specified annotation with a value of 'yes'
+  private hasBooleanAnnotation(annotations: Annotations, annotation: string): boolean {
+    return annotations[annotation] && annotations[annotation] === 'yes' ? true : false
   }
 
   getNodeKubeVersions(nodes$: Observable<KubernetesNode[]> = this.nodes$) {

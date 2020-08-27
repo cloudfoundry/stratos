@@ -1,4 +1,4 @@
-<div *ngIf="condition$ | async as conditionValue" class="kube-node-condition">
+<div *ngIf="hasCondition$ | async" class="kube-node-condition" [ngStyle]="{'padding-top': paddingTop}">
   <div class="kube-node-condition__title">
     <mat-icon [fontSet]="icons[condition][1]">{{ icons[condition][0] }}</mat-icon>
     <div>
@@ -6,5 +6,5 @@
     </div>
   </div>
   <app-boolean-indicator class="kube-node-condition__indicator" [subtle]="subtle" [inverse]="inverse"
-    [isTrue]="conditionValue" type="yes-no"></app-boolean-indicator>
+    [isTrue]="condition$ | async" [type]="type"></app-boolean-indicator>
 </div>

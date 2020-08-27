@@ -17,7 +17,7 @@ import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/p
 import { getCurrentPageRequestInfo } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
 import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
-import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
+import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
 interface IValueLabels {
   usedLabel?: string;
@@ -30,6 +30,7 @@ interface IEndpointDetails {
   label: string;
   name: string;
 }
+
 @Component({
   selector: 'app-kubernetes-summary',
   templateUrl: './kubernetes-summary.component.html',
@@ -73,6 +74,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   public nodesReady$: Observable<ISimpleUsageChartData>;
   public networkUnavailable$: Observable<ISimpleUsageChartData>;
   public kubeNodeVersions$: Observable<string>;
+  public caaspData$: Observable<CaaspNodesData>;
 
   public pressureChartThresholds: IChartThresholds = {
     danger: 90,
@@ -164,6 +166,8 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     this.kubeTerminalLink = `/kubernetes/${guid}/terminal`;
 
     this.kubeNodeVersions$ = this.kubeEndpointService.getNodeKubeVersions(nodes$).pipe(startWith('-'));
+
+    this.caaspData$ = this.kubeEndpointService.getCaaspNodesData(nodes$);
 
     this.isLoading$ = combineLatest([
       this.endpointDetails$,

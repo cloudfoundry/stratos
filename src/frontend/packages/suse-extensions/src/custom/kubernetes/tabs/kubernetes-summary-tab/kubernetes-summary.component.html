@@ -55,6 +55,26 @@
         </div>
       </div>
 
+      <!-- Show CaaSP metadata -->
+      <div class="app-metadata" *ngIf="caaspData$ | async as data">
+          <div class="app-metadata__two-cols">
+            <app-metadata-item label="CaaSP Version">
+              <div class="caasp-version">
+                <div>{{ data.version }}</div><mat-icon class="text-warning" matTooltip="Nodes report multiple versions" *ngIf="data.versionMismatch">warning</mat-icon>
+              </div>
+            </app-metadata-item>
+          </div>
+            <div class="app-metadata__two-cols">
+              <app-metadata-item label="Nodes with Updates">
+                <div class="caasp-updates">
+                  <div>{{ data.updates }}</div>
+                  <div *ngIf="data.securityUpdates > 0" class="caasp-updates__security">Security: <b>{{ data.securityUpdates }}</b></div>
+                  <div *ngIf="data.disruptiveUpdates > 0" class="caasp-updates__disruptive">Disruptive: <b>{{ data.disruptiveUpdates }}</b></div>
+                </div>
+              </app-metadata-item>
+          </div>
+      </div>
+
       <div class="kube-details__graphs">
         <div class="kube-details__graphs-group">
           <div class="kube-details__graph">

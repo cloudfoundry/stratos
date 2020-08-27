@@ -1,10 +1,17 @@
 
-// Not currently used but should be - NJ
 @mixin kube-summary-theme($theme, $app-theme) {
-  $backgrounds: map-get($theme, background);
-  $background: mat-color($backgrounds, card);
-  .kube-details__graphs {
-    background: linear-gradient(to bottom, $background 0%, $background 40%, transparent 70%);
+  $status-colors: map-get($app-theme, status);
+  $status-warning: map-get($status-colors, warning);
+  $status-danger: map-get($status-colors, danger);
+
+  .caasp-updates {
+    &__security {
+      border: 1px solid $status-danger;
+      color: $status-danger;
+    }
+    &__disruptive {
+      border: 1px solid $status-warning;
+      color: $status-warning;
+    }
   }
 }
-

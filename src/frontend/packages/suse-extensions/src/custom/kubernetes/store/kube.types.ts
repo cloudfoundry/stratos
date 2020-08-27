@@ -136,7 +136,10 @@ export enum ConditionType {
   DiskPressure = 'DiskPressure',
   Ready = 'Ready',
   PIDPressure = 'PIDPressure',
-  NetworkUnavailable = 'NetworkUnavailable'
+  NetworkUnavailable = 'NetworkUnavailable',
+  CaaspUpdates = 'CaaspUpdates',
+  CaaspDisruptive = 'CaaspDisruptive',
+  CaaspSecurity = 'CaaspSecurity'
 }
 export const ConditionTypeLabels = {
   [ConditionType.Ready]: 'Ready',
@@ -144,7 +147,10 @@ export const ConditionTypeLabels = {
   [ConditionType.MemoryPressure]: 'Memory Pressure',
   [ConditionType.DiskPressure]: 'Disk Pressure',
   [ConditionType.PIDPressure]: 'PID Pressure',
-  [ConditionType.NetworkUnavailable]: 'Network Unavailable'
+  [ConditionType.NetworkUnavailable]: 'Network Unavailable',
+  [ConditionType.CaaspUpdates]: 'Updates Available',
+  [ConditionType.CaaspDisruptive]: 'Disruptive Update',
+  [ConditionType.CaaspSecurity]: 'Security Update'
 };
 
 export enum ConditionStatus {

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first, map, shareReplay } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { MetricQueryConfig, MetricsAction } from '../../../../../store/src/actions/metrics.actions';
@@ -42,7 +42,8 @@ export class KubernetesNodeService {
     this.node$ = nodeEntityService.entityObs$.pipe(
       filter(p => !!p && !!p.entity),
       first(),
-      shareReplay(1),
+      publishReplay(1),
+      refCount()
     );
 
     this.nodeEntity$ = this.node$.pipe(

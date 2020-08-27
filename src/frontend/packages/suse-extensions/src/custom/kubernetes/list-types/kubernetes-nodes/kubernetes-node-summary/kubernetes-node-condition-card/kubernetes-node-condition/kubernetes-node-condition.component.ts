@@ -16,12 +16,22 @@ export class KubernetesNodeConditionComponent implements OnInit {
   @Input()
   condition: ConditionType;
   condition$: Observable<boolean>;
+  hasCondition$: Observable<boolean>;
+
+  @Input()
+  overrideCondition$: Observable<boolean>;
+
+  @Input()
+  type = 'yes-no'
 
   @Input()
   inverse = false;
 
   @Input()
   subtle = false;
+
+  @Input()
+  paddingTop = '20px';
 
   public titles = ConditionTypeLabels;
 
@@ -31,7 +41,10 @@ export class KubernetesNodeConditionComponent implements OnInit {
     MemoryPressure: ['memory', 'material-icons'],
     DiskPressure: ['storage', 'material-icons'],
     PIDPressure: ['vertical_align_center', 'material-icons'],
-    NetworkUnavailable: ['settings_ethernet', 'material-icons']
+    NetworkUnavailable: ['settings_ethernet', 'material-icons'],
+    CaaspUpdates: ['vertical_align_top', 'material-icons'],
+    CaaspDisruptive: ['warning', 'material-icons'],
+    CaaspSecurity: ['security', 'material-icons']
   };
 
   constructor(
@@ -39,13 +52,16 @@ export class KubernetesNodeConditionComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.condition$ = this.kubeNodeService.node$.pipe(
+    this.condition$ = this.overrideCondition$ ? this.overrideCondition$ : this.kubeNodeService.node$.pipe(
       filter(p => !!p && !!p.entity),
       map(p => p.entity.status.conditions),
       map(conditions => conditions.filter(o => o.type === this.condition)),
       filter(conditions => !!conditions.length),
       map(conditions => this.shouldBeGreen(conditions[0]))
     );
+    this.hasCondition$ = this.condition$.pipe(
+      map(() => true)
+    )
   }
 
   shouldBeGreen(condition: KubernetesCondition) {

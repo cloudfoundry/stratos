@@ -11,7 +11,14 @@ import { KubernetesNode } from '../../../store/kube.types';
 })
 export class KubernetesNodeLinkComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 
-  public nodeLink;
+  public nodeLink: string;
+
+  public icon: {
+    icon: string,
+    class: string,
+    message: string
+  };
+
   constructor(
     private kubeEndpointService: KubernetesEndpointService
   ) {
@@ -20,6 +27,22 @@ export class KubernetesNodeLinkComponent extends TableCellCustom<KubernetesNode>
 
   ngOnInit() {
     this.nodeLink = `/kubernetes/${this.kubeEndpointService.kubeGuid}/nodes/${this.row.metadata.name}`;
+    const caaspNodeData = this.kubeEndpointService.getCaaspNodeData(this.row);
+    if (caaspNodeData) {
+      if (caaspNodeData.securityUpdates) {
+        this.icon = {
+          icon: 'error',
+          class: 'error',
+          message: 'Node has security updates'
+        };
+      } else if (caaspNodeData.disruptiveUpdates) {
+        this.icon = {
+          icon: 'warning',
+          class: 'warning',
+          message: 'Node has disruptive updates'
+        };
+      }
+    }
   }
 
 }
