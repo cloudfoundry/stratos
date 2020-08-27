@@ -42,6 +42,10 @@ export class KubernetesAnalysisReportComponent implements OnInit {
   }
 
   ngOnInit() {
+    if (!this.id) {
+      return;
+    }
+
     this.report$ = this.analysisService.getByID(this.kubeEndpointService.baseKube.guid, this.id).pipe(
       map((response: any) => {
         if (!response.type) {

@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MDAppModule } from './../../../../core/md.module';
 
-import { PopeyeReportViewerComponent } from './popeye-report-viewer.component';
-import { KubernetesBaseTestModules, KubeBaseGuidMock } from '../../kubernetes.testing.module';
-import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
+import { MDAppModule } from '../../../../../../core/src/public-api';
+import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
+import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
+import { PopeyeReportViewerComponent } from './popeye-report-viewer.component';
 
 describe('PopeyeReportViewerComponent', () => {
   let component: PopeyeReportViewerComponent;

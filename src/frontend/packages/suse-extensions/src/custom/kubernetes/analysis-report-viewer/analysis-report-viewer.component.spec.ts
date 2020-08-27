@@ -1,7 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AnalysisReportViewerComponent } from './analysis-report-viewer.component';
 import { KubernetesBaseTestModules } from '../kubernetes.testing.module';
+import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
+import { AnalysisReportViewerComponent } from './analysis-report-viewer.component';
 
 describe('AnalysisReportViewerComponent', () => {
   let component: AnalysisReportViewerComponent;
@@ -12,6 +13,9 @@ describe('AnalysisReportViewerComponent', () => {
       declarations: [ AnalysisReportViewerComponent ],
       imports: [
         KubernetesBaseTestModules,
+      ],
+      providers: [
+        KubernetesAnalysisService
       ]
     })
     .compileComponents();

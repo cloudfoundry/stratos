@@ -1,11 +1,13 @@
-
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KubernetesAnalysisInfoComponent } from './kubernetes-analysis-info.component';
-import { AnalysisInfoCardComponent } from './analysis-info-card/analysis-info-card.component';
-import { KubernetesBaseTestModules, KubeBaseGuidMock } from '../../../kubernetes.testing.module';
-import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
+import { SidePanelService } from '../../../../../../../core/src/shared/services/side-panel.service';
+import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
+import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
+import { SharedModule } from './../../../../../../../core/src/shared/shared.module';
+import { AnalysisInfoCardComponent } from './analysis-info-card/analysis-info-card.component';
+import { KubernetesAnalysisInfoComponent } from './kubernetes-analysis-info.component';
+
 
 describe('KubernetesAnalysisInfoComponent', () => {
   let component: KubernetesAnalysisInfoComponent;
@@ -15,11 +17,13 @@ describe('KubernetesAnalysisInfoComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ KubernetesAnalysisInfoComponent, AnalysisInfoCardComponent ],
       imports: [
+        SharedModule,
         KubernetesBaseTestModules,
       ],
       providers: [
         KubernetesAnalysisService,
         KubernetesEndpointService,
+        SidePanelService,
         KubeBaseGuidMock,
       ]
     })

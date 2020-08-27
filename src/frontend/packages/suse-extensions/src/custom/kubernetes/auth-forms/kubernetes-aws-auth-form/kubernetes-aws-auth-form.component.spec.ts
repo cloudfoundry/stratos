@@ -2,8 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { MDAppModule } from '../../../../core/md.module';
-import { SharedModule } from '../../../../shared/shared.module';
+import { MDAppModule, SharedModule } from '../../../../../../core/src/public-api';
 import { KubernetesAWSAuthFormComponent } from './kubernetes-aws-auth-form.component';
 
 describe('KubernetesAWSAuthFormComponent', () => {

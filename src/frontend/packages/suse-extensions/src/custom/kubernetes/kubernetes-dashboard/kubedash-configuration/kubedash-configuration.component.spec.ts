@@ -1,10 +1,10 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { KubedashConfigurationComponent } from './kubedash-configuration.component';
-import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
-import { TabNavService } from '../../../../../tab-nav.service';
 import { HttpClient, HttpHandler } from '@angular/common/http';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
+
+import { TabNavService } from '../../../../../../core/tab-nav.service';
+import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
+import { KubedashConfigurationComponent } from './kubedash-configuration.component';
 
 describe('KubedashConfigurationComponent', () => {
   let component: KubedashConfigurationComponent;

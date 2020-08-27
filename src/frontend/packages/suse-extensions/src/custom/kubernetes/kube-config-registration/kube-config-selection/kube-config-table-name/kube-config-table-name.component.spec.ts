@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { IListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source-types';
+import {
+  IListDataSource,
+} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 import { KubeConfigTableName } from './kube-config-table-name.component';

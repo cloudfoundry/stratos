@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { CoreModule } from '@stratosui/core';
 
-import { CoreModule } from '../../../../core/core.module';
 import { LoaderComponent } from './loader.component';
 
 describe('LoaderComponent', () => {

@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TabNavService } from '../../../../tab-nav.service';
-import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
+import { TabNavService } from '../../../../../core/tab-nav.service';
+import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
 import { HelmModule } from '../helm.module';
 import { MonocularTabBaseComponent } from './monocular-tab-base.component';
 

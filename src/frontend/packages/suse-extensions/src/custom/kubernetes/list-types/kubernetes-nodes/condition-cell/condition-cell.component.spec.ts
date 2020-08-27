@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
+import { BaseTestModules } from '../../../../../../../core/test-framework/core-test.helper';
 import { ConditionCellComponent } from './condition-cell.component';
 
 describe('ConditionCellComponent', () => {

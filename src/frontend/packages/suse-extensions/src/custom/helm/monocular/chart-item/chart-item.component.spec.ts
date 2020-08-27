@@ -3,8 +3,8 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { LoggerService } from '../../../../../../core/src/core/logger.service';
 import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
-import { LoggerService } from '../../../../core/logger.service';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
 import { ChartItemComponent } from './chart-item.component';

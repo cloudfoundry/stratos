@@ -1,12 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TabNavService } from 'frontend/packages/core/tab-nav.service';
 
-import { HelmReleaseProviders, KubernetesBaseTestModules, KubeBaseGuidMock } from '../../../../kubernetes.testing.module';
-import { HelmReleaseSummaryTabComponent } from './helm-release-summary-tab.component';
-import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
+import { SidePanelService } from '../../../../../../../../core/src/shared/services/side-panel.service';
+import { HelmReleaseProviders, KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
-import { AnalysisReportSelectorComponent } from './../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
-import { SidePanelService } from './../../../../../../shared/services/side-panel.service';
+import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
+import {
+  AnalysisReportSelectorComponent,
+} from './../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
+import { HelmReleaseSummaryTabComponent } from './helm-release-summary-tab.component';
 
 describe('HelmReleaseSummaryTabComponent', () => {
   let component: HelmReleaseSummaryTabComponent;

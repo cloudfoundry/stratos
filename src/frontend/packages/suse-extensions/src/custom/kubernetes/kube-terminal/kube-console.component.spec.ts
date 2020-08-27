@@ -4,9 +4,9 @@ import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { ApplicationServiceMock } from '../../../../../cloud-foundry/test-framework/application-service-helper';
-import { TabNavService } from '../../../../tab-nav.service';
-import { CoreModule } from '../../../core/core.module';
-import { SharedModule } from '../../../shared/shared.module';
+import { SharedModule } from '../../../../../core/src/public-api';
+import { TabNavService } from '../../../../../core/tab-nav.service';
+import { CoreModule } from './../../../../../core/src/core/core.module';
 import { KubeConsoleComponent } from './kube-console.component';
 
 describe('KubeConsoleComponent', () => {

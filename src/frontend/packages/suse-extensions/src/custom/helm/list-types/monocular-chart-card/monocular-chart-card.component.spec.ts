@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
+import { BaseTestModulesNoShared } from '../../../../../../core/test-framework/core-test.helper';
 import { ChartItemComponent } from '../../monocular/chart-item/chart-item.component';
 import { ListItemComponent } from '../../monocular/list-item/list-item.component';
 import { ChartsService } from '../../monocular/shared/services/charts.service';

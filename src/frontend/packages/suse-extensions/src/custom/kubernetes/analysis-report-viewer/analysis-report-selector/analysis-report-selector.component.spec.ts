@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MDAppModule } from './../../../../core/md.module';
 
-import { AnalysisReportSelectorComponent } from './analysis-report-selector.component';
-import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
-import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
+import { MDAppModule } from '../../../../../../core/src/public-api';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../kubernetes.testing.module';
+import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
+import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
+import { AnalysisReportSelectorComponent } from './analysis-report-selector.component';
 
 describe('AnalysisReportSelectorComponent', () => {
   let component: AnalysisReportSelectorComponent;

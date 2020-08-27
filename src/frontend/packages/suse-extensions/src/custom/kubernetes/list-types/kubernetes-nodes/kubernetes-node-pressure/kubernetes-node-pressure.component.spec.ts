@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
+import { BaseTestModules } from '../../../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodePressureComponent } from './kubernetes-node-pressure.component';
 
 describe('KubernetesNodePressureComponent', () => {

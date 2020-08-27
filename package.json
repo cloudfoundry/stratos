@@ -28,6 +28,7 @@
     "test-frontend:store": "NG_TEST_SUITE=store ng test store --code-coverage --watch=false",
     "test-frontend:cloud-foundry": "NG_TEST_SUITE=cloud-foundry ng test cloud-foundry --code-coverage --watch=false",
     "test-frontend:cf-autoscaler": "NG_TEST_SUITE=autoscaler ng test cf-autoscaler --code-coverage --watch=false",
+    "test-frontend:extensions": "NG_TEST_SUITE=extensions ng test extensions --code-coverage --watch=false",
     "posttest": "nyc report --reporter=html --reporter=lcovonly --reporter=json --tempDir=coverage/nyc",
     "codecov": "codecov -f coverage/coverage-final.json",
     "lint": "ng lint --format stylish",

@@ -1,11 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
-import { SidePanelService } from '../../../shared/services/side-panel.service';
+import { SidePanelService } from '../../../../../core/src/shared/services/side-panel.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
+import {
+  ResourceAlertViewComponent,
+} from './../analysis-report-viewer/resource-alert-preview/resource-alert-view/resource-alert-view.component';
 import { KubernetesResourceViewerComponent } from './kubernetes-resource-viewer.component';
-import { ResourceAlertViewComponent } from './../analysis-report-viewer/resource-alert-preview/resource-alert-view/resource-alert-view.component';
 
 describe('KubernetesResourceViewerComponent', () => {
   let component: KubernetesResourceViewerComponent;

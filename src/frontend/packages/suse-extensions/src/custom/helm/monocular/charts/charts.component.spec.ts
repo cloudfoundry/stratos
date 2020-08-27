@@ -6,8 +6,8 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 
+import { LoggerService } from '../../../../../../core/src/core/logger.service';
 import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
-import { LoggerService } from '../../../../core/logger.service';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ChartListComponent } from '../chart-list/chart-list.component';
 import { LoaderComponent } from '../loader/loader.component';

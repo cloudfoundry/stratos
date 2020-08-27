@@ -4,9 +4,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../core/core.module';
-import { SharedModule } from '../../shared/shared.module';
+import { CoreModule } from '../../../../core/src/core/core.module';
 import { appReducers } from '../../../../store/src/reducers.module';
+import { SharedModule } from './../../../../core/src/shared/shared.module';
 import { SuseLoginComponent } from './suse-login.component';
 
 describe('SuseLoginComponent', () => {

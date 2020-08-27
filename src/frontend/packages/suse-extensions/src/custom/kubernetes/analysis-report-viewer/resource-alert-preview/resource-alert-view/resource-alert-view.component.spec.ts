@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MDAppModule } from './../../../../../core/md.module';
 
-import { ResourceAlertViewComponent } from './resource-alert-view.component';
-import { KubernetesBaseTestModules, KubeBaseGuidMock } from '../../../kubernetes.testing.module';
-import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
+import { MDAppModule } from '../../../../../../../core/src/public-api';
+import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
+import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
+import { ResourceAlertViewComponent } from './resource-alert-view.component';
 
 describe('ResourceAlertViewComponent', () => {
   let component: ResourceAlertViewComponent;
