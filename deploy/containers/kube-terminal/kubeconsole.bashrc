@@ -6,9 +6,7 @@ RESET="\033[0m"
 BOLD="\033[1m"
 DIM="\033[2m"
 
-echo -e "${BOLD}${GREEN}SUSE Stratos Console${RESET}"
-echo ""
-echo -e "${CYAN}Kubernetes Terminal${RESET}"
+echo -e "${CYAN}Stratos Kubernetes Terminal${RESET}"
 echo ""
 
 # Only do these on first run
@@ -51,7 +49,9 @@ if [ ! -f "/stratos/.firstrun" ]; then
   if [ -f "${HOME}/.stratos/helm-setup" ]; then
     echo "Setting up Helm repositories ..."
     source  "${HOME}/.stratos/helm-setup" > /dev/null
-    helm repo update 2>&1 > /dev/null
+
+    # helm repo update can take a while, so get the user to do that if they want to use helm
+    echo -e "You may need to run ${CYAN}helm repo update${RESET} to update your repositories before using Helm"
     echo ""
   fi
 
@@ -73,5 +73,5 @@ touch "/stratos/.firstrun"
 unset `compgen -A variable | grep KUBERNETES`
 
 echo 
-echo -e "Ready - ${CYAN}kubectl${RESET} and ${CYAN}helm${RESET} commands are available"
+echo -e "${CYAN}kubectl${RESET} and ${CYAN}helm${RESET} commands are available"
 echo ""
