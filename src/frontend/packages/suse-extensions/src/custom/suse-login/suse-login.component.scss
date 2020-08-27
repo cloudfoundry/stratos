@@ -1,13 +1,21 @@
 @import '../../../../suse-theme/sass/colors';
 
+app-suse-login {
+  background: url(/core/assets/custom/login/sign-in-bg.svg) #7AD4AA no-repeat center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+}
+
 .suse-login {
   align-items: center;
-  background-color: $suse-gray;
+  align-self: center;
+  background-color: #fff;
   color: $suse-gray-fg;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: 100%;
   &__header,
   &__content,
   &__footer {
@@ -28,43 +36,60 @@
     align-items: flex-start;
     color: $suse-text;
     flex: 1;
-    margin-top: 100px;
-    overflow-y: auto;
-    width: 90%;
+    width: 1120px;
   }
   &__footer {
     flex: 0 0 auto;
-    width: 90%;
-    padding: 20px 0;
+    padding: 20px 0 0 0;
   }
   &__title {
     font-family: "Work Sans";
     width: 90%;
   }
   &__copyright {
-    color: $suse-gray-fg;
     flex: 1;
+    font-size: 12px;
+    opacity: 0.7;
   }
   &__logo {
     img {
       width: 128px;
     }
   }
+  &__footer-mobile {
+    display: none;
+  }
   &__intro {
-    flex: 1;
+    background-color: $suse-dark-green;
+    display: flex;
+    flex: 0 0 445px;
+    flex-direction: column;
     font-family: "Work Sans";
-    margin-right: 24px;
+    padding: 32px;
+    &-img {
+      margin-bottom: 1rem;
+    }
+    &-img-left {
+      align-self: flex-start;
+      margin-bottom: 1rem;
+    }
+  }
+  &__line {
+    margin: 32px -32px;
+    overflow: hidden;
   }
   &__box {
     display: flex;
-    flex: 1;
     flex-direction: column;
     justify-content: center;
-    margin-left: 24px;
+    width: 75%;
   }
   &__form {
     display: flex;
     flex-direction: column;
+    .mat-form-field {
+      margin-bottom: 12px;
+    }
     .mat-form-field:not(.mat-form-field-invalid).mat-form-field-appearance-legacy {
       color: $suse-gray-fg;
       .mat-form-field-label {
@@ -81,37 +106,44 @@
     }
     margin-top: 24px;
   }
+  &__right {
+    align-self: center;
+    display: flex;
+    justify-content: center;
+    flex: 1;
+  }
+  &__logo-mobile {
+    display: none;
+  }
   &__headline {
     color: $suse-primary-color;
     font-family: "Work Sans";
-    font-size: 52px;
-    font-weight: 300;
-    margin: 0;
-  }
-  &__tagline {
-    color: $suse-gray-fg;
-    font-family: "Work Sans";
-    font-size: 18px;
+    font-size: 28px;
     font-weight: 300;
     line-height: 1.5;
-    margin: 24px 0;
+    margin: 0;
+    margin-bottom: .5rem;    
+  }
+  &__tagline {
+    font-family: "Work Sans";
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.5;
+    margin: 0;
   }
   &__form-outer {
-    max-width: 400px;
     opacity: 1;
     transition: opacity 250ms linear;
   }
   &__form-title {
-    color: $suse-gray-fg;
-    font-size: 30px;
+    color: $suse-primary-color;
+    font-size: 28px;
     font-weight: 300;
     margin-bottom: 24px;
     transition: opacity 250ms linear;
   }
   &__loading {
-    display: none;
     margin-top: 24px;
-    max-width: 400px;
     opacity: 0;
     transition: opacity 250ms linear;
   }
@@ -129,42 +161,103 @@
   }
   &__message {
     color: $suse-gray-fg;
-    font-size: 18px;
-    font-weight: 300;
-    height: 20px;
+    font-size: 14px;
+    height: 24px;
     max-width: 400px;
     padding-top: 20px;
   }
+
+  &__sso-button.mat-button.suse-login__submit {
+    align-self: center;
+    padding: 0 60px;
+  }
+
 }
 
-// If SSO Login, move the form underneath the intro
+// If SSO Login change the presentation
 .suse-login-sso {
-  &.suse-login__content {
-    flex-direction: column;
-    .suse-login__intro {
-      flex: 0;
-    }
-    .suse-login__box {
-      justify-content: flex-start;
-      margin-left: 0;
-    }
+  .suse-login__intro {
+    flex: 1;
+  };
+  .suse-login__line IMG {
+    height: 0;
+    padding: 20px;
+  }
+  .suse-login__sso-button.mat-button.suse-login__submit {
+    align-self: flex-start;
+  }
+
+
+}
+
+@media only screen and (max-width: 1120px) {
+
+  .suse-login {
+    align-self: unset;
+    height: 100%;
+    width: 100%;
+  }
+
+  .suse-login__content {
+    width: 100%;
+  }
+
+  .suse-login__intro {
+    flex: 0;
+    height: 100%;
+    width: 335px;
+  }
+
+  .suse-login__right {
+    align-self: unset;
+    margin-top: 120px;
   }
 }
 
-// On small screens, hide the intro and just show the login box
-@media(max-width: 768px) {
-  .suse-login:not(.suse-login-sso) {
+// Mobile - login form only (unless SSO)
+@media only screen and (max-width: 768px) {
+
+  .suse-login:not(.suse-login-sso)  {
+  
     .suse-login {
-      &__intro {
-        display: none;
-      }
-      &__box {
-        margin: 0;
-      }
-      &__content {
-        max-width: 400px;
-        width: 80%;
-      }
+      
+    &__intro {
+      display: none;
     }
+
+    &__logo-mobile {
+      display: inline;
+      left: 30px;
+      position: absolute;
+      top: 30px;
+    }
+
+    &__footer-mobile {
+      align-items: flex-end;
+      background-color: #fff;
+      bottom: 0;
+      color: #000;
+      display: flex;
+      height: 60px;
+      padding: 30px;
+      position: fixed;
+      width: 100%;
+      z-index: 1;
+    }
+
+    &__right {
+      margin-bottom: 60px;
+    }
+  }
+}
+}
+
+
+// Sticky copyright footer
+@media only screen and (min-height: 580px) and (max-width: 1120px) {
+
+  .suse-login__footer {
+    position: fixed;
+    bottom: 20px;
   }
 }

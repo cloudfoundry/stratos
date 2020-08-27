@@ -1,43 +1,58 @@
-<div class="suse-login" id="app-login-page">
-  <div class="suse-login__header">
-    <div class="suse-login__title">SUSE Stratos Console</div>
-  </div>
-  <div class="suse-login__content" [ngClass]="{'suse-login-sso': ssoLogin}">
+<div class="suse-login" id="app-login-page" [ngClass]="{'suse-login-sso': ssoLogin}" >
+  <div class="suse-login__content">
     <div class="suse-login__intro">
-      <h1 class="suse-login__headline">SUSE<br>Stratos<br>Console</h1>
+      <img class="suse-login__intro-img-left" src="/core/assets/custom/login/suse-logo-light.svg">
+      <img class="suse-login__intro-img" src="/core/assets/custom/login/sign-in-lock-1.svg">
+      <h1 class="suse-login__headline">SUSE<br>Stratos Console</h1>
       <p class="suse-login__tagline">Manage and monitor Cloud Foundry and Kubernetes systems and workloads.</p>
-    </div>
-    <div class="suse-login__box" [ngClass]="{'suse-login__busy': busy$ | async }">
-      <div *ngIf="!ssoLogin" class="suse-login__form-title">Sign in</div>
-      <div class="suse-login__form-outer">
-        <form class="suse-login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-          <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
-            <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
-          </mat-form-field>
-          <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
-            <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
-          </mat-form-field>
-          <button class="suse-login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button
-            mat-raised-button [disabled]="!loginForm.valid">
-            {{ !ssoLogin ? 'Login' : 'Login with SSO' }}
-          </button>
-        </form>
+      <div class="suse-login__line">
+        <img src="/core/assets/custom/login/sign-in-line.svg">
       </div>
-      <div id="login__loading" class="suse-login__loading">
-        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      <div *ngIf="ssoLogin" class="suse-login__sso-container" [ngClass]="{'suse-login__busy': busy$ | async }">
+        <ng-container *ngTemplateOutlet="loginform"></ng-container>
       </div>
-      <div id="login-error-message" class="suse-login__message"
-        [ngClass]="{'suse-login__message--show': !!message, 'suse-login__message-error': this.error}">
-        {{ message }}
+      <div class="suse-login__footer">
+        <div class="suse-login__copyright">
+          <span *ngIf="config.copyright" [innerHTML]="config.copyright"></span>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="suse-login__footer">
-    <div class="suse-login__copyright">
-      <span *ngIf="config.copyright" [innerHTML]="config.copyright"></span>
-    </div>
-    <div class="suse-login__logo">
-      <a href="https://www.suse.com" target="_blank"><img src="/core/assets/custom/suse_login_logo.svg"></a>
+    <div class="suse-login__right" *ngIf="!ssoLogin">
+      <img class="suse-login__logo-mobile" src="/core/assets/custom/login/suse-logo-dark.svg">
+      <div class="suse-login__footer-mobile">
+        <div class="suse-login__copyright">
+          <span *ngIf="config.copyright" [innerHTML]="config.copyright"></span>
+        </div>
+      </div>
+
+      <div class="suse-login__box" [ngClass]="{'suse-login__busy': busy$ | async }">
+        <div *ngIf="!ssoLogin" class="suse-login__form-title">Sign in</div>
+        <ng-container *ngTemplateOutlet="loginform"></ng-container>
+      </div>
     </div>
   </div>
 </div>
+
+<ng-template #loginform>
+  <div class="suse-login__form-outer">
+    <form class="suse-login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
+      <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
+        <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
+      </mat-form-field>
+      <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
+        <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
+      </mat-form-field>
+      <button class="suse-login__submit" [ngClass]="{'suse-login__sso-button': ssoLogin}" color="primary" *ngIf="!loggedIn" type="submit" mat-button
+        mat-raised-button [disabled]="!loginForm.valid">
+        {{ !ssoLogin ? 'Login' : 'Login with SSO' }}
+      </button>
+    </form>
+  </div>
+  <div id="login__loading" class="suse-login__loading">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+  <div id="login-error-message" class="suse-login__message"
+    [ngClass]="{'suse-login__message--show': !!message, 'suse-login__message-error': this.error}">
+    {{ message }}
+  </div>
+</ng-template>
