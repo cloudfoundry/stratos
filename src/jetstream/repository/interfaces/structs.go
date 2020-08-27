@@ -215,9 +215,10 @@ type Info struct {
 	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
 	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
 	Configuration struct {
-		TechPreview        bool  `json:"enableTechPreview"`
-		ListMaxSize        int64 `json:"listMaxSize,omitempty"`
-		ListAllowLoadMaxed bool  `json:"listAllowLoadMaxed,omitempty"`
+		TechPreview        bool   `json:"enableTechPreview"`
+		ListMaxSize        int64  `json:"listMaxSize,omitempty"`
+		ListAllowLoadMaxed bool   `json:"listAllowLoadMaxed,omitempty"`
+		APIKeysEnabled     string `json:"APIKeysEnabled"`
 	} `json:"config"`
 }
 
