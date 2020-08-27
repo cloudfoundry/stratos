@@ -41,6 +41,15 @@ func makeNewRequest() (echo.Context, *httptest.ResponseRecorder) {
 	return ctx, rec
 }
 
+func makeNewRequestWithParams(httpVerb string, formValues map[string]string) (echo.Context, *httptest.ResponseRecorder) {
+	req := setupMockReq(httpVerb, "", formValues)
+	rec := httptest.NewRecorder()
+	e := echo.New()
+	ctx := e.NewContext(req, rec)
+
+	return ctx, rec
+}
+
 func Test_apiKeyMiddleware(t *testing.T) {
 	t.Parallel()
 
