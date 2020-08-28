@@ -257,12 +257,6 @@ func main() {
 	}()
 	log.Info("Session data store initialized.")
 
-	// Setting default value for APIKeysEnabled
-	if portalConfig.APIKeysEnabled == "" {
-		log.Debug(`APIKeysEnabled not set, setting to "admin_only"`)
-		portalConfig.APIKeysEnabled = config.APIKeysConfigEnum.AdminOnly
-	}
-
 	// Setup the global interface for the proxy
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore, sessionStoreOptions, envLookup)
 	portalProxy.SessionDataStore = sessionDataStore
@@ -664,6 +658,12 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 	}
 
 	log.Infof("Session Cookie name: %s", cookieName)
+
+	// Setting default value for APIKeysEnabled
+	if pc.APIKeysEnabled == "" {
+		log.Debug(`APIKeysEnabled not set, setting to "admin_only"`)
+		pc.APIKeysEnabled = config.APIKeysConfigEnum.AdminOnly
+	}
 
 	pp := &portalProxy{
 		Config:                 pc,
