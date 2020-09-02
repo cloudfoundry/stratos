@@ -39,25 +39,26 @@ function DocVersionSuggestions() {
   const suggestedDoc =
     latestDocSuggestion ?? getVersionMainDoc(latestVersionSuggestion);
   return (
-    <div className="alert alert--warning margin-bottom--md" role="alert">
+    <div className="alert alert--secondary margin-bottom--md" role="alert">
       {activeVersionName === 'next' ? (
         <div>
           This is unreleased documentation for {siteTitle}{' '}
-          <strong>{activeVersionName}</strong> version.
+          <strong>{activeVersionName}</strong> version. For the latest released documentation see {' '}
+          <strong>
+            <Link to={suggestedDoc.path}>here</Link>
+          </strong>{' '}
+        ({latestVersionSuggestion.name}).
         </div>
       ) : (
           <div>
             This is documentation for {siteTitle}{' '}
-            <strong>v{activeVersionName}</strong>.
+            <strong>v{activeVersionName}</strong>. For the latest released documentation see {' '}
+            <strong>
+              <Link to={suggestedDoc.path}>here</Link>
+            </strong>{' '}
+        ({latestVersionSuggestion.name}).
           </div>
         )}
-      <div className="margin-top--md">
-        For the latest released documentation see {' '}
-        <strong>
-          <Link to={suggestedDoc.path}>here</Link>
-        </strong>{' '}
-        ({latestVersionSuggestion.name}).
-      </div>
     </div>
   );
 }
