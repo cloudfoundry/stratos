@@ -3,6 +3,8 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import { useActivePlugin, useActiveVersion, useDocVersionSuggestions } from '@theme/hooks/useDocs';
 import React from 'react';
 
+import styles from './styles.module.css';
+
 const useMandatoryActiveDocsPluginId = () => {
   const activePlugin = useActivePlugin();
 
@@ -36,27 +38,25 @@ function DocVersionSuggestions() {
   const activeVersionName = activeVersion.name; // try to link to same doc in latest version (not always possible)
   // fallback to main doc of latest version
 
+  styles;
+
   const suggestedDoc =
     latestDocSuggestion ?? getVersionMainDoc(latestVersionSuggestion);
   return (
-    <div className="alert alert--secondary margin-bottom--md" role="alert">
+    <div className="alert alert--secondary margin-bottom--md" role="alert" >
       {activeVersionName === 'next' ? (
-        <div>
-          This is unreleased documentation for {siteTitle}{' '}
-          <strong>{activeVersionName}</strong> version. For the latest released documentation see {' '}
+        <div className={styles.container}>
+          This is the development documentation. For the latest released documentation see{' '}
           <strong>
-            <Link to={suggestedDoc.path}>here</Link>
-          </strong>{' '}
-        ({latestVersionSuggestion.name}).
+            <Link to={suggestedDoc.path}> {latestVersionSuggestion.name}</Link>
+          </strong>.
         </div>
       ) : (
-          <div>
-            This is documentation for {siteTitle}{' '}
-            <strong>v{activeVersionName}</strong>. For the latest released documentation see {' '}
+          <div className={styles.container}>
+            This is documentation for <strong>{activeVersionName}</strong>. For the latest released documentation see {' '}
             <strong>
-              <Link to={suggestedDoc.path}>here</Link>
-            </strong>{' '}
-        ({latestVersionSuggestion.name}).
+              <Link to={suggestedDoc.path}>{latestVersionSuggestion.name}</Link>
+            </strong>.
           </div>
         )}
     </div>
