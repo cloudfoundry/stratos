@@ -60,6 +60,8 @@ Versions is handled automatically by `npm run versions` which is called as part 
 1. Add to the top `<label of version to be displayed in website>:<version of repo to checkout that contains required docs>:<show version in versions drop down`. For example `[ "4.0.0:4.0.0:true"]`
 1. Commit, push and merge changes
 
+> Note - the most recent version (first in array) MUST be visible in the drop down. This is the version that is picked by Docusaurus as the default
+
 Everything else should be handled by the CI process (building with all versions in file and publishing)
 
 
@@ -73,8 +75,9 @@ npm run docusaurus -- swizzle @docusaurus/theme-classic Navbar
 ```
 
 Currently these components are in `./website/src/theme`
-- DocVersionSuggestions
-- NavBar
+- DocsVersionDropdownNavbarItem (trims out versions in drop down, shows link to all versions)
+- DocVersionSuggestions (fixes text shown when not on last released version)
+- NavBar (dynamically hide the versions drop down if not in the docs section)
 
 After Docusaurus is updated these will remain the Stratos version of the old Docusaurus version. Therefore may need to be recreated using swizzle and applying the same changes.
 
