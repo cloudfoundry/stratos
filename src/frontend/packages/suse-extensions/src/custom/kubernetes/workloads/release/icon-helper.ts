@@ -6,7 +6,7 @@ export function getIcon(kind: string) {
     return iconMappings.default;
   }
 }
-  
+
 const iconMappings = {
   Namespace: {
     name: 'namespace',
@@ -62,13 +62,22 @@ const iconMappings = {
     font: 'stratos-icons'
   },
   Secret: {
-    name: 'config_map',
-    font: 'stratos-icons'
-  },
-  ServiceAccount: {
     name: 'lock',
     font: 'Material Icons',
     fontSet: 'material-icons'
+  },
+  ServiceAccount: {
+    name: 'account_circle',
+    font: 'Material Icons',
+    fontSet: 'material-icons'
+  },
+  Job: {
+    name: 'job',
+    font: 'stratos-icons'
+  },
+  PersistentVolumeClaim: {
+    name: 'persistent_volume',
+    font: 'stratos-icons'
   },
   default: {
     name: 'collocation',
