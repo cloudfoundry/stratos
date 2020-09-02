@@ -9,7 +9,7 @@
 
 <div class="keys-page__new" *ngIf="keyDetails$ | async as keyDetails">
 
-  <mat-card class="autoscaler-credential__card">
+  <mat-card class="keys-page__card">
     <mat-card-header>
       <mat-icon>vpn_key</mat-icon>New API Key
     </mat-card-header>
@@ -17,7 +17,7 @@
       <p>Your API Key has been successfully created. Use the following information to connect to Stratos.</p>
       <p><i>Please safely record these details, there is no later way to view them</i></p>
       <ul>
-        <li>Secret: {{keyDetails.secret}}</li>
+        <li id="apikey-secret">Secret: {{keyDetails.secret}}</li>
       </ul>
       <button (click)="clearKeyDetails()" mat-button color="warn">Close</button>
     </mat-card-content>
