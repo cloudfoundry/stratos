@@ -21,7 +21,7 @@ export class ResetsHelpers {
    * have been configured
    */
   connectAllEndpoints(req, userType: ConsoleUserType = ConsoleUserType.admin) {
-    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' })
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'api/v1/endpoints' })
       .then(response => {
         const cnsis = JSON.parse(response);
         const p = promise.fulfilled({});
@@ -47,7 +47,7 @@ export class ResetsHelpers {
    * have been configured
    */
   connectEndpoint(req, endpointName: string, userType: ConsoleUserType = ConsoleUserType.admin) {
-    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' })
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'api/v1/endpoints' })
       .then(response => {
         const cnsis = JSON.parse(response);
         const promises = [];
@@ -132,7 +132,7 @@ export class ResetsHelpers {
    * @description Remove all registered endpoints
    */
   removeAllEndpoints(req) {
-    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' }).then((data) => {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'api/v1/endpoints' }).then((data) => {
       if (!data || !data.length) {
         return;
       }
@@ -147,7 +147,7 @@ export class ResetsHelpers {
   }
 
   removeEndpoint(req, endpointName): promise.Promise<any> {
-    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' }).then((data) => {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'api/v1/endpoints' }).then((data) => {
       if (!data || !data.length) {
         return;
       }
@@ -164,7 +164,7 @@ export class ResetsHelpers {
   }
 
   private doConnectEndpoint(req, cnsiGuid, username, password) {
-    return reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/cnsi' }, null, {
+    return reqHelpers.sendRequest(req, { method: 'POST', url: 'api/v1/tokens' }, null, {
       cnsi_guid: cnsiGuid,
       username,
       password

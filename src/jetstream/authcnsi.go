@@ -308,7 +308,7 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.
 func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	log.Debug("logoutOfCNSI")
 
-	cnsiGUID := c.FormValue("cnsi_guid")
+	cnsiGUID := c.Param("cnsi_guid")
 
 	if len(cnsiGUID) == 0 {
 		return interfaces.NewHTTPShadowError(

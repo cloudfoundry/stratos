@@ -944,21 +944,24 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	sessionAuthGroup := sessionGroup.Group("/auth")
 
+	stableAPIGroup := e.Group("/api/v1")
+	stableAPIGroup.Use(p.sessionMiddleware())
+	stableAPIGroup.Use(p.xsrfMiddleware())
+
 	// Connect to endpoint
-	sessionAuthGroup.POST("/login/cnsi", p.loginToCNSI)
+	stableAPIGroup.POST("/tokens", p.loginToCNSI)
 
 	// Connect to Enpoint (SSO)
-	sessionAuthGroup.GET("/login/cnsi", p.ssoLoginToCNSI)
+	stableAPIGroup.GET("/tokens", p.ssoLoginToCNSI)
 
 	// Disconnect endpoint
-	sessionAuthGroup.POST("/logout/cnsi", p.logoutOfCNSI)
+	stableAPIGroup.DELETE("/tokens/:cnsi_guid", p.logoutOfCNSI)
 
 	// Verify Session
 	sessionAuthGroup.GET("/session/verify", p.verifySession)
 
 	// CNSI operations
-	apiKeyGroup.GET("/cnsis", p.listCNSIs)
-	apiKeyGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
+	stableAPIGroup.GET("/endpoints", p.listCNSIs)
 
 	// Info
 	sessionGroup.GET("/info", p.info)
@@ -986,6 +989,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		if err == nil {
 			// Plugin supports endpoint plugin
 			endpointType := endpointPlugin.GetType()
+			// RENAME: POST /pp/v1/register/ENDPOINT_TYPE -> /api/v1/endpoints (endpoint type should be in the request, not as a param)
 			adminGroup.POST("/register/"+endpointType, endpointPlugin.Register)
 		}
 
@@ -996,8 +1000,10 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	}
 
 	// Apply edits for the given endpoint
+	// RENAME: POST /pp/v1/endpoint/ID -> POST /api/v1/endpoints/ID
 	adminGroup.POST("/endpoint/:id", p.updateEndpoint)
 
+	// RENAME: POST /pp/v1/unregister -> DELETE /api/v1/endpoints/ID
 	adminGroup.POST("/unregister", p.unregisterCluster)
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 
