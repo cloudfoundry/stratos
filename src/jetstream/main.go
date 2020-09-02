@@ -874,6 +874,23 @@ func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.
 	return client
 }
 
+// routes endpoint registration requests to Register functions of respective plugins
+// based on endpoint_type parameter
+func (p *portalProxy) pluginRegisterRouter(c echo.Context) error {
+	log.Debug("pluginRegisterRouter")
+	endpointType := c.FormValue("endpoint_type")
+	if endpointType == "" {
+		return errors.New("endpoint_type parameter is missing")
+	}
+
+	if val, ok := p.PluginRegisterRoutes[endpointType]; ok {
+		log.Debugf("Routing to plugin: %s.Register", endpointType)
+		return val(c)
+	}
+
+	return fmt.Errorf("Unknown endpoint_type %s", endpointType)
+}
+
 func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	log.Debug("registerRoutes")
 
@@ -984,13 +1001,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	adminGroup := sessionGroup
 	adminGroup.Use(p.adminMiddleware)
 
+	p.PluginRegisterRoutes = make(map[string]func(echo.Context) error)
+
 	for _, plugin := range p.Plugins {
 		endpointPlugin, err := plugin.GetEndpointPlugin()
 		if err == nil {
 			// Plugin supports endpoint plugin
-			endpointType := endpointPlugin.GetType()
-			// RENAME: POST /pp/v1/register/ENDPOINT_TYPE -> /api/v1/endpoints (endpoint type should be in the request, not as a param)
-			adminGroup.POST("/register/"+endpointType, endpointPlugin.Register)
+			p.PluginRegisterRoutes[endpointPlugin.GetType()] = endpointPlugin.Register
 		}
 
 		routePlugin, err := plugin.GetRoutePlugin()
@@ -999,12 +1016,14 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		}
 	}
 
-	// Apply edits for the given endpoint
-	// RENAME: POST /pp/v1/endpoint/ID -> POST /api/v1/endpoints/ID
-	adminGroup.POST("/endpoint/:id", p.updateEndpoint)
+	stableAdminAPIGroup := stableAPIGroup
+	stableAdminAPIGroup.Use(p.adminMiddleware)
+	// route endpoint creation requests to respecive plugins
+	stableAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
 
-	// RENAME: POST /pp/v1/unregister -> DELETE /api/v1/endpoints/ID
-	adminGroup.POST("/unregister", p.unregisterCluster)
+	// Apply edits for the given endpoint
+	stableAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint)
+	stableAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster)
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 
 	// Serve up static resources

@@ -171,18 +171,15 @@ export class EndpointsEffect {
   @Effect() unregister$ = this.actions$.pipe(
     ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS),
     mergeMap(action => {
-      const params: HttpParams = new HttpParams({
-        fromObject: {
-          cnsi_guid: action.guid
-        }
-      });
-
       return this.doEndpointAction(
         action,
-        '/pp/v1/unregister',
-        params,
+        '/api/v1/endpoints/' + action.guid,
+        null,
         'delete',
-        action.endpointsType
+        action.endpointsType,
+        null,
+        null,
+        "DELETE"
       );
     }));
 
@@ -211,8 +208,12 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/register/' + action.endpointsType,
-        new HttpParams({}),
+        '/api/v1/endpoints',
+        new HttpParams({
+          fromObject: {
+            'endpoint_type': action.endpointsType
+          }
+        }),
         'create',
         action.endpointsType,
         body,
@@ -240,7 +241,7 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/endpoint/' + action.id,
+        '/api/v1/endpoints/' + action.id,
         new HttpParams({}),
         'update',
         action.endpointsType,

@@ -114,7 +114,7 @@ export class ResetsHelpers {
       endpointsOfType.forEach((ep) => {
         if (!ep.skip) {
           p.then(() => reqHelpers.sendRequest(
-            req, { method: 'POST', url: 'pp/v1/register/' + endpointType }, null, this.makeRegisterFormData(ep)
+            req, { method: 'POST', url: 'api/v1/endpoints?endpoint_type=' + endpointType }, null, this.makeRegisterFormData(ep)
           ));
         }
       });
@@ -124,7 +124,7 @@ export class ResetsHelpers {
 
   registerDefaultCloudFoundry(req) {
     const endpoint = e2e.secrets.getDefaultCFEndpoint();
-    return reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/register/cf' }, null, this.makeRegisterFormData(endpoint));
+    return reqHelpers.sendRequest(req, { method: 'POST', url: 'api/v1/endpoints?endpoint_type=cf' }, null, this.makeRegisterFormData(endpoint));
   }
 
   /**
@@ -140,7 +140,7 @@ export class ResetsHelpers {
       data = JSON.parse(data);
       const p = promise.fulfilled({});
       data.forEach((c) => {
-        p.then(() => reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/unregister' }, null, { cnsi_guid: c.guid }));
+        p.then(() => reqHelpers.sendRequest(req, { method: 'DELETE', url: 'api/v1/endpoints/' + c.guid }, null, {}));
       });
       return p;
     });
@@ -156,7 +156,7 @@ export class ResetsHelpers {
       const p = promise.fulfilled({});
       data.forEach((c) => {
         if (c.name === endpointName) {
-          p.then(() => reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/unregister' }, null, { cnsi_guid: c.guid }));
+          p.then(() => reqHelpers.sendRequest(req, { method: 'DELETE', url: 'api/v1/unregister/' + c.guid }, null, {}));
         }
       });
       return p;

@@ -149,7 +149,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 // TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls
 func (p *portalProxy) unregisterCluster(c echo.Context) error {
-	cnsiGUID := c.FormValue("cnsi_guid")
+	cnsiGUID := c.Param("id")
 	log.WithField("cnsiGUID", cnsiGUID).Debug("unregisterCluster")
 
 	if len(cnsiGUID) == 0 {
