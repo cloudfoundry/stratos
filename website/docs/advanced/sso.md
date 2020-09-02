@@ -68,3 +68,8 @@ SSO_WHITELIST=https://your.domain/*,https://your.other.domain/*
 When set, any requests to log in with a different `state` will be denied.
 
 In order for the SSO `state` to match an entry from the whitelist the schema, hostname, port and path must match exactly. A wildcard `*` can be provided for the path to match anything.
+
+## Troubleshooting
+
+1. User has selected the incorrect permissions when logging in to Stratos via SSO for the first time.
+   - The user can update their permissions and other account settings via https://login.< uaa address >/profile
