@@ -1,6 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { HelmReleaseGuidMock } from '../../../../../helm/helm-testing.module';
 import { HelmReleaseProviders, KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
+import { HelmReleaseSocketService } from '../../helm-release-tab-base/helm-release-socket-service';
+import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
+import { HelmReleaseHelperService } from '../helm-release-helper.service';
 import { HelmReleaseServicesTabComponent } from './helm-release-services-tab.component';
 
 
@@ -13,9 +17,15 @@ describe('HelmReleaseServicesTabComponent', () => {
       imports: [
         ...KubernetesBaseTestModules
       ],
-      declarations: [HelmReleaseServicesTabComponent],
+      declarations: [
+        HelmReleaseServicesTabComponent,
+        WorkloadLiveReloadComponent
+      ],
       providers: [
-        ...HelmReleaseProviders
+        ...HelmReleaseProviders,
+        HelmReleaseSocketService,
+        HelmReleaseHelperService,
+        HelmReleaseGuidMock
       ]
     })
       .compileComponents();

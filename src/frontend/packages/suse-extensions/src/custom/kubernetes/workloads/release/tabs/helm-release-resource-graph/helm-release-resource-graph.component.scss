@@ -1,3 +1,5 @@
+@import '../helm-release-helpers';
+
 :host {
   display: flex;
   height: 100%;
@@ -9,3 +11,5 @@
     stroke-dashoffset: 1000;
   }
 }
+
+@include add-life-update-style

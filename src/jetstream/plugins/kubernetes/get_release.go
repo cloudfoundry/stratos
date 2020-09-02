@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -15,6 +16,17 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
+const (
+	PauseTrue int = iota + 20000
+	PauseFalse
+)
+
+// ResourceMessage ...  Incoming content of socket
+type ResourceMessage struct {
+	MessageType int `json:"type"`
+}
+
+// ResourceResponse ... Outgoing content of socket
 type ResourceResponse struct {
 	Kind string          `json:"kind"`
 	Data json.RawMessage `json:"data"`
@@ -98,7 +110,7 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 
 	// ws is the websocket ready for use
 
-	// Write the release info first - we will then go fetch the status of evertyhing in the release and send
+	// Write the release info first - we will then go fetch the status of everything in the release and send
 	// this back incrementally
 
 	// Parse the manifest
@@ -145,16 +157,20 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 	sendResource(ws, "ManifestErrors", rel.ManifestErrors)
 
 	stopchan := make(chan bool)
+	pausechan := make(chan bool)
 
-	go readLoop(ws, stopchan)
+	go readLoop(ws, stopchan, pausechan)
 
 	var sleep = 1 * time.Second
+	var paused = false
 
 	// Now we have everything, so loop, polling to get status
 	for {
-		log.Debug("Polling for release - wait 10 seconds")
 
 		select {
+		case pause := <-pausechan:
+			paused = pause
+			break
 		case <-stopchan:
 			ws.Close()
 			return nil
@@ -162,7 +178,12 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 			break
 		}
 
-		log.Debug("Polling for release ....")
+		if paused {
+			log.Debug("Updating release resources paused ....")
+			continue
+		}
+
+		log.Debug("Updating release resources ....")
 
 		// Pods
 		rel.UpdatePods(c.portalProxy)
@@ -180,15 +201,42 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 
 		sleep = 10 * time.Second
 	}
-
-	ws.Close()
-
-	return nil
 }
 
-func readLoop(c *websocket.Conn, stopchan chan<- bool) {
+func readLoop(c *websocket.Conn, stopchan chan<- bool, pausechan chan<- bool) {
 	for {
-		if _, _, err := c.NextReader(); err != nil {
+
+		messageType, r, err := c.NextReader()
+		if err != nil {
+			c.Close()
+			close(stopchan)
+			break
+		}
+
+		switch messageType {
+		case websocket.TextMessage:
+			data, err := ioutil.ReadAll(r)
+			if err != nil {
+				log.Warnf("Failed to read content of helm resource websocket message: %+v", err)
+				break
+			}
+
+			message := ResourceMessage{}
+			err = json.Unmarshal(data, &message)
+			if err != nil {
+				log.Warnf("Failed to parse content of helm resource websocket message: %+v", err)
+				break
+			}
+
+			switch message.MessageType {
+			case PauseTrue:
+				pausechan <- true
+				break
+			case PauseFalse:
+				pausechan <- false
+				break
+			}
+		default:
 			c.Close()
 			close(stopchan)
 			break

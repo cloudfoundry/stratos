@@ -1,5 +1,6 @@
 
 @import '../../../../../../../../core/sass/mixins';
+@import '../helm-release-helpers';
 
 .resources {
   padding: 0 10px;
@@ -67,3 +68,4 @@
   }
 }
 
+@include add-life-update-style

@@ -10,6 +10,8 @@
 
   <app-analysis-report-selector *ngIf="analyzerService.enabled$ | async" (selected)="analysisChanged($event)"
     [endpoint]="helper.endpointGuid" [path]="path"></app-analysis-report-selector>
+
+  <app-workload-live-reload></app-workload-live-reload>
 </app-page-sub-nav>
 
 <ngx-graph *ngIf="nodes && nodes.length" class="chart-container" [draggingEnabled]="false" [links]="links"
