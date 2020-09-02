@@ -1,3 +1,4 @@
+import { ApiKey } from './apiKey.types';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -5,16 +6,18 @@ import {
 } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import {
-  endpointEntityType,
+  apiKeyEntityType,
   STRATOS_ENDPOINT_TYPE,
-  stratosEntityFactory,
   systemInfoEntityType,
   userFavouritesEntityType,
   userProfileEntityType,
 } from './helpers/stratos-entity-factory';
+import { endpointEntityType, EndpointModel, stratosEntityFactory } from './public-api';
 import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './reducers/favorite.reducer';
 import { systemEndpointsReducer } from './reducers/system-endpoints.reducer';
 import {
+  ApiKeyActionBuilder,
+  apiKeyActionBuilder,
   EndpointActionBuilder,
   endpointActionBuilder,
   SystemInfoActionBuilder,
@@ -25,7 +28,6 @@ import {
   userProfileActionBuilder,
 } from './stratos-action-builders';
 import { stratosEntityCatalog } from './stratos-entity-catalog';
-import { EndpointModel } from './types/endpoint.types';
 import { SystemInfo } from './types/system.types';
 import { UserFavorite } from './types/user-favorites.types';
 import { UserProfileInfo } from './types/user-profile.types';
@@ -45,7 +47,8 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
     generateSystemInfo(stratosType),
     generateUserFavorite(stratosType),
     generateUserProfile(stratosType),
-    generateMetricsEndpoint()
+    generateMetricsEndpoint(),
+    generateAPIKeys(stratosType)
   ]
 }
 
@@ -150,4 +153,23 @@ function generateMetricsEndpoint() {
     metadata => `/endpoints/metrics/${metadata.guid}`
   )
   return stratosEntityCatalog.metricsEndpoint;
+}
+
+function generateAPIKeys(stratosType) {
+  const definition: IStratosEntityDefinition = {
+    schema: stratosEntityFactory(apiKeyEntityType),
+    type: apiKeyEntityType,
+    endpoint: stratosType,
+  }
+  stratosEntityCatalog.apiKey = new StratosCatalogEntity<
+    undefined,
+    ApiKey,
+    ApiKeyActionBuilder
+  >(
+    definition,
+    {
+      actionBuilders: apiKeyActionBuilder
+    }
+  )
+  return stratosEntityCatalog.apiKey;
 }
