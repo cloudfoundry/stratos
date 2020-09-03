@@ -3,15 +3,15 @@ import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 import { of as observableOf } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
-import { EntityService } from '../../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/app-state';
+import { EntityService } from '../../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {

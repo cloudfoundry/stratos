@@ -1,18 +1,18 @@
-import { promise, browser } from 'protractor';
+import { browser, promise } from 'protractor';
 
 import { ApplicationBasePage } from './application-page.po';
-import { MessageNoAutoscalePolicy } from './message-no-autoscaler-policy';
 import { BannerAutoscalerTab } from './banner-autoscaler-tab';
 import { CardAutoscalerDefault } from './card-autoscaler-default.po';
 import { CardAutoscalerMetric } from './card-autoscaler-metric';
+import { MessageNoContentPo } from './message-no-autoscaler-policy';
 import { TableAutoscalerEvents } from './table-autoscaler-events.po';
-import { TableAutoscalerTriggers } from './table-autoscaler-triggers';
 import { TableAutoscalerSchedules } from './table-autoscaler-schedules';
+import { TableAutoscalerTriggers } from './table-autoscaler-triggers';
 
 export class ApplicationPageAutoscalerTab extends ApplicationBasePage {
 
   bannerAutoscalerTab: BannerAutoscalerTab;
-  messageNoPolicy: MessageNoAutoscalePolicy;
+  messageNoPolicy: MessageNoContentPo;
   cardDefault: CardAutoscalerDefault;
   cardMetric: CardAutoscalerMetric;
   tableTriggers: TableAutoscalerTriggers;
@@ -21,7 +21,7 @@ export class ApplicationPageAutoscalerTab extends ApplicationBasePage {
 
   constructor(public cfGuid: string, public appGuid: string) {
     super(cfGuid, appGuid, 'autoscale');
-    this.messageNoPolicy = new MessageNoAutoscalePolicy();
+    this.messageNoPolicy = new MessageNoContentPo();
     this.bannerAutoscalerTab = new BannerAutoscalerTab(cfGuid, appGuid);
     this.cardDefault = new CardAutoscalerDefault(cfGuid, appGuid);
     this.cardMetric = new CardAutoscalerMetric(cfGuid, appGuid);

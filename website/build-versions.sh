@@ -16,26 +16,28 @@ function cleanUpBefore() (
   mkdir -p $currentWebsite/versioned_sidebars
 
   echo "[]" > $currentWebsite/versions.json
+
+  cleanUpGit
 ) 
 
 function gitClone() (
   rurl="$1" localdir="$2"
   echo "Cloning from $rurl into $localdir"
   git clone --depth 1 --no-single-branch $rurl $localdir
-  pushd $localdir/website
+  pushd $localdir/website > /dev/null
   npm install
-  popd
+  popd > /dev/null
 )
 
 function checkoutAndTag() (
   logInner "Checking out: $versionsHash"
-  pushd $tempDirForGit
+  pushd $tempDirForGit > /dev/null
   git checkout $versionsHash
-  pushd website
+  pushd website > /dev/null
   logInner "Tagging with version $versionsLabel"
   npm run version -- $versionsLabel
-  popd
-  popd
+  popd > /dev/null
+  popd > /dev/null
 )
 
 function createVersionedDocs() (
@@ -71,7 +73,7 @@ function updateVersionsFile() (
   echo $versions > $versionsFile
 )
 
-function cleanUpAfter() (
+function cleanUpGit() (
   echo Removing folder: $tempDirForGit 
   rm -rf $tempDirForGit
 ) 
@@ -96,11 +98,11 @@ echo Versions File: $versionsFile
 echo Internal Versions File: $internalVersionsFile
 echo Current Directory: $DIR
 
+cleanUpBefore $DIR
+
 gitClone $gitUrl $tempDirForGit
 
 versions="]"
-
-cleanUpBefore $DIR
 
 internalVersions=$(jq -r '.[]' $internalVersionsFile)
 export internalVersionsArray=($internalVersions)
@@ -145,4 +147,4 @@ for ((i = ${#internalVersionsArray[@]} - 1;i >= 0;i--)); do
 done
 
 updateVersionsFile $versions
-cleanUpAfter $tempDirForGit
+cleanUpGit $tempDirForGit

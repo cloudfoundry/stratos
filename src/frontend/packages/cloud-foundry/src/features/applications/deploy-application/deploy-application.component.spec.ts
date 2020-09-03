@@ -7,7 +7,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../core/src/core/github.helpers';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySharedModule } from '../../../shared/cf-shared.module';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';

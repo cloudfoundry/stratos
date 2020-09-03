@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, startWith } from 'rxjs/operators';
 
-import { LoggerService } from '../../../../../../core/src/core/logger.service';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../../store/src/app-state';
@@ -49,7 +48,6 @@ export class RemoveUserComponent implements OnDestroy {
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfUserService: CfUserService,
     private cfRolesService: CfRolesService,
-    private logService: LoggerService,
     private route: ActivatedRoute,
     private userPerms: CurrentUserPermissionsService
   ) {
@@ -67,7 +65,7 @@ export class RemoveUserComponent implements OnDestroy {
           first()
         );
     } else {
-      this.logService.error('User param not defined');
+      console.error('User param not defined');
       return;
     }
 

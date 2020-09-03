@@ -12,7 +12,6 @@ import Toggle from '@theme/Toggle';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import versionsWithHash from '../../../internal-versions.json';
 import styles from './styles.module.css';
 
 /**
@@ -25,53 +24,7 @@ const DefaultNavItemPosition = 'right'; // If split links by left/right
 // if position is unspecified, fallback to right (as v1)
 
 
-let stratosVersionsTweaked = false;
 let stratosIsNotDocsPage = false;
-function stratosTweak() {
-  if (stratosVersionsTweaked) {
-    return;
-  }
-  stratosVersionsTweaked = true;
-
-  // Remove certain versions from version drop down
-  const context = useDocusaurusContext();
-  const versions = context.globalData['docusaurus-plugin-content-docs'].default.versions;
-  const newVersions = [];
-  const pastVersions = versionsWithHash.map(versionWithHash => versionWithHash.split(':'))
-  versions.forEach(version => {
-    const pastVersion = pastVersions.find(pastVersion => pastVersion[0] === version.name)
-    if (version.name === 'next' || (pastVersion && pastVersion[2] === 'true')) {
-      newVersions.push(version)
-    }
-  })
-  context.globalData['docusaurus-plugin-content-docs'].default.versions = newVersions;
-}
-
-/**
- * Add the 'All Versions' link to the versions drop down
- */
-function stratosAddAllVersions() {
-  let ul = document.getElementsByClassName("dropdown__menu");
-  if (!ul) {
-    return;
-  }
-
-  ul = ul[0];
-  if (!ul || !ul.appendChild) {
-    return;
-  }
-
-  const a = document.createElement('a');
-  const linkText = document.createTextNode("All Versions");
-  a.appendChild(linkText);
-  a.href = "/versions";
-  a.className = 'dropdown__link'
-
-  const li = document.createElement("li");
-  li.appendChild(a);
-  ul.appendChild(li);
-}
-
 function stratosUpdateIsNotDocsPage() {
   const path = ExecutionEnvironment.canUseDOM ? window.location.pathname : null;
   if (path) {
@@ -127,10 +80,8 @@ function Navbar() {
   }, [windowSize]);
 
   useEffect(() => {
-    stratosAddAllVersions();
     stratosUpdateIsNotDocsPage();
   }, []);
-  stratosTweak();
 
   const { leftItems, rightItems } = splitNavItemsByPosition(items);
   return (

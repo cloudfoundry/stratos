@@ -202,3 +202,8 @@ img.cf-logo {
 .stratosIsNotDocsPage .navbar__item.dropdown--right {
   display: none;
 }
+
+/* Hide the `Versions: x` pill that appears above a doc page's title */
+article > div > .badge.badge--secondary {
+  display: none;
+}

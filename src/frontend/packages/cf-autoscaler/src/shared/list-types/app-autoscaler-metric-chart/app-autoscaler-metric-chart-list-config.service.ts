@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';

@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { Md5 } from 'ts-md5/dist/md5';
 
 import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
@@ -8,6 +8,8 @@ import { GitSCM, SCMIcon } from './scm';
 import { GitSCMType } from './scm.service';
 
 const gitLabAPIUrl = 'https://gitlab.com/api/v4';
+const GITLAB_PER_PAGE_PARAM = 'per_page';
+const GITLAB_PER_PAGE_PARAM_VALUE = 100;
 
 export class GitLabSCM implements GitSCM {
 
@@ -29,19 +31,18 @@ export class GitLabSCM implements GitSCM {
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
     const parts = projectName.split('/');
 
-    let obs$ = httpClient.get(`${gitLabAPIUrl}/users/${parts[0]}/projects?search=${parts[1]}`);
-    if (parts.length !== 2) {
-      obs$ = observableOf(null);
-    }
+    const obs$ = parts.length !== 2 ?
+      observableOf(null) :
+      httpClient.get(`${gitLabAPIUrl}/projects/${parts.join('%2F')}`);
 
     return obs$.pipe(
       map((data: any) => {
-        if (data.length !== 1) {
+        if (!data) {
           throw new HttpErrorResponse({
             status: 404
           });
         }
-        return this.convertProject(data[0]);
+        return this.convertProject(data);
       })
     );
   }
@@ -59,7 +60,13 @@ export class GitLabSCM implements GitSCM {
 
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
     const prjNameEncoded = encodeURIComponent(projectName);
-    return httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches`).pipe(
+    return httpClient.get(
+      `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches`, {
+      params: {
+        [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
+      }
+    }
+    ).pipe(
       map((data: any) => {
         const branches = [];
         data.forEach(b => {
@@ -87,7 +94,13 @@ export class GitLabSCM implements GitSCM {
 
   getCommits(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit[]> {
     const prjNameEncoded = encodeURIComponent(projectName);
-    return httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits?ref_name=${commitSha}`).pipe(
+    return httpClient.get(
+      `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits?ref_name=${commitSha}`, {
+      params: {
+        [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
+      }
+    }
+    ).pipe(
       map((data: any) => {
         const commits = [];
         data.forEach(c => commits.push(this.convertCommit(projectName, c)));
@@ -110,15 +123,27 @@ export class GitLabSCM implements GitSCM {
 
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]> {
     const prjParts = projectName.split('/');
-    let url = `${gitLabAPIUrl}/projects?search=${projectName}`;
-    if (prjParts.length > 1) {
-      url = `${gitLabAPIUrl}/users/${prjParts[0]}/projects?search=${prjParts[1]}`;
-    }
-    return httpClient.get(url).pipe(
-      map((repos: any) => {
-        return repos.map(item => item.path_with_namespace);
-      })
+
+    const obs$ = prjParts.length > 1 ?
+      this.getMatchingUserGroupRepositories(httpClient, prjParts) :
+      httpClient.get(`${gitLabAPIUrl}/projects?search=${projectName}`, {
+        params: {
+          [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
+        }
+      });
+
+    return obs$.pipe(
+      map((repos: any[]) => repos.map(item => item.path_with_namespace)),
     );
+  }
+
+  private getMatchingUserGroupRepositories(httpClient: HttpClient, prjParts: string[]): Observable<any[]> {
+    return combineLatest([
+      httpClient.get<[]>(`${gitLabAPIUrl}/users/${prjParts[0]}/projects/?search=${prjParts[1]}`).pipe(catchError(() => of([]))),
+      httpClient.get<[]>(`${gitLabAPIUrl}/groups/${prjParts[0]}/projects?search=${prjParts[1]}`).pipe(catchError(() => of([]))),
+    ]).pipe(
+      map(([a, b]: [any[], any[]]) => a.concat(b)),
+    )
   }
 
   private convertProject(prj: any): GitRepo {

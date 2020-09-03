@@ -72,7 +72,6 @@ const appRoutes: Routes = [
           }
         }
       },
-      { path: 'entity-list', loadChildren: () => import('./api-driven-views/api-driven-views.module').then(m => m.ApiDrivenViewsModule) },
       {
         path: 'endpoints',
         data: {
@@ -95,6 +94,7 @@ const appRoutes: Routes = [
       },
       { path: 'about', loadChildren: () => import('./features/about/about.module').then(m => m.AboutModule) },
       { path: 'user-profile', loadChildren: () => import('./features/user-profile/user-profile.module').then(m => m.UserProfileModule) },
+      { path: 'api-keys', loadChildren: () => import('./features/api-keys/api-keys.module').then(m => m.ApiKeysModule) },
       { path: 'events', loadChildren: () => import('./features/event-page/event-page.module').then(m => m.EventPageModule) },
       {
         path: 'errors/:endpointId',

@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, takeWhile, tap } from 'rxjs/operators';
 

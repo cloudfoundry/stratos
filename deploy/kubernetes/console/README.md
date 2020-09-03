@@ -22,7 +22,7 @@ Check the repository was successfully added by searching for the `console`, for 
 ```
 helm search repo console
 NAME               	CHART VERSION   APP VERSION	DESCRIPTION                                  
-stratos/console    	3.2.0           3.2.0      	A Helm chart for deploying Stratos UI Console
+stratos/console    	4.0.1           4.0.1      	A Helm chart for deploying Stratos UI Console
 ```
 
 > Note: Version numbers will depend on the version of Stratos available from the Helm repository
@@ -115,6 +115,8 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.service.extraLabels|Additional labels to be added to all service resources||
 |console.service.ingress.annotations|Annotations to be added to the ingress resource||
 |console.service.ingress.extraLabels|Additional labels to be added to the ingress resource||
+|console.sslProtocols|SSL Protocols to use for the nginx configuration|TLSv1.2 TLSv1.3|
+|console.sslCiphers|SSL Ciphers to use for the nginx configuration|HIGH:!aNULL:!MD5|
 |console.nodeSelector|Node selectors to use for the console Pod||
 |mariadb.nodeSelector|Node selectors to use for the database Pod||
 |configInit.nodeSelector|Node selectors to use for the configuration Pod||

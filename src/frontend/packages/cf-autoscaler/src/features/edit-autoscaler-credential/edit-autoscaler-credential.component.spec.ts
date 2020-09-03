@@ -7,7 +7,7 @@ import { ApplicationService } from '../../../../cloud-foundry/src/features/appli
 import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../core/src/tab-nav.service';
 import { createBasicStoreModule } from '../../../../store/testing/public-api';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { EditAutoscalerCredentialComponent } from './edit-autoscaler-credential.component';
