@@ -8,10 +8,10 @@ sources:
 icon: https://raw.githubusercontent.com/cloudfoundry/stratos/master/deploy/kubernetes/console/icon.png
 maintainers:
   - name: Stratos @ SUSE
-    email: TODO: RC
+    email: "TODO: RC"
     url: https://stratos.app
 keywords:
   - Stratos
-  - Cloud Foundry
+  - "Cloud Foundry"
   - Kubernetes
   - Helm
