@@ -1,13 +1,12 @@
-/**
- * Formats log messages from the Cloud Foundry firehose
- */
-import * as moment from 'moment';
+import moment from 'moment';
 
-import { LoggerService } from '../../../../../../core/src/core/logger.service';
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
 import { AnsiColorizer } from '../../../../../../core/src/shared/components/log-viewer/ansi-colorizer';
 import { FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
 
+/**
+ * Formats log messages from the Cloud Foundry firehose
+ */
 
 /* eslint-disable no-control-regex */
 const ANSI_ESCAPE_MATCHER = new RegExp('\x1B\\[([0-9;]*)m', 'g');
@@ -29,7 +28,7 @@ export class CloudFoundryFirehoseFormatter {
 
   private colorizer = new AnsiColorizer();
 
-  constructor(private logService: LoggerService, private utils: UtilsService) { }
+  constructor(private utils: UtilsService) { }
 
   // Enable or disable all filters
   public showAll(all: boolean) {
@@ -66,7 +65,7 @@ export class CloudFoundryFirehoseFormatter {
           filtered = this.handleOtherEvent(cfEvent);
       }
     } catch (error) {
-      this.logService.error('Failed to filter jsonMessage from WebSocket: ' + jsonString);
+      console.error('Failed to filter jsonMessage from WebSocket: ' + jsonString);
       filtered = jsonString;
     }
 

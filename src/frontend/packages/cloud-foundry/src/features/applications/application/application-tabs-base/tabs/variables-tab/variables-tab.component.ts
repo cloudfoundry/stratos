@@ -4,19 +4,18 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { LoggerService } from '../../../../../../../../core/src/core/logger.service';
 import {
   ListDataSource,
 } from '../../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
+import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
+import { stratosEndpointGuidKey } from '../../../../../../../../store/src/entity-request-pipeline/pipeline.types';
 import {
   ListAppEnvVar,
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 import {
   CfAppVariablesListConfigService,
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-list-config.service';
-import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { ApplicationService } from '../../../../application.service';
-import { stratosEndpointGuidKey } from '../../../../../../../../store/src/entity-request-pipeline/pipeline.types';
 
 export interface VariableTabAllEnvVarType {
   name: string;
@@ -39,7 +38,6 @@ export class VariablesTabComponent implements OnInit {
     private store: Store<CFAppState>,
     private appService: ApplicationService,
     private listConfig: ListConfig<ListAppEnvVar>,
-    private loggerService: LoggerService
   ) {
     this.envVarsDataSource = listConfig.getDataSource();
   }
@@ -96,7 +94,7 @@ export class VariablesTabComponent implements OnInit {
     try {
       return JSON.parse(value);
     } catch (err) {
-      this.loggerService.debug('Failed to parse STRATOS_PROJECT env var', err);
+      console.warn('Failed to parse STRATOS_PROJECT env var', err);
     }
     return '';
   }

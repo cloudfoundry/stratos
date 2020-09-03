@@ -1,3 +1,4 @@
+import { AddApiKey, DeleteApiKey, GetAllApiKeys } from './actions/apiKey.actions';
 import {
   AuthParams,
   BaseEndpointAction,
@@ -195,4 +196,21 @@ export const userProfileActionBuilder: UserProfileActionBuilder = {
   get: (userGuid: string) => new FetchUserProfileAction(userGuid),
   updateProfile: (profile: UserProfileInfo, password: string) => new UpdateUserProfileAction(profile, password),
   updatePassword: (guid: string, passwordChanges: UserProfilePasswordUpdate) => new UpdateUserPasswordAction(guid, passwordChanges)
+}
+
+export interface ApiKeyActionBuilder extends OrchestratedActionBuilders {
+  create: (
+    comment: string
+  ) => AddApiKey;
+  delete: (
+    guid: string
+  ) => DeleteApiKey;
+  getMultiple: (
+
+  ) => GetAllApiKeys;
+}
+export const apiKeyActionBuilder: ApiKeyActionBuilder = {
+  create: (comment: string) => new AddApiKey(comment),
+  delete: (guid: string) => new DeleteApiKey(guid),
+  getMultiple: () => new GetAllApiKeys()
 }

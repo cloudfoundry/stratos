@@ -16,7 +16,9 @@ module.exports = {
       items: [{
         type: 'docsVersionDropdown',
         position: 'right',
-      }, {
+        nextVersionLabel: 'Latest',
+      },
+      {
         to: 'docs/',
         activeBasePath: 'docs',
         label: 'Docs',
@@ -25,7 +27,7 @@ module.exports = {
         href: 'https://github.com/cloudfoundry/stratos',
         label: 'GitHub',
         position: 'right',
-      },],
+      }],
     },
     footer: {
       style: 'dark',
@@ -68,6 +70,16 @@ module.exports = {
       defaultMode: 'light',
       disableSwitch: false,
       respectPrefersColorScheme: true,
+      switchConfig: {
+        darkIcon: '🌙',
+        darkIconStyle: {
+          marginLeft: '2px',
+        },
+        lightIcon: '☀️',
+        lightIconStyle: {
+          marginLeft: '1px',
+        },
+      },
     },
   },
   presets: [
