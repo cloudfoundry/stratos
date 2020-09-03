@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { browser, promise } from 'protractor';
-import * as request from 'request-promise-native';
+import request from 'request-promise-native';
 
 import { E2E, e2e } from '../e2e';
 import { ConsoleUserType } from './e2e-helpers';
@@ -125,8 +125,8 @@ export class RequestHelpers {
     Object.keys(options).forEach(key => {
       const v = options[key];
       if (typeof v === 'string' && key === 'password') {
-        options[key]='******';
-      } else if  (typeof v === 'object') {
+        options[key] = '******';
+      } else if (typeof v === 'object') {
         this.sanitizeOption(options[key]);
       }
     });

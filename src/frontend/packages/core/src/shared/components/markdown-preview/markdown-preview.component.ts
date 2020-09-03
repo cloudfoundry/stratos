@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, Input, SecurityContext, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import * as markdown from 'marked';
+import markdown from 'marked';
 
 import { PreviewableComponent } from '../../previewable-component';
 

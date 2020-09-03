@@ -1,5 +1,5 @@
-import { Type } from '@angular/core';
-import * as moment from 'moment';
+import { Injectable, Type } from '@angular/core';
+import moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -13,7 +13,6 @@ import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
-import { Injectable } from "@angular/core";
 import { CardCell } from './list.types';
 
 export enum ListViewTypes {

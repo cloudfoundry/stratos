@@ -158,7 +158,7 @@ func (p *PgsqlAPIKeysRepository) DeleteAPIKey(userGUID string, keyGUID string) e
 func (p *PgsqlAPIKeysRepository) UpdateAPIKeyLastUsed(keyGUID string) error {
 	log.Debug("UpdateAPIKeyLastUsed")
 
-	err := execQuery(p, sqlQueries.UpdateAPIKeyLastUsed, time.Now(), keyGUID)
+	err := execQuery(p, sqlQueries.UpdateAPIKeyLastUsed, time.Now().UTC(), keyGUID)
 	if err != nil {
 		return fmt.Errorf("UpdateAPIKeyLastUsed: %v", err)
 	}

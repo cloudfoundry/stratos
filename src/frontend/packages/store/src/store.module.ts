@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 
 import { APIEffect } from './effects/api.effects';
+import { ApiKeyEffect } from './effects/apiKey.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { DashboardEffect } from './effects/dashboard.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
@@ -43,7 +44,8 @@ import { AppReducersModule } from './reducers.module';
       UserProfileEffect,
       RecursiveDeleteEffect,
       UserFavoritesEffect,
-      PermissionsEffects
+      PermissionsEffects,
+      ApiKeyEffect
     ])
   ]
 })

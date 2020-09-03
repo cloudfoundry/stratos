@@ -4,12 +4,13 @@ apiVersion: apps/v1
 {{- else }}
 apiVersion: apps/v1beta1
 {{- end }}
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: stratos
-{{- if .Values.console.statefulSetAnnotations }}
+{{- if .Values.console.deploymentAnnotations }}
   annotations:
-{{ toYaml .Values.console.statefulSetAnnotations | indent 4 }}
+    checksum/config: {{ default (randAlphaNum 5 | quote) .Values.console.checksum }}
+{{ toYaml .Values.console.deploymentAnnotations | indent 4 }}
 {{- end }}
   labels:
     app.kubernetes.io/name: "stratos"
@@ -19,12 +20,16 @@ metadata:
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     app: "{{ .Release.Name }}"
     component: stratos
-{{- if .Values.console.statefulSetExtraLabels }}
-{{ toYaml .Values.console.statefulSetExtraLabels | indent 4 }}
+{{- if .Values.console.deploymentExtraLabels }}
+{{ toYaml .Values.console.deploymentExtraLabels | indent 4 }}
 {{- end }}
 spec:
-  serviceName: stratos
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1    
   selector:
     matchLabels:
       app.kubernetes.io/name: "stratos"

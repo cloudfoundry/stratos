@@ -124,3 +124,7 @@ go-vendor-*.tgz
 website/build
 website/site-dist
 website/.docusaurus
+website/versioned_docs
+website/versioned_sidebars
+website/versions.json
+website/versions-repo
