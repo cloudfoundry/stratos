@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // Endpoint - This represents the CNSI endpoint

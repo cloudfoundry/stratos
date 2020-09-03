@@ -9,7 +9,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type portalProxy struct {

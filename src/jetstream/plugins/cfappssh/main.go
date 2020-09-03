@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // CFAppSSH - Plugin to allow SSH into an application instance

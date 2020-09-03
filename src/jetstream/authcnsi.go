@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
@@ -305,6 +305,16 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.
 	return uaaRes, u, &cnsiRecord, nil
 }
 
+// logoutOfCNSI godoc
+// @Summary Remove endpoint
+// @Description Remove endpoint
+// @Accept	json
+// @Produce	json
+// @Param cnsi_guid path string true "Endpoint GUID"
+// @Success 200
+// @Failure 400
+// @Security ApiKeyAuth
+// @Router /tokens/{cnsi_guid} [delete]
 func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	log.Debug("logoutOfCNSI")
 

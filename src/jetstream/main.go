@@ -23,17 +23,20 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/cloudfoundry-incubator/stratos/src/jetstream/docs"
+
 	"bitbucket.org/liamstask/goose/lib/goose"
 	"github.com/antonlindstrom/pgstore"
 	"github.com/cf-stratos/mysqlstore"
 	cfenv "github.com/cloudfoundry-community/go-cfenv"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/nwmac/sqlitestore"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
@@ -46,6 +49,21 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/sessiondata"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
+
+// @title Stratos API
+// @version 1.0
+// @description Stratos backend API.
+
+// @contact.name Stratos maintainers
+// @contact.url https://github.com/cloudfoundry/stratos/issues
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @BasePath /api/v1
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
 // server to come online before we bail out.
@@ -893,6 +911,8 @@ func (p *portalProxy) pluginRegisterRouter(c echo.Context) error {
 
 func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	log.Debug("registerRoutes")
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	for _, plugin := range p.Plugins {
 		middlewarePlugin, err := plugin.GetMiddlewarePlugin()
