@@ -156,7 +156,7 @@ export class ResetsHelpers {
       const p = promise.fulfilled({});
       data.forEach((c) => {
         if (c.name === endpointName) {
-          p.then(() => reqHelpers.sendRequest(req, { method: 'DELETE', url: 'api/v1/unregister/' + c.guid }, null, {}));
+          p.then(() => reqHelpers.sendRequest(req, { method: 'DELETE', url: 'api/v1/endpoints/' + c.guid }, null, {}));
         }
       });
       return p;
