@@ -12,7 +12,7 @@ For Cloud Foundry, it allows users and administrators to both manage application
 
 For Kubernetes, it provides Developers with views of their Kubernetes resources, the ability to view and deploy Helm Charts and view Workloads.
 
-![Stratos Application view](../images/screenshots/app-summary.png)
+![Stratos Application view](/images/screenshots/app-summary.png)
 
 ## Quick Start
 

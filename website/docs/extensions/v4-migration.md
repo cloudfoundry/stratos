@@ -8,14 +8,14 @@ extensions by opening the door to npm style plugins.
 
 Prominent changes include
 - `custom-src` has been removed along with the symlink approach of including files. Custom code is now added as npm packages in `src/frontend/packages`.
-Modules and routes are now exposed in a more standard package way. More info [here](/docs/extensions/frontend#including-modules-and-routes).
+Modules and routes are now exposed in a more standard package way. More info [here](./frontend#including-modules-and-routes).
 Some existing components will not be included in some production style builds without also declaring them to the extension service, see 
 usages of `ExtensionService.declare`.
-- Material Design theming approach has been expanded to include many common colors, this removes the need to apply custom styles in a lot of cases. More info [here](/docs/extensions/theming#colors).
-- Dark theme is applied in a different way. More info [here](/docs/extensions/theming#dark-theme).
-- Image assets are replaced in a different way. More info [here](/docs/extensions/theming#images).
-- Custom component can now be themed, so theme colors can be accessed from within and applied. More info [here](/docs/extensions/theming#components).
-- A new 'loading' indicator has been added that you may wish to customize, more info [here](/docs/extensions/frontend#loading-indicator).
+- Material Design theming approach has been expanded to include many common colors, this removes the need to apply custom styles in a lot of cases. More info [here](./theming#colors).
+- Dark theme is applied in a different way. More info [here](./theming#dark-theme).
+- Image assets are replaced in a different way. More info [here](./theming#images).
+- Custom component can now be themed, so theme colors can be accessed from within and applied. More info [here](./theming#components).
+- A new 'loading' indicator has been added that you may wish to customize, more info [here](./frontend#loading-indicator).
 
 ## Basic Migration Steps
 To aid in migrating we've provided these instructions.
