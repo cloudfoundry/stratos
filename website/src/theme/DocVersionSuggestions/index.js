@@ -38,8 +38,6 @@ function DocVersionSuggestions() {
   const activeVersionName = activeVersion.name; // try to link to same doc in latest version (not always possible)
   // fallback to main doc of latest version
 
-  styles;
-
   const suggestedDoc =
     latestDocSuggestion ?? getVersionMainDoc(latestVersionSuggestion);
   return (
