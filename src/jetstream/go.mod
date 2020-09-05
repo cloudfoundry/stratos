@@ -31,7 +31,6 @@ require (
 	github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4
 	github.com/cppforlife/go-patch v0.2.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v1.13.1 // indirect
 	github.com/domodwyer/mailyak v3.1.1+incompatible
@@ -46,7 +45,6 @@ require (
 	github.com/golang/mock v1.4.4
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/google/martian v2.1.0+incompatible // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20190411002643-bd77b112433e // indirect
 	github.com/gorilla/context v1.1.1
 	github.com/gorilla/securecookie v1.1.1
@@ -57,11 +55,8 @@ require (
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/kr/pty v1.1.8 // indirect
-	github.com/kubeapps/common v0.0.0-20181107174310-61d8eb6f11b4 // indirect
 	github.com/kylelemons/go-gypsy v0.0.0-20160905020020-08cad365cd28 // indirect
-	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo/v4 v4.1.17
-	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/lib/pq v1.1.0 // indirect
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
@@ -77,10 +72,8 @@ require (
 	github.com/onsi/gomega v1.8.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
-	github.com/pkg/errors v0.8.1 // indirect
 	github.com/poy/eachers v0.0.0-20181020210610-23942921fe77 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94 // indirect
-	github.com/sajari/fuzzy v1.0.0 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.3.0
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
