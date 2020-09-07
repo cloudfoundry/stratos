@@ -7,6 +7,7 @@ import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../../store/src/reducers.module';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { TabNavService } from '../../../tab-nav.service';
@@ -31,7 +32,10 @@ describe('ConsoleUaaWizardComponent', () => {
         StoreModule.forRoot(appReducers),
         NoopAnimationsModule,
       ],
-      providers: [TabNavService]
+      providers: [
+        TabNavService,
+        CurrentUserPermissionsService
+      ]
     })
       .compileComponents();
   }));

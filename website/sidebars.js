@@ -39,6 +39,12 @@ module.exports = {
           'developer/backend',
         ]
       },
+      {
+        Deploy: [
+          'developer/deploy',
+          'developer/developers-guide-helm'
+        ]
+      },
       'developer/developers-guide-e2e-tests',
       'developer/developers-guide-env-tech',
     ],

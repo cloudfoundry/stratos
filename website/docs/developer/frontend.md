@@ -12,12 +12,12 @@ Before making changes to the frontend code you should be familiar with
 1. Redux / NGRX / Observables
 1. Node / NPM
 
-There are a some introduction style resources [here](/docs/developer/developers-guide-env-tech.md). There's also some advice on helpful [VS code plugins](/docs/developer/developers-guide-env-tech#vs-code-plug-ins). If you feel comfortable with these and are happy with your dev environment please skip straight to
+There are a some introduction style resources [here](./developers-guide-env-tech.md). There's also some advice on helpful [VS code plugins](./developers-guide-env-tech#vs-code-plug-ins). If you feel comfortable with these and are happy with your dev environment please skip straight to
 [Set up Dependencies](#set-up-dependencies).
 
 ## Set up Dependencies
 
-* Set up a Stratos backend. Both backend and frontend exist in this same repo. Follow the [Backend Development](/docs/developer/introduction#build--run-locally) set up guide.
+* Set up a Stratos backend. Both backend and frontend exist in this same repo. Follow the [Backend Development](./introduction#build--run-locally) set up guide.
 * Install [NodeJs](https://nodejs.org) (if not already install) (minimum node version 12.13.0)
 * Install [Angular CLI](https://cli.angular.io/) (if not already install) - `npm install -g @angular/cli`
 
@@ -55,7 +55,7 @@ We use the angular material theming mechanism. See [here](https://material.angul
 
 ### Extensions
 
-Documentation on extensions can be found [here](/docs/extensions/introduction). From a developers perspective extensions are managed by npm packages.
+Documentation on extensions can be found [here](../extensions/introduction). From a developers perspective extensions are managed by npm packages.
 The default set are in `./src/frontend/packages`, any package added directly here will be automatically included by the build.
 
 At build time the Stratos Devkit (`./src/frontend/packages/devkit`) will ensure all packages are imported correctly and theming, both component and console level, are applied correctly.

@@ -13,7 +13,7 @@ Stratos provides a mechanism for customizing the theme, including:
 
 Theme's are best encapsulated in a new npm package. It should contain the usual `package.json` file with a `stratos` section which will contain some of the theme customizations.
 
-An example of the type of package that can be created can be found in the [ACME example](https://github.com/cloudfoundry/stratos/tree/master/src/frontend/packages/example-theme). To run Stratos with these customizations see [here](/docs/extensions/introduction#acme).
+An example of the type of package that can be created can be found in the [ACME example](https://github.com/cloudfoundry/stratos/tree/master/src/frontend/packages/example-theme). To run Stratos with these customizations see [here](./introduction#acme).
 
 ## Colors
 Stratos uses Material Design and the [angular-material](https://material.angular.io/) library and uses the same approach to theming.
@@ -53,10 +53,10 @@ Additional Stratos colors can be customized by supplying more colors to the `the
 |---|---|
 |app-background-color| Base color to show in the background of the application |
 |app-background-text-color| Color of text when placed on the basic background |
-|side-nav| See [below](/docs/extensions/theming#side-nav-colors) |
-|status| See [below](/docs/extensions/theming#status-colors)|
+|side-nav| See [below](./theming#side-nav-colors) |
+|status| See [below](./theming#status-colors)|
 |subdued-color| Lighter color meant to be a subdued version of the primary color |
-|ansi-colors| See [below](/docs/extensions/theming#ansi-colors)|
+|ansi-colors| See [below](./theming#ansi-colors)|
 |header-background-color| Background color for the main stratos header|
 |header-foreground-color| Foreground color for the main stratos |
 |stratos-title-show-text| Boolean - Show `Stratos` or provided title with the large logo in the about page, default log in page, etc |

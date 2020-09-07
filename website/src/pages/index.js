@@ -73,7 +73,7 @@ const features = [
 
 ];
 
-function Feature({imageUrl, title, description, cls}) {
+function Feature({ imageUrl, title, description, cls }) {
   const imgUrl = useBaseUrl(imageUrl);
   return (
     <div className={clsx('col col--4', styles.feature)}>
@@ -90,15 +90,15 @@ function Feature({imageUrl, title, description, cls}) {
 
 function Home() {
   const context = useDocusaurusContext();
-  const {siteConfig = {}} = context;
+  const { siteConfig = {} } = context;
   return (
     <Layout
       title={`Home`}
       description="Stratos - Web-based Management Interface for Cloud Foundry and Kubernetes">
       <header className={clsx('hero hero--primary', styles.heroBanner)}>
         <div className="container home-intro">
-        <h1 className="hero__title">{siteConfig.title}</h1>
-        <h2 className="hero__subtitle">Open-Source Multi-Cluster UI for <br/> Cloud Foundry and Kubernetes</h2>
+          <h1 className="hero__title">{siteConfig.title}</h1>
+          <h2 className="hero__subtitle">Open-Source Multi-Cluster UI for <br /> Cloud Foundry and Kubernetes</h2>
           <div className={clsx(styles.buttons, 'get-started')}>
             <Link
               className={clsx(
@@ -110,7 +110,7 @@ function Home() {
             </Link>
           </div>
         </div>
-        <img class="home-logo" src="img/logo.png" />
+        <img className="home-logo" src="img/logo.png" />
       </header>
       <main>
         {features && features.length > 0 && (
@@ -126,8 +126,8 @@ function Home() {
         )}
         <section className={clsx(styles.features, 'screenshot-section', 'blue')}>
           <div className="container">
-            <div class="screenshot">
-              <img class="left" src="img/screens/cf-app.png" />
+            <div className="screenshot">
+              <img className="left" src="img/screens/cf-app.png" />
               <div>
                 <h2>Cloud Foundry</h2>
                 <p>Deploy and manage applications in Cloud Foundry. Stream application logs, scale applications and ssh to application instances</p>
@@ -139,9 +139,9 @@ function Home() {
           </div>
         </section>
 
-        <section className={clsx(styles.features, 'screenshot-section', 'white')}>
+        <section className={clsx(styles.features)}>
           <div className="container">
-            <div class="screenshot">
+            <div className="screenshot">
               <div>
                 <h2>Kubernetes</h2>
                 <p>View cluster-level metadata</p>
@@ -149,15 +149,15 @@ function Home() {
                 <p>View Helm Releases and see relationships between Kubernetes Resources</p>
                 <p>and lots more ...</p>
               </div>
-              <img class="right" src="img/screens/kube-graph.png" />
+              <img className="right" src="img/screens/kube-graph.png" />
             </div>
           </div>
         </section>
 
         <section className={clsx(styles.features, 'screenshot-section', 'blue')}>
           <div className="container">
-            <div class="screenshot">
-              <img class="left" src="img/screens/endpoints.png" />
+            <div className="screenshot">
+              <img className="left" src="img/screens/endpoints.png" />
               <div>
                 <h2>Multi-Cluster</h2>
                 <p>Add and Connect multiple Cloud Foundry and/or Kubernetes clusters.</p>
