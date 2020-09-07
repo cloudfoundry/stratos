@@ -50,7 +50,7 @@ export interface SessionData {
   ['plugin-config']?: PluginConfig;
   plugins: {
     demo: boolean,
-    [pluginName: string]: boolean;
+    [pluginName: string]: boolean,
   };
   config: SessionDataConfig;
 }

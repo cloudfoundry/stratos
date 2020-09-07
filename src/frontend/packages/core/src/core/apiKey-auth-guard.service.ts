@@ -20,11 +20,10 @@ export class APIKeyAuthGuardService implements CanActivate {
   canActivate(): Observable<boolean> {
     return this.cups.can(StratosCurrentUserPermissions.API_KEYS).pipe(
       map(can => {
-        if (can) {
-          return true;
+        if (!can) {
+          this.store.dispatch(new RouterNav({ path: ['/'] }));
         }
-        this.store.dispatch(new RouterNav({ path: ['/'] }));
-        return false;
+        return can;
       })
     );
   }
