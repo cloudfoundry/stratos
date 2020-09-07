@@ -12,6 +12,7 @@ import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination
 import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
 import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
 import { UserAvatarComponent } from './../shared/components/user-avatar/user-avatar.component';
+import { APIKeyAuthGuardService } from './apiKey-auth-guard.service';
 import { AuthGuardService } from './auth-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
@@ -69,6 +70,7 @@ import { WindowRef } from './window-ref/window-ref.service';
   ],
   providers: [
     AuthGuardService,
+    APIKeyAuthGuardService,
     NotSetupGuardService,
     PageHeaderService,
     EventWatcherService,

@@ -75,7 +75,7 @@
                     <button mat-menu-item routerLink="/user-profile">
                       <span>Profile</span>
                     </button>
-                    <button mat-menu-item routerLink="/api-keys">
+                    <button mat-menu-item routerLink="/api-keys" *ngIf="canAPIKeys$ | async">
                       <span>API Keys</span>
                     </button>
                     <div class="page-header__menu-separator"></div>

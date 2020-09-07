@@ -15,6 +15,8 @@ import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.sel
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { StratosStatus } from '../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 import { TabNavService } from '../../../tab-nav.service';
@@ -29,6 +31,7 @@ import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from '
   styleUrls: ['./page-header.component.scss']
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
+  public canAPIKeys$: Observable<boolean>;
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
@@ -156,6 +159,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     eventService: GlobalEventService,
     private favoritesConfigMapper: FavoritesConfigMapper,
     private userProfileService: UserProfileService,
+    private cups: CurrentUserPermissionsService,
   ) {
     this.events$ = eventService.events$.pipe(
       startWith([])
@@ -185,6 +189,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.allowGravatar$ = this.store.select(selectDashboardState).pipe(
       map(dashboardState => dashboardState.gravatarEnabled)
     );
+
+    this.canAPIKeys$ = this.cups.can(StratosCurrentUserPermissions.API_KEYS);
   }
 
   ngOnDestroy() {
