@@ -18,8 +18,8 @@ import { Observable } from 'rxjs';
 type GithubPaginationResponse<T = any> = {
   incomplete_results: boolean,
   items: T[],
-  total_count: number
-}
+  total_count: number,
+};
 
 /**
  * Body of a github pagination response (pagination info is in header)
@@ -30,7 +30,7 @@ export const GITHUB_PER_PAGE_PARAM = 'per_page';
 export const GITHUB_PER_PAGE_PARAM_VALUE = 100;
 const GITHUB_MAX_PAGES = 5;
 const GITHUB_PAGE_PARAM = 'page';
-const GITHUB_LINK_PAGE_REGEX = /page=([\d]*)/
+const GITHUB_LINK_PAGE_REGEX = /page=([\d]*)/;
 
 /**
  * Config used with `flattenPagination`. To use when the pagination info is in the body
@@ -44,18 +44,18 @@ export class GithubFlattenerPaginationConfig<T> implements PaginationFlattener<T
   getTotalPages = (res: GithubPaginationResponse<T>): number => {
     const total = Math.floor(this.getTotalResults(res) / GITHUB_PER_PAGE_PARAM_VALUE) + 1;
     if (total > GITHUB_MAX_PAGES) {
-      console.warn(`Not fetching all github entities (too many pages: ${total})`)
+      console.warn(`Not fetching all github entities (too many pages: ${total})`);
       return GITHUB_MAX_PAGES;
     }
     return total;
-  }
+  };
   getTotalResults = (res: GithubPaginationResponse<T>): number => {
     return res.total_count;
   };
   mergePages = (response: any[]): T[] => {
     return response.reduce((all, res) => {
       return all.concat(...res.items);
-    }, [] as T[])
+    }, [] as T[]);
   };
   fetch = (...args: any[]): Observable<GithubPaginationResponse<T>> => {
     return this.httpClient.get<GithubPaginationResponse<T>>(
@@ -75,14 +75,15 @@ export class GithubFlattenerPaginationConfig<T> implements PaginationFlattener<T
     return [requestOption];
   };
   clearResults = (res: GithubPaginationResponse<T>, allResults: number) => {
-    throw new Error('Not Implemented')
+    throw new Error('Not Implemented');
   };
 }
 
 /**
  * Config used with `flattenPagination`. To use when the pagination info in the response header
  */
-export class GithubFlattenerForArrayPaginationConfig<T> implements PaginationFlattener<GithubPaginationArrayResponse<T>, HttpResponse<GithubPaginationArrayResponse<T>>> {
+export class GithubFlattenerForArrayPaginationConfig<T>
+  implements PaginationFlattener<GithubPaginationArrayResponse<T>, HttpResponse<GithubPaginationArrayResponse<T>>> {
   constructor(
     private httpClient: HttpClient,
     public url: string,
@@ -101,7 +102,7 @@ export class GithubFlattenerForArrayPaginationConfig<T> implements PaginationFla
     if (!parts.length) {
       throw new Error('Unable to depagination github request (no commas in `link`)');
     }
-    const last = parts.find(part => part.endsWith('rel="last"'))
+    const last = parts.find(part => part.endsWith('rel="last"'));
     if (!last) {
       throw new Error('Unable to depagination github request (no `last` in `link`)');
     }
@@ -109,23 +110,23 @@ export class GithubFlattenerForArrayPaginationConfig<T> implements PaginationFla
     const lastUrl = trimmedLast.slice(1, trimmedLast.indexOf('>'));
     const lastPageNumber = GITHUB_LINK_PAGE_REGEX.exec(lastUrl);
     if (lastPageNumber.length < 2) {
-      throw new Error(`Unable to depagination github request (could not find page number in ${lastUrl})`)
+      throw new Error(`Unable to depagination github request (could not find page number in ${lastUrl})`);
     }
 
     const total = parseInt(lastPageNumber[1], 10);
     if (total > GITHUB_MAX_PAGES) {
-      console.warn(`Not fetching all github entities (too many pages: ${total})`)
+      console.warn(`Not fetching all github entities (too many pages: ${total})`);
       return GITHUB_MAX_PAGES;
     }
     return total;
-  }
+  };
   getTotalResults = (res: HttpResponse<GithubPaginationArrayResponse<T>>): number => {
     return this.getTotalPages(res) * GITHUB_PER_PAGE_PARAM_VALUE;
   };
   mergePages = (response: any[]): GithubPaginationArrayResponse<T> => {
     return response.reduce((all, res) => {
       return all.concat(...res.body);
-    }, [] as GithubPaginationArrayResponse<T>)
+    }, [] as GithubPaginationArrayResponse<T>);
   };
   fetch = (...args: any[]): Observable<HttpResponse<GithubPaginationArrayResponse<T>>> => {
     return this.httpClient.get<GithubPaginationArrayResponse<T>>(
@@ -147,6 +148,6 @@ export class GithubFlattenerForArrayPaginationConfig<T> implements PaginationFla
     return [requestOption];
   };
   clearResults = (res: HttpResponse<GithubPaginationArrayResponse<T>>, allResults: number) => {
-    throw new Error('Not Implemented')
+    throw new Error('Not Implemented');
   };
 }

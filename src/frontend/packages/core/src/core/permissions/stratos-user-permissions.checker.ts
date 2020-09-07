@@ -41,13 +41,19 @@ export enum StratosPermissionTypes {
 // Every group result must be true in order for the permission to be true. A group result is true if all or some of it's permissions are
 // true (see `getCheckFromConfig`).
 export const stratosPermissionConfigs: IPermissionConfigs = {
-  [StratosCurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(StratosPermissionTypes.STRATOS, StratosPermissionStrings.STRATOS_ADMIN),
-  [StratosCurrentUserPermissions.PASSWORD_CHANGE]: new PermissionConfig(StratosPermissionTypes.STRATOS_SCOPE, StratosScopeStrings.STRATOS_CHANGE_PASSWORD),
+  [StratosCurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(
+    StratosPermissionTypes.STRATOS,
+    StratosPermissionStrings.STRATOS_ADMIN
+  ),
+  [StratosCurrentUserPermissions.PASSWORD_CHANGE]: new PermissionConfig(
+    StratosPermissionTypes.STRATOS_SCOPE,
+    StratosScopeStrings.STRATOS_CHANGE_PASSWORD
+  ),
 };
 
 export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
   constructor(private store: Store<GeneralEntityAppState>, ) {
-    super()
+    super();
   }
 
   getPermissionConfig(action: string) {
@@ -108,7 +114,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
             checks: this.getInternalScopesChecks(configGroup),
           };
       }
-    })
+    });
     // Checker must handle all configs
     return res.every(check => !!check) ? res : null;
   }

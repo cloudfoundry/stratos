@@ -71,7 +71,7 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
         createEntityRelationKey(spaceEntityType, organizationEntityType),
       ],
       populateMissing: true
-    })
+    });
 
     const canEditApp$ = appEntService.waitForEntity$.pipe(
       switchMap(app => cups.can(
@@ -80,14 +80,14 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
         app.entity.entity.space.entity.organization_guid,
         app.entity.entity.space.metadata.guid
       )),
-    )
+    );
 
     const autoscalerEnabled = isAutoscalerEnabled(endpointGuid, esf);
 
     return canEditApp$.pipe(
       switchMap(canEditSpace => canEditSpace ? autoscalerEnabled : of(false)),
       map(can => !can)
-    )
+    );
   }
 })
 @Component({
@@ -179,9 +179,9 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
         if (buildParts.length < 0) {
           return false;
         }
-        return Number.parseInt(buildParts[0]) >= 3
+        return Number.parseInt(buildParts[0], 10) >= 3;
       })
-    )
+    );
 
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
@@ -360,7 +360,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       ],
       query
     }));
-  }
+  };
 
   metricChartPage() {
     this.store.dispatch(new RouterNav({
@@ -402,6 +402,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
         'edit-autoscaler-credential'
       ]
     }));
-  }
+  };
 
 }

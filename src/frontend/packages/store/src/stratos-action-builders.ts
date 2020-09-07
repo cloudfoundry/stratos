@@ -1,7 +1,6 @@
 import { AddApiKey, DeleteApiKey, GetAllApiKeys } from './actions/apiKey.actions';
 import {
   AuthParams,
-  BaseEndpointAction,
   ConnectEndpoint,
   DisconnectEndpoint,
   GetAllEndpoints,
@@ -10,7 +9,7 @@ import {
   UnregisterEndpoint,
   UpdateEndpoint,
 } from './actions/endpoint.actions';
-import { GetSystemInfo } from './actions/system.actions';
+import { GetSystemInfo, GetSystemInfoAssociatedAction } from './actions/system.actions';
 import {
   GetUserFavoritesAction,
   RemoveUserFavoriteAction,
@@ -34,7 +33,7 @@ export interface EndpointActionBuilder extends OrchestratedActionBuilders {
   getMultiple: (
     endpointGuid?: string,
     paginationKey?: string,
-    args?: { login: boolean }
+    args?: { login: boolean, }
   ) => GetAllEndpoints,
   connect: (
     guid: string,
@@ -84,7 +83,7 @@ export const endpointActionBuilder: EndpointActionBuilder = {
   getMultiple: (
     endpointGuid?: string,
     paginationKey?: string,
-    args?: { login: boolean }
+    args?: { login: boolean, }
   ) => new GetAllEndpoints(args ? args.login : false),
   connect: (
     guid: string,
@@ -138,20 +137,20 @@ export const endpointActionBuilder: EndpointActionBuilder = {
     args.clientSecret,
     args.allowSSO
   ),
-}
+};
 
 export interface SystemInfoActionBuilder extends OrchestratedActionBuilders {
   getSystemInfo: (
     login?: boolean,
-    associatedAction?: BaseEndpointAction
-  ) => GetSystemInfo
+    associatedAction?: GetSystemInfoAssociatedAction
+  ) => GetSystemInfo;
 }
 export const systemInfoActionBuilder: SystemInfoActionBuilder = {
   getSystemInfo: (
     login?: false,
-    associatedAction?: BaseEndpointAction
+    associatedAction?: GetSystemInfoAssociatedAction
   ) => new GetSystemInfo(login, associatedAction)
-}
+};
 
 export interface UserFavoriteActionBuilder extends OrchestratedActionBuilders {
   getMultiple: () => GetUserFavoritesAction,
@@ -164,10 +163,10 @@ export interface UserFavoriteActionBuilder extends OrchestratedActionBuilders {
   ) => SaveUserFavoriteAction,
   toggle: (
     favorite: UserFavorite<IFavoriteMetadata>
-  ) => ToggleUserFavoriteAction
+  ) => ToggleUserFavoriteAction;
   updateFavorite: (
     favorite: UserFavorite<IFavoriteMetadata>
-  ) => UpdateUserFavoriteMetadataAction
+  ) => UpdateUserFavoriteMetadataAction;
 }
 
 export const userFavoriteActionBuilder: UserFavoriteActionBuilder = {
@@ -177,26 +176,26 @@ export const userFavoriteActionBuilder: UserFavoriteActionBuilder = {
   save: (favorite: UserFavorite<IFavoriteMetadata>) => new SaveUserFavoriteAction(favorite),
   toggle: (favorite: UserFavorite<IFavoriteMetadata>) => new ToggleUserFavoriteAction(favorite),
   updateFavorite: (favorite: UserFavorite<IFavoriteMetadata>) => new UpdateUserFavoriteMetadataAction(favorite)
-}
+};
 
 export interface UserProfileActionBuilder extends OrchestratedActionBuilders {
   get: (
     userGuid: string
-  ) => FetchUserProfileAction
+  ) => FetchUserProfileAction;
   updateProfile: (
     profile: UserProfileInfo,
     password: string
-  ) => UpdateUserProfileAction
+  ) => UpdateUserProfileAction;
   updatePassword: (
     guid: string,
     passwordChanges: UserProfilePasswordUpdate
-  ) => UpdateUserPasswordAction
+  ) => UpdateUserPasswordAction;
 }
 export const userProfileActionBuilder: UserProfileActionBuilder = {
   get: (userGuid: string) => new FetchUserProfileAction(userGuid),
   updateProfile: (profile: UserProfileInfo, password: string) => new UpdateUserProfileAction(profile, password),
   updatePassword: (guid: string, passwordChanges: UserProfilePasswordUpdate) => new UpdateUserPasswordAction(guid, passwordChanges)
-}
+};
 
 export interface ApiKeyActionBuilder extends OrchestratedActionBuilders {
   create: (
@@ -213,4 +212,4 @@ export const apiKeyActionBuilder: ApiKeyActionBuilder = {
   create: (comment: string) => new AddApiKey(comment),
   delete: (guid: string) => new DeleteApiKey(guid),
   getMultiple: () => new GetAllApiKeys()
-}
+};

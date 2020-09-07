@@ -33,13 +33,20 @@ export class TableCellServiceBrokerComponent extends TableCellCustom<APIResource
   set row(row: APIResource<IService>) {
     this.pRow = row;
     if (row && !this.spaceLink$) {
-      this.broker$ = cfEntityCatalog.serviceBroker.store.getEntityService(this.row.entity.service_broker_guid, this.row.entity.cfGuid, {}).waitForEntity$
-        .pipe(
-          map(e => e.entity)
-        )
+      this.broker$ = cfEntityCatalog.serviceBroker.store.getEntityService(
+        this.row.entity.service_broker_guid,
+        this.row.entity.cfGuid,
+        {}
+      ).waitForEntity$.pipe(
+        map(e => e.entity)
+      );
       this.spaceLink$ = this.broker$.pipe(
         filter(broker => !!broker.entity.space_guid),
-        switchMap(broker => cfEntityCatalog.space.store.getWithOrganization.getEntityService(broker.entity.space_guid, broker.entity.cfGuid).waitForEntity$),
+        switchMap(broker => cfEntityCatalog.space.store.getWithOrganization.getEntityService(
+          broker.entity.space_guid,
+          broker.entity.cfGuid
+        ).waitForEntity$
+        ),
         map(e => e.entity),
         map(space => ({
           name: space.entity.name,
@@ -53,7 +60,7 @@ export class TableCellServiceBrokerComponent extends TableCellCustom<APIResource
           ]
         })
         )
-      )
+      );
     }
   }
   get row(): APIResource<IService> {
@@ -62,12 +69,12 @@ export class TableCellServiceBrokerComponent extends TableCellCustom<APIResource
 
   public spaceLink$: Observable<{
     name: string,
-    link: string[]
+    link: string[],
   }>;
-  public broker$: Observable<APIResource<IServiceBroker>>
+  public broker$: Observable<APIResource<IServiceBroker>>;
 
   constructor() {
-    super()
+    super();
   }
 
 }

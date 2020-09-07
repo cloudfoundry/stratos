@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -23,6 +24,8 @@ import {
 } from '../../../../../features/cf/tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
+
+// tslint:enable:max-line-length
 
 @Injectable()
 export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealthEntry> {
@@ -93,6 +96,6 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
         field: 'state'
       }
     },
-  ]
+  ];
   getDataSource = () => this.dataSource;
 }

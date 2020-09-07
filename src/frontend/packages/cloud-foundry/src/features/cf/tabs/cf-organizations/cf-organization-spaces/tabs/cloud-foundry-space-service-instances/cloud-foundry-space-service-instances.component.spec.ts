@@ -10,9 +10,6 @@ import {
 import { ServiceActionHelperService } from '../../../../../../../shared/data-services/service-action-helper.service';
 import { CloudFoundrySpaceServiceInstancesComponent } from './cloud-foundry-space-service-instances.component';
 
-/* tslint:disable:max-line-length */
-/* tslint:enable:max-line-length */
-
 @NgModule({
   declarations: [TableCellAppCfOrgSpaceHeaderComponent],
   imports: [CommonModule],

@@ -367,6 +367,6 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
       (this.definition as any).authTypes = authTypes;
     }
   }
-  
+
 }
 

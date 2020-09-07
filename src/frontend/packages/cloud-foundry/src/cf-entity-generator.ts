@@ -299,14 +299,14 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     },
     entitiesEmitHandler: (action: PaginatedAction | PaginatedAction[], dispatcher: ActionDispatcher) => {
       let lastValidationFootprint: string;
-      const arrayAction = Array.isArray(action) ? action : [action];
+      const actionsArray = Array.isArray(action) ? action : [action];
       return (state: PaginationEntityState) => {
         const newValidationFootprint = getPaginationCompareString(state);
         if (lastValidationFootprint !== newValidationFootprint) {
           lastValidationFootprint = newValidationFootprint;
-          arrayAction.forEach(action => dispatcher(new CfValidateEntitiesStart(
-            action,
-            state.ids[action.__forcedPageNumber__ || state.currentPage]
+          actionsArray.forEach(actionFromArray => dispatcher(new CfValidateEntitiesStart(
+            actionFromArray,
+            state.ids[actionFromArray.__forcedPageNumber__ || state.currentPage]
           )));
         }
       };
@@ -314,7 +314,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     entitiesFetchHandler: (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => {
       combineLatest(actions.map(action => safePopulatePaginationFromParent(store, action))).pipe(
         first(),
-      ).subscribe(actions => actions.forEach(action => store.dispatch(action)));
+      ).subscribe(newActions => newActions.forEach(newAction => store.dispatch(newAction)));
     },
     paginationConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,
@@ -1231,7 +1231,7 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
     labelPlural: 'Organizations',
     endpoint: endpointDefinition,
     icon: 'organization',
-    iconFont: 'stratos-icons'    
+    iconFont: 'stratos-icons'
   };
   cfEntityCatalog.org = new StratosCatalogEntity<
     IOrgFavMetadata,
