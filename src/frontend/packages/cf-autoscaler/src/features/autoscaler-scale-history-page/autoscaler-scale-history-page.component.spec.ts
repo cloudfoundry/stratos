@@ -7,6 +7,7 @@ import { createEmptyStoreModule } from '@stratosui/store/testing';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../core/src/core/core.module';
+import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../core/src/tab-nav.service';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
@@ -30,7 +31,8 @@ describe('AutoscalerScaleHistoryPageComponent', () => {
       providers: [
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        TabNavService
+        TabNavService,
+        CurrentUserPermissionsService
       ]
     })
       .compileComponents();
