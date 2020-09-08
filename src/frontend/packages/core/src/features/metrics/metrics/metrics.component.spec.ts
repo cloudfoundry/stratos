@@ -6,6 +6,7 @@ import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { TabNavService } from '../../../tab-nav.service';
 import { MetricsService } from '../services/metrics-service';
@@ -27,7 +28,11 @@ describe('MetricsComponent', () => {
         createBasicStoreModule(),
       ],
       declarations: [MetricsComponent],
-      providers: [MetricsService, TabNavService]
+      providers: [
+        MetricsService,
+        TabNavService,
+        CurrentUserPermissionsService
+      ]
     })
       .compileComponents();
   }));

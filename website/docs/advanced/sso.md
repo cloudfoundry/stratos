@@ -68,3 +68,18 @@ SSO_WHITELIST=https://your.domain/*,https://your.other.domain/*
 When set, any requests to log in with a different `state` will be denied.
 
 In order for the SSO `state` to match an entry from the whitelist the schema, hostname, port and path must match exactly. A wildcard `*` can be provided for the path to match anything.
+
+## Troubleshooting
+
+1. User has selected the incorrect application authorities when logging in to Stratos via SSO for the first time.
+   - The user can update their permissions and other account settings via https://login.< uaa address >/profile
+2. Administrator wants to remove the application authorities selection users see when logging in to Stratos via SSO for the first time
+   - This is carried out at the Admins discretion
+   - Using the `uaac` cli update the 'autoapprove' property of the client used by Stratos to either `true` for all authorities or a comma separated list for the authorities to be removed.
+
+     ```
+     uaac client update <console client> --autoapprove true
+     ```
+3. User sees the error message `No scopes were granted` when trying to log in to Stratos via SSO
+   - User may not have selected any of the application authorities when logging in to Stratos via SSO for the first time
+   - Either of the resolutions to 1 and 2 can be made

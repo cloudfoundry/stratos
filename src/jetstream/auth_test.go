@@ -784,9 +784,9 @@ func TestVerifySession(t *testing.T) {
 			So(contentType, ShouldEqual, "application/json; charset=UTF-8")
 		})
 
-		var expectedScopes = "\"scopes\":[\"openid\",\"scim.read\",\"cloud_controller.admin\",\"uaa.user\",\"cloud_controller.read\",\"password.write\",\"routing.router_groups.read\",\"cloud_controller.write\",\"doppler.firehose\",\"scim.write\"]"
+		var expectedScopes = `"scopes":["openid","scim.read","cloud_controller.admin","uaa.user","cloud_controller.read","password.write","routing.router_groups.read","cloud_controller.write","doppler.firehose","scim.write"]`
 
-		var expectedBody = "{\"version\":{\"proxy_version\":\"dev\",\"database_version\":20161117141922},\"user\":{\"guid\":\"asd-gjfg-bob\",\"name\":\"admin\",\"admin\":false," + expectedScopes + "},\"endpoints\":{\"cf\":{}},\"plugins\":null,\"config\":{\"enableTechPreview\":false}}"
+		var expectedBody = `{"version":{"proxy_version":"dev","database_version":20161117141922},"user":{"guid":"asd-gjfg-bob","name":"admin","admin":false,` + expectedScopes + `},"endpoints":{"cf":{}},"plugins":null,"config":{"enableTechPreview":false,"APIKeysEnabled":"admin_only"}}`
 
 		Convey("Should contain expected body", func() {
 			So(res, ShouldNotBeNil)

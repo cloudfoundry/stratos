@@ -7,6 +7,7 @@ import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { TabNavService } from '../../../tab-nav.service';
@@ -49,7 +50,9 @@ describe('CreateEndpointComponent', () => {
         }
       },
         TabNavService,
-        SidePanelService],
+        SidePanelService,
+        CurrentUserPermissionsService
+      ],
     })
       .compileComponents();
   }));

@@ -282,6 +282,8 @@ spec:
           value: {{ default "" .Values.console.userInviteSubject | quote }}
         - name: ENABLE_TECH_PREVIEW
           value: {{ default "false" .Values.console.techPreview | quote }}
+        - name: API_KEYS_ENABLED
+          value: {{ default "admin_only" .Values.console.apiKeysEnabled | quote }}
         {{- if .Values.console.ui }}
         {{- if .Values.console.ui.listMaxSize }}
         - name: UI_LIST_MAX_SIZE
