@@ -3,11 +3,17 @@
 .versions {
 
   h1 {
-    font-size: 18px;
+    font-size: 16px;
     margin-top: 0;
   }
   .more-link {
+    cursor: pointer;
+    font-size: 14px;
     margin-top: .5em;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
@@ -23,6 +29,8 @@
 }
 
 .version {
+  font-size: 14px;
+
   &__table {
     display: table;
     width: 100%;
@@ -32,11 +40,12 @@
   }
   &__cell {
     display: table-cell;
+    font-size: 14px;
   }
 }
 
 .app-version {
   h1 {
-    font-size: 18px;
+    font-size: 16px;
   }
 }

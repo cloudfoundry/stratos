@@ -501,6 +501,8 @@ func newChartListResponse(charts []*models.Chart) utils.ApiListResponse {
 func chartVersionAttributes(cid string, cv models.ChartVersion) models.ChartVersion {
 	cv.Readme = pathPrefix + "/assets/" + cid + "/versions/" + cv.Version + "/README.md"
 	cv.Values = pathPrefix + "/assets/" + cid + "/versions/" + cv.Version + "/values.yaml"
+	cv.Schema = pathPrefix + "/assets/" + cid + "/versions/" + cv.Version + "/values.schema.json"
+
 	return cv
 }
 

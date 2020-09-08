@@ -1,4 +1,11 @@
 <div class="chart-details-usage__install">
-  <button class="chart-details-usage__install-btn" color="primary" mat-button mat-raised-button
+  <button *ngIf="endpointsService.hasConnectedEndpointType('k8s') | async; else nok8s" class="chart-details-usage__install-btn" color="primary" mat-button mat-raised-button
   routerLink="/monocular/install/{{chart.id}}/{{currentVersion}}">Install Chart</button>
 </div>
+
+<!-- If there are no Kubernetes endpoints connected, show a disabled buitton with a tool tip-->
+<ng-template #nok8s>
+  <div matTooltip="Add a Kubernetes endpoint to install charts">
+    <button disabled="true" class="chart-details-usage__install-btn" color="primary" mat-button mat-raised-button>Install Chart</button>
+  </div>
+</ng-template>

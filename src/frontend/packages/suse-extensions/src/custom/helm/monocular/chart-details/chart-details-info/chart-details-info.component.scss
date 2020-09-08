@@ -1,7 +1,7 @@
 .chartInfo {
 
   h1 {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   app-panel {
@@ -15,11 +15,7 @@
     }
   }
 
-  &__related {
-    max-width: 280px;
-  }
-
-  &__related-link {
+  &__link {
     font-size: 14px;
   }
 
@@ -27,5 +23,6 @@
     overflow: auto;
     display: block;
     margin-bottom: 2em;
+    max-width: 260px;
   }
 }

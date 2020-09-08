@@ -1,4 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { of } from 'rxjs';
+import { catchError, first } from 'rxjs/operators';
 
 import { Chart } from '../../shared/models/chart';
 import { ChartVersion } from '../../shared/models/chart-version';
@@ -12,8 +14,22 @@ import { ChartsService } from '../../shared/services/charts.service';
 })
 export class ChartDetailsInfoComponent implements OnInit {
   @Input() chart: Chart;
-  @Input() currentVersion: ChartVersion;
   versions: ChartVersion[];
+  schema: any = null;
+
+  _currentVersion: ChartVersion;
+
+  get currentVersion(): ChartVersion {
+    return this._currentVersion;
+  }
+
+  @Input() set currentVersion (version: ChartVersion) {
+    this._currentVersion = version;
+    if (version) {
+      this.getSchema(this._currentVersion);
+    }
+  }
+
   constructor(private chartsService: ChartsService) { }
 
   ngOnInit() {
@@ -52,4 +68,14 @@ export class ChartDetailsInfoComponent implements OnInit {
       repoURL === 'https://kubernetes-charts-incubator.storage.googleapis.com'
     );
   }
+
+  private getSchema(currentVersion: ChartVersion) {
+    this.chartsService.getChartSchema(currentVersion).pipe(
+      first(),
+      catchError(() => of(null))
+    ).subscribe(schema => {
+      this.schema = schema;
+    });
+  }
+
 }

@@ -13,6 +13,7 @@ export class ChartVersionAttributes {
   icons: ChartVersionIcon[];
   readme: string;
   version: string;
+  schema?: string;
   /* tslint:disable-next-line:variable-name */
   app_version: string;
   urls: string[];

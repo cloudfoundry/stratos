@@ -109,6 +109,19 @@ export class ChartsService {
       responseType: 'text'
     });
   }
+
+  /**
+   * Get a chart's Schema using the API
+   *
+   * @param repo Repository name
+   * @param chartName Chart name
+   * @param version Chart version
+   * @return An observable that will be the json schema
+   */
+  getChartSchema(chartVersion: ChartVersion): Observable<any> {
+    return this.http.get(`${this.hostname}${chartVersion.attributes.schema}`);
+  }
+
   /**
    * Get chart versions using the API
    *
