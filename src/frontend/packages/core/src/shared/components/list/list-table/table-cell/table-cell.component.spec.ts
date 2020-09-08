@@ -15,10 +15,6 @@ import { AppChipsComponent } from '../../../chips/chips.component';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { listTableCells, TableCellComponent } from './table-cell.component';
 
-/* tslint:disable:max-line-length */
-
-/* tslint:enable:max-line-length */
-
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
   let fixture: ComponentFixture<TableCellComponent<any>>;

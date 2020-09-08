@@ -89,11 +89,13 @@ export class EndpointsEffect {
         });
       });
 
+      const isLogin = associatedAction.type === GET_ENDPOINTS ? (associatedAction as GetAllEndpoints).login : false;
+
       // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
       // (endpoint success)
       return [
         new WrapperRequestActionSuccess(mappedData, associatedAction, 'fetch'),
-        new GetAllEndpointsSuccess(mappedData, associatedAction['login']),
+        new GetAllEndpointsSuccess(mappedData, isLogin),
       ];
     }));
 

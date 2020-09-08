@@ -21,7 +21,11 @@ export class ApiKeysPageComponent {
 
   public keyDetails = new Subject<string>();
   public keyDetails$ = this.keyDetails.asObservable();
+
+  /* tslint:disable:ban-types  */
+  // This is intentionally typed, property can be null and there's different logic associated with it
   public hasKeys$: Observable<Boolean>;
+  /* tslint:enable */
 
   constructor(
     private dialog: MatDialog,
@@ -29,13 +33,13 @@ export class ApiKeysPageComponent {
     this.hasKeys$ = stratosEntityCatalog.apiKey.store.getPaginationService().entities$.pipe(
       map(entities => entities && !!entities.length),
       startWith(null),
-    )
+    );
   }
 
   addApiKey() {
     this.showDialog().pipe(first()).subscribe(key => {
       this.keyDetails.next(key);
-    })
+    });
   }
 
   clearKeyDetails() {

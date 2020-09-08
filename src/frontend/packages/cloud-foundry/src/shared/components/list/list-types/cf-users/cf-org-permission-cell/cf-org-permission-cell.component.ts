@@ -20,7 +20,7 @@ import { getOrgRoles } from '../../../../../../features/cf/cf.helpers';
 import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/cf-user.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
-import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
+import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
   selector: 'app-org-user-permission-cell',
@@ -28,7 +28,7 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
   styleUrls: ['./cf-org-permission-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNames> {
+export class CfOrgPermissionCellComponent extends CfPermissionCellDirective<OrgUserRoleNames> {
 
   constructor(
     public store: Store<CFAppState>,
@@ -96,6 +96,6 @@ export class CfOrgPermissionCellComponent extends CfPermissionCell<OrgUserRoleNa
   }
 
   public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
-    this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid)
+    this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
 
 }

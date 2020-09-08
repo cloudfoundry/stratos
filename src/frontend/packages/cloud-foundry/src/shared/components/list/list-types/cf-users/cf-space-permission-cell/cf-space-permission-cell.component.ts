@@ -20,7 +20,7 @@ import { getSpaceRoles } from '../../../../../../features/cf/cf.helpers';
 import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../store/types/cf-user.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
-import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
+import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
   selector: 'app-cf-space-permission-cell',
@@ -28,7 +28,7 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
   styleUrls: ['./cf-space-permission-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRoleNames> {
+export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<SpaceUserRoleNames> {
 
   missingRoles$: Observable<boolean>;
 
@@ -83,7 +83,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
       filter(org => !!org),
       first(),
       map((orgs: APIResource<IOrganization>[]) => {
-        const orgNames: { [orgGuid: string]: string } = {};
+        const orgNames: { [orgGuid: string]: string; } = {};
         orgs.forEach(org => {
           orgNames[org.metadata.guid] = org.entity.name;
         });
@@ -154,5 +154,5 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
   }
 
   public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
-    this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
+    this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid);
 }

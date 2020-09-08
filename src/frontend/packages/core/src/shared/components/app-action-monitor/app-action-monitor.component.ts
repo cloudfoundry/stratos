@@ -84,11 +84,11 @@ export class AppActionMonitorComponent<T> implements OnInit {
     };
 
     // Some data$ obs only ever emit once. If we subscribed directly to this then that emit would be consumed and will not be available
-    // in the data source connect subscription. So wrap it in a replay to ensure the last emitted value is available 
+    // in the data source connect subscription. So wrap it in a replay to ensure the last emitted value is available
     this.replayData$ = this.data$.pipe(
       publishReplay(1),
       refCount()
-    )
+    );
 
     this.allColumns = [...this.columns, monitorColumn];
     this.dataSource = {

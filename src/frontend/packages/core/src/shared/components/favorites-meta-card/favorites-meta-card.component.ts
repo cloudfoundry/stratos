@@ -87,12 +87,9 @@ export class FavoritesMetaCardComponent {
       this.prettyName = prettyName || 'Unknown';
       this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, stratosEntityFactory(userFavouritesEntityType));
 
-      // If this favorite is an endpoint, lookup the image for it from the entitiy catalog
+      // If this favorite is an endpoint, lookup the image for it from the entity catalog
       if (this.favorite.entityType === 'endpoint') {
-        this.iconUrl$ = endpoint$.pipe(map(a => {
-          const entityDef = entityCatalog.getEndpoint(a.cnsi_type, a.sub_type);
-          return entityDef.definition.logoUrl;
-        }));
+        this.iconUrl$ = endpoint$.pipe(map(a => entityCatalog.getEndpoint(a.cnsi_type, a.sub_type).definition.logoUrl));
       } else {
         this.iconUrl$ = observableOf('');
       }
@@ -141,7 +138,7 @@ export class FavoritesMetaCardComponent {
 
   private removeFavorite = () => {
     stratosEntityCatalog.userFavorite.api.delete(this.favorite);
-  }
+  };
 
   public toggleMoreError() {
     this.showMore = !this.showMore;
