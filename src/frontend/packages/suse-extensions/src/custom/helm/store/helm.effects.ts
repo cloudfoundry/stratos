@@ -159,6 +159,41 @@ export class HelmEffects {
     })
   );
 
+  private static createHelmErrorMessage(err: any): string {
+    if (err) {
+      if (err.error && err.error.message) {
+        // Kube error
+        return err.error.message;
+      } else if (err.message) {
+        // Http error
+        return err.message;
+      } else if (err.error.status) {
+        // Jetstream error
+        return err.error.status;
+      }
+    }
+    return 'Helm API request error';
+  }
+
+  public static createHelmError(err: any): { status: string, message: string; } {
+    let unwrapped = err;
+    if (err.error) {
+      unwrapped = err.error;
+    }
+    const jetstreamError = isJetstreamError(unwrapped);
+    if (jetstreamError) {
+      // Wrapped error
+      return {
+        status: jetstreamError.error.statusCode.toString(),
+        message: HelmEffects.createHelmErrorMessage(jetstreamError)
+      };
+    }
+    return {
+      status: err && err.status ? err.status + '' : '500',
+      message: this.createHelmErrorMessage(err)
+    };
+  }
+
   private makeRequest(
     action: EntityRequestAction,
     url: string,
@@ -185,41 +220,6 @@ export class HelmEffects {
         ];
       })
     );
-  }
-
-  static createHelmErrorMessage(err: any): string {
-    if (err) {
-      if (err.error && err.error.message) {
-        // Kube error
-        return err.error.message;
-      } else if (err.message) {
-        // Http error
-        return err.message;
-      } else if (err.error.status) {
-        // Jetstream error
-        return err.error.status;
-      }
-    }
-    return 'Helm API request error';
-  }
-
-  static createHelmError(err: any): { status: string, message: string } {
-    let unwrapped = err;
-    if (err.error) {
-      unwrapped = err.error;
-    }
-    const jetstreamError = isJetstreamError(unwrapped);
-    if (jetstreamError) {
-      // Wrapped error
-      return {
-        status: jetstreamError.error.statusCode.toString(),
-        message: HelmEffects.createHelmErrorMessage(jetstreamError)
-      };
-    }
-    return {
-      status: err && err.status ? err.status + '' : '500',
-      message: this.createHelmErrorMessage(err)
-    };
   }
 
   private checkSyncStatus() {

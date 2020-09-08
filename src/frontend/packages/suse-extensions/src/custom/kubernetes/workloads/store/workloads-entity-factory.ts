@@ -15,17 +15,19 @@ export const getHelmReleaseDetailsFromGuid = (guid: string) => {
     endpointId: parts[0],
     namespace: parts[1],
     releaseTitle: parts[2]
-  }
-}
-export const getHelmReleaseId = (endpointId: string, namespace: string, name: string) => `${endpointId}${separator}${namespace}${separator}${name}`;
+  };
+};
+export const getHelmReleaseId = (endpointId: string, namespace: string, name: string) =>
+  `${endpointId}${separator}${namespace}${separator}${name}`;
 export const getHelmReleaseIdByObj = (entity: HelmRelease) => getHelmReleaseId(entity.endpointId, entity.namespace, entity.name);
 export const getHelmReleaseGraphId = (endpointId: string, releaseTitle: string) => `${endpointId}${separator}${releaseTitle}`;
 export const getHelmReleaseGraphIdByObj = (entity: HelmReleaseGraph) => getHelmReleaseGraphId(entity.endpointId, entity.releaseTitle);
 export const getHelmReleaseResourceId = (endpointId: string, releaseTitle: string) => `${endpointId}${separator}${releaseTitle}`;
-export const getHelmReleaseResourceIdByObj = (entity: HelmReleaseResources) => getHelmReleaseResourceId(entity.endpointId, entity.releaseTitle);
+export const getHelmReleaseResourceIdByObj = (entity: HelmReleaseResources) =>
+  getHelmReleaseResourceId(entity.endpointId, entity.releaseTitle);
 
 const entityCache: {
-  [key: string]: EntitySchema
+  [key: string]: EntitySchema,
 } = {};
 
 entityCache[helmReleaseEntityKey] = new KubernetesEntitySchema(
@@ -48,6 +50,6 @@ entityCache[helmReleaseResourceEntityType] = new KubernetesEntitySchema(
 
 Object.entries(entityCache).forEach(([key, workloadSchema]) => addKubernetesEntitySchema(key, workloadSchema));
 
-export const createHelmReleaseEntities = (): { [cacheName: string]: EntitySchema } => {
+export const createHelmReleaseEntities = (): { [cacheName: string]: EntitySchema; } => {
   return entityCache;
 };

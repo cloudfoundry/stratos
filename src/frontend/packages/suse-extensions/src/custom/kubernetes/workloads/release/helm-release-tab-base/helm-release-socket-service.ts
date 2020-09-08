@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
@@ -24,14 +24,15 @@ enum SocketEventTypes {
 }
 
 interface SocketMessage {
-  type: SocketEventTypes
+  type: SocketEventTypes;
 }
 
 @Injectable()
-export class HelmReleaseSocketService {
+export class HelmReleaseSocketService implements OnDestroy {
 
   private sub: Subscription;
   private sendToSocket = new Subject<any>();
+  public isPaused = false;
 
   constructor(
     private helmReleaseHelper: HelmReleaseHelperService,
@@ -133,16 +134,16 @@ export class HelmReleaseSocketService {
 
   public stop() {
     if (this.sub) {
-      this.sub.unsubscribe()
+      this.sub.unsubscribe();
       this.sub = null;
     }
   }
 
   public enable(enable: boolean) {
     if (enable) {
-      this.start()
+      this.start();
     } else {
-      this.stop()
+      this.stop();
     }
   }
 
@@ -151,16 +152,14 @@ export class HelmReleaseSocketService {
   }
 
   public pause(pause: boolean) {
-    if (pause != this.isPaused) {
+    if (pause !== this.isPaused) {
       const message: SocketMessage = {
         type: pause ? SocketEventTypes.PAUSE_TRUE : SocketEventTypes.PAUSE_FALSE
-      }
+      };
       this.sendToSocket.next(JSON.stringify(message));
       this.isPaused = pause;
     }
   }
-
-  public isPaused = false;
 
   ngOnDestroy() {
     this.sub.unsubscribe();

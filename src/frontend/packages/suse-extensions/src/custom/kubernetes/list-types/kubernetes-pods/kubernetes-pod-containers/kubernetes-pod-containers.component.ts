@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import { TitleCasePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import * as moment from 'moment';
@@ -13,6 +14,8 @@ import {
 import { CardCell } from '../../../../../../../core/src/shared/components/list/list.types';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
 import { Container, ContainerState, ContainerStatus, InitContainer, KubernetesPod } from '../../../store/kube.types';
+
+/* tslint:enable:max-line-length */
 
 export interface ContainerForTable {
   isInit: boolean;
@@ -43,6 +46,13 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
       font: '',
       tooltip: 'Init Container'
     }
+  };
+
+  public readyBoolConfig: TableCellBooleanIndicatorComponentConfig<ContainerForTable> = {
+    isEnabled: (row: ContainerForTable) => row.containerStatus.ready,
+    type: BooleanIndicatorType.yesNo,
+    subtle: false,
+    showText: false
   };
 
   @Input()
@@ -91,13 +101,6 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
     ];
     return containerStatusWithContainers.sort((a, b) => a.container.name.localeCompare(b.container.name));
   }
-
-  public readyBoolConfig: TableCellBooleanIndicatorComponentConfig<ContainerForTable> = {
-    isEnabled: (row: ContainerForTable) => row.containerStatus.ready,
-    type: BooleanIndicatorType.yesNo,
-    subtle: false,
-    showText: false
-  };
 
   private containerStatusToString(state: string, status: ContainerState): string {
     const exitCode = status.exitCode ? `:${status.exitCode}` : '';

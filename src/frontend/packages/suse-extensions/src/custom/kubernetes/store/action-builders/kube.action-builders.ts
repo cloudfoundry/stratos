@@ -8,7 +8,7 @@ import {
   GetAnalysisReports,
   GetAnalysisReportsByPath,
   RunAnalysisReport,
-} from '../anaylsis.actions';
+} from '../analysis.actions';
 import {
   CreateKubernetesNamespace,
   GeKubernetesDeployments,
@@ -31,35 +31,35 @@ export interface KubeStatefulSetsActionBuilders extends OrchestratedActionBuilde
   getMultiple: (
     kubeGuid: string,
     paginationKey?: string,
-  ) => GetKubernetesStatefulSets
+  ) => GetKubernetesStatefulSets;
 }
 
 export const kubeStatefulSetsActionBuilders: KubeStatefulSetsActionBuilders = {
   getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesStatefulSets(kubeGuid)
-}
+};
 
 export interface KubePodActionBuilders extends OrchestratedActionBuilders {
   get: (
     podName: string,
     kubeGuid: string,
-    extraArgs: { namespace: string }
+    extraArgs: { namespace: string; }
   ) => GetKubernetesPod,
   getMultiple: (
     kubeGuid: string,
     paginationKey?: string,
-  ) => GetKubernetesPods
+  ) => GetKubernetesPods;
   getOnNode: (
     kubeGuid: string,
     nodeName: string
-  ) => GetKubernetesPodsOnNode
+  ) => GetKubernetesPodsOnNode;
   getInNamespace: (
     kubeGuid: string,
     namespace: string
-  ) => GetKubernetesPodsInNamespace
+  ) => GetKubernetesPodsInNamespace;
   getInWorkload: (
     kubeGuid: string,
     releaseTitle: string
-  ) => GetHelmReleasePods
+  ) => GetHelmReleasePods;
 }
 
 export const kubePodActionBuilders: KubePodActionBuilders = {
@@ -68,28 +68,28 @@ export const kubePodActionBuilders: KubePodActionBuilders = {
   getOnNode: (kubeGuid: string, nodeName: string) => new GetKubernetesPodsOnNode(kubeGuid, nodeName),
   getInNamespace: (kubeGuid: string, namespace: string) => new GetKubernetesPodsInNamespace(kubeGuid, namespace),
   getInWorkload: (kubeGuid: string, releaseTitle: string) => new GetHelmReleasePods(kubeGuid, releaseTitle)
-}
+};
 
 export interface KubeDeploymentActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (
     kubeGuid: string,
     paginationKey?: string,
-  ) => GeKubernetesDeployments
+  ) => GeKubernetesDeployments;
 }
 
 export const kubeDeploymentActionBuilders: KubeDeploymentActionBuilders = {
   getMultiple: (kubeGuid: string, paginationKey?: string) => new GeKubernetesDeployments(kubeGuid)
-}
+};
 
 export interface KubeNodeActionBuilders extends OrchestratedActionBuilders {
   get: (
     nodeName: string,
     kubeGuid: string
-  ) => GetKubernetesNode
+  ) => GetKubernetesNode;
   getMultiple: (
     kubeGuid: string,
     paginationKey?: string,
-  ) => GetKubernetesNodes
+  ) => GetKubernetesNodes;
   healthCheck: (
     kubeGuid: string,
   ) => KubeHealthCheck;
@@ -99,7 +99,7 @@ export const kubeNodeActionBuilders: KubeNodeActionBuilders = {
   get: (nodeName: string, endpointGuid: string) => new GetKubernetesNode(nodeName, endpointGuid),
   getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesNodes(kubeGuid),
   healthCheck: (kubeGuid: string) => new KubeHealthCheck(kubeGuid)
-}
+};
 
 export interface KubeNamespaceActionBuilders extends OrchestratedActionBuilders {
   get: (
@@ -113,35 +113,35 @@ export interface KubeNamespaceActionBuilders extends OrchestratedActionBuilders 
   getMultiple: (
     kubeGuid: string,
     paginationKey?: string,
-  ) => GetKubernetesNamespaces
+  ) => GetKubernetesNamespaces;
 }
 
 export const kubeNamespaceActionBuilders: KubeNamespaceActionBuilders = {
   get: (namespace: string, kubeGuid: string) => new GetKubernetesNamespace(namespace, kubeGuid),
   create: (namespace: string, kubeGuid: string) => new CreateKubernetesNamespace(namespace, kubeGuid),
   getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesNamespaces(kubeGuid)
-}
+};
 
 export interface KubeServiceActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (
     kubeGuid: string,
     paginationKey?: string
-  ) => GetKubernetesServices
+  ) => GetKubernetesServices;
   getInNamespace: (
     namespace: string,
     kubeGuid: string
-  ) => GetKubernetesServicesInNamespace
+  ) => GetKubernetesServicesInNamespace;
   getInWorkload: (
     releaseTitle: string,
     kubeGuid: string
-  ) => GetHelmReleaseServices
+  ) => GetHelmReleaseServices;
 }
 
 export const kubeServiceActionBuilders: KubeServiceActionBuilders = {
   getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesServices(kubeGuid),
   getInNamespace: (namespace: string, kubeGuid: string) => new GetKubernetesServicesInNamespace(kubeGuid, namespace),
   getInWorkload: (releaseTitle: string, kubeGuid: string) => new GetHelmReleaseServices(kubeGuid, releaseTitle)
-}
+};
 
 export interface KubeDashboardActionBuilders extends OrchestratedActionBuilders {
   get: (
@@ -151,7 +151,7 @@ export interface KubeDashboardActionBuilders extends OrchestratedActionBuilders 
 
 export const kubeDashboardActionBuilders: KubeDashboardActionBuilders = {
   get: (kubeGuid: string) => new GetKubernetesDashboard(kubeGuid)
-}
+};
 
 export interface AnalysisReportsActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (
@@ -183,4 +183,4 @@ export const analysisReportsActionBuilders: AnalysisReportsActionBuilders = {
   getByPath: (kubeGuid: string, path: string) => new GetAnalysisReportsByPath(kubeGuid, path),
   delete: (kubeGuid: string, id: string) => new DeleteAnalysisReport(kubeGuid, id),
   run: (kubeGuid: string, id: string, namespace?: string, app?: string) => new RunAnalysisReport(kubeGuid, id, namespace, app)
-}
+};

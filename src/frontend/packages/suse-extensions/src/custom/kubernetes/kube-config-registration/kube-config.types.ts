@@ -35,7 +35,7 @@ export interface KubeConfigFileCluster {
   _subType?: string;
   // additional info is required in order to connect, hints at register only, though is specific due to warning message
   _additionalUserInfo: boolean;
-  // unique identifier 
+  // unique identifier
   _id: string;
 }
 
@@ -51,7 +51,7 @@ export interface KubeConfigFileUserDetail {
   'client-certificate-data'?: string;
   'client-key-data'?: string;
   token?: string;
-  exec?: any
+  exec?: any;
   username?: string;
   password?: string;
 }
@@ -100,5 +100,5 @@ export interface EndpointConfig {
 export interface KubeConfigImportAuthConfig {
   subType: string;
   authType: string;
-  values: { [key: string]: string };
+  values: { [key: string]: string, };
 }

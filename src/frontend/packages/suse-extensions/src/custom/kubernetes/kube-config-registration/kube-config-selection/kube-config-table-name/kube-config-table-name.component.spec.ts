@@ -5,28 +5,28 @@ import {
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { KubeConfigFileCluster } from '../../kube-config.types';
-import { KubeConfigTableName } from './kube-config-table-name.component';
+import { KubeConfigTableNameComponent } from './kube-config-table-name.component';
 
 describe('KubeConfigTableName', () => {
-  let component: KubeConfigTableName;
-  let fixture: ComponentFixture<KubeConfigTableName>;
+  let component: KubeConfigTableNameComponent;
+  let fixture: ComponentFixture<KubeConfigTableNameComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
       ],
-      declarations: [KubeConfigTableName]
+      declarations: [KubeConfigTableNameComponent]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(KubeConfigTableName);
+    fixture = TestBed.createComponent(KubeConfigTableNameComponent);
     component = fixture.componentInstance;
     component.dataSource = {
-      getRowUniqueId: (row) => ""
-    } as IListDataSource<KubeConfigFileCluster>
+      getRowUniqueId: (row) => ''
+    } as IListDataSource<KubeConfigFileCluster>;
     fixture.detectChanges();
   });
 

@@ -5,4 +5,4 @@ import { Component } from '@angular/core';
   templateUrl: './suse-welcome.component.html',
   styleUrls: ['./suse-welcome.component.scss'],
 })
-export class SuseWelcomeComponent {}
+export class SuseWelcomeComponent { }

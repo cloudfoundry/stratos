@@ -71,7 +71,7 @@ export class HelmReleaseHelperService {
 
   public fetchReleaseResources(): Observable<HelmReleaseResources> {
     // Get helm release
-    const action = workloadsEntityCatalog.resource.actions.get(this.releaseTitle, this.endpointGuid)
+    const action = workloadsEntityCatalog.resource.actions.get(this.releaseTitle, this.endpointGuid);
     return workloadsEntityCatalog.resource.store.getEntityMonitor(
       action.guid
     ).entity$.pipe(
@@ -90,7 +90,7 @@ export class HelmReleaseHelperService {
   }
 
   private mapPods(pods: KubernetesPod[]): HelmReleaseChartData {
-    const podPhases: { [phase: string]: number } = {};
+    const podPhases: { [phase: string]: number, } = {};
     const containers = {
       ready: {
         name: 'Ready',
@@ -132,6 +132,7 @@ export class HelmReleaseHelperService {
     };
   }
 
+  // tslint:disable-next-line:ban-types
   private isContainerReady(state: ContainerStateCollection = {}): Boolean {
     if (state.running) {
       return true;
@@ -139,7 +140,7 @@ export class HelmReleaseHelperService {
       return false;
     } else if (!!state.terminated) {
       // Assume a failed state is not ready (covers completed init states), discard success state
-      return state.terminated.exitCode === 0 ? null : false
+      return state.terminated.exitCode === 0 ? null : false;
     }
     return false;
   }

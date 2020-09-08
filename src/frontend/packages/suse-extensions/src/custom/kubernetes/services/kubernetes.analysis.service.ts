@@ -9,7 +9,7 @@ import { ResetPaginationOfType } from '../../../../../store/src/actions/paginati
 import { AppState } from '../../../../../store/src/app-state';
 import { ListActionState, RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
-import { GetAnalysisReports } from '../store/anaylsis.actions';
+import { GetAnalysisReports } from '../store/analysis.actions';
 import { AnalysisReport } from '../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../workloads/store/workloads-entity-factory';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
@@ -50,7 +50,7 @@ export class KubernetesAnalysisService {
     this.hideAnalysis$ = this.enabled$.pipe(
       map(enabled => !enabled),
       startWith(true),
-    )
+    );
 
     const allEngines = {
       popeye:
@@ -100,10 +100,10 @@ export class KubernetesAnalysisService {
       })
     );
 
-    this.action = kubeEntityCatalog.analysisReport.actions.getMultiple(this.kubeGuid)
+    this.action = kubeEntityCatalog.analysisReport.actions.getMultiple(this.kubeGuid);
   }
 
-  public delete(endpointID: string, item: { id: string }) {
+  public delete(endpointID: string, item: { id: string, }) {
     return kubeEntityCatalog.analysisReport.api.delete(endpointID, item.id);
   }
 
@@ -117,7 +117,7 @@ export class KubernetesAnalysisService {
       filter(([oldE, newE]) => oldE.creating && !newE.creating),
       map(([, newE]) => newE),
       first()
-    )
+    );
     obs$.subscribe(() => {
       const type = id.charAt(0).toUpperCase() + id.substring(1);
       let msg;
@@ -136,7 +136,7 @@ export class KubernetesAnalysisService {
 
   public getByID(endpoint: string, id: string, refresh = false): Observable<AnalysisReport> {
     if (refresh) {
-      kubeEntityCatalog.analysisReport.api.getById<RequestInfoState>(endpoint, id)
+      kubeEntityCatalog.analysisReport.api.getById<RequestInfoState>(endpoint, id);
     }
 
     const entityService = kubeEntityCatalog.analysisReport.store.getById.getEntityService(endpoint, id);
@@ -154,7 +154,7 @@ export class KubernetesAnalysisService {
 
   public getByPath(endpointID: string, path: string, refresh = false): Observable<AnalysisReport[]> {
     if (refresh) {
-      kubeEntityCatalog.analysisReport.api.getByPath<ListActionState>(endpointID, path)
+      kubeEntityCatalog.analysisReport.api.getByPath<ListActionState>(endpointID, path);
     }
     return kubeEntityCatalog.analysisReport.store.getByPath.getPaginationService(endpointID, path).entities$.pipe(
       filter(entities => !!entities)

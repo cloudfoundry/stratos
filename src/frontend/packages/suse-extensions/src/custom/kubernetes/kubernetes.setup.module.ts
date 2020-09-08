@@ -26,7 +26,7 @@ import {
   KubeConfigTableCertComponent,
 } from './kube-config-registration/kube-config-selection/kube-config-table-cert/kube-config-table-cert.component';
 import {
-  KubeConfigTableName,
+  KubeConfigTableNameComponent,
 } from './kube-config-registration/kube-config-selection/kube-config-table-name/kube-config-table-name.component';
 import {
   KubeConfigTableSelectComponent,
@@ -64,7 +64,7 @@ import { KubernetesEndpointService } from './services/kubernetes-endpoint.servic
     KubeConfigTableUserSelectComponent,
     KubeConfigTableImportStatusComponent,
     KubeConfigTableSubTypeSelectComponent,
-    KubeConfigTableName,
+    KubeConfigTableNameComponent,
     KubeConfigTableCertComponent
   ],
   providers: [
@@ -81,7 +81,7 @@ import { KubernetesEndpointService } from './services/kubernetes-endpoint.servic
     KubeConfigTableUserSelectComponent,
     KubeConfigTableImportStatusComponent,
     KubeConfigTableSubTypeSelectComponent,
-    KubeConfigTableName,
+    KubeConfigTableNameComponent,
     KubeConfigTableCertComponent
   ]
 })

@@ -32,13 +32,13 @@ const layouts = [
 ];
 
 interface CustomHelmReleaseGraphNode extends Omit<HelmReleaseGraphNode, 'data'> {
-  data: CustomHelmReleaseGraphNodeData
+  data: CustomHelmReleaseGraphNodeData;
 }
 
 interface CustomHelmReleaseGraphNode {
   id: string;
   label: string;
-  data: CustomHelmReleaseGraphNodeData
+  data: CustomHelmReleaseGraphNodeData;
 }
 
 interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
@@ -48,7 +48,7 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
   text: string,
   icon: any,
   alerts: [],
-  alertSummary: {}
+  alertSummary: {};
 }
 
 @Component({
@@ -115,14 +115,14 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
             dash: missing ? 6 : 0,
             fill: colors.bg,
             text: colors.fg,
-            icon: icon,
+            icon,
             alerts: null,
             alertSummary: {}
           },
         };
 
         // Does this node have any alerts?
-        this.applyAlertToNode(newNode, report)
+        this.applyAlertToNode(newNode, report);
 
         newNodes.push(newNode);
       });
@@ -200,7 +200,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
         },
         this.componentFactoryResolver
       );
-    })
+    });
 
   }
 

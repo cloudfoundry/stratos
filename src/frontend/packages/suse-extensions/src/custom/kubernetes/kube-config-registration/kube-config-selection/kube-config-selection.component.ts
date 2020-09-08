@@ -16,7 +16,7 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { KubeConfigHelper } from '../kube-config.helper';
 import { KubeConfigFileCluster } from '../kube-config.types';
 import { KubeConfigTableCertComponent } from './kube-config-table-cert/kube-config-table-cert.component';
-import { KubeConfigTableName } from './kube-config-table-name/kube-config-table-name.component';
+import { KubeConfigTableNameComponent } from './kube-config-table-name/kube-config-table-name.component';
 import { KubeConfigTableSelectComponent } from './kube-config-table-select/kube-config-table-select.component';
 import {
   KubeConfigTableSubTypeSelectComponent,
@@ -50,7 +50,7 @@ export class KubeConfigSelectionComponent {
     selectAllChecked: false,
     selectAllFilteredRows: () => {
       // Should always go to true from indeterminate
-      this.dataSource.selectAllChecked = this.dataSource.selectAllIndeterminate ? true : !this.dataSource.selectAllChecked
+      this.dataSource.selectAllChecked = this.dataSource.selectAllIndeterminate ? true : !this.dataSource.selectAllChecked;
       this.dataSource.selectAllIndeterminate = false; // either all off or all on, cannot be indeterminate
 
       this.helper.clusters$.pipe(
@@ -65,7 +65,7 @@ export class KubeConfigSelectionComponent {
         first(),
       ).subscribe(clusters => {
         this.checkCanGoNext(clusters);
-      })
+      });
     },
     editRow: null,
     editRowName: null,
@@ -95,7 +95,7 @@ export class KubeConfigSelectionComponent {
     },
     {
       columnId: 'name', headerCell: () => 'Name',
-      cellComponent: KubeConfigTableName,
+      cellComponent: KubeConfigTableNameComponent,
       cellFlex: '3',
       class: 'app-table__cell--table-no-v-padding'
     },
@@ -135,7 +135,7 @@ export class KubeConfigSelectionComponent {
     public helper: KubeConfigHelper,
     private snackbarService: SnackBarService
   ) {
-    this.helper.clustersChanged = () => this.clustersChanged()
+    this.helper.clustersChanged = () => this.clustersChanged();
   }
 
   // Save data for the next step to know the list of clusters to import
@@ -145,15 +145,15 @@ export class KubeConfigSelectionComponent {
       success: true,
       data: clusters
     }))
-  )
+  );
 
   clustersParse(cluster: string) {
     this.snackbarService.hide();
     this.helper.parse(cluster).pipe(first()).subscribe(errorString => {
       if (errorString) {
-        this.snackbarService.show(`Failed to load Kube Config: ${errorString}`, 'Close')
+        this.snackbarService.show(`Failed to load Kube Config: ${errorString}`, 'Close');
       }
-    })
+    });
   }
 
   onEnter = () => {
@@ -161,8 +161,8 @@ export class KubeConfigSelectionComponent {
       return;
     }
     // Handle back from review step (ensure newly registered endpoints are taken into account)
-    this.helper.updateAll().pipe(first()).subscribe(() => { })
-  }
+    this.helper.updateAll().pipe(first()).subscribe(() => { });
+  };
 
   // Row changed event - update the next button and selection state
   clustersChanged() {
@@ -187,7 +187,7 @@ export class KubeConfigSelectionComponent {
       } else {
         this.dataSource.selectAllIndeterminate = true;
       }
-    })
+    });
 
   }
 

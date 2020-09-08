@@ -20,8 +20,8 @@ interface KubernetesResourceViewerResource {
   jsonView: KubeAPIResource;
   age: string;
   creationTimestamp: string;
-  labels: { name: string, value: string }[];
-  annotations: { name: string, value: string }[];
+  labels: { name: string, value: string, }[];
+  annotations: { name: string, value: string, }[];
   kind: string;
   apiVersion: string;
 }
@@ -66,6 +66,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
 
         resource.jsonView = newItem;
 
+        /* tslint:disable-next-line:no-string-literal  */
         const fallback = item['_metadata'] || {};
 
         const ts = item.metadata ? item.metadata.creationTimestamp : fallback.creationTimestamp;
@@ -92,7 +93,9 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
           });
         }
 
+        /* tslint:disable-next-line:no-string-literal  */
         resource.kind = item['kind'] || fallback.kind || props.resourceKind;
+        /* tslint:disable-next-line:no-string-literal  */
         resource.apiVersion = item['apiVersion'] || fallback.apiVersion || this.getVersionFromSelfLink(item.metadata['selfLink']);
 
         // Apply analysis if there is one - if this is a k8s resource (i.e. not a container)

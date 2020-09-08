@@ -7,7 +7,7 @@ import { ChartsService } from '../shared/services/charts.service';
   selector: 'app-chart-item',
   templateUrl: './chart-item.component.html',
   styleUrls: ['./chart-item.component.scss'],
-  /* tslint:disable-next-line:use-input-property-decorator */
+  /* tslint:disable-next-line:no-inputs-metadata-property */
   inputs: ['chart', 'showVersion', 'showDescription']
 })
 export class ChartItemComponent implements OnInit {

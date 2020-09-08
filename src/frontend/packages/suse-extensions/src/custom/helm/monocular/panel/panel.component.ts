@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-panel',
   templateUrl: './panel.component.html',
   styleUrls: ['./panel.component.scss'],
-  /* tslint:disable-next-line:use-input-property-decorator */
+  /* tslint:disable-next-line:no-inputs-metadata-property */
   inputs: ['title', 'background', 'container', 'border']
 })
 export class PanelComponent {

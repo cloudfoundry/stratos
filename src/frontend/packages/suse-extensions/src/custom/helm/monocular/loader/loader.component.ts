@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-loader',
   templateUrl: './loader.component.html',
   styleUrls: ['./loader.component.scss'],
-  /* tslint:disable-next-line:use-input-property-decorator */
+  /* tslint:disable-next-line:no-inputs-metadata-property */
   inputs: ['loading']
 })
 export class LoaderComponent {

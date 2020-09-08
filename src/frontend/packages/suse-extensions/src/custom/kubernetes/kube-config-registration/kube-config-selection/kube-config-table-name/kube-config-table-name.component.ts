@@ -8,4 +8,4 @@ import { KubeConfigFileCluster } from '../../kube-config.types';
   templateUrl: './kube-config-table-name.component.html',
   styleUrls: ['./kube-config-table-name.component.scss']
 })
-export class KubeConfigTableName extends TableCellCustom<KubeConfigFileCluster> { }
+export class KubeConfigTableNameComponent extends TableCellCustom<KubeConfigFileCluster> { }

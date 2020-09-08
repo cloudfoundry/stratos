@@ -27,7 +27,7 @@ import {
   GetAnalysisReportsByPath,
   RUN_ANALYSIS_REPORT_TYPES,
   RunAnalysisReport,
-} from './anaylsis.actions';
+} from './analysis.actions';
 import { AnalysisReport } from './kube.types';
 
 @Injectable()
@@ -143,7 +143,7 @@ export class AnalysisEffects {
             const guid = schema.getId(report);
             res.entities[entityKey][guid] = report;
             res.result.push(guid);
-          })
+          });
           return [new WrapperRequestActionSuccess(res, action)];
         }),
         catchError(error => [

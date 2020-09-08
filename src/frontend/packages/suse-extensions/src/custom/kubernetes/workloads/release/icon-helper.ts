@@ -1,12 +1,3 @@
-export function getIcon(kind: string) {
-  const rkind = kind || 'Pod';
-  if (iconMappings[rkind]) {
-    return iconMappings[rkind];
-  } else {
-    return iconMappings.default;
-  }
-}
-
 const iconMappings = {
   Namespace: {
     name: 'namespace',
@@ -84,3 +75,12 @@ const iconMappings = {
     font: 'stratos-icons'
   }
 };
+
+export function getIcon(kind: string) {
+  const rkind = kind || 'Pod';
+  if (iconMappings[rkind]) {
+    return iconMappings[rkind];
+  } else {
+    return iconMappings.default;
+  }
+}

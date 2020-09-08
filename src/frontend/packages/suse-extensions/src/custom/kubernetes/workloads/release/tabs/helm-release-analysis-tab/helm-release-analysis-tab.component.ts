@@ -25,7 +25,7 @@ export class HelmReleaseAnalysisTabComponent {
     public helmReleaseHelper: HelmReleaseHelperService
   ) {
     this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
-   }
+  }
 
   public analysisChanged(report) {
     if (report.id !== this.currentReport) {
@@ -34,9 +34,8 @@ export class HelmReleaseAnalysisTabComponent {
     }
   }
 
-
   public onReportCount(count: number) {
     this.noReportsAvailable = count === 0;
-  }  
+  }
 
 }

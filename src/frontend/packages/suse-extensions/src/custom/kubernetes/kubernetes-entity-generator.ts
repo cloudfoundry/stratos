@@ -71,7 +71,7 @@ const enum KubeEndpointAuthTypes {
   GKE = 'gke-auth',
 }
 
-const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig } = {
+const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
   [KubeEndpointAuthTypes.CERT_AUTH]: {
     value: KubeEndpointAuthTypes.CERT_AUTH,
     name: 'Kubernetes Cert Auth',
@@ -132,7 +132,11 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     iconFont: 'stratos-icons',
     logoUrl: '/core/assets/custom/kubernetes.svg',
     urlValidation: undefined,
-    authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CERT_AUTH], kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG], BaseEndpointAuth.UsernamePassword],
+    authTypes: [
+      kubeAuthTypeMap[KubeEndpointAuthTypes.CERT_AUTH],
+      kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG],
+      BaseEndpointAuth.UsernamePassword
+    ],
     renderPriority: 4,
     subTypes: [
       {
@@ -209,7 +213,8 @@ function generateStatefulSetsEntity(endpointDefinition: StratosEndpointExtension
     schema: kubernetesEntityFactory(kubernetesStatefulSetsEntityType),
     endpoint: endpointDefinition
   };
-  kubeEntityCatalog.statefulSet = new StratosCatalogEntity<IFavoriteMetadata, KubernetesStatefulSet, KubeStatefulSetsActionBuilders>(definition, {
+  kubeEntityCatalog.statefulSet = new StratosCatalogEntity<IFavoriteMetadata, KubernetesStatefulSet, KubeStatefulSetsActionBuilders>(
+    definition, {
     actionBuilders: kubeStatefulSetsActionBuilders
   });
   return kubeEntityCatalog.statefulSet;
@@ -233,7 +238,8 @@ function generateDeploymentsEntity(endpointDefinition: StratosEndpointExtensionD
     schema: kubernetesEntityFactory(kubernetesDeploymentsEntityType),
     endpoint: endpointDefinition
   };
-  kubeEntityCatalog.deployment = new StratosCatalogEntity<IFavoriteMetadata, KubernetesDeployment, KubeDeploymentActionBuilders>(definition, {
+  kubeEntityCatalog.deployment = new StratosCatalogEntity<IFavoriteMetadata, KubernetesDeployment, KubeDeploymentActionBuilders>(
+    definition, {
     actionBuilders: kubeDeploymentActionBuilders
   });
   return kubeEntityCatalog.deployment;
@@ -296,7 +302,7 @@ function generateAnalysisReportsEntity(endpointDefinition: StratosEndpointExtens
   kubeEntityCatalog.analysisReport = new StratosCatalogEntity<undefined, any, AnalysisReportsActionBuilders>(definition, {
     actionBuilders: analysisReportsActionBuilders
   });
-  return kubeEntityCatalog.analysisReport
+  return kubeEntityCatalog.analysisReport;
 }
 
 function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {

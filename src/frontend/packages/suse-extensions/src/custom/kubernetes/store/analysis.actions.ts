@@ -31,12 +31,12 @@ abstract class AnalysisSingleEntityAction extends AnalysisAction implements Kube
 }
 
 
-/** 
+/**
  * Get the analysis reports for the given endpoint ID
  */
 export class GetAnalysisReports extends AnalysisPaginationAction {
   constructor(public kubeGuid: string) {
-    super(kubeGuid, GET_ANALYSIS_REPORTS_TYPES, kubeGuid)
+    super(kubeGuid, GET_ANALYSIS_REPORTS_TYPES, kubeGuid);
   }
   initialParams = {
     'order-direction': 'asc',

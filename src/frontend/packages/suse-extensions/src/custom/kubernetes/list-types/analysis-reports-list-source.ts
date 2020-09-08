@@ -10,7 +10,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import { isFetchingPage } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
-import { GetAnalysisReports } from '../store/anaylsis.actions';
+import { GetAnalysisReports } from '../store/analysis.actions';
 import { AnalysisReport } from '../store/kube.types';
 
 export class AnalysisReportsDataSource extends ListDataSource<AnalysisReport> {
@@ -52,12 +52,12 @@ export class AnalysisReportsDataSource extends ListDataSource<AnalysisReport> {
     kubeEntityCatalog.analysisReport.store.getPaginationMonitor(this.analysisAction.kubeGuid).pagination$.pipe(
       first(),
       map(isFetchingPage)
-    ).subscribe(isFetchingPage => {
-      if (!isFetchingPage) {
+    ).subscribe(isFetchingPageRes => {
+      if (!isFetchingPageRes) {
         ngZone.run(() => {
           store.dispatch(this.analysisAction);
         });
       }
-    })
+    });
   }
 }
