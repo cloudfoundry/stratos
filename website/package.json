@@ -10,6 +10,7 @@
     "deploy": "./deploy.sh",
     "version": "docusaurus docs:version",
     "versions": "./build-versions.sh",
+    "add-version": "./add-version.sh",
     "docusaurus": "docusaurus",
     "serve": "docusaurus serve"
   },
