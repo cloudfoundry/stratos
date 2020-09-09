@@ -23,7 +23,8 @@ function cleanUpBefore() (
 function gitClone() (
   rurl="$1" localdir="$2"
   echo "Cloning from $rurl into $localdir"
-  git clone --depth 1 --no-single-branch $rurl $localdir
+  # git clone --depth 1 --no-single-branch $rurl $localdir
+  git clone $rurl $localdir
   pushd $localdir/website > /dev/null
   npm install
   popd > /dev/null
