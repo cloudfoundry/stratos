@@ -129,8 +129,6 @@ import {
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 
-/* tslint:disable:max-line-length */
-
 @NgModule({
   imports: [
     CommonModule,

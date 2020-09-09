@@ -28,7 +28,7 @@ export interface ICellPermissionList<T> extends IUserRole<T> {
 }
 
 @Directive()
-export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<CfUser>> {
+export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIResource<CfUser>> {
   userEntity: BehaviorSubject<CfUser> = new BehaviorSubject(null);
 
   @Input('row')

@@ -96,7 +96,7 @@
   "devDependencies": {
     "@angular-builders/custom-webpack": "^9.1.0",
     "@angular-devkit/architect": "^0.901.7",
-    "@angular-devkit/build-angular": "~0.901.5",
+    "@angular-devkit/build-angular": "^0.901.12",
     "@angular-devkit/build-ng-packagr": "~0.901.5",
     "@angular-devkit/core": "^9.1.7",
     "@angular-devkit/schematics": "^9.1.5",

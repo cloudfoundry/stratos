@@ -30,12 +30,6 @@ import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../sto
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/manage-users-set-usernames.component';
 
-/* tslint:disable:max-line-length */
-
-
-
-/* tslint:enable:max-line-length */
-
 @Component({
   selector: 'app-manage-users-confirm',
   templateUrl: './manage-users-confirm.component.html',
@@ -84,8 +78,8 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 
   private updateChanges = new Subject();
   private nameCache: {
-    user: { [guid: string]: string },
-    role: { [guid: string]: string },
+    user: { [guid: string]: string, },
+    role: { [guid: string]: string, },
   } = {
       user: {},
       role: {}
@@ -129,7 +123,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     this.store.select(selectCfUsersRoles).pipe(
       first(),
     ).subscribe(usersRoles => this.store.dispatch(new UsersRolesClearUpdateState(usersRoles.changedRoles)));
-  }
+  };
 
   fetchUsername = (userGuid: string, users: APIResource<CfUser>[]): string => {
     let res = this.nameCache.user[userGuid];
@@ -139,11 +133,11 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     res = users.find(user => user.metadata.guid === userGuid).entity.username;
     this.nameCache.user[userGuid] = res;
     return res;
-  }
+  };
 
   fetchRoleName = (roleName: OrgUserRoleNames | SpaceUserRoleNames, isOrg: boolean): string => {
     return isOrg ? UserRoleLabels.org.short[roleName] : UserRoleLabels.space.short[roleName];
-  }
+  };
 
   private createCfObs() {
     this.cfGuid$ = this.store.select(selectCfUsersRoles).pipe(
