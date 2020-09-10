@@ -115,7 +115,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
       step.busy = true;
-      const obs$ = step.onNext();
+      const obs$ = step.onNext(this.currentIndex, step);
       if (!(obs$ instanceof Observable)) {
         return;
       }
