@@ -39,7 +39,7 @@ export class KubernetesEndpointsListConfigService implements IListConfig<Endpoin
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
-    endpointsListConfigService: EndpointsListConfigService
+    endpointsListConfigService: EndpointsListConfigService,
   ) {
     this.columns = endpointsListConfigService.columns.filter(column => {
       return column.columnId !== 'type';
@@ -49,7 +49,7 @@ export class KubernetesEndpointsListConfigService implements IListConfig<Endpoin
       this,
       paginationMonitorFactory,
       entityMonitorFactory,
-      internalEventMonitorFactory
+      internalEventMonitorFactory,
     );
   }
   public getColumns = () => this.columns;

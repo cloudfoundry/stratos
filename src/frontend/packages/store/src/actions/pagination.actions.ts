@@ -69,7 +69,12 @@ export class CreatePagination extends BasePaginationAction implements Action {
   /**
    * @param seed The pagination key for the section we should use as a seed when creating the new pagination section.
    */
-  constructor(pEntityConfig: Partial<EntityCatalogEntityConfig>, public paginationKey: string, public seed?: string) {
+  constructor(
+    pEntityConfig: Partial<EntityCatalogEntityConfig>,
+    public paginationKey: string,
+    public seed?: string,
+    public initialParams?: PaginationParam
+  ) {
     super(pEntityConfig);
   }
   type = CREATE_PAGINATION;

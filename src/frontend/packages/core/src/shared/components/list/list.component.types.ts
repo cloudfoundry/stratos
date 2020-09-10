@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import { Injectable, Type } from '@angular/core';
 import * as moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -13,7 +13,6 @@ import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
-import { Injectable } from "@angular/core";
 import { CardCell } from './list.types';
 
 export enum ListViewTypes {
@@ -204,7 +203,7 @@ export class MultiFilterManager<T> {
   public filterIsReady$: Observable<boolean>;
   public filterItems$: Observable<IListMultiFilterConfigItem[]>;
   public hasItems$: Observable<boolean>;
-  public hasOneItem$: Observable<boolean>;
+  public hasOneOrLessItems$: Observable<boolean>;
   public value: string;
 
   public filterKey: string;
@@ -217,7 +216,7 @@ export class MultiFilterManager<T> {
     this.filterKey = this.multiFilterConfig.key;
     this.allLabel = multiFilterConfig.allLabel || 'All';
     this.filterItems$ = this.getItemObservable(multiFilterConfig);
-    this.hasOneItem$ = this.filterItems$.pipe(map(items => items.length === 1));
+    this.hasOneOrLessItems$ = this.filterItems$.pipe(map(items => items.length <= 1));
     this.hasItems$ = this.filterItems$.pipe(map(items => !!items.length));
     this.filterIsReady$ = this.getReadyObservable(multiFilterConfig, dataSource, this.hasItems$);
   }

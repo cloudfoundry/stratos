@@ -18,7 +18,8 @@ export class EndpointsDataSource extends BaseEndpointsDataSource {
     listConfig: IListConfig<EndpointModel>,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
-    internalEventMonitorFactory: InternalEventMonitorFactory
+    internalEventMonitorFactory: InternalEventMonitorFactory,
+    filterByType = false
   ) {
     super(
       store,
@@ -28,7 +29,8 @@ export class EndpointsDataSource extends BaseEndpointsDataSource {
       paginationMonitorFactory,
       entityMonitorFactory,
       internalEventMonitorFactory,
-      false
+      false,
+      filterByType
     );
   }
 }

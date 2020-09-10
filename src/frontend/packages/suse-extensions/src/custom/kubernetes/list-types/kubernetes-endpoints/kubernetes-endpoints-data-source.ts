@@ -33,7 +33,7 @@ export class KubernetesEndpointsDataSource extends BaseEndpointsDataSource {
       'k8s',
       paginationMonitorFactory,
       entityMonitorFactory,
-      internalEventMonitorFactory
+      internalEventMonitorFactory,
     );
   }
 

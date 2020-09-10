@@ -172,7 +172,7 @@ export class MonocularRepositoryListConfig implements IListConfig<EndpointModel>
       paginationMonitorFactory,
       entityMonitorFactory,
       internalEventMonitorFactory,
-      ngZone
+      ngZone,
     );
   }
 
