@@ -8,6 +8,7 @@ import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
+import { ApiRequestTypes } from '../../../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../../../../../../store/src/types/api.types';
 import {
   EntityRequestAction,
@@ -16,9 +17,19 @@ import {
   WrapperRequestActionSuccess,
 } from '../../../../../../store/src/types/request.types';
 import { HelmEffects } from '../../../helm/store/helm.effects';
-import { HelmRelease } from '../workload.types';
+import { HelmRelease, HelmReleaseHistory } from '../workload.types';
+import { workloadsEntityCatalog } from './../workloads-entity-catalog';
 import { getHelmReleaseId } from './workloads-entity-factory';
-import { GET_HELM_RELEASE, GET_HELM_RELEASES, GetHelmRelease, GetHelmReleases } from './workloads.actions';
+import {
+  GET_HELM_RELEASE,
+  GET_HELM_RELEASE_HISTORY,
+  GET_HELM_RELEASES,
+  GetHelmRelease,
+  GetHelmReleaseHistory,
+  GetHelmReleases,
+  UPGRADE_HELM_RELEASE,
+  UpgradeHelmRelease,
+} from './workloads.actions';
 
 @Injectable()
 export class WorkloadsEffects {
@@ -82,7 +93,77 @@ export class WorkloadsEffects {
     })
   );
 
-  private mapHelmRelease(data, endpointId, guid: string) {
+  @Effect()
+  fetchHelmReleaseHistory$ = this.actions$.pipe(
+    ofType<GetHelmReleaseHistory>(GET_HELM_RELEASE_HISTORY),
+    flatMap(action => {
+      const entityKey = entityCatalog.getEntityKey(action);
+      return this.makeRequest(
+        action,
+        `/pp/${this.proxyAPIVersion}/helm/releases/${action.endpointGuid}/${action.namespace}/${action.releaseTitle}/history`,
+        (response) => {
+          const processedData = {
+            entities: { [entityKey]: {} },
+            result: []
+          } as NormalizedResponse;
+
+          const data: HelmReleaseHistory = {
+            endpointId: action.endpointGuid,
+            releaseTitle: action.releaseTitle,
+            revisions: []
+          };
+
+          for (const version of response) {
+            data.revisions.push({
+              ...version.info,
+              revision: version.version,
+              chart: version.chart.metadata,
+              values: version.chart.values
+            });
+          }
+          // Store the data against the release guid
+          processedData.entities[entityKey][action.guid] = data;
+          processedData.result.push(action.guid);
+          return processedData;
+        }, [action.endpointGuid]);
+    })
+  );
+
+  @Effect()
+  helmUpgrade$ = this.actions$.pipe(
+    ofType<UpgradeHelmRelease>(UPGRADE_HELM_RELEASE),
+    flatMap(action => {
+      const requestType: ApiRequestTypes = 'update';
+      const url = `/pp/v1//helm/releases/${action.endpointGuid}/${action.namespace}/${action.releaseTitle}`;
+      this.store.dispatch(new StartRequestAction(action, requestType));
+      // Refresh the workload after upgrade
+      const fetchAction = workloadsEntityCatalog.release.actions.get(action.releaseTitle, action.endpointGuid,
+        { namespace: action.namespace });
+      return this.httpClient.post(url, action.values).pipe(
+        mergeMap(() => {
+          return [
+            fetchAction,
+            new WrapperRequestActionSuccess(null, action)
+          ];
+        }),
+        catchError(error => {
+          const { status, message } = HelmEffects.createHelmError(error);
+          const errorMessage = `Failed to upgrade helm release: ${message}`;
+          return [
+            new WrapperRequestActionFailed(errorMessage, action, requestType, {
+              endpointIds: [action.endpointGuid],
+              url: error.url || url,
+              eventCode: status,
+              message: errorMessage,
+              error
+            })
+          ];
+        })
+      );
+    })
+  );
+
+private mapHelmRelease(data, endpointId, guid: string) {
     const helmRelease: HelmRelease = {
       ...data,
       endpointId

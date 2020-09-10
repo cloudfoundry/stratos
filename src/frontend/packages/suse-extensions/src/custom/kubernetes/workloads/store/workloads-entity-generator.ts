@@ -7,6 +7,7 @@ import { IFavoriteMetadata } from '../../../../../../store/src/types/user-favori
 import { kubernetesEntityFactory } from '../../kubernetes-entity-factory';
 import { HelmRelease, HelmReleaseGraph, HelmReleaseResources } from '../workload.types';
 import { workloadsEntityCatalog } from '../workloads-entity-catalog';
+import { HelmReleaseHistory } from './../workload.types';
 import {
   WorkloadGraphBuilders,
   workloadGraphBuilders,
@@ -14,15 +15,24 @@ import {
   workloadReleaseBuilders,
   WorkloadResourceBuilders,
   workloadResourceBuilders,
+  WorkloadResourceHistoryBuilders,
+  workloadResourceHistoryBuilders,
 } from './workload-action-builders';
-import { helmReleaseEntityKey, helmReleaseGraphEntityType, helmReleaseResourceEntityType } from './workloads-entity-factory';
+import {
+  helmReleaseEntityKey,
+  helmReleaseGraphEntityType,
+  helmReleaseHistoryEntityType,
+  helmReleaseResourceEntityType,
+} from './workloads-entity-factory';
 
 
 export function generateWorkloadsEntities(endpointDefinition: StratosEndpointExtensionDefinition): StratosBaseCatalogEntity[] {
+
   return [
     generateReleaseEntity(endpointDefinition),
     generateReleaseGraphEntity(endpointDefinition),
     generateReleaseResourceEntity(endpointDefinition),
+    generateReleaseHistoryEntity(endpointDefinition)
   ];
 }
 
@@ -69,5 +79,20 @@ function generateReleaseResourceEntity(endpointDefinition: StratosEndpointExtens
     }
   );
   return workloadsEntityCatalog.resource;
+}
+
+function generateReleaseHistoryEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  const definition = {
+    type: helmReleaseHistoryEntityType,
+    schema: kubernetesEntityFactory(helmReleaseHistoryEntityType),
+    endpoint: endpointDefinition
+  };
+  workloadsEntityCatalog.history = new StratosCatalogEntity<IFavoriteMetadata, HelmReleaseHistory, WorkloadResourceHistoryBuilders>(
+    definition,
+    {
+      actionBuilders: workloadResourceHistoryBuilders
+    }
+  );
+  return workloadsEntityCatalog.history;
 }
 

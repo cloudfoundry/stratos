@@ -178,8 +178,10 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/helm/releases", c.ListReleases)
 	echoGroup.POST("/helm/install", c.InstallRelease)
 	echoGroup.DELETE("/helm/releases/:endpoint/:namespace/:name", c.DeleteRelease)
+	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name/history", c.GetReleaseHistory)
 	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name/status", c.GetReleaseStatus)
 	echoGroup.GET("/helm/releases/:endpoint/:namespace/:name", c.GetRelease)
+	echoGroup.POST("/helm/releases/:endpoint/:namespace/:name", c.UpgradeRelease)
 
 	// Kube Terminal
 	if c.kubeTerminal != nil {

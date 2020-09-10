@@ -1,5 +1,5 @@
 import { OrchestratedActionBuilders } from '../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { GetHelmVersions, GetMonocularCharts, HelmInstall } from './helm.actions';
+import { GetHelmChartVersions, GetHelmVersions, GetMonocularCharts, HelmInstall } from './helm.actions';
 import { HelmInstallValues } from './helm.types';
 
 export interface HelmChartActionBuilders extends OrchestratedActionBuilders {
@@ -20,4 +20,12 @@ export interface HelmVersionActionBuilders extends OrchestratedActionBuilders {
 
 export const helmVersionActionBuilders: HelmVersionActionBuilders = {
   getMultiple: () => new GetHelmVersions()
+}
+
+export interface HelmChartVersionsActionBuilders extends OrchestratedActionBuilders {
+  getMultiple: (repoName: string, chartName: string) => GetHelmChartVersions
+}
+
+export const helmChartVersionsActionBuilders: HelmChartVersionsActionBuilders = {
+  getMultiple: (repoName: string, chartName: string) => new GetHelmChartVersions(repoName, chartName)
 }

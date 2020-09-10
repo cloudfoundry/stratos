@@ -4,6 +4,11 @@
     <span>Delete</span>
   </button>
 
+  <button *ngIf="canUpgrade$ | async" mat-button name="upgrade" [routerLink]="['../upgrade']" matTooltip="Upgrade">
+    <mat-icon>vertical_align_top</mat-icon>
+    <span>Upgrade</span>
+  </button>
+
   <app-analysis-report-runner [kubeId]="helmReleaseHelper.endpointGuid" [namespace]="helmReleaseHelper.namespace"
     [app]="helmReleaseHelper.releaseTitle">
   </app-analysis-report-runner>
@@ -16,35 +21,41 @@
 
 <app-loading-page [isLoading]="isBusy$" [text]="loadingMessage">
   <ng-container *ngIf="helmReleaseHelper.release$ | async as release">
-    <app-entity-summary-title [imagePath]="release.chart.metadata.icon" [title]="release.name"
+    <div>
+      <div *ngIf="hasUpgrade$ | async as upgrade" class="chart-upgrade">
+        Upgrade available: {{ upgrade }}
+      </div>
+      <app-entity-summary-title [imagePath]="release.chart.metadata.icon" [title]="release.name"
       [subText]="release.chart.metadata.description" [subTitle]="release.chart.metadata.name"
       [fallBackIcon]="'workloads'" [fallBackIconFont]="'stratos-icons'">
-      <div class="summary">
-        <div class="chart-details">
-          <app-metadata-item class="chart-details__item" label="Chart Version">{{ release.chart.metadata.version }}
-          </app-metadata-item>
-          <app-metadata-item class="chart-details__item" label="Application Version">
-            {{ release.chart.metadata.appVersion || '-' }}
-          </app-metadata-item>
-          <app-metadata-item class="chart-details__item" label="Cluster">
-            <a [routerLink]="createClusterLink()">{{ getClusterName() | async }}</a>
-          </app-metadata-item>
-          <app-metadata-item class="chart-details__item" label="Namespace">
-            <a [routerLink]="createNamespaceLink(release.namespace)">{{ release.namespace }}</a>
-          </app-metadata-item>
-          <app-metadata-item class="chart-details__item" label="Release Version">{{ release.version }}
-          </app-metadata-item>
-          <app-metadata-item class="chart-details__item" label="Status">{{ release.status | titlecase }}
-          </app-metadata-item>
-          <app-metadata-item class="chart-details__item" label="First Deployed">
-            {{ release.info.first_deployed | date:'medium' }}
-          </app-metadata-item>
-          <app-metadata-item class="chart-details__item" label="Last Deployed">
-            {{ release.info.last_deployed | date:'medium' }}
-          </app-metadata-item>
+        <div class="summary">
+          <div class="chart-details">
+            <app-metadata-item class="chart-details__item" label="Chart Version">{{ release.chart.metadata.version }}
+            </app-metadata-item>
+            <app-metadata-item class="chart-details__item" label="Application Version">
+              {{ release.chart.metadata.appVersion || '-' }}
+            </app-metadata-item>
+            <app-metadata-item class="chart-details__item" label="Cluster">
+              <a [routerLink]="createClusterLink()">{{ getClusterName() | async }}</a>
+            </app-metadata-item>
+            <app-metadata-item class="chart-details__item" label="Namespace">
+              <a [routerLink]="createNamespaceLink(release.namespace)">{{ release.namespace }}</a>
+            </app-metadata-item>
+            <app-metadata-item class="chart-details__item" label="Release Version">{{ release.version }}
+            </app-metadata-item>
+            <app-metadata-item class="chart-details__item" label="Status">{{ release.status | titlecase }}
+            </app-metadata-item>
+            <app-metadata-item class="chart-details__item" label="First Deployed">
+              {{ release.info.first_deployed | date:'medium' }}
+            </app-metadata-item>
+            <app-metadata-item class="chart-details__item" label="Last Deployed">
+              {{ release.info.last_deployed | date:'medium' }}
+            </app-metadata-item>
+          </div>
         </div>
-      </div>
-    </app-entity-summary-title>
+      </app-entity-summary-title>
+    </div>
+      
     <div *ngIf="hasResources$ | async; else loadingResources" class="resources">
       <app-metadata-item class="chart-details__item" label="Pods and Containers"></app-metadata-item>
       <app-tile-grid>

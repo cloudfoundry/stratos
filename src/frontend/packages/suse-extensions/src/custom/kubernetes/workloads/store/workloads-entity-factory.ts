@@ -7,6 +7,7 @@ export const helmReleasePodEntityType = 'helmReleasePod';
 export const helmReleaseServiceEntityType = 'helmReleaseService';
 export const helmReleaseGraphEntityType = 'helmReleaseGraph';
 export const helmReleaseResourceEntityType = 'helmReleaseResource';
+export const helmReleaseHistoryEntityType = 'helmReleaseHistory';
 
 const separator = ':';
 export const getHelmReleaseDetailsFromGuid = (guid: string) => {
@@ -48,8 +49,16 @@ entityCache[helmReleaseResourceEntityType] = new KubernetesEntitySchema(
   { idAttribute: getHelmReleaseResourceIdByObj }
 );
 
+entityCache[helmReleaseHistoryEntityType] = new KubernetesEntitySchema(
+  helmReleaseHistoryEntityType,
+  {},
+  { idAttribute: getHelmReleaseResourceIdByObj }
+);
+
 Object.entries(entityCache).forEach(([key, workloadSchema]) => addKubernetesEntitySchema(key, workloadSchema));
+
 
 export const createHelmReleaseEntities = (): { [cacheName: string]: EntitySchema; } => {
   return entityCache;
 };
+

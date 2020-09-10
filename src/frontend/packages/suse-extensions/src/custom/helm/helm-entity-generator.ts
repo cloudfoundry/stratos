@@ -11,14 +11,17 @@ import {
   helmEntityFactory,
   helmVersionsEntityType,
   monocularChartsEntityType,
+  monocularChartVersionsEntityType,
 } from './helm-entity-factory';
 import {
   HelmChartActionBuilders,
   helmChartActionBuilders,
+  HelmChartVersionsActionBuilders,
+  helmChartVersionsActionBuilders,
   HelmVersionActionBuilders,
   helmVersionActionBuilders,
 } from './store/helm.action-builders';
-import { HelmVersion, MonocularChart } from './store/helm.types';
+import { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.types';
 
 
 export function generateHelmEntities(): StratosBaseCatalogEntity[] {
@@ -35,10 +38,12 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
     authTypes: [],
     renderPriority: 10,
   };
+
   return [
     generateEndpointEntity(endpointDefinition),
     generateChartEntity(endpointDefinition),
     generateVersionEntity(endpointDefinition),
+    generateChartVersionsEntity(endpointDefinition),
   ];
 }
 
@@ -78,6 +83,21 @@ function generateVersionEntity(endpointDefinition: StratosEndpointExtensionDefin
     }
   );
   return helmEntityCatalog.version;
+}
+
+function generateChartVersionsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  const definition = {
+    type: monocularChartVersionsEntityType,
+    schema: helmEntityFactory(monocularChartVersionsEntityType),
+    endpoint: endpointDefinition
+  };
+  helmEntityCatalog.chartVersions = new StratosCatalogEntity<IFavoriteMetadata, MonocularVersion[], HelmChartVersionsActionBuilders>(
+    definition,
+    {
+      actionBuilders: helmChartVersionsActionBuilders
+    }
+  );
+  return helmEntityCatalog.chartVersions;
 }
 
 

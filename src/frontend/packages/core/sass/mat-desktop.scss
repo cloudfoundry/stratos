@@ -63,6 +63,10 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
     font-size: $desktop-font-size;
   }
 
+  .mat-slide-toggle-label {
+    font-size: $desktop-font-size;
+  }
+
   // Allow a slightly-wider snackbar on desktop
   .mat-snack-bar-container {
     max-width: 40vw;

@@ -50,7 +50,7 @@
                 <mat-select id="{{multiFilterManager.filterKey}}" matInput [(value)]="multiFilterManager.value"
                   [disabled]="!(multiFilterManager.filterIsReady$ | async)"
                   (selectionChange)="multiFilterManager.selectItem($event.value)">
-                  <mat-option>{{ multiFilterManager.allLabel }}</mat-option>
+                  <mat-option *ngIf="!multiFilterManager.hideAllOption">{{ multiFilterManager.allLabel }}</mat-option>
                   <mat-option *ngFor="let selectItem of multiFilterManager.filterItems$ | async"
                     [value]="selectItem.value">
                     {{selectItem.label}}

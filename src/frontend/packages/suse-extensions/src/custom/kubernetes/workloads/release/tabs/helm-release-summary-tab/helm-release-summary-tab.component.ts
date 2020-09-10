@@ -47,6 +47,11 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
   public path: string;
 
+  public hasUpgrade$: Observable<string>;
+
+  // Can we upgrade? Yes as long as the Helm Chart can be found
+  public canUpgrade$: Observable<boolean>;
+
   public podChartColors = [
     {
       name: 'Running',
@@ -114,6 +119,10 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       })
       )
     );
+
+    this.hasUpgrade$ = this.helmReleaseHelper.hasUpgrade().pipe(map(v => v ? v.version : null));
+
+    this.canUpgrade$ = this.helmReleaseHelper.hasUpgrade(true).pipe(map(v => !!v));
 
     this.resources$ = combineLatest(
       this.helmReleaseHelper.fetchReleaseGraph(),
@@ -217,7 +226,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
           const action = workloadsEntityCatalog.release.actions.getMultiple();
           this.store.dispatch(new ClearPaginationOfType(action));
           this.completeDelete();
-          this.store.dispatch(new RouterNav({ path: ['workloads'] }));
+          this.store.dispatch(new RouterNav({ path: ['./workloads'] }));
         }
       });
     });

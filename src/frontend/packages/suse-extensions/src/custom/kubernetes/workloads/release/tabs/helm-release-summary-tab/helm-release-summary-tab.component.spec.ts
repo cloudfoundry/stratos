@@ -2,9 +2,10 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TabNavService } from 'frontend/packages/core/tab-nav.service';
 
 import { SidePanelService } from '../../../../../../../../core/src/shared/services/side-panel.service';
-import { HelmReleaseProviders, KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
+import { HelmReleaseProviders, KubeBaseGuidMock } from '../../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
+import { WorkloadsBaseTestingModule } from '../../../workloads.testing.module';
 import {
   AnalysisReportSelectorComponent,
 } from './../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
@@ -17,7 +18,7 @@ describe('HelmReleaseSummaryTabComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...KubernetesBaseTestModules
+        ...WorkloadsBaseTestingModule
       ],
       declarations: [HelmReleaseSummaryTabComponent, AnalysisReportSelectorComponent],
       providers: [

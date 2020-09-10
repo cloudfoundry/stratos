@@ -1,3 +1,6 @@
+import { Chart } from './../monocular/shared/models/chart';
+import { ChartVersion } from './../monocular/shared/models/chart-version';
+
 export interface MonocularRepository {
   name: string;
   url: string;
@@ -7,26 +10,18 @@ export interface MonocularRepository {
   status: string;
 }
 
-export interface MonocularChart {
-  id: string;
+// Reuse types from the Monocular codebase
+export interface MonocularChart extends Chart {
   name: string;
-  attributes: {
-    description: string;
-    home: string;
-    icon: string;
-    keywords: string[];
-    repo: {
-      name: string;
-      url: string;
-    };
-  };
-  relationships: {
-    latestChartVersion: {
-      data: {
-        version: string
-      }
-    }
-  };
+}
+
+export type MonocularVersion = ChartVersion;
+
+// Basic Chart Metadata
+export interface ChartMetadata {
+  name: string;
+  description: string;
+  sources: string[];
 }
 
 export interface HelmVersion {
@@ -50,12 +45,19 @@ export enum HelmStatus {
   Pending_Rollback = 8
 }
 
-
-
 export interface HelmInstallValues {
   endpoint: string;
   releaseName: string;
   releaseNamespace: string;
   values: string;
   chart: string;
+}
+
+export interface HelmUpgradeValues {
+  chart: {
+    name: string;
+    repo: string;
+    version: string;
+  };
+  restartPods?: boolean;
 }

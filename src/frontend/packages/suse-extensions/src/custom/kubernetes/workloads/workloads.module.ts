@@ -7,6 +7,9 @@ import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { KubernetesModule } from '../kubernetes.module';
 import { HelmReleaseCardComponent } from './list-types/helm-release-card/helm-release-card.component';
 import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/helm-release-tab-base.component';
+import {
+  HelmReleaseAnalysisTabComponent,
+} from './release/tabs/helm-release-analysis-tab/helm-release-analysis-tab.component';
 import { HelmReleaseNotesTabComponent } from './release/tabs/helm-release-notes-tab/helm-release-notes-tab.component';
 import { HelmReleasePodsTabComponent } from './release/tabs/helm-release-pods/helm-release-pods-tab.component';
 import {
@@ -17,8 +20,9 @@ import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summ
 import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
 import { HelmReleasesTabComponent } from './releases-tab/releases-tab.component';
 import { WorkloadsStoreModule } from './store/workloads.store.module';
+import { UpgradeReleaseComponent } from './upgrade-release/upgrade-release.component';
 import { WorkloadsRouting } from './workloads.routing';
-import { HelmReleaseAnalysisTabComponent } from './release/tabs/helm-release-analysis-tab/helm-release-analysis-tab.component';
+import { HelmReleaseHistoryTabComponent } from './release/tabs/helm-release-history-tab/helm-release-history-tab.component';
 import { WorkloadLiveReloadComponent } from './release/workload-live-reload/workload-live-reload.component';
 
 @NgModule({
@@ -29,7 +33,7 @@ import { WorkloadLiveReloadComponent } from './release/workload-live-reload/work
     WorkloadsStoreModule,
     WorkloadsRouting,
     NgxGraphModule,
-    KubernetesModule
+    KubernetesModule,
   ],
   declarations: [
     HelmReleasesTabComponent,
@@ -43,6 +47,8 @@ import { WorkloadLiveReloadComponent } from './release/workload-live-reload/work
     HelmReleaseCardComponent,
     HelmReleaseAnalysisTabComponent,
     WorkloadLiveReloadComponent,
+    UpgradeReleaseComponent,
+    HelmReleaseHistoryTabComponent,
   ],
   entryComponents: [
     HelmReleaseCardComponent

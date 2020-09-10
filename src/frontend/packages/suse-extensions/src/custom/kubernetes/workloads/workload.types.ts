@@ -21,7 +21,11 @@ export interface HelmRelease {
   chart: {
     values: any;
     metadata: {
+      name: string;
+      version: string;
       icon?: string;
+      description: string;
+      sources: string[];
     };
   };
 }
@@ -65,6 +69,19 @@ export interface HelmReleaseGraphLink {
 export interface HelmReleaseResources extends HelmReleaseEntity {
   data: HelmReleaseResource[],
   kind: string
+};
+
+export interface HelmReleaseRevision {
+  first_deployed: string;
+  last_deployed: string;
+  deleted: boolean;
+  description: string;
+  status: string;
+  revision: number;
+}
+
+export interface HelmReleaseHistory extends HelmReleaseEntity {
+  revisions: HelmReleaseRevision[],
 };
 
 export interface HelmReleaseKubeAPIResource extends KubeAPIResource {

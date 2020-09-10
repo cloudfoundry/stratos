@@ -5,6 +5,7 @@ import { HelmVersion, MonocularChart } from './store/helm.types';
 
 export const helmVersionsEntityType = 'helmVersions';
 export const monocularChartsEntityType = 'monocularCharts';
+export const monocularChartVersionsEntityType = 'monocularChartVersions';
 
 export const getMonocularChartId = (entity: MonocularChart) => entity.id;
 export const getHelmVersionId = (entity: HelmVersion) => entity.endpointId;
@@ -41,6 +42,12 @@ entityCache[monocularChartsEntityType] = new HelmEntitySchema(
 
 entityCache[helmVersionsEntityType] = new HelmEntitySchema(
   helmVersionsEntityType,
+  {},
+  { idAttribute: getHelmVersionId }
+);
+
+entityCache[monocularChartVersionsEntityType] = new HelmEntitySchema(
+  monocularChartVersionsEntityType,
   {},
   { idAttribute: getHelmVersionId }
 );

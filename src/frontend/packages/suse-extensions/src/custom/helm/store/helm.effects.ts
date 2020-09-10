@@ -23,7 +23,9 @@ import { helmEntityCatalog } from '../helm-entity-catalog';
 import { getHelmVersionId, getMonocularChartId, HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 import {
   GET_HELM_VERSIONS,
+  GET_MONOCULAR_CHART_VERSIONS,
   GET_MONOCULAR_CHARTS,
+  GetHelmChartVersions,
   GetHelmVersions,
   GetMonocularCharts,
   HELM_INSTALL,
@@ -123,6 +125,32 @@ export class HelmEffects {
           processedData.entities[entityKey][getHelmVersionId(version)] = version;
           processedData.result.push(endpoint);
         });
+        return processedData;
+      }, []);
+    })
+  );
+
+  @Effect()
+  fetchChartVersions$ = this.actions$.pipe(
+    ofType<GetHelmChartVersions>(GET_MONOCULAR_CHART_VERSIONS),
+    flatMap(action => {
+      const entityKey = entityCatalog.getEntityKey(action);
+      return this.makeRequest(action, `/pp/${this.proxyAPIVersion}/chartsvc/v1/charts/${action.repoName}/${action.chartName}/versions`,
+      (response) => {
+        const base = {
+          entities: { [entityKey]: {} },
+          result: []
+        } as NormalizedResponse;
+
+        const items = response.data as Array<any>;
+        const processedData = items.reduce((res, data) => {
+          const id = getMonocularChartId(data);
+          res.entities[entityKey][id] = data;
+          // Promote the name to the top-level object for simplicity
+          data.name = data.attributes.name;
+          res.result.push(id);
+          return res;
+        }, base);
         return processedData;
       }, []);
     })
