@@ -88,14 +88,14 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
     },
     {
       columnId: 'version',
-      headerCell: () => 'Version',
+      headerCell: () => 'Chart Version',
       cellDefinition: {
-        valuePath: 'version'
+        valuePath: 'chart.metadata.version'
       },
       sort: {
         type: 'sort',
         orderKey: 'version',
-        field: 'version'
+        field: 'chart.metadata.version'
       },
       cellFlex: '1'
     },
