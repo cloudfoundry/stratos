@@ -64,7 +64,7 @@ export class ApplicationDeploySourceTypes {
       disabledText: 'The selected Cloud Foundry cannot deploy Docker images. Please check that the Diego Docker feature flag is enabled'
     },
     {
-      name: 'Application Archive File',
+      name: 'Application Archive',
       id: DEPLOY_TYPES_IDS.FILE,
       helpText: 'Please select the archive file that contains the application you would like to deploy.',
       graphic: { matIcon: 'unarchive' }

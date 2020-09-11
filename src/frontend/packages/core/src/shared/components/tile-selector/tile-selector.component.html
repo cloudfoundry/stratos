@@ -11,7 +11,7 @@
 </div>
 
 <ng-template #tile let-options="options" let-selected="selected">
-  <app-tile-selector-tile *ngFor="let tile of options"
-    (tileSelect)="selectionChange(tile)" [tile]="tile" [active]="selected === tile || !selected">
+  <app-tile-selector-tile *ngFor="let tile of options" (tileSelect)="selectionChange(tile)" [tile]="tile"
+    [active]="selected === tile || !selected" [smaller]="smallerTiles">
   </app-tile-selector-tile>
 </ng-template>

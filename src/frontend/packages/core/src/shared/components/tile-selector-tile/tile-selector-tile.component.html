@@ -1,13 +1,16 @@
-<div *ngIf="tile" class="tile-selector" [ngClass]="{'tile-selector__active': active, 'tile-selector__taller': !!tile.description}" (click)="onClick(tile)">
-  <div class="tile-selector__header">
-    <mat-icon *ngIf="tile.graphic.matIcon; else imgIcon" class="tile-selector__icon"
-      [fontSet]="tile.graphic.matIconFont"> {{ tile.graphic.matIcon }}</mat-icon>
-    <ng-template #imgIcon>
-      <img src="{{tile.graphic.location}}" />
-    </ng-template>
+<div *ngIf="tile" class="tile-selector-parent" [ngClass]="{'smaller': smaller}">
+  <div class="tile-selector" [ngClass]="{'tile-selector__active': active, 'tile-selector__taller': !!tile.description}"
+    (click)="onClick(tile)">
+    <div class="tile-selector__header">
+      <mat-icon *ngIf="tile.graphic.matIcon; else imgIcon" class="tile-selector__icon"
+        [fontSet]="tile.graphic.matIconFont"> {{ tile.graphic.matIcon }}</mat-icon>
+      <ng-template #imgIcon>
+        <img src="{{tile.graphic.location}}" />
+      </ng-template>
+    </div>
+    <div class="tile-selector__content">
+      <h3>{{ tile.label }}</h3>
+    </div>
+    <div class="tile-selector__description" *ngIf="tile && tile.description">{{ tile.description }}</div>
   </div>
-  <div class="tile-selector__content">
-    <h3>{{ tile.label }}</h3>
-  </div>
-  <div class="tile-selector__description" *ngIf="tile && tile.description">{{ tile.description }}</div>
 </div>
