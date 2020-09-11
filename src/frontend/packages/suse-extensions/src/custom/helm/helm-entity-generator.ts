@@ -1,18 +1,28 @@
+import { Store } from '@ngrx/store';
+import { of } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { IListAction } from '../../../../core/src/shared/components/list/list.component.types';
+import { AppState } from '../../../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
 import { helmEntityCatalog } from './helm-entity-catalog';
 import {
   HELM_ENDPOINT_TYPE,
+  HELM_HUB_ENDPOINT_TYPE,
+  HELM_REPO_ENDPOINT_TYPE,
   helmEntityFactory,
   helmVersionsEntityType,
   monocularChartsEntityType,
   monocularChartVersionsEntityType,
 } from './helm-entity-factory';
+import { HelmHubRegistrationComponent } from './helm-hub-registration/helm-hub-registration.component';
 import {
   HelmChartActionBuilders,
   helmChartActionBuilders,
@@ -25,18 +35,52 @@ import { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.type
 
 
 export function generateHelmEntities(): StratosBaseCatalogEntity[] {
+  const helmRepoRenderPriority = 10;
   const endpointDefinition: StratosEndpointExtensionDefinition = {
     type: HELM_ENDPOINT_TYPE,
-    label: 'Helm Repository',
-    labelPlural: 'Helm Repositories',
+    logoUrl: '/core/assets/custom/helm.svg',
+    authTypes: [],
+    registeredLimit: 0,
     icon: 'helm',
     iconFont: 'stratos-icons',
-    logoUrl: '/core/assets/custom/helm.svg',
-    urlValidation: undefined,
-    unConnectable: true,
-    techPreview: false,
-    authTypes: [],
-    renderPriority: 10,
+    label: 'Helm',
+    labelPlural: 'Helms',
+    subTypes: [
+      {
+        type: HELM_REPO_ENDPOINT_TYPE,
+        label: 'Helm Repository',
+        labelPlural: 'Helm Repositories',
+        logoUrl: '/core/assets/custom/helm.svg',
+        urlValidation: undefined,
+        unConnectable: true,
+        techPreview: false,
+        authTypes: [],
+        endpointListActions: (store: Store<AppState>): IListAction<EndpointModel>[] => {
+          return [{
+            action: (item: EndpointModel) => helmEntityCatalog.chart.api.synchronise(item),
+            label: 'Synchronize',
+            description: '',
+            createVisible: row => row.pipe(
+              map(item => item.cnsi_type === HELM_ENDPOINT_TYPE && item.sub_type === HELM_REPO_ENDPOINT_TYPE)
+            ),
+            createEnabled: () => of(true)
+          }];
+        },
+        renderPriority: helmRepoRenderPriority,
+        registeredLimit: null,
+      },
+      {
+        type: HELM_HUB_ENDPOINT_TYPE,
+        label: 'Helm Hub',
+        labelPlural: 'Helm Hubs',
+        authTypes: [],
+        unConnectable: true,
+        logoUrl: '/core/assets/custom/helm.svg',
+        renderPriority: helmRepoRenderPriority + 1,
+        registrationComponent: HelmHubRegistrationComponent,
+        registeredLimit: 1,
+      },
+    ],
   };
 
   return [
@@ -50,7 +94,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   helmEntityCatalog.endpoint = new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/monocular/repos/${metadata.guid}`,
+    metadata => `/monocular/charts`,
   );
   return helmEntityCatalog.endpoint;
 }

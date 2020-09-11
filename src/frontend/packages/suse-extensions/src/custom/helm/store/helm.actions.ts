@@ -1,3 +1,6 @@
+import { Action } from '@ngrx/store';
+
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../../../store/src/types/request.types';
 import {
@@ -25,6 +28,8 @@ export const HELM_INSTALL = '[Helm] Install';
 export const HELM_INSTALL_SUCCESS = '[Helm] Install Success';
 export const HELM_INSTALL_FAILURE = '[Helm] Install Failure';
 
+export const HELM_SYNCHRONISE = '[Helm] Synchronise';
+
 export interface MonocularPaginationAction extends PaginatedAction, EntityRequestAction { }
 
 export class GetMonocularCharts implements MonocularPaginationAction {
@@ -46,6 +51,15 @@ export class GetMonocularCharts implements MonocularPaginationAction {
     'order-direction-field': 'name',
   };
   flattenPagination = true;
+}
+
+export class HelmSynchronise implements Action {
+  public type = HELM_SYNCHRONISE;
+  public guid: string;
+
+  constructor(public endpoint: EndpointModel) {
+    this.guid = endpoint.guid;
+  }
 }
 
 export class HelmInstall implements EntityRequestAction {
@@ -80,7 +94,7 @@ export class GetHelmVersions implements MonocularPaginationAction {
 }
 
 export class GetHelmChartVersions implements MonocularPaginationAction {
-  constructor(public repoName: string, public chartName: string) {
+  constructor(public monocularEndpoint: string, public repoName: string, public chartName: string) {
     this.paginationKey = `'monocular-chart-versions-${repoName}-${chartName}`;
   }
   type = GET_MONOCULAR_CHART_VERSIONS;

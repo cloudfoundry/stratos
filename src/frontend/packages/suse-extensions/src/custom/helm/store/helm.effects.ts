@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { catchError, flatMap, mergeMap } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { catchError, flatMap, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { environment } from '../../../../../core/src/environments/environment';
 import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../../../../../store/src/actions/endpoint.actions';
@@ -12,6 +13,7 @@ import { AppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { isJetstreamError } from '../../../../../store/src/jetstream';
 import { ApiRequestTypes } from '../../../../../store/src/reducers/api-request-reducer/request-helpers';
+import { endpointOfTypeSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import {
   EntityRequestAction,
@@ -20,7 +22,9 @@ import {
   WrapperRequestActionSuccess,
 } from '../../../../../store/src/types/request.types';
 import { helmEntityCatalog } from '../helm-entity-catalog';
-import { getHelmVersionId, getMonocularChartId, HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
+import { getHelmVersionId, getMonocularChartId, HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../helm-entity-factory';
+import { Chart } from '../monocular/shared/models/chart';
+import { stratosMonocularEndpointGuid } from '../monocular/stratos-monocular.helper';
 import {
   GET_HELM_VERSIONS,
   GET_MONOCULAR_CHART_VERSIONS,
@@ -29,9 +33,51 @@ import {
   GetHelmVersions,
   GetMonocularCharts,
   HELM_INSTALL,
+  HELM_SYNCHRONISE,
   HelmInstall,
+  HelmSynchronise,
 } from './helm.actions';
 import { HelmVersion } from './helm.types';
+
+type MonocularChartsResponse = {
+  data: Chart[];
+};
+
+const mapMonocularChartResponse = (entityKey: string, response: MonocularChartsResponse): NormalizedResponse => {
+  const base: NormalizedResponse = {
+    entities: { [entityKey]: {} },
+    result: []
+  };
+
+  const items = response.data as Array<any>;
+  const processedData: NormalizedResponse = items.reduce((res, data) => {
+    const id = getMonocularChartId(data);
+    res.entities[entityKey][id] = data;
+    // Promote the name to the top-level object for simplicity
+    data.name = data.attributes.name;
+    res.result.push(id);
+    return res;
+  }, base);
+  return processedData;
+};
+
+const mergeMonocularChartResponses = (entityKey: string, responses: MonocularChartsResponse[]): NormalizedResponse => {
+  const combined = responses.reduce((res, response) => {
+    res.data = res.data.concat(response.data);
+    return res;
+  }, { data: [] });
+  return mapMonocularChartResponse(entityKey, combined);
+};
+
+const addMonocularId = (endpointId: string, response: MonocularChartsResponse): MonocularChartsResponse => {
+  const data = response.data.map(chart => ({
+    ...chart,
+    monocularEndpointId: endpointId
+  }));
+  return {
+    data
+  };
+};
 
 @Injectable()
 export class HelmEffects {
@@ -39,7 +85,8 @@ export class HelmEffects {
   constructor(
     private httpClient: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    public snackBar: MatSnackBar,
   ) { }
 
   // Endpoints that we know are synchronizing
@@ -53,7 +100,7 @@ export class HelmEffects {
   updateOnSyncFinished$ = this.actions$.pipe(
     ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS),
     flatMap(action => {
-      // Look to see if we have any endpoints that are sycnhronizing
+      // Look to see if we have any endpoints that are synchronizing
       let updated = false;
       Object.values(action.payload.entities.stratosEndpoint).forEach(endpoint => {
         if (endpoint.cnsi_type === HELM_ENDPOINT_TYPE && endpoint.endpoint_metadata) {
@@ -78,25 +125,43 @@ export class HelmEffects {
   @Effect()
   fetchCharts$ = this.actions$.pipe(
     ofType<GetMonocularCharts>(GET_MONOCULAR_CHARTS),
-    flatMap(action => {
+    withLatestFrom(this.store),
+    flatMap(([action, appState]) => {
       const entityKey = entityCatalog.getEntityKey(action);
-      return this.makeRequest(action, `/pp/${this.proxyAPIVersion}/chartsvc/v1/charts`, (response) => {
-        const base = {
-          entities: { [entityKey]: {} },
-          result: []
-        } as NormalizedResponse;
 
-        const items = response.data as Array<any>;
-        const processedData = items.reduce((res, data) => {
-          const id = getMonocularChartId(data);
-          res.entities[entityKey][id] = data;
-          // Promote the name to the top-level object for simplicity
-          data.name = data.attributes.name;
-          res.result.push(id);
-          return res;
-        }, base);
-        return processedData;
-      }, []);
+      this.store.dispatch(new StartRequestAction(action));
+
+      const helmEndpoints = Object.values(endpointOfTypeSelector(HELM_ENDPOINT_TYPE)(appState));
+      const helmHubEndpoint = helmEndpoints.find(endpoint => endpoint.sub_type === HELM_HUB_ENDPOINT_TYPE);
+
+      // See https://github.com/SUSE/stratos/issues/466. It would be better to use the standard proxy for this request and go out to all
+      // valid helm sub types
+      const stratosMonocular = this.httpClient.get<MonocularChartsResponse>(`/pp/${this.proxyAPIVersion}/chartsvc/v1/charts`);
+      const helmHubMonocular = helmHubEndpoint ? this.createHelmHubRequest(helmHubEndpoint.guid) : of({ data: [] });
+
+      return combineLatest([
+        stratosMonocular,
+        helmHubMonocular
+      ]).pipe(
+        map(res => mergeMonocularChartResponses(entityKey, res)),
+        mergeMap((response: NormalizedResponse) => [new WrapperRequestActionSuccess(response, action)]),
+        catchError(error => {
+          const { status, message } = HelmEffects.createHelmError(error);
+          const endpointIds = helmEndpoints.map(e => e.guid);
+          if (helmHubEndpoint) {
+            endpointIds.push(helmHubEndpoint.guid);
+          }
+          return [
+            new WrapperRequestActionFailed(message, action, 'fetch', {
+              endpointIds,
+              url: null,
+              eventCode: status,
+              message,
+              error
+            })
+          ];
+        })
+      );
     })
   );
 
@@ -106,10 +171,10 @@ export class HelmEffects {
     flatMap(action => {
       const entityKey = entityCatalog.getEntityKey(action);
       return this.makeRequest(action, `/pp/${this.proxyAPIVersion}/helm/versions`, (response) => {
-        const processedData = {
+        const processedData: NormalizedResponse = {
           entities: { [entityKey]: {} },
           result: []
-        } as NormalizedResponse;
+        };
 
         // Go through each endpoint ID
         Object.keys(response).forEach(endpoint => {
@@ -136,23 +201,25 @@ export class HelmEffects {
     flatMap(action => {
       const entityKey = entityCatalog.getEntityKey(action);
       return this.makeRequest(action, `/pp/${this.proxyAPIVersion}/chartsvc/v1/charts/${action.repoName}/${action.chartName}/versions`,
-      (response) => {
-        const base = {
-          entities: { [entityKey]: {} },
-          result: []
-        } as NormalizedResponse;
+        (response) => {
+          const base: NormalizedResponse = {
+            entities: { [entityKey]: {} },
+            result: []
+          };
 
-        const items = response.data as Array<any>;
-        const processedData = items.reduce((res, data) => {
-          const id = getMonocularChartId(data);
-          res.entities[entityKey][id] = data;
-          // Promote the name to the top-level object for simplicity
-          data.name = data.attributes.name;
-          res.result.push(id);
-          return res;
-        }, base);
-        return processedData;
-      }, []);
+          const items = response.data as Array<any>;
+          const processedData = items.reduce((res, data) => {
+            const id = getMonocularChartId(data);
+            res.entities[entityKey][id] = data;
+            // Promote the name to the top-level object for simplicity
+            data.name = data.attributes.name;
+            res.result.push(id);
+            return res;
+          }, base);
+          return processedData;
+        }, [], {
+        'x-cap-cnsi-list': action.monocularEndpoint !== stratosMonocularEndpointGuid ? action.monocularEndpoint : ''
+      });
     })
   );
 
@@ -184,6 +251,26 @@ export class HelmEffects {
           ];
         })
       );
+    })
+  );
+
+  @Effect()
+  helmSynchronise$ = this.actions$.pipe(
+    ofType<HelmSynchronise>(HELM_SYNCHRONISE),
+    flatMap(action => {
+      const requestArgs = {
+        headers: null,
+        params: null
+      };
+      const proxyAPIVersion = environment.proxyAPIVersion;
+      const url = `/pp/${proxyAPIVersion}/chartrepos/${action.endpoint.guid}`;
+      const req = this.httpClient.post(url, requestArgs);
+      req.subscribe(ok => {
+        this.snackBar.open('Helm Repository synchronization started', 'Dismiss', { duration: 3000 });
+      }, err => {
+        this.snackBar.open(`Failed to Synchronize Helm Repository '${action.endpoint.name}'`, 'Dismiss', { duration: 5000 });
+      });
+      return [];
     })
   );
 
@@ -222,15 +309,24 @@ export class HelmEffects {
     };
   }
 
+  private createHelmHubRequest(endpointId: string): Observable<MonocularChartsResponse> {
+    return this.httpClient.get<MonocularChartsResponse>(`/pp/${this.proxyAPIVersion}/chartsvc/v1/charts`, {
+      headers: {
+        'x-cap-cnsi-list': endpointId
+      }
+    }).pipe(map(res => addMonocularId(endpointId, res)));
+  }
+
   private makeRequest(
     action: EntityRequestAction,
     url: string,
     mapResult: (response: any) => NormalizedResponse,
-    endpointIds: string[]
+    endpointIds: string[],
+    headers = {}
   ): Observable<Action> {
     this.store.dispatch(new StartRequestAction(action));
     const requestArgs = {
-      headers: null,
+      headers,
       params: null
     };
     return this.httpClient.get(url, requestArgs).pipe(

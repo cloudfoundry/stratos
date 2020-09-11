@@ -1,15 +1,11 @@
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 
-import {
-  DataFunction,
-  ListDataSource,
-} from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
+import { ListDataSource } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { IListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
 import { helmEntityCatalog } from '../../../helm/helm-entity-catalog';
-import { helmEntityFactory, monocularChartVersionsEntityType } from '../../../helm/helm-entity-factory';
 import { MonocularVersion } from './../../../helm/store/helm.types';
 
 
@@ -26,13 +22,19 @@ export class HelmReleaseVersionsDataSource extends ListDataSource<MonocularVersi
     repoName: string,
     chartName: string,
     version: string,
+    monocularEndpoint: string,
   ) {
+    const action = helmEntityCatalog.chartVersions.actions.getMultiple(null, null, {
+      repoName,
+      chartName,
+      monocularEndpoint
+    });
     super({
       store,
-      action: helmEntityCatalog.chartVersions.actions.getMultiple(repoName, chartName),
-      schema: helmEntityFactory(monocularChartVersionsEntityType),
-      getRowUniqueId: (object: MonocularVersion) => object.id,
-      paginationKey: helmEntityCatalog.chartVersions.actions.getMultiple(repoName, chartName).paginationKey,
+      action,
+      schema: action.entity[0],
+      getRowUniqueId: (object: MonocularVersion) => action.entity[0].getId(object),
+      paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [
         (entities: MonocularVersion[], paginationState: PaginationEntityState) => this.endpointTypeFilter(entities, paginationState)
@@ -45,7 +47,7 @@ export class HelmReleaseVersionsDataSource extends ListDataSource<MonocularVersi
   }
 
 
-  public endpointTypeFilter: DataFunction<MonocularVersion> = (entities: MonocularVersion[], paginationState: PaginationEntityState) => {
+  public endpointTypeFilter(entities: MonocularVersion[], paginationState: PaginationEntityState): MonocularVersion[] {
     if (
       !paginationState.clientPagination ||
       !paginationState.clientPagination.filter ||
@@ -55,7 +57,7 @@ export class HelmReleaseVersionsDataSource extends ListDataSource<MonocularVersi
 
     // Filter out development versions if configured
     const showAll = paginationState.clientPagination.filter.items[typeFilterKey] === 'all';
-    return showAll ?  entities : entities.filter(e => e.attributes.version.indexOf('-') === -1);
+    return showAll ? entities : entities.filter(e => e.attributes.version.indexOf('-') === -1);
   }
 }
 

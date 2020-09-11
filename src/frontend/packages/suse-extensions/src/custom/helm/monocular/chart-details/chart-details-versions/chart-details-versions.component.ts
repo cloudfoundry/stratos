@@ -1,7 +1,9 @@
 import { Component, Input } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { ChartAttributes } from '../../shared/models/chart';
 import { ChartVersion } from '../../shared/models/chart-version';
+import { getMonocularEndpoint } from '../../stratos-monocular.helper';
 
 @Component({
   selector: 'app-chart-details-versions',
@@ -13,9 +15,11 @@ export class ChartDetailsVersionsComponent {
   @Input() currentVersion: ChartVersion;
   showAllVersions: boolean;
 
+  constructor(private route: ActivatedRoute) { }
+
   goToVersionUrl(version: ChartVersion): string {
     const chart: ChartAttributes = version.relationships.chart.data;
-    return `/monocular/charts/${chart.repo.name}/${chart.name}/${version.attributes.version}`;
+    return `/monocular/charts/${getMonocularEndpoint(this.route)}/${chart.repo.name}/${chart.name}/${version.attributes.version}`;
   }
 
   isSelected(version: ChartVersion): boolean {

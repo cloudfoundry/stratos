@@ -8,6 +8,7 @@ export class Chart {
   links: string[];
   attributes: ChartAttributes;
   relationships: ChartRelationships;
+  monocularEndpointId?: string;
 }
 
 
@@ -29,6 +30,6 @@ class ChartRelationships {
 class ChartVersionRelationship {
   data: ChartVersionAttributes;
   links: {
-    self: string
+    self: string,
   };
 }

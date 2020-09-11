@@ -1,5 +1,5 @@
-import { Chart } from './../monocular/shared/models/chart';
-import { ChartVersion } from './../monocular/shared/models/chart-version';
+import { Chart } from '../monocular/shared/models/chart';
+import { ChartVersion } from '../monocular/shared/models/chart-version';
 
 export interface MonocularRepository {
   name: string;
@@ -47,10 +47,26 @@ export enum HelmStatus {
 
 export interface HelmInstallValues {
   endpoint: string;
+  monocularEndpoint: string;
   releaseName: string;
   releaseNamespace: string;
   values: string;
-  chart: string;
+  chart: {
+    name: string;
+    repo: string;
+    version: string;
+  };
+}
+
+export interface HelmUpgradeValues {
+  values: string;
+  chart: {
+    name: string;
+    repo: string;
+    version: string;
+  };
+  restartPods?: boolean;
+  monocularEndpoint?: string;
 }
 
 export interface HelmUpgradeValues {

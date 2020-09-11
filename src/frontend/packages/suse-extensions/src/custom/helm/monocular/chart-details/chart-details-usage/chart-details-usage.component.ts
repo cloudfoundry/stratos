@@ -2,9 +2,11 @@ import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DomSanitizer } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
 
 import { EndpointsService } from '../../../../../../../core/src/core/endpoints.service';
 import { Chart } from '../../shared/models/chart';
+import { getMonocularEndpoint } from '../../stratos-monocular.helper';
 
 @Component({
   selector: 'app-chart-details-usage',
@@ -22,7 +24,8 @@ export class ChartDetailsUsageComponent implements OnInit {
     private mdIconRegistry: MatIconRegistry,
     private sanitizer: DomSanitizer,
     public snackBar: MatSnackBar,
-    public endpointsService: EndpointsService
+    public endpointsService: EndpointsService,
+    private route: ActivatedRoute,
   ) { }
 
   ngOnInit() {
@@ -35,24 +38,8 @@ export class ChartDetailsUsageComponent implements OnInit {
     );
   }
 
-  // Show an snack bar to confirm the user that the code has been copied
-  showSnackBar(): void {
-    this.snackBar.open('Copied to the clipboard', '', {
-      duration: 1500
-    });
-  }
-
-  get showRepoInstructions(): boolean {
-    return this.chart.attributes.repo.name !== 'stable';
-  }
-
-  get repoAddInstructions(): string {
-    return `helm repo add ${this.chart.attributes.repo.name} ${this.chart
-      .attributes.repo.url}`;
-  }
-
-  get installInstructions(): string {
-    return `helm install ${this.chart.id} --version ${this.currentVersion}`;
+  get installUrl(): string {
+    return `/monocular/install/${getMonocularEndpoint(this.route, this.chart)}/${this.chart.id}/${this.currentVersion}`;
   }
 
 }

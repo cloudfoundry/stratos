@@ -11,6 +11,7 @@ import { EntityCatalogModule } from '../../../../store/src/entity-catalog.module
 import { EndpointHealthCheck } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { HELM_ENDPOINT_TYPE } from './helm-entity-factory';
 import { generateHelmEntities } from './helm-entity-generator';
+import { HelmHubRegistrationComponent } from './helm-hub-registration/helm-hub-registration.component';
 import { HelmStoreModule } from './helm.store.module';
 
 @NgModule({
@@ -20,6 +21,9 @@ import { HelmStoreModule } from './helm.store.module';
     CommonModule,
     SharedModule,
     HelmStoreModule,
+  ],
+  declarations: [
+    HelmHubRegistrationComponent
   ]
 })
 export class HelmSetupModule {

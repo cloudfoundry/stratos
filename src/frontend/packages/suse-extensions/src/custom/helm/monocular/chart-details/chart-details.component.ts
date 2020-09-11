@@ -6,6 +6,7 @@ import { Chart } from '../shared/models/chart';
 import { ChartVersion } from '../shared/models/chart-version';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
+import { getMonocularEndpoint } from '../stratos-monocular.helper';
 
 @Component({
   selector: 'app-chart-details',
@@ -55,6 +56,6 @@ export class ChartDetailsComponent implements OnInit {
   updateMetaTags(): void { }
 
   goToRepoUrl(): string {
-    return `/charts/${this.chart.attributes.repo.name}`;
+    return `/charts/${getMonocularEndpoint(null, this.chart)}/${this.chart.attributes.repo.name}`;
   }
 }

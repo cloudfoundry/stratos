@@ -3,6 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { helmEntityCatalog } from '../../../../helm/helm-entity-catalog';
+import { ChartAttributes } from '../../../../helm/monocular/shared/models/chart';
 import { ChartMetadata } from '../../../../helm/store/helm.types';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
 import { ContainerStateCollection, KubernetesPod } from '../../../store/kube.types';
@@ -59,6 +60,13 @@ class Version {
     return false;
   }
 }
+
+type InternalHelmUpgrade = {
+  release: HelmRelease,
+  upgrade: ChartAttributes,
+  version: string,
+  monocularEndpointId: string;
+};
 
 @Injectable()
 export class HelmReleaseHelperService {
@@ -206,7 +214,7 @@ export class HelmReleaseHelperService {
     return false;
   }
 
-  public hasUpgrade(returnLatest = false): Observable<any> {
+  public hasUpgrade(returnLatest = false): Observable<InternalHelmUpgrade> {
     const updates = combineLatest(this.getCharts(), this.release$);
     return updates.pipe(
       map(([charts, release]) => {
@@ -219,7 +227,8 @@ export class HelmReleaseHelperService {
                 return {
                   release,
                   upgrade: c.attributes,
-                  version: c.relationships.latestChartVersion.data.version
+                  version: c.relationships.latestChartVersion.data.version,
+                  monocularEndpointId: c.monocularEndpointId
                 };
               }
             }
@@ -233,8 +242,9 @@ export class HelmReleaseHelperService {
             return {
               release,
               upgrade: releaseChart.attributes,
-              version: releaseChart.relationships.latestChartVersion.data.version
-            }
+              version: releaseChart.relationships.latestChartVersion.data.version,
+              monocularEndpointId: releaseChart.monocularEndpointId
+            };
           }
         }
         return null;

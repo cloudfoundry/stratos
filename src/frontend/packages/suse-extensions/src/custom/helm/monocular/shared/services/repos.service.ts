@@ -8,7 +8,6 @@ import { RepoAttributes } from '../models/repo';
 import { ConfigService } from './config.service';
 
 
-
 @Injectable()
 export class ReposService {
 
@@ -34,7 +33,7 @@ export class ReposService {
     );
   }
 
-  private extractData(res: { data: any }) {
+  private extractData(res: { data: any; }) {
     return res.data || {};
   }
 

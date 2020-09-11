@@ -1,7 +1,7 @@
 import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
@@ -19,6 +19,7 @@ import {
 import { SnackBarService } from '../../../../services/snackbar.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { createMetaCardMenuItemSeparator } from '../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { IListAction } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
 
@@ -37,6 +38,27 @@ function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent 
   return obj ? obj.isEndpointListDetailsComponent ? obj as EndpointListDetailsComponent : null : null;
 }
 
+/**
+ * Combine the result of all createVisibles functions for the given actions
+ */
+function combineCreateVisibles(
+  customActions: IListAction<EndpointModel>[]
+): (row$: Observable<EndpointModel>) => Observable<boolean> {
+  const createVisiblesFns = customActions
+    .map(action => action.createVisible)
+    .filter(createVisible => !!createVisible);
+  if (createVisiblesFns.length === 0) {
+    return () => of(false);
+  } else {
+    return (row$: Observable<EndpointModel>) => {
+      const createVisibles = createVisiblesFns.map(createVisible => createVisible(row$));
+      return combineLatest(createVisibles).pipe(
+        map(allRes => allRes.some(res => res))
+      );
+    };
+  }
+}
+
 @Injectable()
 export class EndpointListHelper {
   constructor(
@@ -48,7 +70,23 @@ export class EndpointListHelper {
     private snackBarService: SnackBarService,
   ) { }
 
-  endpointActions(): IListAction<EndpointModel>[] {
+  endpointActions(includeSeparators = false): IListAction<EndpointModel>[] {
+    // Add any additional actions that are per endpoint type
+    const customActions = entityCatalog.getAllEndpointTypes()
+      .map(endpoint => endpoint.definition.endpointListActions)
+      .filter(endpointListActions => !!endpointListActions)
+      .map(endpointListActions => endpointListActions(this.store))
+      .reduce((res, actions) => res.concat(actions), []);
+
+    if (includeSeparators && customActions.length) {
+      // Only show the separator if we have custom actions to separate AND at least one is visible
+      const createVisibleFn = combineCreateVisibles(customActions);
+      customActions.splice(0, 0, {
+        ...createMetaCardMenuItemSeparator(),
+        createVisible: createVisibleFn
+      });
+    }
+
     return [
       {
         action: (item) => {
@@ -126,7 +164,8 @@ export class EndpointListHelper {
         label: 'Edit endpoint',
         description: 'Edit the endpoint',
         createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
-      }
+      },
+      ...customActions
     ];
   }
 

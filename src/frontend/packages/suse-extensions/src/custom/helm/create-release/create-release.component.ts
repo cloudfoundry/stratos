@@ -16,12 +16,17 @@ import { kubeEntityCatalog } from '../../kubernetes/kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
 import { KubernetesNamespace } from '../../kubernetes/store/kube.types';
 import { helmEntityCatalog } from '../helm-entity-catalog';
+import { createMonocularProviders } from '../monocular/stratos-monocular-providers.helpers';
+import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../monocular/stratos-monocular.helper';
 import { HelmInstallValues } from '../store/helm.types';
 
 @Component({
   selector: 'app-create-release',
   templateUrl: './create-release.component.html',
   styleUrls: ['./create-release.component.scss'],
+  providers: [
+    ...createMonocularProviders()
+  ]
 })
 export class CreateReleaseComponent implements OnInit, OnDestroy {
 
@@ -61,7 +66,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     private confirmDialog: ConfirmationDialogService,
   ) {
     const chart = this.route.snapshot.params;
-    this.cancelUrl = `/monocular/charts/${chart.repo}/${chart.chartName}/${chart.version}`;
+    this.cancelUrl = `/monocular/charts/${getMonocularEndpoint(this.route)}/${chart.repo}/${chart.chartName}/${chart.version}`;
 
     this.setupDetailsStep();
 
@@ -207,13 +212,13 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       // this.overridesYamlAutosize.resizeToFitContent(true);
       this.overridesYamlTextArea.nativeElement.focus();
     }, 1);
-  }
+  };
 
   submit: StepOnNextFunction = () => {
     return this.createNamespace().pipe(
       switchMap(createRes => createRes.success ? this.installChart() : of(createRes))
     );
-  }
+  };
 
   createNamespace(): Observable<StepOnNextResult> {
     if (!this.details.controls.createNamespace.value || this.createdNamespace) {
@@ -245,11 +250,17 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   }
 
   installChart(): Observable<StepOnNextResult> {
+    const endpoint = getMonocularEndpoint(this.route, null, null);
     // Build the request body
     const values: HelmInstallValues = {
       ...this.details.value,
       ...this.overrides.value,
-      chart: this.route.snapshot.params
+      chart: {
+        chartName: this.route.snapshot.params.chartName,
+        repo: this.route.snapshot.params.repo,
+        version: this.route.snapshot.params.version,
+      },
+      monocularEndpoint: endpoint === stratosMonocularEndpointGuid ? null : endpoint
     };
 
     // Make the request

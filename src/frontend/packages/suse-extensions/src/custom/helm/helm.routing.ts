@@ -5,7 +5,6 @@ import { MonocularChartViewComponent } from './chart-view/monocular.component';
 import { CreateReleaseComponent } from './create-release/create-release.component';
 import { MonocularTabBaseComponent } from './monocular-tab-base/monocular-tab-base.component';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
-import { RepositoryTabComponent } from './tabs/repository-tab/repository-tab.component';
 
 const monocular: Routes = [
   {
@@ -15,14 +14,12 @@ const monocular: Routes = [
       { path: '', redirectTo: 'charts', pathMatch: 'full' },
       { path: 'charts', component: CatalogTabComponent },
       { path: 'charts/:repo', component: CatalogTabComponent },
-      { path: 'repos', component: RepositoryTabComponent },
-      { path: 'repos/:guid', component: RepositoryTabComponent },
     ]
   },
-  { pathMatch: 'full', path: 'charts/:repo/:chartName/:version', component: MonocularChartViewComponent },
-  { path: 'charts/:repo/:chartName', component: MonocularChartViewComponent },
-  { pathMatch: 'full', path: 'install/:repo/:chartName/:version', component: CreateReleaseComponent },
-  { pathMatch: 'full', path: 'install/:repo/:chartName', component: CreateReleaseComponent },
+  { pathMatch: 'full', path: 'charts/:endpoint/:repo/:chartName/:version', component: MonocularChartViewComponent },
+  { path: 'charts/:endpoint/:repo/:chartName', component: MonocularChartViewComponent },
+  { pathMatch: 'full', path: 'install/:endpoint/:repo/:chartName/:version', component: CreateReleaseComponent },
+  { path: 'install/:endpoint/:repo/:chartName', component: CreateReleaseComponent },
 ];
 
 @NgModule({

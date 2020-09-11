@@ -348,9 +348,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 	for _, values := range info.Endpoints {
 		for _, endpoint := range values {
 			// Look to see if we can find the metrics provider for this URL
-			log.Debugf("Processing endpoint: %+v", endpoint)
 			log.Debugf("Processing endpoint: %+v", endpoint.CNSIRecord)
-
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.DopplerLoggingEndpoint); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
 				endpoint.Metadata["metrics_job"] = provider.Job

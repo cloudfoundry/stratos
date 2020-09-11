@@ -1,10 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { createMonocularProviders } from '../monocular/stratos-monocular-providers.helpers';
+import { getMonocularEndpoint } from '../monocular/stratos-monocular.helper';
+
+
 @Component({
   selector: 'app-monocular',
   templateUrl: './monocular.component.html',
   styleUrls: ['./monocular.component.scss'],
+  providers: [
+    ...createMonocularProviders()
+  ]
 })
 export class MonocularChartViewComponent implements OnInit {
 
@@ -27,7 +34,7 @@ export class MonocularChartViewComponent implements OnInit {
 
     if (!!parts.version) {
       breadcrumbs.push(
-        { value: this.title, routerLink: `/monocular/charts/${parts.repo}/${parts.chartName}` }
+        { value: this.title, routerLink: `/monocular/charts/${getMonocularEndpoint(this.route)}/${parts.repo}/${parts.chartName}` }
       );
       this.title = parts.version;
     }

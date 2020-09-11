@@ -163,7 +163,7 @@ export class WorkloadsEffects {
     })
   );
 
-private mapHelmRelease(data, endpointId, guid: string) {
+  private mapHelmRelease(data, endpointId, guid: string) {
     const helmRelease: HelmRelease = {
       ...data,
       endpointId
@@ -201,7 +201,7 @@ private mapHelmRelease(data, endpointId, guid: string) {
             message: errorMessage,
             error
           })
-        ]
+        ];
       })
     );
   }

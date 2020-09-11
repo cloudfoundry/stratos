@@ -22,7 +22,7 @@ import { HelmReleaseVersionsDataSource } from './release-version-data-source';
 
 const typeFilterKey = 'versionType';
 
-export class ReleaseUpgradeVersionsListConfig implements IListConfig<any> {
+export class ReleaseUpgradeVersionsListConfig implements IListConfig<MonocularVersion> {
 
   public versionsDataSource: ListDataSource<MonocularVersion>;
 
@@ -32,7 +32,7 @@ export class ReleaseUpgradeVersionsListConfig implements IListConfig<any> {
   getMultiActions: () => IMultiListAction<any>[];
   getSingleActions: () => IListAction<any>[];
 
-  columns: Array<ITableColumn<any>> = [
+  columns: Array<ITableColumn<MonocularVersion>> = [
     {
       columnId: 'radio',
       headerCell: () => '',
@@ -80,33 +80,34 @@ export class ReleaseUpgradeVersionsListConfig implements IListConfig<any> {
     repoName: string,
     chartName: string,
     version: string,
+    monocularEndpoint: string
   ) {
     this.getGlobalActions = () => [];
     this.getMultiActions = () => [];
     this.getSingleActions = () => [];
 
-    this.versionsDataSource = new HelmReleaseVersionsDataSource(store, this, repoName, chartName, version);
+    this.versionsDataSource = new HelmReleaseVersionsDataSource(store, this, repoName, chartName, version, monocularEndpoint);
 
     this.multiFiltersConfigs = [{
       hideAllOption: true,
       autoSelectFirst: true,
       key: typeFilterKey,
-        label: 'Endpoint Type',
-        list$: of([
-          {
-            label: 'Release Versions',
-            item: {},
-            value: 'release'
-          },
-          {
-            label: 'All Versions',
-            item: {},
-            value: 'all'
-          }
-        ]),
-        loading$: of(false),
-        select: new BehaviorSubject(undefined)
-      }];
+      label: 'Endpoint Type',
+      list$: of([
+        {
+          label: 'Release Versions',
+          item: {},
+          value: 'release'
+        },
+        {
+          label: 'All Versions',
+          item: {},
+          value: 'all'
+        }
+      ]),
+      loading$: of(false),
+      select: new BehaviorSubject(undefined)
+    }];
 
     // Auto-select first non-development version
     setTimeout(() => {
@@ -122,7 +123,7 @@ export class ReleaseUpgradeVersionsListConfig implements IListConfig<any> {
   private getFirstNonDevelopmentVersion(rows: MonocularVersion[]): MonocularVersion {
     for (const mv of rows) {
       if (mv.attributes.version.indexOf('-') === -1) {
-        return mv
+        return mv;
       }
     }
     return rows[0];

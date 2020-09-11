@@ -1,9 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { LoggerService } from '../../../../../../../core/src/core/logger.service';
+import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../../stratos-monocular.helper';
 import { Chart } from '../models/chart';
 import { ChartVersion } from '../models/chart-version';
 import { ConfigService } from './config.service';
@@ -19,11 +21,29 @@ export class ChartsService {
   constructor(
     private http: HttpClient,
     config: ConfigService,
-    private loggerService: LoggerService
+    private loggerService: LoggerService,
+    private route: ActivatedRoute,
   ) {
     this.hostname = `${config.backendHostname}/chartsvc`;
     this.cacheCharts = {};
     this.hostname = '/pp/v1/chartsvc';
+  }
+
+  /**
+   * Update url to go to a monocular instance other than stratos
+   * These are used as img src values so won't hit our http interceptor
+   */
+  private updateStratosUrl(chart: Chart, url: string): string {
+    const endpoint = getMonocularEndpoint(this.route, chart);
+    if (!endpoint || endpoint === stratosMonocularEndpointGuid) {
+      return url;
+    }
+    const parts = url.split('/');
+    const chartsvcIndex = parts.findIndex(part => part === 'chartsvc');
+    if (chartsvcIndex >= 0) {
+      parts.splice(chartsvcIndex, 0, `monocular/${endpoint}`);
+    }
+    return parts.join('/');
   }
 
   /**
@@ -48,7 +68,7 @@ export class ChartsService {
         observer.next(this.cacheCharts[repo]);
       });
     } else {
-      return this.http.get<{ data: any }>(url).pipe(
+      return this.http.get<{ data: any, }>(url).pipe(
         map(r => this.extractData(r)),
         tap((data) => this.storeCache(data, repo)),
         catchError(this.handleError)
@@ -119,7 +139,7 @@ export class ChartsService {
    * @return An observable that will be the json schema
    */
   getChartSchema(chartVersion: ChartVersion): Observable<any> {
-    return this.http.get(`${this.hostname}${chartVersion.attributes.schema}`);
+    return chartVersion.attributes.schema ? this.http.get(`${this.hostname}${chartVersion.attributes.schema}`) : of(null);
   }
 
   /**
@@ -130,7 +150,7 @@ export class ChartsService {
    * @return An observable containing an array of ChartVersions
    */
   getVersions(repo: string, chartName: string): Observable<ChartVersion[]> {
-    return this.http.get<{ data: any }>(`${this.hostname}/v1/charts/${repo}/${chartName}/versions`).pipe(
+    return this.http.get<{ data: any; }>(`${this.hostname}/v1/charts/${repo}/${chartName}/versions`).pipe(
       map(m => this.extractData(m)),
       catchError(this.handleError)
     );
@@ -157,7 +177,7 @@ export class ChartsService {
    */
   getChartIconURL(chart: Chart): string {
     if (chart.attributes.icon) {
-      return `${this.hostname}${chart.attributes.icon}`;
+      return this.updateStratosUrl(chart, `${this.hostname}${chart.attributes.icon}`);
     } else {
       return '/core/assets/custom/placeholder.png';
     }
@@ -175,7 +195,7 @@ export class ChartsService {
   }
 
 
-  private extractData(res: { data: any }) {
+  private extractData(res: { data: any; }) {
     return res.data || {};
   }
 

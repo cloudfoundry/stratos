@@ -28,6 +28,7 @@ const routes: Routes = [
         pathMatch: 'full',
       },
       {
+        // guid = kube endpoint
         path: ':guid/upgrade',
         component: UpgradeReleaseComponent,
         pathMatch: 'full',

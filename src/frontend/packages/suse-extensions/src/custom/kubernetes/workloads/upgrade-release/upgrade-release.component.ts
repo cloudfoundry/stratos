@@ -7,7 +7,8 @@ import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { StepComponent, StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { HelmUpgradeValues } from '../../../helm/store/helm.types';
+import { stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-monocular.helper';
+import { HelmUpgradeValues, MonocularVersion } from '../../../helm/store/helm.types';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
 import { HelmReleaseGuid } from '../workload.types';
 import { workloadsEntityCatalog } from './../workloads-entity-catalog';
@@ -33,15 +34,20 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
 export class UpgradeReleaseComponent {
 
   public cancelUrl;
-  public listConfig;
+  public listConfig: ReleaseUpgradeVersionsListConfig;
   public validate$: Observable<boolean>;
-  private version;
+  private version: MonocularVersion;
   public overrides: FormGroup;
+
+  private monocularEndpointId: string;
 
   // Future
   public showAdvancedOptions = false;
 
-  constructor(store: Store<any>, public helper: HelmReleaseHelperService) {
+  constructor(
+    store: Store<any>,
+    public helper: HelmReleaseHelperService
+  ) {
 
     this.cancelUrl = `/workloads/${this.helper.guid}`;
 
@@ -57,7 +63,8 @@ export class UpgradeReleaseComponent {
       const name = chart.upgrade.name;
       const repoName = chart.upgrade.repo.name;
       const version = chart.release.chart.metadata.version;
-      this.listConfig = new ReleaseUpgradeVersionsListConfig(store, repoName, name, version);
+      this.listConfig = new ReleaseUpgradeVersionsListConfig(store, repoName, name, version, chart.monocularEndpointId);
+      this.monocularEndpointId = chart.monocularEndpointId;
 
       // First step is valid when a version has been selected
       this.validate$ = this.listConfig.versionsDataSource.selectedRows$.pipe(
@@ -79,36 +86,37 @@ export class UpgradeReleaseComponent {
 
   doUpgrade: StepOnNextFunction = (index: number, step: StepComponent) => {
     // If we are showing the advanced options, don't upgrade if we aer not on the last step
-    if (this.showAdvancedOptions && index === 1 ) {
+    if (this.showAdvancedOptions && index === 1) {
       return of({ success: true });
     }
 
     const values: HelmUpgradeValues = {
-      ...this.overrides.value,
+      values: this.overrides.controls.values.value,
       restartPods: false,
       chart: {
         name: this.version.relationships.chart.data.name,
         repo: this.version.relationships.chart.data.repo.name,
         version: this.version.attributes.version,
       },
+      monocularEndpoint: this.monocularEndpointId === stratosMonocularEndpointGuid ? null : this.monocularEndpointId
     };
 
     // Make the request
     return workloadsEntityCatalog.release.api.upgrade<ActionState>(this.helper.releaseTitle,
       this.helper.endpointGuid, this.helper.namespace, values).pipe(
-      // Wait for result of request
-      filter(state => !!state),
-      pairwise(),
-      filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
-      map(([, newVal]) => newVal),
-      map(result => ({
-        success: !result.error,
-        redirect: !result.error,
-        redirectPayload: {
-          path: !result.error ? this.cancelUrl : ''
-        },
-        message: !result.error ? '' : result.message
-      }))
-    );
-  }
+        // Wait for result of request
+        filter(state => !!state),
+        pairwise(),
+        filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
+        map(([, newVal]) => newVal),
+        map(result => ({
+          success: !result.error,
+          redirect: !result.error,
+          redirectPayload: {
+            path: !result.error ? this.cancelUrl : ''
+          },
+          message: !result.error ? '' : result.message
+        }))
+      );
+  };
 }

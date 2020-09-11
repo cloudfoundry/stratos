@@ -176,7 +176,7 @@ class EntityCatalog {
     return Array.from(this.endpoints.values());
   }
 
-  public getAllEndpointTypes(techPreviewEnabled = false) {
+  public getAllEndpointTypes(techPreviewEnabled = false): StratosCatalogEndpointEntity[] {
     const baseEndpoints = Array.from(this.endpoints.values())
       .filter(item => !item.definition.techPreview || item.definition.techPreview && techPreviewEnabled);
     return baseEndpoints.reduce((allEndpoints, baseEndpoint) => {

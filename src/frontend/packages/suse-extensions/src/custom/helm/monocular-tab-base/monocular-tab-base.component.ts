@@ -14,10 +14,6 @@ import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 })
 export class MonocularTabBaseComponent implements OnInit {
 
-  public tabLinks = [
-    { link: 'charts', label: 'Charts', icon: 'folder_open' },
-    { link: 'repos', label: 'Repositories', icon: 'products', iconFont: 'stratos-icons' }
-  ];
   public endpointIds$: Observable<string[]>;
 
   constructor(private store: Store<AppState>) { }

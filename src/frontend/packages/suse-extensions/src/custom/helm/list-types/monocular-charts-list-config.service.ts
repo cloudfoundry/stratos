@@ -14,13 +14,14 @@ import {
 import { ListView } from '../../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { defaultHelmKubeListPageSize } from '../../kubernetes/list-types/kube-helm-list-types';
+import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 import { MonocularChart } from '../store/helm.types';
 import { MonocularChartCardComponent } from './monocular-chart-card/monocular-chart-card.component';
 import { MonocularChartsDataSource } from './monocular-charts-data-source';
 
 @Injectable()
 export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
-  AppsDataSource: MonocularChartsDataSource;
+  dataSource: MonocularChartsDataSource;
   isLocal = true;
   multiFilterConfigs: IListMultiFilterConfig[];
 
@@ -74,26 +75,36 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
     noEntries: 'There are no charts'
   };
 
+  private initialised: Observable<boolean>;
+
   constructor(
     store: Store<AppState>,
     private endpointsService: EndpointsService,
     private route: ActivatedRoute,
   ) {
-    this.AppsDataSource = new MonocularChartsDataSource(store, this);
+
+    this.initialised = endpointsService.endpoints$.pipe(
+      filter(endpoints => !!endpoints),
+      map(endpoints => {
+        this.dataSource = new MonocularChartsDataSource(store, this, endpoints);
+        return true;
+      }),
+    );
   }
 
   getGlobalActions = () => [];
   getMultiActions = () => [];
   getSingleActions = () => [];
   getColumns = () => this.columns;
-  getDataSource = () => this.AppsDataSource;
+  getDataSource = () => this.dataSource;
   getMultiFiltersConfigs = () => [this.createRepositoryFilterConfig()];
+  getInitialised = () => this.initialised;
 
   private createRepositoryFilterConfig(): IListMultiFilterConfig {
     return {
       key: 'repository',
-      label: 'Repository',
-      allLabel: 'All Repositories',
+      label: 'Source',
+      allLabel: 'All Sources',
       list$: this.helmRepositories(),
       loading$: observableOf(false),
       select: new BehaviorSubject(this.route.snapshot.params.repo)
@@ -105,7 +116,7 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
       map(endpoints => {
         const repos = [];
         Object.values(endpoints).forEach(ep => {
-          if (ep.cnsi_type === 'helm') {
+          if (ep.cnsi_type === HELM_ENDPOINT_TYPE) {
             repos.push({ label: ep.name, item: ep.name, value: ep.name });
           }
         });
