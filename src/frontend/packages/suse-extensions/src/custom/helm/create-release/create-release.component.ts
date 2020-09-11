@@ -89,7 +89,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     this.details = new FormGroup({
       endpoint: new FormControl('', Validators.required),
       releaseName: new FormControl('', Validators.required),
-      releaseNamespace: new FormControl(''),
+      releaseNamespace: new FormControl('', Validators.required),
       createNamespace: new FormControl(false),
     });
     this.details.controls.createNamespace.disable();

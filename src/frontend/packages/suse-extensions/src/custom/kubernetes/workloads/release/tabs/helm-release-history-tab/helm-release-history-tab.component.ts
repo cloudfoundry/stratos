@@ -74,7 +74,9 @@ export class HelmReleaseHistoryTabComponent {
       },
     ];
 
-    const data$ = this.helmReleaseHelper.fetchReleaseHistory();
+    const data$ = this.helmReleaseHelper.fetchReleaseHistory().pipe(
+      map(history => [...history].sort((a, b) => b.revision - a.revision))
+    );
     this.dataSource = {
       connect: () => data$,
       disconnect: () => { },

@@ -218,7 +218,9 @@ export class HelmEffects {
           }, base);
           return processedData;
         }, [], {
-        'x-cap-cnsi-list': action.monocularEndpoint !== stratosMonocularEndpointGuid ? action.monocularEndpoint : ''
+        'x-cap-cnsi-list': action.monocularEndpoint && action.monocularEndpoint !== stratosMonocularEndpointGuid ?
+          action.monocularEndpoint :
+          ''
       });
     })
   );

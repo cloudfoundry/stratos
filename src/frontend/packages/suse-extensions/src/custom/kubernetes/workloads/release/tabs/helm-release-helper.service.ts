@@ -14,6 +14,7 @@ import {
   HelmReleaseGraph,
   HelmReleaseGuid,
   HelmReleaseResources,
+  HelmReleaseRevision,
 } from '../../workload.types';
 import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
 
@@ -147,7 +148,7 @@ export class HelmReleaseHelperService {
     );
   }
 
-  public fetchReleaseHistory(): Observable<any> {
+  public fetchReleaseHistory(): Observable<HelmReleaseRevision[]> {
     // Get the history for a Helm release
     return workloadsEntityCatalog.history.store.getEntityService(
       this.releaseTitle,
