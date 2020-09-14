@@ -190,8 +190,9 @@ app-suse-login {
   .suse-login__sso-button.mat-button.suse-login__submit {
     align-self: flex-start;
   }
-
-
+  .suse-login__message {
+    padding-top: 0;
+  }
 }
 
 @media only screen and (max-width: 1120px) {

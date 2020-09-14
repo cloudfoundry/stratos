@@ -1,5 +1,7 @@
 @mixin login-page-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
+  $warn: map-get($theme, warn);
+
   .login {
     background-color: map-get($app-theme, app-background-color);
     &__title {
@@ -7,6 +9,12 @@
     }
     &-message {
       color: mat-contrast($primary, 500);
+    }
+  }
+
+  .suse-login-sso {
+    .suse-login__message {
+      color: mat-color($warn);
     }
   }
 }

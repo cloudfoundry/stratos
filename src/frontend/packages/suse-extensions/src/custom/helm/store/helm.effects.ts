@@ -4,17 +4,26 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { catchError, flatMap, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+import { catchError, first, flatMap, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { environment } from '../../../../../core/src/environments/environment';
-import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../../../../../store/src/actions/endpoint.actions';
-import { ClearPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
+import {
+  EndpointActionComplete,
+  GET_ENDPOINTS_SUCCESS,
+  GetAllEndpointsSuccess,
+  REGISTER_ENDPOINTS_SUCCESS,
+  UNREGISTER_ENDPOINTS_SUCCESS,
+  UnregisterEndpoint,
+} from '../../../../../store/src/actions/endpoint.actions';
+import { ClearPaginationOfType, ResetPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { isJetstreamError } from '../../../../../store/src/jetstream';
 import { ApiRequestTypes } from '../../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { endpointOfTypeSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { NormalizedResponse } from '../../../../../store/src/types/api.types';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import {
   EntityRequestAction,
   StartRequestAction,
@@ -272,6 +281,38 @@ export class HelmEffects {
       }, err => {
         this.snackBar.open(`Failed to Synchronize Helm Repository '${action.endpoint.name}'`, 'Dismiss', { duration: 5000 });
       });
+      return [];
+    })
+  );
+
+  @Effect()
+  endpointUnregister$ = this.actions$.pipe(
+    ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS_SUCCESS),
+    flatMap(action => stratosEntityCatalog.endpoint.store.getEntityMonitor(action.guid).entity$.pipe(
+      first(),
+      mergeMap(endpoint => {
+        if (endpoint.cnsi_type !== HELM_ENDPOINT_TYPE) {
+          return [];
+        }
+        return [
+          new ResetPaginationOfType(helmEntityCatalog.chart.getSchema()),
+          new ResetPaginationOfType(helmEntityCatalog.chartVersions.getSchema()),
+          new ResetPaginationOfType(helmEntityCatalog.version.getSchema()),
+        ];
+      })
+    ))
+  );
+
+  @Effect()
+  registerEndpoint$ = this.actions$.pipe(
+    ofType<EndpointActionComplete>(REGISTER_ENDPOINTS_SUCCESS),
+    flatMap(action => {
+      const endpoint: EndpointModel = action.endpoint as EndpointModel;
+      if (endpoint && endpoint.cnsi_type === HELM_ENDPOINT_TYPE && endpoint.sub_type === HELM_HUB_ENDPOINT_TYPE) {
+        return [
+          new ResetPaginationOfType(helmEntityCatalog.chart.getSchema()),
+        ];
+      }
       return [];
     })
   );
