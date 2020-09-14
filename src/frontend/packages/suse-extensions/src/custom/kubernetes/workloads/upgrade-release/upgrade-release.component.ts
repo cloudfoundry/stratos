@@ -11,6 +11,7 @@ import { stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-mo
 import { HelmUpgradeValues, MonocularVersion } from '../../../helm/store/helm.types';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
 import { HelmReleaseGuid } from '../workload.types';
+import { getFirstChartUrl } from '../workload.utils';
 import { workloadsEntityCatalog } from './../workloads-entity-catalog';
 import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config';
 
@@ -90,6 +91,7 @@ export class UpgradeReleaseComponent {
       return of({ success: true });
     }
 
+    // Add the chart url into the values
     const values: HelmUpgradeValues = {
       values: this.overrides.controls.values.value,
       restartPods: false,
@@ -98,7 +100,8 @@ export class UpgradeReleaseComponent {
         repo: this.version.relationships.chart.data.repo.name,
         version: this.version.attributes.version,
       },
-      monocularEndpoint: this.monocularEndpointId === stratosMonocularEndpointGuid ? null : this.monocularEndpointId
+      monocularEndpoint: this.monocularEndpointId === stratosMonocularEndpointGuid ? null : this.monocularEndpointId,
+      chartUrl: getFirstChartUrl(this.version)
     };
 
     // Make the request

@@ -2,7 +2,6 @@ package monocular
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -10,45 +9,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type HelmRepoInfo struct {
-	ID         string `json:"id"`
-	Type       string `json:"type"`
-	Attributes struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	} `json:"attributes"`
-}
-
 type helmStatusInfo map[string]bool
 
-func (m *Monocular) ListRepos(c echo.Context) error {
-	log.Debug("ListRepos")
-
-	endpoints, err := m.portalProxy.ListEndpoints()
-	if err != nil {
-		return errors.New("Could not get endpoints")
-	}
-
-	repos := make([]HelmRepoInfo, 0)
-	for _, ep := range endpoints {
-		if ep.CNSIType == helmEndpointType {
-			// Helm endpoint
-			repo := HelmRepoInfo{
-				ID:   ep.Name,
-				Type: "repository",
-			}
-			repo.Attributes.Name = ep.Name
-			repo.Attributes.URL = ep.APIEndpoint.String()
-			repos = append(repos, repo)
-		}
-	}
-
-	return c.JSON(200, repos)
-}
-
-// GetRepoStatuses will get the status of the Helm Endpoints requested
-func (m *Monocular) GetRepoStatuses(c echo.Context) error {
-	log.Debug("GetRepoStatuses")
+// getRepoStatuses will get the status of the Helm Endpoints requested
+func (m *Monocular) getRepoStatuses(c echo.Context) error {
+	log.Debug("getRepoStatuses")
 
 	// Get the list of endpoints we are looking at
 	// Need to extract the parameters from the request body

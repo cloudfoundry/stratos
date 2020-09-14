@@ -15,10 +15,13 @@ import { RequestInfoState } from '../../../../../store/src/reducers/api-request-
 import { kubeEntityCatalog } from '../../kubernetes/kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
 import { KubernetesNamespace } from '../../kubernetes/store/kube.types';
+import { getFirstChartUrl } from '../../kubernetes/workloads/workload.utils';
 import { helmEntityCatalog } from '../helm-entity-catalog';
 import { createMonocularProviders } from '../monocular/stratos-monocular-providers.helpers';
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../monocular/stratos-monocular.helper';
 import { HelmInstallValues } from '../store/helm.types';
+import { ChartsService } from './../monocular/shared/services/charts.service';
+import { HelmChartReference } from './../store/helm.types';
 
 @Component({
   selector: 'app-create-release',
@@ -59,14 +62,18 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
   private createdNamespace = false;
 
+  private chart: HelmChartReference;
+
   constructor(
     private route: ActivatedRoute,
     public endpointsService: EndpointsService,
     private httpClient: HttpClient,
     private confirmDialog: ConfirmationDialogService,
+    private chartsService: ChartsService,
   ) {
-    const chart = this.route.snapshot.params;
-    this.cancelUrl = `/monocular/charts/${getMonocularEndpoint(this.route)}/${chart.repo}/${chart.chartName}/${chart.version}`;
+    const chart = this.route.snapshot.params as HelmChartReference;
+    this.cancelUrl = `/monocular/charts/${getMonocularEndpoint(this.route)}/${chart.repo}/${chart.name}/${chart.version}`;
+    this.chart = chart;
 
     this.setupDetailsStep();
 
@@ -75,7 +82,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     });
 
     // Fetch the values.yaml for the Chart
-    const valuesYamlUrl = `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.chartName}/versions/${chart.version}/values.yaml`;
+    const valuesYamlUrl = `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.name}/versions/${chart.version}/values.yaml`;
 
     this.httpClient.get(valuesYamlUrl, { responseType: 'text' })
       .subscribe(response => {
@@ -256,33 +263,45 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       ...this.details.value,
       ...this.overrides.value,
       chart: {
-        chartName: this.route.snapshot.params.chartName,
+        name: this.route.snapshot.params.name,
         repo: this.route.snapshot.params.repo,
         version: this.route.snapshot.params.version,
       },
       monocularEndpoint: endpoint === stratosMonocularEndpointGuid ? null : endpoint
     };
 
-    // Make the request
-    return helmEntityCatalog.chart.api.install<RequestInfoState>(values).pipe(
-      // Wait for result of request
-      filter(state => !!state),
-      pairwise(),
-      filter(([oldVal, newVal]) => (oldVal.creating && !newVal.creating)),
-      map(([, newVal]) => newVal),
-      map(result => ({
-        success: !result.error,
-        redirect: !result.error,
-        redirectPayload: {
-          path: !result.error ? `workloads/${values.endpoint}:${values.releaseNamespace}:${values.releaseName}/summary` : ''
-        },
-        message: !result.error ? '' : result.message
-      }))
+    // Get the chart first, so we can get then install URL, then install
+    return this.chartsService.getVersion(this.chart.repo, this.chart.name, this.chart.version).pipe(
+      switchMap(chartInfo => {
+        if (!chartInfo) {
+          throw new Error('Could not get Chart URL');
+        }
+        // Add the chart url into the values
+        values.chartUrl = getFirstChartUrl(chartInfo);
+        if (values.chartUrl.length === 0) {
+          throw new Error('Could not get Chart URL');
+        }
+        // Make the request
+        return helmEntityCatalog.chart.api.install<RequestInfoState>(values).pipe(
+          // Wait for result of request
+          filter(state => !!state),
+          pairwise(),
+          filter(([oldVal, newVal]) => (oldVal.creating && !newVal.creating)),
+          map(([, newVal]) => newVal),
+          map(result => ({
+            success: !result.error,
+            redirect: !result.error,
+            redirectPayload: {
+              path: !result.error ? `workloads/${values.endpoint}:${values.releaseNamespace}:${values.releaseName}/summary` : ''
+            },
+            message: !result.error ? '' : result.message
+          }))
+        )
+      })
     );
   }
 
   ngOnDestroy() {
     safeUnsubscribe(...this.subs);
   }
-
 }

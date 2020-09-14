@@ -53,3 +53,6 @@ AUTH_ENDPOINT_TYPE=local
 LOCAL_USER=admin
 LOCAL_USER_PASSWORD=admin
 LOCAL_USER_SCOPE=stratos.admin
+
+# Cache folder for Helm Charts
+HELM_CACHE_FOLDER=./.helm-cache

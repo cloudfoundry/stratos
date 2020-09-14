@@ -47,24 +47,6 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-repository))/stratos-console
-- name: fdbserver-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-repository))/stratos-fdbserver
-- name: fdbdoclayer-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-repository))/stratos-fdbdoclayer
-- name: chartsync-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-repository))/stratos-chartsync
 - name: kube-terminal-image
   type: docker-image
   source:
@@ -159,13 +141,6 @@ jobs:
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      - put: kube-terminal-image
-        params:
-          dockerfile: stratos/deploy/containers/kube-terminal/Dockerfile.kubeterminal
-          build: stratos/deploy/containers/kube-terminal
-          tag: image-tag/v2-alpha-tag
-          patch_base_reg: ((patch-base-reg))
-          patch_base_tag: ((patch-base-tag))
     - do: 
       - put: ui-image
         params:
@@ -184,31 +159,17 @@ jobs:
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
     - do:
-      - put: fdbserver-image
-        params:
-          dockerfile: stratos/deploy/containers/monocular/fdb-server/Dockerfile
-          build: stratos/deploy/containers/monocular/fdb-server/
-          tag: image-tag/v2-alpha-tag
-          patch_base_reg: ((patch-base-reg))
-          patch_base_tag: ((patch-base-tag))
-      - put: fdbdoclayer-image
-        params:
-          dockerfile: stratos/deploy/containers/monocular/fdb-doclayer/Dockerfile
-          build: stratos/deploy/containers/monocular/fdb-doclayer/
-          tag: image-tag/v2-alpha-tag
-          patch_base_reg: ((patch-base-reg))
-          patch_base_tag: ((patch-base-tag))
-      - put: chartsync-image
-        params:
-          dockerfile: stratos/src/jetstream/plugins/monocular/chart-repo/Dockerfile
-          build: stratos/src/jetstream/plugins/monocular/chart-repo/
-          tag: image-tag/v2-alpha-tag
-          patch_base_reg: ((patch-base-reg))
-          patch_base_tag: ((patch-base-tag))
       - put: analyzers-image
         params:
           dockerfile: stratos/src/jetstream/plugins/analysis/container/Dockerfile
           build: stratos/src/jetstream/plugins/analysis/container/
+          tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
+      - put: kube-terminal-image
+        params:
+          dockerfile: stratos/deploy/containers/kube-terminal/Dockerfile.kubeterminal
+          build: stratos/deploy/containers/kube-terminal
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))

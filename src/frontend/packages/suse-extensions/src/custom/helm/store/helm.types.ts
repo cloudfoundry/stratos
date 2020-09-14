@@ -45,35 +45,26 @@ export enum HelmStatus {
   Pending_Rollback = 8
 }
 
-export interface HelmInstallValues {
-  endpoint: string;
+export interface HelmChartReference {
+  name: string;
+  repo: string;
+  version: string;
+}
+
+export interface HelmUpgradeInstallValues {
   monocularEndpoint: string;
+  values: string;
+  chart: HelmChartReference;
+  chartUrl: string;
+}
+
+export interface HelmInstallValues extends HelmUpgradeInstallValues {
+  endpoint: string;
   releaseName: string;
   releaseNamespace: string;
-  values: string;
-  chart: {
-    name: string;
-    repo: string;
-    version: string;
-  };
 }
 
-export interface HelmUpgradeValues {
-  values: string;
-  chart: {
-    name: string;
-    repo: string;
-    version: string;
-  };
-  restartPods?: boolean;
-  monocularEndpoint?: string;
-}
 
-export interface HelmUpgradeValues {
-  chart: {
-    name: string;
-    repo: string;
-    version: string;
-  };
+export interface HelmUpgradeValues extends HelmUpgradeInstallValues {
   restartPods?: boolean;
 }

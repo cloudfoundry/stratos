@@ -128,9 +128,6 @@ images:
   proxy: stratos-jetstream
   mariadb: stratos-mariadb
   configInit: stratos-config-init
-  fdbserver: stratos-fdbserver
-  fdbdoclayer: stratos-fdbdoclayer
-  chartsync: stratos-chartsync
   analyzers: stratos-analyzers
 
 # Specify which storage class should be used for PVCs

@@ -3,7 +3,6 @@ package kubernetes
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/labstack/echo"
@@ -28,6 +27,7 @@ type installRequest struct {
 	Name              string `json:"releaseName"`
 	Namespace         string `json:"releaseNamespace"`
 	Values            string `json:"values"`
+	ChartURL          string `json:"chartUrl"`
 	Chart             struct {
 		Name       string `json:"chartName"`
 		Repository string `json:"repo"`
@@ -38,17 +38,13 @@ type installRequest struct {
 type upgradeRequest struct {
 	MonocularEndpoint string `json:"monocularEndpoint"`
 	Values            string `json:"values"`
+	ChartURL          string `json:"chartUrl"`
 	Chart             struct {
 		Name       string `json:"name"`
 		Repository string `json:"repo"`
 		Version    string `json:"version"`
 	} `json:"chart"`
 	RestartPods bool `json:"restartPods"`
-}
-
-// Monocular is a plugin for Monocular
-type Monocular interface {
-	GetChartDownloadUrl(monocularEndpoint, chartID, chartVersion string) (string, error)
 }
 
 // InstallRelease will install a Helm 3 release
@@ -63,7 +59,12 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 		return interfaces.NewJetstreamErrorf("Could not get Create Release Parameters: %v+", err)
 	}
 
-	chart, err := c.loadChart(params.MonocularEndpoint, params.Chart.Repository, params.Chart.Name, params.Chart.Version)
+	// Client must give us the download URL for the chart
+	if len(params.ChartURL) == 0 {
+		return interfaces.NewJetstreamErrorf("Client did not supply Chart download URL")
+	}
+
+	chart, err := c.loadChart(params.ChartURL)
 	if err != nil {
 		return interfaces.NewJetstreamErrorf("Could not load chart: %v+", err)
 	}
@@ -112,29 +113,8 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	return ec.JSON(200, release)
 }
 
-func (c *KubernetesSpecification) getChart(monocularEndpoint, chartID, version string) (string, error) {
-	helm := c.portalProxy.GetPlugin("monocular")
-	if helm == nil {
-		return "", errors.New("Could not find monocular plugin")
-	}
-
-	monocular, ok := helm.(Monocular)
-	if !ok {
-		return "", errors.New("Could not find monocular plugin interface")
-	}
-
-	return monocular.GetChartDownloadUrl(monocularEndpoint, chartID, version)
-}
-
 // Load the Helm chart for the given repository, name and version
-func (c *KubernetesSpecification) loadChart(monocularEndpoint, repo, name, version string) (*chart.Chart, error) {
-
-	chartID := fmt.Sprintf("%s/%s", repo, name)
-	downloadURL, err := c.getChart(monocularEndpoint, chartID, version)
-	if err != nil {
-		return nil, fmt.Errorf("Could not get the Download URL for the Helm Chart: %+v", err)
-	}
-
+func (c *KubernetesSpecification) loadChart(downloadURL string) (*chart.Chart, error) {
 	log.Debugf("Helm Chart Download URL: %s", downloadURL)
 
 	// NWM: Should we look up Helm Repository endpoint and use the value from that
@@ -218,17 +198,22 @@ func (c *KubernetesSpecification) UpgradeRelease(ec echo.Context) error {
 		return interfaces.NewJetstreamErrorf("Could not get Upgrade Release Parameters: %+v", err)
 	}
 
+	// Client must give us the download URL for the chart
+	if len(params.ChartURL) == 0 {
+		return interfaces.NewJetstreamErrorf("Client did not supply Chart download URL")
+	}
+
+	chart, err := c.loadChart(params.ChartURL)
+	if err != nil {
+		return interfaces.NewJetstreamErrorf("Could not load chart for upgrade: %+v", err)
+	}
+
 	config, hc, err := c.GetHelmConfiguration(endpointGUID, userGUID, namespace)
 	if err != nil {
 		return interfaces.NewJetstreamErrorf("Could not get Helm Configuration for endpoint: %+v", err)
 	}
 
 	defer hc.Cleanup()
-
-	chart, err := c.loadChart(params.MonocularEndpoint, params.Chart.Repository, params.Chart.Name, params.Chart.Version)
-	if err != nil {
-		return interfaces.NewJetstreamErrorf("Could not load chart for upgrade: %+v", err)
-	}
 
 	userSuppliedValues := map[string]interface{}{}
 	if err := yaml.Unmarshal([]byte(params.Values), &userSuppliedValues); err != nil {

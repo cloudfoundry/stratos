@@ -633,5 +633,12 @@ func (p *portalProxy) updateEndpoint(c echo.Context) error {
 		}
 	}
 
+	// Notify plugins if they support the notification interface
+	for _, plugin := range p.Plugins {
+		if notifier, ok := plugin.(interfaces.EndpointNotificationPlugin); ok {
+			notifier.OnEndpointNotification(interfaces.EndpointUpdateAction, &endpoint)
+		}
+	}
+
 	return nil
 }

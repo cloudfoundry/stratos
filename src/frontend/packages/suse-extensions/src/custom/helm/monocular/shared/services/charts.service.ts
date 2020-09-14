@@ -125,9 +125,9 @@ export class ChartsService {
    * @return An observable that will be a chartReadme
    */
   getChartReadme(chartVersion: ChartVersion): Observable<string> {
-    return this.http.get(`${this.hostname}${chartVersion.attributes.readme}`, {
+    return chartVersion.attributes.readme ? this.http.get(`${this.hostname}${chartVersion.attributes.readme}`, {
       responseType: 'text'
-    });
+    }) : of('<h1>No Readme available for this chart</h1>');
   }
 
   /**
@@ -175,9 +175,11 @@ export class ChartsService {
    *
    * @param chart Chart object
    */
-  getChartIconURL(chart: Chart): string {
-    if (chart.attributes.icon) {
-      return this.updateStratosUrl(chart, `${this.hostname}${chart.attributes.icon}`);
+  getChartIconURL(chart: Chart, version?: ChartVersion): string {
+    let url = version ? version.relationships.chart.data.icon : null;
+    url = url || chart.attributes.icon;
+    if (url) {
+      return this.updateStratosUrl(chart, `${this.hostname}${url}`);
     } else {
       return '/core/assets/custom/placeholder.png';
     }

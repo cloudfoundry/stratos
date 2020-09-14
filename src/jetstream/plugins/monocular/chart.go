@@ -14,12 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package models
+package monocular
 
 import (
 	"time"
-
-	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
 // Repo holds the App repository details
@@ -30,18 +28,18 @@ type Repo struct {
 
 // Chart is a higher-level representation of a chart package
 type Chart struct {
-	ID              string             `json:"-" bson:"_id"`
-	Name            string             `json:"name"`
-	Repo            Repo               `json:"repo"`
-	Description     string             `json:"description"`
-	Home            string             `json:"home"`
-	Keywords        []string           `json:"keywords"`
-	Maintainers     []chart.Maintainer `json:"maintainers"`
-	Sources         []string           `json:"sources"`
-	Icon            string             `json:"icon"`
-	RawIcon         []byte             `json:"-" bson:"raw_icon"`
-	IconContentType string             `json:"-" bson:"icon_content_type,omitempty"`
-	ChartVersions   []ChartVersion     `json:"-"`
+	ID              string            `json:"-"`
+	Name            string            `json:"name"`
+	Repo            Repo              `json:"repo"`
+	Description     string            `json:"description"`
+	Home            string            `json:"home"`
+	Keywords        []string          `json:"keywords"`
+	Maintainers     []ChartMaintainer `json:"maintainers"`
+	Sources         []string          `json:"sources"`
+	Icon            string            `json:"icon"`
+	RawIcon         []byte            `json:"-"`
+	IconContentType string            `json:"-"`
+	ChartVersions   []ChartVersion    `json:"-"`
 }
 
 // ChartVersion is a representation of a specific version of a chart
@@ -51,17 +49,9 @@ type ChartVersion struct {
 	Created    time.Time `json:"created"`
 	Digest     string    `json:"digest"`
 	URLs       []string  `json:"urls"`
-	Readme     string    `json:"readme" bson:"-"`
-	Values     string    `json:"values" bson:"-"`
-	Schema     string    `json:"schema" bson:"-"`
-}
-
-// ChartFiles holds the README and values for a given chart version
-type ChartFiles struct {
-	ID     string `bson:"_id"`
-	Readme string
-	Values string
-	Schema string
+	Readme     string    `json:"readme,omitempty"`
+	Values     string    `json:"values,omitempty"`
+	Schema     string    `json:"schema,omitempty"`
 }
 
 //RepoCheck describes the state of a repository in terms its current checksum and last update time.

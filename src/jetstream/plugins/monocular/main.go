@@ -1,26 +1,18 @@
 package monocular
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular/store"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/helm/monocular/chartsvc"
-	"github.com/helm/monocular/chartsvc/foundationdb"
-	"github.com/helm/monocular/chartsvc/models"
-	"github.com/helm/monocular/chartsvc/utils"
 )
 
 const (
@@ -28,30 +20,25 @@ const (
 	helmHubEndpointType   = "hub"
 	helmRepoEndpointType  = "repo"
 	stratosPrefix         = "/pp/v1/"
-	prefix                = "/pp/v1/chartsvc/"
 	kubeReleaseNameEnvVar = "STRATOS_HELM_RELEASE"
-	foundationDBURLEnvVar = "FDB_URL"
-	syncServerURLEnvVar   = "SYNC_SERVER_URL"
-	caCertEnvVar          = "MONOCULAR_CA_CRT_PATH"
-	tlsKeyEnvVar          = "MONOCULAR_KEY_PATH"
-	tLSCertEnvVar         = "MONOCULAR_CRT_PATH"
-	localDevEnvVar        = "FDB_LOCAL_DEV"
-	chartSyncBasePort     = 45000
+	cacheFolderEnvVar     = "HELM_CACHE_FOLDER"
+	defaultCacheFolder    = "./.helm-cache"
 )
 
 // Monocular is a plugin for Monocular
 type Monocular struct {
 	portalProxy     interfaces.PortalProxy
 	chartSvcRoutes  http.Handler
-	RepoQueryStore  *chartsvc.ChartSvcDatastore
+	ChartStore      store.ChartStore
 	FoundationDBURL string
 	SyncServiceURL  string
 	devSyncPID      int
+	CacheFolder     string
 }
 
 type HelmHubChart struct {
-	utils.ApiResponse
-	Attributes *models.ChartVersion `json:"attributes"`
+	APIResponse
+	Attributes *ChartVersion `json:"attributes"`
 }
 
 type HelmHubChartResponse struct {
@@ -60,24 +47,39 @@ type HelmHubChartResponse struct {
 
 // Init creates a new Monocular
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+	store.InitRepositoryProvider(portalProxy.GetConfig().DatabaseProviderName)
 	return &Monocular{portalProxy: portalProxy}, nil
 }
 
 // Init performs plugin initialization
 func (m *Monocular) Init() error {
 	log.Debug("Monocular init .... ")
-	if err := m.configure(); err != nil {
+
+	m.CacheFolder = m.portalProxy.Env().String(cacheFolderEnvVar, defaultCacheFolder)
+	folder, err := filepath.Abs(m.CacheFolder)
+	if err != nil {
+		return err
+	}
+	m.CacheFolder = folder
+	log.Infof("Using Cache folder: %s", m.CacheFolder)
+
+	// Check that the folder exists - try to make it, if not
+	if _, err := os.Stat(m.CacheFolder); os.IsNotExist(err) {
+		log.Info("Helm Cache folder does not exist - creating")
+		if err := os.MkdirAll(m.CacheFolder, os.ModePerm); err != nil {
+			log.Warn("Could not create folder for Helm Cache")
+			return err
+		}
+	}
+
+	store, err := store.NewHelmChartDBStore(m.portalProxy.GetDatabaseConnection())
+	if err != nil {
+		log.Errorf("Can not get Helm Chart store: %s", err)
 		return err
 	}
 
-	fdbURL := m.FoundationDBURL
-	fDB := "monocular-plugin"
-	debug := false
-	caCertPath, _ := m.portalProxy.Env().Lookup(caCertEnvVar)
-	TLSCertPath, _ := m.portalProxy.Env().Lookup(tLSCertEnvVar)
-	tlsKeyPath, _ := m.portalProxy.Env().Lookup(tlsKeyEnvVar)
-	m.ConfigureChartSVC(&fdbURL, &fDB, caCertPath, TLSCertPath, tlsKeyPath, &debug)
-	m.chartSvcRoutes = chartsvc.SetupRoutes()
+	m.ChartStore = store
+
 	m.InitSync()
 	m.syncOnStartup()
 	return nil
@@ -86,70 +88,10 @@ func (m *Monocular) Init() error {
 // Destroy does any cleanup for the plugin on exit
 func (m *Monocular) Destroy() {
 	log.Debug("Monocular plugin .. destroy")
-	if m.devSyncPID != 0 {
-		log.Info("... Stopping chart sync tool")
-		if p, err := os.FindProcess(m.devSyncPID); err == nil {
-			p.Kill()
-		} else {
-			log.Error("Could not find process for the chart sync tool")
-		}
-	}
-}
-
-func (m *Monocular) configure() error {
-
-	// Env var lookup for Monocular services
-	m.FoundationDBURL = m.portalProxy.Env().String(foundationDBURLEnvVar, "")
-	m.SyncServiceURL = m.portalProxy.Env().String(syncServerURLEnvVar, "")
-
-	if fdbPort, isLocal := m.portalProxy.Env().Lookup(localDevEnvVar); isLocal {
-		// Create a random port to use for the chart sync service
-		devSyncPort := chartSyncBasePort + rand.Intn(5000)
-		m.FoundationDBURL = fmt.Sprintf("mongodb://127.0.0.1:%s", fdbPort)
-		m.SyncServiceURL = fmt.Sprintf("http://127.0.0.1:%d", devSyncPort)
-
-		// Run the chartrepo tool
-		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-		if err != nil {
-			log.Error("Can not get folder of current process")
-		}
-		chartSyncTool := filepath.Join(dir, "plugins", "monocular", "chart-repo", "chartrepo")
-		cmd := exec.Command(chartSyncTool, "serve", fmt.Sprintf("--doclayer-url=%s", m.FoundationDBURL))
-		cmd.Env = make([]string, 1)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Env[0] = fmt.Sprintf("PORT=%d", devSyncPort)
-		if err = cmd.Start(); err != nil {
-			log.Fatalf("Error starting chart sync tool: %+v", err)
-		} else {
-			m.devSyncPID = cmd.Process.Pid
-		}
-	}
-
-	log.Debugf("Foundation DB : %s", m.FoundationDBURL)
-	log.Debugf("Sync Server   : %s", m.SyncServiceURL)
-
-	if len(m.FoundationDBURL) == 0 || len(m.SyncServiceURL) == 0 {
-		return errors.New("Helm Monocular DB and/or Sync server are not configured")
-	}
-
-	return nil
-}
-
-func getReleaseNameEnvVarPrefix(name string) string {
-	prefix := strings.ToUpper(name)
-	prefix = strings.ReplaceAll(prefix, "-", "_")
-	return prefix
 }
 
 func (m *Monocular) syncOnStartup() {
-
-	// Get the repositories that we currently have
-	repos, err := foundationdb.ListRepositories()
-	if err != nil {
-		log.Errorf("Chart Repository Startup: Unable to sync repositories: %v+", err)
-		return
-	}
+	// Always sync all repositories on startup
 
 	// Get all of the helm endpoints
 	endpoints, err := m.portalProxy.ListEndpoints()
@@ -158,17 +100,13 @@ func (m *Monocular) syncOnStartup() {
 		return
 	}
 
-	helmRepos := make([]string, 0)
+	helmRepos := make(map[string]bool)
 	for _, ep := range endpoints {
 		if ep.CNSIType == helmEndpointType {
 			if ep.SubType == helmRepoEndpointType {
-				helmRepos = append(helmRepos, ep.Name)
-
-				// Is this an endpoint that we don't have charts for ?
-				if !arrayContainsString(repos, ep.Name) {
-					log.Infof("Syncing helm repository to chart store: %s", ep.Name)
-					m.Sync(interfaces.EndpointRegisterAction, ep)
-				}
+				helmRepos[ep.Name] = true
+				log.Infof("Syncing helm repository to chart store: %s", ep.Name)
+				m.Sync(interfaces.EndpointRegisterAction, ep)
 			} else {
 				metadata := "{}"
 				m.portalProxy.UpdateEndpointMetadata(ep.GUID, metadata)
@@ -176,16 +114,15 @@ func (m *Monocular) syncOnStartup() {
 		}
 	}
 
-	// Now delete any repositories that are no longer registered as endpoints
-	for _, repo := range repos {
-		if !arrayContainsString(helmRepos, repo) {
-			log.Infof("Removing helm repository from chart store: %s", repo)
-			endpoint := &interfaces.CNSIRecord{
-				GUID:     repo,
-				Name:     repo,
-				CNSIType: helmEndpointType,
+	// Delete any endpoints left in the chart store that are no longer registered
+	// Get all of the endpoints that we have in the Database Chart Store
+	existing, err := m.ChartStore.GetEndpointIDs()
+	if err == nil {
+		for _, id := range existing {
+			if _, ok := helmRepos[id]; !ok {
+				log.Warnf("Endpoint ID %s exists in the Chart Store but does not exist as an endpoint - deleting", id)
+				m.deleteChartStoreForEndpoint(id)
 			}
-			m.Sync(interfaces.EndpointUnregisterAction, endpoint)
 		}
 	}
 }
@@ -200,17 +137,7 @@ func arrayContainsString(a []string, x string) bool {
 	return false
 }
 
-func (m *Monocular) ConfigureChartSVC(fdbURL *string, fDB *string, cACertFile string, certFile string, keyFile string, debug *bool) error {
-	//TLS options must either be all set to enabled TLS, or none set to disable TLS
-	var tlsEnabled = cACertFile != "" && keyFile != "" && certFile != ""
-	if !(tlsEnabled || (cACertFile == "" && keyFile == "" && certFile == "")) {
-		return errors.New("To enable TLS, all 3 TLS cert paths must be set.")
-	}
-	m.RepoQueryStore = chartsvc.InitFDBDocLayerConnection(fdbURL, fDB, &tlsEnabled, cACertFile, certFile, keyFile, debug)
-
-	return nil
-}
-
+// OnEndpointNotification handles notification that endpoint has been remoevd
 func (m *Monocular) OnEndpointNotification(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
 	if endpoint.CNSIType == helmEndpointType && endpoint.SubType == helmRepoEndpointType {
 		m.Sync(action, endpoint)
@@ -239,16 +166,57 @@ func (m *Monocular) AddAdminGroupRoutes(echoGroup *echo.Group) {
 
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
-	// Requests to Monocular Instances
-	echoGroup.Any("/chartsvc/*", m.handleAPI)
+
+	// API for Helm Chart Repositories - sync and sync status
 	// Reach out to a monocular instance other than Stratos (like helm hub). This is usually done via `x-cap-cnsi-list`
 	// however cannot be done for things like img src
 	echoGroup.Any("/monocular/:guid/chartsvc/*", m.handleMonocularInstance)
 
-	// API for Helm Chart Repositories
-	echoGroup.GET("/chartrepos", m.ListRepos)
-	echoGroup.POST("/chartrepos/status", m.GetRepoStatuses)
-	echoGroup.POST("/chartrepos/:guid", m.SyncRepo)
+	echoGroup.POST("/chartrepos/:guid", m.syncRepo)
+	echoGroup.POST("/chartrepos/status", m.getRepoStatuses)
+
+	// Routes for Chart Store
+	chartSvcGroup := echoGroup.Group("/chartsvc")
+
+	// Routes for the internal chart store
+
+	// Get specific chart version file (used for values.yaml)
+	chartSvcGroup.GET("/v1/assets/:repo/:name/versions/:version/:filename", m.getChartAndVersionFile)
+
+	// Get specific chart version file
+	chartSvcGroup.GET("/v1/charts/:repo/:name/versions/:version/files/:filename", m.getChartAndVersionFile)
+
+	// Get specific chart version of a chart
+	chartSvcGroup.GET("/v1/charts/:repo/:name/versions/:version", m.getChartVersion)
+
+	// Get chart versions
+	chartSvcGroup.GET("/v1/charts/:repo/:name/versions", m.getChartVersions)
+
+	// Get a chart
+	chartSvcGroup.GET("/v1/charts/:repo/:name", m.getChart)
+
+	// // Get list of charts
+	chartSvcGroup.GET("/v1/charts", m.listCharts)
+
+	// Get the chart icon for a specific version
+	chartSvcGroup.GET("/v1/assets/:repo/:chartName/:version/logo", m.getIcon)
+
+	// Get the chart icon
+	chartSvcGroup.GET("/v1/assets/:repo/:chartName/logo", m.getIcon)
+}
+
+// Check if the request if for an external Monocular instance and handle it if so
+func (m *Monocular) processMonocularRequest(c echo.Context) (bool, error) {
+	externalMonocularEndpoint, err := m.isExternalMonocularRequest(c)
+	if err != nil {
+		return true, echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// If this request is associated with an external monocular instance forward the request on to it
+	if externalMonocularEndpoint != nil {
+		return true, m.baseHandleMonocularInstance(c, externalMonocularEndpoint)
+	}
+	return false, nil
 }
 
 // isExternalMonocularRequest .. Should this request go out to an external monocular instance? IF so returns external monocular endpoint
@@ -276,30 +244,6 @@ func (m *Monocular) validateExternalMonocularEndpoint(cnsi string) (*interfaces.
 	}
 
 	return nil, nil
-}
-
-// Forward requests to the Chart Service API
-func (m *Monocular) handleAPI(c echo.Context) error {
-	externalMonocularEndpoint, err := m.isExternalMonocularRequest(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	// If this request is associated with an external monocular instance forward the request on to it
-	if externalMonocularEndpoint != nil {
-		return m.baseHandleMonocularInstance(c, externalMonocularEndpoint)
-	}
-
-	// Modify the path to remove our prefix for the Chart Service API
-	path := c.Request().URL.Path
-	log.Debugf("URL to chartsvc requested: %v", path)
-	if strings.Index(path, prefix) == 0 {
-		path = path[len(prefix)-1:]
-		c.Request().URL.Path = path
-	}
-	log.Debugf("URL to chartsvc requested after modification: %v", path)
-	m.chartSvcRoutes.ServeHTTP(c.Response().Writer, c.Request())
-	return nil
 }
 
 func (m *Monocular) handleMonocularInstance(c echo.Context) error {
@@ -391,60 +335,4 @@ func (m *Monocular) baseHandleMonocularInstance(c echo.Context, monocularEndpoin
 	}
 
 	return nil
-}
-
-// GetChartDownloadUrl ... Get the download url for the bits required to install the given chart
-func (m *Monocular) GetChartDownloadUrl(monocularEndpoint, chartID, version string) (string, error) {
-	if len(monocularEndpoint) > 0 {
-		// Fetch the monocular endpoint for the url
-		endpoint, err := m.validateExternalMonocularEndpoint(monocularEndpoint)
-		if err != nil {
-			return "", err
-		}
-		url := endpoint.APIEndpoint
-
-		// Fetch the chart, this will give us the url to download the bits
-		url.Path += "/chartsvc/v1/charts/" + chartID + "/versions/" + version
-		req, err := http.NewRequest(http.MethodGet, url.String(), nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		client := &http.Client{Timeout: 30 * time.Second}
-		res, err := client.Do(req)
-		if err != nil {
-			return "", err
-		} else if res.StatusCode >= 400 {
-			return "", fmt.Errorf("Couldn't download monocular chart (%+v) from '%+v'", res.StatusCode, req.URL)
-		} else if res.Body != nil {
-			body, _ := ioutil.ReadAll(res.Body)
-			defer res.Body.Close()
-
-			// Reach into the chart response for the download URL
-			chartVersionResponse := &HelmHubChartResponse{}
-			err := json.Unmarshal(body, chartVersionResponse)
-			if err != nil {
-				return "", err
-			}
-			if len(chartVersionResponse.Data.Attributes.URLs) < 1 {
-				return "", errors.New("Response contained no chart package urls")
-			}
-			return chartVersionResponse.Data.Attributes.URLs[0], err
-		} else {
-			return "", errors.New("No body in response to chart request")
-		}
-	} else {
-		store := m.RepoQueryStore
-		chart, err := store.GetChart(chartID)
-		if err != nil {
-			return "", errors.New("Could not find Chart")
-		}
-
-		// Find the download URL for the version
-		for _, chartVersion := range chart.ChartVersions {
-			if chartVersion.Version == version {
-				if len(chartVersion.URLs) == 1 {
-					return chartVersion.URLs[0], nil
-				}
-			}
-		}
-		return "", errors.New("Could not find Chart Version")
-	}
 }

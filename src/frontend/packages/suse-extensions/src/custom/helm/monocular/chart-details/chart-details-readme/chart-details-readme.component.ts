@@ -19,19 +19,22 @@ export class ChartDetailsReadmeComponent {
     }
   }
 
-  public loading = true;
+  public loading = false;
   public readmeContent$: Observable<string>;
   private renderer = new markdown.Renderer();
+  private loadingDelay: any;
 
   constructor(private chartsService: ChartsService) {
     this.renderer.link = (href, title, text) => `<a target="_blank" title="${title}" href="${href}">${text}</a>`;
     this.renderer.code = (text: string) => `<code>${text}</code>`;
+    this.loadingDelay = setTimeout(() => this.loading = true, 100);
   }
 
   // TODO: See #150 - This should not require loading the specific version and then the readme
   private getReadme(currentVersion: ChartVersion): Observable<string> {
     return this.chartsService.getChartReadme(currentVersion).pipe(
       map(resp => {
+        clearTimeout(this.loadingDelay);
         this.loading = false;
         return markdown(resp, {
           renderer: this.renderer

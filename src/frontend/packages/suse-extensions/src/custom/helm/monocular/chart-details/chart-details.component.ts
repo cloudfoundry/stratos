@@ -16,16 +16,21 @@ import { getMonocularEndpoint } from '../stratos-monocular.helper';
 export class ChartDetailsComponent implements OnInit {
   /* This resource will be different, probably ChartVersion */
   chart: Chart;
-  loading = true;
+  loading = false;
+  initing = true;
   currentVersion: ChartVersion;
   iconUrl: string;
   titleVersion: string;
+
+  loadingDelay: any;
 
   constructor(
     private route: ActivatedRoute,
     private chartsService: ChartsService,
     private config: ConfigService,
-  ) { }
+  ) {
+    this.loadingDelay = setTimeout(() => this.loading = true, 100);
+  }
 
   ngOnInit() {
     this.route.params.forEach((params: Params) => {
@@ -34,7 +39,9 @@ export class ChartDetailsComponent implements OnInit {
 
       if (!!chartName) {
         this.chartsService.getChart(repo, chartName).pipe(first()).subscribe(chart => {
+          clearTimeout(this.loadingDelay);
           this.loading = false;
+          this.initing = false;
           this.chart = chart;
           const version = params.version || this.chart.relationships.latestChartVersion.data.version;
           this.chartsService.getVersion(repo, chartName, version).pipe(first())
@@ -42,8 +49,8 @@ export class ChartDetailsComponent implements OnInit {
               this.currentVersion = chartVersion;
               this.titleVersion = this.currentVersion.attributes.app_version || '';
               this.updateMetaTags();
+              this.iconUrl = this.chartsService.getChartIconURL(this.chart, chartVersion);
             });
-          this.iconUrl = this.chartsService.getChartIconURL(this.chart);
         });
       }
     });

@@ -96,6 +96,7 @@ src/jetstream/config.properties
 src/jetstream/db/dbconf.yml
 src/jetstream/plugins/monocular/chart-repo/chartrepo
 src/jetstream/plugins/analysis/container/analyzers
+src/jetstream/.helm-cache
 
 # Customisations - these can be removed in the future
 # Left in for now to prevent these files being checked-in, if they are still present

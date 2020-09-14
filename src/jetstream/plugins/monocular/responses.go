@@ -14,21 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package utils
+package monocular
 
 //BodyAPIListResponse is an API body response in list format including the number of results pages
 type BodyAPIListResponse struct {
-	Data *ApiListResponse `json:"data"`
+	Data *APIListResponse `json:"data"`
 	Meta Meta             `json:"meta,omitempty"`
 }
 
 //BodyAPIResponse is an API body response in non-list format
 type BodyAPIResponse struct {
-	Data ApiResponse `json:"data"`
+	Data APIResponse `json:"data"`
 }
 
-//ApiResponse is an API response in non-list format
-type ApiResponse struct {
+//APIResponse is an API response in non-list format
+type APIResponse struct {
 	ID            string      `json:"id"`
 	Type          string      `json:"type"`
 	Attributes    interface{} `json:"attributes"`
@@ -36,8 +36,8 @@ type ApiResponse struct {
 	Relationships RelMap      `json:"relationships"`
 }
 
-//ApiListResponse is an API response in list format
-type ApiListResponse []*ApiResponse
+//APIListResponse is an API response in list format
+type APIListResponse []*APIResponse
 
 //SelfLink the self-referencing URL to a chart in a response
 type SelfLink struct {

@@ -18,8 +18,8 @@ const monocular: Routes = [
   },
   { pathMatch: 'full', path: 'charts/:endpoint/:repo/:chartName/:version', component: MonocularChartViewComponent },
   { path: 'charts/:endpoint/:repo/:chartName', component: MonocularChartViewComponent },
-  { pathMatch: 'full', path: 'install/:endpoint/:repo/:chartName/:version', component: CreateReleaseComponent },
-  { path: 'install/:endpoint/:repo/:chartName', component: CreateReleaseComponent },
+  { pathMatch: 'full', path: 'install/:endpoint/:repo/:name/:version', component: CreateReleaseComponent },
+  { path: 'install/:endpoint/:repo/:name', component: CreateReleaseComponent },
 ];
 
 @NgModule({

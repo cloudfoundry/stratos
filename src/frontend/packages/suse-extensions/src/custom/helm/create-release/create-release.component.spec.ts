@@ -9,6 +9,9 @@ import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-m
 import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { KubernetesBaseTestModules } from '../../kubernetes/kubernetes.testing.module';
+import { MockChartService } from '../monocular/shared/services/chart.service.mock';
+import { ChartsService } from '../monocular/shared/services/charts.service';
+import { ConfigService } from '../monocular/shared/services/config.service';
 import { CreateReleaseComponent } from './create-release.component';
 
 describe('CreateReleaseComponent', () => {
@@ -31,8 +34,10 @@ describe('CreateReleaseComponent', () => {
         EntityMonitorFactory,
         InternalEventMonitorFactory,
         TabNavService,
-        ConfirmationDialogService
-      ]
+        ConfirmationDialogService,
+        { provide: ChartsService, useValue: new MockChartService() },
+        { provide: ConfigService, useValue: { appName: 'appName' } },
+    ]
     })
       .compileComponents();
 

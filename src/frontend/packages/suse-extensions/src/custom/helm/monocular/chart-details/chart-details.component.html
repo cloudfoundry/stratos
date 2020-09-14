@@ -1,5 +1,5 @@
 <div>
-  <app-panel *ngIf="!chart && !loading" class="app-panel--container">
+  <app-panel *ngIf="!chart && !initing" class="app-panel--container">
     <h2>Sorry, we couldn't find the chart</h2>
   </app-panel>
   <app-loader [loading]="loading">

@@ -282,6 +282,8 @@ spec:
           value: {{ default "" .Values.console.userInviteSubject | quote }}
         - name: ENABLE_TECH_PREVIEW
           value: {{ default "false" .Values.console.techPreview | quote }}
+        - name: HELM_CACHE_FOLDER
+          value: /helm-cache
         {{- if .Values.console.ui }}
         {{- if .Values.console.ui.listMaxSize }}
         - name: UI_LIST_MAX_SIZE
@@ -315,9 +317,8 @@ spec:
           name: "{{ .Release.Name }}-templates"
           readOnly: true
         {{- end }}
-        - mountPath: "/etc/monocular-certs"
-          name: "{{ .Release.Name }}-monocular-certs"
-          readOnly: true
+        - mountPath: /helm-cache
+          name: helm-cache-volume          
       {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
@@ -347,6 +348,5 @@ spec:
         configMap:
           name: {{ .Values.console.templatesConfigMapName }}
       {{- end }}
-      - name: "{{ .Release.Name }}-monocular-certs"
-        secret:
-          secretName: {{ .Release.Name }}-fdbdoclayer-certs
+      - name: helm-cache-volume
+        emptyDir: {}      
