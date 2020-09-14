@@ -1,4 +1,4 @@
-<div class="suse-login" id="app-login-page" [ngClass]="{'suse-login-sso': ssoLogin}" >
+<div class="suse-login" id="app-login-page" [ngClass]="{'suse-login-sso': ssoLogin}">
   <div class="suse-login__content">
     <div class="suse-login__intro">
       <img class="suse-login__intro-img-left" src="/core/assets/custom/login/suse-logo-light.svg">
@@ -26,7 +26,7 @@
       </div>
 
       <div class="suse-login__box" [ngClass]="{'suse-login__busy': busy$ | async }">
-        <div *ngIf="!ssoLogin" class="suse-login__form-title">Sign in</div>
+        <div *ngIf="!ssoLogin" class="suse-login__form-title" [ngClass]="{'hidden': initialLoad$ | async}">Sign in</div>
         <ng-container *ngTemplateOutlet="loginform"></ng-container>
       </div>
     </div>
@@ -34,7 +34,7 @@
 </div>
 
 <ng-template #loginform>
-  <div class="suse-login__form-outer">
+  <div class="suse-login__form-outer" [ngClass]="{'hidden': initialLoad$ | async}">
     <form class="suse-login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
       <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
         <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
@@ -42,8 +42,8 @@
       <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
         <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
       </mat-form-field>
-      <button class="suse-login__submit" [ngClass]="{'suse-login__sso-button': ssoLogin}" color="primary" *ngIf="!loggedIn" type="submit" mat-button
-        mat-raised-button [disabled]="!loginForm.valid">
+      <button class="suse-login__submit" [ngClass]="{'suse-login__sso-button': ssoLogin}" color="primary"
+        *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!loginForm.valid">
         {{ !ssoLogin ? 'Login' : 'Login with SSO' }}
       </button>
     </form>
