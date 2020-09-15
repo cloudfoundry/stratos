@@ -1,5 +1,28 @@
 # Change Log
 
+## 4.1.0
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/4.0.1...4.1.0)
+
+This release contains a number of fixes and improvements:
+
+**Improvements:**
+
+- Add support for API Keys [\#4504](https://github.com/cloudfoundry/stratos/issues/4504)
+- API Keys: Make feature configurable for different user types [\#4531](https://github.com/cloudfoundry/stratos/issues/4531)
+- Register Endpoint: Reduce size of cards [\#4568](https://github.com/cloudfoundry/stratos/issues/4568)
+- Metrics view: Add "The last day" to time range selector  [\#4516](https://github.com/cloudfoundry/stratos/issues/4516)
+
+
+**Fixes:**
+
+- Sort endpoint table by type results in empty sort drop down in cf endpoints list [\#4565](https://github.com/cloudfoundry/stratos/issues/4565)
+- Endpoint unregister clears user sort & filter selection [\#4563](https://github.com/cloudfoundry/stratos/issues/4563)
+- Metrics: Metrics detail page can show two endpoint cards if URLs have trailing slash [\#4528](https://github.com/cloudfoundry/stratos/issues/4528)
+- Deploy from Gitlab: Repos in groups do not work [\#4153](https://github.com/cloudfoundry/stratos/issues/4153)
+- Deploy app from Github repo only shows branches from a-e in dropdown [\#3966](https://github.com/cloudfoundry/stratos/issues/3966)
+
+
 ## 4.0.1
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/4.0.0...4.0.1)
