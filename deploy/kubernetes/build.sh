@@ -296,5 +296,5 @@ printf "${RESET}"
 echo
 echo "To deploy using Helm, execute the following:"
 echo 
-echo "    helm install helm-chart --namespace console --name my-console"
+echo "    helm install my-console ./helm-chart --namespace console"
 echo

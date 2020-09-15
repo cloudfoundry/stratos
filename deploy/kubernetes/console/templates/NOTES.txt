@@ -1,0 +1,31 @@
+{{- if .Values.console.techPreview }}
+Tech Preview is enabled, extra features will be shown.
+{{- end}}
+
+To access Stratos:
+{{- $ingress := .Values.console.ingress | default dict }}
+{{- if $ingress.enabled }}
+From outside the cluster, the server URL is: http://{{ .Values.console.ingress.host }}
+{{- else }}
+Get the URL by running these commands in the same shell:
+{{- if contains "NodePort" .Values.console.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services console-ui-ext)
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo https://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.console.service.type }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        You can watch the status of by running 'kubectl get svc --namespace {{ .Release.Namespace }} -w console-ui-ext'
+
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} console-ui-ext -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo http://$SERVICE_IP:{{ .Values.console.service.servicePort }}
+{{- else if contains "ClusterIP"  .Values.console.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app=stratos-0,component=ui" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 443
+{{- end }}
+{{- end }}
+
+To learn more about the release, try:
+  $ helm status {{ .Release.Name }} -n {{ .Release.Namespace }}
+  $ helm get values {{ .Release.Name }} -n {{ .Release.Namespace }}
+  $ kubectl get services -n {{ .Release.Namespace }}
+  $ kubectl get pods -n {{ .Release.Namespace }}
