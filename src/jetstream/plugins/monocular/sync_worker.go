@@ -3,6 +3,7 @@ package monocular
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	yaml "gopkg.in/yaml.v2"
 
@@ -52,6 +53,9 @@ func (m *Monocular) syncHelmRepository(endpointID, repoName, url string) error {
 	var latestCharts []store.ChartStoreRecord
 	var allCharts []store.ChartStoreRecord
 
+	log.Infof("Helm Repository sync started for %s", repoName)
+	start := time.Now()
+
 	// Iterate over each chart in the index
 	for name, chartVersions := range index.Entries {
 		log.Debugf("Helm Repository Sync: Processing chart: %s", name)
@@ -70,7 +74,8 @@ func (m *Monocular) syncHelmRepository(endpointID, repoName, url string) error {
 		log.Errorf("%s", err)
 	}
 
-	log.Infof("Sync completed for %s", repoName)
+	elapsed := time.Since(start).Round(time.Second)
+	log.Infof("Helm Repository sync completed for %s (%s)", repoName, elapsed)
 
 	return nil
 }
@@ -127,6 +132,9 @@ func (m *Monocular) procesChartVersions(endpoint, repoName, name string, chartVe
 			if err := m.ChartStore.Save(record, batchID); err != nil {
 				log.Warnf("Error saving Chart %s, Version %s to the database: %+v", record.Name, record.Version, err)
 			}
+
+			// Small delay mainly for SQLite so we don't hog the database connection
+			time.Sleep(2 * time.Millisecond)
 		}
 	}
 

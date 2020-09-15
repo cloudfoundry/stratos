@@ -104,8 +104,7 @@ func (m *Monocular) syncOnStartup() {
 	for _, ep := range endpoints {
 		if ep.CNSIType == helmEndpointType {
 			if ep.SubType == helmRepoEndpointType {
-				helmRepos[ep.Name] = true
-				log.Infof("Syncing helm repository to chart store: %s", ep.Name)
+				helmRepos[ep.GUID] = true
 				m.Sync(interfaces.EndpointRegisterAction, ep)
 			} else {
 				metadata := "{}"

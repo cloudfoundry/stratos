@@ -11,6 +11,7 @@ import (
 
 var (
 	saveChartVersion   = `INSERT INTO helm_charts (endpoint, name, repo_name, version, created, app_version, description, icon_url, chart_url, source_url, digest, is_latest, update_batch) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
+	updateChartVersion = `UPDATE helm_charts SET created=$1, app_version=$2, description=$3, icon_url=$4, chart_url=$5, source_url=$6, digest=$7, is_latest=$8, update_batch=$9 WHERE endpoint=$10 AND name=$11 AND repo_name=$12 AND version=$13`
 	deleteChartVersion = `DELETE FROM helm_charts WHERE endpoint = $1 AND name = $2 and version = $3`
 	deleteForEndpoint  = `DELETE FROM helm_charts WHERE endpoint = $1`
 	deleteForBatch     = `DELETE FROM helm_charts WHERE endpoint = $1 AND name = $2 and update_batch != $3`
@@ -20,12 +21,15 @@ var (
 	getChartVersion    = `SELECT endpoint, name, repo_name, version, created, app_version, description, icon_url, chart_url, source_url, digest, is_latest FROM helm_charts WHERE repo_name = $1 AND name = $2 AND version = $3`
 	getChartVersions   = `SELECT endpoint, name, repo_name, version, created, app_version, description, icon_url, chart_url, source_url, digest, is_latest FROM helm_charts WHERE repo_name = $1 AND name = $2`
 	getEndpointIDs     = `SELECT DISTINCT endpoint FROM helm_charts`
+	updateChartDigest  = `UPDATE helm_charts SET is_latest=$1, update_batch=$2 WHERE endpoint=$3 AND name=$4 AND repo_name=$5 AND version=$6`
 )
 
 // InitRepositoryProvider - One time init for the given DB Provider
 func InitRepositoryProvider(databaseProvider string) {
 	saveChartVersion = datastore.ModifySQLStatement(saveChartVersion, databaseProvider)
-	deleteChartVersion = datastore.ModifySQLStatement(deleteChartVersion, databaseProvider)
+	updateChartVersion = datastore.ModifySQLStatement(updateChartVersion, databaseProvider)
+	updateChartVersion = datastore.ModifySQLStatement(updateChartVersion, databaseProvider)
+	updateChartDigest = datastore.ModifySQLStatement(updateChartDigest, databaseProvider)
 	deleteForEndpoint = datastore.ModifySQLStatement(deleteForEndpoint, databaseProvider)
 	deleteForBatch = datastore.ModifySQLStatement(deleteForBatch, databaseProvider)
 	renameEndpoint = datastore.ModifySQLStatement(renameEndpoint, databaseProvider)
@@ -49,12 +53,22 @@ func NewHelmChartDBStore(dcp *sql.DB) (ChartStore, error) {
 // Save a Helm Chart to the database
 func (p *HelmChartDBStore) Save(chart ChartStoreRecord, batchID string) error {
 
-	// Delete the existing record
-	p.db.Exec(deleteChartVersion, chart.EndpointID, chart.Name, chart.Version)
-
 	sourceURL := ""
 	if len(chart.Sources) > 0 {
 		sourceURL = chart.Sources[0]
+	}
+
+	// Get the existing record - if it has the same digest, then no need to store it
+	record, err := p.GetChart(chart.Repository, chart.Name, chart.Version)
+	if err == nil && record.Digest == chart.Digest {
+		_, err := p.db.Exec(updateChartDigest, chart.IsLatest, batchID, chart.EndpointID, chart.Name, chart.Repository, chart.Version)
+		return err
+	}
+
+	if err == nil {
+		// The record already exists, so update it
+		_, err := p.db.Exec(updateChartVersion, chart.Created, chart.AppVersion, chart.Description, chart.IconURL, chart.ChartURL, sourceURL, chart.Digest, chart.IsLatest, batchID, chart.EndpointID, chart.Name, chart.Repository, chart.Version)
+		return err
 	}
 
 	if _, err := p.db.Exec(saveChartVersion, chart.EndpointID, chart.Name, chart.Repository, chart.Version, chart.Created, chart.AppVersion, chart.Description, chart.IconURL, chart.ChartURL, sourceURL, chart.Digest, chart.IsLatest, batchID); err != nil {
