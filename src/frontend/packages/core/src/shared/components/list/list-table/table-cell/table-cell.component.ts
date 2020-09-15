@@ -9,12 +9,12 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
+import {
+  TableCellKubeNodeComponent,
+} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/app-instance/table-cell-kube-node/table-cell-kube-node.component';
 import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import {
-  TableCellKubeNodeComponent,
-} from '../../list-types/app-instance/table-cell-kube-node/table-cell-kube-node.component';
 import {
   TableCellEndpointAddressComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-address/table-cell-endpoint-address.component';
@@ -63,7 +63,7 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellExpanderComponent,
   TableCellEndpointAddressComponent,
   ...coreEndpointListDetailsComponents,
-  TableCellKubeNodeComponent // TODO: RC Move
+  TableCellKubeNodeComponent
 ];
 
 @Component({

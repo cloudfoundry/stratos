@@ -2,15 +2,13 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import { endpointSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { selectEntity } from '../../../../../store/src/selectors/api.selectors';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 
 @Component({
-  selector: 'cf-container-orchestrator-stepper',
+  selector: 'app-container-orchestrator-stepper',
   templateUrl: './container-orchestrator-stepper.component.html',
   styleUrls: ['./container-orchestrator-stepper.component.scss']
 })
@@ -27,9 +25,8 @@ export class ContainerOrchestratorStepperComponent {
     if (activatedRoute.snapshot.queryParamMap.get('cf')) {
       this.cancelUrl = `/cloud-foundry/${cfGuid}/summary`;
     }
-    this.cfName$ = store.select(selectEntity<EndpointModel>(endpointSchemaKey, cfGuid)).pipe(
-      filter(endpoint => !!endpoint),
-      map(endpoint => endpoint.name)
+    this.cfName$ = stratosEntityCatalog.endpoint.store.getEntityService(cfGuid).waitForEntity$.pipe(
+      map(endpoint => endpoint.entity.name)
     );
   }
 

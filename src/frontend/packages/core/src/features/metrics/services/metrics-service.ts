@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
+import { METRICS_ENDPOINT_TYPE } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
@@ -26,7 +27,7 @@ export class MetricsService {
   haveNoConnectedMetricsEndpoints$: Observable<boolean>;
 
   constructor() {
-    this.endpointsMonitor = stratosEntityCatalog.endpoint.store.getPaginationMonitor()
+    this.endpointsMonitor = stratosEntityCatalog.endpoint.store.getPaginationMonitor();
 
     this.setupObservables();
   }
@@ -35,7 +36,7 @@ export class MetricsService {
     this.metricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
       map((endpoints: EndpointModel[]) => {
         const result: MetricsEndpointProvider[] = [];
-        const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
+        const metrics = endpoints.filter(e => e.cnsi_type === METRICS_ENDPOINT_TYPE);
         metrics.forEach(ep => {
 
           const provider: MetricsEndpointProvider = {
@@ -64,7 +65,7 @@ export class MetricsService {
 
     this.haveNoMetricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
       map((endpoints: any) => {
-        const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
+        const metrics = endpoints.filter(e => e.cnsi_type === METRICS_ENDPOINT_TYPE);
         return metrics.length === 0;
       }),
       publishReplay(1),
@@ -73,7 +74,7 @@ export class MetricsService {
 
     this.haveNoConnectedMetricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
       map((endpoints: any) => {
-        const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
+        const metrics = endpoints.filter(e => e.cnsi_type === METRICS_ENDPOINT_TYPE);
         const connected = metrics.filter(e => !!e.user);
         return connected.length === 0;
       }),

@@ -9,7 +9,7 @@ import {
 } from '../actions/endpoint.actions';
 import { METRIC_API_SUCCESS, MetricAPIQueryTypes, MetricsAPIActionSuccess } from '../actions/metrics-api.actions';
 import { IRequestEntityTypeState } from '../app-state';
-import { endpointConnectionStatus, EndpointModel, EndpointRelationTypes } from '../types/endpoint.types';
+import { endpointConnectionStatus, EndpointModel } from '../types/endpoint.types';
 import { GET_SYSTEM_INFO } from './../actions/system.actions';
 
 export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action) {
@@ -49,15 +49,17 @@ function fetchingEndpointInfo(state) {
   return modified ? fetchingState : state;
 }
 
-export function endpointHasCfMetrics(endpoint: EndpointModel): boolean {
-  return endpoint && endpoint.relations ?
-    !!endpoint.relations.receives.find(relation => relation.type === EndpointRelationTypes.METRICS_CF) : false;
-}
+// EndpointRelationTypes.METRICS_CF
+// TODO: RC move to metrics helper if needed at all???
+// export function endpointHasMetricsType(endpoint: EndpointModel, type: EndpointRelationTypes): boolean {
+//   return endpoint && endpoint.relations ?
+//     !!endpoint.relations.receives.find(relation => relation.type === type) : false;
+// }
 
 function changeEndpointConnectionStatus(
   state: IRequestEntityTypeState<EndpointModel>,
   action: {
-    guid: string
+    guid: string;
   },
   connectionStatus: endpointConnectionStatus
 ) {

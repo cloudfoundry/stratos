@@ -9,9 +9,10 @@ export const apiKeyEntityType = 'apiKey';
 export const metricEntityType = 'metrics';
 
 export const STRATOS_ENDPOINT_TYPE = 'stratos';
+export const METRICS_ENDPOINT_TYPE = 'metrics';
 
 const entityCache: {
-  [key: string]: EntitySchema
+  [key: string]: EntitySchema;
 } = {};
 
 class StratosEntitySchema extends EntitySchema {

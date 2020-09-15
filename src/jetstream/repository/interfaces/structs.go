@@ -397,7 +397,8 @@ type PortalConfig struct {
 	// can perform migrations
 }
 
-// SetCanPerformMigrations updates the state that records if we can perform Database migrations
-func (c *PortalConfig) SetCanPerformMigrations(value bool) {
-	c.CanMigrateDatabaseSchema = c.CanMigrateDatabaseSchema && value
-}
+// TODO: RC
+// // SetCanPerformMigrations updates the state that records if we can perform Database migrations
+// func (c *PortalConfig) SetCanPerformMigrations(value bool) {
+// 	c.CanMigrateDatabaseSchema = c.CanMigrateDatabaseSchema && value
+// }

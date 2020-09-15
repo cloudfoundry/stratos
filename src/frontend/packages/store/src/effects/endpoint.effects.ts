@@ -241,7 +241,6 @@ export class EndpointsEffect {
   @Effect() updateRelation$ = this.actions$.pipe(
     ofType<SaveEndpointRelation>(UPDATE_ENDPOINT_RELATION),
     mergeMap(action => {
-      const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.updateRelationKey);
       // Endpoint is _target_ of relation's _provider_
       const relation = {
         provider: action.relation.guid,
@@ -254,7 +253,7 @@ export class EndpointsEffect {
       });
 
       return this.doRelationAction(
-        apiAction,
+        action,
         '/pp/v1/relation',
         params,
         'update',
@@ -269,7 +268,6 @@ export class EndpointsEffect {
   @Effect() deleteRelation$ = this.actions$.pipe(
     ofType<DeleteEndpointRelation>(DELETE_ENDPOINT_RELATION),
     mergeMap(action => {
-      const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.deleteRelationKey);
       // Endpoint is _target_ of relation's _provider_
       const relation = {
         provider: action.relation.guid,
@@ -282,7 +280,7 @@ export class EndpointsEffect {
       });
 
       return this.doRelationAction(
-        apiAction,
+        action,
         '/pp/v1/relation',
         params,
         'delete',
@@ -293,6 +291,7 @@ export class EndpointsEffect {
       );
     })
   );
+
   @Effect() updateEndpoint$ = this.actions$.pipe(
     ofType<UpdateEndpoint>(UPDATE_ENDPOINT),
     mergeMap((action: UpdateEndpoint) => {
@@ -342,9 +341,18 @@ export class EndpointsEffect {
     return message;
   }
 
+  // private getEndpointUpdateAction(guid: string, type: string, updatingKey: string) {
+  //   return {
+  //     entityKey: endpointStoreNames.type,
+  //     guid,
+  //     type,
+  //     updatingKey,
+  //   } as IRequestAction;
+  // }
+
   // TODO: RC review
   private doRelationAction(
-    apiAction: IRequestAction,
+    apiAction: EntityRequestAction,
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',

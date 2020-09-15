@@ -264,24 +264,30 @@ export class UpdateEndpoint extends SingleBaseEndpointAction {
   ];
 }
 
-export class SaveEndpointRelation extends EndpointAction {
-  type = UPDATE_ENDPOINT_RELATION;
+export class SaveEndpointRelation extends SingleBaseEndpointAction {
   constructor(
-    public guid: string,
+    guid: string,
     public relation: EndpointsRelation,
-    public endpointType = 'cf'
+    saveEndpointType = 'cf'
   ) {
-    super();
+    super(
+      UPDATE_ENDPOINT_RELATION,
+      guid,
+      saveEndpointType
+    );
   }
 }
 
-export class DeleteEndpointRelation extends EndpointAction {
-  type = DELETE_ENDPOINT_RELATION;
+export class DeleteEndpointRelation extends SingleBaseEndpointAction {
   constructor(
-    public guid: string,
+    guid: string,
     public relation: EndpointsRelation,
-    public endpointType = 'cf'
+    deleteEndpointType = 'cf'
   ) {
-    super();
+    super(
+      DELETE_ENDPOINT_RELATION,
+      guid,
+      deleteEndpointType
+    );
   }
 }

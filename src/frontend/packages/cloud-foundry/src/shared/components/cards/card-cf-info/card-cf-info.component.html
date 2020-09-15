@@ -17,6 +17,16 @@
           <app-metadata-item *ngIf="autoscalerVersion$ | async as autoscalerVersion" icon="meter"
             iconFont="stratos-icons" label="Autoscaler Version">
             {{ autoscalerVersion }}</app-metadata-item>
+          <!-- // TODO: RC does this look ok now under AS version? -->
+          <app-metadata-item *ngIf="eiriniEnabled$ | async" icon="account_balance_wallet"
+            label="Container Orchestrator">
+            <div class="user-invites">
+              {{ (cfEndpointService.containerOrchestrator$ | async) }}
+              <ng-container *ngIf="(canConfigureOrchestrator$ | async)">
+                - <button color="primary" mat-button (click)="configureEirini()">Configure</button>
+              </ng-container>
+            </div>
+          </app-metadata-item>
         </div>
         <div class="app-metadata__two-cols">
           <app-metadata-item icon="person" label="Account Username">

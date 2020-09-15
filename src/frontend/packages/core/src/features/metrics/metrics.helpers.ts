@@ -20,6 +20,7 @@ export interface MetricsEndpointInfo {
   status: Observable<StratosStatus>;
 }
 
+// TODO: RC is this needed?
 // Process the endpoint and Stratos marker file data to give a single list of endpoitns
 // linked to this metrics endpoint, comprising those that are known in Stratos and those that are not
 export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo[] {
@@ -80,11 +81,11 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
 // Simple URL compare that ignores tailing forward slashes
 function compareUrl(a: string, b: string): boolean {
   if (a && a.endsWith('/')) {
-    a = a.substr(0, a.length -1);
+    a = a.substr(0, a.length - 1);
   }
 
   if (b && b.endsWith('/')) {
-    b = b.substr(0, b.length -1);
+    b = b.substr(0, b.length - 1);
   }
 
   return a === b;

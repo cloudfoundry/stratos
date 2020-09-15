@@ -382,6 +382,21 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 	return user, ok
 }
 
+func (p *portalProxy) GetCNSIUsers() ([]string, error) {
+	log.Debug("GetCNSIUsers")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := tokenRepo.ListUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, *interfaces.TokenRecord, bool) {
 	log.Debug("GetCNSIUserAndToken")
 

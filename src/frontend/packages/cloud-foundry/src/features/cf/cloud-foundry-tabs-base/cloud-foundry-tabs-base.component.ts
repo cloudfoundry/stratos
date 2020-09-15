@@ -62,9 +62,16 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       startWith(true),
     );
 
-    const cellsHidden$ = endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
+    const cellsHidden$ = EndpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
       map(hasMetrics => !hasMetrics)
     );
+    // TODO: RC At the moment the cells side nave item will always show, even when eirini is configured.
+    // We can change this with the below code, however that creates a flicker of cells nav item before it's removed
+    // We can change this to not show at first... which would then move the flicker on to the diego cell's use case
+    // const cellsHidden$ = endpointsService.eiriniMetricsProvider(cfEndpointService.cfGuid).pipe(
+    //   switchMap(eiriniMetricsProvider => eiriniMetricsProvider ? of(false) : endpointsService.hasCellMetrics(cfEndpointService.cfGuid)),
+    //   map(hasMetrics => !hasMetrics)
+    // );
 
     // Default tabs + add any tabs from extensions
     this.tabLinks = [

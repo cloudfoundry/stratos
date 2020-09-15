@@ -31,6 +31,7 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import { CfContainerOrchestrator, cfEiriniRelationshipLabel } from '../../../shared/eirini.helper';
 import { QParam, QParamJoiners } from '../../../shared/q-param';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -65,6 +66,7 @@ export class CloudFoundryEndpointService {
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
   cfGuid: string;
+  containerOrchestrator$: Observable<CfContainerOrchestrator>;
 
   static createGetAllOrganizations(cfGuid: string) {
     const paginationKey = cfGuid ?
@@ -144,7 +146,7 @@ export class CloudFoundryEndpointService {
 
     this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(this.cfGuid);
 
-    this.cfInfoEntityService = cfEntityCatalog.cfInfo.store.getEntityService(this.cfGuid)
+    this.cfInfoEntityService = cfEntityCatalog.cfInfo.store.getEntityService(this.cfGuid);
     this.constructCoreObservables();
     this.constructSecondaryObservable();
   }
@@ -188,6 +190,10 @@ export class CloudFoundryEndpointService {
     );
 
     this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), publishReplay(1), refCount());
+
+    this.containerOrchestrator$ = this.endpoint$.pipe(
+      map(cf => cfEiriniRelationshipLabel(cf.entity)),
+    );
   }
 
   public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {

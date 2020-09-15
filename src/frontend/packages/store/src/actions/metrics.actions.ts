@@ -39,8 +39,7 @@ export class MetricQueryConfig {
 // FIXME: Final solution for Metrics - STRAT-152
 export class MetricsAction implements EntityRequestAction {
   constructor(
-    // FIXME: This is ignored in all cases - STRAT-152
-    guid: string,
+    guid: string, // FIXME: This is ignored in all cases - STRAT-152
     public endpointGuid: string,
     public query: MetricQueryConfig,
     public url: string,
@@ -96,7 +95,7 @@ export class FetchCFMetricsAction extends MetricsAction {
     public query: MetricQueryConfig,
     queryType: MetricQueryType = MetricQueryType.QUERY,
     isSeries = true) {
-    super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf`, null, queryType, isSeries);
+    super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf`, null, queryType, isSeries, 'TODOCF'); // TODO: RC
   }
 }
 
@@ -110,7 +109,7 @@ export class FetchCfEiriniMetricsAction extends MetricsAction {
     public query: MetricQueryConfig,
     queryType: MetricQueryType = MetricQueryType.QUERY,
     isSeries = true) {
-    super(metricsKey, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/eirini`, null, queryType, isSeries, false);
+    super(metricsKey, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/eirini`, null, queryType, isSeries, 'TODOCFE', false);// TODO: RC
   }
 }
 
@@ -124,7 +123,7 @@ export class FetchCFCellMetricsAction extends MetricsAction {
     public query: MetricQueryConfig,
     queryType: MetricQueryType = MetricQueryType.QUERY,
     isSeries = true) {
-    super(cfGuid + '-' + cellId, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/cells`, null, queryType, isSeries);
+    super(cfGuid + '-' + cellId, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/cells`, null, queryType, isSeries, 'TODOCFCELL');
   }
 }
 
@@ -170,7 +169,7 @@ export class FetchApplicationMetricsAction extends MetricsAction {
     query: MetricQueryConfig,
     queryType: MetricQueryType = MetricQueryType.RANGE_QUERY,
     isSeries = true) {
-    super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`, null, queryType, isSeries);
+    super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`, null, queryType, isSeries, 'TODOGEN');
   }
 }
 
@@ -182,6 +181,6 @@ export class FetchApplicationChartMetricsAction extends MetricsChartAction {
     guid: string,
     cfGuid: string,
     query: MetricQueryConfig,) {
-    super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`);
+    super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`, 'TODOGENCHART');
   }
 }

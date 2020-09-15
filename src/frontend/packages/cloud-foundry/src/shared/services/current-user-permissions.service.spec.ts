@@ -64,7 +64,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
             CfScopeStrings.CF_READ_SCOPE,
           ]
         },
-        metricsAvailable: false,
+        // metricsAvailable: false,
         connectionStatus: 'connected',
         system_shared_token: false,
         sso_allowed: false
@@ -102,7 +102,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
             StratosScopeStrings.SCIM_READ
           ]
         },
-        metricsAvailable: false,
+        // metricsAvailable: false,
         connectionStatus: 'connected',
         system_shared_token: false,
         sso_allowed: false

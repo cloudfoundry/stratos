@@ -209,6 +209,7 @@ import { AppNameUniqueDirective } from './directives/app-name-unique.directive/a
 import { CfUserPermissionDirective } from './directives/cf-user-permission/cf-user-permission.directive';
 import { ApplicationStateService } from './services/application-state.service';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
+import { EiriniMetricsService } from './services/eirini-metrics.service';
 
 const cfListTableCells: Type<TableCellCustom<any>>[] = [
   TableCellServiceInstanceAppsAttachedComponent,
@@ -376,7 +377,8 @@ const cfListCards: Type<CardCell<any>>[] = [
   ],
   providers: [
     ApplicationStateService,
-    CloudFoundryUserProvidedServicesService
+    CloudFoundryUserProvidedServicesService,
+    EiriniMetricsService
   ]
 })
 export class CloudFoundrySharedModule { }

@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
-import { cfEiriniRelationship, eiriniEnabled } from '../../../cloud-foundry/src/shared/eirini.helper';
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
 import { EndpointHealthCheck } from '../../../store/src/entity-catalog/entity-catalog.types';
@@ -12,8 +11,7 @@ import { EndpointModel, entityCatalog } from '../../../store/src/public-api';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { stratosEntityCatalog } from '../../../store/src/stratos-entity-catalog';
-import { EndpointsRelation, EndpointState } from '../../../store/src/types/endpoint.types';
-import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
+import { EndpointRelationTypes, EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthChecks } from './endpoints-health-checks';
 import { UserService } from './user.service';
 
@@ -21,23 +19,6 @@ import { UserService } from './user.service';
 
 @Injectable()
 export class EndpointsService implements CanActivate {
-
-  endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
-  haveRegistered$: Observable<boolean>;
-  haveConnected$: Observable<boolean>;
-  disablePersistenceFeatures$: Observable<boolean>;
-
-  static getLinkForEndpoint(endpoint: EndpointModel): string {
-    if (!endpoint) {
-      return '';
-    }
-    const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-    const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint);
-    if (catalogEntity) {
-      return catalogEntity.builders.entityBuilder.getLink(metadata);
-    }
-    return '';
-  }
 
   constructor(
     private store: Store<EndpointOnlyAppState>,
@@ -65,6 +46,35 @@ export class EndpointsService implements CanActivate {
         auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true'
       )
     );
+  }
+
+  endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
+  haveRegistered$: Observable<boolean>;
+  haveConnected$: Observable<boolean>;
+  disablePersistenceFeatures$: Observable<boolean>;
+
+  static getLinkForEndpoint(endpoint: EndpointModel): string {
+    if (!endpoint) {
+      return '';
+    }
+    const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+    const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint);
+    if (catalogEntity) {
+      return catalogEntity.builders.entityBuilder.getLink(metadata);
+    }
+    return '';
+  }
+
+  // TODO: RC check where this is used, understand how effects new type. where should it live?
+  static hasMetrics(endpointId: string, type: EndpointRelationTypes = EndpointRelationTypes.METRICS_CF): Observable<boolean> {
+    return stratosEntityCatalog.endpoint.store.getEntityService(endpointId).waitForEntity$.pipe(
+      map(endpoint => endpoint.entity),
+      map(endpoint => {
+        return endpoint && endpoint.relations ?
+          !!endpoint.relations.receives.find(relation => relation.type === type) : false;
+      })
+    );
+    // return endpointHasMetricsByAvailable(this.store, endpointId);
   }
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {
@@ -120,27 +130,24 @@ export class EndpointsService implements CanActivate {
       }));
   }
 
-  hasMetrics(endpointId: string): Observable<boolean> {
-    return endpointHasMetricsByAvailable(this.store, endpointId);
-  }
+  // // TODO: RC cf specific code
+  // eiriniMetricsProvider(endpointId: string): Observable<EndpointsRelation> {
+  //   const eiriniProvider$ = stratosEntityCatalog.endpoint.store.getEntityService(endpointId).waitForEntity$.pipe(
+  //     map(em => cfEiriniRelationship(em.entity))
+  //   );
+  //   return combineLatest([
+  //     eiriniEnabled(this.store),
+  //     eiriniProvider$
+  //   ]).pipe(
+  //     map(([eirini, eiriniProvider]) => eirini ? eiriniProvider : null)
+  //   );
+  // }
 
-  eiriniMetricsProvider(endpointId: string): Observable<EndpointsRelation> {
-    const eiriniProvider$ = stratosEntityCatalog.endpoint.store.getEntityService(endpointId).waitForEntity$.pipe(
-      map(em => cfEiriniRelationship(em.entity))
-    );
-    return combineLatest([
-      eiriniEnabled(this.store),
-      eiriniProvider$
-    ]).pipe(
-      map(([eirini, eiriniProvider]) => eirini ? eiriniProvider : null)
-    );
-  }
-
-  hasEiriniMetrics(endpointId: string): Observable<boolean> {
-    return this.eiriniMetricsProvider(endpointId).pipe(
-      map(eirini => !!eirini)
-    );
-  }
+  // hasEiriniMetrics(endpointId: string): Observable<boolean> {
+  //   return this.eiriniMetricsProvider(endpointId).pipe(
+  //     map(eirini => !!eirini)
+  //   );
+  // }
 
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
     return this.connectedEndpointsOfTypes(type).pipe(

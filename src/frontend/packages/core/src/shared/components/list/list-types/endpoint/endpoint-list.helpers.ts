@@ -60,7 +60,7 @@ export class EndpointListHelper {
           );
           this.confirmDialog.open(confirmation, () => {
             const obs$ = stratosEntityCatalog.endpoint.api.disconnect<ActionState>(item.guid, item.cnsi_type);
-            this.handleAction(obs$, () => {
+            this.handleAction(obs$, () => { // TODO: RC ignores failure/success!
               this.snackBarService.show(`Disconnected endpoint '${item.name}'`);
               stratosEntityCatalog.systemInfo.api.getSystemInfo();
             });
@@ -109,7 +109,7 @@ export class EndpointListHelper {
           );
           this.confirmDialog.open(confirmation, () => {
             const obs$ = stratosEntityCatalog.endpoint.api.unregister<ActionState>(item.guid, item.cnsi_type);
-            this.handleAction(obs$, () => {
+            this.handleAction(obs$, () => { // TODO: RC ignores failure/success!
               this.snackBarService.show(`Unregistered ${item.name}`);
             });
           });

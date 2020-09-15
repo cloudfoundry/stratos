@@ -51,7 +51,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     map(app => getFavoriteFromEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE))
   );
 
-  isBusyUpdating$: Observable<{ updating: boolean }>;
+  isBusyUpdating$: Observable<{ updating: boolean; }>;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);
 
@@ -102,7 +102,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       { link: 'events', label: 'Events', icon: 'watch_later' }
     ];
 
-    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
+    EndpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
         this.tabLinks = [
           ...this.tabLinks,

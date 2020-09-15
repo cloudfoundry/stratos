@@ -90,11 +90,11 @@ type PortalProxy interface {
 
 	// TODO: RC Needed?
 	// SetCanPerformMigrations updates the state that records if we can perform Database migrations
-	SetCanPerformMigrations(bool)
+	// SetCanPerformMigrations(bool)
 
 	// TODO: RC Needed?
 	// CanPerformMigrations returns if we can perform Database migrations
-	CanPerformMigrations() bool
+	// CanPerformMigrations() bool
 
 	// Config Table
 	GetConfigValue(group, name string) (string, error)

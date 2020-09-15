@@ -2,16 +2,19 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { endpointHasMetricsByAvailable } from '../../../../core/src/features/endpoints/endpoint-helpers';
+import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
 import { AppState } from '../../../../store/src/app-state';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { IMetrics } from '../../../../store/src/types/base-metric.types';
+import { EndpointRelationTypes } from '../../../../store/src/types/endpoint.types';
 import { MetricQueryType } from '../../../../store/src/types/metric.types';
 import { FetchCFCellMetricsPaginatedAction } from '../../actions/cf-metrics.actions';
 import { CFEntityConfig } from '../../cf-types';
 import { CellMetrics } from './tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell.service';
+
+// TODO: RC should this be injectable??
 
 export class CfCellHelper {
 
@@ -61,7 +64,8 @@ export class CfCellHelper {
   }
 
   public hasCellMetrics(endpointId: string): Observable<boolean> {
-    return endpointHasMetricsByAvailable(this.store, endpointId).pipe(
+    return EndpointsService.hasMetrics(endpointId, EndpointRelationTypes.METRICS_CF).pipe(
+      //   endpointHasMetricsByAvailable(this.store, endpointId).pipe(
       // If metrics set up for this endpoint check if we can fetch cell metrics from it.
       // If the metric is unknown an empty list is returned
       switchMap(hasMetrics => hasMetrics ? this.createCellMetricAction(endpointId).pipe(map(action => !!action)) : of(false))

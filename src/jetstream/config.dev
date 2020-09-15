@@ -56,3 +56,7 @@ LOCAL_USER_SCOPE=stratos.admin
 
 # Enable/disable API key-based access to Stratos API (disabled, admin_only, all_users). Default is admin_only
 #API_KEYS_ENABLED=admin_only
+
+# // TODO: RC describe
+EIRINI=false
+EIRINI_POD_NAMESPACE=eirini

@@ -2,9 +2,9 @@ import { Component, Input } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../../store/src/types/base-metric.types';
-import { EntityService } from '../../../../../../core/entity-service';
-import { TableCellCustom } from '../../../list.types';
 import { ListAppInstance } from '../app-instance-types';
 
 @Component({
@@ -19,7 +19,7 @@ export class TableCellKubeNodeComponent extends TableCellCustom<ListAppInstance>
 
   @Input('config')
   set config(config: {
-    eiriniPodsService: EntityService<IMetrics<IMetricMatrixResult<{ pod: string, node: string}>>>
+    eiriniPodsService: EntityService<IMetrics<IMetricMatrixResult<{ pod: string, node: string; }>>>;
   }) {
     if (!config || !config.eiriniPodsService || this.nodeName$) {
       return;

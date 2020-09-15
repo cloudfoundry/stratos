@@ -421,7 +421,8 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
     dataReducers: [
       endpointDisconnectRemoveEntitiesReducer()
     ],
-    actionBuilders: quotaDefinitionActionBuilder
+    actionBuilders: quotaDefinitionActionBuilder,
+
   });
   return cfEntityCatalog.quotaDefinition;
 }
@@ -1131,8 +1132,23 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
 function generateCfEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   cfEntityCatalog.cfEndpoint = new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/cloud-foundry/${metadata.guid}`
+    metadata => `/cloud-foundry/${metadata.guid}`,
   );
+  // TODO: RC
+  // createActions: (store: Store<AppState>): IListAction<EndpointModel>[] => {
+  //   return [
+  //     {
+  //       action: (endpoint) => store.dispatch(new RouterNav({ path: `${endpoint.guid}/eirini` })),
+  //       label: 'Configure',
+  //       createVisible: (row$: Observable<EndpointModel>): Observable<boolean> => row$.pipe(
+  //         filter(row => row.cnsi_type === 'cf'),
+  //         first(),
+  //         switchMap(() => canConfigureOrchestrator(store)),
+  //         startWith(false)
+  //       )
+  //     }
+  //   ];
+  // }
   return cfEntityCatalog.cfEndpoint;
 }
 

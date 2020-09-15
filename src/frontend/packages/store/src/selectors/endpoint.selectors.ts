@@ -19,7 +19,7 @@ export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointEn
 //   (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
 //     const metrics = {};
 //     Object.values(endpoints).forEach(endpoint => {
-//       if (endpoint.cnsi_type === 'metrics') {
+//       if (endpoint.cnsi_type === METRICS_ENDPOINT_TYPES) {
 //         metrics[endpoint.guid] = endpoint;
 //       }
 //     });
