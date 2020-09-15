@@ -9,7 +9,6 @@ This release contains a number of fixes and improvements:
 **Improvements:**
 
 - Add support for API Keys [\#4504](https://github.com/cloudfoundry/stratos/issues/4504)
-- API Keys: Make feature configurable for different user types [\#4531](https://github.com/cloudfoundry/stratos/issues/4531)
 - Register Endpoint: Reduce size of cards [\#4568](https://github.com/cloudfoundry/stratos/issues/4568)
 - Metrics view: Add "The last day" to time range selector  [\#4516](https://github.com/cloudfoundry/stratos/issues/4516)
 
